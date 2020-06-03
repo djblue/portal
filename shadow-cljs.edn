@@ -1,0 +1,10 @@
+{:deps {:aliases [:cljs]}
+ :dev-http
+ {9090 {:root "resources/"
+        :handler sedit.main/handler}}
+ :builds
+ {:app {:output-dir "resources/"
+        :asset-path "."
+        :target :browser
+        :modules {:main {:init-fn sedit.core/main!}}
+        :devtools {:after-load sedit.core/reload!}}}}

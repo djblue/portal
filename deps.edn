@@ -1,0 +1,22 @@
+{:paths ["src" "test" "resources"]
+ :deps
+ { com.cognitect/transit-clj {:mvn/version "1.0.324"}
+  org.clojure/data.json {:mvn/version "1.0.0"}
+  http-kit {:mvn/version "2.3.0"}}
+ :aliases
+ {:cljs
+  {:extra-deps
+   {org.clojure/clojurescript {:mvn/version "1.10.758"}
+    com.cognitect/transit-cljs {:mvn/version "0.8.264"}
+    reagent {:mvn/version "0.9.1"}}}
+  :shadow-cljs {:extra-deps
+                {thheller/shadow-cljs {:mvn/version "2.9.10"}}
+                :main-opts ["-m" "shadow.cljs.devtools.cli"]}
+  :edn  {:main-opts ["-m" "sedit.main" "edn"]}
+  :json {:main-opts ["-m" "sedit.main" "json"]}
+  :test {:extra-paths ["test"]
+         :extra-deps
+         {com.cognitect/test-runner
+          {:git/url "https://github.com/cognitect-labs/test-runner.git"
+           :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}}
+         :main-opts ["-m" "cognitect.test-runner"]}}}
