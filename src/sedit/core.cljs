@@ -57,12 +57,18 @@
 
 (defn sedit-map [settings values]
   (let [[open close] ["{" "}"]
-        settings (update settings :limits/max-depth dec)]
+        settings (update settings :limits/max-depth dec)
+        type+count
+        [:div {:style {:vertical-align :top
+                       :box-sizing :border-box
+                       :padding (:spacing/padding settings)
+                       :color "#bf616a"}} open (count values) close]]
     (if (< (:limits/max-depth settings) 0)
-      nil
+      type+count
       [:table
        {:style
-        {:border-collapse :collapse
+        {:width "100%"
+         :border-collapse :collapse
          :color (:colors/text settings)
          :font-size  (:font-size settings)
          :border-radius (:border-radius settings)
@@ -72,12 +78,7 @@
         [:tr
          {:style
           {:border-bottom (str "1px solid " (:colors/border settings))}}
-         [:td
-          (let []
-            [:div {:style {:vertical-align :top
-                           :box-sizing :border-box
-                           :padding (:spacing/padding settings)
-                           :color "#bf616a"}} open (count values) close])]
+         [:td type+count]
          [:td]]]
        [:tbody
         (take
@@ -104,9 +105,15 @@
           (vector? values)  ["[" "]"]
           (seq? values)     ["(" ")"]
           (set? values)     ["#{" "}"])
+        type+count [:div
+                    [:div {:style {:vertical-align :top
+                                   :box-sizing :border-box
+                                   :padding (:spacing/padding settings)
+                                   :color "#bf616a"}} open (count values) close]]
         settings (update settings :limits/max-depth dec)]
+
     (if (< (:limits/max-depth settings) 0)
-      nil
+      type+count
       [:div
        {:key (hash values)
         :style
@@ -114,18 +121,16 @@
          :flex-direction (:layout/direction settings)
          :color (:colors/text settings)
          :font-size  (:font-size settings)
+         :box-sizing :border-box
+         ;:padding (:spacing/padding settings)
+         :margin  (:spacing/padding settings)
          :border-radius (:border-radius settings)
-         :margin (:spacing/padding settings)
          :border (str "1px solid " (:colors/border settings))}}
 
        [:div
         {:style
          {:border-bottom (str "1px solid " (:colors/border settings))}}
-        [:div
-         [:div {:style {:vertical-align :top
-                        :box-sizing :border-box
-                        :padding (:spacing/padding settings)
-                        :color "#bf616a"}} open (count values) close]]]
+        type+count]
        (->> values
             (map-indexed
              (fn [idx itm]
@@ -140,7 +145,8 @@
   (into
    [:div (deep-merge
           {:key (hash children)
-           :style {:padding (:spacing/padding settings)
+           :style {;:white-space :nowrap
+                   :padding (:spacing/padding settings)
                    :box-sizing :border-box}}
           props)]
    children))
@@ -311,8 +317,9 @@
         (take 5)
         (map-indexed
          (fn [index item]
-           [:div {:key index}
-            [sedit settings item]]))))]))
+           [:div
+            {:key index :on-click #(reset! path (:path item))}
+            [sedit settings (dissoc item :string-value)]]))))]))
 
 (defn app []
   (let [settings    @state
@@ -338,9 +345,9 @@
         :align-items :center
         :justify-content :center
         :overflow :auto}}
-      [:div {:style {:max-height "100%" :max-width "100%"}}
+      [:div {:style {:max-height "100%" :max-width "100%" :flex 1}}
        [:div {:style {:padding "64px" :box-sizing :border-box}}
-        (sedit settings (get-in value parent-path))]]]
+        [sedit settings (get-in value parent-path)]]]]
      [search-bar settings]
      [sedit (-> settings
                 (dissoc :input/text-search)
