@@ -53,84 +53,147 @@
            (:hidden props)
            child))])))
 
+(defn get-background [settings]
+  (if (even? (:depth settings))
+    (:colors/background settings)
+    (:colors/background2 settings)))
+
+(defn summary [settings value]
+  (when-let [[open close]
+             (cond
+               (map? value)     ["{" "}"]
+               (vector? value)  ["[" "]"]
+               (seq? value)     ["(" ")"]
+               (set? value)     ["#{" "}"])]
+    [:div
+     {:style {:vertical-align :top
+              :color "#bf616a"}}
+     open (count value) close]))
+
+(defn table-view? [value]
+  (and (coll? value) (every? map? value)))
+
+(defn table-view [settings values]
+  (let [settings (update settings :depth inc)]
+    (if (> (:depth settings) (:limits/max-depth settings))
+      [summary settings values]
+      (let [columns (into #{} (mapcat keys values))]
+        [:table
+         {:style
+          {:width "100%"
+           :display :grid
+           :background (get-background settings)
+           :border-collapse :collapse
+           :color (:colors/text settings)
+           :font-size  (:font-size settings)
+           :border-radius (:border-radius settings)}}
+         [:tbody
+          [:tr
+           (map-indexed
+            (fn [grid-column column]
+              [:th {:key grid-column
+                    :style
+                    {:border (str "1px solid " (:colors/border settings))
+                     :box-sizing :border-box
+                     :padding (:spacing/padding settings)}}
+               [sedit settings column]])
+            columns)]
+          (map-indexed
+           (fn [grid-row row]
+             [:tr {:key grid-row}
+              (map-indexed
+               (fn [grid-column column]
+                 [:td
+                  {:key grid-column
+                   :style
+                   {:border (str "1px solid " (:colors/border settings))
+                    :padding (:spacing/padding settings)
+                    :box-sizing :border-box}}
+                  (when-let [value (get row column)]
+                    [sedit settings value])])
+               columns)])
+           values)]]))))
+
 (defonce path (r/atom []))
 
 (defn sedit-map [settings values]
-  (let [[open close] ["{" "}"]
-        settings (update settings :limits/max-depth dec)
-        type+count
-        [:div {:style {:vertical-align :top
-                       :box-sizing :border-box
-                       :padding (:spacing/padding settings)
-                       :color "#bf616a"}} open (count values) close]]
-    (if (< (:limits/max-depth settings) 0)
-      type+count
-      [:table
+  (let [settings (update settings :depth inc)]
+    (if (> (:depth settings) (:limits/max-depth settings))
+      [summary settings values]
+      [:div
        {:style
         {:width "100%"
-         :border-collapse :collapse
+         :display :grid
+         :background (get-background settings)
+         :grid-gap (:spacing/padding settings)
+         :padding (:spacing/padding settings)
+         :box-sizing :border-box
          :color (:colors/text settings)
          :font-size  (:font-size settings)
          :border-radius (:border-radius settings)
          :border (str "1px solid " (:colors/border settings))}}
 
-       [:thead
-        [:tr
-         {:style
-          {:border-bottom (str "1px solid " (:colors/border settings))}}
-         [:td type+count]
-         [:td]]]
-       [:tbody
-        (take
-         (:limits/max-length settings)
-         (filter
-          some?
-          (for [[k v] values]
-            (let [sedit-k [sedit settings k]
-                  sedit-v [sedit (update settings :parent-path conj k) v]]
-              [:tr
-               {:key (hash k)}
-               [:td {:on-click #(reset! path (conj (:parent-path settings) k))
+       #_[:thead
+          [:tr
+           {:style
+            {:border-bottom (str "1px solid " (:colors/border settings))}}
+           [:td
+            [:div
+             {:style {:display :flex}}
+             #_(map (partial sedit settings) (:parent-path settings))
+             type+count]]
+           [:td]]]
+       (take
+        (:limits/max-length settings)
+        (filter
+         some?
+         (for [[k v] values]
+           (let [sedit-k [sedit settings k]
+                 sedit-v [sedit (update settings :parent-path conj k) v]]
+             [:<>
+              {:key (hash k)}
+              [:div {:on-click #(reset! path (conj (:parent-path settings) k))
                      :style
-                     {:vertical-align :top
-                      :cursor :pointer}}
-                sedit-k]
-               [:td {:style
-                     {:vertical-align :top}}
-                sedit-v]]))))]])))
+                     {:cursor :pointer
+                      :grid-column 1}}
+               [:div
+                {:style {:display :flex}}
+                sedit-k]]
+
+              #_[:td {:style
+                      {:vertical-align :top
+                       :text-align :left
+                       :padding (:spacing/padding settings)}}
+                 [summary settings v]]
+
+              [:div {:style
+                     {:grid-column 2
+                      :text-align :right}}
+
+               sedit-v]]))))])))
 
 (defn sedit-coll [settings values]
-  (let [[open close]
-        (cond
-          (vector? values)  ["[" "]"]
-          (seq? values)     ["(" ")"]
-          (set? values)     ["#{" "}"])
-        type+count [:div
-                    [:div {:style {:vertical-align :top
-                                   :box-sizing :border-box
-                                   :padding (:spacing/padding settings)
-                                   :color "#bf616a"}} open (count values) close]]
-        settings (update settings :limits/max-depth dec)]
-
-    (if (< (:limits/max-depth settings) 0)
-      type+count
+  (let [settings (update settings :depth inc)]
+    (if (> (:depth settings) (:limits/max-depth settings))
+      [summary settings values]
       [:div
        {:key (hash values)
         :style
-        {:display :flex
-         :flex-direction (:layout/direction settings)
+        {:text-align :left
+         :display :grid
+         :background (get-background settings)
+         :grid-gap (:spacing/padding settings)
+         :padding (:spacing/padding settings)
+         :box-sizing :border-box
          :color (:colors/text settings)
          :font-size  (:font-size settings)
-         :box-sizing :border-box
-         ;:padding (:spacing/padding settings)
-         :margin  (:spacing/padding settings)
          :border-radius (:border-radius settings)
          :border (str "1px solid " (:colors/border settings))}}
 
-       [:div
-        {:style
-         {:border-bottom (str "1px solid " (:colors/border settings))}}
-        type+count]
+       #_[:div
+          {:style
+           {:border-bottom (str "1px solid " (:colors/border settings))}}
+          type+count]
        (->> values
             (map-indexed
              (fn [idx itm]
@@ -138,18 +201,6 @@
                [sedit (update settings :parent-path conj idx) itm]))
             (filter some?)
             (take (:limits/max-length settings)))])))
-
-(def deep-merge (partial merge-with merge))
-
-(defn terminal [settings props & children]
-  (into
-   [:div (deep-merge
-          {:key (hash children)
-           :style {;:white-space :nowrap
-                   :padding (:spacing/padding settings)
-                   :box-sizing :border-box}}
-          props)]
-   children))
 
 (defn trim-string [settings s]
   (let [max-length (:limits/string-length settings)]
@@ -174,6 +225,9 @@
 
 (defn sedit [settings value]
   (cond
+    (table-view? value)
+    [table-view settings value]
+
     (map? value)
     [sedit-map settings value]
 
@@ -181,26 +235,26 @@
     [sedit-coll settings value]
 
     (boolean? value)
-    [terminal settings {:style {:color (:colors/boolean settings)}}
+    [:span {:style {:color (:colors/boolean settings)}}
      (pr-str value)]
 
     (symbol? value)
-    [terminal settings {:style {:color (:colors/symbol settings)}}
+    [:span {:style {:color (:colors/symbol settings)}}
      value]
 
     (number? value)
-    [terminal settings {:style {:color (:colors/number settings)}}
+    [:span {:style {:color (:colors/number settings)}}
      value]
 
     (string? value)
-    [terminal settings {:style {:color (:colors/string settings)}}
+    [:span {:style {:color (:colors/string settings)}}
      (pr-str (trim-string settings value))]
 
     (keyword? value)
     (let [keyword-name (name value)
           keyword-namespace (namespace value)]
       (when keyword-name
-        [terminal settings {:style {:color (:colors/keyword settings)}}
+        [:span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
          ":" (when keyword-namespace
                [:span {:style {:color (:colors/keyword-namespace settings)}}
                 keyword-namespace
@@ -208,25 +262,26 @@
          keyword-name]))
 
     (instance? js/Date value)
-    [terminal settings {:style {:color (:colors/date settings)}}
+    [:span {:style {:color (:colors/date settings)}}
      (pr-str value)]
 
     (instance? cljs.core/UUID value)
-    [terminal settings {:style {:color (:colors/uuid settings)}}
+    [:span {:style {:color (:colors/uuid settings)}}
      (pr-str value)]
 
     (instance? cljs.core/Var value)
-    [terminal settings {:style {:color (:colors/var settings)}}
+    [:span {:style {:color (:colors/var settings)}}
      (pr-str value)]
 
     :else
-    [terminal settings {}
+    [:span {}
      (trim-string settings (pr-str value))]))
 
 (def themes
   {:themes/nord
    {:colors/text "#d8dee9"
     :colors/background "#2e3440"
+    :colors/background2 "rgba(0,0,0,0.1)"
     :colors/boolean "#5e81ac"
     :colors/string "#a3be8c"
     :colors/keyword "#5e81ac"
@@ -246,9 +301,13 @@
     :limits/max-depth 3
     :limits/max-length 1000
     :layout/direction :row
-    :spacing/padding "3px"
+    :spacing/padding "10px"
     :border-radius "2px"}
    (:themes/nord themes)))
+
+(comment
+  (true? (swap! state assoc :sedit/value example))
+  (true? (swap! state assoc :spacing/padding "10px")))
 
 (def example
   {:example/booleans #{true false}
@@ -267,6 +326,38 @@
 
 (defonce state (r/atom default-settings))
 
+(defonce search-text (r/atom ""))
+
+(defn search-input [settings]
+  [:input
+   {:on-change #(reset! search-text (.-value (.-target %)))
+    :value @search-text
+    :style
+    {:flex "1"
+     :background (:colors/background settings)
+     :margin (:spacing/padding settings)
+     :padding (:spacing/padding settings)
+     :box-sizing :border
+     :font-size (:font-size settings)
+     :color (:colors/text settings)
+     :border (str "1px solid " (:colors/border settings))}}])
+
+(defn search-results [settings]
+  (let [search-text-value @search-text]
+    (when-not (s/blank? search-text-value)
+      [:<>
+       (->>
+        search-text-value
+        (filter-index (:sedit/index settings))
+        (take 10)
+        (map-indexed
+         (fn [index item]
+           [:div
+            {:key index :on-click #(do
+                                     (reset! search-text nil)
+                                     (reset! path (:path item)))}
+            [sedit settings (dissoc item :string-value)]])))])))
+
 (defn toolbar [settings path]
   [:div
    {:style
@@ -274,6 +365,7 @@
      :flex-direction :row
      :display :flex
      :align-items :center
+     :justify-content :center
      :border-bottom  (str "1px solid " (:colors/border settings))}}
    [:button
     {:on-click #(swap! path (fn [v] (if (empty? v) v (pop v))))
@@ -286,46 +378,15 @@
       :padding "10px 20px"
       :border-radius (:border-radius settings)
       :cursor :pointer
-      :margin "0 20px"}} "back"]])
-
-(defonce search-text (r/atom ""))
-
-(defn search-bar [settings]
-  (let [search-text-value @search-text]
-    [:div
-     {:style
-      {:border-top    (str "1px solid " (:colors/border settings))
-       :border-bottom (str "1px solid " (:colors/border settings))
-       :display :flex
-       :flex-direction :column}}
-     [:input
-      {:on-change #(reset! search-text (.-value (.-target %)))
-       :value search-text-value
-       :style
-       {:flex "1"
-        :background (:colors/background settings)
-        :margin (:spacing/padding settings)
-        :padding (:spacing/padding settings)
-        :box-sizing :border
-        :font-size (:font-size settings)
-        :color (:colors/text settings)
-        :border (str "1px solid " (:colors/border settings))}}]
-     (when-not (s/blank? search-text-value)
-       (->>
-        search-text-value
-        (filter-index (:sedit/index settings))
-        (take 5)
-        (map-indexed
-         (fn [index item]
-           [:div
-            {:key index :on-click #(reset! path (:path item))}
-            [sedit settings (dissoc item :string-value)]]))))]))
+      :margin "0 20px"}} "back"]
+   [search-input settings]])
 
 (defn app []
   (let [settings    @state
         value       (:sedit/value settings)
         parent-path @path
-        settings    (assoc settings :parent-path parent-path)]
+        settings    (assoc settings :parent-path parent-path)
+        settings    (assoc settings :depth 0)]
     [:div
      {:style
       {:display :flex
@@ -344,20 +405,21 @@
         :flex 1
         :align-items :center
         :justify-content :center
-        :overflow :auto}}
-      [:div {:style {:max-height "100%" :max-width "100%" :flex 1}}
+        :overflow-y :auto}}
+      [:div {:style {:max-height "100%" :max-width "100%"}}
        [:div {:style {:padding "64px" :box-sizing :border-box}}
-        [sedit settings (get-in value parent-path)]]]]
-     [search-bar settings]
-     [sedit (-> settings
-                (dissoc :input/text-search)
-                (assoc :layout/direction :row))
-      (select-keys
-       settings
-       [:limits/string-length
-        :limits/max-depth
-        :limits/max-length
-        :parent-path])]]))
+        (if-not (s/blank? @search-text)
+          [search-results settings]
+          [sedit settings (get-in value parent-path)])]]]
+     #_[sedit (-> settings
+                  (dissoc :input/text-search)
+                  (assoc :layout/direction :row))
+        (select-keys
+         settings
+         [:limits/string-length
+          :limits/max-depth
+          :limits/max-length
+          :parent-path])]]))
 
 (defn json->edn [json]
   (let [r (t/reader :json)]
@@ -383,7 +445,7 @@
         (assoc new-state :sedit/index index)]
     (swap! state merge new-state-with-index)))
 
-(def load-state
+(def load-state!
   (partial send-rpc! {:op :sedit.rpc/load-state} merge-state))
 
 (def await-state!
@@ -392,10 +454,13 @@
 (defn promise-loop [f]
   (.finally (f) #(promise-loop f)))
 
-(defn main! []
-  (load-state)
-  (promise-loop await-state!)
+(defn render-app []
   (r/render [app]
             (.getElementById js/document "root")))
 
-(defn reload! [] (main!))
+(defn main! []
+  (load-state!)
+  (promise-loop await-state!)
+  (render-app))
+
+(defn reload! [] (render-app))
