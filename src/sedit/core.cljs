@@ -3,6 +3,42 @@
             [clojure.string :as s]
             [cognitect.transit :as t]))
 
+(defn index-value
+  ([value]
+   (index-value [] value))
+
+  ([path value]
+   (cond
+     (map? value)
+     (mapcat
+      (fn [[k v]]
+        (let [path (conj path k)]
+          (concat
+           (index-value path k)
+           (index-value path v))))
+      value)
+
+     (coll? value)
+     (apply
+      concat
+      (map-indexed
+       (fn [k v]
+         (let [path (conj path k)]
+           (concat
+            (index-value path k)
+            (index-value path v))))
+       value))
+
+     :else
+     [{:path path
+       :value value
+       :string-value (s/lower-case (pr-str value))}])))
+
+(defn filter-index [index s]
+  (filter #(s/includes? (:string-value %)
+                        (s/lower-case s))
+          index))
+
 (declare sedit)
 
 (defn collapsible []
@@ -25,8 +61,7 @@
     (if (< (:limits/max-depth settings) 0)
       nil
       [:table
-       {:key (hash values)
-        :style
+       {:style
         {:border-collapse :collapse
          :color (:colors/text settings)
          :font-size  (:font-size settings)
@@ -50,19 +85,18 @@
          (filter
           some?
           (for [[k v] values]
-            (let [sedit-k (sedit settings k)
-                  sedit-v (sedit (update settings :parent-path conj k) v)]
-              (when (or (some? sedit-k) (some? sedit-v))
-                [:tr
-                 {:key (hash k)}
-                 [:td {:on-click #(reset! path (conj (:parent-path settings) k))
-                       :style
-                       {:vertical-align :top
-                        :cursor :pointer}}
-                  sedit-k]
-                 [:td {:style
-                       {:vertical-align :top}}
-                  sedit-v]])))))]])))
+            (let [sedit-k [sedit settings k]
+                  sedit-v [sedit (update settings :parent-path conj k) v]]
+              [:tr
+               {:key (hash k)}
+               [:td {:on-click #(reset! path (conj (:parent-path settings) k))
+                     :style
+                     {:vertical-align :top
+                      :cursor :pointer}}
+                sedit-k]
+               [:td {:style
+                     {:vertical-align :top}}
+                sedit-v]]))))]])))
 
 (defn sedit-coll [settings values]
   (let [[open close]
@@ -95,7 +129,8 @@
        (->> values
             (map-indexed
              (fn [idx itm]
-               (sedit (update settings :parent-path conj idx) itm)))
+               ^{:key idx}
+               [sedit (update settings :parent-path conj idx) itm]))
             (filter some?)
             (take (:limits/max-length settings)))])))
 
@@ -134,53 +169,53 @@
 (defn sedit [settings value]
   (cond
     (map? value)
-    (sedit-map settings value)
+    [sedit-map settings value]
 
     (coll? value)
-    (sedit-coll settings value)
+    [sedit-coll settings value]
 
     (boolean? value)
-    (terminal settings {:style {:color (:colors/boolean settings)}}
-              (text-search settings (pr-str value)))
+    [terminal settings {:style {:color (:colors/boolean settings)}}
+     (pr-str value)]
 
     (symbol? value)
-    (terminal settings {:style {:color (:colors/symbol settings)}}
-              (text-search settings value))
+    [terminal settings {:style {:color (:colors/symbol settings)}}
+     value]
 
     (number? value)
-    (terminal settings {:style {:color (:colors/number settings)}}
-              (text-search settings value))
+    [terminal settings {:style {:color (:colors/number settings)}}
+     value]
 
     (string? value)
-    (terminal settings {:style {:color (:colors/string settings)}}
-              (text-search settings (pr-str (trim-string settings value))))
+    [terminal settings {:style {:color (:colors/string settings)}}
+     (pr-str (trim-string settings value))]
 
     (keyword? value)
-    (let [keyword-name (text-search settings (name value))
-          keyword-namespace (text-search settings (namespace value))]
+    (let [keyword-name (name value)
+          keyword-namespace (namespace value)]
       (when keyword-name
-        (terminal settings {:style {:color (:colors/keyword settings)}}
-                  ":" (when keyword-namespace
-                        [:span {:style {:color (:colors/keyword-namespace settings)}}
-                         keyword-namespace
-                         "/"])
-                  keyword-name)))
+        [terminal settings {:style {:color (:colors/keyword settings)}}
+         ":" (when keyword-namespace
+               [:span {:style {:color (:colors/keyword-namespace settings)}}
+                keyword-namespace
+                "/"])
+         keyword-name]))
 
     (instance? js/Date value)
-    (terminal settings {:style {:color (:colors/date settings)}}
-              (text-search settings  (pr-str value)))
+    [terminal settings {:style {:color (:colors/date settings)}}
+     (pr-str value)]
 
     (instance? cljs.core/UUID value)
-    (terminal settings {:style {:color (:colors/uuid settings)}}
-              (text-search settings (pr-str value)))
+    [terminal settings {:style {:color (:colors/uuid settings)}}
+     (pr-str value)]
 
     (instance? cljs.core/Var value)
-    (terminal settings {:style {:color (:colors/var settings)}}
-              (text-search settings (pr-str value)))
+    [terminal settings {:style {:color (:colors/var settings)}}
+     (pr-str value)]
 
     :else
-    (terminal settings {}
-              (text-search settings (trim-string settings (pr-str value))))))
+    [terminal settings {}
+     (trim-string settings (pr-str value))]))
 
 (def themes
   {:themes/nord
@@ -226,6 +261,59 @@
 
 (defonce state (r/atom default-settings))
 
+(defn toolbar [settings path]
+  [:div
+   {:style
+    {:height "64px"
+     :flex-direction :row
+     :display :flex
+     :align-items :center
+     :border-bottom  (str "1px solid " (:colors/border settings))}}
+   [:button
+    {:on-click #(swap! path (fn [v] (if (empty? v) v (pop v))))
+     :style
+     {:background (:colors/text settings)
+      :color (:colors/background settings)
+      :font-size (:font-size settings)
+      :border :none
+      :box-sizing :border-box
+      :padding "10px 20px"
+      :border-radius (:border-radius settings)
+      :cursor :pointer
+      :margin "0 20px"}} "back"]])
+
+(defonce search-text (r/atom ""))
+
+(defn search-bar [settings]
+  (let [search-text-value @search-text]
+    [:div
+     {:style
+      {:border-top    (str "1px solid " (:colors/border settings))
+       :border-bottom (str "1px solid " (:colors/border settings))
+       :display :flex
+       :flex-direction :column}}
+     [:input
+      {:on-change #(reset! search-text (.-value (.-target %)))
+       :value search-text-value
+       :style
+       {:flex "1"
+        :background (:colors/background settings)
+        :margin (:spacing/padding settings)
+        :padding (:spacing/padding settings)
+        :box-sizing :border
+        :font-size (:font-size settings)
+        :color (:colors/text settings)
+        :border (str "1px solid " (:colors/border settings))}}]
+     (when-not (s/blank? search-text-value)
+       (->>
+        search-text-value
+        (filter-index (:sedit/index settings))
+        (take 5)
+        (map-indexed
+         (fn [index item]
+           [:div {:key index}
+            [sedit settings item]]))))]))
+
 (defn app []
   (let [settings    @state
         value       (:sedit/value settings)
@@ -242,26 +330,7 @@
        :font-size (:font-size settings)
        :height "100vh"
        :width "100vw"}}
-
-     [:div
-      {:style
-       {:height "64px"
-        :flex-direction :row
-        :display :flex
-        :align-items :center
-        :border-bottom  (str "1px solid " (:colors/border settings))}}
-      [:button
-       {:on-click #(swap! path (fn [v] (if (empty? v) v (pop v))))
-        :style
-        {:background (:colors/text settings)
-         :color (:colors/background settings)
-         :font-size (:font-size settings)
-         :border :none
-         :box-sizing :border-box
-         :padding "10px 20px"
-         :border-radius (:border-radius settings)
-         :cursor :pointer
-         :margin "0 20px"}} "back"]]
+     [toolbar settings path]
      [:div
       {:style
        {:display :flex
@@ -272,16 +341,16 @@
       [:div {:style {:max-height "100%" :max-width "100%"}}
        [:div {:style {:padding "64px" :box-sizing :border-box}}
         (sedit settings (get-in value parent-path))]]]
-
-     (sedit (-> settings
+     [search-bar settings]
+     [sedit (-> settings
                 (dissoc :input/text-search)
                 (assoc :layout/direction :row))
-            (select-keys
-             settings
-             [:limits/string-length
-              :limits/max-depth
-              :limits/max-length
-              :parent-path]))]))
+      (select-keys
+       settings
+       [:limits/string-length
+        :limits/max-depth
+        :limits/max-length
+        :parent-path])]]))
 
 (defn json->edn [json]
   (let [r (t/reader :json)]
@@ -301,11 +370,17 @@
        (.then json->edn)
        (.then done))))
 
+(defn merge-state [new-state]
+  (let [index (index-value (:sedit/value new-state))
+        new-state-with-index
+        (assoc new-state :sedit/index index)]
+    (swap! state merge new-state-with-index)))
+
 (def load-state
-  (partial send-rpc! {:op :sedit.rpc/load-state} #(swap! state merge %)))
+  (partial send-rpc! {:op :sedit.rpc/load-state} merge-state))
 
 (def await-state!
-  (partial send-rpc! {:op :sedit.rpc/await-state} #(swap! state merge %)))
+  (partial send-rpc!  {:op :sedit.rpc/await-state} merge-state))
 
 (defn promise-loop [f]
   (.finally (f) #(promise-loop f)))
