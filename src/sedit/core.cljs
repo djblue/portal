@@ -1,6 +1,7 @@
 (ns sedit.core
   (:require [reagent.core :as r]
-            [clojure.string :as s]
+            [sedit.styled :as s]
+            [clojure.string :as str]
             [cognitect.transit :as t]))
 
 (defn index-value
@@ -32,11 +33,11 @@
      :else
      [{:path path
        :value value
-       :string-value (s/lower-case (pr-str value))}])))
+       :string-value (str/lower-case (pr-str value))}])))
 
 (defn filter-index [index s]
-  (filter #(s/includes? (:string-value %)
-                        (s/lower-case s))
+  (filter #(str/includes? (:string-value %)
+                          (str/lower-case s))
           index))
 
 (declare sedit)
@@ -44,7 +45,7 @@
 (defn collapsible []
   (let [state (r/atom {:open? true})]
     (fn [props child]
-      [:div
+      [s/div
        {:on-click #(do
                      (swap! state update :open? not)
                      (.stopPropagation %))}
@@ -65,7 +66,7 @@
                (vector? value)  ["[" "]"]
                (seq? value)     ["(" ")"]
                (set? value)     ["#{" "}"])]
-    [:div
+    [s/div
      {:style {:vertical-align :top
               :color "#bf616a"}}
      open (count value) close]))
@@ -78,7 +79,7 @@
     (if (> (:depth settings) (:limits/max-depth settings))
       [summary settings values]
       (let [columns (into #{} (mapcat keys values))]
-        [:table
+        [s/table
          {:style
           {:width "100%"
            :display :grid
@@ -87,23 +88,23 @@
            :color (:colors/text settings)
            :font-size  (:font-size settings)
            :border-radius (:border-radius settings)}}
-         [:tbody
-          [:tr
+         [s/tbody
+          [s/tr
            (map-indexed
             (fn [grid-column column]
-              [:th {:key grid-column
-                    :style
-                    {:border (str "1px solid " (:colors/border settings))
-                     :box-sizing :border-box
-                     :padding (:spacing/padding settings)}}
+              [s/th {:key grid-column
+                     :style
+                     {:border (str "1px solid " (:colors/border settings))
+                      :box-sizing :border-box
+                      :padding (:spacing/padding settings)}}
                [sedit settings column]])
             columns)]
           (map-indexed
            (fn [grid-row row]
-             [:tr {:key grid-row}
+             [s/tr {:key grid-row}
               (map-indexed
                (fn [grid-column column]
-                 [:td
+                 [s/td
                   {:key grid-column
                    :style
                    {:border (str "1px solid " (:colors/border settings))
@@ -120,7 +121,7 @@
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [summary settings values]
-      [:div
+      [s/div
        {:style
         {:width "100%"
          :display :grid
@@ -133,16 +134,16 @@
          :border-radius (:border-radius settings)
          :border (str "1px solid " (:colors/border settings))}}
 
-       #_[:thead
-          [:tr
+       #_[s/thead
+          [s/tr
            {:style
             {:border-bottom (str "1px solid " (:colors/border settings))}}
-           [:td
-            [:div
+           [s/td
+            [s/div
              {:style {:display :flex}}
              #_(map (partial sedit settings) (:parent-path settings))
              type+count]]
-           [:td]]]
+           [s/td]]]
        (take
         (:limits/max-length settings)
         (filter
@@ -152,23 +153,23 @@
                  sedit-v [sedit (update settings :parent-path conj k) v]]
              [:<>
               {:key (hash k)}
-              [:div {:on-click #(reset! path (conj (:parent-path settings) k))
-                     :style
-                     {:cursor :pointer
-                      :grid-column 1}}
-               [:div
+              [s/div {:on-click #(reset! path (conj (:parent-path settings) k))
+                      :style
+                      {:cursor :pointer
+                       :grid-column "1"}}
+               [s/div
                 {:style {:display :flex}}
                 sedit-k]]
 
-              #_[:td {:style
-                      {:vertical-align :top
-                       :text-align :left
-                       :padding (:spacing/padding settings)}}
+              #_[s/td {:style
+                       {:vertical-align :top
+                        :text-align :left
+                        :padding (:spacing/padding settings)}}
                  [summary settings v]]
 
-              [:div {:style
-                     {:grid-column 2
-                      :text-align :right}}
+              [s/div {:style
+                      {:grid-column "2"
+                       :text-align :right}}
 
                sedit-v]]))))])))
 
@@ -176,7 +177,7 @@
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [summary settings values]
-      [:div
+      [s/div
        {:key (hash values)
         :style
         {:text-align :left
@@ -190,7 +191,7 @@
          :border-radius (:border-radius settings)
          :border (str "1px solid " (:colors/border settings))}}
 
-       #_[:div
+       #_[s/div
           {:style
            {:border-bottom (str "1px solid " (:colors/border settings))}}
           type+count]
@@ -215,13 +216,13 @@
     (some? value)
     (let [text (:input/text-search settings)
           len  (count text)
-          i    (s/index-of (s/lower-case value)
-                           (s/lower-case text))]
+          i    (str/index-of (str/lower-case value)
+                             (str/lower-case text))]
       (when-not (nil? i)
         (let [before  (subs value 0 i)
               match   (subs value i (+ len i))
               after   (subs value (+ len i))]
-          [:span before [:mark match] after])))))
+          [s/span before [:mark match] after])))))
 
 (defn sedit [settings value]
   (cond
@@ -235,46 +236,46 @@
     [sedit-coll settings value]
 
     (boolean? value)
-    [:span {:style {:color (:colors/boolean settings)}}
+    [s/span {:style {:color (:colors/boolean settings)}}
      (pr-str value)]
 
     (symbol? value)
-    [:span {:style {:color (:colors/symbol settings)}}
+    [s/span {:style {:color (:colors/symbol settings)}}
      value]
 
     (number? value)
-    [:span {:style {:color (:colors/number settings)}}
+    [s/span {:style {:color (:colors/number settings)}}
      value]
 
     (string? value)
-    [:span {:style {:color (:colors/string settings)}}
+    [s/span {:style {:color (:colors/string settings)}}
      (pr-str (trim-string settings value))]
 
     (keyword? value)
     (let [keyword-name (name value)
           keyword-namespace (namespace value)]
       (when keyword-name
-        [:span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
+        [s/span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
          ":" (when keyword-namespace
-               [:span {:style {:color (:colors/keyword-namespace settings)}}
+               [s/span {:style {:color (:colors/keyword-namespace settings)}}
                 keyword-namespace
                 "/"])
          keyword-name]))
 
     (instance? js/Date value)
-    [:span {:style {:color (:colors/date settings)}}
+    [s/span {:style {:color (:colors/date settings)}}
      (pr-str value)]
 
     (instance? cljs.core/UUID value)
-    [:span {:style {:color (:colors/uuid settings)}}
+    [s/span {:style {:color (:colors/uuid settings)}}
      (pr-str value)]
 
     (instance? cljs.core/Var value)
-    [:span {:style {:color (:colors/var settings)}}
+    [s/span {:style {:color (:colors/var settings)}}
      (pr-str value)]
 
     :else
-    [:span {}
+    [s/span {}
      (trim-string settings (pr-str value))]))
 
 (def themes
@@ -329,7 +330,7 @@
 (defonce search-text (r/atom ""))
 
 (defn search-input [settings]
-  [:input
+  [s/input
    {:on-change #(reset! search-text (.-value (.-target %)))
     :value @search-text
     :style
@@ -344,7 +345,7 @@
 
 (defn search-results [settings]
   (let [search-text-value @search-text]
-    (when-not (s/blank? search-text-value)
+    (when-not (str/blank? search-text-value)
       [:<>
        (->>
         search-text-value
@@ -352,14 +353,14 @@
         (take 10)
         (map-indexed
          (fn [index item]
-           [:div
+           [s/div
             {:key index :on-click #(do
                                      (reset! search-text nil)
                                      (reset! path (:path item)))}
             [sedit settings (dissoc item :string-value)]])))])))
 
 (defn toolbar [settings path]
-  [:div
+  [s/div
    {:style
     {:height "64px"
      :flex-direction :row
@@ -367,7 +368,7 @@
      :align-items :center
      :justify-content :center
      :border-bottom  (str "1px solid " (:colors/border settings))}}
-   [:button
+   [s/button
     {:on-click #(swap! path (fn [v] (if (empty? v) v (pop v))))
      :style
      {:background (:colors/text settings)
@@ -387,7 +388,7 @@
         parent-path @path
         settings    (assoc settings :parent-path parent-path)
         settings    (assoc settings :depth 0)]
-    [:div
+    [s/div
      {:style
       {:display :flex
        :justify-content :space-between
@@ -399,16 +400,16 @@
        :height "100vh"
        :width "100vw"}}
      [toolbar settings path]
-     [:div
+     [s/div
       {:style
        {:display :flex
         :flex 1
         :align-items :center
         :justify-content :center
         :overflow-y :auto}}
-      [:div {:style {:max-height "100%" :max-width "100%"}}
-       [:div {:style {:padding "64px" :box-sizing :border-box}}
-        (if-not (s/blank? @search-text)
+      [s/div {:style {:max-height "100%" :max-width "100%"}}
+       [s/div {:style {:padding "64px" :box-sizing :border-box}}
+        (if-not (str/blank? @search-text)
           [search-results settings]
           [sedit settings (get-in value parent-path)])]]]
      #_[sedit (-> settings
