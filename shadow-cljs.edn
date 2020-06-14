@@ -7,4 +7,5 @@
         :asset-path "."
         :target :browser
         :modules {:main {:init-fn sedit.core/main!}}
-        :devtools {:after-load sedit.core/reload!}}}}
+        :devtools {:after-load sedit.core/reload!
+                   :preloads   [shadow.remote.runtime.cljs.browser]}}}}
