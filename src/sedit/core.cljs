@@ -78,12 +78,12 @@
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [summary settings values]
-      (let [columns (into #{} (mapcat keys values))]
+      (let [columns (into #{} (mapcat keys values))
+            background (get-background settings)]
         [s/table
          {:style
           {:width "100%"
            :display :grid
-           :background (get-background settings)
            :border-collapse :collapse
            :color (:colors/text settings)
            :font-size  (:font-size settings)
@@ -95,6 +95,7 @@
               [s/th {:key grid-column
                      :style
                      {:border (str "1px solid " (:colors/border settings))
+                      :background background
                       :box-sizing :border-box
                       :padding (:spacing/padding settings)}}
                [sedit settings column]])
@@ -108,6 +109,7 @@
                   {:key grid-column
                    :style
                    {:border (str "1px solid " (:colors/border settings))
+                    :background background
                     :padding (:spacing/padding settings)
                     :box-sizing :border-box}}
                   (when-let [value (get row column)]
