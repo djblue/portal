@@ -368,6 +368,17 @@
                                      (reset! path (:path item)))}
             [sedit settings (dissoc item :string-value)]])))])))
 
+(defn toolbar-button-styles [settings]
+  {:background (:colors/text settings)
+   :color (:colors/background settings)
+   :font-size (:font-size settings)
+   :border :none
+   :box-sizing :border-box
+   :padding "10px 20px"
+   :border-radius (:border-radius settings)
+   :cursor :pointer
+   :margin "0 20px"})
+
 (defn toolbar [settings path]
   [s/div
    {:style
@@ -379,17 +390,44 @@
      :border-bottom  (str "1px solid " (:colors/border settings))}}
    [s/button
     {:on-click (:sedit/on-back settings)
-     :style
-     {:background (:colors/text settings)
-      :color (:colors/background settings)
-      :font-size (:font-size settings)
-      :border :none
-      :box-sizing :border-box
-      :padding "10px 20px"
-      :border-radius (:border-radius settings)
-      :cursor :pointer
-      :margin "0 20px"}} "back"]
-   [search-input settings]])
+     :style    (toolbar-button-styles settings)} "back"]
+   [search-input settings]
+   [s/button
+    {:on-click (:sedit/on-clear settings)
+     :style    (toolbar-button-styles settings)} "clear"]])
+
+(defn json->edn [json]
+  (let [r (t/reader :json)]
+    (t/read r json)))
+
+(defn edn->json [edn]
+  (let [w (t/writer :json)]
+    (t/write w edn)))
+
+(defn send-rpc!
+  ([msg] (send-rpc! msg identity))
+  ([msg done]
+   (-> (js/fetch
+        "/rpc"
+        #js {:method "POST" :body (edn->json msg)})
+       (.then #(.text %))
+       (.then json->edn)
+       (.then done))))
+
+(defn merge-state [new-state]
+  (let [index (index-value (:sedit/value new-state))
+        new-state-with-index
+        (assoc new-state :sedit/index index)]
+    (swap! state merge new-state-with-index)))
+
+(defn load-state! []
+  (send-rpc! {:op             :sedit.rpc/load-state
+              :sedit/state-id (:sedit/state-id @state)}
+             merge-state))
+
+(defn clear-values! []
+  (send-rpc! {:op :sedit.rpc/clear-values}
+             #(swap! state assoc :sedit/history '())))
 
 (defn app []
   (let [settings    @state
@@ -397,6 +435,7 @@
                         (:sedit/value settings))
         settings    (assoc settings
                            :depth 0
+                           :sedit/on-clear #(clear-values!)
                            :sedit/on-nav
                            #(when-not (= value %)
                               (swap! state update :sedit/history conj %))
@@ -427,36 +466,6 @@
           [search-results settings]
           [sedit settings value])]]]]))
 
-(defn json->edn [json]
-  (let [r (t/reader :json)]
-    (t/read r json)))
-
-(defn edn->json [edn]
-  (let [w (t/writer :json)]
-    (t/write w edn)))
-
-(defn send-rpc!
-  ([msg] (send-rpc! msg identity))
-  ([msg done]
-   (-> (js/fetch
-        "/rpc"
-        #js {:method "POST" :body (edn->json msg)})
-       (.then #(.text %))
-       (.then json->edn)
-       (.then done))))
-
-(defn merge-state [new-state]
-  (let [index (index-value (:sedit/value new-state))
-        new-state-with-index
-        (assoc new-state :sedit/index index)]
-    (swap! state merge new-state-with-index)))
-
-(def load-state!
-  (partial send-rpc! {:op :sedit.rpc/load-state} merge-state))
-
-(def await-state!
-  (partial send-rpc!  {:op :sedit.rpc/await-state} merge-state))
-
 (defn promise-loop [f]
   (.finally (f) #(promise-loop f)))
 
@@ -465,8 +474,7 @@
             (.getElementById js/document "root")))
 
 (defn main! []
-  (load-state!)
-  (promise-loop await-state!)
+  (promise-loop load-state!)
   (render-app))
 
 (defn reload! [] (render-app))

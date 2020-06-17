@@ -6,7 +6,8 @@
             [clojure.data.json :as json]
             [cognitect.transit :as transit]
             [org.httpkit.server :as server])
-  (:import [java.io ByteArrayOutputStream PushbackReader]))
+  (:import [java.io ByteArrayOutputStream PushbackReader]
+           [java.util UUID]))
 
 (defn get-paths []
   (concat
@@ -45,7 +46,23 @@
 
 (defn update-setting [k v] (swap! state assoc k v) true)
 
-(defn update-value [value] (update-setting :sedit/value value))
+(defn update-value [new-value]
+  (swap!
+   state
+   (fn [state]
+     (assoc
+      state
+      :sedit/state-id (UUID/randomUUID)
+      :sedit/value
+      (let [value (:sedit/value state)]
+        (if-not (coll? value)
+          (list new-value)
+          (conj value new-value)))))))
+
+(defn clear-values []
+  (swap! state assoc
+         :sedit/state-id (UUID/randomUUID)
+         :sedit/value (list)))
 
 (defn send-rpc [channel value]
   (server/send!
@@ -58,29 +75,26 @@
             (catch Exception e
               (value->transit {:status :error})))}))
 
-(defonce channels (atom nil))
-
-(defn watch-state []
-  (when (nil? @channels)
-    (add-watch
-     state :async
-     (fn [_ _ old new]
-       (doseq [channel @channels]
-         (send-rpc channel new))))
-    (reset! channels #{})))
-
 (def ops
-  {:sedit.rpc/load-state
+  {:sedit.rpc/clear-values
    (fn [request channel]
-     (send-rpc channel @state))
-   :sedit.rpc/await-state
+     (send-rpc channel (clear-values)))
+   :sedit.rpc/load-state
    (fn [request channel]
-     (watch-state)
-     (swap! channels conj channel)
-     (server/on-close
-      channel
-      (fn [status]
-        (swap! channels disj channel))))})
+     (let [state-value @state
+           id (get-in request [:body :sedit/state-id])]
+       (if-not (= id (:sedit/state-id state-value))
+         (send-rpc channel state-value)
+         (let [watch-key (keyword (gensym))]
+           (add-watch
+            state
+            watch-key
+            (fn [_ _ old new]
+              (send-rpc channel @state)))
+           (server/on-close
+            channel
+            (fn [status]
+              (remove-watch state watch-key)))))))})
 
 (defn not-found [request channel]
   (send-rpc channel {:status :not-found}))
