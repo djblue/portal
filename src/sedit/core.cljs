@@ -143,7 +143,6 @@
            [s/td
             [s/div
              {:style {:display :flex}}
-             #_(map (partial sedit settings) (:parent-path settings))
              type+count]]
            [s/td]]]
        (take
@@ -152,13 +151,11 @@
          some?
          (for [[k v] values]
            (let [sedit-k [sedit settings k]
-                 sedit-v [sedit (update settings :parent-path conj k) v]]
+                 sedit-v [sedit settings v]]
              [:<>
               {:key (hash k)}
-              [s/div {:on-click #(reset! path (conj (:parent-path settings) k))
-                      :style
-                      {:cursor :pointer
-                       :grid-column "1"}}
+              [s/div {:style
+                      {:grid-column "1"}}
                [s/div
                 {:style {:display :flex}}
                 sedit-k]]
@@ -201,7 +198,7 @@
             (map-indexed
              (fn [idx itm]
                ^{:key idx}
-               [sedit (update settings :parent-path conj idx) itm]))
+               [sedit settings itm]))
             (filter some?)
             (take (:limits/max-length settings)))])))
 
@@ -227,58 +224,67 @@
           [s/span before [:mark match] after])))))
 
 (defn sedit [settings value]
-  (cond
-    (table-view? value)
-    [table-view settings value]
+  [s/div
+   {:on-click
+    (fn [e]
+      (.stopPropagation e)
+      ((:sedit/on-nav settings) value))
+    :style {:cursor :pointer
+            :border-radius (:border-radius settings)
+            :border "1px solid rgba(0,0,0,0)"}
+    :style/hover {:border "1px solid #D8DEE9"}}
+   (cond
+     (table-view? value)
+     [table-view settings value]
 
-    (map? value)
-    [sedit-map settings value]
+     (map? value)
+     [sedit-map settings value]
 
-    (coll? value)
-    [sedit-coll settings value]
+     (coll? value)
+     [sedit-coll settings value]
 
-    (boolean? value)
-    [s/span {:style {:color (:colors/boolean settings)}}
-     (pr-str value)]
+     (boolean? value)
+     [s/span {:style {:color (:colors/boolean settings)}}
+      (pr-str value)]
 
-    (symbol? value)
-    [s/span {:style {:color (:colors/symbol settings)}}
-     value]
+     (symbol? value)
+     [s/span {:style {:color (:colors/symbol settings)}}
+      value]
 
-    (number? value)
-    [s/span {:style {:color (:colors/number settings)}}
-     value]
+     (number? value)
+     [s/span {:style {:color (:colors/number settings)}}
+      value]
 
-    (string? value)
-    [s/span {:style {:color (:colors/string settings)}}
-     (pr-str (trim-string settings value))]
+     (string? value)
+     [s/span {:style {:color (:colors/string settings)}}
+      (pr-str (trim-string settings value))]
 
-    (keyword? value)
-    (let [keyword-name (name value)
-          keyword-namespace (namespace value)]
-      (when keyword-name
-        [s/span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
-         ":" (when keyword-namespace
-               [s/span {:style {:color (:colors/keyword-namespace settings)}}
-                keyword-namespace
-                "/"])
-         keyword-name]))
+     (keyword? value)
+     (let [keyword-name (name value)
+           keyword-namespace (namespace value)]
+       (when keyword-name
+         [s/span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
+          ":" (when keyword-namespace
+                [s/span {:style {:color (:colors/keyword-namespace settings)}}
+                 keyword-namespace
+                 "/"])
+          keyword-name]))
 
-    (instance? js/Date value)
-    [s/span {:style {:color (:colors/date settings)}}
-     (pr-str value)]
+     (instance? js/Date value)
+     [s/span {:style {:color (:colors/date settings)}}
+      (pr-str value)]
 
-    (instance? cljs.core/UUID value)
-    [s/span {:style {:color (:colors/uuid settings)}}
-     (pr-str value)]
+     (instance? cljs.core/UUID value)
+     [s/span {:style {:color (:colors/uuid settings)}}
+      (pr-str value)]
 
-    (instance? cljs.core/Var value)
-    [s/span {:style {:color (:colors/var settings)}}
-     (pr-str value)]
+     (instance? cljs.core/Var value)
+     [s/span {:style {:color (:colors/var settings)}}
+      (pr-str value)]
 
-    :else
-    [s/span {}
-     (trim-string settings (pr-str value))]))
+     :else
+     [s/span {}
+      (trim-string settings (pr-str value))])])
 
 (def themes
   {:themes/nord
@@ -305,7 +311,8 @@
     :limits/max-length 1000
     :layout/direction :row
     :spacing/padding "10px"
-    :border-radius "2px"}
+    :border-radius "2px"
+    :sedit/history '()}
    (:themes/nord themes)))
 
 (comment
@@ -371,7 +378,7 @@
      :justify-content :center
      :border-bottom  (str "1px solid " (:colors/border settings))}}
    [s/button
-    {:on-click #(swap! path (fn [v] (if (empty? v) v (pop v))))
+    {:on-click (:sedit/on-back settings)
      :style
      {:background (:colors/text settings)
       :color (:colors/background settings)
@@ -386,10 +393,15 @@
 
 (defn app []
   (let [settings    @state
-        value       (:sedit/value settings)
-        parent-path @path
-        settings    (assoc settings :parent-path parent-path)
-        settings    (assoc settings :depth 0)]
+        value       (or (first (:sedit/history settings))
+                        (:sedit/value settings))
+        settings    (assoc settings
+                           :depth 0
+                           :sedit/on-nav
+                           #(when-not (= value %)
+                              (swap! state update :sedit/history conj %))
+                           :sedit/on-back
+                           #(swap! state update :sedit/history rest))]
     [s/div
      {:style
       {:display :flex
@@ -413,16 +425,7 @@
        [s/div {:style {:padding "64px" :box-sizing :border-box}}
         (if-not (str/blank? @search-text)
           [search-results settings]
-          [sedit settings (get-in value parent-path)])]]]
-     #_[sedit (-> settings
-                  (dissoc :input/text-search)
-                  (assoc :layout/direction :row))
-        (select-keys
-         settings
-         [:limits/string-length
-          :limits/max-depth
-          :limits/max-length
-          :parent-path])]]))
+          [sedit settings value])]]]]))
 
 (defn json->edn [json]
   (let [r (t/reader :json)]
