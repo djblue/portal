@@ -74,7 +74,7 @@
 (defn table-view? [value]
   (and (coll? value) (every? map? value)))
 
-(defn table-view [settings values]
+(defn sedit-table [settings values]
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [summary settings values]
@@ -83,7 +83,6 @@
         [s/table
          {:style
           {:width "100%"
-           :display :grid
            :border-collapse :collapse
            :color (:colors/text settings)
            :font-size  (:font-size settings)
@@ -223,6 +222,11 @@
               after   (subs value (+ len i))]
           [s/span before [:mark match] after])))))
 
+(def viewers
+  {:sedit.viewer/map    {:predicate map?        :component sedit-map}
+   :sedit.viewer/table  {:predicate table-view? :component sedit-table}
+   :sedit.viewer/coll   {:predicate coll?       :component sedit-coll}})
+
 (defn sedit [settings value]
   [s/div
    {:on-click
@@ -237,9 +241,6 @@
                   (when-not (zero? (:depth settings))
                     "1px solid #D8DEE9")}}
    (cond
-     (table-view? value)
-     [table-view settings value]
-
      (map? value)
      [sedit-map settings value]
 
@@ -288,6 +289,55 @@
      :else
      [s/span {}
       (trim-string settings (pr-str value))])])
+
+(defn sedit-1 []
+  (let [selected-viewer (r/atom nil)]
+    (fn [settings value]
+      (let [compatible-viewers
+            (into #{} (keep (fn [[k {:keys [predicate]}]]
+                              (when (predicate value) k)) viewers))
+            viewer    (or @selected-viewer (first compatible-viewers))
+            component (if-not (contains? compatible-viewers viewer)
+                        sedit
+                        (get-in viewers [viewer :component] sedit))]
+        [s/div
+         {:style
+          {:flex 1}}
+         [s/div
+          {:style
+           {:position :relative
+            :min-height "calc(100% - 64px)"
+            :max-height "calc(100% - 64px)"
+            :min-width "100%"
+            :box-sizing :border-box
+            :border (str "1px solid " (:colors/border settings))}}
+          [:div
+           {:style
+            {:position :absolute
+             :top 0
+             :left 0
+             :right 0
+             :bottom 0
+             :overflow :auto
+             :box-sizing :border-box
+             :padding 20}}
+           [:div
+            [component settings value]]]]
+         (when-not (empty? compatible-viewers)
+           [:select
+            {:value (pr-str viewer)
+             :on-change #(reset! selected-viewer
+                                 (keyword (.substr (.. % -target -value) 1)))
+             :style
+             {:background (:colors/background settings)
+              :margin (:spacing/padding settings)
+              :padding (:spacing/padding settings)
+              :box-sizing :border
+              :font-size (:font-size settings)
+              :color (:colors/text settings)
+              :border (str "1px solid " (:colors/border settings))}}
+            (for [k compatible-viewers]
+              [:option {:key k :value (pr-str k)} (pr-str k)])])]))))
 
 (def themes
   {:themes/nord
@@ -475,27 +525,13 @@
           reverse
           (map-indexed
            (fn [idx ls]
-             [s/div
-              {:key idx
-               :style
-               {:flex 1
-                :width "100%"
-                :height "100%"
-                :overflow-y :auto}}
-              [:div
-               {:style
-                {:display :flex
-                 :align-items :center
-                 :justify-content :center
-                 :box-sizing :border-box
-                 :padding 20
-                 :min-height "100%"
-                 :border (str "1px solid " (:colors/border settings))}}
-               [sedit
-                (update settings
-                        :sedit/on-nav
-                        (fn [on-nav] #(on-nav (conj ls %))))
-                (first ls)]]])))])]]))
+             [:<>
+              {:key idx}
+              [sedit-1
+               (update settings
+                       :sedit/on-nav
+                       (fn [on-nav] #(on-nav (conj ls %))))
+               (first ls)]])))])]]))
 
 (defn promise-loop [f]
   (.finally (f) #(promise-loop f)))
