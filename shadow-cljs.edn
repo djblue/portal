@@ -1,4 +1,6 @@
 {:deps {:aliases [:cljs]}
+ :nrepl
+ {:middleware [sedit.nrepl/wrap-sedit]}
  :dev-http
  {9090 {:root "resources/"
         :handler sedit.main/handler}}
