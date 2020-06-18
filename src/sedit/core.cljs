@@ -227,12 +227,15 @@
   [s/div
    {:on-click
     (fn [e]
-      (.stopPropagation e)
-      ((:sedit/on-nav settings) value))
+      (when-not (zero? (:depth settings))
+        (.stopPropagation e)
+        ((:sedit/on-nav settings) value)))
     :style {:cursor :pointer
             :border-radius (:border-radius settings)
             :border "1px solid rgba(0,0,0,0)"}
-    :style/hover {:border "1px solid #D8DEE9"}}
+    :style/hover {:border
+                  (when-not (zero? (:depth settings))
+                    "1px solid #D8DEE9")}}
    (cond
      (table-view? value)
      [table-view settings value]
@@ -307,7 +310,8 @@
    {:font/family "monospace"
     :font-size "12pt"
     :limits/string-length 100
-    :limits/max-depth 3
+    :limits/max-depth 2
+    :limits/max-panes 2
     :limits/max-length 1000
     :layout/direction :row
     :spacing/padding "10px"
@@ -429,22 +433,26 @@
   (send-rpc! {:op :sedit.rpc/clear-values}
              #(swap! state assoc :sedit/history '())))
 
+(defn get-history-stack [settings]
+  (if (empty? (:sedit/history settings))
+    [(list (:sedit/value settings))]
+    (loop [ls (:sedit/history settings) result []]
+      (if (empty? ls)
+        result
+        (recur (rest ls) (conj result ls))))))
+
 (defn app []
-  (let [settings    @state
-        value       (or (first (:sedit/history settings))
-                        (:sedit/value settings))
-        settings    (assoc settings
-                           :depth 0
-                           :sedit/on-clear #(clear-values!)
-                           :sedit/on-nav
-                           #(when-not (= value %)
-                              (swap! state update :sedit/history conj %))
-                           :sedit/on-back
-                           #(swap! state update :sedit/history rest))]
+  (let [settings
+        (assoc @state
+               :depth 0
+               :sedit/on-clear #(clear-values!)
+               :sedit/on-nav
+               (fn [history]
+                 (swap! state assoc :sedit/history history))
+               :sedit/on-back #(swap! state update :sedit/history rest))]
     [s/div
      {:style
       {:display :flex
-       :justify-content :space-between
        :flex-direction :column
        :background (:colors/background settings)
        :color (:colors/text settings)
@@ -453,18 +461,41 @@
        :height "100vh"
        :width "100vw"}}
      [toolbar settings path]
-     [s/div
-      {:style
-       {:display :flex
-        :flex 1
-        :align-items :center
-        :justify-content :center
-        :overflow-y :auto}}
-      [s/div {:style {:max-height "100%" :max-width "100%"}}
-       [s/div {:style {:padding "64px" :box-sizing :border-box}}
-        (if-not (str/blank? @search-text)
-          [search-results settings]
-          [sedit settings value])]]]]))
+     [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
+      (if-not (str/blank? @search-text)
+        [search-results settings]
+        [:div
+         {:style
+          {:width "100%"
+           :height "100%"
+           :display :flex}}
+         (->>
+          (get-history-stack settings)
+          (take (:limits/max-panes settings))
+          reverse
+          (map-indexed
+           (fn [idx ls]
+             [s/div
+              {:key idx
+               :style
+               {:flex 1
+                :width "100%"
+                :height "100%"
+                :overflow-y :auto}}
+              [:div
+               {:style
+                {:display :flex
+                 :align-items :center
+                 :justify-content :center
+                 :box-sizing :border-box
+                 :padding 20
+                 :min-height "100%"
+                 :border (str "1px solid " (:colors/border settings))}}
+               [sedit
+                (update settings
+                        :sedit/on-nav
+                        (fn [on-nav] #(on-nav (conj ls %))))
+                (first ls)]]])))])]]))
 
 (defn promise-loop [f]
   (.finally (f) #(promise-loop f)))
