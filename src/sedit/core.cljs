@@ -361,7 +361,7 @@
     :font-size "12pt"
     :limits/string-length 100
     :limits/max-depth 2
-    :limits/max-panes 2
+    :limits/max-panes 1
     :limits/max-length 1000
     :layout/direction :row
     :spacing/padding "10px"
@@ -469,6 +469,8 @@
        (.then done))))
 
 (defn merge-state [new-state]
+  (when-not (:sedit/open? new-state)
+    (js/window.close))
   (let [index (index-value (:sedit/value new-state))
         new-state-with-index
         (assoc new-state :sedit/index index)]

@@ -121,6 +121,7 @@
 (defonce server (atom nil))
 
 (defn open-inspector [value]
+  (swap! state assoc :sedit/open? true)
   (update-value value)
   (when (nil? @server)
     (reset!
@@ -133,7 +134,8 @@
       (str "--app=http://localhost:" (-> @server meta :local-port))))
 
 (defn close-inspector []
-  (@server :timeout 100)
+  (swap! state assoc :sedit/open? false)
+  (@server :timeout 1000)
   (reset! server nil))
 
 (defn inspect [v]
