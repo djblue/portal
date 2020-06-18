@@ -1,6 +1,6 @@
 {:paths ["src" "test" "resources"]
  :deps
- { com.cognitect/transit-clj {:mvn/version "1.0.324"}
+ {com.cognitect/transit-clj {:mvn/version "1.0.324"}
   org.clojure/data.json {:mvn/version "1.0.0"}
   http-kit {:mvn/version "2.3.0"}}
  :aliases
