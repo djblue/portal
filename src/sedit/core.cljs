@@ -1,6 +1,7 @@
 (ns sedit.core
   (:require [reagent.core :as r]
             [sedit.styled :as s]
+            [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [cognitect.transit :as t]))
 
@@ -39,6 +40,114 @@
   (filter #(str/includes? (:string-value %)
                           (str/lower-case s))
           index))
+
+(def themes
+  {:themes/nord
+   {:colors/text "#d8dee9"
+    :colors/background "#2e3440"
+    :colors/background2 "rgba(0,0,0,0.1)"
+    :colors/boolean "#5e81ac"
+    :colors/string "#a3be8c"
+    :colors/keyword "#5e81ac"
+    :colors/keyword-namespace "#88c0d0"
+    :colors/tag "#EBCB8B"
+    :colors/symbol "#d8dee9"
+    :colors/number "#b48ead"
+    :colors/date "#ebcb8b"
+    :colors/uuid "#d08770"
+    :colors/var "#88c0d0"
+    :colors/border "#4c566a"}})
+
+(def default-settings
+  (merge
+   {:font/family "monospace"
+    :font-size "12pt"
+    :limits/string-length 100
+    :limits/max-depth 2
+    :limits/max-panes 1
+    :limits/max-length 1000
+    :layout/direction :row
+    :spacing/padding "10px"
+    :border-radius "2px"
+    :sedit/history '()}
+   (:themes/nord themes)))
+
+(def example
+  {:example/booleans #{true false}
+   :example/nil nil
+   :example/vector [1 2 4]
+   "string-key" "string-value"
+   :example/list (list 1 2 3)
+   :example/set #{1 2 3}
+   {:example/settings default-settings} :hello-world
+   #{1 2 3} [4 5 6]
+   :example/date (js/Date.)
+   :example/var #'default-settings
+   :example/uuid (random-uuid)
+   :example/nested-vector [1 2 3 [4 5 6]]
+   :example/code '(defn hello-world [] (println "hello, world"))})
+
+(defonce state (r/atom default-settings))
+
+(spec/def ::http-request
+  (spec/keys
+   :req-un [::url]
+   :opt-un [::headers ::method ::body]))
+
+(spec/def ::url string?)
+(spec/def ::method #{"GET" "POST" "PUT" "PATCH" "DELETE"})
+(spec/def ::headers map?)
+(spec/def ::body string?)
+
+(defn button-styles [settings]
+  {:background (:colors/text settings)
+   :color (:colors/background settings)
+   :font-size (:font-size settings)
+   :border :none
+   :box-sizing :border-box
+   :padding "10px 20px"
+   :border-radius (:border-radius settings)
+   :cursor :pointer
+   :margin "0 20px"})
+
+(defn json->edn [json]
+  (let [r (t/reader :json)]
+    (t/read r json)))
+
+(defn edn->json [edn]
+  (let [w (t/writer :json)]
+    (t/write w edn)))
+
+(defn send-rpc!
+  ([msg] (send-rpc! msg identity))
+  ([msg done]
+   (-> (js/fetch
+        "/rpc"
+        #js {:method "POST" :body (edn->json msg)})
+       (.then #(.text %))
+       (.then json->edn)
+       (.then done))))
+
+(defn merge-state [new-state]
+  (when-not (:sedit/open? new-state)
+    (js/window.close))
+  (let [index (index-value (:sedit/value new-state))
+        new-state-with-index
+        (assoc new-state :sedit/index index)]
+    (swap! state merge new-state-with-index)))
+
+(defn load-state! []
+  (send-rpc! {:op             :sedit.rpc/load-state
+              :sedit/state-id (:sedit/state-id @state)}
+             merge-state))
+
+(defn clear-values! []
+  (send-rpc! {:op :sedit.rpc/clear-values}
+             #(swap! state assoc :sedit/history '())))
+
+(defn http-request [request]
+  (send-rpc! {:op :sedit.rpc/http-request
+              :request request}))
 
 (declare sedit)
 
@@ -115,6 +224,23 @@
                     [sedit settings (get row column)])])
                columns)])
            values)]]))))
+
+(defn http-request? [value]
+  (spec/valid? ::http-request value))
+
+(defn sedit-http []
+  (let [response (r/atom nil)]
+    (fn [settings value]
+      [:div
+       [s/button
+        {:style (button-styles settings)
+         :on-click (fn []
+                     (->  (http-request value)
+                          (.then #(reset! response %))))}
+        "send request"]
+       [sedit settings value]
+       (when @response
+         [sedit settings @response])])))
 
 (defonce path (r/atom []))
 
@@ -223,9 +349,10 @@
           [s/span before [:mark match] after])))))
 
 (def viewers
-  {:sedit.viewer/map    {:predicate map?        :component sedit-map}
-   :sedit.viewer/table  {:predicate table-view? :component sedit-table}
-   :sedit.viewer/coll   {:predicate coll?       :component sedit-coll}})
+  {:sedit.viewer/map    {:predicate map?          :component sedit-map}
+   :sedit.viewer/table  {:predicate table-view?   :component sedit-table}
+   :sedit.viewer/coll   {:predicate coll?         :component sedit-coll}
+   :sedit.viewer/http   {:predicate http-request? :component sedit-http}})
 
 (defn sedit [settings value]
   [s/div
@@ -286,6 +413,16 @@
      [s/span {:style {:color (:colors/var settings)}}
       (pr-str value)]
 
+     (t/tagged-value? value)
+     [:span
+      {:style {:display :flex}}
+      [s/span
+       {:style {:padding-right (:spacing/padding settings)
+                :box-sizing :border-box}}
+       [s/span {:style {:color (:colors/tag settings)}} "#"]
+       [s/span {:style {:color (:colors/text settings)}} (.-tag value)]]
+      [sedit settings (.-rep value)]]
+
      :else
      [s/span {}
       (trim-string settings (pr-str value))])])
@@ -339,57 +476,6 @@
             (for [k compatible-viewers]
               [:option {:key k :value (pr-str k)} (pr-str k)])])]))))
 
-(def themes
-  {:themes/nord
-   {:colors/text "#d8dee9"
-    :colors/background "#2e3440"
-    :colors/background2 "rgba(0,0,0,0.1)"
-    :colors/boolean "#5e81ac"
-    :colors/string "#a3be8c"
-    :colors/keyword "#5e81ac"
-    :colors/keyword-namespace "#88c0d0"
-    :colors/symbol "#d8dee9"
-    :colors/number "#b48ead"
-    :colors/date "#ebcb8b"
-    :colors/uuid "#d08770"
-    :colors/var "#88c0d0"
-    :colors/border "#4c566a"}})
-
-(def default-settings
-  (merge
-   {:font/family "monospace"
-    :font-size "12pt"
-    :limits/string-length 100
-    :limits/max-depth 2
-    :limits/max-panes 1
-    :limits/max-length 1000
-    :layout/direction :row
-    :spacing/padding "10px"
-    :border-radius "2px"
-    :sedit/history '()}
-   (:themes/nord themes)))
-
-(comment
-  (true? (swap! state assoc :sedit/value example))
-  (true? (swap! state assoc :spacing/padding "10px")))
-
-(def example
-  {:example/booleans #{true false}
-   :example/nil nil
-   :example/vector [1 2 4]
-   "string-key" "string-value"
-   :example/list (list 1 2 3)
-   :example/set #{1 2 3}
-   {:example/settings default-settings} :hello-world
-   #{1 2 3} [4 5 6]
-   :example/date (js/Date.)
-   :example/var #'default-settings
-   :example/uuid (random-uuid)
-   :example/nested-vector [1 2 3 [4 5 6]]
-   :example/code '(defn hello-world [] (println "hello, world"))})
-
-(defonce state (r/atom default-settings))
-
 (defonce search-text (r/atom ""))
 
 (defn search-input [settings]
@@ -422,17 +508,6 @@
                                      (reset! path (:path item)))}
             [sedit settings (dissoc item :string-value)]])))])))
 
-(defn toolbar-button-styles [settings]
-  {:background (:colors/text settings)
-   :color (:colors/background settings)
-   :font-size (:font-size settings)
-   :border :none
-   :box-sizing :border-box
-   :padding "10px 20px"
-   :border-radius (:border-radius settings)
-   :cursor :pointer
-   :margin "0 20px"})
-
 (defn toolbar [settings path]
   [s/div
    {:style
@@ -444,46 +519,11 @@
      :border-bottom  (str "1px solid " (:colors/border settings))}}
    [s/button
     {:on-click (:sedit/on-back settings)
-     :style    (toolbar-button-styles settings)} "back"]
+     :style    (button-styles settings)} "back"]
    [search-input settings]
    [s/button
     {:on-click (:sedit/on-clear settings)
-     :style    (toolbar-button-styles settings)} "clear"]])
-
-(defn json->edn [json]
-  (let [r (t/reader :json)]
-    (t/read r json)))
-
-(defn edn->json [edn]
-  (let [w (t/writer :json)]
-    (t/write w edn)))
-
-(defn send-rpc!
-  ([msg] (send-rpc! msg identity))
-  ([msg done]
-   (-> (js/fetch
-        "/rpc"
-        #js {:method "POST" :body (edn->json msg)})
-       (.then #(.text %))
-       (.then json->edn)
-       (.then done))))
-
-(defn merge-state [new-state]
-  (when-not (:sedit/open? new-state)
-    (js/window.close))
-  (let [index (index-value (:sedit/value new-state))
-        new-state-with-index
-        (assoc new-state :sedit/index index)]
-    (swap! state merge new-state-with-index)))
-
-(defn load-state! []
-  (send-rpc! {:op             :sedit.rpc/load-state
-              :sedit/state-id (:sedit/state-id @state)}
-             merge-state))
-
-(defn clear-values! []
-  (send-rpc! {:op :sedit.rpc/clear-values}
-             #(swap! state assoc :sedit/history '())))
+     :style    (button-styles settings)} "clear"]])
 
 (defn get-history-stack [settings]
   (if (empty? (:sedit/history settings))

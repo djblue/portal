@@ -5,7 +5,8 @@
             [clojure.edn :as edn]
             [clojure.data.json :as json]
             [cognitect.transit :as transit]
-            [org.httpkit.server :as server])
+            [org.httpkit.server :as server]
+            [org.httpkit.client :as client])
   (:import [java.io ByteArrayOutputStream PushbackReader]
            [java.util UUID]))
 
@@ -26,7 +27,13 @@
   (find-bin #{"chrome" "google-chrome-stable" "chromium" "Google Chrome"}))
 
 (defn value->transit-stream [value out]
-  (let [writer (transit/writer out :json)]
+  (let [writer (transit/writer
+                out
+                :json
+                {:default-handler
+                 (transit/write-handler
+                  "sedit.transit/unknown"
+                  pr-str)})]
     (transit/write writer value)
     (.toString out)))
 
@@ -94,7 +101,12 @@
            (server/on-close
             channel
             (fn [status]
-              (remove-watch state watch-key)))))))})
+              (remove-watch state watch-key)))))))
+   :sedit.rpc/http-request
+   (fn [request channel]
+     (send-rpc
+      channel
+      @(client/request (get-in request [:body :request]))))})
 
 (defn not-found [request channel]
   (send-rpc channel {:status :not-found}))
