@@ -5,7 +5,17 @@
   http-kit {:mvn/version "2.3.0"}
   io.aviso/pretty {:mvn/version "0.1.37"}}
  :aliases
- {:cljs
+ {:dev-cljs
+  ;; Using clojurescript from source is required to get around
+  ;; the older version (0.8.309) of transit-clj bundled in their jar.
+  ;; This is necessary because the :default-handler for transit-clj
+  ;; wasn't added until 0.8.319
+  {:override-deps
+   {org.clojure/clojurescript
+    {:git/url "https://github.com/clojure/clojurescript.git"
+     :tag "1.10.758"
+     :sha "f5a9766110227c0d2a8702b32c44d52059b97a53"}}}
+  :cljs
   {:extra-deps
    {org.clojure/clojurescript {:mvn/version "1.10.758"}
     com.cognitect/transit-cljs {:mvn/version "0.8.264"}
