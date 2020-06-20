@@ -6,7 +6,8 @@
             [clojure.data.json :as json]
             [cognitect.transit :as transit]
             [org.httpkit.server :as server]
-            [org.httpkit.client :as client])
+            [org.httpkit.client :as client]
+            [io.aviso.exception :as ex])
   (:import [java.io ByteArrayOutputStream PushbackReader]
            [java.util UUID]))
 
@@ -31,18 +32,17 @@
     (symbol (str (:ns m)) (str (:name m)))))
 
 (defn value->transit-stream [value out]
-  (let [writer (transit/writer
-                out
-                :json
-                {:handlers
-                 {clojure.lang.Var
-                  (transit/write-handler
-                   "sedit.transit/var"
-                   var->symbol)}
-                 :default-handler
-                 (transit/write-handler
-                  "sedit.transit/unknown"
-                  pr-str)})]
+  (let [writer
+        (transit/writer
+         out
+         :json
+         {:handlers
+          {clojure.lang.Var
+           (transit/write-handler "sedit.transit/var" var->symbol)
+           java.lang.Throwable
+           (transit/write-handler "sedit.transit/exception" #(ex/analyze-exception % nil))}
+          :default-handler
+          (transit/write-handler "sedit.transit/unknown" pr-str)})]
     (transit/write writer value)
     (.toString out)))
 
@@ -87,9 +87,12 @@
     :headers {"Content-Type"
               "application/transit+json; charset=utf-8"}
     :body (try
-            (value->transit value)
+            (value->transit
+             (assoc value :sedit.rpc/exception nil))
             (catch Exception e
-              (value->transit {:status :error})))}))
+              (value->transit
+               {:sedit/state-id (:sedit/state-id value)
+                :sedit.rpc/exception e})))}))
 
 (def ops
   {:sedit.rpc/clear-values

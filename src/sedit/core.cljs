@@ -55,7 +55,9 @@
     :colors/number "#b48ead"
     :colors/date "#ebcb8b"
     :colors/uuid "#d08770"
-    :colors/border "#4c566a"}})
+    :colors/border "#4c566a"
+    :colors/package "#88c0d0"
+    :colors/exception "#bf616a"}})
 
 (def default-settings
   (merge
@@ -229,7 +231,7 @@
 (defn sedit-http []
   (let [response (r/atom nil)]
     (fn [settings value]
-      [:div
+      [s/div
        [s/button
         {:style (button-styles settings)
          :on-click (fn []
@@ -352,6 +354,9 @@
    :sedit.viewer/coll   {:predicate coll?         :component sedit-coll}
    :sedit.viewer/http   {:predicate http-request? :component sedit-http}})
 
+(defn sedit-number [settings value]
+  [s/span {:style {:color (:colors/number settings)}} value])
+
 (defn sedit-namespace [settings value]
   (when-let [ns (namespace value)]
     [s/span {:style {:color (:colors/namespace settings)}} ns "/"]))
@@ -368,9 +373,58 @@
    (name value)])
 
 (defn sedit-var [settings value]
-  [:span
+  [s/span
    [s/span {:style {:color (:colors/tag settings)}} "#'"]
    [sedit-symbol settings value]])
+
+(defn sedit-exception [settings value]
+  (let [settings (update settings :depth inc)]
+    [s/div
+     {:style
+      {:background (get-background settings)
+       :padding (:spacing/padding settings)
+       :box-sizing :border-box
+       :color (:colors/text settings)
+       :font-size  (:font-size settings)
+       :border-radius (:border-radius settings)
+       :border (str "1px solid " (:colors/border settings))}}
+     (map
+      (fn [value]
+        (let [{:keys [class-name message stack-trace]} value]
+          [:<>
+           {:key (hash value)}
+           [s/div
+            {:style
+             {:margin-bottom (:spacing/padding settings)}}
+            [s/span {:style {:font-weight :bold
+                             :color (:colors/exception settings)}}
+             class-name] ": " message]
+           [s/div
+            {:style {:display     :grid
+                     :text-align :right}}
+            (map-indexed
+             (fn [idx line]
+               (let [{:keys [names]} line]
+                 [:<> {:key idx}
+                  (if (:omitted line)
+                    [s/div {:style {:grid-column "1"}} "..."]
+                    [s/div {:style {:grid-column "1"}}
+                     (if (empty? names)
+                       [s/span
+                        [s/span {:style {:color (:colors/package settings)}}
+                         (:package line) "."]
+                        [s/span {:style {:font-style :italic}}
+                         (:simple-class line) "."]
+                        (str (:method line))]
+                       (let [[ns & names] names]
+                         [s/span
+                          [s/span {:style {:color (:colors/namespace settings)}} ns "/"]
+                          (str/join "/" names)]))])
+                  [s/div {:style {:grid-column "2"}} (:file line)]
+                  [s/div {:style {:grid-column "3"}}
+                   [sedit-number settings (:line line)]]]))
+             stack-trace)]]))
+      value)]))
 
 (defn sedit [settings value]
   [s/div
@@ -400,8 +454,7 @@
      [sedit-symbol settings value]
 
      (number? value)
-     [s/span {:style {:color (:colors/number settings)}}
-      value]
+     [sedit-number settings value]
 
      (string? value)
      [s/span {:style {:color (:colors/string settings)}}
@@ -423,7 +476,9 @@
        (case tag
          "sedit.transit/var"
          [sedit-var settings rep]
-         [:span
+         "sedit.transit/exception"
+         [sedit-exception settings rep]
+         [s/span
           {:style {:display :flex}}
           [s/span
            {:style {:padding-right (:spacing/padding settings)
@@ -457,7 +512,7 @@
             :min-width "100%"
             :box-sizing :border-box
             :border (str "1px solid " (:colors/border settings))}}
-          [:div
+          [s/div
            {:style
             {:position :absolute
              :top 0
@@ -467,7 +522,7 @@
              :overflow :auto
              :box-sizing :border-box
              :padding 20}}
-           [:div
+           [s/div
             [component settings value]]]]
          (when-not (empty? compatible-viewers)
            [:select
@@ -563,9 +618,11 @@
        :width "100vw"}}
      [toolbar settings path]
      [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
-      (if-not (str/blank? @search-text)
-        [search-results settings]
-        [:div
+      (cond
+        (some? (:sedit.rpc/exception settings))
+        [sedit-exception settings (.-rep (:sedit.rpc/exception settings))]
+        :else
+        [s/div
          {:style
           {:width "100%"
            :height "100%"
