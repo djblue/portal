@@ -129,12 +129,11 @@
        (.then done))))
 
 (defn merge-state [new-state]
-  (when-not (:sedit/open? new-state)
-    (js/window.close))
   (let [index (index-value (:sedit/value new-state))
         new-state-with-index
         (assoc new-state :sedit/index index)]
-    (swap! state merge new-state-with-index)))
+    (when (false? (:sedit/open? (swap! state merge new-state-with-index)))
+      (js/window.close))))
 
 (defn load-state! []
   (send-rpc! {:op             :sedit.rpc/load-state
