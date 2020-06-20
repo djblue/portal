@@ -111,8 +111,8 @@
                     :background background
                     :padding (:spacing/padding settings)
                     :box-sizing :border-box}}
-                  (when-let [value (get row column)]
-                    [sedit settings value])])
+                  (when (contains? row column)
+                    [sedit settings (get row column)])])
                columns)])
            values)]]))))
 
