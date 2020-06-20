@@ -26,11 +26,20 @@
 (defn get-chrome-bin []
   (find-bin #{"chrome" "google-chrome-stable" "chromium" "Google Chrome"}))
 
+(defn var->symbol [v]
+  (let [m (meta v)]
+    (symbol (str (:ns m)) (str (:name m)))))
+
 (defn value->transit-stream [value out]
   (let [writer (transit/writer
                 out
                 :json
-                {:default-handler
+                {:handlers
+                 {clojure.lang.Var
+                  (transit/write-handler
+                   "sedit.transit/var"
+                   var->symbol)}
+                 :default-handler
                  (transit/write-handler
                   "sedit.transit/unknown"
                   pr-str)})]

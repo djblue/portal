@@ -49,13 +49,12 @@
     :colors/boolean "#5e81ac"
     :colors/string "#a3be8c"
     :colors/keyword "#5e81ac"
-    :colors/keyword-namespace "#88c0d0"
+    :colors/namespace "#88c0d0"
     :colors/tag "#EBCB8B"
     :colors/symbol "#d8dee9"
     :colors/number "#b48ead"
     :colors/date "#ebcb8b"
     :colors/uuid "#d08770"
-    :colors/var "#88c0d0"
     :colors/border "#4c566a"}})
 
 (def default-settings
@@ -353,6 +352,26 @@
    :sedit.viewer/coll   {:predicate coll?         :component sedit-coll}
    :sedit.viewer/http   {:predicate http-request? :component sedit-http}})
 
+(defn sedit-namespace [settings value]
+  (when-let [ns (namespace value)]
+    [s/span {:style {:color (:colors/namespace settings)}} ns "/"]))
+
+(defn sedit-symbol [settings value]
+  [s/span {:style {:color (:colors/symbol settings) :white-space :nowrap}}
+   [sedit-namespace settings value]
+   (name value)])
+
+(defn sedit-keyword [settings value]
+  [s/span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
+   ":"
+   [sedit-namespace settings value]
+   (name value)])
+
+(defn sedit-var [settings value]
+  [:span
+   [s/span {:style {:color (:colors/tag settings)}} "#'"]
+   [sedit-symbol settings value]])
+
 (defn sedit [settings value]
   [s/div
    {:on-click
@@ -378,8 +397,7 @@
       (pr-str value)]
 
      (symbol? value)
-     [s/span {:style {:color (:colors/symbol settings)}}
-      value]
+     [sedit-symbol settings value]
 
      (number? value)
      [s/span {:style {:color (:colors/number settings)}}
@@ -390,15 +408,7 @@
       (pr-str (trim-string settings value))]
 
      (keyword? value)
-     (let [keyword-name (name value)
-           keyword-namespace (namespace value)]
-       (when keyword-name
-         [s/span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
-          ":" (when keyword-namespace
-                [s/span {:style {:color (:colors/keyword-namespace settings)}}
-                 keyword-namespace
-                 "/"])
-          keyword-name]))
+     [sedit-keyword settings value]
 
      (instance? js/Date value)
      [s/span {:style {:color (:colors/date settings)}}
@@ -408,19 +418,19 @@
      [s/span {:style {:color (:colors/uuid settings)}}
       (pr-str value)]
 
-     (instance? cljs.core/Var value)
-     [s/span {:style {:color (:colors/var settings)}}
-      (pr-str value)]
-
      (t/tagged-value? value)
-     [:span
-      {:style {:display :flex}}
-      [s/span
-       {:style {:padding-right (:spacing/padding settings)
-                :box-sizing :border-box}}
-       [s/span {:style {:color (:colors/tag settings)}} "#"]
-       [s/span {:style {:color (:colors/text settings)}} (.-tag value)]]
-      [sedit settings (.-rep value)]]
+     (let [tag (.-tag value) rep (.-rep value)]
+       (case tag
+         "sedit.transit/var"
+         [sedit-var settings rep]
+         [:span
+          {:style {:display :flex}}
+          [s/span
+           {:style {:padding-right (:spacing/padding settings)
+                    :box-sizing :border-box}}
+           [s/span {:style {:color (:colors/tag settings)}} "#"]
+           [s/span {:style {:color (:colors/text settings)}} tag]]
+          [sedit settings rep]]))
 
      :else
      [s/span {}
