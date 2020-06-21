@@ -7,17 +7,17 @@
 
 (defn index-value
   ([value]
-   (index-value [] value))
+   (index-value nil [] value))
 
-  ([path value]
+  ([coll path value]
    (cond
      (map? value)
      (mapcat
       (fn [[k v]]
         (let [path (conj path k)]
           (concat
-           (index-value path k)
-           (index-value path v))))
+           (index-value value path k)
+           (index-value value path v))))
       value)
 
      (coll? value)
@@ -27,12 +27,14 @@
        (fn [k v]
          (let [path (conj path k)]
            (concat
-            (index-value path k)
-            (index-value path v))))
+            (index-value value path k)
+            (index-value value path v))))
        value))
 
      :else
      [{:path path
+       :coll coll
+       :key (last path)
        :value value
        :string-value (str/lower-case (pr-str value))}])))
 
@@ -233,7 +235,8 @@
         [s/span {:style {:color (:colors/text settings)}} (:type rep)]
 
         [s/div
-         {:style {:padding (:spacing/padding settings)}}
+         {:style {:box-sizing :border-box
+                  :padding (:spacing/padding settings)}}
          [s/span {:style {:color (:colors/tag settings)}} "#"]
          tag]))))
 
@@ -401,6 +404,7 @@
     [s/div
      {:style
       {:padding (:spacing/padding settings)
+       :box-sizing :border-box
        :background color}}
      [s/div
       {:style
@@ -650,7 +654,7 @@
      :background (:colors/background settings)
      :margin (:spacing/padding settings)
      :padding (:spacing/padding settings)
-     :box-sizing :border
+     :box-sizing :border-box
      :font-size (:font-size settings)
      :color (:colors/text settings)
      :border (str "1px solid " (:colors/border settings))}}])
@@ -658,18 +662,18 @@
 (defn search-results [settings]
   (let [search-text-value @search-text]
     (when-not (str/blank? search-text-value)
-      [:<>
+      [portal-1
+       (update settings
+               :portal/on-nav
+               (fn [on-nav]
+                 #(do
+                    (-> (on-nav (:value %))
+                        (.then (fn [] (reset! search-text nil)))))))
        (->>
         search-text-value
         (filter-index (:portal/index settings))
-        (take 10)
-        (map-indexed
-         (fn [index item]
-           [s/div
-            {:key index :on-click #(do
-                                     (reset! search-text nil)
-                                     (reset! path (:path item)))}
-            [portal settings (dissoc item :string-value)]])))])))
+        (map #(dissoc % :string-value))
+        (take 15))])))
 
 (defn toolbar [settings path]
   [s/div
@@ -727,6 +731,10 @@
       (cond
         (some? (:portal.rpc/exception settings))
         [portal-exception settings (.-rep (:portal.rpc/exception settings))]
+
+        (not (str/blank? @search-text))
+        [search-results settings]
+
         :else
         [s/div
          {:style
