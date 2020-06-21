@@ -649,6 +649,7 @@
   [s/input
    {:on-change #(reset! search-text (.-value (.-target %)))
     :value @search-text
+    :placeholder "Type to filter..."
     :style
     {:flex "1"
      :background (:colors/background settings)
