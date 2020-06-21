@@ -233,8 +233,6 @@
        (when @response
          [portal settings @response])])))
 
-(defonce path (r/atom []))
-
 (defn portal-map [settings values]
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
@@ -607,7 +605,7 @@
         (map #(dissoc % :string-value))
         (take 15))])))
 
-(defn toolbar [settings path]
+(defn toolbar [settings]
   [s/div
    {:style
     {:height "64px"
@@ -658,7 +656,7 @@
        :font-size (:font-size settings)
        :height "100vh"
        :width "100vw"}}
-     [toolbar settings path]
+     [toolbar settings]
      [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
       (cond
         (some? (:portal.rpc/exception settings))
