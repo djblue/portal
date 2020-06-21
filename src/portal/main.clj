@@ -77,9 +77,8 @@
     in
     :json
     {:handlers
-     {"portal.transit/unknown"
-      (transit/read-handler
-       (comp uuid->instance :id))}})))
+     {"portal.transit/var" (transit/read-handler find-var)
+      "portal.transit/unknown" (transit/read-handler (comp uuid->instance :id))}})))
 
 (defn value->transit [value]
   (let [out (ByteArrayOutputStream. (* 10 1024 1024))]
