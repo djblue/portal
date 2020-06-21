@@ -464,8 +464,27 @@
         "portal.transit/object"     :object
         :tagged))))
 
+(defn get-portal-component [type]
+  (case type
+    :map portal-map
+    (:set :vector :list :coll) portal-coll
+    :boolean    portal-boolean
+    :symbol     portal-symbol
+    :number     portal-number
+    :string     portal-string
+    :keyword    portal-keyword
+    :date       portal-date
+    :uuid       portal-uuid
+    :var        portal-var
+    :exception  portal-exception
+    :object     portal-object
+    :uri        portal-uri
+    :tagged     portal-tagged
+    portal-default))
+
 (defn portal [settings value]
-  (let [type (get-value-type value)]
+  (let [type (get-value-type value)
+        component (get-portal-component type)]
     [s/div
      {:on-click
       (fn [e]
@@ -479,50 +498,7 @@
       :style/hover {:border
                     (when (= 1 (:depth settings))
                       "1px solid #D8DEE9")}}
-     (case type
-       :map
-       [portal-map settings value]
-
-       (:set :vector :list :coll)
-       [portal-coll settings value]
-
-       :boolean
-       [portal-boolean settings value]
-
-       :symbol
-       [portal-symbol settings value]
-
-       :number
-       [portal-number settings value]
-
-       :string
-       [portal-string settings value]
-
-       :keyword
-       [portal-keyword settings value]
-
-       :date
-       [portal-date settings value]
-
-       :uuid
-       [portal-uuid settings value]
-
-       :var
-       [portal-var settings value]
-
-       :exception
-       [portal-exception settings value]
-
-       :object
-       [portal-object settings value]
-
-       :uri
-       [portal-uri settings value]
-
-       :tagged
-       [portal-tagged settings value]
-
-       [portal-default settings value])]))
+     [component settings value]]))
 
 (defn portal-metadata [settings value]
   (when-let [m (meta
