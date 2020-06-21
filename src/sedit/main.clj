@@ -27,6 +27,22 @@
 (defn get-chrome-bin []
   (find-bin #{"chrome" "google-chrome-stable" "chromium" "Google Chrome"}))
 
+(defonce instance-cache (atom {}))
+
+(defn instance->uuid [instance]
+  (let [k [:instance instance]]
+    (-> instance-cache
+        (swap!
+         (fn [cache]
+           (if (contains? cache k)
+             cache
+             (let [uuid (UUID/randomUUID)]
+               (assoc cache [:uuid uuid] instance k uuid)))))
+        (get k))))
+
+(defn uuid->instance [uuid]
+  (get @instance-cache [:uuid uuid]))
+
 (defn var->symbol [v]
   (let [m (meta v)]
     (with-meta (symbol (str (:ns m)) (str (:name m))) m)))
@@ -49,14 +65,20 @@
            "sedit.transit/unknown"
            (fn [o]
              (with-meta
-               {:type (pr-str (type o)) :string (pr-str o)}
+               {:id (instance->uuid o) :type (pr-str (type o)) :string (pr-str o)}
                (meta o))))})]
     (transit/write writer value)
     (.toString out)))
 
 (defn transit-stream->value [in]
-  (let [reader (transit/reader in :json)]
-    (transit/read reader)))
+  (transit/read
+   (transit/reader
+    in
+    :json
+    {:handlers
+     {"sedit.transit/unknown"
+      (transit/read-handler
+       (comp uuid->instance :id))}})))
 
 (defn value->transit [value]
   (let [out (ByteArrayOutputStream. (* 10 1024 1024))]
@@ -84,6 +106,7 @@
           (conj value new-value)))))))
 
 (defn clear-values []
+  (reset! instance-cache {})
   (swap! state assoc
          :sedit/state-id (UUID/randomUUID)
          :sedit/value (list)))
