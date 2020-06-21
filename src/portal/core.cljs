@@ -209,16 +209,33 @@
     (:colors/background2 settings)))
 
 (defn summary [settings value]
-  (when-let [[open close]
-             (cond
-               (map? value)     ["{" "}"]
-               (vector? value)  ["[" "]"]
-               (seq? value)     ["(" ")"]
-               (set? value)     ["#{" "}"])]
-    [s/div
-     {:style {:vertical-align :top
-              :color "#bf616a"}}
-     open (count value) close]))
+  (cond
+    (coll? value)
+    (when-let [[open close]
+               (cond
+                 (map? value)     ["{" "}"]
+                 (vector? value)  ["[" "]"]
+                 (seq? value)     ["(" ")"]
+                 (set? value)     ["#{" "}"])]
+      [s/div
+       {:style {:vertical-align :top
+                :color "#bf616a"}}
+       open (count value) close])
+
+    (t/tagged-value? value)
+    (let [tag (.-tag value) rep (.-rep value)]
+      (case tag
+        ("r"
+         "portal.transit/var"
+         "portal.transit/exception") nil
+
+        "portal.transit/unknown"
+        [s/span {:style {:color (:colors/text settings)}} (:type rep)]
+
+        [s/div
+         {:style {:padding (:spacing/padding settings)}}
+         [s/span {:style {:color (:colors/tag settings)}} "#"]
+         tag]))))
 
 (defn table-view? [value]
   (and (coll? value) (every? map? value)))
