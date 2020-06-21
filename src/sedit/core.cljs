@@ -604,20 +604,23 @@
             [sedit-metadata settings value]
             [component settings value]]]]
          (when-not (empty? compatible-viewers)
-           [:select
-            {:value (pr-str viewer)
-             :on-change #(reset! selected-viewer
-                                 (keyword (.substr (.. % -target -value) 1)))
-             :style
-             {:background (:colors/background settings)
-              :margin (:spacing/padding settings)
-              :padding (:spacing/padding settings)
-              :box-sizing :border
-              :font-size (:font-size settings)
-              :color (:colors/text settings)
-              :border (str "1px solid " (:colors/border settings))}}
-            (for [k compatible-viewers]
-              [:option {:key k :value (pr-str k)} (pr-str k)])])]))))
+           [s/div
+            {:style
+             {:background (:colors/background2 settings)}}
+            [:select
+             {:value (pr-str viewer)
+              :on-change #(reset! selected-viewer
+                                  (keyword (.substr (.. % -target -value) 1)))
+              :style
+              {:background (:colors/background settings)
+               :margin (:spacing/padding settings)
+               :padding (:spacing/padding settings)
+               :box-sizing :border
+               :font-size (:font-size settings)
+               :color (:colors/text settings)
+               :border (str "1px solid " (:colors/border settings))}}
+             (for [k compatible-viewers]
+               [:option {:key k :value (pr-str k)} (pr-str k)])]])]))))
 
 (defonce search-text (r/atom ""))
 
@@ -656,6 +659,7 @@
    {:style
     {:height "64px"
      :flex-direction :row
+     :background (:colors/background2 settings)
      :display :flex
      :align-items :center
      :justify-content :center}}
