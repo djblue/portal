@@ -29,7 +29,7 @@
 
 (defn var->symbol [v]
   (let [m (meta v)]
-    (symbol (str (:ns m)) (str (:name m)))))
+    (with-meta (symbol (str (:ns m)) (str (:name m))) m)))
 
 (defn value->transit-stream [value out]
   (let [writer
@@ -41,11 +41,14 @@
            (transit/write-handler "sedit.transit/var" var->symbol)
            java.lang.Throwable
            (transit/write-handler "sedit.transit/exception" #(ex/analyze-exception % nil))}
+          :transform transit/write-meta
           :default-handler
           (transit/write-handler
            "sedit.transit/unknown"
            (fn [o]
-             {:type (pr-str (type o)) :string (pr-str o)}))})]
+             (with-meta
+               {:type (pr-str (type o)) :string (pr-str o)}
+               (meta o))))})]
     (transit/write writer value)
     (.toString out)))
 

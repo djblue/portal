@@ -496,6 +496,15 @@
      [s/span {}
       (trim-string settings (pr-str value))])])
 
+(defn sedit-metadata [settings value]
+  (when-let [m (meta
+                (if-not (t/tagged-value? value)
+                  value
+                  (.-rep value)))]
+    [s/div
+     {:style {:padding-bottom (:spacing/padding settings)}}
+     [sedit settings m]]))
+
 (defn sedit-1 []
   (let [selected-viewer (r/atom nil)]
     (fn [settings value]
@@ -528,6 +537,7 @@
              :box-sizing :border-box
              :padding 20}}
            [s/div
+            [sedit-metadata settings value]
             [component settings value]]]]
          (when-not (empty? compatible-viewers)
            [:select
