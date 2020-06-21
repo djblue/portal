@@ -42,7 +42,10 @@
            java.lang.Throwable
            (transit/write-handler "sedit.transit/exception" #(ex/analyze-exception % nil))}
           :default-handler
-          (transit/write-handler "sedit.transit/unknown" pr-str)})]
+          (transit/write-handler
+           "sedit.transit/unknown"
+           (fn [o]
+             {:type (pr-str (type o)) :string (pr-str o)}))})]
     (transit/write writer value)
     (.toString out)))
 

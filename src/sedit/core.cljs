@@ -478,14 +478,19 @@
          [sedit-var settings rep]
          "sedit.transit/exception"
          [sedit-exception settings rep]
-         [s/span
-          {:style {:display :flex}}
-          [s/span
-           {:style {:padding-right (:spacing/padding settings)
-                    :box-sizing :border-box}}
+         "sedit.transit/unknown"
+         [s/span {:title (:type rep)} (:string rep)]
+
+         [s/div
+          {:style {:display :flex
+                   :align-items :center}}
+          [s/div
+           {:style {:padding (:spacing/padding settings)}}
            [s/span {:style {:color (:colors/tag settings)}} "#"]
-           [s/span {:style {:color (:colors/text settings)}} tag]]
-          [sedit settings rep]]))
+           tag]
+          [s/div
+           {:style {:flex 1}}
+           [sedit settings rep]]]))
 
      :else
      [s/span {}
