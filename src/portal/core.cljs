@@ -345,12 +345,15 @@
     :target "_blank"}
    value])
 
+(defn exception-summary [settings value]
+  [s/span {:style {:font-weight :bold
+                   :color (::c/exception settings)}}
+   (:class-name (first value))])
+
 (defn portal-exception [settings value]
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
-      [s/span {:style {:font-weight :bold
-                       :color (::c/exception settings)}}
-       (:class-name (first value))]
+      [exception-summary settings value]
       [s/div
        {:style
         {:background (get-background settings)
@@ -398,67 +401,98 @@
                stack-trace)]]))
         value)])))
 
+(defn get-value-type [value]
+  (cond
+    (map? value)      :map
+    (set? value)      :set
+    (vector? value)   :vector
+    (list? value)     :list
+    (coll? value)     :coll
+    (boolean? value)  :boolean
+    (symbol? value)   :symbol
+    (number? value)   :number
+    (string? value)   :string
+    (keyword? value)  :keyword
+
+    (instance? js/Date value)         :date
+    (instance? cljs.core/UUID value)  :uuid
+
+    (t/tagged-value? value)
+    (let [tag (.-tag value) rep (.-rep value)]
+      (case tag
+        "r"                         :uri
+        "portal.transit/var"        :var
+        "portal.transit/exception"  :exception
+        "portal.transit/object"     :object
+        :tagged))))
+
 (defn portal [settings value]
-  [s/div
-   {:on-click
-    (fn [e]
-      (when (= 1 (:depth settings))
-        (.stopPropagation e)
-        ((:portal/on-nav settings) {:value value})))
-    :style {:cursor :pointer
-            :width "100%"
-            :border-radius (:border-radius settings)
-            :border "1px solid rgba(0,0,0,0)"}
-    :style/hover {:border
-                  (when (= 1 (:depth settings))
-                    "1px solid #D8DEE9")}}
-   (cond
-     (map? value)
-     [portal-map settings value]
+  (let [type (get-value-type value)]
+    [s/div
+     {:on-click
+      (fn [e]
+        (when (= 1 (:depth settings))
+          (.stopPropagation e)
+          ((:portal/on-nav settings) {:value value})))
+      :style {:cursor :pointer
+              :width "100%"
+              :border-radius (:border-radius settings)
+              :border "1px solid rgba(0,0,0,0)"}
+      :style/hover {:border
+                    (when (= 1 (:depth settings))
+                      "1px solid #D8DEE9")}}
+     (case type
+       :map
+       [portal-map settings value]
 
-     (coll? value)
-     [portal-coll settings value]
+       (:set :vector :list :coll)
+       [portal-coll settings value]
 
-     (boolean? value)
-     [s/span {:style {:color (::c/boolean settings)}}
-      (pr-str value)]
+       :boolean
+       [s/span {:style {:color (::c/boolean settings)}}
+        (pr-str value)]
 
-     (symbol? value)
-     [portal-symbol settings value]
+       :symbol
+       [portal-symbol settings value]
 
-     (number? value)
-     [portal-number settings value]
+       :number
+       [portal-number settings value]
 
-     (string? value)
-     [portal-string settings value]
+       :string
+       [portal-string settings value]
 
-     (keyword? value)
-     [portal-keyword settings value]
+       :keyword
+       [portal-keyword settings value]
 
-     (instance? js/Date value)
-     [s/span {:style {:color (::c/date settings)}}
-      (pr-str value)]
+       :date
+       [s/span {:style {:color (::c/date settings)}}
+        (pr-str value)]
 
-     (instance? cljs.core/UUID value)
-     [s/span {:style {:color (::c/uuid settings)}}
-      (pr-str value)]
+       :uuid
+       [s/span {:style {:color (::c/uuid settings)}}
+        (pr-str value)]
 
-     (t/tagged-value? value)
-     (let [tag (.-tag value) rep (.-rep value)]
-       (case tag
-         "portal.transit/var"
-         [portal-var settings rep]
-         "portal.transit/exception"
-         [portal-exception settings rep]
-         "portal.transit/unknown"
+       :var
+       (let [tag (.-tag value) rep (.-rep value)]
+         [portal-var settings rep])
+
+       :exception
+       (let [tag (.-tag value) rep (.-rep value)]
+         [portal-exception settings rep])
+
+       :object
+       (let [tag (.-tag value) rep (.-rep value)]
          [s/span {:title (:type rep)
                   :style
                   {:color (::c/text settings)}}
-          (:string rep)]
+          (:string rep)])
 
-         "r"
-         [portal-uri settings (.-rep value)]
+       :uri
+       (let [tag (.-tag value) rep (.-rep value)]
+         [portal-uri settings (.-rep value)])
 
+       :tagged
+       (let [tag (.-tag value) rep (.-rep value)]
          [s/div
           {:style {:display :flex
                    :align-items :center}}
@@ -468,11 +502,10 @@
            tag]
           [s/div
            {:style {:flex 1}}
-           [portal settings rep]]]))
+           [portal settings rep]]])
 
-     :else
-     [s/span {}
-      (trim-string settings (pr-str value))])])
+       [s/span {}
+        (trim-string settings (pr-str value))])]))
 
 (defn portal-metadata [settings value]
   (when-let [m (meta

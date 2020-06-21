@@ -63,7 +63,7 @@
           :transform transit/write-meta
           :default-handler
           (transit/write-handler
-           "portal.transit/unknown"
+           "portal.transit/object"
            (fn [o]
              (with-meta
                {:id (instance->uuid o) :type (pr-str (type o)) :string (pr-str o)}
@@ -78,7 +78,7 @@
     :json
     {:handlers
      {"portal.transit/var" (transit/read-handler find-var)
-      "portal.transit/unknown" (transit/read-handler (comp uuid->instance :id))}})))
+      "portal.transit/object" (transit/read-handler (comp uuid->instance :id))}})))
 
 (defn value->transit [value]
   (let [out (ByteArrayOutputStream. (* 10 1024 1024))]
