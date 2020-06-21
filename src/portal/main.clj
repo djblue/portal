@@ -1,4 +1,4 @@
-(ns sedit.main
+(ns portal.main
   (:require [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
@@ -54,15 +54,15 @@
          :json
          {:handlers
           {clojure.lang.Var
-           (transit/write-handler "sedit.transit/var" var->symbol)
+           (transit/write-handler "portal.transit/var" var->symbol)
            java.net.URL
            (transit/write-handler "r" str)
            java.lang.Throwable
-           (transit/write-handler "sedit.transit/exception" #(ex/analyze-exception % nil))}
+           (transit/write-handler "portal.transit/exception" #(ex/analyze-exception % nil))}
           :transform transit/write-meta
           :default-handler
           (transit/write-handler
-           "sedit.transit/unknown"
+           "portal.transit/unknown"
            (fn [o]
              (with-meta
                {:id (instance->uuid o) :type (pr-str (type o)) :string (pr-str o)}
@@ -76,7 +76,7 @@
     in
     :json
     {:handlers
-     {"sedit.transit/unknown"
+     {"portal.transit/unknown"
       (transit/read-handler
        (comp uuid->instance :id))}})))
 
@@ -98,9 +98,9 @@
    (fn [state]
      (assoc
       state
-      :sedit/state-id (UUID/randomUUID)
-      :sedit/value
-      (let [value (:sedit/value state)]
+      :portal/state-id (UUID/randomUUID)
+      :portal/value
+      (let [value (:portal/value state)]
         (if-not (coll? value)
           (list new-value)
           (conj value new-value)))))))
@@ -108,8 +108,8 @@
 (defn clear-values []
   (reset! instance-cache {})
   (swap! state assoc
-         :sedit/state-id (UUID/randomUUID)
-         :sedit/value (list)))
+         :portal/state-id (UUID/randomUUID)
+         :portal/value (list)))
 
 (defn send-rpc [channel value]
   (server/send!
@@ -119,21 +119,21 @@
               "application/transit+json; charset=utf-8"}
     :body (try
             (value->transit
-             (assoc value :sedit.rpc/exception nil))
+             (assoc value :portal.rpc/exception nil))
             (catch Exception e
               (value->transit
-               {:sedit/state-id (:sedit/state-id value)
-                :sedit.rpc/exception e})))}))
+               {:portal/state-id (:portal/state-id value)
+                :portal.rpc/exception e})))}))
 
 (def ops
-  {:sedit.rpc/clear-values
+  {:portal.rpc/clear-values
    (fn [request channel]
      (send-rpc channel (clear-values)))
-   :sedit.rpc/load-state
+   :portal.rpc/load-state
    (fn [request channel]
      (let [state-value @state
-           id (get-in request [:body :sedit/state-id])]
-       (if-not (= id (:sedit/state-id state-value))
+           id (get-in request [:body :portal/state-id])]
+       (if-not (= id (:portal/state-id state-value))
          (send-rpc channel state-value)
          (let [watch-key (keyword (gensym))]
            (add-watch
@@ -145,7 +145,7 @@
             channel
             (fn [status]
               (remove-watch state watch-key)))))))
-   :sedit.rpc/http-request
+   :portal.rpc/http-request
    (fn [request channel]
      (send-rpc
       channel
@@ -177,7 +177,7 @@
 (defonce server (atom nil))
 
 (defn open-inspector [value]
-  (swap! state assoc :sedit/open? true)
+  (swap! state assoc :portal/open? true)
   (update-value value)
   (when (nil? @server)
     (reset!
@@ -190,7 +190,7 @@
       (str "--app=http://localhost:" (-> @server meta :local-port))))
 
 (defn close-inspector []
-  (swap! state assoc :sedit/open? false)
+  (swap! state assoc :portal/open? false)
   (@server :timeout 1000)
   (reset! server nil))
 

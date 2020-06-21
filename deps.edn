@@ -23,8 +23,8 @@
   :shadow-cljs {:extra-deps
                 {thheller/shadow-cljs {:mvn/version "2.9.10"}}
                 :main-opts ["-m" "shadow.cljs.devtools.cli"]}
-  :edn  {:main-opts ["-m" "sedit.main" "edn"]}
-  :json {:main-opts ["-m" "sedit.main" "json"]}
+  :edn  {:main-opts ["-m" "portal.main" "edn"]}
+  :json {:main-opts ["-m" "portal.main" "json"]}
   :test {:extra-paths ["test"]
          :extra-deps
          {com.cognitect/test-runner

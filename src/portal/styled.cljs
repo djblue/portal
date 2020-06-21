@@ -1,4 +1,4 @@
-(ns sedit.styled
+(ns portal.styled
   (:require [reagent.core :as r]
             ["emotion" :as emotion]))
 

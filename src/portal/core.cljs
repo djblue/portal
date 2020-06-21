@@ -1,6 +1,6 @@
-(ns sedit.core
+(ns portal.core
   (:require [reagent.core :as r]
-            [sedit.styled :as s]
+            [portal.styled :as s]
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [cognitect.transit :as t]))
@@ -122,7 +122,7 @@
     :layout/direction :row
     :spacing/padding "10px"
     :border-radius "2px"
-    :sedit/history '()}
+    :portal/history '()}
    (:themes/nord themes)))
 
 (defonce state (r/atom default-settings))
@@ -167,26 +167,26 @@
        (.then done))))
 
 (defn merge-state [new-state]
-  (let [index (index-value (:sedit/value new-state))
+  (let [index (index-value (:portal/value new-state))
         new-state-with-index
-        (assoc new-state :sedit/index index)]
-    (when (false? (:sedit/open? (swap! state merge new-state-with-index)))
+        (assoc new-state :portal/index index)]
+    (when (false? (:portal/open? (swap! state merge new-state-with-index)))
       (js/window.close))))
 
 (defn load-state! []
-  (send-rpc! {:op             :sedit.rpc/load-state
-              :sedit/state-id (:sedit/state-id @state)}
+  (send-rpc! {:op             :portal.rpc/load-state
+              :portal/state-id (:portal/state-id @state)}
              merge-state))
 
 (defn clear-values! []
-  (send-rpc! {:op :sedit.rpc/clear-values}
-             #(swap! state assoc :sedit/history '())))
+  (send-rpc! {:op :portal.rpc/clear-values}
+             #(swap! state assoc :portal/history '())))
 
 (defn http-request [request]
-  (send-rpc! {:op :sedit.rpc/http-request
+  (send-rpc! {:op :portal.rpc/http-request
               :request request}))
 
-(declare sedit)
+(declare portal)
 
 (defn collapsible []
   (let [state (r/atom {:open? true})]
@@ -220,7 +220,7 @@
 (defn table-view? [value]
   (and (coll? value) (every? map? value)))
 
-(defn sedit-table [settings values]
+(defn portal-table [settings values]
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [summary settings values]
@@ -243,7 +243,7 @@
                       :background background
                       :box-sizing :border-box
                       :padding (:spacing/padding settings)}}
-               [sedit settings column]])
+               [portal settings column]])
             columns)]
           (map-indexed
            (fn [grid-row row]
@@ -258,14 +258,14 @@
                     :padding (:spacing/padding settings)
                     :box-sizing :border-box}}
                   (when (contains? row column)
-                    [sedit settings (get row column)])])
+                    [portal settings (get row column)])])
                columns)])
            values)]]))))
 
 (defn http-request? [value]
   (spec/valid? ::http-request value))
 
-(defn sedit-http []
+(defn portal-http []
   (let [response (r/atom nil)]
     (fn [settings value]
       [s/div
@@ -275,13 +275,13 @@
                      (->  (http-request value)
                           (.then #(reset! response (:response %)))))}
         "send request"]
-       [sedit settings value]
+       [portal settings value]
        (when @response
-         [sedit settings @response])])))
+         [portal settings @response])])))
 
 (defonce path (r/atom []))
 
-(defn sedit-map [settings values]
+(defn portal-map [settings values]
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [summary settings values]
@@ -302,8 +302,8 @@
         (filter
          some?
          (for [[k v] values]
-           (let [sedit-k [sedit settings k]
-                 sedit-v [sedit settings v]]
+           (let [portal-k [portal settings k]
+                 portal-v [portal settings v]]
              [:<>
               {:key (hash k)}
               [s/div {:style
@@ -311,14 +311,14 @@
                        :grid-column "1"}}
                [s/div
                 {:style {:display :flex}}
-                sedit-k]]
+                portal-k]]
               [s/div {:style
                       {:grid-column "2"
                        :text-align :right}}
 
-               sedit-v]]))))])))
+               portal-v]]))))])))
 
-(defn sedit-coll [settings values]
+(defn portal-coll [settings values]
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [summary settings values]
@@ -339,7 +339,7 @@
             (map-indexed
              (fn [idx itm]
                ^{:key idx}
-               [sedit settings itm]))
+               [portal settings itm]))
             (filter some?)
             (take (:limits/max-length settings)))])))
 
@@ -365,18 +365,18 @@
           [s/span before [:mark match] after])))))
 
 (def viewers
-  {:sedit.viewer/map    {:predicate map?          :component sedit-map}
-   :sedit.viewer/table  {:predicate table-view?   :component sedit-table}
-   :sedit.viewer/coll   {:predicate coll?         :component sedit-coll}
-   :sedit.viewer/http   {:predicate http-request? :component sedit-http}})
+  {:portal.viewer/map    {:predicate map?          :component portal-map}
+   :portal.viewer/table  {:predicate table-view?   :component portal-table}
+   :portal.viewer/coll   {:predicate coll?         :component portal-coll}
+   :portal.viewer/http   {:predicate http-request? :component portal-http}})
 
-(defn sedit-number [settings value]
+(defn portal-number [settings value]
   [s/span {:style {:color (:colors/number settings)}} value])
 
 (defn hex-color? [s]
   (re-matches #"#[0-9a-f]{6}|#[0-9a-f]{3}gi" s))
 
-(defn sedit-string [settings value]
+(defn portal-string [settings value]
   (if-let [color (hex-color? value)]
     [s/div
      {:style
@@ -393,34 +393,34 @@
     [s/span {:style {:color (:colors/string settings)}}
      (pr-str (trim-string settings value))]))
 
-(defn sedit-namespace [settings value]
+(defn portal-namespace [settings value]
   (when-let [ns (namespace value)]
     [s/span {:style {:color (:colors/namespace settings)}} ns "/"]))
 
-(defn sedit-symbol [settings value]
+(defn portal-symbol [settings value]
   [s/span {:style {:color (:colors/symbol settings) :white-space :nowrap}}
-   [sedit-namespace settings value]
+   [portal-namespace settings value]
    (name value)])
 
-(defn sedit-keyword [settings value]
+(defn portal-keyword [settings value]
   [s/span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
    ":"
-   [sedit-namespace settings value]
+   [portal-namespace settings value]
    (name value)])
 
-(defn sedit-var [settings value]
+(defn portal-var [settings value]
   [s/span
    [s/span {:style {:color (:colors/tag settings)}} "#'"]
-   [sedit-symbol settings value]])
+   [portal-symbol settings value]])
 
-(defn sedit-uri [settings value]
+(defn portal-uri [settings value]
   [s/a
    {:href value
     :style {:color (:colors/uri settings)}
     :target "_blank"}
    value])
 
-(defn sedit-exception [settings value]
+(defn portal-exception [settings value]
   (let [settings (update settings :depth inc)]
     [s/div
      {:style
@@ -465,46 +465,46 @@
                           (str/join "/" names)]))])
                   [s/div {:style {:grid-column "2"}} (:file line)]
                   [s/div {:style {:grid-column "3"}}
-                   [sedit-number settings (:line line)]]]))
+                   [portal-number settings (:line line)]]]))
              stack-trace)]]))
       value)]))
 
-(defn sedit [settings value]
+(defn portal [settings value]
   [s/div
    {:on-click
     (fn [e]
-      (when-not (zero? (:depth settings))
+      (when (= 1 (:depth settings))
         (.stopPropagation e)
-        ((:sedit/on-nav settings) value)))
+        ((:portal/on-nav settings) value)))
     :style {:cursor :pointer
             :width "100%"
             :border-radius (:border-radius settings)
             :border "1px solid rgba(0,0,0,0)"}
     :style/hover {:border
-                  (when-not (zero? (:depth settings))
+                  (when (= 1 (:depth settings))
                     "1px solid #D8DEE9")}}
    (cond
      (map? value)
-     [sedit-map settings value]
+     [portal-map settings value]
 
      (coll? value)
-     [sedit-coll settings value]
+     [portal-coll settings value]
 
      (boolean? value)
      [s/span {:style {:color (:colors/boolean settings)}}
       (pr-str value)]
 
      (symbol? value)
-     [sedit-symbol settings value]
+     [portal-symbol settings value]
 
      (number? value)
-     [sedit-number settings value]
+     [portal-number settings value]
 
      (string? value)
-     [sedit-string settings value]
+     [portal-string settings value]
 
      (keyword? value)
-     [sedit-keyword settings value]
+     [portal-keyword settings value]
 
      (instance? js/Date value)
      [s/span {:style {:color (:colors/date settings)}}
@@ -517,18 +517,18 @@
      (t/tagged-value? value)
      (let [tag (.-tag value) rep (.-rep value)]
        (case tag
-         "sedit.transit/var"
-         [sedit-var settings rep]
-         "sedit.transit/exception"
-         [sedit-exception settings rep]
-         "sedit.transit/unknown"
+         "portal.transit/var"
+         [portal-var settings rep]
+         "portal.transit/exception"
+         [portal-exception settings rep]
+         "portal.transit/unknown"
          [s/span {:title (:type rep)
                   :style
                   {:color (:colors/text settings)}}
           (:string rep)]
 
          "r"
-         [sedit-uri settings (.-rep value)]
+         [portal-uri settings (.-rep value)]
 
          [s/div
           {:style {:display :flex
@@ -539,22 +539,22 @@
            tag]
           [s/div
            {:style {:flex 1}}
-           [sedit settings rep]]]))
+           [portal settings rep]]]))
 
      :else
      [s/span {}
       (trim-string settings (pr-str value))])])
 
-(defn sedit-metadata [settings value]
+(defn portal-metadata [settings value]
   (when-let [m (meta
                 (if-not (t/tagged-value? value)
                   value
                   (.-rep value)))]
     [s/div
      {:style {:padding-bottom (:spacing/padding settings)}}
-     [sedit settings m]]))
+     [portal settings m]]))
 
-(defn sedit-1 []
+(defn portal-1 []
   (let [selected-viewer (r/atom nil)]
     (fn [settings value]
       (let [compatible-viewers
@@ -562,8 +562,8 @@
                               (when (predicate value) k)) viewers))
             viewer    (or @selected-viewer (first compatible-viewers))
             component (if-not (contains? compatible-viewers viewer)
-                        sedit
-                        (get-in viewers [viewer :component] sedit))]
+                        portal
+                        (get-in viewers [viewer :component] portal))]
         [s/div
          {:style
           {:flex 1}}
@@ -586,7 +586,7 @@
              :box-sizing :border-box
              :padding 20}}
            [s/div
-            [sedit-metadata settings value]
+            [portal-metadata settings value]
             [component settings value]]]]
          (when-not (empty? compatible-viewers)
            [s/div
@@ -629,7 +629,7 @@
       [:<>
        (->>
         search-text-value
-        (filter-index (:sedit/index settings))
+        (filter-index (:portal/index settings))
         (take 10)
         (map-indexed
          (fn [index item]
@@ -637,7 +637,7 @@
             {:key index :on-click #(do
                                      (reset! search-text nil)
                                      (reset! path (:path item)))}
-            [sedit settings (dissoc item :string-value)]])))])))
+            [portal settings (dissoc item :string-value)]])))])))
 
 (defn toolbar [settings path]
   [s/div
@@ -649,17 +649,17 @@
      :align-items :center
      :justify-content :center}}
    [s/button
-    {:on-click (:sedit/on-back settings)
+    {:on-click (:portal/on-back settings)
      :style    (button-styles settings)} "back"]
    [search-input settings]
    [s/button
-    {:on-click (:sedit/on-clear settings)
+    {:on-click (:portal/on-clear settings)
      :style    (button-styles settings)} "clear"]])
 
 (defn get-history-stack [settings]
-  (if (empty? (:sedit/history settings))
-    [(list (:sedit/value settings))]
-    (loop [ls (:sedit/history settings) result []]
+  (if (empty? (:portal/history settings))
+    [(list (:portal/value settings))]
+    (loop [ls (:portal/history settings) result []]
       (if (empty? ls)
         result
         (recur (rest ls) (conj result ls))))))
@@ -668,11 +668,11 @@
   (let [settings
         (assoc @state
                :depth 0
-               :sedit/on-clear #(clear-values!)
-               :sedit/on-nav
+               :portal/on-clear #(clear-values!)
+               :portal/on-nav
                (fn [history]
-                 (swap! state assoc :sedit/history history))
-               :sedit/on-back #(swap! state update :sedit/history rest))]
+                 (swap! state assoc :portal/history history))
+               :portal/on-back #(swap! state update :portal/history rest))]
     [s/div
      {:style
       {:display :flex
@@ -686,8 +686,8 @@
      [toolbar settings path]
      [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
       (cond
-        (some? (:sedit.rpc/exception settings))
-        [sedit-exception settings (.-rep (:sedit.rpc/exception settings))]
+        (some? (:portal.rpc/exception settings))
+        [portal-exception settings (.-rep (:portal.rpc/exception settings))]
         :else
         [s/div
          {:style
@@ -702,9 +702,9 @@
            (fn [idx ls]
              [:<>
               {:key idx}
-              [sedit-1
+              [portal-1
                (update settings
-                       :sedit/on-nav
+                       :portal/on-nav
                        (fn [on-nav] #(on-nav (conj ls %))))
                (first ls)]])))])]]))
 

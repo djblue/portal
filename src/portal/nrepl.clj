@@ -1,5 +1,5 @@
-(ns sedit.nrepl
-  (:require [sedit.main :as m]
+(ns portal.nrepl
+  (:require [portal.main :as m]
             [nrepl.middleware :refer [set-descriptor!]]
             [nrepl.transport :as transport]
             [nrepl.middleware.session :refer [session]])
@@ -18,7 +18,7 @@
       (read-string s)
       (catch Exception e nil))))
 
-(defrecord SeditTransport [transport handler-msg]
+(defrecord PortalTransport [transport handler-msg]
   Transport
   (recv [this timeout]
     (transport/recv transport timeout))
@@ -31,14 +31,14 @@
          {:code-form code-form :value value})))
     transport))
 
-(defn wrap-sedit [handler]
+(defn wrap-portal [handler]
   (m/inspect 1)
   (fn [msg]
     (-> msg
-        (update :transport ->SeditTransport msg)
+        (update :transport ->PortalTransport msg)
         handler)))
 
-(set-descriptor! #'wrap-sedit
+(set-descriptor! #'wrap-portal
                  {:requires #{}
                   :expects #{"eval"}
                   :handles {}})
