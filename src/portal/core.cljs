@@ -595,13 +595,15 @@
            [s/div
             [portal-metadata settings value]
             [component settings value]]]]
-         (when-not (empty? compatible-viewers)
-           [s/div
-            {:style
-             {:display :flex
-              :align-items :center
-              :justify-content :space-between
-              :background (:colors/background2 settings)}}
+         [s/div
+          {:style
+           {:display :flex
+            :min-height 64
+            :align-items :center
+            :justify-content :space-between
+            :background (:colors/background2 settings)}}
+          (if (empty? compatible-viewers)
+            [s/div]
             [:select
              {:value (pr-str viewer)
               :on-change #(reset! selected-viewer
@@ -615,10 +617,10 @@
                :color (:colors/text settings)
                :border (str "1px solid " (:colors/border settings))}}
              (for [k compatible-viewers]
-               [:option {:key k :value (pr-str k)} (pr-str k)])]
-            [s/div
-             {:style {:padding (:spacing/padding settings)}}
-             [summary settings value]]])]))))
+               [:option {:key k :value (pr-str k)} (pr-str k)])])
+          [s/div
+           {:style {:padding (:spacing/padding settings)}}
+           [summary settings value]]]]))))
 
 (defonce search-text (r/atom ""))
 
