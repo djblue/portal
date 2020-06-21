@@ -45,20 +45,71 @@
   {:themes/nord
    {:colors/text "#d8dee9"
     :colors/background "#2e3440"
-    :colors/background2 "rgba(0,0,0,0.1)"
+    :colors/background2 "#2a2e39"
     :colors/boolean "#5e81ac"
     :colors/string "#a3be8c"
     :colors/keyword "#5e81ac"
     :colors/namespace "#88c0d0"
-    :colors/tag "#EBCB8B"
+    :colors/tag "#ebcb8b"
     :colors/symbol "#d8dee9"
     :colors/number "#b48ead"
     :colors/date "#ebcb8b"
     :colors/uuid "#d08770"
-    :colors/uri "#D08770"
+    :colors/uri "#d08770"
     :colors/border "#4c566a"
     :colors/package "#88c0d0"
-    :colors/exception "#bf616a"}})
+    :colors/exception "#bf616a"}
+   :themes/solarized-dark
+   {:colors/text "#93a1a1"
+    :colors/background "#073642"
+    :colors/background2 "#002b36"
+    :colors/boolean "#268bd2"
+    :colors/string "#859900"
+    :colors/keyword "#268bd2"
+    :colors/namespace "#2aa198"
+    :colors/tag "#b58900"
+    :colors/symbol "#93a1a1"
+    :colors/number "#d33682"
+    :colors/date "#b58900"
+    :colors/uuid "#cb4b16"
+    :colors/uri "#cb4b16"
+    :colors/border "#586e75"
+    :colors/package "#2aa198"
+    :colors/exception "#dc322f"}
+   :themes/solarized-light
+   {:colors/text "#93a1a1"
+    :colors/background "#fdf6e3"
+    :colors/background2 "#eee8d5"
+    :colors/boolean "#268bd2"
+    :colors/string "#859900"
+    :colors/keyword "#268bd2"
+    :colors/namespace "#2aa198"
+    :colors/tag "#b58900"
+    :colors/symbol "#93a1a1"
+    :colors/number "#d33682"
+    :colors/date "#b58900"
+    :colors/uuid "#cb4b16"
+    :colors/uri "#cb4b16"
+    :colors/border "#839496"
+    :colors/package "#2aa198"
+    :colors/exception "#dc322f"}
+   :themes/github-light
+   {:colors/text "#24292e"
+    :colors/background "#fafbfc"
+    :colors/background2 "#f6f8fa"
+    :colors/boolean "#0366d6"
+    :colors/string "#28a745"
+    :colors/keyword "#005cc5"
+    :colors/namespace "#79b8ff"
+    :colors/tag "#ffd33d"
+    :colors/symbol "#24292e"
+    :colors/number "#6f42c1"
+    :colors/date "#ffd33d"
+    :colors/uuid "#f66a0a"
+    :colors/uri "#f66a0a"
+    :colors/border "#839496"
+    :colors/package "#79b8ff"
+    :colors/exception "#d73a49"}})
 
 (def default-settings
   (merge
@@ -358,6 +409,26 @@
 (defn sedit-number [settings value]
   [s/span {:style {:color (:colors/number settings)}} value])
 
+(defn hex-color? [s]
+  (re-matches #"#[0-9a-f]{6}|#[0-9a-f]{3}gi" s))
+
+(defn sedit-string [settings value]
+  (if-let [color (hex-color? value)]
+    [s/div
+     {:style
+      {:padding (:spacing/padding settings)
+       :background color}}
+     [s/div
+      {:style
+       {:text-align :center
+        :filter "contrast(500%) saturate(0) invert(1) contrast(500%)"
+        :opacity 0.75
+        :color color}}
+      color]]
+
+    [s/span {:style {:color (:colors/string settings)}}
+     (pr-str (trim-string settings value))]))
+
 (defn sedit-namespace [settings value]
   (when-let [ns (namespace value)]
     [s/span {:style {:color (:colors/namespace settings)}} ns "/"]))
@@ -465,8 +536,7 @@
      [sedit-number settings value]
 
      (string? value)
-     [s/span {:style {:color (:colors/string settings)}}
-      (pr-str (trim-string settings value))]
+     [sedit-string settings value]
 
      (keyword? value)
      [sedit-keyword settings value]
@@ -487,7 +557,10 @@
          "sedit.transit/exception"
          [sedit-exception settings rep]
          "sedit.transit/unknown"
-         [s/span {:title (:type rep)} (:string rep)]
+         [s/span {:title (:type rep)
+                  :style
+                  {:color (:colors/text settings)}}
+          (:string rep)]
 
          "r"
          [sedit-uri settings (.-rep value)]
