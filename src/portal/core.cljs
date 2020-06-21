@@ -422,52 +422,56 @@
 
 (defn portal-exception [settings value]
   (let [settings (update settings :depth inc)]
-    [s/div
-     {:style
-      {:background (get-background settings)
-       :padding (:spacing/padding settings)
-       :box-sizing :border-box
-       :color (:colors/text settings)
-       :font-size  (:font-size settings)
-       :border-radius (:border-radius settings)
-       :border (str "1px solid " (:colors/border settings))}}
-     (map
-      (fn [value]
-        (let [{:keys [class-name message stack-trace]} value]
-          [:<>
-           {:key (hash value)}
-           [s/div
-            {:style
-             {:margin-bottom (:spacing/padding settings)}}
-            [s/span {:style {:font-weight :bold
-                             :color (:colors/exception settings)}}
-             class-name] ": " message]
-           [s/div
-            {:style {:display     :grid
-                     :text-align :right}}
-            (map-indexed
-             (fn [idx line]
-               (let [{:keys [names]} line]
-                 [:<> {:key idx}
-                  (if (:omitted line)
-                    [s/div {:style {:grid-column "1"}} "..."]
-                    [s/div {:style {:grid-column "1"}}
-                     (if (empty? names)
-                       [s/span
-                        [s/span {:style {:color (:colors/package settings)}}
-                         (:package line) "."]
-                        [s/span {:style {:font-style :italic}}
-                         (:simple-class line) "."]
-                        (str (:method line))]
-                       (let [[ns & names] names]
+    (if (> (:depth settings) (:limits/max-depth settings))
+      [s/span {:style {:font-weight :bold
+                       :color (:colors/exception settings)}}
+       (:class-name (first value))]
+      [s/div
+       {:style
+        {:background (get-background settings)
+         :padding (:spacing/padding settings)
+         :box-sizing :border-box
+         :color (:colors/text settings)
+         :font-size  (:font-size settings)
+         :border-radius (:border-radius settings)
+         :border (str "1px solid " (:colors/border settings))}}
+       (map
+        (fn [value]
+          (let [{:keys [class-name message stack-trace]} value]
+            [:<>
+             {:key (hash value)}
+             [s/div
+              {:style
+               {:margin-bottom (:spacing/padding settings)}}
+              [s/span {:style {:font-weight :bold
+                               :color (:colors/exception settings)}}
+               class-name] ": " message]
+             [s/div
+              {:style {:display     :grid
+                       :text-align :right}}
+              (map-indexed
+               (fn [idx line]
+                 (let [{:keys [names]} line]
+                   [:<> {:key idx}
+                    (if (:omitted line)
+                      [s/div {:style {:grid-column "1"}} "..."]
+                      [s/div {:style {:grid-column "1"}}
+                       (if (empty? names)
                          [s/span
-                          [s/span {:style {:color (:colors/namespace settings)}} ns "/"]
-                          (str/join "/" names)]))])
-                  [s/div {:style {:grid-column "2"}} (:file line)]
-                  [s/div {:style {:grid-column "3"}}
-                   [portal-number settings (:line line)]]]))
-             stack-trace)]]))
-      value)]))
+                          [s/span {:style {:color (:colors/package settings)}}
+                           (:package line) "."]
+                          [s/span {:style {:font-style :italic}}
+                           (:simple-class line) "."]
+                          (str (:method line))]
+                         (let [[ns & names] names]
+                           [s/span
+                            [s/span {:style {:color (:colors/namespace settings)}} ns "/"]
+                            (str/join "/" names)]))])
+                    [s/div {:style {:grid-column "2"}} (:file line)]
+                    [s/div {:style {:grid-column "3"}}
+                     [portal-number settings (:line line)]]]))
+               stack-trace)]]))
+        value)])))
 
 (defn portal [settings value]
   [s/div
