@@ -322,6 +322,10 @@
   (when-let [ns (namespace value)]
     [s/span {:style {:color (::c/namespace settings)}} ns "/"]))
 
+(defn portal-boolean [settings value]
+  [s/span {:style {:color (::c/boolean settings)}}
+   (pr-str value)])
+
 (defn portal-symbol [settings value]
   [s/span {:style {:color (::c/symbol settings) :white-space :nowrap}}
    [portal-namespace settings value]
@@ -333,17 +337,43 @@
    [portal-namespace settings value]
    (name value)])
 
+(defn portal-date [settings value]
+  [s/span {:style {:color (::c/date settings)}}
+   (pr-str value)])
+
+(defn portal-uuid [settings value]
+  [s/span {:style {:color (::c/uuid settings)}}
+   (pr-str value)])
+
 (defn portal-var [settings value]
   [s/span
    [s/span {:style {:color (::c/tag settings)}} "#'"]
-   [portal-symbol settings value]])
+   [portal-symbol settings (.-rep value)]])
 
 (defn portal-uri [settings value]
-  [s/a
-   {:href value
-    :style {:color (::c/uri settings)}
-    :target "_blank"}
-   value])
+  (let [value (.-rep value)]
+    [s/a
+     {:href value
+      :style {:color (::c/uri settings)}
+      :target "_blank"}
+     value]))
+
+(defn portal-tagged [settings value]
+  (let [tag (.-tag value) rep (.-rep value)]
+    [s/div
+     {:style {:display :flex
+              :align-items :center}}
+     [s/div
+      {:style {:padding (:spacing/padding settings)}}
+      [s/span {:style {:color (::c/tag settings)}} "#"]
+      tag]
+     [s/div
+      {:style {:flex 1}}
+      [portal settings rep]]]))
+
+(defn portal-default [settings value]
+  [s/span {}
+   (trim-string settings (pr-str value))])
 
 (defn exception-summary [settings value]
   [s/span {:style {:font-weight :bold
@@ -351,7 +381,8 @@
    (:class-name (first value))])
 
 (defn portal-exception [settings value]
-  (let [settings (update settings :depth inc)]
+  (let [value (.-rep value)
+        settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [exception-summary settings value]
       [s/div
@@ -401,6 +432,13 @@
                stack-trace)]]))
         value)])))
 
+(defn portal-object [settings value]
+  (let [tag (.-tag value) rep (.-rep value)]
+    [s/span {:title (:type rep)
+             :style
+             {:color (::c/text settings)}}
+     (:string rep)]))
+
 (defn get-value-type [value]
   (cond
     (map? value)      :map
@@ -449,8 +487,7 @@
        [portal-coll settings value]
 
        :boolean
-       [s/span {:style {:color (::c/boolean settings)}}
-        (pr-str value)]
+       [portal-boolean settings value]
 
        :symbol
        [portal-symbol settings value]
@@ -465,47 +502,27 @@
        [portal-keyword settings value]
 
        :date
-       [s/span {:style {:color (::c/date settings)}}
-        (pr-str value)]
+       [portal-date settings value]
 
        :uuid
-       [s/span {:style {:color (::c/uuid settings)}}
-        (pr-str value)]
+       [portal-uuid settings value]
 
        :var
-       (let [tag (.-tag value) rep (.-rep value)]
-         [portal-var settings rep])
+       [portal-var settings value]
 
        :exception
-       (let [tag (.-tag value) rep (.-rep value)]
-         [portal-exception settings rep])
+       [portal-exception settings value]
 
        :object
-       (let [tag (.-tag value) rep (.-rep value)]
-         [s/span {:title (:type rep)
-                  :style
-                  {:color (::c/text settings)}}
-          (:string rep)])
+       [portal-object settings value]
 
        :uri
-       (let [tag (.-tag value) rep (.-rep value)]
-         [portal-uri settings (.-rep value)])
+       [portal-uri settings value]
 
        :tagged
-       (let [tag (.-tag value) rep (.-rep value)]
-         [s/div
-          {:style {:display :flex
-                   :align-items :center}}
-          [s/div
-           {:style {:padding (:spacing/padding settings)}}
-           [s/span {:style {:color (::c/tag settings)}} "#"]
-           tag]
-          [s/div
-           {:style {:flex 1}}
-           [portal settings rep]]])
+       [portal-tagged settings value]
 
-       [s/span {}
-        (trim-string settings (pr-str value))])]))
+       [portal-default settings value])]))
 
 (defn portal-metadata [settings value]
   (when-let [m (meta
@@ -665,7 +682,7 @@
      [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
       (cond
         (some? (:portal.rpc/exception settings))
-        [portal-exception settings (.-rep (:portal.rpc/exception settings))]
+        [portal-exception settings (:portal.rpc/exception settings)]
 
         (not (str/blank? @search-text))
         [search-results settings]
