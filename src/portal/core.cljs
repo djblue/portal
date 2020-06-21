@@ -598,7 +598,10 @@
          (when-not (empty? compatible-viewers)
            [s/div
             {:style
-             {:background (:colors/background2 settings)}}
+             {:display :flex
+              :align-items :center
+              :justify-content :space-between
+              :background (:colors/background2 settings)}}
             [:select
              {:value (pr-str viewer)
               :on-change #(reset! selected-viewer
@@ -612,7 +615,10 @@
                :color (:colors/text settings)
                :border (str "1px solid " (:colors/border settings))}}
              (for [k compatible-viewers]
-               [:option {:key k :value (pr-str k)} (pr-str k)])]])]))))
+               [:option {:key k :value (pr-str k)} (pr-str k)])]
+            [s/div
+             {:style {:padding (:spacing/padding settings)}}
+             [summary settings value]]])]))))
 
 (defonce search-text (r/atom ""))
 
