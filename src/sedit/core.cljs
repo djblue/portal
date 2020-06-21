@@ -236,7 +236,7 @@
         {:style (button-styles settings)
          :on-click (fn []
                      (->  (http-request value)
-                          (.then #(reset! response %))))}
+                          (.then #(reset! response (:response %)))))}
         "send request"]
        [sedit settings value]
        (when @response

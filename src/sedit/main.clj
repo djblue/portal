@@ -124,7 +124,8 @@
    (fn [request channel]
      (send-rpc
       channel
-      @(client/request (get-in request [:body :request]))))})
+      {:response
+       @(client/request (get-in request [:body :request]))}))})
 
 (defn not-found [request channel]
   (send-rpc channel {:status :not-found}))
