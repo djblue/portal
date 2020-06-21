@@ -55,6 +55,7 @@
     :colors/number "#b48ead"
     :colors/date "#ebcb8b"
     :colors/uuid "#d08770"
+    :colors/uri "#D08770"
     :colors/border "#4c566a"
     :colors/package "#88c0d0"
     :colors/exception "#bf616a"}})
@@ -377,6 +378,13 @@
    [s/span {:style {:color (:colors/tag settings)}} "#'"]
    [sedit-symbol settings value]])
 
+(defn sedit-uri [settings value]
+  [s/a
+   {:href value
+    :style {:color (:colors/uri settings)}
+    :target "_blank"}
+   value])
+
 (defn sedit-exception [settings value]
   (let [settings (update settings :depth inc)]
     [s/div
@@ -480,6 +488,9 @@
          [sedit-exception settings rep]
          "sedit.transit/unknown"
          [s/span {:title (:type rep)} (:string rep)]
+
+         "r"
+         [sedit-uri settings (.-rep value)]
 
          [s/div
           {:style {:display :flex

@@ -27,6 +27,7 @@
            (attrs->css attrs))]
         children))
 
+(def a      (partial styled :a))
 (def table  (partial styled :table))
 (def tbody  (partial styled :tbody))
 (def thead  (partial styled :thead))

@@ -39,6 +39,8 @@
          {:handlers
           {clojure.lang.Var
            (transit/write-handler "sedit.transit/var" var->symbol)
+           java.net.URL
+           (transit/write-handler "r" str)
            java.lang.Throwable
            (transit/write-handler "sedit.transit/exception" #(ex/analyze-exception % nil))}
           :transform transit/write-meta
