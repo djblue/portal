@@ -9,3 +9,5 @@ dev: node_modules
 release:
 	clojure -A:cljs:shadow-cljs release app
 
+lint:
+	clj-kondo --lint src

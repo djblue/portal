@@ -1,6 +1,5 @@
 (ns portal.styled
-  (:require [reagent.core :as r]
-            ["emotion" :as emotion]))
+  (:require ["emotion" :as emotion]))
 
 (def selectors
   {:style       identity

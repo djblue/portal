@@ -1,8 +1,7 @@
 (ns portal.nrepl
   (:require [portal.main :as m]
             [nrepl.middleware :refer [set-descriptor!]]
-            [nrepl.transport :as transport]
-            [nrepl.middleware.session :refer [session]])
+            [nrepl.transport :as transport])
   (:import [nrepl.transport Transport]))
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
@@ -16,7 +15,7 @@
   (when s
     (try
       (read-string s)
-      (catch Exception e nil))))
+      (catch Exception _e nil))))
 
 (defrecord PortalTransport [transport handler-msg]
   Transport

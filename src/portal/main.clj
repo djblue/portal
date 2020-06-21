@@ -9,7 +9,7 @@
             [org.httpkit.server :as server]
             [org.httpkit.client :as client]
             [io.aviso.exception :as ex])
-  (:import [java.io ByteArrayOutputStream PushbackReader]
+  (:import [java.io ByteArrayOutputStream]
            [java.util UUID]))
 
 (defn get-paths []
@@ -127,7 +127,7 @@
 
 (def ops
   {:portal.rpc/clear-values
-   (fn [request channel]
+   (fn [_request channel]
      (send-rpc channel (clear-values)))
    :portal.rpc/load-state
    (fn [request channel]
@@ -139,11 +139,11 @@
            (add-watch
             state
             watch-key
-            (fn [_ _ old new]
+            (fn [_ _ _old _new]
               (send-rpc channel @state)))
            (server/on-close
             channel
-            (fn [status]
+            (fn [_status]
               (remove-watch state watch-key)))))))
    :portal.rpc/http-request
    (fn [request channel]
@@ -157,7 +157,7 @@
       channel
       {:value (datafy (apply nav (get-in request [:body :args])))}))})
 
-(defn not-found [request channel]
+(defn not-found [_request channel]
   (send-rpc channel {:status :not-found}))
 
 (defn rpc-handler [request]

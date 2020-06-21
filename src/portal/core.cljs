@@ -108,18 +108,6 @@
 
 (declare portal)
 
-(defn collapsible []
-  (let [state (r/atom {:open? true})]
-    (fn [props child]
-      [s/div
-       {:on-click #(do
-                     (swap! state update :open? not)
-                     (.stopPropagation %))}
-       (let [{:keys [open?]} @state]
-         (if-not open?
-           (:hidden props)
-           child))])))
-
 (defn get-background [settings]
   (if (even? (:depth settings))
     (::c/background settings)
