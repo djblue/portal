@@ -1,6 +1,7 @@
 (ns portal.core
   (:require [reagent.core :as r]
             [portal.styled :as s]
+            [portal.colors :as c]
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [cognitect.transit :as t]))
@@ -43,76 +44,6 @@
                           (str/lower-case s))
           index))
 
-(def themes
-  {:themes/nord
-   {:colors/text "#d8dee9"
-    :colors/background "#2e3440"
-    :colors/background2 "#2a2e39"
-    :colors/boolean "#5e81ac"
-    :colors/string "#a3be8c"
-    :colors/keyword "#5e81ac"
-    :colors/namespace "#88c0d0"
-    :colors/tag "#ebcb8b"
-    :colors/symbol "#d8dee9"
-    :colors/number "#b48ead"
-    :colors/date "#ebcb8b"
-    :colors/uuid "#d08770"
-    :colors/uri "#d08770"
-    :colors/border "#4c566a"
-    :colors/package "#88c0d0"
-    :colors/exception "#bf616a"}
-   :themes/solarized-dark
-   {:colors/text "#93a1a1"
-    :colors/background "#073642"
-    :colors/background2 "#002b36"
-    :colors/boolean "#268bd2"
-    :colors/string "#859900"
-    :colors/keyword "#268bd2"
-    :colors/namespace "#2aa198"
-    :colors/tag "#b58900"
-    :colors/symbol "#93a1a1"
-    :colors/number "#d33682"
-    :colors/date "#b58900"
-    :colors/uuid "#cb4b16"
-    :colors/uri "#cb4b16"
-    :colors/border "#586e75"
-    :colors/package "#2aa198"
-    :colors/exception "#dc322f"}
-   :themes/solarized-light
-   {:colors/text "#93a1a1"
-    :colors/background "#fdf6e3"
-    :colors/background2 "#eee8d5"
-    :colors/boolean "#268bd2"
-    :colors/string "#859900"
-    :colors/keyword "#268bd2"
-    :colors/namespace "#2aa198"
-    :colors/tag "#b58900"
-    :colors/symbol "#93a1a1"
-    :colors/number "#d33682"
-    :colors/date "#b58900"
-    :colors/uuid "#cb4b16"
-    :colors/uri "#cb4b16"
-    :colors/border "#839496"
-    :colors/package "#2aa198"
-    :colors/exception "#dc322f"}
-   :themes/github-light
-   {:colors/text "#24292e"
-    :colors/background "#fafbfc"
-    :colors/background2 "#f6f8fa"
-    :colors/boolean "#0366d6"
-    :colors/string "#28a745"
-    :colors/keyword "#005cc5"
-    :colors/namespace "#79b8ff"
-    :colors/tag "#ffd33d"
-    :colors/symbol "#24292e"
-    :colors/number "#6f42c1"
-    :colors/date "#ffd33d"
-    :colors/uuid "#f66a0a"
-    :colors/uri "#f66a0a"
-    :colors/border "#839496"
-    :colors/package "#79b8ff"
-    :colors/exception "#d73a49"}})
-
 (def default-settings
   (merge
    {:font/family "monospace"
@@ -125,7 +56,7 @@
     :spacing/padding "10px"
     :border-radius "2px"
     :portal/history '()}
-   (:themes/nord themes)))
+   (:portal.themes/nord c/themes)))
 
 (defonce state (r/atom default-settings))
 
@@ -140,8 +71,8 @@
 (spec/def ::body string?)
 
 (defn button-styles [settings]
-  {:background (:colors/text settings)
-   :color (:colors/background settings)
+  {:background (::c/text settings)
+   :color (::c/background settings)
    :font-size (:font-size settings)
    :border :none
    :box-sizing :border-box
@@ -207,8 +138,8 @@
 
 (defn get-background [settings]
   (if (even? (:depth settings))
-    (:colors/background settings)
-    (:colors/background2 settings)))
+    (::c/background settings)
+    (::c/background2 settings)))
 
 (defn summary [settings value]
   (cond
@@ -232,12 +163,12 @@
          "portal.transit/exception") nil
 
         "portal.transit/unknown"
-        [s/span {:style {:color (:colors/text settings)}} (:type rep)]
+        [s/span {:style {:color (::c/text settings)}} (:type rep)]
 
         [s/div
          {:style {:box-sizing :border-box
                   :padding (:spacing/padding settings)}}
-         [s/span {:style {:color (:colors/tag settings)}} "#"]
+         [s/span {:style {:color (::c/tag settings)}} "#"]
          tag]))))
 
 (defn table-view? [value]
@@ -253,7 +184,7 @@
          {:style
           {:width "100%"
            :border-collapse :collapse
-           :color (:colors/text settings)
+           :color (::c/text settings)
            :font-size  (:font-size settings)
            :border-radius (:border-radius settings)}}
          [s/tbody
@@ -262,7 +193,7 @@
             (fn [grid-column column]
               [s/th {:key grid-column
                      :style
-                     {:border (str "1px solid " (:colors/border settings))
+                     {:border (str "1px solid " (::c/border settings))
                       :background background
                       :box-sizing :border-box
                       :padding (:spacing/padding settings)}}
@@ -276,7 +207,7 @@
                  [s/td
                   {:key grid-column
                    :style
-                   {:border (str "1px solid " (:colors/border settings))
+                   {:border (str "1px solid " (::c/border settings))
                     :background background
                     :padding (:spacing/padding settings)
                     :box-sizing :border-box}}
@@ -316,10 +247,10 @@
          :grid-gap (:spacing/padding settings)
          :padding (:spacing/padding settings)
          :box-sizing :border-box
-         :color (:colors/text settings)
+         :color (::c/text settings)
          :font-size  (:font-size settings)
          :border-radius (:border-radius settings)
-         :border (str "1px solid " (:colors/border settings))}}
+         :border (str "1px solid " (::c/border settings))}}
        (take
         (:limits/max-length settings)
         (filter
@@ -354,10 +285,10 @@
          :grid-gap (:spacing/padding settings)
          :padding (:spacing/padding settings)
          :box-sizing :border-box
-         :color (:colors/text settings)
+         :color (::c/text settings)
          :font-size  (:font-size settings)
          :border-radius (:border-radius settings)
-         :border (str "1px solid " (:colors/border settings))}}
+         :border (str "1px solid " (::c/border settings))}}
        (->> values
             (map-indexed
              (fn [idx itm]
@@ -394,7 +325,7 @@
    :portal.viewer/http   {:predicate http-request? :component portal-http}})
 
 (defn portal-number [settings value]
-  [s/span {:style {:color (:colors/number settings)}} value])
+  [s/span {:style {:color (::c/number settings)}} value])
 
 (defn hex-color? [s]
   (re-matches #"#[0-9a-f]{6}|#[0-9a-f]{3}gi" s))
@@ -414,33 +345,33 @@
         :color color}}
       color]]
 
-    [s/span {:style {:color (:colors/string settings)}}
+    [s/span {:style {:color (::c/string settings)}}
      (pr-str (trim-string settings value))]))
 
 (defn portal-namespace [settings value]
   (when-let [ns (namespace value)]
-    [s/span {:style {:color (:colors/namespace settings)}} ns "/"]))
+    [s/span {:style {:color (::c/namespace settings)}} ns "/"]))
 
 (defn portal-symbol [settings value]
-  [s/span {:style {:color (:colors/symbol settings) :white-space :nowrap}}
+  [s/span {:style {:color (::c/symbol settings) :white-space :nowrap}}
    [portal-namespace settings value]
    (name value)])
 
 (defn portal-keyword [settings value]
-  [s/span {:style {:color (:colors/keyword settings) :white-space :nowrap}}
+  [s/span {:style {:color (::c/keyword settings) :white-space :nowrap}}
    ":"
    [portal-namespace settings value]
    (name value)])
 
 (defn portal-var [settings value]
   [s/span
-   [s/span {:style {:color (:colors/tag settings)}} "#'"]
+   [s/span {:style {:color (::c/tag settings)}} "#'"]
    [portal-symbol settings value]])
 
 (defn portal-uri [settings value]
   [s/a
    {:href value
-    :style {:color (:colors/uri settings)}
+    :style {:color (::c/uri settings)}
     :target "_blank"}
    value])
 
@@ -448,17 +379,17 @@
   (let [settings (update settings :depth inc)]
     (if (> (:depth settings) (:limits/max-depth settings))
       [s/span {:style {:font-weight :bold
-                       :color (:colors/exception settings)}}
+                       :color (::c/exception settings)}}
        (:class-name (first value))]
       [s/div
        {:style
         {:background (get-background settings)
          :padding (:spacing/padding settings)
          :box-sizing :border-box
-         :color (:colors/text settings)
+         :color (::c/text settings)
          :font-size  (:font-size settings)
          :border-radius (:border-radius settings)
-         :border (str "1px solid " (:colors/border settings))}}
+         :border (str "1px solid " (::c/border settings))}}
        (map
         (fn [value]
           (let [{:keys [class-name message stack-trace]} value]
@@ -468,7 +399,7 @@
               {:style
                {:margin-bottom (:spacing/padding settings)}}
               [s/span {:style {:font-weight :bold
-                               :color (:colors/exception settings)}}
+                               :color (::c/exception settings)}}
                class-name] ": " message]
              [s/div
               {:style {:display     :grid
@@ -482,14 +413,14 @@
                       [s/div {:style {:grid-column "1"}}
                        (if (empty? names)
                          [s/span
-                          [s/span {:style {:color (:colors/package settings)}}
+                          [s/span {:style {:color (::c/package settings)}}
                            (:package line) "."]
                           [s/span {:style {:font-style :italic}}
                            (:simple-class line) "."]
                           (str (:method line))]
                          (let [[ns & names] names]
                            [s/span
-                            [s/span {:style {:color (:colors/namespace settings)}} ns "/"]
+                            [s/span {:style {:color (::c/namespace settings)}} ns "/"]
                             (str/join "/" names)]))])
                     [s/div {:style {:grid-column "2"}} (:file line)]
                     [s/div {:style {:grid-column "3"}}
@@ -519,7 +450,7 @@
      [portal-coll settings value]
 
      (boolean? value)
-     [s/span {:style {:color (:colors/boolean settings)}}
+     [s/span {:style {:color (::c/boolean settings)}}
       (pr-str value)]
 
      (symbol? value)
@@ -535,11 +466,11 @@
      [portal-keyword settings value]
 
      (instance? js/Date value)
-     [s/span {:style {:color (:colors/date settings)}}
+     [s/span {:style {:color (::c/date settings)}}
       (pr-str value)]
 
      (instance? cljs.core/UUID value)
-     [s/span {:style {:color (:colors/uuid settings)}}
+     [s/span {:style {:color (::c/uuid settings)}}
       (pr-str value)]
 
      (t/tagged-value? value)
@@ -552,7 +483,7 @@
          "portal.transit/unknown"
          [s/span {:title (:type rep)
                   :style
-                  {:color (:colors/text settings)}}
+                  {:color (::c/text settings)}}
           (:string rep)]
 
          "r"
@@ -563,7 +494,7 @@
                    :align-items :center}}
           [s/div
            {:style {:padding (:spacing/padding settings)}}
-           [s/span {:style {:color (:colors/tag settings)}} "#"]
+           [s/span {:style {:color (::c/tag settings)}} "#"]
            tag]
           [s/div
            {:style {:flex 1}}
@@ -602,7 +533,7 @@
             :max-height "calc(100% - 64px)"
             :min-width "100%"
             :box-sizing :border-box
-            :border (str "1px solid " (:colors/border settings))}}
+            :border (str "1px solid " (::c/border settings))}}
           [s/div
            {:style
             {:position :absolute
@@ -622,7 +553,7 @@
             :min-height 64
             :align-items :center
             :justify-content :space-between
-            :background (:colors/background2 settings)}}
+            :background (::c/background2 settings)}}
           (if (empty? compatible-viewers)
             [s/div]
             [:select
@@ -630,13 +561,13 @@
               :on-change #(reset! selected-viewer
                                   (keyword (.substr (.. % -target -value) 1)))
               :style
-              {:background (:colors/background settings)
+              {:background (::c/background settings)
                :margin (:spacing/padding settings)
                :padding (:spacing/padding settings)
                :box-sizing :border
                :font-size (:font-size settings)
-               :color (:colors/text settings)
-               :border (str "1px solid " (:colors/border settings))}}
+               :color (::c/text settings)
+               :border (str "1px solid " (::c/border settings))}}
              (for [k compatible-viewers]
                [:option {:key k :value (pr-str k)} (pr-str k)])])
           [s/div
@@ -652,13 +583,13 @@
     :placeholder "Type to filter..."
     :style
     {:flex "1"
-     :background (:colors/background settings)
+     :background (::c/background settings)
      :margin (:spacing/padding settings)
      :padding (:spacing/padding settings)
      :box-sizing :border-box
      :font-size (:font-size settings)
-     :color (:colors/text settings)
-     :border (str "1px solid " (:colors/border settings))}}])
+     :color (::c/text settings)
+     :border (str "1px solid " (::c/border settings))}}])
 
 (defn search-results [settings]
   (let [search-text-value @search-text]
@@ -681,7 +612,7 @@
    {:style
     {:height "64px"
      :flex-direction :row
-     :background (:colors/background2 settings)
+     :background (::c/background2 settings)
      :display :flex
      :align-items :center
      :justify-content :center}}
@@ -721,8 +652,8 @@
      {:style
       {:display :flex
        :flex-direction :column
-       :background (:colors/background settings)
-       :color (:colors/text settings)
+       :background (::c/background settings)
+       :color (::c/text settings)
        :font-family (:font/family settings)
        :font-size (:font-size settings)
        :height "100vh"
