@@ -385,9 +385,9 @@
           [s/span before [:mark match] after])))))
 
 (def viewers
-  {:portal.viewer/map    {:predicate map?          :component portal-map}
+  {:portal.viewer/coll   {:predicate coll?         :component portal-coll}
+   :portal.viewer/map    {:predicate map?          :component portal-map}
    :portal.viewer/table  {:predicate table-view?   :component portal-table}
-   :portal.viewer/coll   {:predicate coll?         :component portal-coll}
    :portal.viewer/http   {:predicate http-request? :component portal-http}})
 
 (defn portal-number [settings value]
