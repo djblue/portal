@@ -312,16 +312,6 @@
          :font-size  (:font-size settings)
          :border-radius (:border-radius settings)
          :border (str "1px solid " (:colors/border settings))}}
-
-       #_[s/thead
-          [s/tr
-           {:style
-            {:border-bottom (str "1px solid " (:colors/border settings))}}
-           [s/td
-            [s/div
-             {:style {:display :flex}}
-             type+count]]
-           [s/td]]]
        (take
         (:limits/max-length settings)
         (filter
@@ -332,17 +322,11 @@
              [:<>
               {:key (hash k)}
               [s/div {:style
-                      {:grid-column "1"}}
+                      {:text-align :left
+                       :grid-column "1"}}
                [s/div
                 {:style {:display :flex}}
                 sedit-k]]
-
-              #_[s/td {:style
-                       {:vertical-align :top
-                        :text-align :left
-                        :padding (:spacing/padding settings)}}
-                 [summary settings v]]
-
               [s/div {:style
                       {:grid-column "2"
                        :text-align :right}}
@@ -366,11 +350,6 @@
          :font-size  (:font-size settings)
          :border-radius (:border-radius settings)
          :border (str "1px solid " (:colors/border settings))}}
-
-       #_[s/div
-          {:style
-           {:border-bottom (str "1px solid " (:colors/border settings))}}
-          type+count]
        (->> values
             (map-indexed
              (fn [idx itm]
@@ -513,6 +492,7 @@
         (.stopPropagation e)
         ((:sedit/on-nav settings) value)))
     :style {:cursor :pointer
+            :width "100%"
             :border-radius (:border-radius settings)
             :border "1px solid rgba(0,0,0,0)"}
     :style/hover {:border
@@ -678,8 +658,7 @@
      :flex-direction :row
      :display :flex
      :align-items :center
-     :justify-content :center
-     :border-bottom  (str "1px solid " (:colors/border settings))}}
+     :justify-content :center}}
    [s/button
     {:on-click (:sedit/on-back settings)
      :style    (button-styles settings)} "back"]
