@@ -125,21 +125,6 @@
     :sedit/history '()}
    (:themes/nord themes)))
 
-(def example
-  {:example/booleans #{true false}
-   :example/nil nil
-   :example/vector [1 2 4]
-   "string-key" "string-value"
-   :example/list (list 1 2 3)
-   :example/set #{1 2 3}
-   {:example/settings default-settings} :hello-world
-   #{1 2 3} [4 5 6]
-   :example/date (js/Date.)
-   :example/var #'default-settings
-   :example/uuid (random-uuid)
-   :example/nested-vector [1 2 3 [4 5 6]]
-   :example/code '(defn hello-world [] (println "hello, world"))})
-
 (defonce state (r/atom default-settings))
 
 (spec/def ::http-request
