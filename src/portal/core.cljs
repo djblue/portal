@@ -182,6 +182,9 @@
   (send-rpc! {:op :portal.rpc/clear-values}
              #(swap! state assoc :portal/history '())))
 
+(defn on-nav [coll k v]
+  (send-rpc! {:op :portal.rpc/on-nav :args [coll k v]}))
+
 (defn http-request [request]
   (send-rpc! {:op :portal.rpc/http-request
               :request request}))
@@ -479,7 +482,7 @@
     (fn [e]
       (when (= 1 (:depth settings))
         (.stopPropagation e)
-        ((:portal/on-nav settings) value)))
+        ((:portal/on-nav settings) {:value value})))
     :style {:cursor :pointer
             :width "100%"
             :border-radius (:border-radius settings)
@@ -674,8 +677,15 @@
                :depth 0
                :portal/on-clear #(clear-values!)
                :portal/on-nav
-               (fn [history]
-                 (swap! state assoc :portal/history history))
+               (fn [target]
+                 (-> (on-nav
+                      (:coll target)
+                      (:key target)
+                      (:value target))
+                     (.then #(swap! state
+                                    assoc
+                                    :portal/history
+                                    (conj (:history target) (:value %))))))
                :portal/on-back #(swap! state update :portal/history rest))]
     [s/div
      {:style
@@ -709,7 +719,7 @@
               [portal-1
                (update settings
                        :portal/on-nav
-                       (fn [on-nav] #(on-nav (conj ls %))))
+                       (fn [on-nav] #(on-nav (assoc % :coll (first ls) :history ls))))
                (first ls)]])))])]]))
 
 (defn promise-loop [f]

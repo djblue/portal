@@ -3,6 +3,7 @@
             [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
             [clojure.edn :as edn]
+            [clojure.datafy :refer [datafy nav]]
             [clojure.data.json :as json]
             [cognitect.transit :as transit]
             [org.httpkit.server :as server]
@@ -150,7 +151,12 @@
      (send-rpc
       channel
       {:response
-       @(client/request (get-in request [:body :request]))}))})
+       @(client/request (get-in request [:body :request]))}))
+   :portal.rpc/on-nav
+   (fn [request channel]
+     (send-rpc
+      channel
+      {:value (datafy (apply nav (get-in request [:body :args])))}))})
 
 (defn not-found [request channel]
   (send-rpc channel {:status :not-found}))
