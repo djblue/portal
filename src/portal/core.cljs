@@ -2,6 +2,7 @@
   (:require [reagent.core :as r]
             [portal.styled :as s]
             [portal.colors :as c]
+            [portal.rpc :as rpc]
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [cognitect.transit :as t]))
@@ -81,24 +82,6 @@
    :cursor :pointer
    :margin "0 20px"})
 
-(defn json->edn [json]
-  (let [r (t/reader :json)]
-    (t/read r json)))
-
-(defn edn->json [edn]
-  (let [w (t/writer :json)]
-    (t/write w edn)))
-
-(defn send-rpc!
-  ([msg] (send-rpc! msg identity))
-  ([msg done]
-   (-> (js/fetch
-        "/rpc"
-        #js {:method "POST" :body (edn->json msg)})
-       (.then #(.text %))
-       (.then json->edn)
-       (.then done))))
-
 (defn merge-state [new-state]
   (let [index (index-value (:portal/value new-state))
         new-state-with-index
@@ -107,20 +90,21 @@
       (js/window.close))))
 
 (defn load-state! []
-  (send-rpc! {:op             :portal.rpc/load-state
-              :portal/state-id (:portal/state-id @state)}
-             merge-state))
+  (-> (rpc/send!
+       {:op             :portal.rpc/load-state
+        :portal/state-id (:portal/state-id @state)})
+      (.then merge-state)))
 
 (defn clear-values! []
-  (send-rpc! {:op :portal.rpc/clear-values}
-             #(swap! state assoc :portal/history '())))
+  (->
+   (rpc/send! {:op :portal.rpc/clear-values})
+   (.then #(swap! state assoc :portal/history '()))))
 
 (defn on-nav [coll k v]
-  (send-rpc! {:op :portal.rpc/on-nav :args [coll k v]}))
+  (rpc/send! {:op :portal.rpc/on-nav :args [coll k v]}))
 
 (defn http-request [request]
-  (send-rpc! {:op :portal.rpc/http-request
-              :request request}))
+  (rpc/send! {:op :portal.rpc/http-request :request request}))
 
 (declare portal)
 
