@@ -276,13 +276,13 @@
     :uuid       inspect-uuid
     :var        inspect-var
     :exception  preview-exception
-    :object     preview-object
+    :object     inspect-object
     :uri        inspect-uri
     :tagged     preview-tagged
     inspect-default))
 
 (def preview-type?
-  #{:map :set :vector :list :coll :object :tagged :exception})
+  #{:map :set :vector :list :coll :tagged :exception})
 
 (defn preview [settings value]
   (let [type (get-value-type value)
