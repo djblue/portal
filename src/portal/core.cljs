@@ -416,11 +416,11 @@
       value)]))
 
 (defn portal-object [settings value]
-  (let [tag (.-tag value) rep (.-rep value)]
-    [s/span {:title (:type rep)
+  (let [value (.-rep value)]
+    [s/span {:title (:type value)
              :style
              {:color (::c/text settings)}}
-     (:string rep)]))
+     (:string value)]))
 
 (defn date? [value] (instance? js/Date value))
 
