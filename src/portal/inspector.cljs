@@ -88,12 +88,12 @@
                  :grid-column "1"}}
          [s/div
           {:style {:display :flex}}
-          [inspector settings k]]]
+          [inspector (assoc settings :coll values) k]]]
         [s/div {:style
                 {:grid-column "2"
                  :text-align :right}}
 
-         [inspector settings v]]])))])
+         [inspector (assoc settings :coll values :k k) v]]])))])
 
 (defn inspect-coll [settings values]
   [s/div
@@ -113,7 +113,7 @@
         (map-indexed
          (fn [idx itm]
            ^{:key idx}
-           [inspector settings itm]))
+           [inspector (assoc settings :coll values :k idx) itm]))
         (filter some?)
         (take (:limits/max-length settings)))])
 
@@ -320,7 +320,10 @@
       (fn [e]
         (when (= 1 (:depth settings))
           (.stopPropagation e)
-          ((:portal/on-nav settings) {:value value})))
+          ((:portal/on-nav settings)
+           (merge
+            {:value value}
+            (select-keys settings [:coll :k])))))
       :style {:cursor :pointer
               :width "100%"
               :border-radius (:border-radius settings)

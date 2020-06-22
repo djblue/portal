@@ -130,7 +130,7 @@
                   :background background
                   :box-sizing :border-box
                   :padding (:spacing/padding settings)}}
-           [inspector settings column]])
+           [inspector (assoc settings :coll values) column]])
         columns)]
       (map-indexed
        (fn [grid-row row]
@@ -145,7 +145,9 @@
                 :padding (:spacing/padding settings)
                 :box-sizing :border-box}}
               (when (contains? row column)
-                [inspector settings (get row column)])])
+                [inspector
+                 (assoc settings :coll values :k column)
+                 (get row column)])])
            columns)])
        values)]]))
 
@@ -353,7 +355,7 @@
               [inspect-1
                (update settings
                        :portal/on-nav
-                       (fn [on-nav] #(on-nav (assoc % :coll (first ls) :history ls))))
+                       (fn [on-nav] #(on-nav (assoc % :history ls))))
                (first ls)]])))])]]))
 
 (defn promise-loop [f]
