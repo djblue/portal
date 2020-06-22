@@ -175,7 +175,7 @@
                   (.-rep value)))]
     [s/div
      {:style {:padding-bottom (:spacing/padding settings)}}
-     [inspector (assoc settings :coll value) m]]))
+     [inspector (assoc settings :coll value :depth 0) m]]))
 
 (def viewers
   {:portal.viewer/coll   {:predicate coll?         :component ins/inspect-coll}
@@ -269,7 +269,7 @@
                :portal/on-nav
                (fn [on-nav]
                  #(do
-                    (-> (on-nav (:value %))
+                    (-> (on-nav %)
                         (.then (fn [] (reset! search-text nil)))))))
        (->>
         search-text-value

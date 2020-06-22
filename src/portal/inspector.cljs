@@ -97,8 +97,7 @@
 
 (defn inspect-coll [settings values]
   [s/div
-   {:key (hash values)
-    :style
+   {:style
     {:text-align :left
      :display :grid
      :background (get-background settings)
@@ -318,7 +317,7 @@
     [s/div
      {:on-click
       (fn [e]
-        (when (= 1 (:depth settings))
+        (when-not (= 1 (:depth settings))
           (.stopPropagation e)
           ((:portal/on-nav settings)
            (merge
@@ -329,7 +328,7 @@
               :border-radius (:border-radius settings)
               :border "1px solid rgba(0,0,0,0)"}
       :style/hover {:border
-                    (when (= 1 (:depth settings))
+                    (when-not (= 1 (:depth settings))
                       "1px solid #D8DEE9")}}
      [component settings value]]))
 
