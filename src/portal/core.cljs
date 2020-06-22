@@ -311,10 +311,11 @@
                       (:coll target)
                       (:key target)
                       (:value target))
-                     (.then #(swap! state
-                                    assoc
-                                    :portal/history
-                                    (conj (:history target) (:value %))))))
+                     (.then #(when-not (= (:value %) (first (:history target)))
+                               (swap! state
+                                      assoc
+                                      :portal/history
+                                      (conj (:history target) (:value %)))))))
                :portal/on-back #(swap! state update :portal/history rest))]
     [s/div
      {:style
