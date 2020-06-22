@@ -4,6 +4,33 @@
             [clojure.string :as str]
             [cognitect.transit :as t]))
 
+(defn date? [value] (instance? js/Date value))
+
+(defn get-value-type [value]
+  (cond
+    (map? value)      :map
+    (set? value)      :set
+    (vector? value)   :vector
+    (list? value)     :list
+    (coll? value)     :coll
+    (boolean? value)  :boolean
+    (symbol? value)   :symbol
+    (number? value)   :number
+    (string? value)   :string
+    (keyword? value)  :keyword
+
+    (uuid? value)     :uuid
+    (t/uuid? value)   :uuid
+    (t/uri? value)    :uri
+    (date? value)     :date
+
+    (t/tagged-value? value)
+    (case (.-tag value)
+      "portal.transit/var"        :var
+      "portal.transit/exception"  :exception
+      "portal.transit/object"     :object
+      :tagged)))
+
 (declare inspector)
 
 (defn get-background [settings]
@@ -12,7 +39,7 @@
     (::c/background2 settings)))
 
 (defn preview-coll [open close]
-  (fn [settings value]
+  (fn [_settings value]
     [s/div {:style {:color "#bf616a"}} open (count value) close]))
 
 (def preview-map    (preview-coll "{" "}"))
@@ -232,33 +259,6 @@
              :style
              {:color (::c/text settings)}}
      (:string value)]))
-
-(defn date? [value] (instance? js/Date value))
-
-(defn get-value-type [value]
-  (cond
-    (map? value)      :map
-    (set? value)      :set
-    (vector? value)   :vector
-    (list? value)     :list
-    (coll? value)     :coll
-    (boolean? value)  :boolean
-    (symbol? value)   :symbol
-    (number? value)   :number
-    (string? value)   :string
-    (keyword? value)  :keyword
-
-    (uuid? value)     :uuid
-    (t/uuid? value)   :uuid
-    (t/uri? value)    :uri
-    (date? value)     :date
-
-    (t/tagged-value? value)
-    (case (.-tag value)
-      "portal.transit/var"        :var
-      "portal.transit/exception"  :exception
-      "portal.transit/object"     :object
-      :tagged)))
 
 (defn get-preview-component [type]
   (case type
