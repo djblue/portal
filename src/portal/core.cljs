@@ -422,6 +422,8 @@
              {:color (::c/text settings)}}
      (:string rep)]))
 
+(defn date? [value] (instance? js/Date value))
+
 (defn get-value-type [value]
   (cond
     (map? value)      :map
@@ -435,17 +437,17 @@
     (string? value)   :string
     (keyword? value)  :keyword
 
-    (instance? js/Date value)         :date
-    (instance? cljs.core/UUID value)  :uuid
+    (uuid? value)     :uuid
+    (t/uuid? value)   :uuid
+    (t/uri? value)    :uri
+    (date? value)     :date
 
     (t/tagged-value? value)
-    (let [tag (.-tag value) rep (.-rep value)]
-      (case tag
-        "r"                         :uri
-        "portal.transit/var"        :var
-        "portal.transit/exception"  :exception
-        "portal.transit/object"     :object
-        :tagged))))
+    (case (.-tag value)
+      "portal.transit/var"        :var
+      "portal.transit/exception"  :exception
+      "portal.transit/object"     :object
+      :tagged)))
 
 (defn get-summary-component [type]
   (case type
