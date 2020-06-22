@@ -34,7 +34,7 @@
 (declare inspector)
 
 (defn get-background [settings]
-  (if (odd? (:depth settings))
+  (if (even? (:depth settings))
     (::c/background settings)
     (::c/background2 settings)))
 
