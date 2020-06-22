@@ -175,7 +175,7 @@
                   (.-rep value)))]
     [s/div
      {:style {:padding-bottom (:spacing/padding settings)}}
-     [inspector settings m]]))
+     [inspector (assoc settings :coll value) m]]))
 
 (def viewers
   {:portal.viewer/coll   {:predicate coll?         :component ins/inspect-coll}
