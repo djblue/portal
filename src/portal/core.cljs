@@ -146,7 +146,7 @@
                 :box-sizing :border-box}}
               (when (contains? row column)
                 [inspector
-                 (assoc settings :coll values :k column)
+                 (assoc settings :coll row :k column)
                  (get row column)])])
            columns)])
        values)]]))
@@ -353,9 +353,11 @@
              [:<>
               {:key idx}
               [inspect-1
-               (update settings
-                       :portal/on-nav
-                       (fn [on-nav] #(on-nav (assoc % :history ls))))
+               (-> settings
+                   (assoc :coll (second ls))
+                   (update
+                    :portal/on-nav
+                    (fn [on-nav] #(on-nav (assoc % :history ls)))))
                (first ls)]])))])]]))
 
 (defn promise-loop [f]
