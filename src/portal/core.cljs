@@ -50,7 +50,7 @@
    {:font/family "monospace"
     :font-size "12pt"
     :limits/string-length 100
-    :limits/max-depth 2
+    :limits/max-depth 1
     :limits/max-panes 1
     :limits/max-length 1000
     :layout/direction :row
@@ -109,7 +109,7 @@
 (declare portal)
 
 (defn get-background [settings]
-  (if (even? (:depth settings))
+  (if (odd? (:depth settings))
     (::c/background settings)
     (::c/background2 settings)))
 
@@ -134,7 +134,7 @@
          "portal.transit/var"
          "portal.transit/exception") nil
 
-        "portal.transit/unknown"
+        "portal.transit/object"
         [s/span {:style {:color (::c/text settings)}} (:type rep)]
 
         [s/div
@@ -147,46 +147,43 @@
   (and (coll? value) (every? map? value)))
 
 (defn portal-table [settings values]
-  (let [settings (update settings :depth inc)]
-    (if (> (:depth settings) (:limits/max-depth settings))
-      [summary settings values]
-      (let [columns (into #{} (mapcat keys values))
-            background (get-background settings)]
-        [s/table
-         {:style
-          {:width "100%"
-           :border-collapse :collapse
-           :color (::c/text settings)
-           :font-size  (:font-size settings)
-           :border-radius (:border-radius settings)}}
-         [s/tbody
-          [s/tr
-           (map-indexed
-            (fn [grid-column column]
-              [s/th {:key grid-column
-                     :style
-                     {:border (str "1px solid " (::c/border settings))
-                      :background background
-                      :box-sizing :border-box
-                      :padding (:spacing/padding settings)}}
-               [portal settings column]])
-            columns)]
+  (let [columns (into #{} (mapcat keys values))
+        background (get-background settings)]
+    [s/table
+     {:style
+      {:width "100%"
+       :border-collapse :collapse
+       :color (::c/text settings)
+       :font-size  (:font-size settings)
+       :border-radius (:border-radius settings)}}
+     [s/tbody
+      [s/tr
+       (map-indexed
+        (fn [grid-column column]
+          [s/th {:key grid-column
+                 :style
+                 {:border (str "1px solid " (::c/border settings))
+                  :background background
+                  :box-sizing :border-box
+                  :padding (:spacing/padding settings)}}
+           [portal settings column]])
+        columns)]
+      (map-indexed
+       (fn [grid-row row]
+         [s/tr {:key grid-row}
           (map-indexed
-           (fn [grid-row row]
-             [s/tr {:key grid-row}
-              (map-indexed
-               (fn [grid-column column]
-                 [s/td
-                  {:key grid-column
-                   :style
-                   {:border (str "1px solid " (::c/border settings))
-                    :background background
-                    :padding (:spacing/padding settings)
-                    :box-sizing :border-box}}
-                  (when (contains? row column)
-                    [portal settings (get row column)])])
-               columns)])
-           values)]]))))
+           (fn [grid-column column]
+             [s/td
+              {:key grid-column
+               :style
+               {:border (str "1px solid " (::c/border settings))
+                :background background
+                :padding (:spacing/padding settings)
+                :box-sizing :border-box}}
+              (when (contains? row column)
+                [portal settings (get row column)])])
+           columns)])
+       values)]]))
 
 (defn http-request? [value]
   (spec/valid? ::http-request value))
@@ -206,66 +203,60 @@
          [portal settings @response])])))
 
 (defn portal-map [settings values]
-  (let [settings (update settings :depth inc)]
-    (if (> (:depth settings) (:limits/max-depth settings))
-      [summary settings values]
-      [s/div
-       {:style
-        {:width "100%"
-         :display :grid
-         :background (get-background settings)
-         :grid-gap (:spacing/padding settings)
-         :padding (:spacing/padding settings)
-         :box-sizing :border-box
-         :color (::c/text settings)
-         :font-size  (:font-size settings)
-         :border-radius (:border-radius settings)
-         :border (str "1px solid " (::c/border settings))}}
-       (take
-        (:limits/max-length settings)
-        (filter
-         some?
-         (for [[k v] values]
-           (let [portal-k [portal settings k]
-                 portal-v [portal settings v]]
-             [:<>
-              {:key (hash k)}
-              [s/div {:style
-                      {:text-align :left
-                       :grid-column "1"}}
-               [s/div
-                {:style {:display :flex}}
-                portal-k]]
-              [s/div {:style
-                      {:grid-column "2"
-                       :text-align :right}}
+  [s/div
+   {:style
+    {:width "100%"
+     :display :grid
+     :background (get-background settings)
+     :grid-gap (:spacing/padding settings)
+     :padding (:spacing/padding settings)
+     :box-sizing :border-box
+     :color (::c/text settings)
+     :font-size  (:font-size settings)
+     :border-radius (:border-radius settings)
+     :border (str "1px solid " (::c/border settings))}}
+   (take
+    (:limits/max-length settings)
+    (filter
+     some?
+     (for [[k v] values]
+       (let [portal-k [portal settings k]
+             portal-v [portal settings v]]
+         [:<>
+          {:key (hash k)}
+          [s/div {:style
+                  {:text-align :left
+                   :grid-column "1"}}
+           [s/div
+            {:style {:display :flex}}
+            portal-k]]
+          [s/div {:style
+                  {:grid-column "2"
+                   :text-align :right}}
 
-               portal-v]]))))])))
+           portal-v]]))))])
 
 (defn portal-coll [settings values]
-  (let [settings (update settings :depth inc)]
-    (if (> (:depth settings) (:limits/max-depth settings))
-      [summary settings values]
-      [s/div
-       {:key (hash values)
-        :style
-        {:text-align :left
-         :display :grid
-         :background (get-background settings)
-         :grid-gap (:spacing/padding settings)
-         :padding (:spacing/padding settings)
-         :box-sizing :border-box
-         :color (::c/text settings)
-         :font-size  (:font-size settings)
-         :border-radius (:border-radius settings)
-         :border (str "1px solid " (::c/border settings))}}
-       (->> values
-            (map-indexed
-             (fn [idx itm]
-               ^{:key idx}
-               [portal settings itm]))
-            (filter some?)
-            (take (:limits/max-length settings)))])))
+  [s/div
+   {:key (hash values)
+    :style
+    {:text-align :left
+     :display :grid
+     :background (get-background settings)
+     :grid-gap (:spacing/padding settings)
+     :padding (:spacing/padding settings)
+     :box-sizing :border-box
+     :color (::c/text settings)
+     :font-size  (:font-size settings)
+     :border-radius (:border-radius settings)
+     :border (str "1px solid " (::c/border settings))}}
+   (->> values
+        (map-indexed
+         (fn [idx itm]
+           ^{:key idx}
+           [portal settings itm]))
+        (filter some?)
+        (take (:limits/max-length settings)))])
 
 (defn trim-string [settings s]
   (let [max-length (:limits/string-length settings)]
@@ -287,12 +278,6 @@
               match   (subs value i (+ len i))
               after   (subs value (+ len i))]
           [s/span before [:mark match] after])))))
-
-(def viewers
-  {:portal.viewer/coll   {:predicate coll?         :component portal-coll}
-   :portal.viewer/map    {:predicate map?          :component portal-map}
-   :portal.viewer/table  {:predicate table-view?   :component portal-table}
-   :portal.viewer/http   {:predicate http-request? :component portal-http}})
 
 (defn portal-number [settings value]
   [s/span {:style {:color (::c/number settings)}} value])
@@ -376,61 +361,59 @@
    (trim-string settings (pr-str value))])
 
 (defn exception-summary [settings value]
-  [s/span {:style {:font-weight :bold
-                   :color (::c/exception settings)}}
-   (:class-name (first value))])
+  (let [value (.-rep value)]
+    [s/span {:style {:font-weight :bold
+                     :color (::c/exception settings)}}
+     (:class-name (first value))]))
 
 (defn portal-exception [settings value]
-  (let [value (.-rep value)
-        settings (update settings :depth inc)]
-    (if (> (:depth settings) (:limits/max-depth settings))
-      [exception-summary settings value]
-      [s/div
-       {:style
-        {:background (get-background settings)
-         :padding (:spacing/padding settings)
-         :box-sizing :border-box
-         :color (::c/text settings)
-         :font-size  (:font-size settings)
-         :border-radius (:border-radius settings)
-         :border (str "1px solid " (::c/border settings))}}
-       (map
-        (fn [value]
-          (let [{:keys [class-name message stack-trace]} value]
-            [:<>
-             {:key (hash value)}
-             [s/div
-              {:style
-               {:margin-bottom (:spacing/padding settings)}}
-              [s/span {:style {:font-weight :bold
-                               :color (::c/exception settings)}}
-               class-name] ": " message]
-             [s/div
-              {:style {:display     :grid
-                       :text-align :right}}
-              (map-indexed
-               (fn [idx line]
-                 (let [{:keys [names]} line]
-                   [:<> {:key idx}
-                    (if (:omitted line)
-                      [s/div {:style {:grid-column "1"}} "..."]
-                      [s/div {:style {:grid-column "1"}}
-                       (if (empty? names)
+  (let [value (.-rep value)]
+    [s/div
+     {:style
+      {:background (get-background settings)
+       :padding (:spacing/padding settings)
+       :box-sizing :border-box
+       :color (::c/text settings)
+       :font-size  (:font-size settings)
+       :border-radius (:border-radius settings)
+       :border (str "1px solid " (::c/border settings))}}
+     (map
+      (fn [value]
+        (let [{:keys [class-name message stack-trace]} value]
+          [:<>
+           {:key (hash value)}
+           [s/div
+            {:style
+             {:margin-bottom (:spacing/padding settings)}}
+            [s/span {:style {:font-weight :bold
+                             :color (::c/exception settings)}}
+             class-name] ": " message]
+           [s/div
+            {:style {:display     :grid
+                     :text-align :right}}
+            (map-indexed
+             (fn [idx line]
+               (let [{:keys [names]} line]
+                 [:<> {:key idx}
+                  (if (:omitted line)
+                    [s/div {:style {:grid-column "1"}} "..."]
+                    [s/div {:style {:grid-column "1"}}
+                     (if (empty? names)
+                       [s/span
+                        [s/span {:style {:color (::c/package settings)}}
+                         (:package line) "."]
+                        [s/span {:style {:font-style :italic}}
+                         (:simple-class line) "."]
+                        (str (:method line))]
+                       (let [[ns & names] names]
                          [s/span
-                          [s/span {:style {:color (::c/package settings)}}
-                           (:package line) "."]
-                          [s/span {:style {:font-style :italic}}
-                           (:simple-class line) "."]
-                          (str (:method line))]
-                         (let [[ns & names] names]
-                           [s/span
-                            [s/span {:style {:color (::c/namespace settings)}} ns "/"]
-                            (str/join "/" names)]))])
-                    [s/div {:style {:grid-column "2"}} (:file line)]
-                    [s/div {:style {:grid-column "3"}}
-                     [portal-number settings (:line line)]]]))
-               stack-trace)]]))
-        value)])))
+                          [s/span {:style {:color (::c/namespace settings)}} ns "/"]
+                          (str/join "/" names)]))])
+                  [s/div {:style {:grid-column "2"}} (:file line)]
+                  [s/div {:style {:grid-column "3"}}
+                   [portal-number settings (:line line)]]]))
+             stack-trace)]]))
+      value)]))
 
 (defn portal-object [settings value]
   (let [tag (.-tag value) rep (.-rep value)]
@@ -464,6 +447,24 @@
         "portal.transit/object"     :object
         :tagged))))
 
+(defn get-summary-component [type]
+  (case type
+    :map summary
+    (:set :vector :list :coll) summary
+    :boolean    portal-boolean
+    :symbol     portal-symbol
+    :number     portal-number
+    :string     portal-string
+    :keyword    portal-keyword
+    :date       portal-date
+    :uuid       portal-uuid
+    :var        portal-var
+    :exception  exception-summary
+    :object     portal-object
+    :uri        portal-uri
+    :tagged     portal-tagged
+    portal-default))
+
 (defn get-portal-component [type]
   (case type
     :map portal-map
@@ -483,8 +484,12 @@
     portal-default))
 
 (defn portal [settings value]
-  (let [type (get-value-type value)
-        component (get-portal-component type)]
+  (let [settings (update settings :depth inc)
+        type (get-value-type value)
+        component
+        (if (> (:depth settings) (:limits/max-depth settings))
+          (get-summary-component type)
+          (get-portal-component type))]
     [s/div
      {:on-click
       (fn [e]
@@ -508,6 +513,12 @@
     [s/div
      {:style {:padding-bottom (:spacing/padding settings)}}
      [portal settings m]]))
+
+(def viewers
+  {:portal.viewer/coll   {:predicate coll?         :component portal-coll}
+   :portal.viewer/map    {:predicate map?          :component portal-map}
+   :portal.viewer/table  {:predicate table-view?   :component portal-table}
+   :portal.viewer/http   {:predicate http-request? :component portal-http}})
 
 (defn portal-1 []
   (let [selected-viewer (r/atom nil)]
