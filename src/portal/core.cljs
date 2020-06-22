@@ -113,35 +113,30 @@
     (::c/background settings)
     (::c/background2 settings)))
 
-(defn summary [settings value]
-  (cond
-    (coll? value)
-    (when-let [[open close]
-               (cond
-                 (map? value)     ["{" "}"]
-                 (vector? value)  ["[" "]"]
-                 (seq? value)     ["(" ")"]
-                 (set? value)     ["#{" "}"])]
-      [s/div
-       {:style {:vertical-align :top
-                :color "#bf616a"}}
-       open (count value) close])
+(defn preview-coll [open close]
+  (fn [settings value]
+    [s/div {:style {:color "#bf616a"}} open (count value) close]))
 
-    (t/tagged-value? value)
-    (let [tag (.-tag value) rep (.-rep value)]
-      (case tag
-        ("r"
-         "portal.transit/var"
-         "portal.transit/exception") nil
+(def preview-map    (preview-coll "{" "}"))
+(def preview-vector (preview-coll "[" "]"))
+(def preview-list   (preview-coll "(" ")"))
+(def preview-set    (preview-coll "#{" "}"))
 
-        "portal.transit/object"
-        [s/span {:style {:color (::c/text settings)}} (:type rep)]
+(defn preview-exception [settings value]
+  (let [value (.-rep value)]
+    [s/span {:style {:font-weight :bold
+                     :color (::c/exception settings)}}
+     (:class-name (first value))]))
 
-        [s/div
-         {:style {:box-sizing :border-box
-                  :padding (:spacing/padding settings)}}
-         [s/span {:style {:color (::c/tag settings)}} "#"]
-         tag]))))
+(defn preview-object [settings value]
+  [s/span {:style {:color (::c/text settings)}} (:type (.-rep value))])
+
+(defn preview-tagged [settings value]
+  [s/div
+   {:style {:box-sizing :border-box
+            :padding (:spacing/padding settings)}}
+   [s/span {:style {:color (::c/tag settings)}} "#"]
+   (.-tag value)])
 
 (defn table-view? [value]
   (and (coll? value) (every? map? value)))
@@ -360,12 +355,6 @@
   [s/span {}
    (trim-string settings (pr-str value))])
 
-(defn exception-summary [settings value]
-  (let [value (.-rep value)]
-    [s/span {:style {:font-weight :bold
-                     :color (::c/exception settings)}}
-     (:class-name (first value))]))
-
 (defn portal-exception [settings value]
   (let [value (.-rep value)]
     [s/div
@@ -449,10 +438,13 @@
       "portal.transit/object"     :object
       :tagged)))
 
-(defn get-summary-component [type]
+(defn get-preview-component [type]
   (case type
-    :map summary
-    (:set :vector :list :coll) summary
+    :map        preview-map
+    :set        preview-set
+    :vector     preview-vector
+    :list       preview-list
+    :coll       preview-list
     :boolean    portal-boolean
     :symbol     portal-symbol
     :number     portal-number
@@ -461,11 +453,20 @@
     :date       portal-date
     :uuid       portal-uuid
     :var        portal-var
-    :exception  exception-summary
-    :object     portal-object
+    :exception  preview-exception
+    :object     preview-object
     :uri        portal-uri
-    :tagged     portal-tagged
+    :tagged     preview-tagged
     portal-default))
+
+(def preview-type?
+  #{:map :set :vector :list :coll :object :tagged :exception})
+
+(defn preview [settings value]
+  (let [type (get-value-type value)
+        component (get-preview-component type)]
+    (when (preview-type? type)
+      [component settings value])))
 
 (defn get-portal-component [type]
   (case type
@@ -490,7 +491,7 @@
         type (get-value-type value)
         component
         (if (> (:depth settings) (:limits/max-depth settings))
-          (get-summary-component type)
+          (get-preview-component type)
           (get-portal-component type))]
     [s/div
      {:on-click
@@ -581,7 +582,7 @@
                [:option {:key k :value (pr-str k)} (pr-str k)])])
           [s/div
            {:style {:padding (:spacing/padding settings)}}
-           [summary settings value]]]]))))
+           [preview settings value]]]]))))
 
 (defonce search-text (r/atom ""))
 
