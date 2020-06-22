@@ -190,8 +190,7 @@
             (into #{} (keep (fn [[k {:keys [predicate]}]]
                               (when (predicate value) k)) viewers))
             viewer    (or @selected-viewer (first compatible-viewers))
-            component (if-not (contains? compatible-viewers viewer)
-                        inspector
+            component (when (contains? compatible-viewers viewer)
                         (get-in viewers [viewer :component] inspector))]
         [s/div
          {:style
@@ -216,7 +215,7 @@
              :padding 20}}
            [s/div
             [inspect-metadata settings value]
-            [component settings value]]]]
+            [inspector (assoc settings :component component) value]]]]
          [s/div
           {:style
            {:display :flex

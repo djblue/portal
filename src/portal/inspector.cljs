@@ -307,17 +307,20 @@
     :tagged     inspect-tagged
     inspect-default))
 
-(defn inspector [settings value]
-  (let [settings (update settings :depth inc)
-        type (get-value-type value)
-        component
+(defn get-component [settings value]
+  (or (get settings :component)
+      (let [type (get-value-type value)]
         (if (> (:depth settings) (:limits/max-depth settings))
           (get-preview-component type)
-          (get-inspect-component type))]
+          (get-inspect-component type)))))
+
+(defn inspector [settings value]
+  (let [component (get-component settings value)
+        settings (-> settings (update :depth inc) (dissoc :component))]
     [s/div
      {:on-click
       (fn [e]
-        (when-not (= 1 (:depth settings))
+        (when (= 2 (:depth settings))
           (.stopPropagation e)
           ((:portal/on-nav settings)
            (merge
@@ -328,7 +331,7 @@
               :border-radius (:border-radius settings)
               :border "1px solid rgba(0,0,0,0)"}
       :style/hover {:border
-                    (when-not (= 1 (:depth settings))
+                    (when (= 2 (:depth settings))
                       "1px solid #D8DEE9")}}
      [component settings value]]))
 
