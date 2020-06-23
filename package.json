@@ -5,6 +5,7 @@
     "react-dom": "16.9.0"
   },
   "devDependencies": {
-    "source-map-support": "^0.5.16"
+    "source-map-support": "^0.5.16",
+    "ws": "^7.3.0"
   }
 }

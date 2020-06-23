@@ -4,9 +4,15 @@
  {9090 {:root "resources/"
         :handler portal.main/handler}}
  :builds
- {:app {:output-dir "resources/"
-        :asset-path "."
-        :target :browser
-        :modules {:main {:init-fn portal.core/main!}}
-        :devtools {:after-load portal.core/reload!
-                   :preloads   [shadow.remote.runtime.cljs.browser]}}}}
+ {:browser
+  {:output-dir "resources/"
+   :asset-path "."
+   :target :browser
+   :modules {:main {:init-fn portal.core/main!}}
+   :devtools {:after-load portal.core/reload!
+              :preloads   [shadow.remote.runtime.cljs.browser]}}
+
+  :node
+  {:target :node-script
+   :main portal.main/-main
+   :output-to "target/node.js"}}}
