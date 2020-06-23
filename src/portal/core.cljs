@@ -88,13 +88,15 @@
         new-state-with-index
         (assoc new-state :portal/index index)]
     (when (false? (:portal/open? (swap! state merge new-state-with-index)))
-      (js/window.close))))
+      (js/window.close))
+    new-state-with-index))
 
 (defn load-state! []
   (-> (rpc/send!
        {:op             :portal.rpc/load-state
         :portal/state-id (:portal/state-id @state)})
-      (.then merge-state)))
+      (.then merge-state)
+      (.then #(:portal/complete? %))))
 
 (defn clear-values! []
   (->
@@ -361,7 +363,10 @@
                (first ls)]])))])]]))
 
 (defn promise-loop [f]
-  (.finally (f) #(promise-loop f)))
+  (.then
+   (f)
+   (fn [complete?]
+     (when-not complete? (promise-loop f)))))
 
 (defn render-app []
   (r/render [app]
