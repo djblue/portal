@@ -181,7 +181,8 @@
   {:portal.viewer/coll   {:predicate coll?         :component ins/inspect-coll}
    :portal.viewer/map    {:predicate map?          :component ins/inspect-map}
    :portal.viewer/table  {:predicate table-view?   :component inspect-table}
-   :portal.viewer/http   {:predicate http-request? :component inspect-http}})
+   ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
+   })
 
 (defn inspect-1 []
   (let [selected-viewer (r/atom nil)]
