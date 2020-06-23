@@ -5,6 +5,7 @@
             [cognitect.transit :as t]))
 
 (defn date? [value] (instance? js/Date value))
+(defn url? [value] (instance? js/URL value))
 
 (defn get-value-type [value]
   (cond
@@ -18,9 +19,11 @@
     (number? value)   :number
     (string? value)   :string
     (keyword? value)  :keyword
+    (var? value)      :var
 
     (uuid? value)     :uuid
     (t/uuid? value)   :uuid
+    (url? value)      :uri
     (t/uri? value)    :uri
     (date? value)     :date
 
@@ -37,6 +40,18 @@
   (if (even? (:depth settings))
     (::c/background settings)
     (::c/background2 settings)))
+
+(defn tagged-tag [settings tag]
+  [s/div
+   [s/span {:style {:color (::c/tag settings)}} "#"]
+   tag])
+
+(defn tagged-value [settings tag value]
+  [s/div
+   {:style {:display :flex}}
+   [tagged-tag settings tag]
+   [s/div {:style {:margin-left (:spacing/padding settings)}}
+    [inspector settings value]]])
 
 (defn preview-coll [open close]
   (fn [_settings value]
@@ -57,11 +72,7 @@
   [s/span {:style {:color (::c/text settings)}} (:type (.-rep value))])
 
 (defn preview-tagged [settings value]
-  [s/div
-   {:style {:box-sizing :border-box
-            :padding (:spacing/padding settings)}}
-   [s/span {:style {:color (::c/tag settings)}} "#"]
-   (.-tag value)])
+  [tagged-tag settings (.-tag value)])
 
 (defn inspect-map [settings values]
   [s/div
@@ -83,15 +94,11 @@
      (for [[k v] values]
        [:<>
         {:key (hash k)}
-        [s/div {:style
-                {:text-align :left
-                 :grid-column "1"}}
+        [s/div {:style {:grid-column "1"}}
          [s/div
           {:style {:display :flex}}
           [inspector (assoc settings :coll values) k]]]
-        [s/div {:style
-                {:grid-column "2"
-                 :text-align :right}}
+        [s/div {:style {:grid-column "2" }}
          [inspector (assoc settings :coll values :k k) v]]])))])
 
 (defn inspect-coll [settings values]
@@ -165,20 +172,29 @@
    (name value)])
 
 (defn inspect-date [settings value]
-  [s/span {:style {:color (::c/date settings)}}
-   (pr-str value)])
+  [tagged-value settings "inst" (.toJSON value)])
 
 (defn inspect-uuid [settings value]
-  [s/span {:style {:color (::c/uuid settings)}}
-   (pr-str value)])
+  [tagged-value settings "uuid" (str value)])
+
+(defn get-var-symbol [value]
+  (cond
+    (t/tagged-value? value) (.-rep value)
+    :else                   (let [m (meta value)]
+                              (symbol (name (:ns m)) (name (:name m))))))
 
 (defn inspect-var [settings value]
   [s/span
    [s/span {:style {:color (::c/tag settings)}} "#'"]
-   [inspect-symbol settings (.-rep value)]])
+   [inspect-symbol settings (get-var-symbol value)]])
+
+(defn get-url-string [value]
+  (cond
+    (t/tagged-value? value) (.-rep value)
+    :else                   (str value)))
 
 (defn inspect-uri [settings value]
-  (let [value (.-rep value)]
+  (let [value (get-url-string value)]
     [s/a
      {:href value
       :style {:color (::c/uri settings)}
@@ -186,17 +202,7 @@
      value]))
 
 (defn inspect-tagged [settings value]
-  (let [tag (.-tag value) rep (.-rep value)]
-    [s/div
-     {:style {:display :flex
-              :align-items :center}}
-     [s/div
-      {:style {:padding (:spacing/padding settings)}}
-      [s/span {:style {:color (::c/tag settings)}} "#"]
-      tag]
-     [s/div
-      {:style {:flex 1}}
-      [inspector settings rep]]]))
+  [tagged-value settings (.-tag value) (.-rep value)])
 
 (defn inspect-default [settings value]
   [s/span {}
