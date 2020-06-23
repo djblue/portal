@@ -48,10 +48,12 @@
 
 (defn tagged-value [settings tag value]
   [s/div
-   {:style {:display :flex}}
+   {:style {:display :flex :align-items :center}}
    [tagged-tag settings tag]
    [s/div {:style {:margin-left (:spacing/padding settings)}}
-    [inspector settings value]]])
+    [s/div
+     {:style {:margin (str "-" (:spacing/padding settings))}}
+     [inspector settings value]]]])
 
 (defn preview-coll [open close]
   (fn [_settings value]
@@ -94,11 +96,15 @@
      (for [[k v] values]
        [:<>
         {:key (hash k)}
-        [s/div {:style {:grid-column "1"}}
+        [s/div {:style {:grid-column "1"
+                        :display :flex
+                        :align-items :center}}
          [s/div
-          {:style {:display :flex}}
+          {:style {:display :flex :flex 1}}
           [inspector (assoc settings :coll values) k]]]
-        [s/div {:style {:grid-column "2" }}
+        [s/div {:style {:grid-column "2"
+                        :display :flex
+                        :align-items :center}}
          [inspector (assoc settings :coll values :k k) v]]])))])
 
 (defn inspect-coll [settings values]
@@ -138,7 +144,7 @@
   (if-let [color (hex-color? value)]
     [s/div
      {:style
-      {:padding (:spacing/padding settings)
+      {:padding (* 0.65 (:spacing/padding settings))
        :box-sizing :border-box
        :background color}}
      [s/div
@@ -312,15 +318,13 @@
     :tagged     inspect-tagged
     inspect-default))
 
-(defn get-component [settings value]
-  (or (get settings :component)
-      (let [type (get-value-type value)]
-        (if (> (:depth settings) (:limits/max-depth settings))
-          (get-preview-component type)
-          (get-inspect-component type)))))
-
 (defn inspector [settings value]
-  (let [component (get-component settings value)
+  (let [preview? (> (:depth settings) (:limits/max-depth settings))
+        component (or (get settings :component)
+                      (let [type (get-value-type value)]
+                        (if preview?
+                          (get-preview-component type)
+                          (get-inspect-component type))))
         settings (-> settings (update :depth inc) (dissoc :component))]
     [s/div
      {:on-click
@@ -333,6 +337,9 @@
             (select-keys settings [:coll :k])))))
       :style {:cursor :pointer
               :width "100%"
+              :padding (when (or preview? (not (coll? value)))
+                         (* 0.65 (:spacing/padding settings)))
+              :box-sizing :border-box
               :border-radius (:border-radius settings)
               :border "1px solid rgba(0,0,0,0)"}
       :style/hover {:border

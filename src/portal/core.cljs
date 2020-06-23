@@ -55,7 +55,7 @@
     :limits/max-panes 1
     :limits/max-length 1000
     :layout/direction :row
-    :spacing/padding "10px"
+    :spacing/padding 8
     :border-radius "2px"
     :portal/history '()}
    (:portal.themes/nord c/themes)))
