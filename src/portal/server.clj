@@ -81,10 +81,10 @@
 
 (defn rpc-handler [request]
   (server/with-channel request channel
-    (let [request (update request :body transit-stream->value)
-          op (get rt/ops (get-in request [:body :op]) not-found)
-          done #(send-rpc channel %)
-          f (op request done)]
+    (let [body  (transit-stream->value (:body request))
+          op    (get rt/ops (:op body) not-found)
+          done  #(send-rpc channel %)
+          f     (op body done)]
       (when (fn? f)
         (server/on-close channel f)))))
 
