@@ -92,7 +92,6 @@
         [s/div {:style
                 {:grid-column "2"
                  :text-align :right}}
-
          [inspector (assoc settings :coll values :k k) v]]])))])
 
 (defn inspect-coll [settings values]

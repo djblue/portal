@@ -5,7 +5,8 @@
   (let [r (t/reader :json)] (t/read r json)))
 
 (defn edn->json [edn]
-  (let [w (t/writer :json)] (t/write w edn)))
+  (let [w (t/writer :json {:transform t/write-meta})]
+    (t/write w edn)))
 
 (defn send!  [msg]
   (-> (js/fetch

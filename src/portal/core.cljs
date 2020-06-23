@@ -37,7 +37,7 @@
      :else
      [{:path path
        :coll coll
-       :key (last path)
+       :k (last path)
        :value value
        :string-value (str/lower-case (pr-str value))}])))
 
@@ -310,7 +310,7 @@
                (fn [target]
                  (-> (on-nav
                       (:coll target)
-                      (:key target)
+                      (:k target)
                       (:value target))
                      (.then #(when-not (= (:value %) (first (:history target)))
                                (swap! state
