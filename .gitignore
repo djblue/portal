@@ -2,3 +2,6 @@
 .shadow-cljs/
 target/
 node_modules/
+cljs-runtime/
+resources/main.js
+resources/manifest.edn
