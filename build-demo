@@ -1,0 +1,26 @@
+#!/bin/bash
+ 
+set -e
+
+BRANCH=gh-pages
+DIR=target/demo/
+
+git branch -D $BRANCH || echo 'skip'
+
+rm -f $DIR
+
+clojure -A:cljs:shadow-cljs release demo
+
+cp -r resources/index.html $DIR
+
+deploy() {
+  git --git-dir=.git --work-tree="$DIR" "$@"
+}
+
+deploy checkout --orphan $BRANCH
+deploy add .
+deploy commit -m 'Build demo'
+deploy checkout master -f
+
+rm -rf $DIR
+
