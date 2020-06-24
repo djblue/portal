@@ -141,8 +141,8 @@
      [inspector (assoc settings :coll value :depth 0) m]]))
 
 (def viewers
-  {:portal.viewer/coll   {:predicate coll?         :component ins/inspect-coll}
-   :portal.viewer/map    {:predicate map?          :component ins/inspect-map}
+  {:portal.viewer/map    {:predicate map?          :component ins/inspect-map}
+   :portal.viewer/coll   {:predicate coll?         :component ins/inspect-coll}
    :portal.viewer/table  {:predicate table-view?   :component inspect-table}
    ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
    })
