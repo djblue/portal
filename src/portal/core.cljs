@@ -46,22 +46,6 @@
                           (str/lower-case s))
           index))
 
-(def default-settings
-  (merge
-   {:font/family "monospace"
-    :font-size "12pt"
-    :limits/string-length 100
-    :limits/max-depth 1
-    :limits/max-panes 1
-    :limits/max-length 1000
-    :layout/direction :row
-    :spacing/padding 8
-    :border-radius "2px"
-    :portal/history '()}
-   (:portal.themes/nord c/themes)))
-
-(defonce state (r/atom default-settings))
-
 (spec/def ::http-request
   (spec/keys
    :req-un [::url]
@@ -82,29 +66,6 @@
    :border-radius (:border-radius settings)
    :cursor :pointer
    :margin "0 20px"})
-
-(defn merge-state [new-state]
-  (let [index (index-value (:portal/value new-state))
-        new-state-with-index
-        (assoc new-state :portal/index index)]
-    (when (false? (:portal/open? (swap! state merge new-state-with-index)))
-      (js/window.close))
-    new-state-with-index))
-
-(defn load-state! []
-  (-> (rpc/send!
-       {:op             :portal.rpc/load-state
-        :portal/state-id (:portal/state-id @state)})
-      (.then merge-state)
-      (.then #(:portal/complete? %))))
-
-(defn clear-values! []
-  (->
-   (rpc/send! {:op :portal.rpc/clear-values})
-   (.then #(swap! state assoc :portal/history '()))))
-
-(defn on-nav [coll k v]
-  (rpc/send! {:op :portal.rpc/on-nav :args [coll k v]}))
 
 (defn http-request [request]
   (rpc/send! {:op :portal.rpc/http-request :request request}))
@@ -304,23 +265,10 @@
         result
         (recur (rest ls) (conj result ls))))))
 
+(defonce state (r/atom nil))
+
 (defn app []
-  (let [settings
-        (assoc @state
-               :depth 0
-               :portal/on-clear #(clear-values!)
-               :portal/on-nav
-               (fn [target]
-                 (-> (on-nav
-                      (:coll target)
-                      (:k target)
-                      (:value target))
-                     (.then #(when-not (= (:value %) (first (:history target)))
-                               (swap! state
-                                      assoc
-                                      :portal/history
-                                      (conj (:history target) (:value %)))))))
-               :portal/on-back #(swap! state update :portal/history rest))]
+  (let [settings (assoc @state :depth 0)]
     [s/div
      {:style
       {:display :flex
@@ -362,18 +310,74 @@
                     (fn [on-nav] #(on-nav (assoc % :history ls)))))
                (first ls)]])))])]]))
 
+(defn render-app []
+  (r/render [app]
+            (.getElementById js/document "root")))
+
 (defn promise-loop [f]
   (.then
    (f)
    (fn [complete?]
      (when-not complete? (promise-loop f)))))
 
-(defn render-app []
-  (r/render [app]
-            (.getElementById js/document "root")))
+(defn on-back []
+  (swap! state update :portal/history rest))
 
-(defn main! []
-  (promise-loop load-state!)
-  (render-app))
+(defn on-nav [send! target]
+  (->  (send!
+        {:op :portal.rpc/on-nav
+         :args [(:coll target) (:k target) (:value target)]})
+       (.then #(when-not (= (:value %) (first (:history target)))
+                 (swap! state
+                        assoc
+                        :portal/history
+                        (conj (:history target) (:value %)))))))
+
+(defn on-clear [send!]
+  (->
+   (send! {:op :portal.rpc/clear-values})
+   (.then #(swap! state assoc :portal/history '()))))
+
+(defn merge-state [new-state]
+  (let [index (index-value (:portal/value new-state))
+        new-state-with-index
+        (assoc new-state :portal/index index)]
+    (when (false? (:portal/open? (swap! state merge new-state-with-index)))
+      (js/window.close))
+    new-state-with-index))
+
+(defn load-state [send!]
+  (-> (send!
+       {:op             :portal.rpc/load-state
+        :portal/state-id (:portal/state-id @state)})
+      (.then merge-state)
+      (.then #(:portal/complete? %))))
+
+(def default-settings
+  (merge
+   {:font/family "monospace"
+    :font-size "12pt"
+    :limits/string-length 100
+    :limits/max-depth 1
+    :limits/max-panes 1
+    :limits/max-length 1000
+    :layout/direction :row
+    :spacing/padding 8
+    :border-radius "2px"
+    :portal/history '()}
+   (:portal.themes/nord c/themes)))
+
+(defn get-actions [send!]
+  {:portal/on-clear (partial on-clear send!)
+   :portal/on-nav   (partial on-nav send!)
+   :portal/on-back  (partial on-back send!)
+   :portal/on-load  (partial load-state send!)})
+
+(defn main!
+  ([] (main! (get-actions rpc/send!)))
+  ([settings]
+   (swap! state merge default-settings settings)
+   (promise-loop (:portal/on-load settings))
+   (render-app)))
 
 (defn reload! [] (render-app))

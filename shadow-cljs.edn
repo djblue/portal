@@ -1,8 +1,8 @@
 {:deps {:aliases [:cljs]}
  ;:nrepl {:middleware [portal.nrepl/wrap-portal]}
  :dev-http
- {9090 {:root "resources/"
-        :handler portal.main/handler}}
+ {9090 "resources/"
+  9091 ["target/demo/" "resources/"]}
  :builds
  {:browser
   {:output-dir "resources/"
@@ -11,6 +11,13 @@
    :modules {:main {:init-fn portal.core/main!}}
    :devtools {:after-load portal.core/reload!
               :preloads   [shadow.remote.runtime.cljs.browser]}}
+
+  :demo
+  {:output-dir "target/demo/"
+   :asset-path "."
+   :target :browser
+   :modules {:main {:init-fn examples.demo/main!}}
+   :devtools {:after-load examples.demo/reload!}}
 
   :node
   {:target :node-script
