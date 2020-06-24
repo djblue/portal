@@ -30,9 +30,8 @@
 ;(defonce state (atom nil))
 (defonce server (atom nil))
 
-(defn open-inspector [value]
+(defn open-inspector []
   (swap! rt/state assoc :portal/open? true)
-  (rt/update-value value)
   (when (nil? @server)
     (reset!
      server
@@ -49,7 +48,7 @@
   (reset! server nil))
 
 (defn inspect [v]
-  (.start (Thread. #(open-inspector v)))
+  (.start (Thread. #(rt/update-value v)))
   v)
 
 (defn -main [& args]

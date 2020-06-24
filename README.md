@@ -6,9 +6,23 @@ State: alpha, but it mostly works I think
 
 ![screenshot](./resources/screenshot.png)
 
-## Usage
+## API Usage
 
-...
+```clojure
+(require '[portal.api :as p])
+
+(p/open) ; Open a new inspector
+
+(p/tap) ; Add portal as a tap> target
+
+(tap> :hello) ; Start tapping out values
+
+(p/clear) ; Clear all values
+
+(tap> :world) ; Tap out more values
+
+(p/close) ; Close the inspector when done
+```
 
 ## CLI Usage
 
