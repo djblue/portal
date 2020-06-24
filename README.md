@@ -8,6 +8,10 @@ State: alpha, but it mostly works I think
 
 ## API Usage
 
+```bash
+clj -Sdeps '{:deps {portal {:git/url "https://github.com/djblue/portal.git" :sha "6339a5b2c0cef3df780c053d4eea9253cdca6301"}}}'
+```
+
 ```clojure
 (require '[portal.api :as p])
 
