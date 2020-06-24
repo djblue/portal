@@ -1,6 +1,6 @@
 # portal
 
-A clojure tool to see through your data.
+A clojure tool to browse through your data.
 
 State: alpha, but it mostly works I think
 
