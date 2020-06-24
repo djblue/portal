@@ -1,6 +1,6 @@
 (ns examples.demo
   (:require [portal.core :as portal]
-            [examples.hacker-news :as hn]
+            [examples.data :refer [data]]
             [portal.async :as a]
             [clojure.datafy :refer [datafy nav]]))
 
@@ -18,9 +18,6 @@
   (portal/main!
    (merge
     (portal/get-actions send!)
-    {:portal/value
-     {::stories hn/stories
-      ::uuid (random-uuid)
-      ::date (js/Date.)}})))
+    {:portal/value data})))
 
 (defn reload! [])
