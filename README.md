@@ -4,6 +4,8 @@ A clojure tool to see through your data.
 
 State: alpha, but it mostly works I think
 
+![screenshot](./resources/screenshot.png)
+
 ## Usage
 
 ...
