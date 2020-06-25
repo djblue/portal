@@ -8,6 +8,7 @@
   {:output-dir "resources/"
    :asset-path "."
    :target :browser
+   :compiler-options {:warnings-as-errors true}
    :modules {:main {:init-fn portal.core/main!}}
    :devtools {:after-load portal.core/reload!
               :preloads   [shadow.remote.runtime.cljs.browser]}}
@@ -16,10 +17,12 @@
   {:output-dir "target/demo/"
    :asset-path "."
    :target :browser
+   :compiler-options {:warnings-as-errors true}
    :modules {:main {:init-fn examples.demo/main!}}
    :devtools {:after-load examples.demo/reload!}}
 
   :node
   {:target :node-script
    :main portal.main/-main
-   :output-to "target/node.js"}}}
+   :output-to "target/node.js"
+   :compiler-options {:warnings-as-errors true}}}}
