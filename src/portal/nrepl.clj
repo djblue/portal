@@ -1,5 +1,6 @@
 (ns portal.nrepl
-  (:require [portal.main :as m]
+  (:require [portal.api :as p]
+            [portal.runtime :as rt]
             [nrepl.middleware :refer [set-descriptor!]]
             [nrepl.transport :as transport])
   (:import [nrepl.transport Transport]))
@@ -26,12 +27,12 @@
     (when-let [code-form (read-string* (:code handler-msg))]
       (when (and (some? value)
                  (not (form-from-cursive? code-form)))
-        (m/update-value
+        (rt/update-value
          {:code-form code-form :value value})))
     transport))
 
 (defn wrap-portal [handler]
-  (m/inspect 1)
+  (p/open)
   (fn [msg]
     (-> msg
         (update :transport ->PortalTransport msg)
