@@ -12,7 +12,7 @@ The portal UI can be used to inspect values of various shapes and sizes.
 It will only show you one level at a time and clicking an item will
 navigate you into that item. Simple values (`"hello, world"`, `:a`, `1`,
 `true`) resolve to themselves, while compound values (`[]`, `{}`, `#{}`)
-will contains their elements.
+will contain their elements.
 
 There are currently three viewers to see values: coll, map and table.
 Coll supports any collection, while map only supports maps and the table
@@ -48,7 +48,7 @@ There is one exception to the behavior described above for the UI,
 [datafy](https://clojuredocs.org/clojure.datafy/datafy) and
 [nav](https://clojuredocs.org/clojure.datafy/nav). They are extension
 points defined in clojure to support user defined logic for transforming
-anything into normal clojure data and how to traverse it.
+anything into clojure data and how to traverse it.
 
 For a great overview of datafy and nav, I recommend reading [Clojure
 1.10's Datafy and Nav](https://corfield.org/blog/2018/12/03/datafy-nav/)
@@ -77,7 +77,7 @@ perfect development environment!
 
 ## Principles
 
-- Support as much of clojure data as possible
+- Support as much of clojure's data as possible
 - First class support for async extensibility
 - Simple standalone usage without a clojure environment
 - Easy theming
