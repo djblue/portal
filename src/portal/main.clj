@@ -56,5 +56,6 @@
         in (case input-format
              "json"  (-> *in* io/reader (json/read :key-fn keyword))
              "edn"   (-> *in* io/reader read-edn))]
-    (open-inspector in)
+    (rt/update-value in)
+    (open-inspector)
     (shutdown-agents)))
