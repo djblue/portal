@@ -14,5 +14,8 @@ jobs:
     - name: clj-kondo checks
       uses: DeLaGuardo/clojure-lint-action@v1
       with:
-        # Github token to report linter results back to check
         github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: shadow-cljs build
+      uses: vouch-opensource/tools.deps-build@1.0.1
+      with:
+        alias: cljs:ci
