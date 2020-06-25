@@ -1,17 +1,21 @@
 (ns examples.data
-  (:require [portal.colors :as c]
-            [examples.hacker-news :as hn]))
+  (:require #?(:clj [clojure.java.io :as io])
+            [portal.colors :as c]
+            [examples.hacker-news :as hn])
+  #?(:clj (:import [java.io File]
+                   [java.net URI URL]
+                   [java.util UUID])))
 
 (def platform-data
-  #?(:clj {::class java.io.File
-           ::file (clojure.java.io/file "deps.edn")
-           ::directory  (clojure.java.io/file ".")
-           ::uri (java.net.URI. "http://www.google.com")
-           ::url (java.net.URL. "http://www.google.com")
+  #?(:clj {::class File
+           ::file (io/file "deps.edn")
+           ::directory  (io/file ".")
+           ::uri (URI. "http://www.google.com")
+           ::url (URL. "http://www.google.com")
            ::exception (try (/ 1 0) (catch Exception e e))
            ::io-exception (try (slurp "/hello") (catch Exception e e))
            ::user-exception (Exception. "hi")
-           ::uuid (java.util.UUID/randomUUID)
+           ::uuid (UUID/randomUUID)
            ::deps (read-string (slurp "deps.edn"))
            ::date (java.util.Date.)}
      :cljs {::promise (js/Promise.resolve 123)

@@ -149,7 +149,7 @@
 
 (defn start [handler]
   (js/Promise.
-   (fn [resolve reject]
+   (fn [resolve _reject]
      (let [server (http/createServer #(handler %1 %2))]
        (.listen server 0
                 #(let [port (.-port (.address server))
@@ -190,9 +190,9 @@
   (tap> (js/Promise.resolve 1))
   (tap> 1)
 
-  (extend-protocol clojure.core.protocols/Datafiable
-    js/Promise
-    (datafy [this] (.then this identity)))
+  ;(extend-protocol clojure.core.protocols/Datafiable
+  ;  js/Promise
+  ;  (datafy [this] (.then this identity)))
 
   (open-inspector 1)
   (-> @rt/instance-cache)

@@ -67,7 +67,7 @@
   (a/let [res (fetch-hn (str "/user/" user ".json"))]
     (vary-meta res assoc `nav #'nav-hn)))
 
-(defn nav-item [coll k v]
+(defn nav-item [_coll _k v]
   (a/let [res (fetch-hn (str "/item/" v ".json"))]
     (vary-meta res assoc `nav #'nav-hn)))
 
