@@ -71,9 +71,29 @@ perfect development environment!
 
 ## CLI Usage
 
-    cat deps.edn | clojure -m portal.main edn
+To use portal from the cli, do the following depending on your data
+format:
 
-    cat package.json | clojure -m portal.main json
+```bash
+cat deps.edn     | clojure -m portal.main edn
+cat package.json | clojure -m portal.main json
+cat transit.json | clojure -m portal.main transit
+```
+
+I keep the following aliases handy for easier CLI use:
+
+```bash
+alias edn='clojure -A:portal -m portal.main edn'
+alias json='clojure -A:portal -m portal.main json'
+alias transit='clojure -A:portal -m portal.main transit'
+```
+
+and often use the `Copy as cURL` feature in the chrome network tab to do
+the following:
+
+```
+curl ... | transit
+```
 
 ## Principles
 

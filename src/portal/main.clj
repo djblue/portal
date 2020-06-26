@@ -54,8 +54,9 @@
 (defn -main [& args]
   (let [[input-format] args
         in (case input-format
-             "json"  (-> *in* io/reader (json/read :key-fn keyword))
-             "edn"   (-> *in* io/reader read-edn))]
+             "json"     (-> System/in io/reader (json/read :key-fn keyword))
+             "edn"      (-> System/in io/reader read-edn)
+             "transit"  (-> System/in server/transit-stream->value))]
     (rt/update-value in)
     (open-inspector)
     (shutdown-agents)))
