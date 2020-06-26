@@ -71,7 +71,7 @@ how to get more data!
 ```clojure
 (require '[examples.hacker-news :as hn])
 
-(tap> hn/data)
+(tap> hn/stories)
 ```
 
 An interesting use case for nav is allowing users to nav into keywords to
