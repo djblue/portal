@@ -22,9 +22,19 @@ The UX will probably evolve over time and user feedback is welcome!
 
 ## API Usage
 
+To start a repl with portal, run the clojure cli with:
+
 ```bash
-clj -Sdeps '{:deps {portal {:git/url "https://github.com/djblue/portal.git" :sha "6339a5b2c0cef3df780c053d4eea9253cdca6301"}}}'
+clj -Sdeps '{:deps {portal {:git/url "https://github.com/djblue/portal.git" :sha "18a0fc858db4b86b2e4aca123acf9fe9c9b9187f"}}}'
 ```
+
+or for a node clojurescript repl, do:
+
+```bash
+clj -Sdeps '{:deps {portal {:git/url "https://github.com/djblue/portal.git" :sha "18a0fc858db4b86b2e4aca123acf9fe9c9b9187f"} org.clojure/clojurescript {:mvn/version "1.10.758"}}}' -m cljs.main -re node
+```
+
+then try the portal api with the following commands:
 
 ```clojure
 (require '[portal.api :as p])
