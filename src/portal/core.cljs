@@ -140,10 +140,30 @@
      {:style {:padding-bottom (:spacing/padding settings)}}
      [inspector (assoc settings :coll value :depth 0) m]]))
 
+(defn inspect-html [settings value]
+  [:iframe {:style {:width "100%"
+                    :height "100%"
+                    :border-radius (:border-radius settings)
+                    :border (str "1px solid " (::c/border settings))}
+            :src-doc value}])
+
+(defn inspect-text [settings value]
+  [:pre
+   {:style
+    {:cursor :text
+     :overflow :auto
+     :padding (:spacing/padding settings)
+     :background (ins/get-background settings)
+     :border-radius (:border-radius settings)
+     :border (str "1px solid " (::c/border settings))}}
+   value])
+
 (def viewers
   {:portal.viewer/map    {:predicate map?          :component ins/inspect-map}
    :portal.viewer/coll   {:predicate coll?         :component ins/inspect-coll}
    :portal.viewer/table  {:predicate table-view?   :component inspect-table}
+   :portal.viewer/text   {:predicate string?       :component inspect-text}
+   :portal.viewer/html   {:predicate string?       :component inspect-html}
    ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
    })
 
