@@ -17,11 +17,6 @@
   []
   (m/close-inspector))
 
-(defn inspect
-  "Directly inspect a single value."
-  [v]
-  (m/inspect v))
-
 (defn clear
   "Clear all values."
   []

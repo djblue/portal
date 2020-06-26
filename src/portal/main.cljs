@@ -1,10 +1,30 @@
 (ns portal.main
   (:require [portal.runtime :as rt]
             [cognitect.transit :as t]
+            [clojure.string :as s]
             [portal.async :as a]
+            [portal.resources :as io]
             ["http" :as http]
+            ["path" :as path]
             ["fs" :as fs]
             ["child_process" :as cp]))
+
+(defn get-paths []
+  (concat
+   ["/Applications/Google Chrome.app/Contents/MacOS"]
+   (s/split (.-PATH js/process.env) #":")))
+
+(defn find-bin [files]
+  (some
+   identity
+   (for [path (get-paths) file files]
+     (let [f (path/join path file)]
+       (when-not (try (fs/accessSync f fs/constants.X_OK)
+                      (catch js/Error _e true))
+         f)))))
+
+(defn get-chrome-bin []
+  (find-bin #{"chrome" "google-chrome-stable" "chromium" "Google Chrome"}))
 
 ;; server.cljs
 
@@ -16,9 +36,6 @@
       "utf8"
       (fn [err data]
         (if err (reject err) (resolve data)))))))
-
-(defn get-chrome-bin []
-  (js/Promise.resolve "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"))
 
 (defn sh [bin & args]
   (js/Promise.
@@ -132,16 +149,15 @@
     (when (fn? cleanup)
       (.on request "close" cleanup))))
 
-(defn send-resource [response content-type resource-name]
-  (a/let [body (slurp (str "resources/" resource-name))]
-    (-> response
-        (.writeHead 200 #js {"Content-Type" content-type})
-        (.end body))))
+(defn send-resource [response content-type body]
+  (-> response
+      (.writeHead 200 #js {"Content-Type" content-type})
+      (.end body)))
 
 (defn handler [request response]
   (let [paths
-        {"/"        #(send-resource response "text/html"       "index.html")
-         "/main.js" #(send-resource response "text/javascript" "main.js")
+        {"/"        #(send-resource response "text/html"       (io/resource "index.html"))
+         "/main.js" #(send-resource response "text/javascript" (io/resource "main.js"))
          "/rpc"     #(rpc-handler request response)}
 
         f (get paths (.-url request) #(-> response (.writeHead 404) .end))]
@@ -159,9 +175,8 @@
 (defn stop [handle]
   (.close (:server handle)))
 
-(defn open-inspector [value]
+(defn open-inspector []
   (swap! rt/state assoc :portal/open? true)
-  (rt/update-value value)
   (a/let [chrome-bin (get-chrome-bin)
           instance   (or @server (start #'handler))]
     (reset! server instance)
@@ -194,7 +209,7 @@
   ;  js/Promise
   ;  (datafy [this] (.then this identity)))
 
-  (open-inspector 1)
+  (open-inspector)
   (-> @rt/instance-cache)
   (-> @server)
   (close-inspector)
