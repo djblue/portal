@@ -76,7 +76,7 @@
 (defn preview-tagged [settings value]
   [tagged-tag settings (.-tag value)])
 
-(defn inspect-map [settings values]
+(defn container-map [settings child]
   [s/div
    {:style
     {:width "100%"
@@ -88,7 +88,21 @@
      :color (::c/text settings)
      :font-size  (:font-size settings)
      :border-radius (:border-radius settings)
-     :border (str "1px solid " (::c/border settings))}}
+     :border (str "1px solid " (::c/border settings))}} child])
+
+(defn container-map-k [_settings child]
+  [s/div {:style {:grid-column "1"
+                  :display :flex
+                  :align-items :center}} child])
+
+(defn container-map-v [_settings child]
+  [s/div {:style {:grid-column "2"
+                  :display :flex
+                  :align-items :center}} child])
+
+(defn inspect-map [settings values]
+  [container-map
+   settings
    (take
     (:limits/max-length settings)
     (filter
@@ -96,18 +110,14 @@
      (for [[k v] values]
        [:<>
         {:key (hash k)}
-        [s/div {:style {:grid-column "1"
-                        :display :flex
-                        :align-items :center}}
-         [s/div
-          {:style {:display :flex :flex 1}}
-          [inspector (assoc settings :coll values) k]]]
-        [s/div {:style {:grid-column "2"
-                        :display :flex
-                        :align-items :center}}
+        [container-map-k
+         settings
+         [inspector (assoc settings :coll values) k]]
+        [container-map-v
+         settings
          [inspector (assoc settings :coll values :k k) v]]])))])
 
-(defn inspect-coll [settings values]
+(defn container-coll [settings child]
   [s/div
    {:style
     {:text-align :left
@@ -119,7 +129,11 @@
      :color (::c/text settings)
      :font-size  (:font-size settings)
      :border-radius (:border-radius settings)
-     :border (str "1px solid " (::c/border settings))}}
+     :border (str "1px solid " (::c/border settings))}} child])
+
+(defn inspect-coll [settings values]
+  [container-coll
+   settings
    (->> values
         (map-indexed
          (fn [idx itm]
