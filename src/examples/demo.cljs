@@ -18,4 +18,4 @@
 (defn main! []
   (portal/main! (portal/get-actions send!)))
 
-(defn reload! [])
+(defn reload! [] (portal/reload!))
