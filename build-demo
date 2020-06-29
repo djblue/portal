@@ -7,7 +7,7 @@ DIR=target/demo/
 
 git branch -D $BRANCH || echo 'skip'
 
-rm -f $DIR
+rm -rf $DIR
 
 clojure -A:cljs:shadow-cljs release demo
 
