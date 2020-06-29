@@ -15,7 +15,9 @@
     ::uri "#d08770"
     ::border "#4c566a"
     ::package "#88c0d0"
-    ::exception "#bf616a"}
+    ::exception "#bf616a"
+    ::diff-add "#a3be8c"
+    ::diff-remove "#bf616a"}
    :portal.themes/solarized-dark
    {::text "#93a1a1"
     ::background "#073642"
@@ -30,7 +32,9 @@
     ::uri "#cb4b16"
     ::border "#586e75"
     ::package "#2aa198"
-    ::exception "#dc322f"}
+    ::exception "#dc322f"
+    ::diff-add "#859900"
+    ::diff-remove "#dc322f"}
    :portal.themes/solarized-light
    {::text "#93a1a1"
     ::background "#fdf6e3"
@@ -45,7 +49,9 @@
     ::uri "#cb4b16"
     ::border "#839496"
     ::package "#2aa198"
-    ::exception "#dc322f"}
+    ::exception "#dc322f"
+    ::diff-add "#859900"
+    ::diff-remove "#dc322f"}
    :portal.themes/github-light
    {::text "#24292e"
     ::background "#fafbfc"
@@ -60,5 +66,7 @@
     ::uri "#f66a0a"
     ::border "#839496"
     ::package "#79b8ff"
-    ::exception "#d73a49"}})
+    ::exception "#d73a49"
+    ::diff-add "#28a745"
+    ::diff-remove "#d73a49"}})
 

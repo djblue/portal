@@ -120,7 +120,8 @@
 (defn container-coll [settings child]
   [s/div
    {:style
-    {:text-align :left
+    {:width "100%"
+     :text-align :left
      :display :grid
      :background (get-background settings)
      :grid-gap (:spacing/padding settings)

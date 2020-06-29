@@ -4,6 +4,7 @@
             [portal.colors :as c]
             [portal.rpc :as rpc]
             [portal.inspector :as ins :refer [inspector]]
+            [portal.diff :as d]
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [cognitect.transit :as t]))
@@ -164,6 +165,7 @@
    :portal.viewer/table  {:predicate table-view?   :component inspect-table}
    :portal.viewer/text   {:predicate string?       :component inspect-text}
    :portal.viewer/html   {:predicate string?       :component inspect-html}
+   :portal.viewer/diff   {:predicate d/can-view?   :component d/inspect-diff}
    ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
    })
 

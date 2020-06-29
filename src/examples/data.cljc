@@ -23,26 +23,43 @@
             ::uuid (random-uuid)
             ::date (js/Date.)}))
 
-(def data
-  (merge
-   platform-data
-   {::hacker-news hn/stories
-    ::themes c/themes
-    ::regex #"hello-world"
-    ::ns *ns*
-    ::with-meta (with-meta [1 2 3] {:hello :world})
-    ::booleans #{true false}
-    ::nil nil
-    ::vector [1 2 4]
-    "string-key" "string-value"
-    ::list (list 1 2 3)
+(def basic-data
+  {::booleans #{true false}
+   ::nil nil
+   ::vector [1 2 4]
+   "string-key" "string-value"
+   ::list (range 3)
+   ::set #{1 2 3}
+   ::ns-symbol 'hello/world
+   ::keyword :hello-world
+   ::ns-keyword ::hello-world
+   ::range (range 10)
+   ::nested-vector [1 2 3 [4 5 6]]})
+
+(def clojure-data
+  {::regex #"hello-world"
+   ::var #'portal.colors/themes
+   ::with-meta (with-meta 'with-meta {:hello :world})
+   {:example/settings 'complex-key} :hello-world})
+
+(def diff-data
+  [{::removed "value"
+    ::same-key "same-value"
+    ::change-type #{1 2}
+    ::set #{0 1 2}
+    ::vector [::a ::removed ::b]
+    ::different-value ::old-key}
+   {::added "value"
+    ::same-key "same-value"
+    ::change-type {:a :b :c :d}
     ::set #{1 2 3}
-    {:example/settings 'complex-key} :hello-world
-    #{1 2 3} [4 5 6]
-    ::var #'portal.colors/themes
-    ::ns-symbol 'hello/world
-    ::keyword :hello-world
-    ::ns-keyword ::hello-world
-    ::range (range 10)
-    ::nested-vector [1 2 3 [4 5 6]]
-    ::code '(defn hello-world [] (println "hello, world"))}))
+    ::vector [::a ::added ::b]
+    ::different-value ::new-key}])
+
+(def data
+  {::platform-data platform-data
+   ::hacker-news hn/stories
+   ::diff diff-data
+   ::basic-data basic-data
+   ::themes c/themes
+   ::clojure-data clojure-data})
