@@ -11,3 +11,7 @@ release:
 
 lint:
 	clj-kondo --lint src
+	clojure -A:cljfmt check
+
+fmt:
+	clojure -A:cljfmt fix
