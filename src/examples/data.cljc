@@ -46,12 +46,14 @@
   [{::removed "value"
     ::same-key "same-value"
     ::change-type #{1 2}
+    ::deep-change {:a 0}
     ::set #{0 1 2}
     ::vector [::a ::removed ::b]
     ::different-value ::old-key}
    {::added "value"
     ::same-key "same-value"
     ::change-type {:a :b :c :d}
+    ::deep-change {:a 1}
     ::set #{1 2 3}
     ::vector [::a ::added ::b]
     ::different-value ::new-key}])

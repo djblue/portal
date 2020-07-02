@@ -45,7 +45,6 @@
         [ins/container-map-v
          settings
          (cond
-           (= a b)           [inspector settings a]
            (= a ::not-found) [diff-added settings b]
            (= b ::not-found) [diff-removed settings a]
            :else             [inspect-diff settings [a b]])]])]))
@@ -71,7 +70,6 @@
        [:<>
         {:key i}
         (cond
-          (= a b)           [inspector settings a]
           (= a ::not-found) [diff-added settings b]
           (= b ::not-found) [diff-removed settings a]
           :else             [inspect-diff settings [a b]])])]))
