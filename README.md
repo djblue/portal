@@ -121,7 +121,8 @@ curl ... | transit
 
 ## Ideas for the Future 
 
-- Diff Viewer
+- ~Diff Viewer~
+  - Any vector pair can be diffed in portal via [lambdaisland/deep-diff2](https://github.com/lambdaisland/deep-diff2#diffing)
 - Markdown Viewer
 - Chart Viewer
 - Node+Edge Graphs Viewer
