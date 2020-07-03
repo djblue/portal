@@ -4,7 +4,7 @@
  {9090 "resources/"
   9091 ["target/demo/" "resources/"]}
  :builds
- {:browser
+ {:client
   {:output-dir "resources/"
    :asset-path "."
    :target :browser
