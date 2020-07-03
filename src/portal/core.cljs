@@ -132,14 +132,50 @@
        (when @response
          [inspector settings @response])])))
 
+(defonce show-meta? (r/atom false))
+
 (defn inspect-metadata [settings value]
   (when-let [m (meta
                 (if-not (t/tagged-value? value)
                   value
                   (.-rep value)))]
     [s/div
-     {:style {:padding-bottom (:spacing/padding settings)}}
-     [inspector (assoc settings :coll value :depth 0) m]]))
+     {:style
+      {:border-bottom (str "1px solid " (::c/border settings))}}
+     [s/div
+      {:on-click #(swap! show-meta? not)
+       :style/hover {:color (::c/tag settings)}
+       :style {:cursor :pointer
+               :user-select :none
+               :color (::c/namespace settings)
+               :padding-top (* 1 (:spacing/padding settings))
+               :padding-bottom (* 1 (:spacing/padding settings))
+               :padding-left (* 2 (:spacing/padding settings))
+               :padding-right (* 2 (:spacing/padding settings))
+               :font-size "16pt"
+               :font-weight 100
+               :display :flex
+               :justify-content :space-between
+               :background (::c/background2 settings)
+               :font-family "sans-serif"}}
+      [s/a
+       {:href "https://clojure.org/reference/metadata"
+        :target "_blank"
+        :style
+        {:color :inherit
+         :text-decoration :none}}
+       "metadata"]
+      [s/div
+       {:title "toggle metadata"
+        :style {:font-weight :bold}}
+       (if @show-meta?  "—" "+")]]
+     (when @show-meta?
+       [s/div
+        {:style
+         {:border-top (str "1px solid " (::c/border settings))
+          :box-sizing :border-box
+          :padding (* 2 (:spacing/padding settings))}}
+        [inspector (assoc settings :coll value :depth 0) m]])]))
 
 (defn inspect-html [settings value]
   [:iframe {:style {:width "100%"
@@ -197,11 +233,14 @@
              :right 0
              :bottom 0
              :overflow :auto
-             :box-sizing :border-box
-             :padding 20}}
+             :box-sizing :border-box}}
            [s/div
             [inspect-metadata settings value]
-            [inspector (assoc settings :component component) value]]]]
+            [s/div
+             {:style
+              {:box-sizing :border-box
+               :padding (* 2 (:spacing/padding settings))}}
+             [inspector (assoc settings :component component) value]]]]]
          [s/div
           {:style
            {:display :flex
