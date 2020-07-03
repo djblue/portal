@@ -2,13 +2,18 @@
   (:require [portal.styled :as s]
             [portal.colors :as c]
             [clojure.string :as str]
-            [cognitect.transit :as t]))
+            [cognitect.transit :as t]
+            [lambdaisland.deep-diff2.diff-impl :as diff]))
 
 (defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))
 
 (defn get-value-type [value]
   (cond
+    (instance? diff/Deletion value)   :diff
+    (instance? diff/Insertion value)  :diff
+    (instance? diff/Mismatch value)   :diff
+
     (map? value)      :map
     (set? value)      :set
     (vector? value)   :vector
@@ -35,6 +40,40 @@
       :tagged)))
 
 (declare inspector)
+
+(defn diff-added [settings value]
+  (let [color (::c/diff-add settings)]
+    [s/div
+     {:style {:flex 1
+              :background (str color "22")
+              :border (str "1px solid " color)
+              :border-radius (:border-radius settings)}}
+     [inspector settings value]]))
+
+(defn diff-removed [settings value]
+  (let [color (::c/diff-remove settings)]
+    [s/div
+     {:style {:flex 1
+              :background (str color "22")
+              :border (str "1px solid " color)
+              :border-radius (:border-radius settings)}}
+     [inspector settings value]]))
+
+(defn inspect-diff [settings value]
+  (let [removed (get value :- ::not-found)
+        added   (get value :+ ::not-found)]
+    [s/div
+     {:style {:display :flex :width "100%"}}
+     (when-not (= removed ::not-found)
+       [s/div {:style
+               {:flex 1
+                :margin-right
+                (when-not (= added ::not-found)
+                  (:spacing/padding settings))}}
+        [diff-removed settings removed]])
+     (when-not (= added ::not-found)
+       [s/div {:style {:flex 1}}
+        [diff-added settings added]])]))
 
 (defn get-background [settings]
   (if (even? (:depth settings))
@@ -287,6 +326,7 @@
 
 (defn get-preview-component [type]
   (case type
+    :diff       inspect-diff
     :map        preview-map
     :set        preview-set
     :vector     preview-vector
@@ -317,6 +357,7 @@
 
 (defn get-inspect-component [type]
   (case type
+    :diff       inspect-diff
     (:set :vector :list :coll) inspect-coll
     :map        inspect-map
     :boolean    inspect-boolean

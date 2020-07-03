@@ -19,7 +19,8 @@
   :cljs
   {:extra-deps
    {org.clojure/clojurescript {:mvn/version "1.10.758"}
-    reagent {:mvn/version "0.9.1"}}}
+    reagent {:mvn/version "0.9.1"}
+    lambdaisland/deep-diff2 {:mvn/version "2.0.0-93"}}}
   :shadow-cljs {:extra-deps
                 {thheller/shadow-cljs {:mvn/version "2.9.10"}}
                 :main-opts ["-m" "shadow.cljs.devtools.cli"]}
