@@ -16,6 +16,6 @@
        {:value (datafy res)}))))
 
 (defn main! []
-  (portal/main! (portal/get-actions send!)))
+  (portal/main! (portal/get-actions #'send!)))
 
 (defn reload! [] (portal/reload!))

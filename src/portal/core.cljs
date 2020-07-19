@@ -441,4 +441,6 @@
    (promise-loop (:portal/on-load settings))
    (render-app)))
 
-(defn reload! [] (render-app))
+(defn reload! []
+  ((:portal/on-load @state))
+  (render-app))
