@@ -8,7 +8,11 @@
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [cognitect.transit :as t]
-            [markdown.core :refer [md->html]]))
+            [markdown.core :refer [md->html]]
+            [markdown.common :as common]
+            [hickory.core :refer [parse-fragment as-hiccup]]
+            [hickory.utils :as utils]
+            [clojure.walk :as w]))
 
 (defn index-value
   ([value]
@@ -196,8 +200,96 @@
      :border (str "1px solid " (::c/border settings))}}
    value])
 
+(defn headers [settings form]
+  (update-in
+   form
+   [1 :style]
+   assoc
+   :color
+   (::c/namespace settings)
+   :padding-top
+   (* 0.5 (:spacing/padding settings))
+   :padding-bottom
+   (* 0.5 (:spacing/padding settings))
+   :margin-bottom
+   (:spacing/padding settings)
+   :border-bottom
+   (str "1px solid " (::c/border settings))))
+
+(def hiccup-styles
+  {:h1 headers :h2 headers :h3 headers
+   :h4 headers :h5 headers :h6 headers
+   :a
+   (fn [settings form]
+     (update-in
+      form
+      [1 :style]
+      assoc
+      :color
+      (::c/uri settings)))
+   :p
+   (fn [settings form]
+     (update-in
+      form
+      [1 :style]
+      assoc
+      :font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
+      :font-size (:font-size settings)))
+   :img
+   (fn [_settings form]
+     (update-in
+      form
+      [1 :style]
+      assoc
+      :max-width "100%"))
+   :code
+   (fn [settings form]
+     (update-in
+      form
+      [1 :style]
+      assoc
+      :padding (* 0.5 (:spacing/padding settings))
+      :background (::c/background2 settings)
+      :border-radius (:border-radius settings)))
+   :pre
+   (fn [settings form]
+     (update-in
+      form
+      [1 :style]
+      assoc
+      :overflow :auto
+      :padding (* 2 (:spacing/padding settings))
+      :background (::c/background2 settings)
+      :border-radius (:border-radius settings)))})
+
+(defn inspect-hiccup [settings value]
+  (w/postwalk
+   (fn [x]
+     (let [f (and (vector? x)
+                  (get hiccup-styles (first x)))]
+       (if-not (fn? f)
+         x
+         (if (map? (second x))
+           (f settings x)
+           (f settings (into [(first x) {}] (rest x)))))))
+   value))
+
 (defn inspect-markdown [settings value]
-  [inspect-html settings (md->html value)])
+  ;; I couldn't figure out a good way to disable html escaping, which
+  ;; occurs in both markdown-clj and hickory, so I decided to manually
+  ;; intercepts calls into utility methods and replace their
+  ;; implementations. This is probably brittle, but I have little choice.
+  (with-redefs
+   [common/escape-code   identity
+    common/escaped-chars identity
+    utils/html-escape    identity]
+    [inspect-hiccup
+     settings
+     (->> (md->html value)
+          parse-fragment
+          (map as-hiccup)
+          (into [:div {:style {:max-width "1012px"
+                               :margin "0 auto"}}]))]))
 
 (def viewers
   {:portal.viewer/map      {:predicate map?          :component ins/inspect-map}
@@ -207,6 +299,7 @@
    :portal.viewer/html     {:predicate string?       :component inspect-html}
    :portal.viewer/diff     {:predicate d/can-view?   :component d/inspect-diff}
    :portal.viewer/markdown {:predicate string?       :component inspect-markdown}
+   :portal.viewer/hiccup   {:predicate vector?       :component inspect-hiccup}
    ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
    })
 

@@ -1,5 +1,6 @@
 (ns examples.data
   (:require #?(:clj [clojure.java.io :as io])
+            [examples.macros :refer [read-file]]
             [portal.colors :as c]
             [examples.hacker-news :as hn])
   #?(:clj (:import [java.io File]
@@ -58,10 +59,17 @@
     ::vector [::a ::added ::b]
     ::different-value ::new-key}])
 
+(def hiccup
+  [:div
+   [:h1 "hello"]
+   [:a {:href "https://www.google.com"} "google.com"]])
+
 (def data
   {::platform-data platform-data
    ::hacker-news hn/stories
    ::diff diff-data
    ::basic-data basic-data
    ::themes c/themes
-   ::clojure-data clojure-data})
+   ::clojure-data clojure-data
+   ::markdown (read-file "README.md")
+   ::hiccup hiccup})
