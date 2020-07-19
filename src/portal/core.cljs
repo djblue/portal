@@ -7,7 +7,8 @@
             [portal.diff :as d]
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
-            [cognitect.transit :as t]))
+            [cognitect.transit :as t]
+            [markdown.core :refer [md->html]]))
 
 (defn index-value
   ([value]
@@ -195,13 +196,17 @@
      :border (str "1px solid " (::c/border settings))}}
    value])
 
+(defn inspect-markdown [settings value]
+  [inspect-html settings (md->html value)])
+
 (def viewers
-  {:portal.viewer/map    {:predicate map?          :component ins/inspect-map}
-   :portal.viewer/coll   {:predicate coll?         :component ins/inspect-coll}
-   :portal.viewer/table  {:predicate table-view?   :component inspect-table}
-   :portal.viewer/text   {:predicate string?       :component inspect-text}
-   :portal.viewer/html   {:predicate string?       :component inspect-html}
-   :portal.viewer/diff   {:predicate d/can-view?   :component d/inspect-diff}
+  {:portal.viewer/map      {:predicate map?          :component ins/inspect-map}
+   :portal.viewer/coll     {:predicate coll?         :component ins/inspect-coll}
+   :portal.viewer/table    {:predicate table-view?   :component inspect-table}
+   :portal.viewer/text     {:predicate string?       :component inspect-text}
+   :portal.viewer/html     {:predicate string?       :component inspect-html}
+   :portal.viewer/diff     {:predicate d/can-view?   :component d/inspect-diff}
+   :portal.viewer/markdown {:predicate string?       :component inspect-markdown}
    ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
    })
 
