@@ -6,7 +6,7 @@ State: alpha, but usable
 
 ## Client
 
-[![screenshot](./resources/screenshot.png)](http://djblue.github.io/portal/)
+[![screenshot](https://raw.githubusercontent.com/djblue/portal/master/resources/screenshot.png)](http://djblue.github.io/portal/)
 
 The portal UI can be used to inspect values of various shapes and sizes.
 It will only show you one level at a time and clicking an item will
