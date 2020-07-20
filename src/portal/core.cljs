@@ -5,6 +5,7 @@
             [portal.rpc :as rpc]
             [portal.inspector :as ins :refer [inspector]]
             [portal.diff :as d]
+            [portal.viewer.tree :refer [inspect-tree-1]]
             [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [cognitect.transit :as t]
@@ -300,6 +301,7 @@
    :portal.viewer/diff     {:predicate d/can-view?   :component d/inspect-diff}
    :portal.viewer/markdown {:predicate string?       :component inspect-markdown}
    :portal.viewer/hiccup   {:predicate vector?       :component inspect-hiccup}
+   :portal.viewer/tree     {:predicate #(-> true)    :component inspect-tree-1}
    ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
    })
 
@@ -310,6 +312,9 @@
             (into #{} (keep (fn [[k {:keys [predicate]}]]
                               (when (predicate value) k)) viewers))
             viewer    (or @selected-viewer (first compatible-viewers))
+            settings (assoc settings
+                            :portal/rainbow
+                            (cycle ((juxt ::c/exception ::c/keyword ::c/string ::c/tag ::c/number ::c/uri) settings)))
             component (when (contains? compatible-viewers viewer)
                         (get-in viewers [viewer :component] inspector))]
         [s/div
