@@ -16,4 +16,10 @@ lint:
 fmt:
 	clojure -A:cljfmt fix
 
+pom.xml: deps.edn
+	clojure -Spom
+
+install:
+	mvn install
+
 ci: lint
