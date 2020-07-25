@@ -1,19 +1,18 @@
 (ns portal.core
-  (:require [reagent.core :as r]
-            [portal.styled :as s]
-            [portal.colors :as c]
-            [portal.rpc :as rpc]
-            [portal.inspector :as ins :refer [inspector]]
-            [portal.diff :as d]
-            [portal.viewer.tree :refer [inspect-tree-1]]
-            [clojure.spec.alpha :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [cognitect.transit :as t]
-            [markdown.core :refer [md->html]]
-            [markdown.common :as common]
-            [hickory.core :refer [parse-fragment as-hiccup]]
-            [hickory.utils :as utils]
-            [clojure.walk :as w]))
+            [portal.colors :as c]
+            [portal.diff :as d]
+            [portal.inspector :as ins :refer [inspector]]
+            [portal.rpc :as rpc]
+            [portal.styled :as s]
+            [portal.viewer.hiccup :refer [inspect-hiccup]]
+            [portal.viewer.html :refer [inspect-html]]
+            [portal.viewer.markdown :refer [inspect-markdown]]
+            [portal.viewer.text :refer [inspect-text]]
+            [portal.viewer.tree :refer [inspect-tree-1]]
+            [reagent.core :as r]))
 
 (defn index-value
   ([value]
@@ -182,115 +181,6 @@
           :box-sizing :border-box
           :padding (* 2 (:spacing/padding settings))}}
         [inspector (assoc settings :coll value :depth 0) m]])]))
-
-(defn inspect-html [settings value]
-  [:iframe {:style {:width "100%"
-                    :height "100%"
-                    :border-radius (:border-radius settings)
-                    :border (str "1px solid " (::c/border settings))}
-            :src-doc value}])
-
-(defn inspect-text [settings value]
-  [:pre
-   {:style
-    {:cursor :text
-     :overflow :auto
-     :padding (:spacing/padding settings)
-     :background (ins/get-background settings)
-     :border-radius (:border-radius settings)
-     :border (str "1px solid " (::c/border settings))}}
-   value])
-
-(defn headers [settings form]
-  (update-in
-   form
-   [1 :style]
-   assoc
-   :color
-   (::c/namespace settings)
-   :padding-top
-   (* 0.5 (:spacing/padding settings))
-   :padding-bottom
-   (* 0.5 (:spacing/padding settings))
-   :margin-bottom
-   (:spacing/padding settings)
-   :border-bottom
-   (str "1px solid " (::c/border settings))))
-
-(def hiccup-styles
-  {:h1 headers :h2 headers :h3 headers
-   :h4 headers :h5 headers :h6 headers
-   :a
-   (fn [settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :color
-      (::c/uri settings)))
-   :p
-   (fn [settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
-      :font-size (:font-size settings)))
-   :img
-   (fn [_settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :max-width "100%"))
-   :code
-   (fn [settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :padding (* 0.5 (:spacing/padding settings))
-      :background (::c/background2 settings)
-      :border-radius (:border-radius settings)))
-   :pre
-   (fn [settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :overflow :auto
-      :padding (* 2 (:spacing/padding settings))
-      :background (::c/background2 settings)
-      :border-radius (:border-radius settings)))})
-
-(defn inspect-hiccup [settings value]
-  (w/postwalk
-   (fn [x]
-     (let [f (and (vector? x)
-                  (get hiccup-styles (first x)))]
-       (if-not (fn? f)
-         x
-         (if (map? (second x))
-           (f settings x)
-           (f settings (into [(first x) {}] (rest x)))))))
-   value))
-
-(defn inspect-markdown [settings value]
-  ;; I couldn't figure out a good way to disable html escaping, which
-  ;; occurs in both markdown-clj and hickory, so I decided to manually
-  ;; intercepts calls into utility methods and replace their
-  ;; implementations. This is probably brittle, but I have little choice.
-  (with-redefs
-   [common/escape-code   identity
-    common/escaped-chars identity
-    utils/html-escape    identity]
-    [inspect-hiccup
-     settings
-     (->> (md->html value)
-          parse-fragment
-          (map as-hiccup)
-          (into [:div {:style {:max-width "1012px"
-                               :margin "0 auto"}}]))]))
 
 (def viewers
   [{:name :portal.viewer/map      :predicate map?          :component ins/inspect-map}
