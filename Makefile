@@ -22,4 +22,7 @@ pom.xml: deps.edn
 install:
 	mvn install
 
+deploy: pom.xml
+	mvn deploy
+
 ci: lint
