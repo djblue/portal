@@ -2,6 +2,8 @@
 
 A clojure tool to navigate through your data.
 
+[![Clojars Project](https://clojars.org/djblue/portal/latest-version.svg)](https://clojars.org/djblue/portal)
+
 State: alpha, but usable
 
 ## Client
@@ -25,13 +27,15 @@ The UX will probably evolve over time and user feedback is welcome!
 To start a repl with portal, run the clojure cli with:
 
 ```bash
-clj -Sdeps '{:deps {portal {:git/url "https://github.com/djblue/portal.git" :sha "a186894bce30960ffb4161ecc2291e67c0a7c380"}}}'
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.1.0"}}}'
 ```
 
 or for a node clojurescript repl, do:
 
 ```bash
-clj -Sdeps '{:deps {portal {:git/url "https://github.com/djblue/portal.git" :sha "a186894bce30960ffb4161ecc2291e67c0a7c380"} org.clojure/clojurescript {:mvn/version "1.10.758"}}}' -m cljs.main -re node
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.1.0"}
+                    org.clojure/clojurescript {:mvn/version "1.10.758"}}}' \
+    -m cljs.main -re node
 ```
 
 then try the portal api with the following commands:
