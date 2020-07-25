@@ -293,30 +293,30 @@
                                :margin "0 auto"}}]))]))
 
 (def viewers
-  {:portal.viewer/map      {:predicate map?          :component ins/inspect-map}
-   :portal.viewer/coll     {:predicate coll?         :component ins/inspect-coll}
-   :portal.viewer/table    {:predicate table-view?   :component inspect-table}
-   :portal.viewer/text     {:predicate string?       :component inspect-text}
-   :portal.viewer/html     {:predicate string?       :component inspect-html}
-   :portal.viewer/diff     {:predicate d/can-view?   :component d/inspect-diff}
-   :portal.viewer/markdown {:predicate string?       :component inspect-markdown}
-   :portal.viewer/hiccup   {:predicate vector?       :component inspect-hiccup}
-   :portal.viewer/tree     {:predicate #(-> true)    :component inspect-tree-1}
+  [{:name :portal.viewer/map      :predicate map?          :component ins/inspect-map}
+   {:name :portal.viewer/coll     :predicate coll?         :component ins/inspect-coll}
+   {:name :portal.viewer/table    :predicate table-view?   :component inspect-table}
+   {:name :portal.viewer/tree     :predicate coll?         :component inspect-tree-1}
+   {:name :portal.viewer/text     :predicate string?       :component inspect-text}
+   {:name :portal.viewer/html     :predicate string?       :component inspect-html}
+   {:name :portal.viewer/diff     :predicate d/can-view?   :component d/inspect-diff}
+   {:name :portal.viewer/markdown :predicate string?       :component inspect-markdown}
+   {:name :portal.viewer/hiccup   :predicate vector?       :component inspect-hiccup}
    ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
-   })
+   ])
 
 (defn inspect-1 []
   (let [selected-viewer (r/atom nil)]
     (fn [settings value]
-      (let [compatible-viewers
-            (into #{} (keep (fn [[k {:keys [predicate]}]]
-                              (when (predicate value) k)) viewers))
-            viewer    (or @selected-viewer (first compatible-viewers))
+      (let [compatible-viewers (filter #((:predicate %) value) viewers)
+            viewer       (or (some #(when (= (:name %) @selected-viewer) %)
+                                   compatible-viewers)
+                             (first compatible-viewers))
+            component    (or (:component viewer) inspector)
             settings (assoc settings
                             :portal/rainbow
-                            (cycle ((juxt ::c/exception ::c/keyword ::c/string ::c/tag ::c/number ::c/uri) settings)))
-            component (when (contains? compatible-viewers viewer)
-                        (get-in viewers [viewer :component] inspector))]
+                            (cycle ((juxt ::c/exception ::c/keyword ::c/string
+                                          ::c/tag ::c/number ::c/uri) settings)))]
         [s/div
          {:style
           {:flex 1}}
@@ -354,7 +354,7 @@
           (if (empty? compatible-viewers)
             [s/div]
             [:select
-             {:value (pr-str viewer)
+             {:value (pr-str (:name viewer))
               :on-change #(reset! selected-viewer
                                   (keyword (.substr (.. % -target -value) 1)))
               :style
@@ -365,8 +365,8 @@
                :font-size (:font-size settings)
                :color (::c/text settings)
                :border (str "1px solid " (::c/border settings))}}
-             (for [k compatible-viewers]
-               [:option {:key k :value (pr-str k)} (pr-str k)])])
+             (for [{:keys [name]} compatible-viewers]
+               [:option {:key name :value (pr-str name)} (pr-str name)])])
           [s/div
            {:style {:padding (:spacing/padding settings)}}
            [ins/preview settings value]]]]))))
