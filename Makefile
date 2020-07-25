@@ -10,7 +10,7 @@ release: node_modules
 	clojure -A:cljs:shadow-cljs release client
 
 lint:
-	clj-kondo --lint src
+	clojure -A:kondo --lint src
 	clojure -A:cljfmt check
 
 fmt:

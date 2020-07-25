@@ -38,6 +38,9 @@
           {:git/url "https://github.com/cognitect-labs/test-runner.git"
            :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}}
          :main-opts ["-m" "cognitect.test-runner"]}
+  :kondo
+  {:main-opts ["-m" "clj-kondo.main"]
+   :extra-deps {clj-kondo {:mvn/version "2020.06.21"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt {:mvn/version "0.6.8"}}}}}
