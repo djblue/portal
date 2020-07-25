@@ -1,15 +1,15 @@
 (ns portal.core
-  (:require [clojure.spec.alpha :as spec]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [cognitect.transit :as t]
             [portal.colors :as c]
-            [portal.diff :as d]
             [portal.inspector :as ins :refer [inspector]]
             [portal.rpc :as rpc]
             [portal.styled :as s]
+            [portal.viewer.diff :as d]
             [portal.viewer.hiccup :refer [inspect-hiccup]]
             [portal.viewer.html :refer [inspect-html]]
             [portal.viewer.markdown :refer [inspect-markdown]]
+            [portal.viewer.table :refer [inspect-table table-view?]]
             [portal.viewer.text :refer [inspect-text]]
             [portal.viewer.tree :refer [inspect-tree-1]]
             [reagent.core :as r]))
@@ -51,91 +51,6 @@
   (filter #(str/includes? (:string-value %)
                           (str/lower-case s))
           index))
-
-(spec/def ::http-request
-  (spec/keys
-   :req-un [::url]
-   :opt-un [::headers ::method ::body]))
-
-(spec/def ::url string?)
-(spec/def ::method #{"GET" "POST" "PUT" "PATCH" "DELETE"})
-(spec/def ::headers map?)
-(spec/def ::body string?)
-
-(defn button-styles [settings]
-  {:background (::c/text settings)
-   :color (::c/background settings)
-   :font-size (:font-size settings)
-   :border :none
-   :box-sizing :border-box
-   :padding "10px 20px"
-   :border-radius (:border-radius settings)
-   :cursor :pointer
-   :margin "0 20px"})
-
-(defn http-request [request]
-  (rpc/send! {:op :portal.rpc/http-request :request request}))
-
-(defn table-view? [value]
-  (and (coll? value) (every? map? value)))
-
-(defn inspect-table [settings values]
-  (let [columns (into #{} (mapcat keys values))
-        background (ins/get-background settings)]
-    [s/table
-     {:style
-      {:width "100%"
-       :border-collapse :collapse
-       :color (::c/text settings)
-       :font-size  (:font-size settings)
-       :border-radius (:border-radius settings)}}
-     [s/tbody
-      [s/tr
-       (map-indexed
-        (fn [grid-column column]
-          [s/th {:key grid-column
-                 :style
-                 {:border (str "1px solid " (::c/border settings))
-                  :background background
-                  :box-sizing :border-box
-                  :padding (:spacing/padding settings)}}
-           [inspector (assoc settings :coll values) column]])
-        columns)]
-      (map-indexed
-       (fn [grid-row row]
-         [s/tr {:key grid-row}
-          (map-indexed
-           (fn [grid-column column]
-             [s/td
-              {:key grid-column
-               :style
-               {:border (str "1px solid " (::c/border settings))
-                :background background
-                :padding (:spacing/padding settings)
-                :box-sizing :border-box}}
-              (when (contains? row column)
-                [inspector
-                 (assoc settings :coll row :k column)
-                 (get row column)])])
-           columns)])
-       values)]]))
-
-(defn http-request? [value]
-  (spec/valid? ::http-request value))
-
-(defn inspect-http []
-  (let [response (r/atom nil)]
-    (fn [settings value]
-      [s/div
-       [s/button
-        {:style (button-styles settings)
-         :on-click (fn []
-                     (->  (http-request value)
-                          (.then #(reset! response (:response %)))))}
-        "send request"]
-       [inspector settings value]
-       (when @response
-         [inspector settings @response])])))
 
 (defonce show-meta? (r/atom false))
 
@@ -191,9 +106,7 @@
    {:name :portal.viewer/html     :predicate string?       :component inspect-html}
    {:name :portal.viewer/diff     :predicate d/can-view?   :component d/inspect-diff}
    {:name :portal.viewer/markdown :predicate string?       :component inspect-markdown}
-   {:name :portal.viewer/hiccup   :predicate vector?       :component inspect-hiccup}
-   ;:portal.viewer/http   {:predicate http-request? :component inspect-http}
-   ])
+   {:name :portal.viewer/hiccup   :predicate vector?       :component inspect-hiccup}])
 
 (defn inspect-1 []
   (let [selected-viewer (r/atom nil)]
@@ -293,6 +206,17 @@
         (filter-index (:portal/index settings))
         (map #(dissoc % :string-value))
         (take 15))])))
+
+(defn button-styles [settings]
+  {:background (::c/text settings)
+   :color (::c/background settings)
+   :font-size (:font-size settings)
+   :border :none
+   :box-sizing :border-box
+   :padding "10px 20px"
+   :border-radius (:border-radius settings)
+   :cursor :pointer
+   :margin "0 20px"})
 
 (defn toolbar [settings]
   [s/div

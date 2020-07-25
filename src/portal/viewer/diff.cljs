@@ -1,4 +1,4 @@
-(ns portal.diff
+(ns portal.viewer.diff
   (:require [lambdaisland.deep-diff2 :refer [diff]]
             [portal.inspector :as ins :refer [inspector]]))
 
