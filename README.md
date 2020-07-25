@@ -129,9 +129,21 @@ curl ... | transit
 
 ## Development
 
+To start development, do:
+
     make dev
 
-    :CljEval (shadow/repl :app) - if you are a vimmer
+### Formatting
+
+To format source code, do:
+
+    make fmt
+
+### CI Checks
+
+To run all ci checks, do:
+
+    make ci
 
 ## License
 

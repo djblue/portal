@@ -15,3 +15,5 @@ lint:
 
 fmt:
 	clojure -A:cljfmt fix
+
+ci: lint
