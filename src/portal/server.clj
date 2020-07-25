@@ -91,7 +91,7 @@
 (defn send-resource [content-type resource-name]
   {:status  200
    :headers {"Content-Type" content-type}
-   :body    (-> resource-name io/resource io/file)})
+   :body    (-> resource-name io/resource slurp)})
 
 (defn handler [request]
   (let [paths
