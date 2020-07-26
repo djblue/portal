@@ -194,21 +194,38 @@
 (defn hex-color? [s]
   (re-matches #"#[0-9a-f]{6}|#[0-9a-f]{3}gi" s))
 
+(defn url-string? [s]
+  (re-matches #"https?://.*" s))
+
 (defn inspect-string [settings value]
-  (if-let [color (hex-color? value)]
+  (prn ::url-string? (url-string? value) value)
+  (cond
+    (url-string? value)
+    [s/span
+     {:style {:color (::c/string settings)}}
+     "\""
+     [s/a
+      {:href value
+       :target "_blank"
+       :style {:color (::c/string settings)}}
+      (trim-string settings value)]
+     "\""]
+
+    (hex-color? value)
     [s/div
      {:style
       {:padding (* 0.65 (:spacing/padding settings))
        :box-sizing :border-box
-       :background color}}
+       :background value}}
      [s/div
       {:style
        {:text-align :center
         :filter "contrast(500%) saturate(0) invert(1) contrast(500%)"
         :opacity 0.75
-        :color color}}
-      color]]
+        :color value}}
+      value]]
 
+    :else
     [s/span {:style {:color (::c/string settings)}}
      (pr-str (trim-string settings value))]))
 
