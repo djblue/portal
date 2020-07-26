@@ -16,60 +16,80 @@
 
 (defn inspect-tree-item []
   (let [open? (r/atom true)]
-    (fn [settings k value child]
-      (if-not (coll? value)
-        [s/div
-         {:style {:display :flex}}
-         (when-not (= k ::root)
-           [s/div {:style {:width :auto}}
-            [inspect-tree-1 settings k]])
-         child]
-        (let [[open close] (delimiter value)
-              color (first (:portal/rainbow settings))]
+    (fn [settings opts]
+      (let [value (:value opts)
+            [open close] (delimiter value)
+            color (first (:portal/rainbow settings))
+            open [s/div
+                  {:style
+                   {:color color
+                    :font-weigth :bold
+                    :margin-right "8px"
+                    :padding-top (:spacing/padding settings)
+                    :padding-bottom (:spacing/padding settings)}} open]
+            close [s/div
+                   {:style
+                    {:color color
+                     :font-weigth :bold
+                     :margin-right "8px"
+                     :padding-top (:spacing/padding settings)
+                     :padding-bottom (:spacing/padding settings)}}
+                   close]
+            toggle [s/div
+                    {:on-click #(swap! open? not)
+                     :style
+                     {:margin-right "8px"
+                      :padding-top (:spacing/padding settings)
+                      :padding-bottom (:spacing/padding settings)}}
+                    (if @open? "▼" "▶")]
+            child [s/div
+                   {:style
+                    {:border-left (str "1px dashed " color "55")
+                     :padding-right 16
+                     :margin-left "0.3em"
+                     :flex-direction :column
+                     :flex-wrap :wrap
+                     :align-items :top}}
+                   (:value-child opts)]
+            ellipsis  [s/div
+                       {:style
+                        {:margin-right "8px"}} "..."]]
+        (cond
+          (not (coll? value))
+          [s/div
+           {:style {:display :flex :align-items :center}}
+           (:key-child opts)
+           (:value-child opts)]
+
+          (not (coll? (:key opts)))
           [s/div
            [s/div {:style {:display :flex :align-items :center}}
-            [s/div
-             {:on-click #(swap! open? not)
-              :style
-              {:margin-right "8px"
-               :padding-top (:spacing/padding settings)
-               :padding-bottom (:spacing/padding settings)}}
-             (if @open? "▼" "▶")]
-            (when-not (= k ::root)
-              [s/div {:style {:width :auto}}
-               [inspect-tree-1 settings k]])
-            [s/div
-             {:style
-              {:color color
-               :font-weigth :bold
-               :margin-right "8px"}} open]
+            toggle
+            (:key-child opts)
+            open
             (when-not @open?
-              [:<>
-               [s/div
-                {:style
-                 {:margin-right "8px"}} "..."]
-               [s/div
-                {:style
-                 {:color color
-                  :font-weigth :bold
-                  :margin-right "8px"}} close]])]
+              [:<> ellipsis close])]
            (when @open?
              [:<>
+              child
+              close])]
+
+          :else
+          [s/div
+           [s/div {:style {:display :flex :align-items :center}}
+            (:key-child opts)
+            (if-not @open?
               [s/div
-               {:style
-                {:border-left (str "1px dashed " color "55")
-                 :padding-left "16px"
-                 :margin-left "0.3em"
-                 :flex-direction :column
-                 :flex-wrap :wrap
-                 :align-items :top}}
-               child]
-              [s/div {:style
-                      {:color color
-                       :font-weigth :bold
-                       :padding-top (:spacing/padding settings)
-                       :padding-bottom (:spacing/padding settings)}}
-               close]])])))))
+               {:style {:display :flex :align-items :center}}
+               toggle
+               open
+               ellipsis
+               close]
+              [s/div
+               {:style {:display :flex :flex-direction :column}}
+               [s/div {:style {:display :flex}} toggle open]
+               child
+               close])]])))))
 
 (defn for-lazy []
   (let [n (r/atom 0)]
@@ -81,24 +101,28 @@
           {:key @n
            :on-change
            #(when % (swap! n + 5))}
-          [s/div {:style {:height "1em"}}]])])))
+          [s/div {:style {:height "1em" :width "1em"}}]])])))
 
 (defn inspect-tree-map [settings value]
   [s/div
    {:style
-    {:padding-left "16px"
+    {:padding-left 16
      :flex-direction :column
      :flex-wrap :wrap
      :align-items :top}}
    [for-lazy
     (for [[k v] value]
       ^{:key (hash k)}
-      [inspect-tree-item settings k v [inspect-tree settings v]])]])
+      [inspect-tree-item settings
+       {:key k
+        :key-child [inspect-tree-1 settings k]
+        :value v
+        :value-child [inspect-tree settings v]}])]])
 
 (defn inspect-tree-coll [settings value]
   [s/div
    {:style
-    {:padding-left "16px"
+    {:padding-left 16
      :flex-direction :column
      :flex-wrap :wrap
      :align-items :top}}
@@ -107,7 +131,10 @@
      (fn [idx item]
        ^{:key idx}
        [s/div
-        [inspect-tree-item settings ::root item [inspect-tree settings item]]])
+        [inspect-tree-item settings
+         {:value item
+          :value-child [inspect-tree settings item]}]])
+
      value)]])
 
 (defn inspect-tree [settings value]
@@ -120,4 +147,6 @@
        :else         [inspector settings value])]))
 
 (defn inspect-tree-1 [settings value]
-  [inspect-tree-item settings ::root value [inspect-tree settings value]])
+  [inspect-tree-item settings
+   {:value value
+    :value-child [inspect-tree settings value]}])
