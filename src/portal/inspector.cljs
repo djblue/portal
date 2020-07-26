@@ -198,7 +198,6 @@
   (re-matches #"https?://.*" s))
 
 (defn inspect-string [settings value]
-  (prn ::url-string? (url-string? value) value)
   (cond
     (url-string? value)
     [s/span
