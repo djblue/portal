@@ -127,7 +127,9 @@ curl ... | transit
 
 - ~Diff Viewer~
   - Any vector pair can be diffed in portal via [lambdaisland/deep-diff2](https://github.com/lambdaisland/deep-diff2#diffing)
-- Markdown Viewer
+- ~Markdown Viewer~
+  - Any string can be viewed as markdown in portal via [yogthos/markdown-clj](https://github.com/yogthos/markdown-clj)
+  - Any hiccup data structure can also be viewed as html
 - Chart Viewer
 - Node+Edge Graphs Viewer
 
