@@ -14,43 +14,78 @@
             [portal.viewer.tree :refer [inspect-tree-1]]
             [reagent.core :as r]))
 
-(defn index-value
-  ([value]
-   (index-value nil [] value))
+(defonce search-text (r/atom ""))
 
-  ([coll path value]
-   (cond
-     (map? value)
-     (mapcat
-      (fn [[k v]]
-        (let [path (conj path k)]
-          (concat
-           (index-value value path k)
-           (index-value value path v))))
-      value)
+(defn filter-data [settings value]
+  (let [search-text @search-text
+        filter-data (partial filter-data settings)]
+    (if (str/blank? search-text)
+      value
+        ;:diff 
+      (case (ins/get-value-type value)
+        :map
+        (let [new-value (->>
+                         (for [[k v] value]
+                           (let [filter-k (filter-data k)
+                                 filter-v (filter-data v)]
+                             (if (= ::not-found filter-k filter-v)
+                               ::not-found
+                               [(if (= filter-k ::not-found)
+                                  k
+                                  filter-k)
+                                (if (= filter-v ::not-found)
+                                  v
+                                  filter-v)])))
+                         (remove #{::not-found})
+                         (into {}))]
+          (if (empty? new-value)
+            ::not-found
+            (with-meta new-value (meta value))))
 
-     (coll? value)
-     (apply
-      concat
-      (map-indexed
-       (fn [k v]
-         (let [path (conj path k)]
-           (concat
-            (index-value value path k)
-            (index-value value path v))))
-       value))
+        :set
+        (let [new-value (->> value
+                             (map filter-data)
+                             (remove #{::not-found})
+                             (into #{}))]
+          (if (empty? new-value)
+            ::not-found
+            (with-meta new-value (meta value))))
 
-     :else
-     [{:path path
-       :coll coll
-       :k (last path)
-       :value value
-       :string-value (str/lower-case (pr-str value))}])))
+        :vector
+        (let [new-value  (->> value
+                              (map filter-data)
+                              (remove #{::not-found})
+                              (into []))]
+          (if (empty? new-value)
+            ::not-found
+            (with-meta new-value (meta value))))
 
-(defn filter-index [index s]
-  (filter #(str/includes? (:string-value %)
-                          (str/lower-case s))
-          index))
+        (:list
+         :coll)
+        (let [new-value (->> value
+                             (map filter-data)
+                             (remove #{::not-found}))]
+          (if (empty? new-value)
+            ::not-found
+            (with-meta new-value (meta value))))
+
+        (:boolean
+         :symbol
+         :number
+         :string
+         :keyword
+         :var
+         :exception
+         :object
+         :uuid
+         :uri
+         :date
+         :tagged)
+        (if (str/includes? (pr-str value) search-text)
+          value
+          ::not-found)
+
+        ::not-found))))
 
 (defonce show-meta? (r/atom false))
 
@@ -111,7 +146,8 @@
 (defn inspect-1 []
   (let [selected-viewer (r/atom nil)]
     (fn [settings value]
-      (let [compatible-viewers (filter #((:predicate %) value) viewers)
+      (let [value   (filter-data settings value)
+            compatible-viewers (filter #((:predicate %) value) viewers)
             viewer       (or (some #(when (= (:name %) @selected-viewer) %)
                                    compatible-viewers)
                              (first compatible-viewers))
@@ -174,8 +210,6 @@
            {:style {:padding (:spacing/padding settings)}}
            [ins/preview settings value]]]]))))
 
-(defonce search-text (r/atom ""))
-
 (defn search-input [settings]
   [s/input
    {:on-change #(reset! search-text (.-value (.-target %)))
@@ -190,22 +224,6 @@
      :font-size (:font-size settings)
      :color (::c/text settings)
      :border (str "1px solid " (::c/border settings))}}])
-
-(defn search-results [settings]
-  (let [search-text-value @search-text]
-    (when-not (str/blank? search-text-value)
-      [inspect-1
-       (update settings
-               :portal/on-nav
-               (fn [on-nav]
-                 #(do
-                    (-> (on-nav %)
-                        (.then (fn [] (reset! search-text nil)))))))
-       (->>
-        search-text-value
-        (filter-index (:portal/index settings))
-        (map #(dissoc % :string-value))
-        (take 15))])))
 
 (defn button-styles [settings]
   {:background (::c/text settings)
@@ -263,9 +281,6 @@
         (some? (:portal.rpc/exception settings))
         [ins/inspect-exception settings (:portal.rpc/exception settings)]
 
-        (not (str/blank? @search-text))
-        [search-results settings]
-
         :else
         [s/div
          {:style
@@ -317,12 +332,9 @@
    (.then #(swap! state assoc :portal/history '()))))
 
 (defn merge-state [new-state]
-  (let [index (index-value (:portal/value new-state))
-        new-state-with-index
-        (assoc new-state :portal/index index)]
-    (when (false? (:portal/open? (swap! state merge new-state-with-index)))
-      (js/window.close))
-    new-state-with-index))
+  (when (false? (:portal/open? (swap! state merge new-state)))
+    (js/window.close))
+  new-state)
 
 (defn load-state [send!]
   (-> (send!
