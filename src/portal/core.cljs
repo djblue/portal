@@ -244,9 +244,16 @@
      :display :flex
      :align-items :center
      :justify-content :center}}
-   [s/button
-    {:on-click (:portal/on-back settings)
-     :style    (button-styles settings)} "back"]
+   (let [disabled? (nil? (:portal/previous-state settings))]
+     [s/button
+      {:disabled disabled?
+       :on-click (:portal/on-back settings)
+       :style    (merge
+                  (button-styles settings)
+                  (when disabled?
+                    {:opacity 0.5
+                     :cursor  :default}))}
+      "back"])
    [search-input settings]
    [s/button
     {:on-click (:portal/on-clear settings)
