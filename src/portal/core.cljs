@@ -143,72 +143,72 @@
    {:name :portal.viewer/markdown :predicate string?       :component inspect-markdown}
    {:name :portal.viewer/hiccup   :predicate vector?       :component inspect-hiccup}])
 
-(defn inspect-1 []
-  (let [selected-viewer (r/atom nil)]
-    (fn [settings value]
-      (let [value   (filter-data settings value)
-            compatible-viewers (filter #((:predicate %) value) viewers)
-            viewer       (or (some #(when (= (:name %) @selected-viewer) %)
-                                   compatible-viewers)
-                             (first compatible-viewers))
-            component    (or (:component viewer) inspector)
-            settings (assoc settings
-                            :portal/rainbow
-                            (cycle ((juxt ::c/exception ::c/keyword ::c/string
-                                          ::c/tag ::c/number ::c/uri) settings)))]
+(defn inspect-1 [settings value]
+  (let [{:keys [selected-viewer set-settings!]} settings
+        value (filter-data settings value)
+        compatible-viewers (filter #((:predicate %) value) viewers)
+        viewer    (or (some #(when (= (:name %) selected-viewer) %)
+                            compatible-viewers)
+                      (first compatible-viewers))
+        component (or (:component viewer) inspector)
+        settings  (assoc settings
+                         :portal/rainbow
+                         (cycle ((juxt ::c/exception ::c/keyword ::c/string
+                                       ::c/tag ::c/number ::c/uri) settings)))]
+    [s/div
+     {:style
+      {:flex 1}}
+     [s/div
+      {:style
+       {:position :relative
+        :min-height "calc(100% - 64px)"
+        :max-height "calc(100% - 64px)"
+        :min-width "100%"
+        :box-sizing :border-box
+        :border (str "1px solid " (::c/border settings))}}
+      [s/div
+       {:style
+        {:position :absolute
+         :top 0
+         :left 0
+         :right 0
+         :bottom 0
+         :overflow :auto
+         :box-sizing :border-box}}
+       [s/div
+        [inspect-metadata settings value]
         [s/div
          {:style
-          {:flex 1}}
-         [s/div
-          {:style
-           {:position :relative
-            :min-height "calc(100% - 64px)"
-            :max-height "calc(100% - 64px)"
-            :min-width "100%"
-            :box-sizing :border-box
-            :border (str "1px solid " (::c/border settings))}}
-          [s/div
-           {:style
-            {:position :absolute
-             :top 0
-             :left 0
-             :right 0
-             :bottom 0
-             :overflow :auto
-             :box-sizing :border-box}}
-           [s/div
-            [inspect-metadata settings value]
-            [s/div
-             {:style
-              {:box-sizing :border-box
-               :padding (* 2 (:spacing/padding settings))}}
-             [inspector (assoc settings :component component) value]]]]]
-         [s/div
-          {:style
-           {:display :flex
-            :min-height 64
-            :align-items :center
-            :justify-content :space-between
-            :background (::c/background2 settings)}}
-          (if (empty? compatible-viewers)
-            [s/div]
-            [:select
-             {:value (pr-str (:name viewer))
-              :on-change #(reset! selected-viewer
-                                  (keyword (.substr (.. % -target -value) 1)))
-              :style
-              {:background (::c/background settings)
-               :margin (:spacing/padding settings)
-               :padding (:spacing/padding settings)
-               :box-sizing :border
-               :font-size (:font-size settings)
-               :color (::c/text settings)
-               :border (str "1px solid " (::c/border settings))}}
-             (for [{:keys [name]} compatible-viewers]
-               [:option {:key name :value (pr-str name)} (pr-str name)])])
-          [s/div
-           {:style {:padding (:spacing/padding settings)}}
-           [ins/preview settings value]]]]))))
+          {:box-sizing :border-box
+           :padding (* 2 (:spacing/padding settings))}}
+         [inspector (assoc settings :component component) value]]]]]
+     [s/div
+      {:style
+       {:display :flex
+        :min-height 64
+        :align-items :center
+        :justify-content :space-between
+        :background (::c/background2 settings)}}
+      (if (empty? compatible-viewers)
+        [s/div]
+        [:select
+         {:value (pr-str (:name viewer))
+          :on-change #(set-settings!
+                       {:selected-viewer
+                        (keyword (.substr (.. % -target -value) 1))})
+          :style
+          {:background (::c/background settings)
+           :margin (:spacing/padding settings)
+           :padding (:spacing/padding settings)
+           :box-sizing :border
+           :font-size (:font-size settings)
+           :color (::c/text settings)
+           :border (str "1px solid " (::c/border settings))}}
+         (for [{:keys [name]} compatible-viewers]
+           [:option {:key name :value (pr-str name)} (pr-str name)])])
+      [s/div
+       {:style {:padding (:spacing/padding settings)}}
+       [ins/preview settings value]]]]))
 
 (defn search-input [settings]
   [s/input
@@ -264,7 +264,8 @@
 (defonce state (r/atom nil))
 
 (defn app []
-  (let [settings (assoc @state :depth 0)]
+  (let [set-settings! (fn [value] (swap! state merge value))
+        settings (assoc @state :depth 0 :set-settings! set-settings!)]
     [s/div
      {:style
       {:display :flex
