@@ -286,9 +286,10 @@
           {:width "100%"
            :height "100%"
            :display :flex}}
-         [inspect-1
-          settings
-          (:portal/value settings)]])]]))
+         (when (contains? settings :portal/value)
+           [inspect-1
+            settings
+            (:portal/value settings)])])]]))
 
 (defn render-app []
   (r/render [app]
@@ -318,7 +319,13 @@
 (defn on-clear [send!]
   (->
    (send! {:op :portal.rpc/clear-values})
-   (.then #(swap! state assoc :portal/history '()))))
+   (.then #(swap! state
+                  (fn [state]
+                    (-> state
+                        (dissoc :portal/value)
+                        (assoc
+                         :portal/previous-state nil
+                         :portal/next-state nil)))))))
 
 (defn merge-state [new-state]
   (when (false? (:portal/open? (swap! state merge new-state)))
@@ -341,8 +348,7 @@
     :limits/max-length 1000
     :layout/direction :row
     :spacing/padding 8
-    :border-radius "2px"
-    :portal/history '()}
+    :border-radius "2px"}
    (:portal.themes/nord c/themes)))
 
 (defn get-actions [send!]
