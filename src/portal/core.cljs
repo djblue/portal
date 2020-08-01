@@ -14,10 +14,8 @@
             [portal.viewer.tree :refer [inspect-tree-1]]
             [reagent.core :as r]))
 
-(defonce search-text (r/atom ""))
-
 (defn filter-data [settings value]
-  (let [search-text @search-text
+  (let [search-text (:search-text settings)
         filter-data (partial filter-data settings)]
     (if (str/blank? search-text)
       value
@@ -212,8 +210,9 @@
 
 (defn search-input [settings]
   [s/input
-   {:on-change #(reset! search-text (.-value (.-target %)))
-    :value @search-text
+   {:on-change #((:set-settings! settings)
+                 {:search-text (.-value (.-target %))})
+    :value (:search-text settings)
     :placeholder "Type to filter..."
     :style
     {:flex "1"
@@ -306,6 +305,7 @@
                        (fn [state]
                          (assoc state
                                 :portal/previous-state state
+                                :search-text ""
                                 :portal/value (:value %))))))))
 
 (defn on-clear [send!]
