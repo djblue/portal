@@ -1,7 +1,7 @@
 (ns portal.viewer.tree
   (:require [portal.inspector :as ins :refer [inspector]]
             [portal.styled :as s]
-            [react-visibility-sensor :default VisibilitySensor]
+            [portal.lazy :as l]
             [reagent.core :as r]))
 
 (defn delimiter [value]
@@ -91,18 +91,6 @@
                child
                close])]])))))
 
-(defn for-lazy []
-  (let [n (r/atom 0)]
-    (fn [seqable]
-      [:<>
-       (take @n seqable)
-       (when (seq (drop @n seqable))
-         [:> VisibilitySensor
-          {:key @n
-           :on-change
-           #(when % (swap! n + 5))}
-          [s/div {:style {:height "1em" :width "1em"}}]])])))
-
 (defn inspect-tree-map [settings value]
   [s/div
    {:style
@@ -110,7 +98,7 @@
      :flex-direction :column
      :flex-wrap :wrap
      :align-items :top}}
-   [for-lazy
+   [l/lazy-seq
     (for [[k v] value]
       ^{:key (hash k)}
       [inspect-tree-item settings
@@ -126,7 +114,7 @@
      :flex-direction :column
      :flex-wrap :wrap
      :align-items :top}}
-   [for-lazy
+   [l/lazy-seq
     (map-indexed
      (fn [idx item]
        ^{:key idx}
