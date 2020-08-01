@@ -6,3 +6,4 @@ cljs-runtime/
 resources/main.js
 resources/manifest.edn
 .clj-kondo/.cache/
+.DS_Store
