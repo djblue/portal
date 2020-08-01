@@ -162,8 +162,7 @@
         :min-height "calc(100% - 64px)"
         :max-height "calc(100% - 64px)"
         :min-width "100%"
-        :box-sizing :border-box
-        :border (str "1px solid " (::c/border settings))}}
+        :box-sizing :border-box}}
       [s/div
        {:style
         {:position :absolute
@@ -183,10 +182,11 @@
      [s/div
       {:style
        {:display :flex
-        :min-height 64
+        :min-height 63
         :align-items :center
         :justify-content :space-between
-        :background (::c/background2 settings)}}
+        :background (::c/background2 settings)
+        :border-top (str "1px solid " (::c/border settings))}}
       (if (empty? compatible-viewers)
         [s/div]
         [:select
@@ -215,9 +215,7 @@
     :value (:search-text settings)
     :placeholder "Type to filter..."
     :style
-    {:flex "1"
-     :background (::c/background settings)
-     :margin (:spacing/padding settings)
+    {:background (::c/background settings)
      :padding (:spacing/padding settings)
      :box-sizing :border-box
      :font-size (:font-size settings)
@@ -227,37 +225,66 @@
 (defn button-styles [settings]
   {:background (::c/text settings)
    :color (::c/background settings)
-   :font-size (:font-size settings)
    :border :none
+   :font-size (:font-size settings)
    :box-sizing :border-box
-   :padding "10px 20px"
+   :padding-left (inc (:spacing/padding settings))
+   :padding-right (inc (:spacing/padding settings))
+   :padding-top (inc (:spacing/padding settings))
+   :padding-bottom (inc (:spacing/padding settings))
    :border-radius (:border-radius settings)
-   :cursor :pointer
-   :margin "0 20px"})
+   :cursor :pointer})
 
 (defn toolbar [settings]
   [s/div
    {:style
-    {:height "64px"
-     :flex-direction :row
+    {:display :grid
+     :grid-template-columns "auto auto 1fr auto"
+     :padding-left (* 2 (:spacing/padding settings))
+     :padding-right (* 2 (:spacing/padding settings))
+     :box-sizing :border-box
+     :grid-gap (* 2 (:spacing/padding settings))
+     :height 63
      :background (::c/background2 settings)
-     :display :flex
      :align-items :center
-     :justify-content :center}}
+     :justify-content :center
+     :border-bottom (str "1px solid " (::c/border settings))}}
    (let [disabled? (nil? (:portal/previous-state settings))]
      [s/button
       {:disabled disabled?
+       :title    "go back"
        :on-click (:portal/on-back settings)
        :style    (merge
                   (button-styles settings)
                   (when disabled?
-                    {:opacity 0.5
+                    {:opacity 0.45
                      :cursor  :default}))}
-      "back"])
+      "◄"])
+   (let [disabled? (nil? (:portal/next-state settings))]
+     [s/button
+      {:disabled disabled?
+       :title    "go next"
+       :on-click (:portal/on-forward settings)
+       :style    (merge
+                  (button-styles settings)
+                  (when disabled?
+                    {:opacity 0.45
+                     :cursor  :default}))}
+      "►"])
    [search-input settings]
-   [s/button
-    {:on-click (:portal/on-clear settings)
-     :style    (button-styles settings)} "clear"]])
+   (let [disabled? (not (contains? settings :portal/value))]
+     [s/button
+      {:disabled disabled?
+       :title    "clear portal"
+       :on-click (:portal/on-clear settings)
+       :style    (merge
+                  (button-styles settings)
+                  (when disabled?
+                    {:opacity 0.45
+                     :cursor  :default})
+                  {:padding-left (* 2 (:spacing/padding settings))
+                   :padding-right (* 2 (:spacing/padding settings))})}
+      "clear"])])
 
 (defonce state (r/atom nil))
 
@@ -302,7 +329,18 @@
      (when-not complete? (promise-loop f)))))
 
 (defn on-back []
-  (swap! state get :portal/previous-state @state))
+  (swap! state
+         (fn [state]
+           (if-let [previous-state (:portal/previous-state state)]
+             (assoc previous-state :portal/next-state state)
+             state))))
+
+(defn on-forward []
+  (swap! state
+         (fn [state]
+           (if-let [next-state (:portal/next-state state)]
+             next-state
+             state))))
 
 (defn on-nav [send! target]
   (-> (send!
@@ -313,6 +351,7 @@
                        (fn [state]
                          (assoc state
                                 :portal/previous-state state
+                                :portal/next-state nil
                                 :search-text ""
                                 :portal/value (:value %))))))))
 
@@ -355,6 +394,7 @@
   {:portal/on-clear (partial on-clear send!)
    :portal/on-nav   (partial on-nav send!)
    :portal/on-back  (partial on-back send!)
+   :portal/on-forward (partial on-forward send!)
    :portal/on-load  (partial load-state send!)})
 
 (defn main!
