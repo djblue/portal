@@ -253,14 +253,6 @@
     {:on-click (:portal/on-clear settings)
      :style    (button-styles settings)} "clear"]])
 
-(defn get-history-stack [settings]
-  (if (empty? (:portal/history settings))
-    [(list (:portal/value settings))]
-    (loop [ls (:portal/history settings) result []]
-      (if (empty? ls)
-        result
-        (recur (rest ls) (conj result ls))))))
-
 (defonce state (r/atom nil))
 
 (defn app []
@@ -288,21 +280,9 @@
           {:width "100%"
            :height "100%"
            :display :flex}}
-         (->>
-          (get-history-stack settings)
-          (take (:limits/max-panes settings))
-          reverse
-          (map-indexed
-           (fn [idx ls]
-             [:<>
-              {:key idx}
-              [inspect-1
-               (-> settings
-                   (assoc :coll (second ls))
-                   (update
-                    :portal/on-nav
-                    (fn [on-nav] #(on-nav (assoc % :history ls)))))
-               (first ls)]])))])]]))
+         [inspect-1
+          settings
+          (:portal/value settings)]])]]))
 
 (defn render-app []
   (r/render [app]
@@ -315,17 +295,18 @@
      (when-not complete? (promise-loop f)))))
 
 (defn on-back []
-  (swap! state update :portal/history rest))
+  (swap! state get :portal/previous-state @state))
 
 (defn on-nav [send! target]
-  (->  (send!
-        {:op :portal.rpc/on-nav
-         :args [(:coll target) (:k target) (:value target)]})
-       (.then #(when-not (= (:value %) (first (:history target)))
-                 (swap! state
-                        assoc
-                        :portal/history
-                        (conj (:history target) (:value %)))))))
+  (-> (send!
+       {:op :portal.rpc/on-nav
+        :args [(:coll target) (:k target) (:value target)]})
+      (.then #(when-not (= (:value %) (:portal/value @state))
+                (swap! state
+                       (fn [state]
+                         (assoc state
+                                :portal/previous-state state
+                                :portal/value (:value %))))))))
 
 (defn on-clear [send!]
   (->
@@ -350,7 +331,6 @@
     :font-size "12pt"
     :limits/string-length 100
     :limits/max-depth 1
-    :limits/max-panes 1
     :limits/max-length 1000
     :layout/direction :row
     :spacing/padding 8
