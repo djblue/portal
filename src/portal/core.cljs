@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [cognitect.transit :as t]
             [portal.colors :as c]
+            [portal.drag-and-drop :as dnd]
             [portal.inspector :as ins :refer [inspector]]
             [portal.rpc :as rpc]
             [portal.styled :as s]
@@ -292,32 +293,34 @@
 (defn app []
   (let [set-settings! (fn [value] (swap! state merge value))
         settings (assoc @state :depth 0 :set-settings! set-settings!)]
-    [s/div
-     {:style
-      {:display :flex
-       :flex-direction :column
-       :background (::c/background settings)
-       :color (::c/text settings)
-       :font-family (:font/family settings)
-       :font-size (:font-size settings)
-       :height "100vh"
-       :width "100vw"}}
-     [toolbar settings]
-     [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
-      (cond
-        (some? (:portal.rpc/exception settings))
-        [ins/inspect-exception settings (:portal.rpc/exception settings)]
+    [dnd/area
+     settings
+     [s/div
+      {:style
+       {:display :flex
+        :flex-direction :column
+        :background (::c/background settings)
+        :color (::c/text settings)
+        :font-family (:font/family settings)
+        :font-size (:font-size settings)
+        :height "100vh"
+        :width "100vw"}}
+      [toolbar settings]
+      [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
+       (cond
+         (some? (:portal.rpc/exception settings))
+         [ins/inspect-exception settings (:portal.rpc/exception settings)]
 
-        :else
-        [s/div
-         {:style
-          {:width "100%"
-           :height "100%"
-           :display :flex}}
-         (when (contains? settings :portal/value)
-           [inspect-1
-            settings
-            (:portal/value settings)])])]]))
+         :else
+         [s/div
+          {:style
+           {:width "100%"
+            :height "100%"
+            :display :flex}}
+          (when (contains? settings :portal/value)
+            [inspect-1
+             settings
+             (:portal/value settings)])])]]]))
 
 (defn render-app []
   (r/render [app]
