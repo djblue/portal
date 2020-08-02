@@ -1,3 +1,5 @@
+.PHONY: dev
+
 all: release
 
 node_modules: package.json
@@ -10,7 +12,7 @@ release: node_modules
 	clojure -A:cljs:shadow-cljs release client
 
 lint:
-	clojure -A:kondo --lint src
+	clojure -A:kondo --lint dev src
 	clojure -A:cljfmt check
 
 fmt:
