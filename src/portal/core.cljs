@@ -256,10 +256,11 @@
        :on-click (:portal/on-back settings)
        :style    (merge
                   (button-styles settings)
+                  {:transform "rotate(180deg)"}
                   (when disabled?
                     {:opacity 0.45
                      :cursor  :default}))}
-      "◄"])
+      "►"])
    (let [disabled? (nil? (:portal/next-state settings))]
      [s/button
       {:disabled disabled?
