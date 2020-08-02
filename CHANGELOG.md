@@ -1,0 +1,21 @@
+## 0.2.0 - 2020-08-02
+
+- Add drag and drop feature to portal
+- Add lines numbers to text viewer
+- Filter lines in text viewer
+- Lazy render text viewer
+- Add forward navigation
+- Preserve viewer selection on navigation
+- Preserve filter text on navigation
+- Disable navigation buttons when not possible
+
+## 0.1.1 - 2020-07-26
+
+- Special case rendering urls encoded as strings
+- Simplify filtering
+- Improve tree viewer complex key handling
+
+## 0.1.0 - 2020-07-24
+
+- Initial release
+
