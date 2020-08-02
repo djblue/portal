@@ -39,7 +39,9 @@
                             :when (= (.-kind item) "file")]
                         (.getAsFile item))]
             ((:set-settings! settings)
-             {:portal/value (mapv file->map value)}))
+             {:portal/value (mapv file->map value)
+              :portal/previous-state nil
+              :portal/next-state nil}))
           (reset! active? false))
         :style {:position :relative}}
        (when @active?
