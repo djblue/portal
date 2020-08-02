@@ -44,6 +44,6 @@
             {:style
              {:color (::c/text settings)
               :font-size (:font-size settings)}}
-            [:pre line-content]]])))
+            [:pre {:style {:margin 0}} line-content]]])))
       {:default-take 100 :step 100}]]]])
 
