@@ -2,12 +2,24 @@
   (:require [portal.styled :as s]
             [reagent.core :as r]))
 
+(defn read-file [file]
+  (js/Promise.
+   (fn [resolve reject]
+     (let [reader (js/window.FileReader.)]
+       (.addEventListener
+        reader
+        "load"
+        (fn [e]
+          (resolve (.-result (.-target e)))))
+       (.addEventListener reader "error" reject)
+       (.readAsText reader file)))))
+
 (defn file->map [file]
   {:name (.-name file)
    :size (.-size file)
    :type (.-type file)
    :last-modified (js/Date. (.-lastModified file))
-   :text          (.text file)})
+   :text          (read-file file)})
 
 (defn area []
   (let [active? (r/atom false)]
