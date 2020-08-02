@@ -39,7 +39,7 @@
               :user-select :none
               :text-align :right
               :padding-right (* 2 (:spacing/padding settings))}}
-            [:span (inc line)]]
+            [:span line]]
            [s/td
             {:style
              {:color (::c/text settings)
