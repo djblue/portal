@@ -288,11 +288,12 @@
                    :padding-right (* 2 (:spacing/padding settings))})}
       "clear"])])
 
-(defonce state (r/atom nil))
+(defonce state     (r/atom nil))
+(defonce tap-state (r/atom nil))
 
 (defn app []
   (let [set-settings! (fn [value] (swap! state merge value))
-        settings (assoc @state :depth 0 :set-settings! set-settings!)]
+        settings (merge @tap-state (assoc @state :depth 0 :set-settings! set-settings!))]
     [dnd/area
      settings
      [s/div
@@ -371,14 +372,14 @@
                          :portal/next-state nil)))))))
 
 (defn merge-state [new-state]
-  (when (false? (:portal/open? (swap! state merge new-state)))
+  (when (false? (:portal/open? (swap! tap-state merge new-state)))
     (js/window.close))
   new-state)
 
 (defn load-state [send!]
   (-> (send!
-       {:op             :portal.rpc/load-state
-        :portal/state-id (:portal/state-id @state)})
+       {:op              :portal.rpc/load-state
+        :portal/state-id (:portal/state-id @tap-state)})
       (.then merge-state)
       (.then #(:portal/complete? %))))
 
