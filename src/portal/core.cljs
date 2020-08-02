@@ -339,7 +339,7 @@
   (swap! state
          (fn [state]
            (if-let [next-state (:portal/next-state state)]
-             next-state
+             (assoc next-state :portal/previous-state state)
              state))))
 
 (defn on-nav [send! target]
