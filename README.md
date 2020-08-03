@@ -4,6 +4,9 @@ A clojure tool to navigate through your data.
 
 [![Clojars Project](https://clojars.org/djblue/portal/latest-version.svg)](https://clojars.org/djblue/portal)
 
+[![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/portal)
+
+
 ## Client
 
 [![screenshot](https://raw.githubusercontent.com/djblue/portal/master/resources/screenshot.png)](http://djblue.github.io/portal/)
