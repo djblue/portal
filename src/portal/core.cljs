@@ -1,6 +1,5 @@
 (ns portal.core
   (:require [clojure.string :as str]
-            [cognitect.transit :as t]
             [portal.colors :as c]
             [portal.drag-and-drop :as dnd]
             [portal.inspector :as ins :refer [inspector]]
@@ -89,10 +88,7 @@
 (defonce show-meta? (r/atom false))
 
 (defn inspect-metadata [settings value]
-  (when-let [m (meta
-                (if-not (t/tagged-value? value)
-                  value
-                  (.-rep value)))]
+  (when-let [m (meta value)]
     [s/div
      {:style
       {:border-bottom (str "1px solid " (::c/border settings))}}

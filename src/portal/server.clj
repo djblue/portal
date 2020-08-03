@@ -42,9 +42,11 @@
           (transit/write-handler
            "portal.transit/object"
            (fn [o]
-             (with-meta
-               {:id (instance->uuid o) :type (pr-str (type o)) :string (pr-str o)}
-               (meta o))))})]
+             {:id (instance->uuid o)
+              :meta (when (instance? clojure.lang.IObj o)
+                      (meta o))
+              :type (pr-str (type o))
+              :string (pr-str o)}))})]
     (transit/write writer value)
     (.toString out)))
 
