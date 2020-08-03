@@ -4,8 +4,6 @@ A clojure tool to navigate through your data.
 
 [![Clojars Project](https://clojars.org/djblue/portal/latest-version.svg)](https://clojars.org/djblue/portal)
 
-State: alpha, but usable
-
 ## Client
 
 [![screenshot](https://raw.githubusercontent.com/djblue/portal/master/resources/screenshot.png)](http://djblue.github.io/portal/)
