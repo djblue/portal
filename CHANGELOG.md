@@ -1,3 +1,8 @@
+## 0.2.1 - 2020-08-02
+
+- Fix issue with finding chrome in windows
+- Fix issue with transit, tagged values and metadata
+
 ## 0.2.0 - 2020-08-02
 
 - Add drag and drop feature to portal

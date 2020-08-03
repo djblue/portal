@@ -25,13 +25,13 @@ The UX will probably evolve over time and user feedback is welcome!
 To start a repl with portal, run the clojure cli with:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.2.0"}}}'
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.2.1"}}}'
 ```
 
 or for a node clojurescript repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.2.0"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.2.1"}
                     org.clojure/clojurescript {:mvn/version "1.10.758"}}}' \
     -m cljs.main -re node
 ```
