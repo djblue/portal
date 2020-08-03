@@ -1,5 +1,6 @@
 (ns portal.main
-  (:require [clojure.java.io :as io]
+  (:require [clojure.java.browse :refer [browse-url]]
+            [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
             [clojure.edn :as edn]
@@ -36,11 +37,14 @@
     (reset!
      server
      (server/start #'server/handler)))
-  (sh (get-chrome-bin)
-      "--incognito"
-      "--disable-features=TranslateUI"
-      "--no-first-run"
-      (str "--app=http://localhost:" (-> @server meta :local-port))))
+  (let [url (str "http://localhost:" (-> @server meta :local-port))]
+    (if-let [bin (get-chrome-bin)]
+      (sh bin
+          "--incognito"
+          "--disable-features=TranslateUI"
+          "--no-first-run"
+          (str "--app=" url))
+      (browse-url url))))
 
 (defn close-inspector []
   (swap! rt/state assoc :portal/open? false)
