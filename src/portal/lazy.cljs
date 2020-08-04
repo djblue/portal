@@ -6,7 +6,7 @@
 
 (defn lazy-seq [_ opts]
   (let [{:keys [default-take step]
-         :or   {default-take 0 step 5}} opts
+         :or   {default-take 0 step 10}} opts
         n (r/atom default-take)]
     (fn [seqable]
       [:<>

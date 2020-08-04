@@ -1,9 +1,10 @@
 (ns portal.inspector
-  (:require [portal.styled :as s]
-            [portal.colors :as c]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [cognitect.transit :as t]
-            [lambdaisland.deep-diff2.diff-impl :as diff]))
+            [lambdaisland.deep-diff2.diff-impl :as diff]
+            [portal.colors :as c]
+            [portal.lazy :as l]
+            [portal.styled :as s]))
 
 (defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))
@@ -142,19 +143,16 @@
 (defn inspect-map [settings values]
   [container-map
    settings
-   (take
-    (:limits/max-length settings)
-    (filter
-     some?
-     (for [[k v] values]
-       [:<>
-        {:key (hash k)}
-        [container-map-k
-         settings
-         [inspector (assoc settings :coll values) k]]
-        [container-map-v
-         settings
-         [inspector (assoc settings :coll values :k k) v]]])))])
+   [l/lazy-seq
+    (for [[k v] values]
+      [:<>
+       {:key (hash k)}
+       [container-map-k
+        settings
+        [inspector (assoc settings :coll values) k]]
+       [container-map-v
+        settings
+        [inspector (assoc settings :coll values :k k) v]]])]])
 
 (defn container-coll [settings child]
   [s/div
@@ -174,13 +172,12 @@
 (defn inspect-coll [settings values]
   [container-coll
    settings
-   (->> values
-        (map-indexed
-         (fn [idx itm]
-           ^{:key idx}
-           [inspector (assoc settings :coll values :k idx) itm]))
-        (filter some?)
-        (take (:limits/max-length settings)))])
+   [l/lazy-seq
+    (map-indexed
+     (fn [idx itm]
+       ^{:key idx}
+       [inspector (assoc settings :coll values :k idx) itm])
+     values)]])
 
 (defn trim-string [settings s]
   (let [max-length (:limits/string-length settings)]

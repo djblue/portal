@@ -1,6 +1,7 @@
 (ns portal.viewer.table
   (:require [portal.colors :as c]
             [portal.inspector :as ins :refer [inspector]]
+            [portal.lazy :as l]
             [portal.styled :as s]))
 
 (defn table-view? [value]
@@ -28,21 +29,22 @@
                   :padding (:spacing/padding settings)}}
            [inspector (assoc settings :coll values) column]])
         columns)]
-      (map-indexed
-       (fn [grid-row row]
-         [s/tr {:key grid-row}
-          (map-indexed
-           (fn [grid-column column]
-             [s/td
-              {:key grid-column
-               :style
-               {:border (str "1px solid " (::c/border settings))
-                :background background
-                :padding (:spacing/padding settings)
-                :box-sizing :border-box}}
-              (when (contains? row column)
-                [inspector
-                 (assoc settings :coll row :k column)
-                 (get row column)])])
-           columns)])
-       values)]]))
+      [l/lazy-seq
+       (map-indexed
+        (fn [grid-row row]
+          [s/tr {:key grid-row}
+           (map-indexed
+            (fn [grid-column column]
+              [s/td
+               {:key grid-column
+                :style
+                {:border (str "1px solid " (::c/border settings))
+                 :background background
+                 :padding (:spacing/padding settings)
+                 :box-sizing :border-box}}
+               (when (contains? row column)
+                 [inspector
+                  (assoc settings :coll row :k column)
+                  (get row column)])])
+            columns)])
+        values)]]]))
