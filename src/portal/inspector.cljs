@@ -397,16 +397,20 @@
                         (if preview?
                           (get-preview-component type)
                           (get-inspect-component type))))
-        settings (-> settings (update :depth inc) (dissoc :component))]
+        settings (-> settings (update :depth inc) (dissoc :component))
+        nav-target? (= 2 (:depth settings))
+        on-nav #((:portal/on-nav settings) (assoc settings :value value))]
     [s/div
      {:on-click
       (fn [e]
-        (when (= 2 (:depth settings))
+        (when nav-target?
           (.stopPropagation e)
-          ((:portal/on-nav settings)
-           (merge
-            {:value value}
-            (select-keys settings [:coll :k])))))
+          (on-nav)))
+      :on-key-down
+      (fn [e]
+        (when (= (.-key e) "Enter")
+          (.stopPropagation e)
+          (on-nav)))
       :style {:cursor :pointer
               :width "100%"
               :padding (when (or preview? (not (coll? value)))
@@ -414,8 +418,9 @@
               :box-sizing :border-box
               :border-radius (:border-radius settings)
               :border "1px solid rgba(0,0,0,0)"}
+      :tab-index (when nav-target? 0)
       :style/hover {:border
-                    (when (= 2 (:depth settings))
+                    (when nav-target?
                       "1px solid #D8DEE9")}}
      [component settings value]]))
 
