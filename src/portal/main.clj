@@ -39,11 +39,12 @@
      (server/start #'server/handler)))
   (let [url (str "http://localhost:" (-> @server meta :local-port))]
     (if-let [bin (get-chrome-bin)]
-      (sh bin
-          "--incognito"
-          "--disable-features=TranslateUI"
-          "--no-first-run"
-          (str "--app=" url))
+      (future
+        (sh bin
+            "--incognito"
+            "--disable-features=TranslateUI"
+            "--no-first-run"
+            (str "--app=" url)))
       (browse-url url))))
 
 (defn close-inspector []
