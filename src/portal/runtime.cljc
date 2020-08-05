@@ -61,7 +61,7 @@
   ;(prn (meta (first (:args request))))
   ;(prn (:args request))
   (let [[coll k v] (:args request)
-        naved      (nav coll k v)]
+        naved      (if coll (nav coll k v) v)]
     (if (= naved v)
       ; allow untransformed promises to pass freely
       (on-datafy naved done)
