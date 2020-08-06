@@ -31,7 +31,15 @@ To start a repl with portal, run the clojure cli with:
 clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.3.0"}}}'
 ```
 
-or for a node clojurescript repl, do:
+or for a **web** clojurescript repl, do:
+
+```bash
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.3.0"}
+                    org.clojure/clojurescript {:mvn/version "1.10.758"}}}' \
+    -m cljs.main
+```
+
+or for a **node** clojurescript repl, do:
 
 ```bash
 clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.3.0"}
@@ -42,7 +50,15 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.3.0"}
 then try the portal api with the following commands:
 
 ```clojure
+;; for node and jvm
 (require '[portal.api :as p])
+
+;; for web
+;; NOTE: you will need to enable browser popups for portal to work in the
+;; browser. If you do not, the UI will not display.
+(require '[portal.web :as p])
+
+
 
 (p/open) ; Open a new inspector
 
