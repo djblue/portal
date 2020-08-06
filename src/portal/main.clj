@@ -6,7 +6,8 @@
             [clojure.edn :as edn]
             [clojure.data.json :as json]
             [portal.server :as server]
-            [portal.runtime :as rt])
+            [portal.runtime :as rt]
+            [portal.runtime.transit :as t])
   (:import [java.io PushbackReader]))
 
 (defn get-paths []
@@ -28,7 +29,6 @@
 (defn read-edn [reader]
   (with-open [in (PushbackReader. reader)] (edn/read in)))
 
-;(defonce state (atom nil))
 (defonce server (atom nil))
 
 (defn open-inspector []
@@ -52,16 +52,12 @@
   (server/stop @server)
   (reset! server nil))
 
-(defn inspect [v]
-  (.start (Thread. #(rt/update-value v)))
-  v)
-
 (defn -main [& args]
   (let [[input-format] args
         in (case input-format
              "json"     (-> System/in io/reader (json/read :key-fn keyword))
              "edn"      (-> System/in io/reader read-edn)
-             "transit"  (-> System/in server/transit-stream->value))]
+             "transit"  (-> System/in t/json-stream->edn))]
     (rt/update-value in)
     (open-inspector)
     (shutdown-agents)))

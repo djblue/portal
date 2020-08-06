@@ -8,7 +8,23 @@
 #?(:clj (def random-uuid #(UUID/randomUUID)))
 
 (defonce instance-cache (atom {}))
-(defonce state (atom nil))
+
+(defn instance->uuid [instance]
+  (let [k [:instance instance]]
+    (-> instance-cache
+        (swap!
+         (fn [cache]
+           (if (contains? cache k)
+             cache
+             (let [uuid (random-uuid)]
+               (assoc cache [:uuid uuid] instance k uuid)))))
+        (get k))))
+
+(defn uuid->instance [uuid]
+  (get @instance-cache [:uuid uuid]))
+
+(defonce state (atom {:portal/state-id (random-uuid)
+                      :portal/value (list)}))
 
 (defn update-setting [k v] (swap! state assoc k v) true)
 

@@ -331,6 +331,7 @@
      (when-not complete? (promise-loop f)))))
 
 (defn on-back []
+  (tap> ::on-back)
   (swap! state
          (fn [state]
            (if-let [previous-state (:portal/previous-state state)]
@@ -338,6 +339,7 @@
              state))))
 
 (defn on-forward []
+  (tap> ::on-forward)
   (swap! state
          (fn [state]
            (if-let [next-state (:portal/next-state state)]
@@ -345,6 +347,7 @@
              state))))
 
 (defn on-nav [send! target]
+  (tap> ::on-nav)
   (-> (send!
        {:op :portal.rpc/on-nav
         :args [(:coll target) (:k target) (:value target)]})
@@ -358,6 +361,7 @@
                                 :portal/value (:value %))))))))
 
 (defn on-clear [send!]
+  (tap> ::on-clear)
   (->
    (send! {:op :portal.rpc/clear-values})
    (.then #(swap! state
@@ -399,12 +403,22 @@
    :portal/on-forward (partial on-forward send!)
    :portal/on-load  (partial load-state send!)})
 
+(defn ^:export start! [send!]
+  (let [send! #(.then
+                (send! (rpc/edn->json %))
+                rpc/json->edn)
+        settings (get-actions send!)]
+    (swap! state merge default-settings settings)
+    (promise-loop (:portal/on-load settings))
+    (render-app)))
+
 (defn main!
   ([] (main! (get-actions rpc/send!)))
   ([settings]
-   (swap! state merge default-settings settings)
-   (promise-loop (:portal/on-load settings))
-   (render-app)))
+   (when js/window.PORTAL_AUTO_START
+     (swap! state merge default-settings settings)
+     (promise-loop (:portal/on-load settings))
+     (render-app))))
 
 (defn reload! []
   ((:portal/on-load @state))

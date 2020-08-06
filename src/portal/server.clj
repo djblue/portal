@@ -1,96 +1,36 @@
 (ns portal.server
   (:require [clojure.java.io :as io]
-            [cognitect.transit :as transit]
             [org.httpkit.server :as server]
-            [io.aviso.exception :as ex]
-            [portal.runtime :as rt])
-  (:import [java.io ByteArrayOutputStream]
-           [java.util UUID]))
+            [portal.runtime :as rt]
+            [portal.runtime.transit :as t]))
 
-(defn instance->uuid [instance]
-  (let [k [:instance instance]]
-    (-> rt/instance-cache
-        (swap!
-         (fn [cache]
-           (if (contains? cache k)
-             cache
-             (let [uuid (UUID/randomUUID)]
-               (assoc cache [:uuid uuid] instance k uuid)))))
-        (get k))))
-
-(defn uuid->instance [uuid]
-  (get @rt/instance-cache [:uuid uuid]))
-
-(defn var->symbol [v]
-  (let [m (meta v)]
-    (with-meta (symbol (str (:ns m)) (str (:name m))) m)))
-
-(defn value->transit-stream [value out]
-  (let [writer
-        (transit/writer
-         out
-         :json
-         {:handlers
-          {clojure.lang.Var
-           (transit/write-handler "portal.transit/var" var->symbol)
-           java.net.URL
-           (transit/write-handler "r" str)
-           java.lang.Throwable
-           (transit/write-handler "portal.transit/exception" #(ex/analyze-exception % nil))}
-          :transform transit/write-meta
-          :default-handler
-          (transit/write-handler
-           "portal.transit/object"
-           (fn [o]
-             {:id (instance->uuid o)
-              :meta (when (instance? clojure.lang.IObj o)
-                      (meta o))
-              :type (pr-str (type o))
-              :string (pr-str o)}))})]
-    (transit/write writer value)
-    (.toString out)))
-
-(defn transit-stream->value [in]
-  (transit/read
-   (transit/reader
-    in
-    :json
-    {:handlers
-     {"portal.transit/var" (transit/read-handler find-var)
-      "portal.transit/object" (transit/read-handler (comp uuid->instance :id))}})))
-
-(defn value->transit [value]
-  (let [out (ByteArrayOutputStream. (* 10 1024 1024))]
-    (value->transit-stream value out)
-    (.toString out)))
-
-(defn send-rpc [channel value]
+(defn- send-rpc [channel value]
   (server/send!
    channel
    {:status 200
     :headers {"Content-Type"
               "application/transit+json; charset=utf-8"}
     :body (try
-            (value->transit
+            (t/edn->json
              (assoc value :portal.rpc/exception nil))
             (catch Exception e
-              (value->transit
+              (t/edn->json
                {:portal/state-id (:portal/state-id value)
                 :portal.rpc/exception e})))}))
 
-(defn not-found [_request done]
+(defn- not-found [_request done]
   (done {:status :not-found}))
 
-(defn rpc-handler [request]
+(defn- rpc-handler [request]
   (server/with-channel request channel
-    (let [body  (transit-stream->value (:body request))
+    (let [body  (t/json-stream->edn (:body request))
           op    (get rt/ops (:op body) not-found)
           done  #(send-rpc channel %)
           f     (op body done)]
       (when (fn? f)
         (server/on-close channel f)))))
 
-(defn send-resource [content-type resource-name]
+(defn- send-resource [content-type resource-name]
   {:status  200
    :headers {"Content-Type" content-type}
    :body    (-> resource-name io/resource slurp)})

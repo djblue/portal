@@ -2,6 +2,7 @@
   (:require [portal.core :as portal]
             [examples.data :refer [data]]
             [portal.async :as a]
+            [portal.web :as p]
             [clojure.datafy :refer [datafy nav]]))
 
 (defn send! [msg]
@@ -16,6 +17,7 @@
        {:value (datafy res)}))))
 
 (defn main! []
+  (p/tap)
   (portal/main! (portal/get-actions #'send!)))
 
 (defn reload! [] (portal/reload!))
