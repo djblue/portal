@@ -245,6 +245,7 @@
      :background (::c/background2 settings)
      :align-items :center
      :justify-content :center
+     :border-top (str "1px solid " (::c/border settings))
      :border-bottom (str "1px solid " (::c/border settings))}}
    (let [disabled? (nil? (:portal/previous-state settings))]
      [s/button
