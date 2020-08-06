@@ -193,26 +193,3 @@
 
 (defn -main [])
 
-(comment
-  (add-tap #'rt/update-value)
-
-  (tap> #'rt/update-value)
-
-  (require 'examples.hacker-news)
-  (tap> examples.hacker-news/stories)
-
-  (tap> (slurp "deps.edn"))
-  (tap> (js/Promise.resolve 1))
-  (tap> 1)
-
-  ;(extend-protocol clojure.core.protocols/Datafiable
-  ;  js/Promise
-  ;  (datafy [this] (.then this identity)))
-
-  (open-inspector)
-  (-> @rt/instance-cache)
-  (-> @server)
-  (close-inspector)
-  (rt/clear-values)
-
-  (stop @server))
