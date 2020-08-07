@@ -9,12 +9,12 @@
             [portal.runtime :as rt]
             [portal.runtime.transit :as t]))
 
-(defn get-paths []
+(defn- get-paths []
   (concat
    ["/Applications/Google Chrome.app/Contents/MacOS"]
    (s/split (.-PATH js/process.env) #":")))
 
-(defn find-bin [files]
+(defn- find-bin [files]
   (some
    identity
    (for [path (get-paths) file files]
@@ -23,21 +23,13 @@
                       (catch js/Error _e true))
          f)))))
 
-(defn get-chrome-bin []
+(defn- get-chrome-bin []
   (find-bin #{"chrome" "google-chrome-stable" "chromium" "Google Chrome"}))
 
 ;; server.cljs
 
-(defn slurp [file-name]
-  (js/Promise.
-   (fn [resolve reject]
-     (fs/readFile
-      file-name
-      "utf8"
-      (fn [err data]
-        (if err (reject err) (resolve data)))))))
 
-(defn sh [bin & args]
+(defn- sh [bin & args]
   (js/Promise.
    (fn [resolve reject]
      (let [ps (cp/spawn bin (clj->js args))]
@@ -46,7 +38,7 @@
 
 (defonce server (atom nil))
 
-(defn buffer-body [request]
+(defn- buffer-body [request]
   (js/Promise.
    (fn [resolve reject]
      (let [body (atom "")]
@@ -83,7 +75,7 @@
       (.writeHead 200 #js {"Content-Type" content-type})
       (.end body)))
 
-(defn handler [request response]
+(defn- handler [request response]
   (let [paths
         {"/"        #(send-resource response "text/html"       (io/resource "index.html"))
          "/main.js" #(send-resource response "text/javascript" (io/resource "main.js"))
@@ -92,7 +84,7 @@
         f (get paths (.-url request) #(-> response (.writeHead 404) .end))]
     (when (fn? f) (f))))
 
-(defn start [handler]
+(defn- start [handler]
   (js/Promise.
    (fn [resolve _reject]
      (let [server (http/createServer #(handler %1 %2))]
@@ -101,24 +93,29 @@
                        result (with-meta {:server server} {:local-port port})]
                    (resolve result)))))))
 
-(defn stop [handle]
+(defn- stop [handle]
   (.close (:server handle)))
 
 (defn open-inspector []
   (swap! rt/state assoc :portal/open? true)
   (a/let [chrome-bin (get-chrome-bin)
-          instance   (or @server (start #'handler))]
+          instance   (or @server (start #'handler))
+          url        (str "http://localhost:" (-> instance meta :local-port))]
     (reset! server instance)
-    (sh chrome-bin
-        "--incognito"
-        "--disable-features=TranslateUI"
-        "--no-first-run"
-        (str "--app=http://localhost:" (-> instance meta :local-port)))))
+    (if-not (some? chrome-bin)
+      (println "Goto" url "to view portal ui.")
+      (sh chrome-bin
+          "--incognito"
+          "--disable-features=TranslateUI"
+          "--no-first-run"
+          (str "--app=http://localhost:" (-> instance meta :local-port)))))
+  true)
 
 (defn close-inspector []
   (swap! rt/state assoc :portal/open? false)
   (stop @server)
-  (reset! server nil))
+  (reset! server nil)
+  true)
 
 (defn -main [])
 
