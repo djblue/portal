@@ -54,8 +54,8 @@ then try the portal api with the following commands:
 (require '[portal.api :as p])
 
 ;; for web
-;; NOTE: you will need to enable browser popups for portal to work in the
-;; browser. If you do not, the UI will not display.
+;; NOTE: you might need to enable popups for the portal ui to work in the
+;; browser.
 (require '[portal.web :as p])
 
 
