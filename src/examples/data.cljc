@@ -11,8 +11,8 @@
   #?(:clj {::class File
            ::file (io/file "deps.edn")
            ::directory  (io/file ".")
-           ::uri (URI. "http://www.google.com")
-           ::url (URL. "http://www.google.com")
+           ::uri (URI. "https://github.com/djblue/portal")
+           ::url (URL. "https://github.com/djblue/portal")
            ::exception (try (/ 1 0) (catch Exception e e))
            ::io-exception (try (slurp "/hello") (catch Exception e e))
            ::user-exception (Exception. "hi")
@@ -20,7 +20,7 @@
            ::deps (read-string (slurp "deps.edn"))
            ::date (java.util.Date.)}
      :cljs {::promise (js/Promise.resolve 123)
-            ::url (js/URL. "http://www.google.com")
+            ::url (js/URL. "https://github.com/djblue/portal")
             ::uuid (random-uuid)
             ::date (js/Date.)}))
 
@@ -62,8 +62,8 @@
 
 (def hiccup
   [:div
-   [:h1 "hello"]
-   [:a {:href "https://www.google.com"} "google.com"]])
+   [:h1 "Hello, I'm hiccup"]
+   [:a {:href "https://github.com/djblue/portal"} "djblue/portal"]])
 
 (def data
   {::platform-data platform-data
