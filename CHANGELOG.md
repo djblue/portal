@@ -1,3 +1,9 @@
+## 0.3.1 - 2020-08-07
+
+- Prevent re-initialization of web portal on page reload
+- Fix portal on node when it can't find chrome
+- Explicitly return nil from api functions
+
 ## 0.3.0 - 2020-08-05
 
 - First cut of `portal.web`, the browser specific api
