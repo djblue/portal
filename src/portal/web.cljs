@@ -60,21 +60,25 @@
 (defn ^:export tap
   "Add portal as a tap> target."
   []
-  (add-tap #'rt/update-value))
+  (add-tap #'rt/update-value)
+  nil)
 
 (defn ^:export open
   "Open a new inspector window."
   []
-  (open-inspector))
+  (open-inspector)
+  nil)
 
 (defn ^:export close
   "Close all current inspector windows."
   []
   (when-let [child @child-window]
-    (.close child)))
+    (.close child))
+  nil)
 
 (defn ^:export clear
   "Clear all values."
   []
-  (rt/clear-values))
+  (rt/clear-values)
+  nil)
 
