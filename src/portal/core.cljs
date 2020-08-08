@@ -324,12 +324,6 @@
   (r/render [app]
             (.getElementById js/document "root")))
 
-(defn promise-loop [f]
-  (.then
-   (f)
-   (fn [complete?]
-     (when-not complete? (promise-loop f)))))
-
 (defn on-back []
   (tap> ::on-back)
   (swap! state
@@ -403,13 +397,24 @@
    :portal/on-forward (partial on-forward send!)
    :portal/on-load  (partial load-state send!)})
 
+(defn long-poll []
+  (let [on-load (or (:portal/on-load @state)
+                    #(js/Promise.resolve false))]
+    (.then (on-load)
+           (fn [complete?]
+             (when-not complete? (long-poll))))))
+
+(defonce flush-send! (atom nil))
+
 (defn ^:export start! [send!]
-  (let [send! #(.then
-                (send! (rpc/edn->json %))
-                rpc/json->edn)
+  (let [send! #(js/Promise.race
+                [(.then (send! (rpc/edn->json %)) rpc/json->edn)
+                 (js/Promise.
+                  (fn [resolve] (reset! flush-send! resolve)))])
         settings (get-actions send!)]
+    (when-let [f @flush-send!] (f))
+    (when-not @state (long-poll))
     (swap! state merge default-settings settings)
-    (promise-loop (:portal/on-load settings))
     (render-app)))
 
 (defn main!
@@ -417,7 +422,7 @@
   ([settings]
    (when js/window.PORTAL_AUTO_START
      (swap! state merge default-settings settings)
-     (promise-loop (:portal/on-load settings))
+     (long-poll)
      (render-app))))
 
 (defn reload! []

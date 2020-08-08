@@ -22,17 +22,22 @@
 (defonce child-window (atom nil))
 (defonce code (io/resource "main.js"))
 
-(defn- open-inspector []
-  (let [child  (js/window.open "" "portal", "resizable,scrollbars,status")
-        doc    (.-document (.-window child))
-        body   (.-body doc)
-        script (.createElement doc "script")
-        el     (.createElement doc "div")]
+(defn- init-child-window [document]
+  (let [body   (.-body document)
+        script (.createElement document "script")
+        el     (.createElement document "div")]
     (set! (.-style body) "margin: 0")
     (set! (.-id el) "root")
     (set! (.-text script) code)
     (.appendChild body el)
-    (.appendChild body script)
+    (.appendChild body script)))
+
+(defn- open-inspector []
+  (let [child  (js/window.open "" "portal", "resizable,scrollbars,status")
+        doc    (.-document (.-window child))]
+    (when-not (.-PORTAL_INIT child)
+      (init-child-window doc)
+      (set! (.-PORTAL_INIT child) true))
     (.portal.core.start_BANG_ child #'send!)
     (set! (.-onunload child)
           (fn []
