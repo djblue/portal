@@ -371,7 +371,6 @@
         merged-state (swap! tap-state merge new-state theme)]
     (when (false? (:portal/open? merged-state))
       (js/window.close))
-    (tap> merged-state)
     merged-state))
 
 (defn load-state [send!]
