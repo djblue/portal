@@ -425,6 +425,4 @@
      (long-poll)
      (render-app))))
 
-(defn reload! []
-  ((:portal/on-load @state))
-  (render-app))
+(defn reload! [] (render-app))
