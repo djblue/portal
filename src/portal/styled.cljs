@@ -37,4 +37,5 @@
 (def span   (partial styled :span))
 (def input  (partial styled :input))
 (def button (partial styled :button))
+(def img    (partial styled :img))
 

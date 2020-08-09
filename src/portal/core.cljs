@@ -8,6 +8,7 @@
             [portal.viewer.diff :as d]
             [portal.viewer.hiccup :refer [inspect-hiccup]]
             [portal.viewer.html :refer [inspect-html]]
+            [portal.viewer.image :as image]
             [portal.viewer.markdown :refer [inspect-markdown]]
             [portal.viewer.table :refer [inspect-table table-view?]]
             [portal.viewer.text :refer [inspect-text]]
@@ -128,7 +129,8 @@
         [inspector (assoc settings :coll value :depth 0) m]])]))
 
 (def viewers
-  [{:name :portal.viewer/map      :predicate map?          :component ins/inspect-map}
+  [{:name :portal.viewer/image    :predicate ins/bin?      :component image/inspect-image}
+   {:name :portal.viewer/map      :predicate map?          :component ins/inspect-map}
    {:name :portal.viewer/coll     :predicate coll?         :component ins/inspect-coll}
    {:name :portal.viewer/table    :predicate table-view?   :component inspect-table}
    {:name :portal.viewer/tree     :predicate coll?         :component inspect-tree-1}

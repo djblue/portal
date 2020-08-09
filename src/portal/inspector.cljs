@@ -8,12 +8,15 @@
 
 (defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))
+(defn bin? [value] (instance? js/Uint8Array value))
 
 (defn get-value-type [value]
   (cond
     (instance? diff/Deletion value)   :diff
     (instance? diff/Insertion value)  :diff
     (instance? diff/Mismatch value)   :diff
+
+    (bin? value)      :binary
 
     (map? value)      :map
     (set? value)      :set
