@@ -31,8 +31,8 @@
 
 (defonce server (atom nil))
 
-(defn open-inspector []
-  (swap! rt/state assoc :portal/open? true)
+(defn open-inspector [options]
+  (swap! rt/state merge {:portal/open? true} options)
   (when (nil? @server)
     (reset!
      server
@@ -59,5 +59,5 @@
              "edn"      (-> System/in io/reader read-edn)
              "transit"  (-> System/in t/json-stream->edn))]
     (rt/update-value in)
-    (open-inspector)
+    (open-inspector nil)
     (shutdown-agents)))

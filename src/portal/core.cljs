@@ -367,9 +367,12 @@
                          :portal/next-state nil)))))))
 
 (defn merge-state [new-state]
-  (when (false? (:portal/open? (swap! tap-state merge new-state)))
-    (js/window.close))
-  new-state)
+  (let [theme (get c/themes (::c/theme new-state ::c/nord))
+        merged-state (swap! tap-state merge new-state theme)]
+    (when (false? (:portal/open? merged-state))
+      (js/window.close))
+    (tap> merged-state)
+    merged-state))
 
 (defn load-state [send!]
   (-> (send!
@@ -387,8 +390,7 @@
     :limits/max-length 1000
     :layout/direction :row
     :spacing/padding 8
-    :border-radius "2px"}
-   (:portal.themes/nord c/themes)))
+    :border-radius "2px"}))
 
 (defn get-actions [send!]
   {:portal/on-clear (partial on-clear send!)

@@ -96,8 +96,8 @@
 (defn- stop [handle]
   (.close (:server handle)))
 
-(defn open-inspector []
-  (swap! rt/state assoc :portal/open? true)
+(defn open-inspector [options]
+  (swap! rt/state merge {:portal/open? true} options)
   (a/let [chrome-bin (get-chrome-bin)
           instance   (or @server (start #'handler))
           url        (str "http://localhost:" (-> instance meta :local-port))]

@@ -1,7 +1,8 @@
 (ns portal.web
   (:require [portal.resources :as io]
             [portal.runtime :as rt]
-            [portal.runtime.transit :as t]))
+            [portal.runtime.transit :as t]
+            [portal.spec :as s]))
 
 (defn- send! [msg]
   (js/Promise.
@@ -32,7 +33,8 @@
     (.appendChild body el)
     (.appendChild body script)))
 
-(defn- open-inspector []
+(defn- open-inspector [options]
+  (swap! rt/state merge {:portal/open? true} options)
   (let [child  (js/window.open "" "portal", "resizable,scrollbars,status")
         doc    (.-document (.-window child))]
     (when-not (.-PORTAL_INIT child)
@@ -52,7 +54,7 @@
 (defn- init []
   (when-let [string (get-item ":portal/open")]
     (if (< (- (js/Date.now) (js/parseInt string)) 5000)
-      (open-inspector)
+      (open-inspector nil)
       (remove-item ":portal/open"))))
 
 (defonce do-init (init))
@@ -65,9 +67,11 @@
 
 (defn ^:export open
   "Open a new inspector window."
-  []
-  (open-inspector)
-  nil)
+  ([] (open nil))
+  ([options]
+   (s/assert-options options)
+   (open-inspector options)
+   nil))
 
 (defn ^:export close
   "Close all current inspector windows."

@@ -1,7 +1,8 @@
-(ns portal.colors)
+(ns portal.colors
+  (:require [clojure.spec.alpha :as s]))
 
 (def themes
-  {:portal.themes/nord
+  {::nord
    {::text "#d8dee9"
     ::background "#2e3440"
     ::background2 "#2a2e39"
@@ -18,7 +19,7 @@
     ::exception "#bf616a"
     ::diff-add "#a3be8c"
     ::diff-remove "#bf616a"}
-   :portal.themes/solarized-dark
+   ::solarized-dark
    {::text "#93a1a1"
     ::background "#073642"
     ::background2 "#002b36"
@@ -35,7 +36,7 @@
     ::exception "#dc322f"
     ::diff-add "#859900"
     ::diff-remove "#dc322f"}
-   :portal.themes/solarized-light
+   ::solarized-light
    {::text "#93a1a1"
     ::background "#fdf6e3"
     ::background2 "#eee8d5"
@@ -51,22 +52,7 @@
     ::package "#2aa198"
     ::exception "#dc322f"
     ::diff-add "#859900"
-    ::diff-remove "#dc322f"}
-   :portal.themes/github-light
-   {::text "#24292e"
-    ::background "#fafbfc"
-    ::background2 "#f6f8fa"
-    ::boolean "#0366d6"
-    ::string "#28a745"
-    ::keyword "#005cc5"
-    ::namespace "#79b8ff"
-    ::tag "#ffd33d"
-    ::symbol "#24292e"
-    ::number "#6f42c1"
-    ::uri "#f66a0a"
-    ::border "#839496"
-    ::package "#79b8ff"
-    ::exception "#d73a49"
-    ::diff-add "#28a745"
-    ::diff-remove "#d73a49"}})
+    ::diff-remove "#dc322f"}})
+
+(s/def ::theme (set (keys themes)))
 
