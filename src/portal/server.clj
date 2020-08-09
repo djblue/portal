@@ -46,4 +46,5 @@
 (defn start [handler]
   (server/run-server handler {:port 0 :join? false}))
 
-(defn stop [server] (server :timeout 1000))
+(defn stop [server]
+  (when server (server :timeout 1000)))
