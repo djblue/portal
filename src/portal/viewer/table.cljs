@@ -30,15 +30,9 @@
               [s/td
                {:key col-index :style (get-styles settings)}
                [component
-                (if transpose?
-                  {:row col
-                   :row-index col-index
-                   :column row
-                   :col-index row-index}
-                  {:row row
-                   :row-index row-index
-                   :column col
-                   :col-index col-index})]])
+                (if-not transpose?
+                  {:row row :column col}
+                  {:row col :column row})]])
             (if transpose? rows cols))])
         (if transpose? cols rows))]]]))
 
@@ -50,11 +44,17 @@
        (let [{:keys [row column]} context]
          (cond
            (= column row ::header) nil
-           (= row ::header) [inspector settings column]
-           (= column ::header) [inspector settings (first row)]
-           :else (let [[_ row] row]
-                   (when (contains? row column)
-                     [inspector settings (get row column)])))))
+
+           (= row ::header)
+           [inspector (assoc settings :coll values) column]
+
+           (= column ::header)
+           [inspector (assoc settings :coll values) (first row)]
+
+           :else
+           (let [[_ row] row]
+             (when (contains? row column)
+               [inspector (assoc settings :coll row :k column) (get row column)])))))
      (into [::header] values)
      (into [::header] columns)]))
 
@@ -68,8 +68,11 @@
      (fn [context]
        (let [{:keys [row column]} context]
          (cond
-           (= row ::header)       [inspector settings column]
-           (contains? column row) [inspector settings (get row column)])))
+           (= row ::header)
+           [inspector (assoc settings :coll row) column]
+
+           (contains? column row)
+           [inspector (assoc settings :coll row :k column) (get row column)])))
      (into [::header] values)
      columns]))
 
