@@ -4,12 +4,14 @@
             [portal.lazy :as l]
             [portal.styled :as s]))
 
-(defn table-view? [value]
-  (and (coll? value) (every? map? value)))
+(defn- get-styles [settings]
+  {:border (str "1px solid " (::c/border settings))
+   :background (ins/get-background settings)
+   :box-sizing :border-box
+   :padding (:spacing/padding settings)})
 
-(defn inspect-table [settings values]
-  (let [columns (into #{} (mapcat keys values))
-        background (ins/get-background settings)]
+(defn- table [settings component rows cols]
+  (let [transpose? false]
     [s/table
      {:style
       {:width "100%"
@@ -18,33 +20,69 @@
        :font-size  (:font-size settings)
        :border-radius (:border-radius settings)}}
      [s/tbody
-      [s/tr
-       (map-indexed
-        (fn [grid-column column]
-          [s/th {:key grid-column
-                 :style
-                 {:border (str "1px solid " (::c/border settings))
-                  :background background
-                  :box-sizing :border-box
-                  :padding (:spacing/padding settings)}}
-           [inspector (assoc settings :coll values) column]])
-        columns)]
       [l/lazy-seq
        (map-indexed
-        (fn [grid-row row]
-          [s/tr {:key grid-row}
+        (fn [row-index row]
+          [s/tr
+           {:key row-index}
            (map-indexed
-            (fn [grid-column column]
+            (fn [col-index col]
               [s/td
-               {:key grid-column
-                :style
-                {:border (str "1px solid " (::c/border settings))
-                 :background background
-                 :padding (:spacing/padding settings)
-                 :box-sizing :border-box}}
-               (when (contains? row column)
-                 [inspector
-                  (assoc settings :coll row :k column)
-                  (get row column)])])
-            columns)])
-        values)]]]))
+               {:key col-index :style (get-styles settings)}
+               [component
+                (if transpose?
+                  {:row col
+                   :row-index col-index
+                   :column row
+                   :col-index row-index}
+                  {:row row
+                   :row-index row-index
+                   :column col
+                   :col-index col-index})]])
+            (if transpose? rows cols))])
+        (if transpose? cols rows))]]]))
+
+(defn- inspect-map-table [settings values]
+  (let [columns (into #{} (mapcat (fn [[_ v]] (keys v)) values))]
+    [table
+     settings
+     (fn [context]
+       (let [{:keys [row column]} context]
+         (cond
+           (= column row ::header) nil
+           (= row ::header) [inspector settings column]
+           (= column ::header) [inspector settings (first row)]
+           :else (let [[_ row] row]
+                   (when (contains? row column)
+                     [inspector settings (get row column)])))))
+     (into [::header] values)
+     (into [::header] columns)]))
+
+(defn- inspect-coll-table [settings values]
+  [inspect-map-table settings (zipmap (range) values)])
+
+(defn- inspect-set-table [settings values]
+  (let [columns (into #{} (mapcat keys values))]
+    [table
+     settings
+     (fn [context]
+       (let [{:keys [row column]} context]
+         (cond
+           (= row ::header)       [inspector settings column]
+           (contains? column row) [inspector settings (get row column)])))
+     (into [::header] values)
+     columns]))
+
+(defn- get-component [values]
+  (cond
+    (map? values) inspect-map-table
+    (set? values) inspect-set-table
+    (coll? values) inspect-coll-table))
+
+(defn table-view? [value]
+  (or (and (coll? value) (every? map? value))
+      (and (map? value) (every? (comp map? second) value))))
+
+(defn inspect-table [settings values]
+  (let [component (get-component values)]
+    [component settings values]))
