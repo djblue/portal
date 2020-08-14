@@ -19,6 +19,6 @@
              (p/open ~options)))
   (step '(tap> :hello-world))
   (step '(p/clear))
-  (step '(require '[examples.hacker-news :as hn]))
-  (step '(tap> hn/stories))
+  (step '(require '[examples.data :refer [data]]))
+  (step '(tap> data))
   (step '(p/close)))
