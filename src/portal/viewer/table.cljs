@@ -61,6 +61,17 @@
 (defn- inspect-coll-table [settings values]
   [inspect-map-table settings (zipmap (range) values)])
 
+(defn inspect-vector-table [settings values]
+  (let [n (reduce max (map count values))]
+    [table
+     settings
+     (fn [context]
+       (let [{:keys [row column]} context]
+         (when (< column (count row))
+           [inspector (assoc settings :coll row :k column) (get row column)])))
+     values
+     (range n)]))
+
 (defn- inspect-set-table [settings values]
   (let [columns (into #{} (mapcat keys values))]
     [table
@@ -76,15 +87,22 @@
      (into [::header] values)
      columns]))
 
-(defn- get-component [values]
+(defn- get-component [value]
   (cond
-    (map? values) inspect-map-table
-    (set? values) inspect-set-table
-    (coll? values) inspect-coll-table))
+    (and (or (vector? value) (list? value))
+         (every? vector? value))
+    inspect-vector-table
 
-(defn table-view? [value]
-  (or (and (coll? value) (every? map? value))
-      (and (map? value) (every? (comp map? second) value))))
+    (and (map? value) (every? map? (vals value)))
+    inspect-map-table
+
+    (and (set? value) (every? map? value))
+    inspect-set-table
+
+    (and (coll? value) (every? map? value))
+    inspect-coll-table))
+
+(defn table-view? [value] (some? (get-component value)))
 
 (defn inspect-table [settings values]
   (let [component (get-component values)]
