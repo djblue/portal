@@ -1,6 +1,5 @@
 (ns portal.inspector
-  (:require [clojure.string :as str]
-            [cognitect.transit :as t]
+  (:require [cognitect.transit :as t]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
             [portal.lazy :as l]
@@ -39,7 +38,6 @@
     (t/tagged-value? value)
     (case (.-tag value)
       "portal.transit/var"        :var
-      "portal.transit/exception"  :exception
       "portal.transit/object"     :object
       :tagged)))
 
@@ -106,12 +104,6 @@
 (def preview-vector (preview-coll "[" "]"))
 (def preview-list   (preview-coll "(" ")"))
 (def preview-set    (preview-coll "#{" "}"))
-
-(defn preview-exception [settings value]
-  (let [value (.-rep value)]
-    [s/span {:style {:font-weight :bold
-                     :color (::c/exception settings)}}
-     (:class-name (first value))]))
 
 (defn preview-object [settings value]
   [s/span {:style {:color (::c/text settings)}} (:type (.-rep value))])
@@ -284,61 +276,12 @@
   [s/span {}
    (trim-string settings (pr-str value))])
 
-(defn inspect-exception [settings value]
-  (let [value (.-rep value)]
-    [s/div
-     {:style
-      {:background (get-background settings)
-       :padding (:spacing/padding settings)
-       :box-sizing :border-box
-       :color (::c/text settings)
-       :font-size  (:font-size settings)
-       :border-radius (:border-radius settings)
-       :border (str "1px solid " (::c/border settings))}}
-     (map
-      (fn [value]
-        (let [{:keys [class-name message stack-trace]} value]
-          [:<>
-           {:key (hash value)}
-           [s/div
-            {:style
-             {:margin-bottom (:spacing/padding settings)}}
-            [s/span {:style {:font-weight :bold
-                             :color (::c/exception settings)}}
-             class-name] ": " message]
-           [s/div
-            {:style {:display     :grid
-                     :text-align :right}}
-            (map-indexed
-             (fn [idx line]
-               (let [{:keys [names]} line]
-                 [:<> {:key idx}
-                  (if (:omitted line)
-                    [s/div {:style {:grid-column "1"}} "..."]
-                    [s/div {:style {:grid-column "1"}}
-                     (if (empty? names)
-                       [s/span
-                        [s/span {:style {:color (::c/package settings)}}
-                         (:package line) "."]
-                        [s/span {:style {:font-style :italic}}
-                         (:simple-class line) "."]
-                        (str (:method line))]
-                       (let [[ns & names] names]
-                         [s/span
-                          [s/span {:style {:color (::c/namespace settings)}} ns "/"]
-                          (str/join "/" names)]))])
-                  [s/div {:style {:grid-column "2"}} (:file line)]
-                  [s/div {:style {:grid-column "3"}}
-                   [inspect-number settings (:line line)]]]))
-             stack-trace)]]))
-      value)]))
-
 (defn inspect-object [settings value]
   (let [value (.-rep value)]
     [s/span {:title (:type value)
              :style
              {:color (::c/text settings)}}
-     (:string value)]))
+     (trim-string settings (:string value))]))
 
 (defn get-preview-component [type]
   (case type
@@ -356,14 +299,13 @@
     :date       inspect-date
     :uuid       inspect-uuid
     :var        inspect-var
-    :exception  preview-exception
-    :object     inspect-object
+    :object     preview-object
     :uri        inspect-uri
     :tagged     preview-tagged
     inspect-default))
 
 (def preview-type?
-  #{:map :set :vector :list :coll :tagged :exception})
+  #{:map :set :vector :list :coll :tagged})
 
 (defn preview [settings value]
   (let [type (get-value-type value)
@@ -384,7 +326,6 @@
     :date       inspect-date
     :uuid       inspect-uuid
     :var        inspect-var
-    :exception  inspect-exception
     :object     inspect-object
     :uri        inspect-uri
     :tagged     inspect-tagged
