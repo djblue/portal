@@ -1,3 +1,12 @@
+## 0.4.0 - 2020-08-17
+
+- Add support for next release of babashka
+  - Requires changes only presently available in master
+  - Switch to cheshire for json
+- Table viewer updates for map of maps (thanks, @BrianChevalier #9)
+- Slim down dependencies
+- Expose theme setting via `portal.api/open`
+
 ## 0.3.1 - 2020-08-07
 
 - Prevent re-initialization of web portal on page reload
