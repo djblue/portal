@@ -109,13 +109,7 @@
                :justify-content :space-between
                :background (::c/background2 settings)
                :font-family "sans-serif"}}
-      [s/a
-       {:href "https://clojure.org/reference/metadata"
-        :target "_blank"
-        :style
-        {:color :inherit
-         :text-decoration :none}}
-       "metadata"]
+      "metadata"
       [s/div
        {:title "toggle metadata"
         :style {:font-weight :bold}}
