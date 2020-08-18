@@ -1,34 +1,41 @@
 (ns portal.server
   (:require [clojure.java.io :as io]
-            [org.httpkit.server :as server]
+            [clojure.datafy :refer [datafy]]
             [portal.runtime :as rt]
             [portal.runtime.transit :as t]))
 
-(defn- send-rpc [channel value]
-  (server/send!
-   channel
-   {:status 200
-    :headers {"Content-Type"
-              "application/transit+json; charset=utf-8"}
-    :body (try
-            (t/edn->json
-             (assoc value :portal.rpc/exception nil))
-            (catch Exception e
-              (t/edn->json
-               {:portal/state-id (:portal/state-id value)
-                :portal.rpc/exception e})))}))
+(defn- send-rpc [value]
+  {:status 200
+   :headers {"Content-Type"
+             "application/transit+json; charset=utf-8"}
+   :body (try
+           (t/edn->json value)
+           (catch Exception e
+             (t/edn->json
+              {:portal/state-id (:portal/state-id value)
+               :portal/value (datafy (Exception. "Transit failed to encode a value. Clear portal to proceed." e))})))})
 
 (defn- not-found [_request done]
   (done {:status :not-found}))
 
+(defn- race [& promises]
+  (let [winner  (promise)
+        futures (for [p promises]
+                  (future (deliver winner @p)))]
+    (dorun futures)
+    (let [winner @winner]
+      (dorun (map future-cancel futures))
+      winner)))
+
 (defn- rpc-handler [request]
-  (server/with-channel request channel
-    (let [body  (t/json-stream->edn (:body request))
-          op    (get rt/ops (:op body) not-found)
-          done  #(send-rpc channel %)
-          f     (op body done)]
-      (when (fn? f)
-        (server/on-close channel f)))))
+  (let [body  (t/json->edn (:body request))
+        op    (get rt/ops (:op body) not-found)
+        p     (promise)
+        done  #(deliver p (send-rpc %))
+        f     (op body done)
+        res   (race p (:closed? request))]
+    (when (fn? f) (f true))
+    res))
 
 (defn- send-resource [content-type resource-name]
   {:status  200
@@ -43,8 +50,3 @@
         f (get paths (:uri request))]
     (when (fn? f) (f))))
 
-(defn start [handler]
-  (server/run-server handler {:port 0 :join? false}))
-
-(defn stop [server]
-  (when server (server :timeout 1000)))

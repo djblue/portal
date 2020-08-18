@@ -17,7 +17,6 @@
            ::io-exception (try (slurp "/hello") (catch Exception e e))
            ::user-exception (Exception. "hi")
            ::uuid (UUID/randomUUID)
-           ::deps (read-string (slurp "deps.edn"))
            ::date (java.util.Date.)}
      :cljs {::promise (js/Promise.resolve 123)
             ::url (js/URL. "https://github.com/djblue/portal")
