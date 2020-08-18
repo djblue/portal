@@ -13,6 +13,8 @@
   (p/close)
 
   (tap> (datafy java.io.File))
+  ;; should cause an error in portal because of transit
+  (tap> {(with-meta 'k {:a :b}) 'v})
 
   (extend-protocol Datafiable
     java.io.File
