@@ -1,6 +1,5 @@
 (ns portal.runtime
   (:require [clojure.datafy :refer [datafy nav]]
-            ;[org.httpkit.client :as client]
             #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a]))
   #?(:clj (:import [java.util UUID])))
@@ -74,8 +73,6 @@
       (a/let [datafied datafied] (done {:value datafied})))))
 
 (defn on-nav [request done]
-  ;(prn (meta (first (:args request))))
-  ;(prn (:args request))
   (let [[coll k v] (:args request)
         naved      (if coll (nav coll k v) v)]
     (if (= naved v)
@@ -83,12 +80,6 @@
       (on-datafy naved done)
       ; wait for any newly returned promise to resolve
       (a/let [naved naved] (on-datafy naved done)))))
-
- ;:portal.rpc/http-request
- ;(fn [request done]
- ;  (done
- ;   {:response
- ;    @(client/request (get-in request [:body :request]))}))
 
 (def ops
   {:portal.rpc/clear-values clear-values
