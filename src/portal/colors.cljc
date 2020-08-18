@@ -1,5 +1,4 @@
-(ns portal.colors
-  (:require [clojure.spec.alpha :as s]))
+(ns portal.colors)
 
 (def themes
   {::nord
@@ -53,6 +52,4 @@
     ::exception "#dc322f"
     ::diff-add "#859900"
     ::diff-remove "#dc322f"}})
-
-(s/def ::theme (set (keys themes)))
 

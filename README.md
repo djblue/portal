@@ -88,8 +88,6 @@ Which can be passed as an option to `p/open`:
   {:portal.colors/theme :portal.colors/nord})
 ```
 
-You will get an exception for invalid options.
-
 ## Datafy and Nav
 
 There is one exception to the behavior described above for the UI,

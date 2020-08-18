@@ -1,12 +1,16 @@
 (ns portal.runtime.transit
+  (:refer-clojure :exclude [find-var])
   (:require [cognitect.transit :as transit]
-            [io.aviso.exception :as ex]
             [portal.runtime :as rt])
-  (:import [java.io ByteArrayOutputStream]))
+  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]))
 
 (defn- var->symbol [v]
-  (let [m (meta v)]
-    (with-meta (symbol (str (:ns m)) (str (:name m))) m)))
+  (let [m (meta v)
+        s (symbol (str (:ns m)) (str (:name m)))]
+    (swap! rt/instance-cache assoc [:var s] v)
+    (with-meta s m)))
+
+(defn- find-var [s] (get @rt/instance-cache [:var s]))
 
 (defn edn->json-stream [value out]
   (let [writer
@@ -14,12 +18,10 @@
          out
          :json
          {:handlers
-          {clojure.lang.Var
+          {(type #'var->symbol)
            (transit/write-handler "portal.transit/var" var->symbol)
            java.net.URL
-           (transit/write-handler "r" str)
-           java.lang.Throwable
-           (transit/write-handler "portal.transit/exception" #(ex/analyze-exception % nil))}
+           (transit/write-handler "r" str)}
           :transform transit/write-meta
           :default-handler
           (transit/write-handler
@@ -30,8 +32,7 @@
                       (meta o))
               :type (pr-str (type o))
               :string (pr-str o)}))})]
-    (transit/write writer value)
-    (.toString out)))
+    (transit/write writer value)))
 
 (defn edn->json [value]
   (let [out (ByteArrayOutputStream. (* 10 1024 1024))]
@@ -46,3 +47,6 @@
     {:handlers
      {"portal.transit/var" (transit/read-handler find-var)
       "portal.transit/object" (transit/read-handler (comp rt/uuid->instance :id))}})))
+
+(defn json->edn [^String json]
+  (json-stream->edn (ByteArrayInputStream. (.getBytes json))))

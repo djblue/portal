@@ -1,5 +1,5 @@
 (ns examples.hacker-news
-  (:require #?(:clj [clojure.data.json :as json])
+  (:require #?(:clj [cheshire.core :as json])
             [clojure.core.protocols :refer [nav]]
             #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a])
@@ -33,7 +33,7 @@
    :submitted "List of the user's stories, polls and comments."})
 
 (defn fetch-json [url]
-  #?(:clj  (-> url slurp (json/read-str :key-fn keyword))
+  #?(:clj  (-> url slurp (json/parse-string true))
      :cljs (-> (fetch url)
                (.then #(js/JSON.parse %))
                (.then #(js->clj % :keywordize-keys true)))))
@@ -48,18 +48,20 @@
   (a/let [url   (as-url (str root path))
           res   (fetch-json url)
           item  (with-meta res {:hacker-news/api-url url})]
-    (cond-> item
-      (contains? item :url)
-      (update :url #(as-url %))
+    (if-not (map? item)
+      item
+      (cond-> item
+        (contains? item :url)
+        (update :url #(as-url %))
 
-      (contains? item :time)
-      (update :time #(as-date (* % 1000)))
+        (contains? item :time)
+        (update :time #(as-date (* % 1000)))
 
-      (contains? item :created)
-      (update :created #(as-date (* % 1000)))
+        (contains? item :created)
+        (update :created #(as-date (* % 1000)))
 
-      (contains? item :type)
-      (update :type keyword))))
+        (contains? item :type)
+        (update :type keyword)))))
 
 (declare nav-hn)
 
@@ -72,9 +74,10 @@
     (vary-meta res assoc `nav #'nav-hn)))
 
 (def stories
-  ^{`nav #'nav-hn}
-  #{:topstories :newstories :beststories
-    :askstories :showstories :jobstories})
+  (with-meta
+    #{:topstories :newstories :beststories
+      :askstories :showstories :jobstories}
+    {`nav #'nav-hn}))
 
 (defn fetch-stories [type]
   (a/let [res (fetch-hn (str "/" (name type) ".json"))]

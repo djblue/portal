@@ -1,7 +1,6 @@
 (ns portal.api
   (:require [portal.main :as m]
-            [portal.runtime :as rt]
-            [portal.spec :as s]))
+            [portal.runtime :as rt]))
 
 (defn tap
   "Add portal as a tap> target."
@@ -13,7 +12,6 @@
   "Open a new inspector window."
   ([] (open nil))
   ([options]
-   (s/assert-options options)
    (m/open-inspector options)
    nil))
 

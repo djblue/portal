@@ -1,12 +1,13 @@
 (ns portal.main
-  (:require [clojure.java.browse :refer [browse-url]]
+  (:require [cheshire.core :as json]
+            [clojure.edn :as edn]
+            [clojure.java.browse :refer [browse-url]]
             [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
-            [clojure.edn :as edn]
-            [clojure.data.json :as json]
-            [portal.server :as server]
+            [portal.http-socket-server :as http]
             [portal.runtime :as rt]
+            [portal.server :as server]
             [portal.runtime.transit :as t])
   (:import [java.io PushbackReader]))
 
@@ -36,8 +37,8 @@
   (when (nil? @server)
     (reset!
      server
-     (server/start #'server/handler)))
-  (let [url (str "http://localhost:" (-> @server meta :local-port))]
+     (http/start #'server/handler)))
+  (let [url (str "http://localhost:" (-> @server :port))]
     (if-let [bin (get-chrome-bin)]
       (future
         (sh bin
@@ -45,19 +46,20 @@
             "--disable-features=TranslateUI"
             "--no-first-run"
             (str "--app=" url)))
-      (browse-url url))))
+      (browse-url url)))
+  @server)
 
 (defn close-inspector []
   (swap! rt/state assoc :portal/open? false)
-  (server/stop @server)
+  (http/stop @server)
   (reset! server nil))
 
 (defn -main [& args]
   (let [[input-format] args
         in (case input-format
-             "json"     (-> System/in io/reader (json/read :key-fn keyword))
+             "json"     (-> System/in io/reader (json/parse-stream true))
              "edn"      (-> System/in io/reader read-edn)
              "transit"  (-> System/in t/json-stream->edn))]
     (rt/update-value in)
-    (open-inspector nil)
+    (http/wait (open-inspector nil))
     (shutdown-agents)))
