@@ -6,6 +6,7 @@
             [portal.rpc :as rpc]
             [portal.styled :as s]
             [portal.viewer.diff :as d]
+            [portal.viewer.exception :as ex]
             [portal.viewer.hiccup :refer [inspect-hiccup]]
             [portal.viewer.html :refer [inspect-html]]
             [portal.viewer.image :as image]
@@ -123,7 +124,8 @@
         [inspector (assoc settings :coll value :depth 0) m]])]))
 
 (def viewers
-  [{:name :portal.viewer/image    :predicate ins/bin?      :component image/inspect-image}
+  [{:name :portal.viewer/ex       :predicate ex/exception? :component ex/inspect-exception}
+   {:name :portal.viewer/image    :predicate ins/bin?      :component image/inspect-image}
    {:name :portal.viewer/map      :predicate map?          :component ins/inspect-map}
    {:name :portal.viewer/coll     :predicate coll?         :component ins/inspect-coll}
    {:name :portal.viewer/table    :predicate table-view?   :component inspect-table}
@@ -301,20 +303,15 @@
         :width "100vw"}}
       [toolbar settings]
       [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
-       (cond
-         (some? (:portal.rpc/exception settings))
-         [ins/inspect-exception settings (:portal.rpc/exception settings)]
-
-         :else
-         [s/div
-          {:style
-           {:width "100%"
-            :height "100%"
-            :display :flex}}
-          (when (contains? settings :portal/value)
-            [inspect-1
-             settings
-             (:portal/value settings)])])]]]))
+       [s/div
+        {:style
+         {:width "100%"
+          :height "100%"
+          :display :flex}}
+        (when (contains? settings :portal/value)
+          [inspect-1
+           settings
+           (:portal/value settings)])]]]]))
 
 (defn render-app []
   (r/render [app]
