@@ -20,11 +20,6 @@
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
-      <artifactId>data.json</artifactId>
-      <version>1.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
       <version>1.10.1</version>
     </dependency>
@@ -34,19 +29,34 @@
       <version>0.8.264</version>
     </dependency>
     <dependency>
-      <groupId>io.aviso</groupId>
-      <artifactId>pretty</artifactId>
-      <version>0.1.37</version>
-    </dependency>
-    <dependency>
       <groupId>com.cognitect</groupId>
       <artifactId>transit-clj</artifactId>
       <version>1.0.324</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.msgpack</groupId>
+          <artifactId>msgpack</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
-      <groupId>http-kit</groupId>
-      <artifactId>http-kit</artifactId>
-      <version>2.3.0</version>
+      <groupId>cheshire</groupId>
+      <artifactId>cheshire</artifactId>
+      <version>5.10.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>tigris</groupId>
+          <artifactId>tigris</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
   <build>
