@@ -30,12 +30,12 @@
                (.read in buffer 0 content-length)
                (String. buffer)))}))
 
-(def messages
+(def ^:private messages
   {200 "OK"
    404 "Not Found"
    500 "Internal Server Error"})
 
-(defn content-length [^String s] (count (.getBytes s)))
+(defn- content-length [^String s] (count (.getBytes s)))
 
 (defn- format-response ^String [response]
   (let [{:keys [status body headers] :or {status 404}} response
@@ -69,7 +69,6 @@
 (defn start [handler]
   (let [server-socket (ServerSocket. 0)
         port          (.getLocalPort server-socket)]
-
     {:port port
      :server-socket server-socket
      :future (future

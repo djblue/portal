@@ -11,7 +11,7 @@ clean:
 	rm -rf target resources/main.js
 
 target/install-babashka:
-	mkdir target
+	mkdir -p target
 	curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install -o target/install-babashka
 	chmod +x target/install-babashka
 
