@@ -2,7 +2,6 @@
  :deps
  {com.cognitect/transit-clj {:mvn/version "1.0.324"
                              :exclusions [org.msgpack/msgpack
-                                          commons-codec/commons-codec
                                           javax.xml.bind/jaxb-api]}
   com.cognitect/transit-cljs {:mvn/version "0.8.264"}
   cheshire/cheshire {:mvn/version "5.10.0"

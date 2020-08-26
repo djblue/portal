@@ -3,9 +3,15 @@
             [examples.macros :refer [read-file]]
             [portal.colors :as c]
             [examples.hacker-news :as hn])
-  #?(:clj (:import [java.io File]
+  #?(:clj (:import [java.io File ByteArrayOutputStream]
                    [java.net URI URL]
                    [java.util UUID])))
+
+#?(:clj
+   (defn slurp-bytes [x]
+     (with-open [out (ByteArrayOutputStream.)]
+       (io/copy (io/input-stream x) out)
+       (.toByteArray out))))
 
 (def platform-data
   #?(:clj {::class File
@@ -17,7 +23,8 @@
            ::io-exception (try (slurp "/hello") (catch Exception e e))
            ::user-exception (Exception. "hi")
            ::uuid (UUID/randomUUID)
-           ::date (java.util.Date.)}
+           ::date (java.util.Date.)
+           ::binary (slurp-bytes "resources/screenshot.png")}
      :cljs {::promise (js/Promise.resolve 123)
             ::url (js/URL. "https://github.com/djblue/portal")
             ::uuid (random-uuid)
