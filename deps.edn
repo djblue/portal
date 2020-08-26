@@ -36,6 +36,13 @@
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.6.8"}}}
+  :nrepl
+  {:extra-deps {nrepl/nrepl {:mvn/version "0.8.0"}}}
+  :check
+  {:main-opts ["-m" "clj-check.check"]
+   :extra-deps {athos/clj-check
+                {:git/url "https://github.com/athos/clj-check.git"
+                 :sha "da6363a38b06d9b84976ed330a9544b69d3c4dee"}}}
   :test
   {:extra-deps
    {babashka/clj-http-lite

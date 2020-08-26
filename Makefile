@@ -33,6 +33,7 @@ dev: node_modules
 release: node_modules resources/main.js
 
 lint:
+	clojure -A:nrepl:check
 	clojure -A:kondo --lint dev src test
 	clojure -A:cljfmt check
 
