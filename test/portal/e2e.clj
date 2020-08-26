@@ -21,4 +21,5 @@
   (step '(p/clear))
   (step '(require '[examples.data :refer [data]]))
   (step '(tap> data))
-  (step '(p/close)))
+  (step '(p/close))
+  (Thread/sleep 500))
