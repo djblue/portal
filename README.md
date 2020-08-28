@@ -47,6 +47,12 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.4.0"}
     -m cljs.main -re node
 ```
 
+or for a [**babashka**](https://github.com/borkdude/babashka) repl, do:
+
+```bash
+bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.4.0"}}}'`
+```
+
 then try the portal api with the following commands:
 
 ```clojure
