@@ -1,5 +1,5 @@
 BABASHKA_CLASSPATH := $(shell clojure -A:test -Spath)
-PATH  := $(PWD)/../babashka:$(PATH) # switch to target on bb release
+PATH  := $(PWD)/target:$(PATH)
 ENV   := PATH=$(PATH) BABASHKA_CLASSPATH=$(BABASHKA_CLASSPATH)
 SHELL := env $(ENV) /bin/bash
 
@@ -43,7 +43,7 @@ test/jvm:
 test/bb: bb
 	bb -m portal.test-runner
 
-test: test/jvm # test/bb uncomment on bb release
+test: test/jvm test/bb
 
 fmt:
 	clojure -A:cljfmt fix
