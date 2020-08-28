@@ -41,8 +41,8 @@
 (defn as-url [s]
   #?(:clj (java.net.URL. s) :cljs (js/URL. s)))
 
-(defn as-date [s]
-  #?(:clj (java.util.Date. s) :cljs (js/Date. s)))
+(defn as-date [^long timestamp]
+  #?(:clj (java.util.Date. timestamp) :cljs (js/Date. timestamp)))
 
 (defn fetch-hn [path]
   (a/let [url   (as-url (str root path))
