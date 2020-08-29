@@ -2,7 +2,7 @@
 
 A clojure tool to navigate through your data.
 
-[![Clojars Project](https://img.shields.io/clojars/v/djblue/portal?color=2E3440&style=for-the-badge)](https://clojars.org/djblue/portal)
+[![Clojars Project](https://img.shields.io/clojars/v/djblue/portal?color=2a2e39&style=for-the-badge)](https://clojars.org/djblue/portal)
 
 [![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/portal)
 

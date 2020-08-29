@@ -50,7 +50,6 @@
       form
       [1 :style]
       assoc
-      :padding (* 0.5 (:spacing/padding settings))
       :background (::c/background2 settings)
       :border-radius (:border-radius settings)))
    :pre
