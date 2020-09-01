@@ -1,6 +1,6 @@
 ## 0.4.1 - 2020-08-31
 
-- Fix windows issues (thanks, @MrGung #12)
+- Fix windows issues (thanks, [@MrGung](https://github.com/MrGung) [#12](https://github.com/djblue/portal/issues/12))
   - Explicitly set string encoding for Windows
 - Fix markdown viewer code style
 - Fix support for binary data
@@ -11,7 +11,7 @@
 - Add support for next release of babashka
   - Requires changes only presently available in master
   - Switch to cheshire for json
-- Table viewer updates for map of maps (thanks, @BrianChevalier #9)
+- Table viewer updates for map of maps (thanks, [@BrianChevalier](https://github.com/BrianChevalier) [#9](https://github.com/djblue/portal/pull/9))
 - Slim down dependencies
 - Expose theme setting via `portal.api/open`
 
@@ -30,7 +30,7 @@
     - `portal.web.close()`
     - `portal.web.clear()`
     - `portal.web.tap()`
-- Fix nav to nil exception (thanks, @rzwiefel #8)
+- Fix nav to nil exception (thanks, [@rzwiefel](https://github.com/rzwiefel) [#8](https://github.com/djblue/portal/pull/8))
 - Spawn chrome app in future to prevent blocking
 - Initial keyboard support
   - Tab to move focus to next nav target
