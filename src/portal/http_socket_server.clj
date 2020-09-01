@@ -35,7 +35,7 @@
    404 "Not Found"
    500 "Internal Server Error"})
 
-(defn- content-length [^String s] (count (.getBytes s)))
+(defn- content-length [^String s] (count (.getBytes s "UTF-8")))
 
 (defn- format-response ^String [response]
   (let [{:keys [status body headers] :or {status 404}} response
