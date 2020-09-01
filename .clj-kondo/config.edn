@@ -1,7 +1,3 @@
-{:linters
- {:unresolved-symbol
-  {:exclude [(org.httpkit.server/with-channel [request channel])
-             (portal.e2e/step)]}}
- :lint-as
+{:lint-as
  {portal.async/let clojure.core/let
   portal.sync/let  clojure.core/let}}
