@@ -1,3 +1,11 @@
+## 0.4.1 - 2020-08-31
+
+- Fix windows issues (thanks, @MrGung #12)
+  - Explicitly set string encoding for Windows
+- Fix markdown viewer code style
+- Fix support for binary data
+  - Stop excluding commons-codec/commons-codec
+
 ## 0.4.0 - 2020-08-17
 
 - Add support for next release of babashka
