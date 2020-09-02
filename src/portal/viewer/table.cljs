@@ -5,17 +5,46 @@
             [portal.styled :as s]))
 
 (defn- get-styles [settings]
-  {:border (str "1px solid " (::c/border settings))
-   :background (ins/get-background settings)
-   :box-sizing :border-box
-   :padding (:spacing/padding settings)})
+  {:white-space :nowrap
+   :border-bottom (str "1px solid " (::c/border settings))
+   :border-right (str "1px solid " (::c/border settings))})
+
+(defn- table-header-row [settings child]
+  [s/th
+   {:style
+    (assoc
+     (get-styles settings)
+     :top 0
+     :z-index 2
+     :position :sticky
+     :background (ins/get-background settings))}
+   child])
+
+(defn- table-header-column [settings child]
+  [s/th
+   {:style
+    (assoc
+     (get-styles settings)
+     :left 0
+     :z-index 1
+     :position :sticky
+     :text-align :right
+     :background (ins/get-background settings))}
+   child])
+
+(defn- table-data [settings child]
+  [s/td {:style (get-styles settings)} child])
 
 (defn- table [settings component rows cols]
   (let [transpose? false]
     [s/table
      {:style
       {:width "100%"
-       :border-collapse :collapse
+       :border-top (str "1px solid " (::c/border settings))
+       :border-left (str "1px solid " (::c/border settings))
+       :background (ins/get-background settings)
+       :border-spacing 0
+       :position :relative
        :color (::c/text settings)
        :font-size  (:font-size settings)
        :border-radius (:border-radius settings)}}
@@ -24,51 +53,86 @@
        (map-indexed
         (fn [row-index row]
           [s/tr
-           {:key row-index}
+           {:key row-index
+            :style/hover
+            {:background (str (::c/border settings) "55")}}
            (map-indexed
             (fn [col-index col]
-              [s/td
-               {:key col-index :style (get-styles settings)}
-               [component
-                (if-not transpose?
-                  {:row row :column col}
-                  {:row col :column row})]])
+              ^{:key col-index}
+              [component
+               (if-not transpose?
+                 {:row row    :row-index row-index
+                  :column col :column-index col-index}
+                 {:row col    :row-index col-index
+                  :column row :column-index row-index})])
             (if transpose? rows cols))])
         (if transpose? cols rows))]]]))
 
 (defn- inspect-map-table [settings values]
-  (let [columns (into #{} (mapcat (fn [[_ v]] (keys v)) values))]
+  (let [columns (into #{} (mapcat keys (vals values)))]
     [table
      settings
      (fn [context]
        (let [{:keys [row column]} context]
          (cond
-           (= column row ::header) nil
+           (= column row ::header) [table-header-row settings]
 
            (= row ::header)
-           [inspector (assoc settings :coll values) column]
+           [table-header-row
+            settings
+            [inspector (assoc settings :coll values) column]]
 
            (= column ::header)
-           [inspector (assoc settings :coll values) (first row)]
+           [table-header-column
+            settings
+            [inspector (assoc settings :coll values) (first row)]]
 
            :else
-           (let [[_ row] row]
-             (when (contains? row column)
-               [inspector (assoc settings :coll row :k column) (get row column)])))))
-     (into [::header] values)
-     (into [::header] columns)]))
+           [table-data
+            settings
+            (let [[_ row] row]
+              (when (contains? row column)
+                [inspector (assoc settings :coll row :k column) (get row column)]))])))
+     (concat [::header] values)
+     (concat [::header] columns)]))
 
 (defn- inspect-coll-table [settings values]
-  [inspect-map-table settings (zipmap (range) values)])
+  (let [columns (into #{} (mapcat keys values))]
+    [table
+     settings
+     (fn [context]
+       (let [{:keys [row column]} context]
+         (cond
+           (= column row ::header) [table-header-row settings]
 
-(defn inspect-vector-table [settings values]
+           (= row ::header)
+           [table-header-row
+            settings
+            [inspector (assoc settings :coll values) column]]
+
+           (= column ::header)
+           [table-header-column
+            settings
+            [inspector (assoc settings :coll values) (dec (:row-index context))]]
+
+           :else
+           [table-data
+            settings
+            (when (contains? row column)
+              [inspector (assoc settings :coll row :k column) (get row column)])])))
+     (concat [::header] values)
+     (concat [::header] columns)]))
+
+(defn- inspect-vector-table [settings values]
   (let [n (reduce max (map count values))]
     [table
      settings
      (fn [context]
        (let [{:keys [row column]} context]
-         (when (< column (count row))
-           [inspector (assoc settings :coll row :k column) (get row column)])))
+         [table-data
+          settings
+          (when (< column (count row))
+            [inspector (assoc settings :coll row :k column) (get row column)])]))
      values
      (range n)]))
 
@@ -80,11 +144,15 @@
        (let [{:keys [row column]} context]
          (cond
            (= row ::header)
-           [inspector (assoc settings :coll row) column]
+           [table-header-row
+            settings
+            [inspector (assoc settings :coll row) column]]
 
            (contains? column row)
-           [inspector (assoc settings :coll row :k column) (get row column)])))
-     (into [::header] values)
+           [table-data
+            settings
+            [inspector (assoc settings :coll row :k column) (get row column)]])))
+     (concat [::header] values)
      columns]))
 
 (defn- get-component [value]
