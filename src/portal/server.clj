@@ -37,15 +37,19 @@
     (when (fn? f) (f true))
     res))
 
-(defn- send-resource [content-type resource-name]
+(def resource
+  {"main.js"    (io/resource "main.js")
+   "index.html" (io/resource "index.html")})
+
+(defn- send-resource [content-type resource]
   {:status  200
    :headers {"Content-Type" content-type}
-   :body    (-> resource-name io/resource slurp)})
+   :body    (slurp resource)})
 
 (defn handler [request]
   (let [paths
-        {"/"        #(send-resource "text/html"       "index.html")
-         "/main.js" #(send-resource "text/javascript" "main.js")
+        {"/"        #(send-resource "text/html"       (resource "index.html"))
+         "/main.js" #(send-resource "text/javascript" (resource "main.js"))
          "/rpc"     #(rpc-handler request)}
         f (get paths (:uri request))]
     (when (fn? f) (f))))

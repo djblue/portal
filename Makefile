@@ -8,7 +8,7 @@ SHELL := env $(ENV) /bin/bash
 all: release
 
 clean:
-	rm -rf target resources/main.js
+	rm -rf target resources/main.js .shadow-cljs
 
 target/install-babashka:
 	mkdir -p target
@@ -27,8 +27,8 @@ node_modules: package.json
 resources/main.js:
 	clojure -A:cljs:shadow-cljs release client
 
-dev: node_modules
-	clojure -A:cider:cljs:dev-cljs:shadow-cljs watch client demo
+dev: node_modules release
+	clojure -A:dev:cider:cljs:dev-cljs:shadow-cljs watch client
 
 release: node_modules resources/main.js
 
@@ -61,19 +61,19 @@ ci: lint test
 
 e2e/jvm: release
 	@echo "running e2e tests for jvm"
-	@clojure -m portal.e2e | clojure -e "(set! *warn-on-reflection* true)" -r
+	@clojure -A:test -m portal.e2e | clojure -e "(set! *warn-on-reflection* true)" -r
 
 e2e/node: release
 	@echo "running e2e tests for node"
-	@clojure -m portal.e2e | clojure -A:cljs -m cljs.main -re node
+	@clojure -A:test -m portal.e2e | clojure -A:cljs -m cljs.main -re node
 
 e2e/bb: release bb
 	@echo "running e2e tests for babashka"
-	@clojure -m portal.e2e | bb
+	@clojure -A:test -m portal.e2e | bb
 
 e2e/web: release
 	@echo "running e2e tests for web"
 	@echo "please wait for browser to open before proceeding"
-	@clojure -m portal.e2e web | clojure -A:cljs -m cljs.main
+	@clojure -A:test -m portal.e2e web | clojure -A:cljs -m cljs.main
 
 e2e: e2e/jvm e2e/node e2e/web e2e/bb

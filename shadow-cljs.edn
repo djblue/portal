@@ -1,17 +1,15 @@
 {:deps {:aliases [:cljs]}
  ;:nrepl {:middleware [portal.nrepl/wrap-portal]}
- :dev-http
- {9090 "resources/"
-  9091 ["target/demo/" "resources/"]}
  :builds
  {:client
-  {:output-dir "resources/"
+  {:output-dir "target/resources/"
    :asset-path "."
    :target :browser
    :compiler-options {:warnings-as-errors true}
    :modules {:main {:init-fn portal.core/main!}}
+   :release {:output-dir "resources/"}
    :devtools {:after-load portal.core/reload!
-              :preloads   [shadow.remote.runtime.cljs.browser]}}
+              :preloads   [cljs.user]}}
 
   :demo
   {:output-dir "target/demo/"

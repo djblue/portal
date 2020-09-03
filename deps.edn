@@ -1,4 +1,4 @@
-{:paths ["src" "test" "resources"]
+{:paths ["src" "resources"]
  :deps
  {com.cognitect/transit-clj {:mvn/version "1.0.324"
                              :exclusions [org.msgpack/msgpack
@@ -7,7 +7,8 @@
   cheshire/cheshire {:mvn/version "5.10.0"
                      :exclusions [tigris/tigris]}}
  :aliases
- {:dev-cljs
+ {:dev {:extra-paths ["dev" "test"]}
+  :dev-cljs
   ;; Using clojurescript from source is required to get around
   ;; the older version (0.8.309) of transit-clj bundled in their jar.
   ;; This is necessary because the :default-handler for transit-clj
@@ -44,7 +45,8 @@
                 {:git/url "https://github.com/athos/clj-check.git"
                  :sha "da6363a38b06d9b84976ed330a9544b69d3c4dee"}}}
   :test
-  {:extra-deps
+  {:extra-paths ["test"]
+   :extra-deps
    {babashka/clj-http-lite
     {:git/url "https://github.com/babashka/clj-http-lite.git"
      :sha "f44ebe45446f0f44f2b73761d102af3da6d0a13e"}}}}}

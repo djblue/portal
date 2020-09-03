@@ -318,7 +318,6 @@
             (.getElementById js/document "root")))
 
 (defn on-back []
-  (tap> ::on-back)
   (swap! state
          (fn [state]
            (if-let [previous-state (:portal/previous-state state)]
@@ -326,7 +325,6 @@
              state))))
 
 (defn on-forward []
-  (tap> ::on-forward)
   (swap! state
          (fn [state]
            (if-let [next-state (:portal/next-state state)]
@@ -334,7 +332,6 @@
              state))))
 
 (defn on-nav [send! target]
-  (tap> ::on-nav)
   (-> (send!
        {:op :portal.rpc/on-nav
         :args [(:coll target) (:k target) (:value target)]})
@@ -348,7 +345,6 @@
                                 :portal/value (:value %))))))))
 
 (defn on-clear [send!]
-  (tap> ::on-clear)
   (->
    (send! {:op :portal.rpc/clear-values})
    (.then #(swap! state
