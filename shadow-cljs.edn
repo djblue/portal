@@ -5,7 +5,9 @@
   {:output-dir "target/resources/"
    :asset-path "."
    :target :browser
-   :compiler-options {:warnings-as-errors true}
+   :compiler-options
+   {:infer-externs true
+    :warnings-as-errors true}
    :modules {:main {:init-fn portal.core/main!}}
    :release {:output-dir "resources/"}
    :devtools {:after-load portal.core/reload!
@@ -15,7 +17,9 @@
   {:output-dir "target/demo/"
    :asset-path "."
    :target :browser
-   :compiler-options {:warnings-as-errors true}
+   :compiler-options
+   {:infer-externs true
+    :warnings-as-errors true}
    :modules {:main {:init-fn examples.demo/main!}}
    :devtools {:after-load examples.demo/reload!}}
 
