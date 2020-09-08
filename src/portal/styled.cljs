@@ -1,21 +1,56 @@
-(ns portal.styled
-  (:require ["emotion" :as emotion]))
+(ns portal.styled)
 
 (def selectors
-  {:style       identity
-   :style/hover (fn [style] {:&:hover style})})
+  {:style       #(str "." %)
+   :style/hover #(str "." % ":hover")})
 
-(defn attrs->css [attrs]
+(defonce cache (atom {}))
+
+(defn- value->css [v]
+  (cond
+    (number? v)  (str v "px")
+    (keyword? v) (name v)
+    :else        v))
+
+(def exclude? #{:opacity :z-index})
+
+(defn- style->css [style]
+  (reduce-kv
+   (fn [css k v]
+     (str
+      css
+      (when (and k v)
+        (str (value->css k) ":"
+             (if (exclude? k)
+               v
+               (value->css v)) ";")))) "" style))
+
+(defn- generate-class [selector style]
+  (let [css (style->css style)]
+    (when-not (empty? css)
+      (let [k  (gensym)
+            f  (get selectors selector)
+            el (js/document.createElement "style")]
+        (set! (.-innerHTML el)
+              (str (f k) "{" css "}"))
+        (.appendChild js/document.head el)
+        (swap! cache assoc [selector style] k)
+        k))))
+
+(defn- get-class [selector style]
+  (or (get @cache [selector style])
+      (generate-class selector style)))
+
+(defn- attrs->css [attrs]
   (reduce
    (fn [attrs selector]
      (if-not (contains? attrs selector)
        attrs
-       (let [style  (get attrs selector)
-             f      (get selectors selector)
-             class  (-> style f clj->js emotion/css)]
+       (let [style (get attrs selector)
+             class (get-class selector style)]
          (-> attrs
              (dissoc selector)
-             (update :class emotion/cx class)))))
+             (update :class str " " class)))))
    attrs
    (keys selectors)))
 
