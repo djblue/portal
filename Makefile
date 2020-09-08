@@ -77,3 +77,6 @@ e2e/web: release
 	@clojure -A:test -m portal.e2e web | clojure -A:cljs -m cljs.main
 
 e2e: e2e/jvm e2e/node e2e/web e2e/bb
+
+demo: release
+	./build-demo
