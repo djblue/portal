@@ -48,8 +48,7 @@
                      :padding-right 16
                      :margin-left "0.3em"
                      :flex-direction :column
-                     :flex-wrap :wrap
-                     :align-items :top}}
+                     :flex-wrap :wrap}}
                    (:value-child opts)]
             ellipsis  [s/div
                        {:style
@@ -96,8 +95,7 @@
    {:style
     {:padding-left 16
      :flex-direction :column
-     :flex-wrap :wrap
-     :align-items :top}}
+     :flex-wrap :wrap}}
    [l/lazy-seq
     (for [[k v] value]
       ^{:key (hash k)}
@@ -112,8 +110,7 @@
    {:style
     {:padding-left 16
      :flex-direction :column
-     :flex-wrap :wrap
-     :align-items :top}}
+     :flex-wrap :wrap}}
    [l/lazy-seq
     (map-indexed
      (fn [idx item]
