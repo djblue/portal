@@ -93,7 +93,7 @@
    [tagged-tag settings tag]
    [s/div {:style {:margin-left (:spacing/padding settings)}}
     [s/div
-     {:style {:margin (str "-" (:spacing/padding settings))}}
+     {:style {:margin (* -1 (:spacing/padding settings))}}
      [inspector settings value]]]])
 
 (defn preview-coll [open close]
