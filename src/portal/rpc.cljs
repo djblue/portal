@@ -27,10 +27,16 @@
   (let [w (t/writer :json {:transform t/write-meta})]
     (t/write w edn)))
 
+(defn- get-sender []
+  (if js/window.opener
+    js/window.opener.portal.web.send_BANG_
+    (fn server-rpc [body]
+      (-> (js/fetch "/rpc" #js {:method "POST" :body body})
+          (.then #(.text %))))))
+
+(defonce sender (get-sender))
+
 (defn send! [msg]
-  (-> (js/fetch
-       "/rpc"
-       #js {:method "POST" :body (edn->json msg)})
-      (.then #(.text %))
+  (-> (sender (edn->json msg))
       (.then json->edn)))
 

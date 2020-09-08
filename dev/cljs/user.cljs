@@ -17,6 +17,8 @@
      :stack    (.-stack this)}))
 
 (comment
+  (set! js/portal.web.code_url (str js/window.location.origin "/main.js"))
+
   (p/open)
   (p/tap)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])

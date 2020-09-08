@@ -4,12 +4,10 @@
             [portal.runtime.transit :as t]
             [portal.spec :as s]))
 
-(defn- send! [msg]
-  (js/Promise.
-   (fn [resolve _reject]
-     (let [body (t/json->edn msg)
-           f    (get rt/ops (:op body))]
-       (f body #(resolve (t/edn->json %)))))))
+(defn- str->src [value content-type]
+  (let [blob (js/Blob. #js [value] #js {:type content-type})
+        url  (or js/window.URL js/window.webkitURL)]
+    (.createObjectURL url blob)))
 
 (defn- get-item [k]
   (js/window.localStorage.getItem k))
@@ -22,25 +20,31 @@
 
 (defonce child-window (atom nil))
 (defonce code (io/resource "main.js"))
+(defonce code-url (str->src code "text/javascript"))
 
-(defn- init-child-window [document]
-  (let [body   (.-body document)
-        script (.createElement document "script")
-        el     (.createElement document "div")]
-    (set! (.-style body) "margin: 0")
-    (set! (.-id el) "root")
-    (set! (.-text script) code)
-    (.appendChild body el)
-    (.appendChild body script)))
+(defn ^:export send! [msg]
+  (js/Promise.
+   (fn [resolve _reject]
+     (let [body (t/json->edn msg)
+           f    (get rt/ops (:op body))]
+       (f body #(resolve (t/edn->json %)))))))
+
+(defn- index-html []
+  (str
+   "<head>"
+   "<title>portal</title>"
+   "<meta charset='UTF-8' />"
+   "<meta name='viewport' content='width=device-width, initial-scale=1' />"
+   "</head>"
+   "<body style=\"margin: 0\">"
+   "<div id=\"root\"></div>"
+   "<script src=\"" code-url "\"></script>"
+   "</body>"))
 
 (defn- open-inspector [options]
   (swap! rt/state merge {:portal/open? true} options)
-  (let [child  (js/window.open "" "portal", "resizable,scrollbars,status")
-        doc    (.-document (.-window child))]
-    (when-not (.-PORTAL_INIT child)
-      (init-child-window doc)
-      (set! (.-PORTAL_INIT child) true))
-    (.portal.core.start_BANG_ child #'send!)
+  (let [url   (str->src (index-html) "text/html")
+        child (js/window.open url "portal", "resizable,scrollbars,status")]
     (set! (.-onunload child)
           (fn []
             (remove-item ":portal/open")))
@@ -77,6 +81,7 @@
   "Close all current inspector windows."
   []
   (when-let [child @child-window]
+    (reset! child-window nil)
     (.close child))
   nil)
 

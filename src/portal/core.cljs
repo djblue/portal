@@ -394,25 +394,11 @@
            (fn [complete?]
              (when-not complete? (long-poll))))))
 
-(defonce flush-send! (atom nil))
-
-(defn ^:export start! [send!]
-  (let [send! #(js/Promise.race
-                [(.then (send! (rpc/edn->json %)) rpc/json->edn)
-                 (js/Promise.
-                  (fn [resolve] (reset! flush-send! resolve)))])
-        settings (get-actions send!)]
-    (when-let [f @flush-send!] (f))
-    (when-not @state (long-poll))
-    (swap! state merge default-settings settings)
-    (render-app)))
-
 (defn main!
   ([] (main! (get-actions rpc/send!)))
   ([settings]
-   (when js/window.PORTAL_AUTO_START
-     (swap! state merge default-settings settings)
-     (long-poll)
-     (render-app))))
+   (swap! state merge default-settings settings)
+   (long-poll)
+   (render-app)))
 
 (defn reload! [] (render-app))
