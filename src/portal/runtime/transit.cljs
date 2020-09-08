@@ -9,7 +9,9 @@
    (t/reader
     :json
     {:handlers
-     {"portal.transit/var"
+     {"r"
+      (t/read-handler #(js/URL. %))
+      "portal.transit/var"
       (t/read-handler
        (fn [s] (let [[_ pair] s] (find-var (first pair)))))
       "portal.transit/object" (t/read-handler (comp rt/uuid->instance :id))}})
