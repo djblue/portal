@@ -24,7 +24,7 @@
            ::user-exception (Exception. "hi")
            ::uuid (UUID/randomUUID)
            ::date (java.util.Date.)
-           ::binary (slurp-bytes "resources/screenshot.png")}
+           ::binary (slurp-bytes (io/resource "screenshot.png"))}
      :cljs {::promise (js/Promise.resolve 123)
             ::url (js/URL. "https://github.com/djblue/portal")
             ::uuid (random-uuid)
