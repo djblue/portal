@@ -28,11 +28,13 @@
      (let [session (:portal.rpc/session-id request)]
        (future (done @(:request (get-session session))))))})
 
+(def timeout 1000)
+
 (defn request [session-id message]
   (let [{:keys [request response]} (get-session session-id)]
     (if-not (deliver request message)
       (throw (ex-info "Portal busy with another request" message))
-      (let [response (deref response 1000 ::timeout)]
+      (let [response (deref response timeout ::timeout)]
         (clear-session session-id)
         (if-not (= response ::timeout)
           response
