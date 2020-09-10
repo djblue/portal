@@ -1,5 +1,6 @@
 (ns portal.ui.rpc
   (:require [cognitect.transit :as t]
+            [portal.ui.app :refer [get-datafy]]
             [portal.ui.state :refer [state tap-state]]
             [com.cognitect.transit.types :as ty]))
 
@@ -51,7 +52,9 @@
 (def ops
   {:portal.rpc/datafy
    (fn [_request]
-     (select-keys (merge @tap-state @state) [:portal/value]))
+     (let [value  (:portal/value (merge @tap-state @state))
+           datafy (get-datafy @state)]
+       {:portal/value (datafy value)}))
    :portal.rpc/push-state
    (fn [request]
      (swap! state
