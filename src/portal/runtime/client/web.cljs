@@ -4,7 +4,7 @@
 (defn request [session message]
   (if-let [child-window @session]
     (t/json->edn
-     (.portal.rpc.handler child-window (t/edn->json message)))
+     (.portal.ui.rpc.handler child-window (t/edn->json message)))
     (throw (ex-info "Portal not open" message))))
 
 (defn- push-state [session new-value]
