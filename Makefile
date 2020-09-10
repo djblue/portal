@@ -37,10 +37,13 @@ lint:
 	clojure -A:kondo --lint dev src test
 	clojure -A:cljfmt check
 
-test/jvm:
+target:
+	mkdir -p target
+
+test/jvm: release target
 	clojure -A:test -m portal.test-runner
 
-test/bb: bb
+test/bb: release bb
 	bb -m portal.test-runner
 
 test: test/jvm test/bb

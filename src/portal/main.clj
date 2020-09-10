@@ -36,6 +36,12 @@
 
 (defonce server (atom nil))
 
+(defn chrome-flags [url]
+  ["--incognito"
+   "--disable-features=TranslateUI"
+   "--no-first-run"
+   (str "--app=" url)])
+
 (defn open-inspector [options]
   (swap! rt/state merge {:portal/open? true} options)
   (when (nil? @server)
@@ -45,12 +51,8 @@
   (let [session-id (random-uuid)
         url (str "http://localhost:" (-> @server :port) "?" session-id)]
     (if-let [bin (get-chrome-bin)]
-      (future
-        (sh bin
-            "--incognito"
-            "--disable-features=TranslateUI"
-            "--no-first-run"
-            (str "--app=" url)))
+      (let [flags (chrome-flags url)]
+        (future (apply sh bin flags)))
       (browse-url url))
     (c/make-atom session-id)))
 

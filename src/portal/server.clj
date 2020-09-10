@@ -51,9 +51,12 @@
    :headers {"Content-Type" content-type}
    :body    (slurp resource)})
 
+(defn wait [] (Thread/sleep 60000))
+
 (defn handler [request]
   (let [paths
         {"/"        #(send-resource "text/html"       (resource "index.html"))
+         "/wait.js" wait
          "/main.js" #(send-resource "text/javascript" (resource "main.js"))
          "/rpc"     #(rpc-handler request)}
         f (get paths (:uri request))]
