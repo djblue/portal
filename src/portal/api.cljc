@@ -12,8 +12,7 @@
   "Open a new inspector window."
   ([] (open nil))
   ([options]
-   (m/open-inspector options)
-   nil))
+   (m/open-inspector options)))
 
 (defn close
   "Close all current inspector windows."

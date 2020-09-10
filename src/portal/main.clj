@@ -7,9 +7,13 @@
             [clojure.string :as s]
             [portal.http-socket-server :as http]
             [portal.runtime :as rt]
+            [portal.runtime.client :as c]
             [portal.server :as server]
             [portal.runtime.transit :as t])
-  (:import [java.io PushbackReader]))
+  (:import [java.io PushbackReader]
+           [java.util UUID]))
+
+(def random-uuid #(UUID/randomUUID))
 
 (defn get-paths []
   (concat
@@ -38,7 +42,8 @@
     (reset!
      server
      (http/start #'server/handler)))
-  (let [url (str "http://localhost:" (-> @server :port))]
+  (let [session-id (random-uuid)
+        url (str "http://localhost:" (-> @server :port) "?" session-id)]
     (if-let [bin (get-chrome-bin)]
       (future
         (sh bin
@@ -46,8 +51,8 @@
             "--disable-features=TranslateUI"
             "--no-first-run"
             (str "--app=" url)))
-      (browse-url url)))
-  @server)
+      (browse-url url))
+    (c/make-atom session-id)))
 
 (defn close-inspector []
   (swap! rt/state assoc :portal/open? false)

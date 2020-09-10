@@ -1,6 +1,7 @@
 (ns portal.web
   (:require [portal.resources :as io]
             [portal.runtime :as rt]
+            [portal.runtime.client.web :as c]
             [portal.runtime.transit :as t]
             [portal.spec :as s]))
 
@@ -75,7 +76,7 @@
   ([options]
    (s/assert-options options)
    (open-inspector options)
-   nil))
+   (c/make-atom child-window)))
 
 (defn ^:export close
   "Close all current inspector windows."

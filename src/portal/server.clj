@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.datafy :refer [datafy]]
             [portal.runtime :as rt]
+            [portal.runtime.client :as c]
             [portal.runtime.transit :as t]))
 
 (defn- send-rpc [value]
@@ -27,14 +28,18 @@
       (dorun (map future-cancel futures))
       winner)))
 
+(def ops (merge c/ops rt/ops))
+
 (defn- rpc-handler [request]
   (let [body  (t/json->edn (:body request))
-        op    (get rt/ops (:op body) not-found)
+        op    (get ops (:op body) not-found)
         p     (promise)
         done  #(deliver p (send-rpc %))
         f     (op body done)
         res   (race p (:closed? request))]
-    (when (fn? f) (f true))
+    (cond
+      (fn? f)     (f true)
+      (future? f) (future-cancel f))
     res))
 
 (def resource

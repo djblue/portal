@@ -2,6 +2,7 @@
   (:require [examples.data :refer [data]]
             [portal.api :as p]
             [portal.server :as s]
+            [cheshire.core :as json]
             [shadow.cljs.devtools.api :as shadow]
             [clojure.java.io :as io]
             [clojure.datafy :refer [datafy]]
@@ -35,15 +36,21 @@
 (comment
   (alter-var-root #'s/resource assoc "main.js" (io/file "target/resources/main.js"))
 
-  (p/open)
+  (def portal (p/open))
   (p/tap)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
   (p/clear)
   (p/close)
 
+  (-> @portal)
+  (tap> portal)
+  (swap! portal * 1000)
+  (reset! portal 1)
+
   (tap> (datafy java.io.File))
   ;; should cause an error in portal because of transit
   (tap> {(with-meta 'k {:a :b}) 'v})
 
+  (tap> (json/parse-stream (io/reader "package-lock.json")))
   (tap> (io/file "deps.edn"))
   (tap> data))

@@ -27,9 +27,12 @@
   (let [w (t/writer :json {:transform t/write-meta})]
     (t/write w edn)))
 
+(defn- get-mode [] (if js/window.opener ::web ::server))
+
 (defn- get-sender []
-  (if js/window.opener
-    js/window.opener.portal.web.send_BANG_
+  (case (get-mode)
+    ::web js/window.opener.portal.web.send_BANG_
+    ::server
     (fn server-rpc [body]
       (-> (js/fetch "/rpc" #js {:method "POST" :body body})
           (.then #(.text %))))))
@@ -40,3 +43,49 @@
   (-> (sender (edn->json msg))
       (.then json->edn)))
 
+(defn get-session [] (uuid (subs js/window.location.search 1)))
+
+(defonce session-id (get-session))
+
+(def ops
+  {:portal.rpc/datafy
+   (fn [_request]
+     ;; TODO: fix this
+     (select-keys
+      (merge @js/portal.core.tap-state
+             @js/portal.core.state)
+      [:portal/value]))
+   :portal.rpc/push-state
+   (fn [request]
+     (swap! js/portal.core.state
+            (fn [state]
+              (assoc state
+                     :portal/previous-state state
+                     :portal/next-state nil
+                     :search-text ""
+                     :portal/value (:state request))))
+     nil)})
+
+(defn- dispatch [request]
+  (when-let [f (get ops (:op request))] (f request)))
+
+(defn ^:export handler [request]
+  (edn->json (dispatch (json->edn request))))
+
+(defn recv! []
+  (-> (send!
+       {:op :portal.rpc/recv-request
+        :portal.rpc/session-id session-id})
+      (.then dispatch)
+      (.then
+       (fn [response]
+         (send!
+          {:op :portal.rpc/send-response
+           :portal.rpc/session-id session-id
+           :response response})))))
+
+(defn long-poll []
+  (when (= (get-mode) ::server)
+    (.then (recv!) long-poll)))
+
+(defonce init (long-poll))

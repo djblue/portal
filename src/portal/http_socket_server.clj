@@ -20,10 +20,10 @@
             (if (string/blank? line)
               headers
               (recur (conj headers line)))))
-        [method path] (string/split req-line #" ")
+        [method uri] (string/split req-line #"[ ?]")
         headers (parse-headers headers)]
     {:method  method
-     :uri     path
+     :uri     uri
      :headers headers
      :body (when-let [content-length (get headers "Content-Length")]
              (let [buffer (char-array content-length)]

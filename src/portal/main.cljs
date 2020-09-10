@@ -7,6 +7,7 @@
             [portal.async :as a]
             [portal.resources :as io]
             [portal.runtime :as rt]
+            [portal.runtime.client :as c]
             [portal.runtime.transit :as t]))
 
 (defn- get-paths []
@@ -61,10 +62,12 @@
                  {:portal/state-id (:portal/state-id value)
                   :portal.rpc/exception e}))))))
 
+(def ops (merge c/ops rt/ops))
+
 (defn- rpc-handler [request response]
   (a/let [body    (buffer-body request)
           req     (t/json->edn body)
-          op      (get rt/ops (get req :op) not-found)
+          op      (get ops (get req :op) not-found)
           done    #(send-rpc response %)
           cleanup (op req done)]
     (when (fn? cleanup)
