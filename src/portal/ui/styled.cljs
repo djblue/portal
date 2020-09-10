@@ -1,4 +1,4 @@
-(ns portal.styled)
+(ns portal.ui.styled)
 
 (def selectors
   {:style       #(str "." %)

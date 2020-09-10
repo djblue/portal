@@ -1,7 +1,7 @@
-(ns portal.viewer.tree
-  (:require [portal.inspector :as ins :refer [inspector]]
-            [portal.styled :as s]
-            [portal.lazy :as l]
+(ns portal.ui.viewer.tree
+  (:require [portal.ui.inspector :as ins :refer [inspector]]
+            [portal.ui.styled :as s]
+            [portal.ui.lazy :as l]
             [reagent.core :as r]))
 
 (defn delimiter [value]

@@ -1,6 +1,6 @@
-(ns portal.viewer.image
+(ns portal.ui.viewer.image
   (:require [portal.colors :as c]
-            [portal.styled :as s]))
+            [portal.ui.styled :as s]))
 
 (defn inspect-image [settings value]
   (let [blob (js/Blob. #js [value])

@@ -1,5 +1,5 @@
-(ns portal.drag-and-drop
-  (:require [portal.styled :as s]
+(ns portal.ui.drag-and-drop
+  (:require [portal.ui.styled :as s]
             [reagent.core :as r]))
 
 (defn read-file [file]

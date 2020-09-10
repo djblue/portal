@@ -1,4 +1,4 @@
-(ns portal.viewer.html
+(ns portal.ui.viewer.html
   (:require [portal.colors :as c]))
 
 (defn inspect-html [settings value]

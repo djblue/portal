@@ -1,5 +1,6 @@
-(ns portal.rpc
+(ns portal.ui.rpc
   (:require [cognitect.transit :as t]
+            [portal.ui.state :refer [state tap-state]]
             [com.cognitect.transit.types :as ty]))
 
 ;; Since any object can have metadata and all unknown objects in portal
@@ -50,14 +51,10 @@
 (def ops
   {:portal.rpc/datafy
    (fn [_request]
-     ;; TODO: fix this
-     (select-keys
-      (merge @js/portal.core.tap-state
-             @js/portal.core.state)
-      [:portal/value]))
+     (select-keys (merge @tap-state @state) [:portal/value]))
    :portal.rpc/push-state
    (fn [request]
-     (swap! js/portal.core.state
+     (swap! state
             (fn [state]
               (assoc state
                      :portal/previous-state state

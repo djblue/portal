@@ -1,4 +1,4 @@
-(ns portal.viewer.hiccup
+(ns portal.ui.viewer.hiccup
   (:require [clojure.walk :as w]
             [portal.colors :as c]))
 

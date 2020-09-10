@@ -1,6 +1,6 @@
-(ns portal.viewer.diff
+(ns portal.ui.viewer.diff
   (:require [lambdaisland.deep-diff2 :refer [diff]]
-            [portal.inspector :as ins :refer [inspector]]))
+            [portal.ui.inspector :as ins :refer [inspector]]))
 
 (defn can-view? [value]
   (and (vector? value) (= 2 (count value))))

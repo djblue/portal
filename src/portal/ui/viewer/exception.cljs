@@ -1,8 +1,8 @@
-(ns portal.viewer.exception
+(ns portal.ui.viewer.exception
   (:require [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [portal.colors :as c]
-            [portal.styled :as s]))
+            [portal.ui.styled :as s]))
 
 (spec/def ::cause string?)
 

@@ -1,9 +1,9 @@
-(ns portal.inspector
+(ns portal.ui.inspector
   (:require [cognitect.transit :as t]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
-            [portal.lazy :as l]
-            [portal.styled :as s]))
+            [portal.ui.lazy :as l]
+            [portal.ui.styled :as s]))
 
 (defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))

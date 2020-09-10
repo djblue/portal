@@ -1,8 +1,8 @@
-(ns portal.viewer.table
+(ns portal.ui.viewer.table
   (:require [portal.colors :as c]
-            [portal.inspector :as ins :refer [inspector]]
-            [portal.lazy :as l]
-            [portal.styled :as s]))
+            [portal.ui.inspector :as ins :refer [inspector]]
+            [portal.ui.lazy :as l]
+            [portal.ui.styled :as s]))
 
 (defn- get-styles [settings]
   {:white-space :nowrap

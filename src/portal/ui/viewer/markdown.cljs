@@ -1,9 +1,9 @@
-(ns portal.viewer.markdown
+(ns portal.ui.viewer.markdown
   (:require [hickory.core :refer [parse-fragment as-hiccup]]
             [hickory.utils :as utils]
             [markdown.common :as common]
             [markdown.core :refer [md->html]]
-            [portal.viewer.hiccup :refer [inspect-hiccup]]))
+            [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
 
 (defn inspect-markdown [settings value]
   ;; I couldn't figure out a good way to disable html escaping, which

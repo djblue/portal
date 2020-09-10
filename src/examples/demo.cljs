@@ -1,5 +1,5 @@
 (ns examples.demo
-  (:require [portal.core :as portal]
+  (:require [portal.ui.core :as portal]
             [examples.data :refer [data]]
             [portal.async :as a]
             [portal.web :as p]

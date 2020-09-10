@@ -1,8 +1,8 @@
-(ns portal.viewer.http
+(ns portal.ui.viewer.http
   (:require [clojure.spec.alpha :as spec]
-            [portal.inspector :as ins :refer [inspector]]
-            [portal.rpc :as rpc]
-            [portal.styled :as s]
+            [portal.ui.inspector :as ins :refer [inspector]]
+            [portal.ui.rpc :as rpc]
+            [portal.ui.styled :as s]
             [reagent.core :as r]))
 
 (spec/def ::http-request

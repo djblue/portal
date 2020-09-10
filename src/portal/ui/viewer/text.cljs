@@ -1,9 +1,9 @@
-(ns portal.viewer.text
+(ns portal.ui.viewer.text
   (:require [clojure.string :as str]
             [portal.colors :as c]
-            [portal.inspector :as ins]
-            [portal.lazy :as l]
-            [portal.styled :as s]))
+            [portal.ui.inspector :as ins]
+            [portal.ui.lazy :as l]
+            [portal.ui.styled :as s]))
 
 (defn inspect-text [settings value]
   [s/div

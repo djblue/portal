@@ -1,6 +1,6 @@
-(ns portal.lazy
+(ns portal.ui.lazy
   (:refer-clojure :exclude [lazy-seq])
-  (:require [portal.styled :as s]
+  (:require [portal.ui.styled :as s]
             [react-visibility-sensor :default VisibilitySensor]
             [reagent.core :as r]))
 

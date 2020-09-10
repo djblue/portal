@@ -1,19 +1,20 @@
-(ns portal.core
+(ns portal.ui.core
   (:require [clojure.string :as str]
             [portal.colors :as c]
-            [portal.drag-and-drop :as dnd]
-            [portal.inspector :as ins :refer [inspector]]
-            [portal.rpc :as rpc]
-            [portal.styled :as s]
-            [portal.viewer.diff :as d]
-            [portal.viewer.exception :as ex]
-            [portal.viewer.hiccup :refer [inspect-hiccup]]
-            [portal.viewer.html :refer [inspect-html]]
-            [portal.viewer.image :as image]
-            [portal.viewer.markdown :refer [inspect-markdown]]
-            [portal.viewer.table :refer [inspect-table table-view?]]
-            [portal.viewer.text :refer [inspect-text]]
-            [portal.viewer.tree :refer [inspect-tree-1]]
+            [portal.ui.state :refer [state tap-state]]
+            [portal.ui.drag-and-drop :as dnd]
+            [portal.ui.inspector :as ins :refer [inspector]]
+            [portal.ui.rpc :as rpc]
+            [portal.ui.styled :as s]
+            [portal.ui.viewer.diff :as d]
+            [portal.ui.viewer.exception :as ex]
+            [portal.ui.viewer.hiccup :refer [inspect-hiccup]]
+            [portal.ui.viewer.html :refer [inspect-html]]
+            [portal.ui.viewer.image :as image]
+            [portal.ui.viewer.markdown :refer [inspect-markdown]]
+            [portal.ui.viewer.table :refer [inspect-table table-view?]]
+            [portal.ui.viewer.text :refer [inspect-text]]
+            [portal.ui.viewer.tree :refer [inspect-tree-1]]
             [reagent.core :as r]))
 
 (defn filter-data [settings value]
@@ -282,9 +283,6 @@
                   {:padding-left (* 2 (:spacing/padding settings))
                    :padding-right (* 2 (:spacing/padding settings))})}
       "clear"])])
-
-(defonce state     (r/atom nil))
-(defonce tap-state (r/atom nil))
 
 (defn app []
   (let [set-settings! (fn [value] (swap! state merge value))
