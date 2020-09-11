@@ -60,6 +60,10 @@
     <resources>
       <resource>
         <directory>src</directory>
+        <excludes>
+          <exclude>portal/ui/**</exclude>
+          <exclude>examples/**</exclude>
+        </excludes>
       </resource>
       <resource>
         <directory>resources</directory>
