@@ -1,3 +1,28 @@
+## 0.5.0 - 2020-09-10
+
+- Remove accidentally included example data in release jar
+- Table viewer updates
+  - prevent text wrapping
+  - fix coll of map indexing
+  - sticky row and column headers
+  - reduce padding to increase info density
+- Allow window refresh and zoom in / out for portal.web
+- Add pseudo portal atom
+
+For jvm and web:
+
+- `portal.api/open` will return an atom like thing
+  - Use `deref` to get the current value viewed in portal
+  - Use `reset!` to push a value into portal's history
+  - Use `swap!` to apply a fn to the current value then `reset!` the
+    result
+
+For node and bb:
+
+- `portal.api/open` will continue to return nil
+  - bb support will be added when interfaces can be implemented
+  - node support is hard since it can't block synchronously
+
 ## 0.4.1 - 2020-08-31
 
 - Fix windows issues (thanks, [@MrGung](https://github.com/MrGung) [#12](https://github.com/djblue/portal/issues/12))
