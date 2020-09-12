@@ -28,7 +28,7 @@
       (dorun (map future-cancel futures))
       winner)))
 
-(def ops (merge c/ops rt/ops))
+(def ^:private ops (merge c/ops rt/ops))
 
 (defn- rpc-handler [request]
   (let [body  (t/json->edn (:body request))
@@ -42,7 +42,7 @@
       (future? f) (future-cancel f))
     res))
 
-(def resource
+(def ^:private resource
   {"main.js"    (io/resource "main.js")
    "index.html" (io/resource "index.html")})
 
@@ -51,7 +51,7 @@
    :headers {"Content-Type" content-type}
    :body    (slurp resource)})
 
-(defn wait [] (Thread/sleep 60000))
+(defn- wait [] (Thread/sleep 60000))
 
 (defn handler [request]
   (let [paths
