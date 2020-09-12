@@ -20,30 +20,31 @@
      :sha "f5a9766110227c0d2a8702b32c44d52059b97a53"}}}
   :cljs
   {:extra-deps
-   {org.clojure/clojurescript {:mvn/version "1.10.758"}
-    reagent/reagent {:mvn/version "0.9.1"}
-    lambdaisland/deep-diff2 {:mvn/version "2.0.0-93"}
+   {org.clojure/clojurescript {:mvn/version "1.10.773"}
+    reagent/reagent {:mvn/version "0.10.0"}
+    lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.5"}
     hickory/hickory {:mvn/version "0.7.1"}}}
   :shadow-cljs
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.11.0"}}
+   {thheller/shadow-cljs {:mvn/version "2.11.4"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2020.06.21"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2020.09.09"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
-   :extra-deps {cljfmt/cljfmt {:mvn/version "0.6.8"}}}
+   :extra-deps {cljfmt/cljfmt {:mvn/version "0.7.0"}}}
   :nrepl
-  {:extra-deps {nrepl/nrepl {:mvn/version "0.8.0"}}}
+  {:extra-deps {nrepl/nrepl {:mvn/version "0.8.1"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
-   :extra-deps {athos/clj-check
-                {:git/url "https://github.com/athos/clj-check.git"
-                 :sha "da6363a38b06d9b84976ed330a9544b69d3c4dee"}}}
+   :extra-deps
+   {athos/clj-check
+    {:git/url "https://github.com/athos/clj-check.git"
+     :sha "da6363a38b06d9b84976ed330a9544b69d3c4dee"}}}
   :test
   {:extra-paths ["test"]
    :extra-deps

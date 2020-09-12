@@ -3,11 +3,11 @@
             [portal.ui.state :refer [state tap-state]]
             [portal.ui.rpc :as rpc]
             [portal.ui.app :refer [app]]
-            [reagent.core :as r]))
+            [reagent.dom :as rdom]))
 
 (defn render-app []
-  (r/render [app]
-            (.getElementById js/document "root")))
+  (rdom/render [app]
+               (.getElementById js/document "root")))
 
 (defn on-back []
   (swap! state
