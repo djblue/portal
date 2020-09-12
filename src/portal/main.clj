@@ -8,7 +8,7 @@
             [portal.http-socket-server :as http]
             [portal.runtime :as rt]
             [portal.runtime.client :as c]
-            [portal.server :as server]
+            [portal.runtime.server :as server]
             [portal.runtime.transit :as t])
   (:import [java.io PushbackReader]
            [java.util UUID]))

@@ -1,4 +1,4 @@
-(ns portal.server
+(ns portal.runtime.server.jvm
   (:require [clojure.java.io :as io]
             [clojure.datafy :refer [datafy]]
             [portal.runtime :as rt]

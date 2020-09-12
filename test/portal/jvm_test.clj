@@ -4,7 +4,7 @@
             [portal.api :as p]
             [portal.main :as m]
             [portal.runtime.client.bb :as bb]
-            [portal.server :as s]))
+            [portal.runtime.server.jvm :as s]))
 
 (defn- headless-chrome-flags [url]
   ["--headless" "--disable-gpu" url])
