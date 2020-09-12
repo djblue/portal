@@ -79,6 +79,31 @@ then try the portal api with the following commands:
 (p/close) ; Close the inspector when done
 ```
 
+### Portal Atom
+
+For the `jvm` and `web` platforms, you can pull values from portal back
+into your runtime by treating portal as an atom:
+
+```clojure
+(def a (p/open))
+
+; push the value 0 into portal
+(reset! a 0)
+
+@a ;=> 0
+
+; inc the current value in portal
+(swap! a inc)
+
+@a ;=> 1
+```
+
+The currently selected viewer has the ability to intercept and transform
+values returned by `deref`. For example, given a map in portal, you may
+decide to view it as a coll, and with that viewer selected, `deref` would
+return a list of pairs. Not many viewers implement this functionality
+currently, but expect more to do so in the future.
+
 ### Themes
 
 There are currently three built-in themes:
