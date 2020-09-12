@@ -1,6 +1,6 @@
 (ns portal.api
-  (:require [portal.main :as m]
-            [portal.runtime :as rt]))
+  (:require [portal.runtime :as rt]
+            [portal.runtime.launcher :as l]))
 
 (defn tap
   "Add portal as a tap> target."
@@ -12,12 +12,12 @@
   "Open a new inspector window."
   ([] (open nil))
   ([options]
-   (m/open-inspector options)))
+   (l/open options)))
 
 (defn close
   "Close all current inspector windows."
   []
-  (m/close-inspector)
+  (l/close)
   nil)
 
 (defn clear

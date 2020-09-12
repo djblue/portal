@@ -2,15 +2,15 @@
   (:require [clojure.test :refer [deftest is]]
             [clojure.java.io :as io]
             [portal.api :as p]
-            [portal.main :as m]
             [portal.runtime.client.bb :as bb]
+            [portal.runtime.launcher.jvm :as l]
             [portal.runtime.server.jvm :as s]))
 
 (defn- headless-chrome-flags [url]
   ["--headless" "--disable-gpu" url])
 
 (defn- open [f]
-  (with-redefs [m/chrome-flags f] (p/open)))
+  (with-redefs [l/chrome-flags f] (p/open)))
 
 (defn- patch-html
   "Patch index.html with a wait.js script to ensure
