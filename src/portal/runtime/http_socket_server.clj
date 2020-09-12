@@ -1,4 +1,4 @@
-(ns portal.http-socket-server
+(ns portal.runtime.http-socket-server
   (:require [clojure.java.io :as io]
             [clojure.string :as string])
   (:import [java.net ServerSocket Socket]

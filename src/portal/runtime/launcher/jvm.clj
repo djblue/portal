@@ -3,9 +3,9 @@
             [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
-            [portal.http-socket-server :as http]
             [portal.runtime :as rt]
             [portal.runtime.client :as c]
+            [portal.runtime.http-socket-server :as http]
             [portal.runtime.server :as server])
   (:import [java.util UUID]))
 

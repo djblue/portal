@@ -1,7 +1,7 @@
 (ns portal.http-socket-server-test
   (:require [clj-http.lite.client :as client]
             [clojure.test :refer [deftest testing is]]
-            [portal.http-socket-server :as server]))
+            [portal.runtime.http-socket-server :as server]))
 
 (def resolved (promise))
 

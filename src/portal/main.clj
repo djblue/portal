@@ -2,10 +2,10 @@
   (:require [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [portal.http-socket-server :as http]
             [portal.runtime :as rt]
-            [portal.runtime.transit :as t]
-            [portal.runtime.launcher :as l])
+            [portal.runtime.http-socket-server :as http]
+            [portal.runtime.launcher :as l]
+            [portal.runtime.transit :as t])
   (:import [java.io PushbackReader]))
 
 (defn read-edn [reader]
