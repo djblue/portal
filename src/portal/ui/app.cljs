@@ -234,6 +234,7 @@
    :color (::c/background settings)
    :border :none
    :font-size (:font-size settings)
+   :font-family "Arial"
    :box-sizing :border-box
    :padding-left (inc (:spacing/padding settings))
    :padding-right (inc (:spacing/padding settings))
@@ -264,11 +265,10 @@
        :on-click (:portal/on-back settings)
        :style    (merge
                   (button-styles settings)
-                  {:transform "rotate(180deg)"}
                   (when disabled?
                     {:opacity 0.45
                      :cursor  :default}))}
-      "►"])
+      "◄"])
    (let [disabled? (nil? (:portal/next-state settings))]
      [s/button
       {:disabled disabled?

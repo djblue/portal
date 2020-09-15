@@ -62,15 +62,14 @@
       (.then #(:portal/complete? %))))
 
 (def default-settings
-  (merge
-   {:font/family "monospace"
-    :font-size "12pt"
-    :limits/string-length 100
-    :limits/max-depth 1
-    :limits/max-length 1000
-    :layout/direction :row
-    :spacing/padding 8
-    :border-radius "2px"}))
+  {:font/family "monospace"
+   :font-size "12pt"
+   :limits/string-length 100
+   :limits/max-depth 1
+   :limits/max-length 1000
+   :layout/direction :row
+   :spacing/padding 8
+   :border-radius "2px"})
 
 (defn get-actions [send!]
   {:portal/on-clear (partial on-clear send!)
