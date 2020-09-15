@@ -1,7 +1,7 @@
 (ns user
   (:require [examples.data :refer [data]]
             [portal.api :as p]
-            [portal.runtime.server :as s]
+            [portal.runtime.server.jvm :as s]
             [cheshire.core :as json]
             [shadow.cljs.devtools.api :as shadow]
             [clojure.java.io :as io]
