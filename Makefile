@@ -81,5 +81,11 @@ e2e/web: release
 
 e2e: e2e/jvm e2e/node e2e/web e2e/bb
 
+main/jvm:
+	cat deps.edn | clojure -m portal.main edn
+
+main/bb:
+	cat deps.edn | bb -cp src:resources -m portal.main edn
+
 demo: release
 	./build-demo

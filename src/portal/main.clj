@@ -3,7 +3,6 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [portal.runtime :as rt]
-            [portal.runtime.http-socket-server :as http]
             [portal.runtime.launcher :as l]
             [portal.runtime.transit :as t])
   (:import [java.io PushbackReader]))
@@ -18,5 +17,6 @@
              "edn"      (-> System/in io/reader read-edn)
              "transit"  (-> System/in t/json-stream->edn))]
     (rt/update-value in)
-    (http/wait (l/open nil))
+    (l/open nil)
+    (l/wait)
     (shutdown-agents)))

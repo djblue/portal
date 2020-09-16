@@ -49,6 +49,8 @@
       (browse-url url))
     (c/make-atom session-id)))
 
+(defn wait [] (http/wait @server))
+
 (defn close []
   (swap! rt/state assoc :portal/open? false)
   (http/stop @server)

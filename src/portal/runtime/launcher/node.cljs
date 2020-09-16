@@ -61,6 +61,8 @@
           (str "--app=http://localhost:" (-> instance meta :local-port)))))
   true)
 
+(defn wait [])
+
 (defn close []
   (swap! rt/state assoc :portal/open? false)
   (stop @server)
