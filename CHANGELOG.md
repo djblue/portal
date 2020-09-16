@@ -1,3 +1,7 @@
+## 0.5.1 - 2020-09-16
+
+- Fix portal.main
+
 ## 0.5.0 - 2020-09-10
 
 - Remove accidentally included example data in release jar
