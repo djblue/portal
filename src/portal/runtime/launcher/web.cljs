@@ -21,10 +21,10 @@
 (defonce code (io/resource "main.js"))
 (defonce code-url (str->src code "text/javascript"))
 
-(defn send! [msg]
+(defn send! [message]
   (js/Promise.
    (fn [resolve _reject]
-     (let [body (t/json->edn msg)
+     (let [body (t/json->edn message)
            f    (get rt/ops (:op body))]
        (f body #(resolve (t/edn->json %)))))))
 

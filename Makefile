@@ -27,10 +27,20 @@ node_modules: package.json
 resources/main.js:
 	clojure -A:cljs:shadow-cljs release client
 
+resources/ws.js:
+	npx browserify --node \
+		--exclude bufferutil \
+		--exclude utf-8-validate \
+		--standalone Server \
+		node_modules/ws > resources/ws.js
+
 dev: node_modules release
 	clojure -A:dev:cider:cljs:dev-cljs:shadow-cljs watch client
 
-release: node_modules resources/main.js
+dev/node: node_modules resources/ws.js release
+	clojure -A:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
+
+release: node_modules resources/main.js resources/ws.js
 
 lint:
 	clojure -A:nrepl:check

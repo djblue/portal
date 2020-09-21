@@ -6,7 +6,7 @@
             [clojure.string :as s]
             [portal.async :as a]
             [portal.runtime :as rt]
-            [portal.runtime.server :as server]))
+            [portal.runtime.server.node :as server]))
 
 (defn- get-paths []
   (concat
@@ -47,19 +47,20 @@
   (.close (:server handle)))
 
 (defn open [options]
-  (swap! rt/state merge {:portal/open? true} options)
-  (a/let [chrome-bin (get-chrome-bin)
-          instance   (or @server (start #'server/handler))
-          url        (str "http://localhost:" (-> instance meta :local-port))]
-    (reset! server instance)
-    (if-not (some? chrome-bin)
-      (println "Goto" url "to view portal ui.")
-      (sh chrome-bin
-          "--incognito"
-          "--disable-features=TranslateUI"
-          "--no-first-run"
-          (str "--app=http://localhost:" (-> instance meta :local-port)))))
-  true)
+  (let [session-id (random-uuid)]
+    (swap! rt/state merge {:portal/open? true} options)
+    (a/let [chrome-bin (get-chrome-bin)
+            instance   (or @server (start #'server/handler))
+            url        (str "http://localhost:" (-> instance meta :local-port) "?" session-id)]
+      (reset! server instance)
+      (if-not (some? chrome-bin)
+        (println "Goto" url "to view portal ui.")
+        (sh chrome-bin
+            "--incognito"
+            "--disable-features=TranslateUI"
+            "--no-first-run"
+            (str "--app=" url))))
+    {:session-id session-id}))
 
 (defn wait [])
 

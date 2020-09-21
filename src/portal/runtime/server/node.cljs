@@ -2,42 +2,55 @@
   (:require [portal.async :as a]
             [portal.resources :as io]
             [portal.runtime :as rt]
-            [portal.runtime.client :as c]
+            [portal.runtime.client.node :as c]
             [portal.runtime.transit :as t]))
-
-(defn- buffer-body [request]
-  (js/Promise.
-   (fn [resolve reject]
-     (let [body (atom "")]
-       (.on request "data" #(swap! body str %))
-       (.on request "end"  #(resolve @body))
-       (.on request "error" reject)))))
 
 (defn- not-found [_request done]
   (done {:status :not-found}))
 
-(defn- send-rpc [response value]
-  (-> response
-      (.writeHead 200 #js {"Content-Type"
-                           "application/transit+json; charset=utf-8"})
-      (.end (try
-              (t/edn->json
-               (assoc value :portal.rpc/exception nil))
-              (catch js/Error e
-                (t/edn->json
-                 {:portal/state-id (:portal/state-id value)
-                  :portal.rpc/exception e}))))))
+(defn- edn->json [value]
+  (try
+    (t/edn->json
+     (assoc value :portal.rpc/exception nil))
+    (catch js/Error e
+      (t/edn->json
+       {:portal/state-id (:portal/state-id value)
+        :portal.rpc/exception e}))))
+
+(defn require-string [src file-name]
+  (let [Module (js/require "module")
+        m (Module.)]
+    (._compile m src file-name)
+    (.-exports m)))
+
+(def Server (-> (io/resource "ws.js") (require-string "ws.js") .-Server))
 
 (def ops (merge c/ops rt/ops))
 
-(defn- rpc-handler [request response]
-  (a/let [body    (buffer-body request)
-          req     (t/json->edn body)
-          op      (get ops (get req :op) not-found)
-          done    #(send-rpc response %)
-          cleanup (op req done)]
-    (when (fn? cleanup)
-      (.on request "close" cleanup))))
+(defn- rpc-handler [request _response]
+  (let [[_ session-id] (.split (.-url request) "?")]
+    (.handleUpgrade
+     (Server. #js {:noServer true})
+     request
+     (.-socket request)
+     (.-headers request)
+     (fn [ws]
+       (let [send!
+             (fn send! [message]
+               (.send ws (edn->json message)))]
+         (swap! c/sessions assoc session-id send!)
+         (.on ws "message"
+              (fn [message]
+                (a/let [req  (t/json->edn message)
+                        id   (:portal.rpc/id req)
+                        op   (get ops (get req :op) not-found)
+                        done #(send! (assoc %
+                                            :portal.rpc/id id
+                                            :op :portal.rpc/response))]
+                  (op req done))))
+         (.on ws "close"
+              (fn []
+                (swap! c/sessions dissoc session-id))))))))
 
 (defn- send-resource [response content-type body]
   (-> response
@@ -49,6 +62,6 @@
         {"/"        #(send-resource response "text/html"       (io/resource "index.html"))
          "/main.js" #(send-resource response "text/javascript" (io/resource "main.js"))
          "/rpc"     #(rpc-handler request response)}
-
-        f (get paths (.-url request) #(-> response (.writeHead 404) .end))]
+        [path] (.split (.-url request) "?")
+        f (get paths path #(-> response (.writeHead 404) .end))]
     (when (fn? f) (f))))

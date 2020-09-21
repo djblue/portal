@@ -27,4 +27,6 @@
   {:target :node-script
    :main portal.main/-main
    :output-to "target/node.js"
-   :compiler-options {:warnings-as-errors true}}}}
+   :compiler-options
+   {:infer-externs true
+    :warnings-as-errors true}}}}

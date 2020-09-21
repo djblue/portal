@@ -86,7 +86,7 @@
              (when-not complete? (long-poll))))))
 
 (defn main!
-  ([] (main! (get-actions rpc/send!)))
+  ([] (main! (get-actions rpc/request)))
   ([settings]
    (swap! state merge default-settings settings)
    (long-poll)

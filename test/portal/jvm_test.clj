@@ -2,7 +2,7 @@
   (:require [clojure.test :refer [deftest is]]
             [clojure.java.io :as io]
             [portal.api :as p]
-            [portal.runtime.client.bb :as bb]
+            [portal.runtime.client.jvm :as client]
             [portal.runtime.launcher.jvm :as l]
             [portal.runtime.server.jvm :as s]))
 
@@ -24,7 +24,7 @@
 (deftest e2e-jvm
   (patch-html)
   (when-let [portal (open headless-chrome-flags)]
-    (with-redefs [bb/timeout 10000]
+    (with-redefs [client/timeout 10000]
       (reset! portal 0)
       (is (= @portal 0))
       (swap! portal inc)

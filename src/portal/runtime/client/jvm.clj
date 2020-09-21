@@ -1,9 +1,52 @@
 (ns portal.runtime.client.jvm
-  (:require [portal.runtime.client.bb :as bb])
   (:import [clojure.lang IAtom IDeref]))
 
-(def ops bb/ops)
-(def request bb/request)
+(defonce sessions (atom {}))
+
+(defonce ^:private id (atom 0))
+(defonce ^:private pending-requests (atom {}))
+
+(defn- next-id [] (swap! id inc))
+
+(def ops
+  {:portal.rpc/response
+   (fn [message _send!]
+     (let [id (:portal.rpc/id message)]
+       (when-let [response (get @pending-requests id)]
+         (deliver response message))))})
+
+(def timeout 1000)
+
+(defn get-session [session-id]
+  (let [p (promise)
+        watch-key (keyword (gensym))]
+    (if-let [send! (get @sessions session-id)]
+      (deliver p send!)
+      (add-watch
+       sessions
+       watch-key
+       (fn [_ _ _old new]
+         (when-let [send! (get new session-id)]
+           (deliver p send!)))))
+    (let [result (deref p timeout nil)]
+      (remove-watch sessions watch-key)
+      result)))
+
+(defn request [session-id message]
+  (if-let [send! (get-session session-id)]
+    (let [id       (next-id)
+          response (promise)
+          message  (assoc message :portal.rpc/id id)]
+      (swap! pending-requests assoc id response)
+      (send! message)
+      (let [response (deref response timeout ::timeout)]
+        (swap! pending-requests dissoc id)
+        (if-not (= response ::timeout)
+          response
+          (throw (ex-info "Portal request timeout"
+                          {:session-id session-id :message message})))))
+    (throw (ex-info "No such portal session"
+                    {:session-id session-id :message message}))))
 
 (defn- push-state [session-id new-value]
   (request session-id {:op :portal.rpc/push-state :state new-value})

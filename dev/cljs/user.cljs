@@ -1,10 +1,11 @@
 (ns cljs.user
   (:require [examples.data :refer [data]]
-            [portal.web :as p]
             [clojure.datafy :refer [datafy]]
             [clojure.core.protocols :refer [Datafiable]]))
 
-(p/tap)
+(defn swap-dev []
+  (set! js/portal.runtime.launcher.web.code_url
+        (str js/window.location.origin "/main.js")))
 
 (extend-protocol Datafiable
   js/Promise
@@ -17,9 +18,13 @@
      :stack    (.-stack this)}))
 
 (comment
-  (set! js/portal.web.code_url (str js/window.location.origin "/main.js"))
+  (require '[portal.api :as p] :reload)
+  (require '[portal.web :as p] :reload)
+  (p/tap)
 
-  (def portal (p/open))
+  (swap-dev)
+
+  (def portal (portal.api/open))
   (p/tap)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
   (p/clear)

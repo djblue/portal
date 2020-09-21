@@ -22,70 +22,87 @@
      (.-tag this)
      (assoc (.-rep this) :meta m))))
 
-(defn json->edn [json]
+(defn- json->edn [json]
   (let [r (t/reader :json)] (t/read r json)))
 
-(defn edn->json [edn]
+(defn- edn->json [edn]
   (let [w (t/writer :json {:transform t/write-meta})]
     (t/write w edn)))
 
-(defn- get-mode [] (if js/window.opener ::web ::server))
+(defonce ^:private id (atom 0))
+(defonce ^:private pending-requests (atom {}))
 
-(defn- get-sender []
-  (case (get-mode)
-    ::web js/window.opener.portal.web.send_BANG_
-    ::server
-    (fn server-rpc [body]
-      (-> (js/fetch "/rpc" #js {:method "POST" :body body})
-          (.then #(.text %))))))
+(defn- next-id [] (swap! id inc))
 
-(defonce sender (get-sender))
+(declare send!)
 
-(defn send! [msg]
-  (-> (sender (edn->json msg))
+(defn- ws-request [message]
+  (js/Promise.
+   (fn [resolve reject]
+     (let [id (next-id)]
+       (swap! pending-requests assoc id [resolve reject])
+       (send! (assoc message :portal.rpc/id id))))))
+
+(defn- web-request [message]
+  (-> (edn->json message)
+      js/window.opener.portal.web.send_BANG_
       (.then json->edn)))
 
-(defn get-session [] (uuid (subs js/window.location.search 1)))
+(def request (if js/window.opener web-request ws-request))
 
-(defonce session-id (get-session))
-
-(def ops
-  {:portal.rpc/datafy
-   (fn [_request]
+(def ^:private ops
+  {:portal.rpc/response
+   (fn [message _send!]
+     (let [id        (:portal.rpc/id message)
+           [resolve] (get @pending-requests id)]
+       (swap! pending-requests dissoc id)
+       (resolve message)))
+   :portal.rpc/datafy
+   (fn [message send!]
      (let [value  (:portal/value (merge @tap-state @state))
            datafy (get-datafy @state)]
-       {:portal/value (datafy value)}))
+       (send!
+        {:op :portal.rpc/response
+         :portal.rpc/id (:portal.rpc/id message)
+         :portal/value (datafy value)})))
    :portal.rpc/push-state
-   (fn [request]
+   (fn [message send!]
      (swap! state
             (fn [state]
               (assoc state
                      :portal/previous-state state
                      :portal/next-state nil
                      :search-text ""
-                     :portal/value (:state request))))
-     nil)})
+                     :portal/value (:state message))))
+     (send!
+      {:op :portal.rpc/response
+       :portal.rpc/id (:portal.rpc/id message)}))})
 
-(defn- dispatch [request]
-  (when-let [f (get ops (:op request))] (f request)))
+(defn- dispatch [message send!]
+  (when-let [f (get ops (:op message))] (f message send!)))
 
 (defn ^:export handler [request]
-  (edn->json (dispatch (json->edn request))))
+  (edn->json (dispatch (json->edn request) identity)))
 
-(defn recv! []
-  (-> (send!
-       {:op :portal.rpc/recv-request
-        :portal.rpc/session-id session-id})
-      (.then dispatch)
-      (.then
-       (fn [response]
-         (send!
-          {:op :portal.rpc/send-response
-           :portal.rpc/session-id session-id
-           :response response})))))
+(defonce ^:private ws-promise (atom nil))
 
-(defn long-poll []
-  (when (= (get-mode) ::server)
-    (.then (recv!) long-poll)))
+(defn- get-session [] (subs js/window.location.search 1))
 
-(defonce init (long-poll))
+(defn- connect []
+  (if-let [ws @ws-promise]
+    ws
+    (reset!
+     ws-promise
+     (js/Promise.
+      (fn [resolve]
+        (when-let [chan (js/WebSocket.
+                         (str "ws://" js/location.host "/rpc?" (get-session)))]
+          (set! (.-onmessage chan) #(dispatch (json->edn (.-data %))
+                                              (fn [message]
+                                                (send! message))))
+          (set! (.-onerror chan)   #(reset!  ws-promise nil))
+          (set! (.-onclose chan)   #(reset!  ws-promise nil))
+          (set! (.-onopen chan)    #(resolve chan))))))))
+
+(defn send! [message]
+  (.then (connect) #(.send % (edn->json message))))

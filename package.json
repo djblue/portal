@@ -5,6 +5,7 @@
     "react-visibility-sensor": "^5.1.1"
   },
   "devDependencies": {
+    "browserify": "^16.5.2",
     "source-map-support": "^0.5.19",
     "ws": "^7.3.1"
   }

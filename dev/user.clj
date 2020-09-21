@@ -9,6 +9,7 @@
             [clojure.core.protocols :refer [Datafiable]]))
 
 (defn cljs [] (shadow/repl :client))
+(defn node [] (shadow/repl :node))
 
 (p/tap)
 
@@ -33,8 +34,13 @@
      :files         (seq (.listFiles this))
      :parent        (.getParentFile this)}))
 
+(defn swap-dev []
+  (alter-var-root
+   #'s/resource
+   assoc "main.js" (io/file "target/resources/main.js")))
+
 (comment
-  (alter-var-root #'s/resource assoc "main.js" (io/file "target/resources/main.js"))
+  (swap-dev)
 
   (def portal (p/open))
   (p/tap)

@@ -3,10 +3,10 @@
             [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
+            [org.httpkit.server :as http]
             [portal.runtime :as rt]
-            [portal.runtime.client :as c]
-            [portal.runtime.http-socket-server :as http]
-            [portal.runtime.server :as server])
+            [portal.runtime.client.jvm :as c]
+            [portal.runtime.server.jvm :as server])
   (:import [java.util UUID]))
 
 (defn- random-uuid [] (UUID/randomUUID))
@@ -40,18 +40,19 @@
   (when (nil? @server)
     (reset!
      server
-     (http/start #'server/handler)))
+     (http/run-server #'server/handler
+                      {:port 0 :legacy-return-value? false})))
   (let [session-id (random-uuid)
-        url (str "http://localhost:" (-> @server :port) "?" session-id)]
+        url (str "http://localhost:" (http/server-port @server) "?" session-id)]
     (if-let [bin (get-chrome-bin)]
       (let [flags (chrome-flags url)]
         (future (apply sh bin flags)))
       (browse-url url))
     (c/make-atom session-id)))
 
-(defn wait [] (http/wait @server))
+(defn wait [] #_(http/wait @server))
 
 (defn close []
   (swap! rt/state assoc :portal/open? false)
-  (http/stop @server)
+  (http/server-stop! @server)
   (reset! server nil))
