@@ -1,4 +1,4 @@
-(ns portal.runtime.launcher.node
+(ns portal.runtime.node.launcher
   (:require ["child_process" :as cp]
             ["fs" :as fs]
             ["http" :as http]
@@ -6,7 +6,7 @@
             [clojure.string :as s]
             [portal.async :as a]
             [portal.runtime :as rt]
-            [portal.runtime.server.node :as server]))
+            [portal.runtime.node.server :as server]))
 
 (defn- get-paths []
   (concat

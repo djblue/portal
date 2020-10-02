@@ -1,4 +1,4 @@
-(ns portal.runtime.client.web
+(ns portal.runtime.web.client
   (:require [portal.runtime.transit :as t]))
 
 (defn request [session message]

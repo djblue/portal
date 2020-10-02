@@ -2,9 +2,9 @@
   (:require [clojure.test :refer [deftest is]]
             [clojure.java.io :as io]
             [portal.api :as p]
-            [portal.runtime.client.jvm :as client]
-            [portal.runtime.launcher.jvm :as l]
-            [portal.runtime.server.jvm :as s]))
+            [portal.runtime.jvm.client :as client]
+            [portal.runtime.jvm.launcher :as l]
+            [portal.runtime.jvm.server :as s]))
 
 (defn- headless-chrome-flags [url]
   ["--headless" "--disable-gpu" url])

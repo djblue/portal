@@ -1,4 +1,4 @@
-(ns portal.runtime.client.node)
+(ns portal.runtime.node.client)
 
 (defonce sessions (atom {}))
 

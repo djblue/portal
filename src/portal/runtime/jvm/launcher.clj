@@ -1,12 +1,12 @@
-(ns portal.runtime.launcher.jvm
+(ns portal.runtime.jvm.launcher
   (:require [clojure.java.browse :refer [browse-url]]
             [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
             [org.httpkit.server :as http]
             [portal.runtime :as rt]
-            [portal.runtime.client.jvm :as c]
-            [portal.runtime.server.jvm :as server])
+            [portal.runtime.jvm.client :as c]
+            [portal.runtime.jvm.server :as server])
   (:import [java.util UUID]))
 
 (defn- random-uuid [] (UUID/randomUUID))

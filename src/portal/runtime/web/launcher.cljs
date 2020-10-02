@@ -1,4 +1,4 @@
-(ns portal.runtime.launcher.web
+(ns portal.runtime.web.launcher
   (:require [portal.resources :as io]
             [portal.runtime :as rt]
             [portal.runtime.transit :as t]))

@@ -1,4 +1,4 @@
-(ns portal.runtime.client.jvm
+(ns portal.runtime.jvm.client
   (:import [clojure.lang IAtom IDeref]))
 
 (defonce sessions (atom {}))

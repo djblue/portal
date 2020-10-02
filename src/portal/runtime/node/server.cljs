@@ -1,8 +1,8 @@
-(ns portal.runtime.server.node
+(ns portal.runtime.node.server
   (:require [portal.async :as a]
             [portal.resources :as io]
             [portal.runtime :as rt]
-            [portal.runtime.client.node :as c]
+            [portal.runtime.node.client :as c]
             [portal.runtime.transit :as t]))
 
 (defn- not-found [_request done]

@@ -1,10 +1,10 @@
-(ns portal.runtime.server.jvm
-  (:require [clojure.java.io :as io]
-            [clojure.datafy :refer [datafy]]
+(ns portal.runtime.jvm.server
+  (:require [clojure.datafy :refer [datafy]]
+            [clojure.java.io :as io]
+            [org.httpkit.server :as server]
             [portal.runtime :as rt]
-            [portal.runtime.client.jvm :as c]
-            [portal.runtime.transit :as t]
-            [org.httpkit.server :as server])
+            [portal.runtime.jvm.client :as c]
+            [portal.runtime.transit :as t])
   (:import [java.util UUID]))
 
 (defn- edn->json [value]

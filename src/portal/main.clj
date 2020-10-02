@@ -3,7 +3,7 @@
             [clojure.edn :as edn]
             [clojure.java.io :as io]
             [portal.runtime :as rt]
-            [portal.runtime.launcher.jvm :as l]
+            [portal.runtime.jvm.launcher :as l]
             [portal.runtime.transit :as t])
   (:import [java.io PushbackReader]))
 

@@ -1,7 +1,7 @@
 (ns portal.api
   (:require [portal.runtime :as rt]
-            #?(:clj  [portal.runtime.launcher.jvm :as l]
-               :cljs [portal.runtime.launcher.node :as l])))
+            #?(:clj  [portal.runtime.jvm.launcher :as l]
+               :cljs [portal.runtime.node.launcher :as l])))
 
 (defn tap
   "Add portal as a tap> target."

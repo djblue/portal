@@ -1,7 +1,7 @@
 (ns portal.web
   (:require [portal.runtime :as rt]
-            [portal.runtime.client.web :as c]
-            [portal.runtime.launcher.web :as l]
+            [portal.runtime.web.client :as c]
+            [portal.runtime.web.launcher :as l]
             [portal.spec :as s]))
 
 (defonce do-init (l/init))
