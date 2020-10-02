@@ -56,7 +56,7 @@
      (let [id        (:portal.rpc/id message)
            [resolve] (get @pending-requests id)]
        (swap! pending-requests dissoc id)
-       (resolve message)))
+       (when (fn? resolve) (resolve message))))
    :portal.rpc/datafy
    (fn [message send!]
      (let [value  (:portal/value (merge @tap-state @state))

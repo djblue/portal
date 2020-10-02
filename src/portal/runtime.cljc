@@ -49,18 +49,22 @@
           :portal/value (list))
    (done nil)))
 
+(defn limit-values [state]
+  (update state :portal/value #(take 25 %)))
+
 (defn load-state [request done]
   (let [state-value @state
         id (:portal/state-id request)
         in-sync? (= id (:portal/state-id state-value))]
     (if-not in-sync?
-      (done state-value)
+      (done (limit-values state-value))
       (let [watch-key (keyword (gensym))]
         (add-watch
          state
          watch-key
          (fn [_ _ _old _new]
-           (done @state)))
+           (remove-watch state watch-key)
+           (done (limit-values @state))))
         (fn [_status]
           (remove-watch state watch-key))))))
 

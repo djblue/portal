@@ -27,6 +27,7 @@
   (def portal (p/open))
   (p/tap)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
+  (doseq [i (range 100)] (tap> [::index i]))
   (p/clear)
   (p/close)
 
