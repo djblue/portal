@@ -2,8 +2,7 @@
   (:require [cheshire.core :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [portal.runtime :as rt]
-            [portal.runtime.jvm.launcher :as l]
+            [portal.api :as p]
             [portal.runtime.transit :as t])
   (:import [java.io PushbackReader]))
 
@@ -16,7 +15,8 @@
              "json"     (-> System/in io/reader (json/parse-stream true))
              "edn"      (-> System/in io/reader read-edn)
              "transit"  (-> System/in t/json-stream->edn))]
-    (rt/update-value in)
-    (l/open nil)
-    (l/wait)
-    (shutdown-agents)))
+    (p/open)
+    (p/tap)
+    (tap> in)
+    (println "Press CTRL+C to exit")
+    @(promise)))

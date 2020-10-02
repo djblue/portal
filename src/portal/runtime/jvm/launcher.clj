@@ -50,8 +50,6 @@
       (browse-url url))
     (c/make-atom session-id)))
 
-(defn wait [] #_(http/wait @server))
-
 (defn close []
   (swap! rt/state assoc :portal/open? false)
   (http/server-stop! @server)

@@ -62,8 +62,6 @@
             (str "--app=" url))))
     {:session-id session-id}))
 
-(defn wait [])
-
 (defn close []
   (swap! rt/state assoc :portal/open? false)
   (stop @server)
