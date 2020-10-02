@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
+            [portal.runtime.index :as index]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.transit :as t])
   (:import [java.util UUID]))
@@ -48,13 +49,12 @@
       (fn [_ch _status] (swap! c/sessions dissoc session-id))})))
 
 (def ^:private resource
-  {"main.js"    (io/resource "main.js")
-   "index.html" (io/resource "index.html")})
+  {"main.js" (io/resource "main.js")})
 
 (defn- send-resource [content-type resource]
   {:status  200
    :headers {"Content-Type" content-type}
-   :body    (slurp resource)})
+   :body    resource})
 
 (defn- wait []
   (try (Thread/sleep 60000)
@@ -62,9 +62,9 @@
 
 (defn handler [request]
   (let [paths
-        {"/"        #(send-resource "text/html"       (resource "index.html"))
+        {"/"        #(send-resource "text/html"       (index/html))
          "/wait.js" wait
-         "/main.js" #(send-resource "text/javascript" (resource "main.js"))
+         "/main.js" #(send-resource "text/javascript" (slurp (resource "main.js")))
          "/rpc"     #(rpc-handler request)}
         f (get paths (:uri request))]
     (when (fn? f) (f))))

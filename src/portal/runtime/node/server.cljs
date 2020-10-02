@@ -2,6 +2,7 @@
   (:require [portal.async :as a]
             [portal.resources :as io]
             [portal.runtime :as rt]
+            [portal.runtime.index :as index]
             [portal.runtime.node.client :as c]
             [portal.runtime.transit :as t]))
 
@@ -59,7 +60,7 @@
 
 (defn handler [request response]
   (let [paths
-        {"/"        #(send-resource response "text/html"       (io/resource "index.html"))
+        {"/"        #(send-resource response "text/html"       (index/html))
          "/main.js" #(send-resource response "text/javascript" (io/resource "main.js"))
          "/rpc"     #(rpc-handler request response)}
         [path] (.split (.-url request) "?")

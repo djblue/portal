@@ -1,6 +1,7 @@
 (ns portal.runtime.web.launcher
   (:require [portal.resources :as io]
             [portal.runtime :as rt]
+            [portal.runtime.index :as index]
             [portal.runtime.transit :as t]))
 
 (defn- str->src [value content-type]
@@ -28,21 +29,9 @@
            f    (get rt/ops (:op body))]
        (f body #(resolve (t/edn->json %)))))))
 
-(defn- index-html []
-  (str
-   "<head>"
-   "<title>portal</title>"
-   "<meta charset='UTF-8' />"
-   "<meta name='viewport' content='width=device-width, initial-scale=1' />"
-   "</head>"
-   "<body style=\"margin: 0\">"
-   "<div id=\"root\"></div>"
-   "<script src=\"" code-url "\"></script>"
-   "</body>"))
-
 (defn open [options]
   (swap! rt/state merge {:portal/open? true} options)
-  (let [url   (str->src (index-html) "text/html")
+  (let [url   (str->src (index/html :code-url code-url :platform "web") "text/html")
         child (js/window.open url "portal", "resizable,scrollbars,status")]
     (set! (.-onunload child)
           (fn []

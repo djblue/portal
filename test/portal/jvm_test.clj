@@ -1,28 +1,18 @@
 (ns portal.jvm-test
   (:require [clojure.test :refer [deftest is]]
-            [clojure.java.io :as io]
             [portal.api :as p]
+            [portal.runtime.index :as index]
             [portal.runtime.jvm.client :as client]
-            [portal.runtime.jvm.launcher :as l]
-            [portal.runtime.jvm.server :as s]))
+            [portal.runtime.jvm.launcher :as launcher]))
 
 (defn- headless-chrome-flags [url]
   ["--headless" "--disable-gpu" url])
 
 (defn- open [f]
-  (with-redefs [l/chrome-flags f] (p/open)))
-
-(defn- patch-html
-  "Patch index.html with a wait.js script to ensure
-  headless chrome doesn't exit early."
-  []
-  (spit "target/test.html"
-        (str (slurp "resources/index.html")
-             "<script src=\"wait.js\"></script>"))
-  (alter-var-root #'s/resource assoc "index.html" (io/file "target/test.html")))
+  (with-redefs [launcher/chrome-flags f] (p/open)))
 
 (deftest e2e-jvm
-  (patch-html)
+  (reset! index/testing? true)
   (when-let [portal (open headless-chrome-flags)]
     (with-redefs [client/timeout 10000]
       (reset! portal 0)
