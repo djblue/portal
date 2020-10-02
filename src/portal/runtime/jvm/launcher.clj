@@ -41,7 +41,9 @@
     (reset!
      server
      (http/run-server #'server/handler
-                      {:port 0 :legacy-return-value? false})))
+                      {:port 0
+                       :max-ws (* 1024 1024 1024)
+                       :legacy-return-value? false})))
   (let [session-id (random-uuid)
         url (str "http://localhost:" (http/server-port @server) "?" session-id)]
     (if-let [bin (get-chrome-bin)]
