@@ -1,12 +1,12 @@
 (ns user
-  (:require [examples.data :refer [data]]
-            [portal.api :as p]
-            [portal.runtime.server.jvm :as s]
-            [cheshire.core :as json]
-            [shadow.cljs.devtools.api :as shadow]
-            [clojure.java.io :as io]
+  (:require [cheshire.core :as json]
+            [clojure.core.protocols :refer [Datafiable]]
             [clojure.datafy :refer [datafy]]
-            [clojure.core.protocols :refer [Datafiable]]))
+            [clojure.java.io :as io]
+            [examples.data :refer [data]]
+            [portal.api :as p]
+            [portal.runtime.jvm.server :as s]
+            [shadow.cljs.devtools.api :as shadow]))
 
 (defn cljs [] (shadow/repl :client))
 (defn node [] (shadow/repl :node))

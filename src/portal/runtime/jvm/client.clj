@@ -17,7 +17,7 @@
 
 (def timeout 1000)
 
-(defn get-session [session-id]
+(defn- get-session [session-id]
   (let [p (promise)
         watch-key (keyword (gensym))]
     (if-let [send! (get @sessions session-id)]
