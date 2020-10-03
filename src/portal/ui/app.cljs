@@ -6,13 +6,16 @@
             [portal.ui.inspector :as ins :refer [inspector]]
             [portal.ui.styled :as s]
             [portal.ui.viewer.diff :as d]
+            [portal.ui.viewer.edn :refer [inspect-edn edn?]]
             [portal.ui.viewer.exception :as ex]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]
             [portal.ui.viewer.html :refer [inspect-html]]
             [portal.ui.viewer.image :as image]
+            [portal.ui.viewer.json :refer [inspect-json json?]]
             [portal.ui.viewer.markdown :refer [inspect-markdown]]
             [portal.ui.viewer.table :refer [inspect-table table-view?]]
             [portal.ui.viewer.text :refer [inspect-text]]
+            [portal.ui.viewer.transit :refer [inspect-transit transit?]]
             [portal.ui.viewer.tree :refer [inspect-tree-1]]
             [reagent.core :as r]))
 
@@ -131,6 +134,9 @@
    {:name :portal.viewer/table    :predicate table-view?   :component inspect-table}
    {:name :portal.viewer/tree     :predicate coll?         :component inspect-tree-1}
    {:name :portal.viewer/text     :predicate string?       :component inspect-text}
+   {:name :portal.viewer/json     :predicate json?         :component inspect-json}
+   {:name :portal.viewer/edn      :predicate edn?          :component inspect-edn}
+   {:name :portal.viewer/transit  :predicate transit?      :component inspect-transit}
    {:name :portal.viewer/html     :predicate string?       :component inspect-html}
    {:name :portal.viewer/diff     :predicate d/can-view?   :component d/inspect-diff}
    {:name :portal.viewer/markdown :predicate string?       :component inspect-markdown}

@@ -66,6 +66,11 @@
     ::vector [::a ::added ::b]
     ::different-value ::new-key}])
 
+(def string-data
+  {::json "{\"hello\": 123}"
+   ::edn (pr-str {:hello 123})
+   ::markdown (read-file "README.md")})
+
 (def hiccup
   [:div
    [:h1 "Hello, I'm hiccup"]
@@ -78,5 +83,5 @@
    ::basic-data basic-data
    ::themes c/themes
    ::clojure-data clojure-data
-   ::markdown (read-file "README.md")
-   ::hiccup hiccup})
+   ::hiccup hiccup
+   ::string-data string-data})
