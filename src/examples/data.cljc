@@ -69,6 +69,7 @@
 (def string-data
   {::json "{\"hello\": 123}"
    ::edn (pr-str {:hello 123})
+   ::csv "a,b,c\n1,2,3\n4,5,6"
    ::markdown (read-file "README.md")})
 
 (def hiccup

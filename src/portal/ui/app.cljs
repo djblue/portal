@@ -10,6 +10,7 @@
             [portal.ui.viewer.exception :as ex]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]
             [portal.ui.viewer.html :refer [inspect-html]]
+            [portal.ui.viewer.csv :refer [inspect-csv csv?]]
             [portal.ui.viewer.image :as image]
             [portal.ui.viewer.json :refer [inspect-json json?]]
             [portal.ui.viewer.markdown :refer [inspect-markdown]]
@@ -137,6 +138,7 @@
    {:name :portal.viewer/json     :predicate json?         :component inspect-json}
    {:name :portal.viewer/edn      :predicate edn?          :component inspect-edn}
    {:name :portal.viewer/transit  :predicate transit?      :component inspect-transit}
+   {:name :portal.viewer/csv      :predicate csv?          :component inspect-csv}
    {:name :portal.viewer/html     :predicate string?       :component inspect-html}
    {:name :portal.viewer/diff     :predicate d/can-view?   :component d/inspect-diff}
    {:name :portal.viewer/markdown :predicate string?       :component inspect-markdown}
