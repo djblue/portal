@@ -97,5 +97,5 @@ main/jvm:
 main/bb:
 	cat deps.edn | bb -cp src:resources -m portal.main edn
 
-demo: release
+demo: bb release
 	./build-demo

@@ -11,7 +11,7 @@ rm -rf $DIR
 
 clojure -A:cljs:shadow-cljs release demo
 
-cp -r resources/index.html $DIR
+bb -cp src -m portal.runtime.index > $DIR/index.html
 
 deploy() {
   git --git-dir=.git --work-tree="$DIR" "$@"

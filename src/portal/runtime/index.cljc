@@ -19,3 +19,5 @@
    ;; wait.js will ensure headless chrome doesn't exit early
    (when @testing? "<script src=\"wait.js\"></script>")
    "</body>"))
+
+(defn -main [] (println (html :platform "demo")))
