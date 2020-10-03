@@ -1,8 +1,9 @@
 (ns portal.ui.rpc
   (:require [cognitect.transit :as t]
+            [com.cognitect.transit.types :as ty]
+            [portal.ui.viewer.diff :as diff]
             [portal.ui.app :refer [get-datafy]]
-            [portal.ui.state :refer [state tap-state]]
-            [com.cognitect.transit.types :as ty]))
+            [portal.ui.state :refer [state tap-state]]))
 
 ;; Since any object can have metadata and all unknown objects in portal
 ;; are encoded as tagged values, if any of those objects have metadata, it
@@ -23,10 +24,14 @@
      (assoc (.-rep this) :meta m))))
 
 (defn- json->edn [json]
-  (let [r (t/reader :json)] (t/read r json)))
+  (let [r (t/reader :json {:handlers diff/readers})]
+    (t/read r json)))
 
 (defn- edn->json [edn]
-  (let [w (t/writer :json {:transform t/write-meta})]
+  (let [w (t/writer
+           :json
+           {:transform t/write-meta
+            :handlers diff/writers})]
     (t/write w edn)))
 
 (defonce ^:private id (atom 0))
