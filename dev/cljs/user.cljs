@@ -1,7 +1,10 @@
 (ns cljs.user
   (:require [clojure.core.protocols :refer [Datafiable]]
             [clojure.datafy :refer [datafy]]
-            [examples.data :refer [data]]))
+            [examples.data :refer [data]]
+            [portal.web :as p]))
+
+(p/tap)
 
 (defn swap-dev []
   (set! js/portal.runtime.web.launcher.code_url
@@ -18,10 +21,6 @@
      :stack    (.-stack this)}))
 
 (comment
-  ;(require '[portal.api :as p] :reload)
-  (require '[portal.web :as p] :reload)
-  (p/tap)
-
   (swap-dev)
 
   (def portal (p/open))
