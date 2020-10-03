@@ -101,3 +101,7 @@
           ^{:key idx} [inspect-trace-line settings trace-line])
         (rest trace))]])])
 
+(def viewer
+  {:predicate exception?
+   :component inspect-exception
+   :name :portal.viewer/ex})

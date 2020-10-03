@@ -74,3 +74,8 @@
            (f settings x)
            (f settings (into [(first x) {}] (rest x)))))))
    value))
+
+(def viewer
+  {:predicate vector?
+   :component inspect-hiccup
+   :name :portal.viewer/hiccup})

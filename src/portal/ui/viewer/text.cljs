@@ -47,3 +47,7 @@
             [:pre {:style {:margin 0}} line-content]]])))
       {:default-take 100 :step 100}]]]])
 
+(def viewer
+  {:predicate string?
+   :component inspect-text
+   :name :portal.viewer/text})

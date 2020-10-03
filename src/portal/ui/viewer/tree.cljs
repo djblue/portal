@@ -135,3 +135,8 @@
   [inspect-tree-item settings
    {:value value
     :value-child [inspect-tree settings value]}])
+
+(def viewer
+  {:predicate coll?
+   :component inspect-tree-1
+   :name :portal.viewer/tree})

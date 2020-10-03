@@ -9,3 +9,9 @@
 
 (defn inspect-json [settings json-string]
   [inspector settings (parse-json json-string)])
+
+(def viewer
+  {:predicate json?
+   :datafy parse-json
+   :component inspect-json
+   :name :portal.viewer/json})

@@ -21,3 +21,8 @@
           (map as-hiccup)
           (into [:div {:style {:max-width "1012px"
                                :margin "0 auto"}}]))]))
+
+(def viewer
+  {:predicate string?
+   :component inspect-markdown
+   :name :portal.viewer/markdown})

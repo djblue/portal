@@ -175,3 +175,8 @@
 (defn inspect-table [settings values]
   (let [component (get-component values)]
     [component settings values]))
+
+(def viewer
+  {:predicate table-view?
+   :component inspect-table
+   :name :portal.viewer/table})

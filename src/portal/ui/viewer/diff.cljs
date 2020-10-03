@@ -31,3 +31,9 @@
     :else
     (let [[a b] value]
       [inspector (assoc settings :depth 0) (diff a b)])))
+
+(def viewer
+  {:predicate can-view?
+   :component inspect-diff
+   :datafy diff
+   :name :portal.viewer/diff})

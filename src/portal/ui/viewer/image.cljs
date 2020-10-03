@@ -1,5 +1,6 @@
 (ns portal.ui.viewer.image
   (:require [portal.colors :as c]
+            [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]))
 
 (defn inspect-image [settings value]
@@ -15,3 +16,7 @@
        :border-radius (:border-radius settings)
        :border (str "1px solid " (::c/border settings))}}]))
 
+(def viewer
+  {:predicate ins/bin?
+   :component inspect-image
+   :name :portal.viewer/image})

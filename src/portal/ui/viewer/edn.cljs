@@ -10,3 +10,9 @@
 
 (defn inspect-edn [settings edn-string]
   [inspector settings (parse-edn edn-string)])
+
+(def viewer
+  {:predicate edn?
+   :datafy parse-edn
+   :component inspect-edn
+   :name :portal.viewer/edn})

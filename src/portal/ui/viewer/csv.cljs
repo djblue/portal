@@ -10,3 +10,8 @@
 (defn inspect-csv [settings csv-string]
   [inspector settings (parse-csv csv-string)])
 
+(def viewer
+  {:predicate csv?
+   :datafy parse-csv
+   :component inspect-csv
+   :name :portal.viewer/csv})

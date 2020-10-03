@@ -1,23 +1,23 @@
 (ns portal.ui.app
   (:require [clojure.string :as str]
             [portal.colors :as c]
-            [portal.ui.state :refer [state tap-state]]
             [portal.ui.drag-and-drop :as dnd]
             [portal.ui.inspector :as ins :refer [inspector]]
+            [portal.ui.state :refer [state tap-state]]
             [portal.ui.styled :as s]
-            [portal.ui.viewer.diff :as d]
-            [portal.ui.viewer.edn :refer [inspect-edn edn?]]
+            [portal.ui.viewer.csv :as csv]
+            [portal.ui.viewer.diff :as diff]
+            [portal.ui.viewer.edn :as edn]
             [portal.ui.viewer.exception :as ex]
-            [portal.ui.viewer.hiccup :refer [inspect-hiccup]]
-            [portal.ui.viewer.html :refer [inspect-html]]
-            [portal.ui.viewer.csv :refer [inspect-csv csv?]]
+            [portal.ui.viewer.hiccup :as hiccup]
+            [portal.ui.viewer.html :as html]
             [portal.ui.viewer.image :as image]
-            [portal.ui.viewer.json :refer [inspect-json json?]]
-            [portal.ui.viewer.markdown :refer [inspect-markdown]]
-            [portal.ui.viewer.table :refer [inspect-table table-view?]]
-            [portal.ui.viewer.text :refer [inspect-text]]
-            [portal.ui.viewer.transit :refer [inspect-transit transit?]]
-            [portal.ui.viewer.tree :refer [inspect-tree-1]]
+            [portal.ui.viewer.json :as json]
+            [portal.ui.viewer.markdown :as md]
+            [portal.ui.viewer.table :as table]
+            [portal.ui.viewer.text :as text]
+            [portal.ui.viewer.transit :as transit]
+            [portal.ui.viewer.tree :as tree]
             [reagent.core :as r]))
 
 (defn filter-data [settings value]
@@ -128,21 +128,21 @@
         [inspector (assoc settings :coll value :depth 0) m]])]))
 
 (def viewers
-  [{:name :portal.viewer/ex       :predicate ex/exception? :component ex/inspect-exception}
-   {:name :portal.viewer/image    :predicate ins/bin?      :component image/inspect-image}
-   {:name :portal.viewer/map      :predicate map?          :component ins/inspect-map}
-   {:name :portal.viewer/coll     :predicate coll?         :component ins/inspect-coll :datafy seq}
-   {:name :portal.viewer/table    :predicate table-view?   :component inspect-table}
-   {:name :portal.viewer/tree     :predicate coll?         :component inspect-tree-1}
-   {:name :portal.viewer/text     :predicate string?       :component inspect-text}
-   {:name :portal.viewer/json     :predicate json?         :component inspect-json}
-   {:name :portal.viewer/edn      :predicate edn?          :component inspect-edn}
-   {:name :portal.viewer/transit  :predicate transit?      :component inspect-transit}
-   {:name :portal.viewer/csv      :predicate csv?          :component inspect-csv}
-   {:name :portal.viewer/html     :predicate string?       :component inspect-html}
-   {:name :portal.viewer/diff     :predicate d/can-view?   :component d/inspect-diff}
-   {:name :portal.viewer/markdown :predicate string?       :component inspect-markdown}
-   {:name :portal.viewer/hiccup   :predicate vector?       :component inspect-hiccup}])
+  [ex/viewer
+   image/viewer
+   {:name :portal.viewer/map  :predicate map?  :component ins/inspect-map}
+   {:name :portal.viewer/coll :predicate coll? :component ins/inspect-coll :datafy seq}
+   table/viewer
+   tree/viewer
+   text/viewer
+   json/viewer
+   edn/viewer
+   transit/viewer
+   csv/viewer
+   html/viewer
+   diff/viewer
+   md/viewer
+   hiccup/viewer])
 
 (defn get-viewer [settings value]
   (let [selected-viewer    (:selected-viewer settings)

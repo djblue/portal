@@ -10,3 +10,9 @@
 
 (defn inspect-transit [settings transit-string]
   [inspector settings (parse-transit transit-string)])
+
+(def viewer
+  {:predicate transit?
+   :datafy parse-transit
+   :component inspect-transit
+   :name :portal.viewer/transit})
