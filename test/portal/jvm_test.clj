@@ -19,7 +19,5 @@
       (is (= @portal 0))
       (swap! portal inc)
       (is (= @portal 1))))
-  (Thread/sleep 100)
-  (p/close)
-  (Thread/sleep 100))
+  (p/close))
 
