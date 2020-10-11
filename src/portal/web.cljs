@@ -2,9 +2,8 @@
   (:require [portal.runtime :as rt]
             [portal.runtime.web.client :as c]
             [portal.runtime.web.launcher :as l]
+            [portal.shortcuts :as shortcuts]
             [portal.spec :as s]))
-
-(defonce do-init (l/init))
 
 (def ^:export send! l/send!)
 
@@ -34,3 +33,15 @@
   (rt/clear-values)
   nil)
 
+(defonce init? (atom false))
+
+(defn init []
+  (when-not @init?
+    (reset! init? true)
+    (l/init)
+    (shortcuts/register!
+     {::shortcuts/osx     #{"meta" "shift" "o"}
+      ::shortcuts/default #{"control" "shift" "o"}}
+     (fn [] (open)))))
+
+(init)

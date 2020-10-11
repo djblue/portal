@@ -1,6 +1,7 @@
 (ns portal.ui.app
   (:require [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.commands :as commands]
             [portal.ui.drag-and-drop :as dnd]
             [portal.ui.inspector :as ins :refer [inspector]]
             [portal.ui.state :refer [state tap-state]]
@@ -131,7 +132,7 @@
   [ex/viewer
    image/viewer
    {:name :portal.viewer/map  :predicate map?  :component ins/inspect-map}
-   {:name :portal.viewer/coll :predicate coll? :component ins/inspect-coll :datafy seq}
+   {:name :portal.viewer/coll :predicate coll? :component ins/inspect-coll}
    table/viewer
    tree/viewer
    text/viewer
@@ -305,7 +306,8 @@
 
 (defn app []
   (let [set-settings! (fn [value] (swap! state merge value))
-        settings (merge @tap-state (assoc @state :depth 0 :set-settings! set-settings!))]
+        theme (get c/themes (get @tap-state ::c/theme ::c/nord))
+        settings (merge theme @tap-state (assoc @state :depth 0 :set-settings! set-settings!))]
     [dnd/area
      settings
      [s/div
@@ -318,6 +320,7 @@
         :font-size (:font-size settings)
         :height "100vh"
         :width "100vw"}}
+      [commands/palette (assoc settings :datafy (get-datafy settings))]
       [toolbar settings]
       [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
        [s/div
