@@ -13,8 +13,6 @@
    :font-size "12pt"
    :limits/string-length 100
    :limits/max-depth 1
-   :limits/max-length 1000
-   :layout/direction :row
    :spacing/padding 8
    :border-radius "2px"})
 
