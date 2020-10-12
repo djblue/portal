@@ -28,13 +28,13 @@ The UX will probably evolve over time and user feedback is welcome!
 To start a repl with portal, run the clojure cli with:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.5.1"}}}'
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.6.0"}}}'
 ```
 
 or for a **web** clojurescript repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.5.1"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.6.0"}
                     org.clojure/clojurescript {:mvn/version "1.10.758"}}}' \
     -m cljs.main
 ```
@@ -42,15 +42,15 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.5.1"}
 or for a **node** clojurescript repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.5.1"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.6.0"}
                     org.clojure/clojurescript {:mvn/version "1.10.758"}}}' \
     -m cljs.main -re node
 ```
 
-or for a [**babashka**](https://github.com/borkdude/babashka) [>=0.2.0](https://github.com/borkdude/babashka/blob/master/CHANGELOG.md#new) repl, do:
+or for a [**babashka**](https://github.com/borkdude/babashka) [>=0.2.2](https://github.com/borkdude/babashka/blob/master/CHANGELOG.md#new) repl, do:
 
 ```bash
-bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.5.1"}}}'`
+bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.6.0"}}}'`
 ```
 
 then try the portal api with the following commands:

@@ -1,3 +1,17 @@
+## 0.6.0 - 2020-10-11
+
+- Initial release of command palette and shortcuts
+  - `cmd+shift+p` on osx and `ctrl+shift+p` everywhere else
+  - Other shortcuts are listed in the command palette next to the command
+- Add edn, json, transit and csv viewers
+- Only pull the last 25 tap items
+- Include version and runtime type in app title
+- Switch rpc to web-sockets
+  - Switch to http-kit for jvm and bb runtimes
+    - Require a minimum version of 0.2.2 for babashka
+  - Bundle `ws` for node clojurescript runtime
+- Fix nav issue with diff viewer
+
 ## 0.5.1 - 2020-09-16
 
 - Fix portal.main
