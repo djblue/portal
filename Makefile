@@ -42,10 +42,16 @@ dev/node: node_modules resources/ws.js release
 
 release: node_modules resources/main.js resources/ws.js
 
-lint:
+lint/check:
 	clojure -A:nrepl:check
+
+lint/kondo:
 	clojure -A:kondo --lint dev src test
+
+lint/cljfmt:
 	clojure -A:cljfmt check
+
+lint: lint/check lint/kondo lint/cljfmt
 
 target:
 	mkdir -p target
