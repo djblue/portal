@@ -25,7 +25,7 @@ node_modules: package.json
 	npm ci
 
 resources/main.js:
-	clojure -A:cljs:shadow-cljs release client
+	clojure -M:cljs:shadow-cljs release client
 
 resources/ws.js:
 	npx browserify --node \
@@ -35,21 +35,21 @@ resources/ws.js:
 		node_modules/ws > resources/ws.js
 
 dev: node_modules release
-	clojure -A:dev:cider:cljs:dev-cljs:shadow-cljs watch client
+	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch client
 
 dev/node: node_modules resources/ws.js release
-	clojure -A:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
+	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
 
 release: node_modules resources/main.js resources/ws.js
 
 lint/check:
-	clojure -A:nrepl:check
+	clojure -M:nrepl:check
 
 lint/kondo:
-	clojure -A:kondo --lint dev src test
+	clojure -M:kondo --lint dev src test
 
 lint/cljfmt:
-	clojure -A:cljfmt check
+	clojure -M:cljfmt check
 
 lint: lint/check lint/kondo lint/cljfmt
 
@@ -57,7 +57,7 @@ target:
 	mkdir -p target
 
 test/jvm: release target
-	clojure -A:test -m portal.test-runner
+	clojure -M:test -m portal.test-runner
 
 test/bb: release bb
 	bb -m portal.test-runner
@@ -65,7 +65,7 @@ test/bb: release bb
 test: test/jvm test/bb
 
 fmt:
-	clojure -A:cljfmt fix
+	clojure -M:cljfmt fix
 
 pom.xml: deps.edn
 	clojure -Spom
@@ -80,20 +80,20 @@ ci: lint test
 
 e2e/jvm: release
 	@echo "running e2e tests for jvm"
-	@clojure -A:test -m portal.e2e | clojure -e "(set! *warn-on-reflection* true)" -r
+	@clojure -M:test -m portal.e2e | clojure -M -e "(set! *warn-on-reflection* true)" -r
 
 e2e/node: release
 	@echo "running e2e tests for node"
-	@clojure -A:test -m portal.e2e | clojure -A:cljs -m cljs.main -re node
+	@clojure -M:test -m portal.e2e | clojure -M:cljs -m cljs.main -re node
 
 e2e/bb: release bb
 	@echo "running e2e tests for babashka"
-	@clojure -A:test -m portal.e2e | bb
+	@clojure -M:test -m portal.e2e | bb
 
 e2e/web: release
 	@echo "running e2e tests for web"
 	@echo "please wait for browser to open before proceeding"
-	@clojure -A:test -m portal.e2e web | clojure -A:cljs -m cljs.main
+	@clojure -M:test -m portal.e2e web | clojure -M:cljs -m cljs.main
 
 e2e: e2e/jvm e2e/node e2e/web e2e/bb
 

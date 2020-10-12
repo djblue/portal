@@ -9,7 +9,7 @@ git branch -D $BRANCH || echo 'skip'
 
 rm -rf $DIR
 
-clojure -A:cljs:shadow-cljs release demo
+clojure -M:cljs:shadow-cljs release demo
 
 bb -cp src -m portal.runtime.index > $DIR/index.html
 
