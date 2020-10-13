@@ -93,6 +93,16 @@
         :background (::c/string settings)
         :border-radius "50%"}}])])
 
+(defn scroll-into-view []
+  (let [el (atom nil)]
+    (fn []
+      (r/create-class
+       {:component-did-mount
+        (fn []
+          (when-let [el @el] (.scrollIntoView el #js {:block "center"})))
+        :reagent-render
+        (fn [] [:div {:ref #(reset! el %) :style {:height "100%"}}])}))))
+
 (defn selector-component []
   (let [selected (r/atom #{})
         active   (r/atom 0)]
@@ -100,7 +110,8 @@
       [pop-up
        settings
        [s/div
-        {:style {:padding (:spacing/padding settings)}}
+        {:style {:box-sizing :border-box
+                 :padding (:spacing/padding settings)}}
         "(Press <space> to select, <a> to toggle all, <i> to invert selection)"]
        (let [selected? @selected
              on-done   (:run input)
@@ -151,6 +162,7 @@
                         (when active?
                           {:border-left (str "5px solid " (::c/boolean settings))
                            :background (::c/background settings)}))}
+                      (when active? [scroll-into-view])
                       [checkbox settings (some? (selected? option))]
                       [inspector settings option]])))
                 doall)]])])))
@@ -258,6 +270,7 @@
                           :background (::c/background settings)}))
                       :style/hover
                       {:background (::c/background settings)}}
+                     (when active? [scroll-into-view])
                      [inspector settings (:name command)]
                      [shortcut settings command]])))
                doall)]]))))
