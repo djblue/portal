@@ -1,3 +1,14 @@
+## 0.6.1 - 2020-10-12
+
+- Ensure active element is always visible
+- Add data transformation commands
+  - keys
+  - vals
+  - select-keys
+  - select-columns
+  - transpose-map
+- Add new enumerated selection input
+
 ## 0.6.0 - 2020-10-11
 
 - Initial release of command palette and shortcuts
