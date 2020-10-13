@@ -1,8 +1,6 @@
 (ns portal.shortcuts
   (:require [clojure.string :as str]))
 
-(defonce ^:private shortcuts (atom {}))
-
 (defn- get-platform []
   (let [platform js/window.navigator.platform]
     (cond
@@ -11,11 +9,16 @@
       (str/includes? platform "Linux")                        ::linux)))
 
 (defn get-shortcut [definition]
-  (or (get definition (get-platform))
-      (get definition ::default)))
+  (cond
+    (string? definition) #{definition}
 
-(defn- event->key [e]
-  (.toLowerCase (.-key e)))
+    (map? definition)
+    (or (get definition (get-platform))
+        (get definition ::default))
+
+    :else definition))
+
+(defn- event->key [e] (.toLowerCase (.-key e)))
 
 (defn- log->seq
   "Returns all key sequences in the event log."
@@ -27,39 +30,41 @@
 (defn- log->combo
   "Return the last key combo from the event log."
   [log]
-  (let [e (first log)]
+  (when-let [e (first log)]
     (cond-> #{(event->key e)}
       (.-ctrlKey e)  (conj "control")
       (.-metaKey e)  (conj "meta")
       (.-shiftKey e) (conj "shift")
       (.-altKey e)   (conj "alt"))))
 
-(defonce ^:private log (atom (list)))
+(defonce ^:private log (atom nil))
 
-(defn- blur [] (reset! log (list)))
+(defn clear! [] (reset! log (list)))
 
-(defn- dispatch! [log]
-  (doseq [combo (concat [(log->combo log)] (log->seq log))]
-    (when-let [shortcut (get @shortcuts combo)]
-      (blur)
-      (shortcut))))
+(defn match? [definition log]
+  (some (fn [combo]
+          (= combo (get-shortcut definition)))
+        (concat [(log->combo log)] (log->seq log))))
 
-(defn- push-log! [event]
-  (swap! log #(take 5 (conj % event))))
-
-(defn- keydown [e]
-  (dispatch! (push-log! e)))
-
-(defonce ^:private init? (atom false))
+(defn- keydown [e] (swap! log #(take 5 (conj % e))))
 
 (defn- init []
-  (when-not @init?
-    (reset! init? true)
-    (js/window.addEventListener "blur" #(blur))
+  (when (nil? @log)
+    (clear!)
+    (js/window.addEventListener "blur" #(clear!))
     (js/window.addEventListener "keydown" #(keydown %))))
 
-(defn register! [definition f]
+(defn matched! [log]
+  (clear!)
+  (when-let [e (first log)] (.preventDefault e)))
+
+(defn add! [k f]
   (init)
-  (when-let [combo (get-shortcut definition)]
-    (swap! shortcuts assoc combo f)))
+  (add-watch
+   log k
+   (fn [_ _ _ log]
+     (when-not (empty? log)
+       (f log)))))
+
+(defn remove! [k] (remove-watch log k))
 

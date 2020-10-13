@@ -39,9 +39,13 @@
   (when-not @init?
     (reset! init? true)
     (l/init)
-    (shortcuts/register!
-     {::shortcuts/osx     #{"meta" "shift" "o"}
-      ::shortcuts/default #{"control" "shift" "o"}}
-     (fn [] (open)))))
+    (shortcuts/add!
+     ::init
+     (fn [log]
+       (when (shortcuts/match?
+              {::shortcuts/osx     #{"meta" "shift" "o"}
+               ::shortcuts/default #{"control" "shift" "o"}}
+              log)
+         (open))))))
 
 (init)
