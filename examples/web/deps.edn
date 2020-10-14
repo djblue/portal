@@ -1,0 +1,9 @@
+{:paths ["src"]
+ :deps
+ {org.clojure/clojurescript {:mvn/version "1.10.764"}}
+ :aliases
+ {:dev
+  {:extra-paths ["dev"]
+   :main-opts ["-m" "cljs.main" "-d" "target" "-r"]
+   :extra-deps
+   {djblue/portal {:mvn/version "0.6.1"}}}}}

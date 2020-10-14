@@ -1,0 +1,7 @@
+{:paths ["src"]
+ :deps {ring/ring {:mvn/version  "1.8.2"}}
+ :aliases
+ {:dev
+  {:extra-paths ["dev"]
+   :extra-deps
+   {djblue/portal {:mvn/version "0.6.1"}}}}}
