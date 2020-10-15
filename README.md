@@ -75,7 +75,7 @@ then try the portal api with the following commands:
 
 ### Portal Atom
 
-For the `jvm` and `web` platforms, you can pull values from portal back
+For the `jvm`, `bb` and `web` platforms, you can pull values from portal back
 into your runtime by treating portal as an atom:
 
 ```clojure
