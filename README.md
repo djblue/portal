@@ -6,22 +6,16 @@ A clojure tool to navigate through your data.
 
 [![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/portal)
 
-
-## Client
-
 [![screenshot](https://raw.githubusercontent.com/djblue/portal/master/resources/screenshot.png)](http://djblue.github.io/portal/)
 
-The portal UI can be used to inspect values of various shapes and sizes.
-It will only show you one level at a time and clicking an item will
-navigate you into that item. Simple values (`"hello, world"`, `:a`, `1`,
-`true`) resolve to themselves, while compound values (`[]`, `{}`, `#{}`)
-will contain their elements.
+The portal UI can be used to inspect values of various shapes and sizes. The UX will probably evolve over time and user feedback is welcome!
 
-There are currently three viewers to see values: coll, map and table.
-Coll supports any collection, while map only supports maps and the table
-only supports list of maps.
+## Apropos Demo
 
-The UX will probably evolve over time and user feedback is welcome!
+To get an overview of portal, you can watch the following recording of a live demo I gave on [Apropos](https://www.youtube.com/channel/UC1UxEQuBvfLJgWR5tk_XIXA/featured).
+
+[![Apropos](https://img.youtube.com/vi/gByyg-m0XOg/hqdefault.jpg)](https://www.youtube.com/watch?v=gByyg-m0XOg "Apropos")
+
 
 ## API Usage
 
