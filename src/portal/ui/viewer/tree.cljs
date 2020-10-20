@@ -97,7 +97,7 @@
      :flex-direction :column
      :flex-wrap :wrap}}
    [l/lazy-seq
-    (for [[k v] value]
+    (for [[k v] (ins/try-sort-map value)]
       ^{:key (hash k)}
       [inspect-tree-item settings
        {:key k

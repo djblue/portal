@@ -93,8 +93,8 @@
             (let [[_ row] row]
               (when (contains? row column)
                 [inspector (assoc settings :coll row :k column) (get row column)]))])))
-     (concat [::header] values)
-     (concat [::header] columns)]))
+     (concat [::header] (ins/try-sort-map values))
+     (concat [::header] (ins/try-sort columns))]))
 
 (defn- inspect-coll-table [settings values]
   (let [columns (into #{} (mapcat keys values))]
@@ -121,7 +121,7 @@
             (when (contains? row column)
               [inspector (assoc settings :coll row :k column) (get row column)])])))
      (concat [::header] values)
-     (concat [::header] columns)]))
+     (concat [::header] (ins/try-sort columns))]))
 
 (defn- inspect-vector-table [settings values]
   (let [n (reduce max (map count values))]
@@ -142,18 +142,17 @@
      settings
      (fn [context]
        (let [{:keys [row column]} context]
-         (cond
-           (= row ::header)
+         (if (= row ::header)
            [table-header-row
             settings
             [inspector (assoc settings :coll row) column]]
 
-           (contains? column row)
            [table-data
             settings
-            [inspector (assoc settings :coll row :k column) (get row column)]])))
-     (concat [::header] values)
-     columns]))
+            (when (contains? row column)
+              [inspector (assoc settings :coll row :k column) (get row column)])])))
+     (concat [::header] (ins/try-sort values))
+     (ins/try-sort columns)]))
 
 (defn- get-component [value]
   (cond

@@ -135,11 +135,19 @@
                   :display :flex
                   :align-items :center}} child])
 
+(defn try-sort [values]
+  (try (sort values)
+       (catch :default _e values)))
+
+(defn try-sort-map [values]
+  (try (sort-by first values)
+       (catch :default _e values)))
+
 (defn inspect-map [settings values]
   [container-map
    settings
    [l/lazy-seq
-    (for [[k v] values]
+    (for [[k v] (try-sort-map values)]
       [:<>
        {:key (hash k)}
        [container-map-k
