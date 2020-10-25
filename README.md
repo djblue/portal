@@ -117,8 +117,9 @@ Which can be passed as an option to `p/open`:
 
 #### Launcher
 
-The following options can be passed to the `p/open` function to change how the
-UI is launched:
+By default, when `p/open` is called, an HTTP server is started on a randomly
+chosen port. To control this server's port and host, call the `p/start`
+function with the following options:
 
 | Option                  | Description                | If not specified     |
 |-------------------------|----------------------------|----------------------|

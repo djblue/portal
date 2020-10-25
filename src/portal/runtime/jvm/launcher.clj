@@ -35,21 +35,24 @@
    "--no-first-run"
    (str "--app=" url)])
 
-(defn- ensure-server [handler port]
+(defn start [options]
   (when (nil? @server)
-    (reset!
-     server
-     (http/run-server handler
-                      {:port port
-                       :max-ws (* 1024 1024 1024)
-                       :legacy-return-value? false}))))
+    (let [{:portal.launcher/keys [port host] :or {port 0 host "localhost"}} options
+          http-server (http/run-server #'server/handler
+                                       {:port port
+                                        :max-ws (* 1024 1024 1024)
+                                        :legacy-return-value? false})]
+      (reset!
+       server
+       {:http-server http-server
+        :port (http/server-port http-server)
+        :host host}))))
 
 (defn open [options]
   (swap! rt/state merge {:portal/open? true} options)
-  (let [{:portal.launcher/keys [port host]} options
-        session-id (random-uuid)
-        _  (ensure-server #'server/handler (or port 0))
-        url (str "http://" (or host "localhost") ":" (http/server-port @server) "?" session-id)]
+  (let [session-id (random-uuid)
+        {:keys [host port]} (or @server (start nil))
+        url (str "http://" host ":" port "?" session-id)]
     (if-let [bin (get-chrome-bin)]
       (let [flags (chrome-flags url)]
         (future (apply sh bin flags)))
@@ -58,5 +61,5 @@
 
 (defn close []
   (swap! rt/state assoc :portal/open? false)
-  (http/server-stop! @server)
+  (some-> server deref :http-server http/server-stop!)
   (reset! server nil))

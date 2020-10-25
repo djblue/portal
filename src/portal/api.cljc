@@ -9,6 +9,12 @@
   (add-tap #'rt/update-value)
   nil)
 
+(defn start
+  "Start the HTTP server with non-default options. Only use if you need
+  control over the HTTP server."
+  [options]
+  (l/start options))
+
 (defn open
   "Open a new inspector window."
   ([] (open nil))
