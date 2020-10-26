@@ -47,14 +47,12 @@
 
 (defn start [options]
   (when (nil? @server)
-    (reset!
-     server
-     (a/let [{:portal.launcher/keys [port host] :or {port 0 host "localhost"}} options
-             server (create-server #'server/handler port host)]
-       server))))
+    (a/let [{:portal.launcher/keys [port host] :or {port 0 host "localhost"}} options
+            instance (create-server #'server/handler port host)]
+      (reset! server instance))))
 
 (defn- stop [handle]
-  (some-> handle :http-server (.close)))
+  (some-> handle :http-server .close))
 
 (defn open [options]
   (let [session-id (random-uuid)]
