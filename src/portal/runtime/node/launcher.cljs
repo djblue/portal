@@ -34,25 +34,32 @@
 
 (defonce ^:private server (atom nil))
 
-(defn- start [handler]
+(defn- create-server [handler port host]
   (js/Promise.
    (fn [resolve _reject]
      (let [server (http/createServer #(handler %1 %2))]
-       (.listen server 0
+       (.listen server port
                 #(let [port (.-port (.address server))
-                       result (with-meta {:server server} {:local-port port})]
+                       result {:http-server server
+                               :port port
+                               :host host}]
                    (resolve result)))))))
 
+(defn start [options]
+  (when (nil? @server)
+    (a/let [{:portal.launcher/keys [port host] :or {port 0 host "localhost"}} options
+            instance (create-server #'server/handler port host)]
+      (reset! server instance))))
+
 (defn- stop [handle]
-  (.close (:server handle)))
+  (some-> handle :http-server .close))
 
 (defn open [options]
   (let [session-id (random-uuid)]
     (swap! rt/state merge {:portal/open? true} options)
     (a/let [chrome-bin (get-chrome-bin)
-            instance   (or @server (start #'server/handler))
-            url        (str "http://localhost:" (-> instance meta :local-port) "?" session-id)]
-      (reset! server instance)
+            {:keys [host port]} (or @server (start nil))
+            url        (str "http://" host ":" port "?" session-id)]
       (if-not (some? chrome-bin)
         (println "Goto" url "to view portal ui.")
         (sh chrome-bin

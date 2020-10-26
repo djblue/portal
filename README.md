@@ -98,7 +98,9 @@ decide to view it as a coll, and with that viewer selected, `deref` would
 return a list of pairs. Not many viewers implement this functionality
 currently, but expect more to do so in the future.
 
-### Themes
+### Options
+
+#### Themes
 
 There are currently three built-in themes:
 
@@ -112,6 +114,17 @@ Which can be passed as an option to `p/open`:
 (p/open
   {:portal.colors/theme :portal.colors/nord})
 ```
+
+#### Launcher
+
+By default, when `p/open` is called, an HTTP server is started on a randomly
+chosen port. To control this server's port and host, call the `p/start`
+function with the following options:
+
+| Option                  | Description                | If not specified     |
+|-------------------------|----------------------------|----------------------|
+| `:portal.launcher/port` | Port used to access UI     | random port selected |
+| `:portal.launcher/host` | Hostname used to access UI | "localhost"          |
 
 ## Datafy and Nav
 
