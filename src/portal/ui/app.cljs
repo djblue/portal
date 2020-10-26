@@ -145,33 +145,44 @@
    md/viewer
    hiccup/viewer])
 
-(defn get-viewer [settings value]
-  (let [selected-viewer    (:selected-viewer settings)
+(defn use-viewer [settings value]
+  (let [set-settings!      (:set-settings! settings)
+        selected-viewer    (:selected-viewer settings)
         compatible-viewers (filter #((:predicate %) value) viewers)]
     {:compatible-viewers compatible-viewers
      :viewer
      (or (some #(when (= (:name %) selected-viewer) %)
                compatible-viewers)
-         (first compatible-viewers))}))
+         (first compatible-viewers))
+     :set-viewer!
+     (fn [viewer]
+       (set-settings! {:selected-viewer viewer}))}))
 
 (defn get-datafy [settings]
   (fn [value]
     (try
-      ((get-in (get-viewer settings (:portal/value settings)) [:viewer :datafy] identity)
+      ((get-in (use-viewer settings (:portal/value settings)) [:viewer :datafy] identity)
        (filter-data settings value))
       (catch js/Error _e value))))
 
 (defn inspect-1 [settings value]
   (let [value (filter-data settings value)
-        {:keys [compatible-viewers viewer]} (get-viewer settings value)
+        {:keys [compatible-viewers viewer set-viewer!]} (use-viewer settings value)
         component (or (:component viewer) inspector)
         settings  (assoc settings
                          :portal/rainbow
                          (cycle ((juxt ::c/exception ::c/keyword ::c/string
-                                       ::c/tag ::c/number ::c/uri) settings)))]
+                                       ::c/tag ::c/number ::c/uri) settings)))
+        commands  (map #(-> %
+                            (dissoc :predicate)
+                            (assoc  :run (fn [] (set-viewer! (:name %)))))
+                       compatible-viewers)]
     [s/div
-     {:style
-      {:flex 1}}
+     {:style {:flex 1}}
+     [commands/palette
+      (assoc settings
+             :datafy (get-datafy settings)
+             :commands commands)]
      [s/div
       {:style
        {:position :relative
@@ -207,9 +218,8 @@
         [s/div]
         [:select
          {:value (pr-str (:name viewer))
-          :on-change #((:set-settings! settings)
-                       {:selected-viewer
-                        (keyword (.substr (.. % -target -value) 1))})
+          :on-change #(set-viewer!
+                       (keyword (.substr (.. % -target -value) 1)))
           :style
           {:background (::c/background settings)
            :margin (:spacing/padding settings)
@@ -320,7 +330,6 @@
         :font-size (:font-size settings)
         :height "100vh"
         :width "100vw"}}
-      [commands/palette (assoc settings :datafy (get-datafy settings))]
       [toolbar settings]
       [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
        [s/div

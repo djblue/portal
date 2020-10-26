@@ -373,9 +373,9 @@
    {:name :portal.command/open-command-palette
     ::shortcuts/osx #{"meta" "shift" "p"}
     ::shortcuts/default #{"control" "shift" "p"}
-    :run (fn []
+    :run (fn [settings]
            (reset! input {:component #(-> [palette-component %1 %2])
-                          :commands commands}))}
+                          :commands (concat commands (:commands settings))}))}
    {:name :portal.command/theme-solarized-dark
     :run (fn [_settings] (st/set-theme! ::c/solarized-dark))}
    {:name :portal.command/theme-solarized-light
