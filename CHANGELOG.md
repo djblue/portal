@@ -1,3 +1,9 @@
+## 0.6.2 - 2020-10-26
+
+- Try to sort maps before rendering
+- Switch viewer from command palette
+- Add options for specifying port and host of launched UI (thanks, [@justone](https://github.com/justone) [#19](https://github.com/djblue/portal/issues/19))
+
 ## 0.6.1 - 2020-10-12
 
 - Ensure active element is always visible
