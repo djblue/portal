@@ -2,14 +2,14 @@
  ;:nrepl {:middleware [portal.nrepl/wrap-portal]}
  :builds
  {:client
-  {:output-dir "target/resources/"
+  {:output-dir "target/resources/portal/"
    :asset-path "."
    :target :browser
    :compiler-options
    {:infer-externs true
     :warnings-as-errors true}
    :modules {:main {:init-fn portal.ui.core/main!}}
-   :release {:output-dir "resources/"}
+   :release {:output-dir "resources/portal/"}
    :devtools {:after-load portal.ui.core/reload!
               :preloads   [cljs.user]}}
 

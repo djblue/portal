@@ -37,7 +37,7 @@
 (defn swap-dev []
   (alter-var-root
    #'s/resource
-   assoc "main.js" (io/file "target/resources/main.js")))
+   assoc "main.js" (io/file "target/resources/portal/main.js")))
 
 (comment
   (swap-dev)

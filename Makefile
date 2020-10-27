@@ -8,7 +8,7 @@ SHELL := env $(ENV) /bin/bash
 all: release
 
 clean:
-	rm -rf target resources/main.js .shadow-cljs
+	rm -rf target resources/portal/
 
 target/install-babashka:
 	mkdir -p target
@@ -24,15 +24,16 @@ bb: target/bb
 node_modules: package.json
 	npm ci
 
-resources/main.js:
+resources/portal/main.js:
 	clojure -M:cljs:shadow-cljs release client
 
-resources/ws.js:
+resources/portal/ws.js:
 	npx browserify --node \
 		--exclude bufferutil \
 		--exclude utf-8-validate \
 		--standalone Server \
-		node_modules/ws > resources/ws.js
+		--outfile resources/portal/ws.js \
+		node_modules/ws
 
 dev: node_modules release
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch client
@@ -40,7 +41,7 @@ dev: node_modules release
 dev/node: node_modules resources/ws.js release
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
 
-release: node_modules resources/main.js resources/ws.js
+release: node_modules resources/portal/main.js resources/portal/ws.js
 
 lint/check:
 	clojure -M:nrepl:check

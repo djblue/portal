@@ -49,7 +49,7 @@
       (fn [_ch _status] (swap! c/sessions dissoc session-id))})))
 
 (def ^:private resource
-  {"main.js" (io/resource "main.js")})
+  {"main.js" (io/resource "portal/main.js")})
 
 (defn- send-resource [content-type resource]
   {:status  200

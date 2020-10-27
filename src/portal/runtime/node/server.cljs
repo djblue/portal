@@ -24,7 +24,8 @@
     (._compile m src file-name)
     (.-exports m)))
 
-(def Server (-> (io/resource "ws.js") (require-string "ws.js") .-Server))
+(def Server (-> (io/resource "portal/ws.js")
+                (require-string "portal/ws.js") .-Server))
 
 (def ops (merge c/ops rt/ops))
 
@@ -61,7 +62,7 @@
 (defn handler [request response]
   (let [paths
         {"/"        #(send-resource response "text/html"       (index/html))
-         "/main.js" #(send-resource response "text/javascript" (io/resource "main.js"))
+         "/main.js" #(send-resource response "text/javascript" (io/resource "portal/main.js"))
          "/rpc"     #(rpc-handler request response)}
         [path] (.split (.-url request) "?")
         f (get paths path #(-> response (.writeHead 404) .end))]

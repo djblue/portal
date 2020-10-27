@@ -3,9 +3,7 @@
 target/
 node_modules/
 cljs-runtime/
-resources/main.js
-resources/ws.js
-resources/manifest.edn
+resources/portal/
 .clj-kondo/.cache/
 .DS_Store
 .nrepl-port
