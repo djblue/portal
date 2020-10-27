@@ -18,7 +18,8 @@
 
     :else definition))
 
-(defn- event->key [e] (.toLowerCase (.-key e)))
+(defn- event->key [e]
+  (when-let [k (.-key e)] (.toLowerCase k)))
 
 (defn- log->seq
   "Returns all key sequences in the event log."
