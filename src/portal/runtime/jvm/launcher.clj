@@ -56,7 +56,9 @@
     (if-let [bin (get-chrome-bin)]
       (let [flags (chrome-flags url)]
         (future (apply sh bin flags)))
-      (browse-url url))
+      (try (browse-url url)
+           (catch Exception _e
+             (println "Goto" url "to view portal ui."))))
     (c/make-atom session-id)))
 
 (defn close []
