@@ -38,7 +38,7 @@ resources/portal/ws.js:
 dev: node_modules release
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch client
 
-dev/node: node_modules resources/ws.js release
+dev/node: node_modules resources/portal/ws.js release
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
 
 release: node_modules resources/portal/main.js resources/portal/ws.js
