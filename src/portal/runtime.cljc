@@ -23,7 +23,8 @@
   (get @instance-cache [:uuid uuid]))
 
 (defonce state (atom {:portal/state-id (random-uuid)
-                      :portal/value (list)}))
+                      :portal/value (list)
+                      :portal.values/limit 25}))
 
 (defn update-setting [k v] (swap! state assoc k v) true)
 
@@ -50,7 +51,7 @@
    (done nil)))
 
 (defn limit-values [state]
-  (update state :portal/value #(take 25 %)))
+  (update state :portal/value #(take (:portal.values/limit state) %)))
 
 (defn load-state [request done]
   (let [state-value @state
