@@ -1,6 +1,6 @@
 ## 0.6.3 - 2020-11-02
 
-- Print url when open fails (thanks, [djomphe-elyada](https://github.com/djomphe-elyada) [#21](https://github.com/djblue/portal/issues/21))
+- Print url when open fails (thanks, [@djomphe-elyada](https://github.com/djomphe-elyada) [#21](https://github.com/djblue/portal/issues/21))
 
 ## 0.6.2 - 2020-10-26
 
