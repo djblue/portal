@@ -98,7 +98,11 @@
 
 (defn preview-coll [open close]
   (fn [_settings value]
-    [s/div {:style {:color "#bf616a"}} open (count value) close]))
+    [s/div {:style {:color "#bf616a"}}
+     open
+     (count value)
+     (when (-> value meta :portal.runtime/more) "+")
+     close]))
 
 (def preview-map    (preview-coll "{" "}"))
 (def preview-vector (preview-coll "[" "]"))
@@ -147,6 +151,7 @@
   [container-map
    settings
    [l/lazy-seq
+    settings
     (for [[k v] (try-sort-map values)]
       [:<>
        {:key (hash k)}
@@ -176,6 +181,7 @@
   [container-coll
    settings
    [l/lazy-seq
+    settings
     (map-indexed
      (fn [idx itm]
        ^{:key idx}
@@ -346,7 +352,10 @@
                         (if preview?
                           (get-preview-component type)
                           (get-inspect-component type))))
-        settings (-> settings (update :depth inc) (dissoc :component))
+        settings (-> settings
+                     (update :depth inc)
+                     (dissoc :component)
+                     (assoc :value value))
         nav-target? (= 2 (:depth settings))
         on-nav #((:portal/on-nav settings) (assoc settings :value value))]
     [s/div

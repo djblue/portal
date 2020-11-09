@@ -50,7 +50,7 @@
   (t/write
    (t/writer
     :json
-    {:transform write-meta
+    {:transform (comp write-meta rt/limit-seq)
      :handlers
      {js/URL
       (t/write-handler (constantly "r") str)

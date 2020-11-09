@@ -58,6 +58,7 @@
   ;; should cause an error in portal because of transit
   (tap> {(with-meta 'k {:a :b}) 'v})
 
+  (tap> (with-meta (range) {:hello :world}))
   (tap> (json/parse-stream (io/reader "package-lock.json")))
   (tap> (io/file "deps.edn"))
   (tap> data))

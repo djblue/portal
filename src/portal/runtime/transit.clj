@@ -22,7 +22,7 @@
            (transit/write-handler "portal.transit/var" var->symbol)
            java.net.URL
            (transit/write-handler "r" str)}
-          :transform transit/write-meta
+          :transform (comp transit/write-meta rt/limit-seq)
           :default-handler
           (transit/write-handler
            "portal.transit/object"

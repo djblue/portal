@@ -4,14 +4,17 @@
             [react-visibility-sensor :default VisibilitySensor]
             [reagent.core :as r]))
 
-(defn lazy-seq [_ opts]
+(defn lazy-seq [_settings _ opts]
   (let [{:keys [default-take step]
          :or   {default-take 0 step 10}} opts
         n (r/atom default-take)]
-    (fn [seqable]
+    (fn [settings seqable]
       [:<>
        (take @n seqable)
-       (when (seq (drop @n seqable))
+       (if-not (seq (drop @n seqable))
+         (when (= (:depth settings) 1)
+           ((:portal/on-more settings) (:value settings))
+           nil)
          [:> VisibilitySensor
           {:key @n
            :on-change

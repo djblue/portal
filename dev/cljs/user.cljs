@@ -39,4 +39,5 @@
   (tap> #js [1 2 3 4 5])
   (tap> (js/Promise.resolve 123))
 
+  (tap> (with-meta (range) {:hello :world}))
   (tap> data))

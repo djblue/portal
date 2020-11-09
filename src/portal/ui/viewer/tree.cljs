@@ -97,6 +97,7 @@
      :flex-direction :column
      :flex-wrap :wrap}}
    [l/lazy-seq
+    settings
     (for [[k v] (ins/try-sort-map value)]
       ^{:key (hash k)}
       [inspect-tree-item settings
@@ -112,6 +113,7 @@
      :flex-direction :column
      :flex-wrap :wrap}}
    [l/lazy-seq
+    settings
     (map-indexed
      (fn [idx item]
        ^{:key idx}
@@ -119,7 +121,6 @@
         [inspect-tree-item settings
          {:value item
           :value-child [inspect-tree settings item]}]])
-
      value)]])
 
 (defn inspect-tree [settings value]

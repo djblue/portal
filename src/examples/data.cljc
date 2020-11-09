@@ -48,7 +48,8 @@
   {::regex #"hello-world"
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
-   {:example/settings 'complex-key} :hello-world})
+   {:example/settings 'complex-key} :hello-world
+   ::range (range)})
 
 (def diff-data
   [{::removed "value"
