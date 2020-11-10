@@ -18,6 +18,7 @@
    [s/table
     [s/tbody
      [l/lazy-seq
+      settings
       (->>
        (str/split value #"\n")
        (map-indexed

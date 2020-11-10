@@ -80,6 +80,25 @@
       (.then merge-state)
       (.then #(:portal/complete? %))))
 
+(defn invoke [send! f & args]
+  (-> (send!
+       {:op :portal.rpc/invoke :f f :args args})
+      (.then #(:return %))))
+
+(defn more [send! value]
+  (when-let [f (-> value meta :portal.runtime/more)]
+    (-> (invoke send! f)
+        (.then
+         (fn [more]
+           (swap! (if (contains? @state :portal/value)
+                    state
+                    tap-state)
+                  update :portal/value
+                  (fn [current]
+                    (with-meta
+                      (concat current more)
+                      (meta more)))))))))
+
 (defn get-actions [send!]
   {:portal/on-clear (partial on-clear send!)
    :portal/on-first on-first
@@ -87,4 +106,5 @@
    :portal/on-nav   (partial on-nav send!)
    :portal/on-back  on-back
    :portal/on-forward on-forward
-   :portal/on-load  (partial load-state send!)})
+   :portal/on-load  (partial load-state send!)
+   :portal/on-more  (partial more send!)})

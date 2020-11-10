@@ -49,22 +49,37 @@
           :portal/value (list))
    (done nil)))
 
-(defn limit-values [state]
-  (update state :portal/value #(take 25 %)))
+(defn limit-seq [value]
+  (if-not (seq? value)
+    value
+    (let [m     (meta value)
+          limit (get m ::more-limit 100)
+          [realized remaining] (split-at limit value)]
+      (with-meta
+        realized
+        (merge
+         m
+         (when (seq remaining)
+           {::more #(limit-seq (with-meta remaining m))}))))))
+
+(defn- set-limit [state]
+  (update state
+          :portal/value
+          #(with-meta % {::more-limit 25})))
 
 (defn load-state [request done]
   (let [state-value @state
         id (:portal/state-id request)
         in-sync? (= id (:portal/state-id state-value))]
     (if-not in-sync?
-      (done (limit-values state-value))
+      (done (set-limit state-value))
       (let [watch-key (keyword (gensym))]
         (add-watch
          state
          watch-key
          (fn [_ _ _old _new]
            (remove-watch state watch-key)
-           (done (limit-values @state))))
+           (done (set-limit @state))))
         (fn [_status]
           (remove-watch state watch-key))))))
 
@@ -85,7 +100,14 @@
       ; wait for any newly returned promise to resolve
       (a/let [naved naved] (on-datafy naved done)))))
 
+(defn invoke [{:keys [f args]} done]
+  (try
+    (done {:return (apply f args)})
+    (catch #?(:clj Exception :cljs js/Error) e
+      (done {:return e}))))
+
 (def ops
   {:portal.rpc/clear-values clear-values
    :portal.rpc/load-state   load-state
-   :portal.rpc/on-nav       on-nav})
+   :portal.rpc/on-nav       on-nav
+   :portal.rpc/invoke       invoke})

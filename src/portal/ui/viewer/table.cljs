@@ -50,6 +50,7 @@
        :border-radius (:border-radius settings)}}
      [s/tbody
       [l/lazy-seq
+       settings
        (map-indexed
         (fn [row-index row]
           [s/tr
