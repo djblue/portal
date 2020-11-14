@@ -2,10 +2,11 @@ BABASHKA_CLASSPATH := $(shell clojure -A:test -Spath)
 PATH  := $(PWD)/target:$(PATH)
 ENV   := PATH=$(PATH) BABASHKA_CLASSPATH=$(BABASHKA_CLASSPATH)
 SHELL := env $(ENV) /bin/bash
+VERSION := 0.6.3
 
 .PHONY: dev test
 
-all: release
+all: dev
 
 clean:
 	rm -rf target resources/portal/
@@ -24,10 +25,10 @@ bb: target/bb
 node_modules: package.json
 	npm ci
 
-resources/portal/main.js:
+resources/portal/main.js: node_modules
 	clojure -M:cljs:shadow-cljs release client
 
-resources/portal/ws.js:
+resources/portal/ws.js: node_modules
 	npx browserify --node \
 		--exclude bufferutil \
 		--exclude utf-8-validate \
@@ -35,13 +36,13 @@ resources/portal/ws.js:
 		--outfile resources/portal/ws.js \
 		node_modules/ws
 
-dev: node_modules release
+resources/js: resources/portal/main.js resources/portal/ws.js
+
+dev: resources/js
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch client
 
-dev/node: node_modules resources/portal/ws.js release
+dev/node: resources/js
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
-
-release: node_modules resources/portal/main.js resources/portal/ws.js
 
 lint/check:
 	clojure -M:nrepl:check
@@ -57,10 +58,10 @@ lint: lint/check lint/kondo lint/cljfmt
 target:
 	mkdir -p target
 
-test/jvm: release target
+test/jvm: resources/js target
 	clojure -M:test -m portal.test-runner
 
-test/bb: release bb
+test/bb: resources/js bb
 	bb -m portal.test-runner
 
 test: test/jvm test/bb
@@ -68,30 +69,21 @@ test: test/jvm test/bb
 fmt:
 	clojure -M:cljfmt fix
 
-pom.xml: deps.edn
-	clojure -Spom
-
-install:
-	mvn install
-
-deploy: pom.xml
-	mvn deploy
-
 ci: lint test
 
-e2e/jvm: release
+e2e/jvm: resources/js
 	@echo "running e2e tests for jvm"
 	@clojure -M:test -m portal.e2e | clojure -M -e "(set! *warn-on-reflection* true)" -r
 
-e2e/node: release
+e2e/node: resources/js
 	@echo "running e2e tests for node"
 	@clojure -M:test -m portal.e2e | clojure -M:cljs -m cljs.main -re node
 
-e2e/bb: release bb
+e2e/bb: resources/js bb
 	@echo "running e2e tests for babashka"
 	@clojure -M:test -m portal.e2e | bb
 
-e2e/web: release
+e2e/web: resources/js
 	@echo "running e2e tests for web"
 	@echo "please wait for browser to open before proceeding"
 	@clojure -M:test -m portal.e2e web | clojure -M:cljs -m cljs.main
@@ -104,5 +96,24 @@ main/jvm:
 main/bb:
 	cat deps.edn | bb -cp src:resources -m portal.main edn
 
-demo: bb release
+demo: resources/js bb
 	./build-demo
+
+set-version:
+	bb -cp dev -m version ${VERSION}
+	git add .
+	git commit -m "Release ${VERSION}"
+
+pom.xml: deps.edn
+	clojure -Spom
+
+jar: pom.xml resources/js
+	mvn package
+
+install: jar
+	mvn install
+
+release: set-version clean ci jar
+
+deploy: release
+	mvn deploy -Dtag="$(shell git rev-parse HEAD)"
