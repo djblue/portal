@@ -2,7 +2,7 @@ BABASHKA_CLASSPATH := $(shell clojure -A:test -Spath)
 PATH  := $(PWD)/target:$(PATH)
 ENV   := PATH=$(PATH) BABASHKA_CLASSPATH=$(BABASHKA_CLASSPATH)
 SHELL := env $(ENV) /bin/bash
-VERSION := 0.6.3
+VERSION := 0.6.4
 
 .PHONY: dev test
 
@@ -116,4 +116,4 @@ install: jar
 release: set-version clean ci jar
 
 deploy: release
-	mvn deploy -Dtag="$(shell git rev-parse HEAD)"
+	mvn deploy

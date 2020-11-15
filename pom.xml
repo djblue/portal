@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>djblue</groupId>
   <artifactId>portal</artifactId>
-  <version>0.6.3</version>
+  <version>0.6.4</version>
   <name>portal</name>
   <description>A clojure tool to navigate through your data.</description>
   <url>https://github.com/djblue/portal</url>
@@ -15,7 +15,7 @@
   </licenses>
   <scm>
     <url>https://github.com/djblue/portal</url>
-    <tag>0.6.3</tag>
+    <tag>0.6.4</tag>
   </scm>
   <dependencies>
     <dependency>

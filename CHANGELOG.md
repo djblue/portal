@@ -1,3 +1,5 @@
+## 0.6.4 - 2020-11-15
+
 - Chunk seqs into groups of 100 for serialization
   - Thanks [@l0st3d](https://github.com/l0st3d) [#17](https://github.com/djblue/portal/issues/17) for the bug report!
 
