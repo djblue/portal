@@ -28,27 +28,32 @@
     hickory/hickory {:mvn/version "0.7.1"}}}
   :shadow-cljs
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.11.4"}}
+   {thheller/shadow-cljs {:mvn/version "2.11.7"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2020.09.09"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2020.11.07"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.7.0"}}}
   :nrepl
-  {:extra-deps {nrepl/nrepl {:mvn/version "0.8.1"}}}
+  {:extra-deps {nrepl/nrepl {:mvn/version "0.8.3"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
    {athos/clj-check
     {:git/url "https://github.com/athos/clj-check.git"
-     :sha "da6363a38b06d9b84976ed330a9544b69d3c4dee"}}}
+     :sha "cd1f25456de5eebda0a69602dd3445905382b3a4"}}}
   :test
   {:extra-paths ["test"]
    :extra-deps
    {babashka/clj-http-lite
     {:git/url "https://github.com/babashka/clj-http-lite.git"
-     :sha "f44ebe45446f0f44f2b73761d102af3da6d0a13e"}}}}}
+     :sha "a75db6db60eadcf609104a979b29499f54b3665b"}}}
+  :antq
+  {:replace-deps
+   {antq/antq           {:mvn/version "0.7.5"}
+    org.slf4j/slf4j-nop {:mvn/version "1.7.30"}}
+   :main-opts  ["-m" "antq.core"]}}}

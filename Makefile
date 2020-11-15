@@ -53,6 +53,14 @@ lint/kondo:
 lint/cljfmt:
 	clojure -M:cljfmt check
 
+check/npm-deps:
+	npm outdated
+
+check/clj-deps:
+	clojure -M:antq
+
+check/deps: check/clj-deps check/npm-deps
+
 lint: lint/check lint/kondo lint/cljfmt
 
 target:
