@@ -1,3 +1,6 @@
+- Chunk seqs into groups of 100 for serialization
+  - Thanks [@l0st3d](https://github.com/l0st3d) [#17](https://github.com/djblue/portal/issues/17) for the bug report!
+
 ## 0.6.3 - 2020-11-02
 
 - Print url when open fails (thanks, [@djomphe-elyada](https://github.com/djomphe-elyada) [#21](https://github.com/djblue/portal/issues/21))
