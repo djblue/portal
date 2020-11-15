@@ -16,8 +16,7 @@ To get an overview of portal, you can watch the following recording of a live de
 
 [![Apropos](https://img.youtube.com/vi/gByyg-m0XOg/hqdefault.jpg)](https://www.youtube.com/watch?v=gByyg-m0XOg "Apropos")
 
-
-## API Usage
+## Usage
 
 To start a repl with portal, run the clojure cli with:
 
@@ -47,7 +46,11 @@ or for a [**babashka**](https://github.com/borkdude/babashka) [>=0.2.2](https://
 bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.6.4"}}}'`
 ```
 
-then try the portal api with the following commands:
+or for examples on how to integrate portal into an existing project, look through the [examples](./examples) directory. 
+
+### API
+
+Try the [portal api](./src/portal/api.cljc) with the following commands:
 
 ```clojure
 ;; for node and jvm
