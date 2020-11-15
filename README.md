@@ -208,6 +208,9 @@ curl ... | transit
 To start development, do:
 
     make dev
+    
+This will start shadow-cljs with a nrepl server. To get going, explore the
+[`user.clj`](https://github.com/djblue/portal/blob/master/dev/user.clj#L43) namespace.
 
 ### Formatting
 
@@ -230,3 +233,10 @@ To run the e2e tests in the jvm, node and web environments, do:
 NOTE: these aren't fully automated tests. They depend on a human for
 verification and synchronization but it beats having to type everything
 out manually into a repl.
+
+### Deployment
+
+To deploy to a release to [clojars](https://clojars.org/djblue/portal),
+bump the [version](https://github.com/djblue/portal/blob/master/Makefile#L5) and do:
+
+    make deploy
