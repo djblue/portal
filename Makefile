@@ -44,13 +44,13 @@ dev: resources/js
 dev/node: resources/js
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
 
-lint/check:
+check/clj-check:
 	clojure -M:nrepl:check
 
-lint/kondo:
+check/clj-kondo:
 	clojure -M:kondo --lint dev src test
 
-lint/cljfmt:
+check/cljfmt:
 	clojure -M:cljfmt check
 
 check/npm-deps:
@@ -61,7 +61,7 @@ check/clj-deps:
 
 check/deps: check/clj-deps check/npm-deps
 
-lint: lint/check lint/kondo lint/cljfmt
+lint: check/clj-check check/clj-kondo check/cljfmt
 
 target:
 	mkdir -p target
