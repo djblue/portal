@@ -165,6 +165,24 @@
        (filter-data settings value))
       (catch js/Error _e value))))
 
+(defn- error-boundary []
+  (let [error         (r/atom nil)
+        last-children (atom nil)]
+    (r/create-class
+     {:display-name "ErrorBoundary"
+      :component-did-catch
+      (fn [_e info]
+        (reset! error [@last-children info]))
+      :reagent-render
+      (fn [& children]
+        (when-not (= children (first @error))
+          (reset! last-children children)
+          (reset! error nil))
+        (if (nil? @error)
+          (into [:<>] children)
+          (let [[_ info] @error]
+            [:pre [:code (pr-str info)]])))})))
+
 (defn inspect-1 [settings value]
   (let [value (filter-data settings value)
         {:keys [compatible-viewers viewer set-viewer!]} (use-viewer settings value)
@@ -205,7 +223,8 @@
          {:style
           {:box-sizing :border-box
            :padding (* 2 (:spacing/padding settings))}}
-         [inspector (assoc settings :component component) value]]]]]
+         [error-boundary
+          [inspector (assoc settings :component component) value]]]]]]
      [s/div
       {:style
        {:display :flex
