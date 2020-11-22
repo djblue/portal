@@ -1,7 +1,5 @@
-BABASHKA_CLASSPATH := $(shell clojure -A:test -Spath)
-PATH  := $(PWD)/target:$(PATH)
-ENV   := PATH=$(PATH) BABASHKA_CLASSPATH=$(BABASHKA_CLASSPATH)
-SHELL := env $(ENV) /bin/bash
+export BABASHKA_CLASSPATH := $(shell clojure -A:test -Spath)
+export PATH := $(PWD)/target:$(PATH)
 VERSION := 0.6.4
 
 .PHONY: dev test
