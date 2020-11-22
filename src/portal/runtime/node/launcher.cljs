@@ -10,7 +10,8 @@
 
 (defn- get-paths []
   (concat
-   ["/Applications/Google Chrome.app/Contents/MacOS"]
+   ["/Applications/Google Chrome.app/Contents/MacOS"
+    "/mnt/c/Program Files (x86)/Google/Chrome/Application"]
    (s/split (.-PATH js/process.env) #":")))
 
 (defn- find-bin [files]
@@ -23,7 +24,7 @@
          f)))))
 
 (defn- get-chrome-bin []
-  (find-bin #{"chrome" "google-chrome-stable" "chromium" "Google Chrome"}))
+  (find-bin #{"chrome" "chrome.exe" "google-chrome-stable" "chromium" "Google Chrome"}))
 
 (defn- sh [bin & args]
   (js/Promise.
