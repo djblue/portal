@@ -15,7 +15,7 @@
        (when-let [response (get @pending-requests id)]
          (deliver response message))))})
 
-(def timeout 1000)
+(def timeout 5000)
 
 (defn- get-session [session-id]
   (let [p (promise)
