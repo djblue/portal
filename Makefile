@@ -9,6 +9,17 @@ all: dev
 clean:
 	rm -rf target resources/portal/
 
+target/install-clojure:
+	mkdir -p target
+	curl https://download.clojure.org/install/linux-install-1.10.1.727.sh -o target/install-clojure
+	chmod +x target/install-clojure
+
+install/clojure: target/install-clojure
+	sudo ./target/install-clojure
+
+install/chrome:
+	sudo apt-get update && sudo apt-get install -y chromium-browser
+
 target/install-babashka:
 	mkdir -p target
 	curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install -o target/install-babashka
