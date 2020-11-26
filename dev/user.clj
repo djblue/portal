@@ -5,11 +5,13 @@
             [clojure.java.io :as io]
             [examples.data :refer [data]]
             [portal.api :as p]
-            [portal.runtime.jvm.server :as s]
-            [shadow.cljs.devtools.api :as shadow]))
+            [portal.runtime.jvm.server :as s]))
 
-(defn cljs [] (shadow/repl :client))
-(defn node [] (shadow/repl :node))
+(defn cljs []
+  ((resolve 'shadow.cljs.devtools.api/repl) :client))
+
+(defn node []
+  ((resolve 'shadow.cljs.devtools.api/repl) :node))
 
 (p/tap)
 
