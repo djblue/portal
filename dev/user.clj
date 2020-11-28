@@ -41,9 +41,9 @@
    #'s/resource
    assoc "main.js" (io/file "target/resources/portal/main.js")))
 
-(comment
-  (swap-dev)
+(swap-dev)
 
+(comment
   (def portal (p/open))
   (p/tap)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
