@@ -50,7 +50,7 @@
         :host host}))))
 
 (defn open [options]
-  (swap! rt/state merge {:portal/open? true} options)
+  (swap! rt/state merge options)
   (let [session-id (random-uuid)
         {:keys [host port]} (or @server (start nil))
         url (str "http://" host ":" port "?" session-id)]
@@ -63,6 +63,7 @@
     (c/make-atom session-id)))
 
 (defn close []
-  (swap! rt/state assoc :portal/open? false)
+  (doseq [session-id (keys @c/sessions)]
+    (c/request session-id {:op :portal.rpc/close}))
   (some-> server deref :http-server http/server-stop!)
   (reset! server nil))

@@ -30,7 +30,7 @@
        (f body #(resolve (t/edn->json %)))))))
 
 (defn open [options]
-  (swap! rt/state merge {:portal/open? true} options)
+  (swap! rt/state merge options)
   (let [url   (str->src (index/html :code-url code-url :platform "web") "text/html")
         child (js/window.open url "portal", "resizable,scrollbars,status")]
     (set! (.-onunload child)

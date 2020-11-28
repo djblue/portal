@@ -70,6 +70,11 @@
         {:op :portal.rpc/response
          :portal.rpc/id (:portal.rpc/id message)
          :portal/value (datafy value)})))
+   :portal.rpc/close
+   (fn [message send!]
+     (js/setTimeout #(js/window.close) 100)
+     (send! {:op :portal.rpc/response
+             :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/push-state
    (fn [message send!]
      (swap! state

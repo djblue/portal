@@ -6,6 +6,7 @@
             [clojure.string :as s]
             [portal.async :as a]
             [portal.runtime :as rt]
+            [portal.runtime.node.client :as c]
             [portal.runtime.node.server :as server]))
 
 (defn- get-paths []
@@ -57,7 +58,7 @@
 
 (defn open [options]
   (let [session-id (random-uuid)]
-    (swap! rt/state merge {:portal/open? true} options)
+    (swap! rt/state merge options)
     (a/let [chrome-bin (get-chrome-bin)
             {:keys [host port]} (or @server (start nil))
             url        (str "http://" host ":" port "?" session-id)]
@@ -71,8 +72,11 @@
     {:session-id session-id}))
 
 (defn close []
-  (swap! rt/state assoc :portal/open? false)
-  (stop @server)
-  (reset! server nil)
+  (a/do
+    (js/Promise.all
+     (for [session-id (keys @c/sessions)]
+       (c/request session-id {:op :portal.rpc/close})))
+    (stop @server)
+    (reset! server nil))
   true)
 

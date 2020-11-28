@@ -2,58 +2,32 @@
 
 (defonce sessions (atom {}))
 
-(defn- promise []
-  (let [p (atom {})]
-    (swap!
-     p
-     assoc
-     :promise
-     (js/Promise.
-      (fn [resolve reject]
-        (swap! p
-               assoc
-               :resolve resolve
-               :reject reject))))
-    p))
+(defonce ^:private id (atom 0))
+(defonce ^:private pending-requests (atom {}))
 
-(defn- deliver [p value]
-  (when-let [resolve (:resolve @p)]
-    (swap! p dissoc :resolve)
-    (resolve p value)))
-
-(defn- then [p f]
-  (when-let [p (:promise @p)] (.then p f)))
+(defn- next-id [] (swap! id inc))
 
 (defn- get-session [session-id]
-  (get
-   (swap! sessions
-          update
-          session-id
-          #(or % {:request (promise) :response (promise)}))
-   session-id))
-
-(defn- clear-session [session-id]
-  (swap! sessions dissoc session-id))
+  (get @sessions session-id))
 
 (def ops
-  {:portal.rpc/send-response
-   (fn [request done]
-     (let [session-id (:portal.rpc/session-id request)]
-       (when-let [response (:response (get-session session-id))]
-         (clear-session session-id)
-         (deliver response (:response request))))
-     (done {}))
-
-   :portal.rpc/recv-request
-   (fn [request done]
-     (let [session (:portal.rpc/session-id request)]
-       (then (:request (get-session session)) done)))})
+  {:portal.rpc/response
+   (fn [message _done]
+     (let [id (:portal.rpc/id message)]
+       (when-let [[resolve] (get @pending-requests id)]
+         (resolve message))))})
 
 (defn request [session-id message]
-  (let [{:keys [request response]} (get-session session-id)]
-    (if-not (deliver request message)
-      (throw (ex-info "Portal busy with another request" message))
-      ;; TODO: add race / timeout
-      (:promise @response))))
+  (if-let [send! (get-session session-id)]
+    (let [id      (next-id)
+          message (assoc message :portal.rpc/id id)]
+      (.then
+       (js/Promise.
+        (fn [resolve reject]
+          (swap! pending-requests assoc id [resolve reject])
+          (send! message)))
+       #(do (swap! pending-requests dissoc id) %)))
+    (throw (ex-info "No such portal session"
+                    {:session-id session-id :message message}))))
 
 (defn make-atom [_session-id])
