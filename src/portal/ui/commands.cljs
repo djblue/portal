@@ -24,35 +24,39 @@
 
 (defn close [] (reset! input nil))
 
-(defn pop-up [settings & children]
-  [s/div
-   {:on-click close
-    :style
-    {:position :fixed
-     :top 0
-     :left 0
-     :right 0
-     :bottom 0
-     :z-index 100
-     :padding-top 200
-     :padding-bottom 200
-     :box-sizing :border-box
-     :height "100%"
-     :overflow :hidden}}
-   (into
-    [s/div
-     {:style
-      {:width "80%"
-       :max-height "40vh"
-       :margin "0 auto"
-       :overflow :hidden
-       :display :flex
-       :flex-direction :column
-       :background (::c/background2 settings)
-       :box-shadow "0 0 10px #0007"
-       :border (str "1px solid " (::c/border settings))
-       :border-radius (:border-radius settings)}}]
-    children)])
+(defn pop-up [_ & children]
+  (into
+   [s/div
+    {:on-click close
+     :style
+     {:position :fixed
+      :top 0
+      :left 0
+      :right 0
+      :bottom 0
+      :z-index 100
+      :padding-top 200
+      :padding-bottom 200
+      :box-sizing :border-box
+      :height "100%"
+      :overflow :hidden}}]
+   children))
+
+(defn container [settings & children]
+  (into
+   [s/div
+    {:style
+     {:width "80%"
+      :max-height "40vh"
+      :margin "0 auto"
+      :overflow :hidden
+      :display :flex
+      :flex-direction :column
+      :background (::c/background2 settings)
+      :box-shadow "0 0 10px #0007"
+      :border (str "1px solid " (::c/border settings))
+      :border-radius (:border-radius settings)}}]
+   children))
 
 (defn with-shortcuts [f]
   (let [k (gensym)]
@@ -107,7 +111,7 @@
   (let [selected (r/atom #{})
         active   (r/atom 0)]
     (fn [settings input]
-      [pop-up
+      [container
        settings
        [s/div
         {:style {:box-sizing :border-box
@@ -195,27 +199,23 @@
   (let [active (r/atom 0)
         filter-text (r/atom "")]
     (fn [settings args]
-      (let [commands
+      (let [options
             (remove
-             (fn [command]
+             (fn [option]
                (let [text @filter-text]
                  (or
-                  (#{:portal.command/close-command-palette
-                     :portal.command/open-command-palette}
-                   (:name command))
-                  (when-let [predicate (:predicate command)]
-                    (not (predicate settings)))
                   (when-not (str/blank? text)
-                    (not (str/includes? (pr-str (:name command)) text))))))
-             (:commands args))
-            n (count commands)
+                    (not (str/includes? (pr-str (:name option)) text))))))
+             (:options args))
+            n (count options)
             on-close close
-            run (fn []
-                  (reset! filter-text "")
-                  (on-close)
-                  (when-let [run (:run (nth commands @active))]
-                    (run settings)))]
-        [pop-up
+            on-select
+            (fn []
+              (reset! filter-text "")
+              (on-close)
+              (when-let [option (nth options @active)]
+                ((:on-select args) option)))]
+        [container
          settings
          [s/div
           {:style
@@ -227,7 +227,7 @@
               (condp shortcuts/match? log
                 "arrowup"   (swap! active #(mod (dec %) n))
                 "arrowdown" (swap! active #(mod (inc %) n))
-                "enter"     (run)
+                "enter"     (on-select)
                 nil)
                (shortcuts/matched! log)))]
           [s/input
@@ -248,7 +248,7 @@
           {:style
            {:height "100%"
             :overflow :auto}}
-          (->> commands
+          (->> options
                (map-indexed
                 (fn [index command]
                   (let [active? (= index @active)]
@@ -257,7 +257,7 @@
                      {:on-click #(do
                                    (.stopPropagation %)
                                    (reset! active index)
-                                   (run))
+                                   (on-select))
                       :style
                       (merge
                        {:border-left (str "5px solid #0000")
@@ -321,7 +321,7 @@
            (let [v (:portal/value settings)]
              (when (coll? v)
                (reset! input
-                       {:component #(-> [selector-component %1 %2])
+                       {:component #(-> [pop-up %1 [selector-component %1 %2]])
                         :options (coll-keys v)
                         :run
                         (fn [options]
@@ -329,12 +329,65 @@
                           (st/push
                            :select-columns
                            (map #(select-keys % options) v)))}))))}
+   {:name :portal.data/count
+    :predicate coll?
+    :run (fn [settings]
+           (let [v (:portal/value settings)]
+             (when (coll? v)
+               (st/push :count (count v)))))}
+   {:name :portal.data/first
+    :predicate coll?
+    :run (fn [settings]
+           (let [v (:portal/value settings)]
+             (when (coll? v)
+               (st/push :get (first v)))))}
+   {:name :portal.data/rest
+    :predicate coll?
+    :run (fn [settings]
+           (let [v (:portal/value settings)]
+             (when (coll? v)
+               (st/push :get (rest v)))))}
+   {:name :portal.data/get
+    :predicate map?
+    :run (fn [settings]
+           (let [v (:portal/value settings)]
+             (when (map? v)
+               (reset! input
+                       {:component #(-> [pop-up %1 [palette-component %1 %2]])
+                        :options (map #(-> {:name %}) (keys v))
+                        :on-select
+                        (fn [option]
+                          (st/push :get (get v (:name option))))}))))}
+   {:name :portal.data/get-in
+    :predicate map?
+    :run (fn [settings]
+           (let [get-key
+                 (fn get-key [path v]
+                   (when (map? v)
+                     (reset! input
+                             {:component #(-> [pop-up %1 [palette-component %1 %2]])
+                              :options (map #(-> {:name %}) (concat [::done] (keys v)))
+                              :on-select
+                              (fn [option]
+                                (let [k (:name option)
+                                      path (conj path k)
+                                      next-value (get v k)]
+                                  (cond
+                                    (= k ::done)
+                                    (st/push :get-in v)
+
+                                    (not (map? next-value))
+                                    (st/push :get-in next-value)
+
+                                    :else
+                                    (get-key path next-value))))})))]
+             (get-key [] (:portal/value settings))))}
    {:name :portal.data/select-columns
     :predicate map-of-maps
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (reset! input
-                     {:component #(-> [selector-component %1 %2])
+                     {:component #(-> [pop-up %1 [selector-component %1 %2]])
                       :options (map-keys v)
                       :run
                       (fn [options]
@@ -352,7 +405,7 @@
            (let [v (:portal/value settings)]
              (when (map? v)
                (reset! input
-                       {:component #(-> [selector-component %1 %2])
+                       {:component #(-> [pop-up %1 [selector-component %1 %2]])
                         :options (keys v)
                         :run
                         (fn [options]
@@ -374,8 +427,20 @@
     ::shortcuts/osx #{"meta" "shift" "p"}
     ::shortcuts/default #{"control" "shift" "p"}
     :run (fn [settings]
-           (reset! input {:component #(-> [palette-component %1 %2])
-                          :commands (concat commands (:commands settings))}))}
+           (let [commands (remove
+                           (fn [option]
+                             (or
+                              (#{:portal.command/close-command-palette
+                                 :portal.command/open-command-palette}
+                               (:name option))
+                              (when-let [predicate (:predicate option)]
+                                (not (predicate settings)))))
+                           (concat commands (:commands settings)))]
+             (reset! input {:component #(-> [pop-up %1 [palette-component %1 %2]])
+                            :options commands
+                            :on-select
+                            (fn [option]
+                              ((:run option) settings))})))}
    {:name :portal.command/theme-solarized-dark
     :run (fn [_settings] (st/set-theme! ::c/solarized-dark))}
    {:name :portal.command/theme-solarized-light
