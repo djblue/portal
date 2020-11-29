@@ -99,10 +99,11 @@
 (defn preview-coll [open close]
   (fn [settings value]
     [s/div
+     {:style
+      {:color (::c/diff-remove settings)}}
      open
-     [s/span {:style {:color (::c/number settings)}}
-      (count value)
-      (when (-> value meta :portal.runtime/more) "+")]
+     (count value)
+     (when (-> value meta :portal.runtime/more) "+")
      close]))
 
 (def preview-map    (preview-coll "{" "}"))
