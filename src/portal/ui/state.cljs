@@ -68,10 +68,7 @@
   (swap! tap-state assoc ::c/theme theme))
 
 (defn merge-state [new-state]
-  (let [merged-state (swap! tap-state merge new-state)]
-    (when (false? (:portal/open? merged-state))
-      (js/window.close))
-    merged-state))
+  (swap! tap-state merge new-state))
 
 (defn load-state [send!]
   (-> (send!
