@@ -4,9 +4,11 @@
                :cljs [portal.async :as a]))
   #?(:clj (:import [java.util UUID])))
 
-#?(:clj (def random-uuid #(UUID/randomUUID)))
+#?(:clj (defn random-uuid [] (UUID/randomUUID)))
 
 (defonce instance-cache (atom {}))
+
+(declare object->value)
 
 (defn instance->uuid [instance]
   (let [k [:instance instance]]
@@ -18,6 +20,22 @@
              (let [uuid (random-uuid)]
                (assoc cache [:uuid uuid] instance k uuid)))))
         (get k))))
+
+(defn- can-meta? [o]
+  #?(:clj (instance? clojure.lang.IObj o)
+     :cljs (implements? IMeta o)))
+
+(defn object->value
+  ([o]
+   (object->value o (instance->uuid o)))
+  ([o id]
+   {:id id
+    :meta (when (can-meta? o) (meta o))
+    :type (pr-str (type o))
+    :string (binding
+             [*print-length* 10
+              *print-level* 2]
+              (pr-str o))}))
 
 (defn uuid->instance [uuid]
   (get @instance-cache [:uuid uuid]))

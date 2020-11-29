@@ -24,14 +24,7 @@
            (transit/write-handler "r" str)}
           :transform (comp transit/write-meta rt/limit-seq)
           :default-handler
-          (transit/write-handler
-           "portal.transit/object"
-           (fn [o]
-             {:id (rt/instance->uuid o)
-              :meta (when (instance? clojure.lang.IObj o)
-                      (meta o))
-              :type (pr-str (type o))
-              :string (pr-str o)}))})]
+          (transit/write-handler "portal.transit/object" rt/object->value)})]
     (transit/write writer value)))
 
 (defn edn->json [value]

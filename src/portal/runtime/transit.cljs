@@ -55,8 +55,5 @@
      {js/URL
       (t/write-handler (constantly "r") str)
       :default
-      (t/write-handler
-       (constantly "portal.transit/object")
-       (fn [o]
-         {:id (rt/instance->uuid o) :type (pr-str (type o)) :string (pr-str o)}))}})
+      (t/write-handler (constantly "portal.transit/object") rt/object->value)}})
    edn))
