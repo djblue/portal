@@ -299,7 +299,7 @@
    (let [disabled? (nil? (:portal/previous-state settings))]
      [s/button
       {:disabled disabled?
-       :title    "go back"
+       :title    "Go back in portal history."
        :on-click (:portal/on-back settings)
        :style    (merge
                   (button-styles settings)
@@ -310,7 +310,7 @@
    (let [disabled? (nil? (:portal/next-state settings))]
      [s/button
       {:disabled disabled?
-       :title    "go next"
+       :title    "Go forward in portal history."
        :on-click (:portal/on-forward settings)
        :style    (merge
                   (button-styles settings)
@@ -322,7 +322,7 @@
    (let [disabled? (not (contains? settings :portal/value))]
      [s/button
       {:disabled disabled?
-       :title    "clear portal"
+       :title    "Clear all values from portal."
        :on-click (:portal/on-clear settings)
        :style    (merge
                   (button-styles settings)
