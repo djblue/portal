@@ -97,11 +97,12 @@
      [inspector settings value]]]])
 
 (defn preview-coll [open close]
-  (fn [_settings value]
-    [s/div {:style {:color "#bf616a"}}
+  (fn [settings value]
+    [s/div
      open
-     (count value)
-     (when (-> value meta :portal.runtime/more) "+")
+     [s/span {:style {:color (::c/number settings)}}
+      (count value)
+      (when (-> value meta :portal.runtime/more) "+")]
      close]))
 
 (def preview-map    (preview-coll "{" "}"))
