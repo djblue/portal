@@ -1,7 +1,5 @@
 (ns portal.runtime
-  (:require [clojure.datafy :refer [datafy nav]]
-            #?(:clj  [portal.sync  :as a]
-               :cljs [portal.async :as a]))
+  (:require [clojure.datafy :refer [datafy nav]])
   #?(:clj (:import [java.util UUID])))
 
 #?(:clj (defn random-uuid [] (UUID/randomUUID)))
@@ -99,31 +97,50 @@
         (fn [_status]
           (remove-watch state watch-key))))))
 
-(defn on-datafy [value done]
-  (let [datafied (datafy value)]
-    (if (= datafied value)
-      ; allow untransformed promises to pass freely
-      (done {:value datafied})
-      ; wait for any newly returned promise to resolve
-      (a/let [datafied datafied] (done {:value datafied})))))
-
 (defn on-nav [request done]
-  (let [[coll k v] (:args request)
-        naved      (if coll (nav coll k v) v)]
-    (if (= naved v)
-      ; allow untransformed promises to pass freely
-      (on-datafy naved done)
-      ; wait for any newly returned promise to resolve
-      (a/let [naved naved] (on-datafy naved done)))))
+  (let [[coll k v] (:args request)]
+    (done {:value (if coll (nav coll k v) v)})))
+
+(def ^:private predicates
+  (merge
+   {'clojure.core/deref
+    #?(:clj  #(instance? clojure.lang.IRef %)
+       :cljs #(satisfies? cljs.core.IDeref %))}
+   #?(:clj
+      {'clojure.core/slurp
+       #(and (instance? java.io.File %)
+             (.isFile ^java.io.File %)
+             (.canRead ^java.io.File %))})))
+
+(declare get-functions)
+
+(def ^:private fns
+  (merge
+   {'clojure.core/deref    #'deref
+    'clojure.core/type     #'type
+    'clojure.datafy/datafy #'datafy
+    `get-functions #'get-functions}
+   #?(:clj {`slurp slurp})))
+
+(defn- get-functions [v]
+  (keys
+   (reduce-kv
+    (fn [fns s predicate]
+      (if (predicate v)
+        fns
+        (dissoc fns s)))
+    (dissoc fns `get-functions)
+    predicates)))
 
 (defn invoke [{:keys [f args]} done]
   (try
-    (done {:return (apply f args)})
+    (let [f (if (symbol? f) (get fns f) f)]
+      (done {:return (apply f args)}))
     (catch #?(:clj Exception :cljs js/Error) e
       (done {:return e}))))
 
 (def ops
-  {:portal.rpc/clear-values clear-values
-   :portal.rpc/load-state   load-state
-   :portal.rpc/on-nav       on-nav
-   :portal.rpc/invoke       invoke})
+  {:portal.rpc/clear-values #'clear-values
+   :portal.rpc/load-state   #'load-state
+   :portal.rpc/on-nav       #'on-nav
+   :portal.rpc/invoke       #'invoke})

@@ -104,4 +104,5 @@
    :portal/on-back  on-back
    :portal/on-forward on-forward
    :portal/on-load  (partial load-state send!)
-   :portal/on-more  (partial more send!)})
+   :portal/on-more  (partial more send!)
+   :portal/on-invoke (partial invoke send!)})

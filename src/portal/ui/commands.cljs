@@ -2,6 +2,7 @@
   (:require [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
+            [portal.async :as a]
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
             [portal.ui.inspector :as ins :refer [inspector]]
@@ -302,53 +303,49 @@
          :when (contains? (get value row) column)]
      [row column])))
 
+(defn get-functions [settings]
+  (a/let [v      (:portal/value settings)
+          invoke (:portal/on-invoke settings)
+          fns    (invoke 'portal.runtime/get-functions v)]
+    (for [f fns]
+      {:name f
+       :run (fn [_settings]
+              (a/let [result (invoke f v)]
+                (st/push f result)))})))
+
 (def commands
-  [{:name :portal.data/vals
+  [{:name 'clojure.core/vals
     :predicate (comp map? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (map? v)
                (st/push ::keys (vals v)))))}
-   {:name :portal.data/keys
+   {:name 'clojure.core/keys
     :predicate (comp map? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (map? v)
                (st/push ::keys (keys v)))))}
-   {:name :portal.data/select-columns
-    :predicate coll-of-maps
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (coll? v)
-               (reset! input
-                       {:component #(-> [pop-up %1 [selector-component %1 %2]])
-                        :options (coll-keys v)
-                        :run
-                        (fn [options]
-                          (close)
-                          (st/push
-                           :select-columns
-                           (map #(select-keys % options) v)))}))))}
-   {:name :portal.data/count
-    :predicate coll?
+   {:name 'clojure.core/count
+    :predicate (comp coll? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (coll? v)
                (st/push :count (count v)))))}
-   {:name :portal.data/first
-    :predicate coll?
+   {:name 'clojure.core/first
+    :predicate (comp coll? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (coll? v)
                (st/push :get (first v)))))}
-   {:name :portal.data/rest
-    :predicate coll?
+   {:name 'clojure.core/rest
+    :predicate (comp coll? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (coll? v)
                (st/push :get (rest v)))))}
-   {:name :portal.data/get
-    :predicate map?
+   {:name 'clojure.core/get
+    :predicate (comp map? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (map? v)
@@ -358,8 +355,8 @@
                         :on-select
                         (fn [option]
                           (st/push :get (get v (:name option))))}))))}
-   {:name :portal.data/get-in
-    :predicate map?
+   {:name 'clojure.core/get-in
+    :predicate (comp map? :portal/value)
     :run (fn [settings]
            (let [get-key
                  (fn get-key [path v]
@@ -382,6 +379,34 @@
                                     :else
                                     (get-key path next-value))))})))]
              (get-key [] (:portal/value settings))))}
+   {:name 'clojure.core/select-keys
+    :predicate (comp map? :portal/value)
+    :run (fn [settings]
+           (let [v (:portal/value settings)]
+             (when (map? v)
+               (reset! input
+                       {:component #(-> [pop-up %1 [selector-component %1 %2]])
+                        :options (keys v)
+                        :run
+                        (fn [options]
+                          (close)
+                          (st/push
+                           :select-keys
+                           (select-keys v options)))}))))}
+   {:name :portal.data/select-columns
+    :predicate coll-of-maps
+    :run (fn [settings]
+           (let [v (:portal/value settings)]
+             (when (coll? v)
+               (reset! input
+                       {:component #(-> [pop-up %1 [selector-component %1 %2]])
+                        :options (coll-keys v)
+                        :run
+                        (fn [options]
+                          (close)
+                          (st/push
+                           :select-columns
+                           (map #(select-keys % options) v)))}))))}
    {:name :portal.data/select-columns
     :predicate map-of-maps
     :run (fn [settings]
@@ -399,20 +424,6 @@
                             (assoc v k (select-keys m options)))
                           v
                           v)))})))}
-   {:name :portal.data/select-keys
-    :predicate (comp map? :portal/value)
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (map? v)
-               (reset! input
-                       {:component #(-> [pop-up %1 [selector-component %1 %2]])
-                        :options (keys v)
-                        :run
-                        (fn [options]
-                          (close)
-                          (st/push
-                           :select-keys
-                           (select-keys v options)))}))))}
    {:name :portal.data/transpose-map
     :predicate map-of-maps
     :run (fn [settings]
@@ -427,15 +438,16 @@
     ::shortcuts/osx #{"meta" "shift" "p"}
     ::shortcuts/default #{"control" "shift" "p"}
     :run (fn [settings]
-           (let [commands (remove
-                           (fn [option]
-                             (or
-                              (#{:portal.command/close-command-palette
-                                 :portal.command/open-command-palette}
-                               (:name option))
-                              (when-let [predicate (:predicate option)]
-                                (not (predicate settings)))))
-                           (concat commands (:commands settings)))]
+           (a/let [fns (get-functions settings)
+                   commands (remove
+                             (fn [option]
+                               (or
+                                (#{:portal.command/close-command-palette
+                                   :portal.command/open-command-palette}
+                                 (:name option))
+                                (when-let [predicate (:predicate option)]
+                                  (not (predicate settings)))))
+                             (concat fns commands (:commands settings)))]
              (reset! input {:component #(-> [pop-up %1 [palette-component %1 %2]])
                             :options commands
                             :on-select

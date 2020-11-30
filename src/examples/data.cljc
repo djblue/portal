@@ -49,7 +49,8 @@
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
    {:example/settings 'complex-key} :hello-world
-   ::range (range)})
+   ::range (range)
+   ::atom (atom ::hello)})
 
 (def diff-data
   [{::removed "value"
