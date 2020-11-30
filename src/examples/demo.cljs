@@ -14,7 +14,8 @@
       :portal/value data}
      :portal.rpc/on-nav
      (a/let [res (apply nav (:args msg))]
-       {:value (datafy res)}))))
+       {:value (datafy res)})
+     :portal.rpc/invoke nil)))
 
 (defn main! []
   (p/tap)
