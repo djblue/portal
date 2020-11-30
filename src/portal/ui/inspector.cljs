@@ -321,7 +321,7 @@
     inspect-default))
 
 (def preview-type?
-  #{:map :set :vector :list :coll :tagged})
+  #{:map :set :vector :list :coll :tagged :object})
 
 (defn preview [settings value]
   (let [type (get-value-type value)
