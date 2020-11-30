@@ -43,8 +43,6 @@
 (defonce state (atom {:portal/state-id (random-uuid)
                       :portal/value (list)}))
 
-(defn update-setting [k v] (swap! state assoc k v) true)
-
 (defn update-value [new-value]
   (swap!
    state
