@@ -49,6 +49,7 @@
     {:style
      {:width "80%"
       :max-height "40vh"
+      :height :fit-content
       :margin "0 auto"
       :overflow :hidden
       :display :flex
@@ -163,7 +164,8 @@
                                   (::c/boolean settings)
                                   (::c/text settings))
                          :display :flex
-                         :align-items :center}
+                         :align-items :center
+                         :height :fit-content}
                         (when active?
                           {:border-left (str "5px solid " (::c/boolean settings))
                            :background (::c/background settings)}))}
@@ -265,7 +267,8 @@
                         :cursor :pointer
                         :display :flex
                         :justify-content :space-between
-                        :align-items :center}
+                        :align-items :center
+                        :height :fit-content}
                        (when active?
                          {:border-left (str "5px solid " (::c/boolean settings))
                           :background (::c/background settings)}))
