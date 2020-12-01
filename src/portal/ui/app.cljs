@@ -333,6 +333,16 @@
                    :padding-right (* 2 (:spacing/padding settings))})}
       "clear"])])
 
+(defn scrollbars []
+  (let [thumb "rgba(0,0,0,0.3)"]
+    [:style
+     (str "* { scrollbar-color: " thumb " rgba(0,0,0,0); } "
+          "*::-webkit-scrollbar { width: 10px; height: 10px; }"
+          "*::-webkit-scrollbar-corner { opacity: 0 }"
+          "*::-webkit-scrollbar-track  { opacity: 0 }"
+          "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
+          "*::-webkit-scrollbar-thumb  { border-radius: 10px; }")]))
+
 (defn app []
   (let [set-settings! (fn [value] (swap! state merge value))
         theme (get c/themes (get @tap-state ::c/theme ::c/nord))
@@ -349,6 +359,7 @@
         :font-size (:font-size settings)
         :height "100vh"
         :width "100vw"}}
+      [scrollbars]
       [toolbar settings]
       [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
        [s/div
