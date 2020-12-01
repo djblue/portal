@@ -311,7 +311,10 @@
       {:name f
        :run (fn [_settings]
               (a/let [result (invoke f v)]
-                (st/push f result)))})))
+                (st/push
+                 {:portal/key f
+                  :portal/f #(invoke f %)
+                  :portal/value result})))})))
 
 (def commands
   [{:name 'clojure.core/vals
@@ -319,31 +322,46 @@
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (map? v)
-               (st/push ::keys (vals v)))))}
+               (st/push
+                {:portal/key :vals
+                 :portal/f #(vals %)
+                 :portal/value (vals v)}))))}
    {:name 'clojure.core/keys
     :predicate (comp map? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (map? v)
-               (st/push ::keys (keys v)))))}
+               (st/push
+                {:portal/key :keys
+                 :portal/f #(keys %)
+                 :portal/value (keys v)}))))}
    {:name 'clojure.core/count
     :predicate (comp coll? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (coll? v)
-               (st/push :count (count v)))))}
+               (st/push
+                {:portal/key :count
+                 :portal/f #(count %)
+                 :portal/value (count v)}))))}
    {:name 'clojure.core/first
     :predicate (comp coll? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (coll? v)
-               (st/push :get (first v)))))}
+               (st/push
+                {:portal/key :first
+                 :portal/f #(first %)
+                 :portal/value (first v)}))))}
    {:name 'clojure.core/rest
     :predicate (comp coll? :portal/value)
     :run (fn [settings]
            (let [v (:portal/value settings)]
              (when (coll? v)
-               (st/push :get (rest v)))))}
+               (st/push
+                {:portal/key :rest
+                 :portal/f #(rest %)
+                 :portal/value (rest v)}))))}
    {:name 'clojure.core/get
     :predicate (comp map? :portal/value)
     :run (fn [settings]
@@ -354,7 +372,10 @@
                         :options (map #(-> {:name %}) (keys v))
                         :on-select
                         (fn [option]
-                          (st/push :get (get v (:name option))))}))))}
+                          (st/push
+                           {:portal/key :get
+                            :portal/f #(get % (:name option))
+                            :portal/value (get v (:name option))}))}))))}
    {:name 'clojure.core/get-in
     :predicate (comp map? :portal/value)
     :run (fn [settings]
@@ -371,10 +392,16 @@
                                       next-value (get v k)]
                                   (cond
                                     (= k ::done)
-                                    (st/push :get-in v)
+                                    (st/push
+                                     {:portal/key :get-in
+                                      :portal/f #(get-in % (drop-last path))
+                                      :portal/value v})
 
                                     (not (map? next-value))
-                                    (st/push :get-in next-value)
+                                    (st/push
+                                     {:portal/key :get-in
+                                      :portal/f #(get-in % path)
+                                      :portal/value next-value})
 
                                     :else
                                     (get-key path next-value))))})))]
@@ -391,8 +418,9 @@
                         (fn [options]
                           (close)
                           (st/push
-                           :select-keys
-                           (select-keys v options)))}))))}
+                           {:portal/key :select-keys
+                            :portal/f #(select-keys % options)
+                            :portal/value (select-keys v options)}))}))))}
    {:name :portal.data/select-columns
     :predicate coll-of-maps
     :run (fn [settings]
@@ -405,8 +433,9 @@
                         (fn [options]
                           (close)
                           (st/push
-                           :select-columns
-                           (map #(select-keys % options) v)))}))))}
+                           {:portal/key :select-columns
+                            :portal/f (fn [v] (map #(select-keys % options) v))
+                            :portal/value (map #(select-keys % options) v)}))}))))}
    {:name :portal.data/select-columns
     :predicate map-of-maps
     :run (fn [settings]
@@ -418,18 +447,26 @@
                       (fn [options]
                         (close)
                         (st/push
-                         :select-columns
-                         (reduce-kv
-                          (fn [v k m]
-                            (assoc v k (select-keys m options)))
-                          v
-                          v)))})))}
+                         {:portal/key :select-columns
+                          :portal/f (fn [v]
+                                      (reduce-kv
+                                       (fn [v k m]
+                                         (assoc v k (select-keys m options)))
+                                       v
+                                       v))
+                          :portal/value (reduce-kv
+                                         (fn [v k m]
+                                           (assoc v k (select-keys m options)))
+                                         v
+                                         v)}))})))}
+
    {:name :portal.data/transpose-map
     :predicate map-of-maps
     :run (fn [settings]
            (st/push
-            :transpose-map
-            (transpose-map (:portal/value settings))))}
+            {:portal/key :transpose-map
+             :portal/f transpose-map
+             :portal/value (transpose-map (:portal/value settings))}))}
    {:name :portal.command/close-command-palette
     ::shortcuts/osx ["escape"]
     ::shortcuts/default ["escape"]
