@@ -93,4 +93,3 @@
     (= k :parent)           (nav-item coll k v)
     (#{:kids :submitted} k) (vary-meta v assoc `nav #'nav-item)
     :else v))
-
