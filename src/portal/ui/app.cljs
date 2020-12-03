@@ -152,7 +152,7 @@
   (let [set-settings!      (:set-settings! settings)
         selected-viewer    (:selected-viewer settings)
         default-viewer     (get viewers-by-name (:portal.viewer/default (meta value)))
-        viewers            (cons default-viewer viewers)
+        viewers            (cons default-viewer (remove #(= default-viewer %) viewers))
         compatible-viewers (filter #(when-let [pred (:predicate %)] (pred value)) viewers)]
     {:compatible-viewers compatible-viewers
      :viewer
