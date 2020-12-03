@@ -155,11 +155,11 @@
         viewers            (cons default-viewer viewers)
         compatible-viewers (filter #(when-let [pred (:predicate %)] (pred value)) viewers)]
     {:compatible-viewers compatible-viewers
-     :viewer 
+     :viewer
      (or
-       (some #(when (= (:name %) selected-viewer) %)
-             compatible-viewers)
-       (first compatible-viewers))
+      (some #(when (= (:name %) selected-viewer) %)
+            compatible-viewers)
+      (first compatible-viewers))
      :set-viewer!
      (fn [viewer]
        (set-settings! {:selected-viewer viewer}))}))
