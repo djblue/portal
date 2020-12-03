@@ -40,7 +40,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.6.4"}
     -m cljs.main -re node
 ```
 
-or for a [**babashka**](https://github.com/borkdude/babashka) [>=0.2.2](https://github.com/borkdude/babashka/blob/master/CHANGELOG.md#new) repl, do:
+or for a [**babashka**](https://github.com/borkdude/babashka) [>=0.2.4](https://github.com/borkdude/babashka/blob/master/CHANGELOG.md#v024) repl, do:
 
 ```bash
 bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.6.4"}}}'`

@@ -27,22 +27,25 @@
          (fn [state]
            (->> (iterate forward state) (take-while some?) last))))
 
-(defn push [k v]
+(defn push [{:portal/keys [key value f]}]
   (swap! state
          (fn [state]
            (assoc state
                   :portal/previous-state state
                   :portal/next-state nil
                   :search-text ""
-                  :portal/key k
-                  :portal/value v))))
+                  :portal/key   key
+                  :portal/f     f
+                  :portal/value value))))
 
 (defn on-nav [send! target]
   (-> (send!
        {:op :portal.rpc/on-nav
         :args [(:coll target) (:k target) (:value target)]})
       (.then #(when-not (= (:value %) (:portal/value @state))
-                (push (:k target) (:value %))))))
+                (push
+                 {:portal/key (:k target)
+                  :portal/value (:value %)})))))
 
 (defn get-path [state]
   (->> state
