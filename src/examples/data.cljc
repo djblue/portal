@@ -49,24 +49,27 @@
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
    {:example/settings 'complex-key} :hello-world
-   ::range (range)
-   ::atom (atom ::hello)})
+   ::atom (atom ::hello)
+   ::function println
+   ::range (range)})
 
 (def diff-data
-  [{::removed "value"
-    ::same-key "same-value"
-    ::change-type #{1 2}
-    ::deep-change {:a 0}
-    ::set #{0 1 2}
-    ::vector [::a ::removed ::b]
-    ::different-value ::old-key}
-   {::added "value"
-    ::same-key "same-value"
-    ::change-type {:a :b :c :d}
-    ::deep-change {:a 1}
-    ::set #{1 2 3}
-    ::vector [::a ::added ::b]
-    ::different-value ::new-key}])
+  (with-meta
+    [{::removed "value"
+      ::same-key "same-value"
+      ::change-type #{1 2}
+      ::deep-change {:a 0}
+      ::set #{0 1 2}
+      ::vector [::a ::removed ::b]
+      ::different-value ::old-key}
+     {::added "value"
+      ::same-key "same-value"
+      ::change-type {:a :b :c :d}
+      ::deep-change {:a 1}
+      ::set #{1 2 3}
+      ::vector [::a ::added ::b]
+      ::different-value ::new-key}]
+    {:portal.viewer/default :portal.viewer/diff}))
 
 (def string-data
   {::json "{\"hello\": 123}"
@@ -75,9 +78,11 @@
    ::markdown (read-file "README.md")})
 
 (def hiccup
-  [:div
-   [:h1 "Hello, I'm hiccup"]
-   [:a {:href "https://github.com/djblue/portal"} "djblue/portal"]])
+  (with-meta
+    [:div
+     [:h1 "Hello, I'm hiccup"]
+     [:a {:href "https://github.com/djblue/portal"} "djblue/portal"]]
+    {:portal.viewer/default :portal.viewer/hiccup}))
 
 (def data
   {::platform-data platform-data
