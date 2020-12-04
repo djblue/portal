@@ -145,15 +145,21 @@
    md/viewer
    hiccup/viewer])
 
+(def viewers-by-name
+  (into {} (map (juxt :name identity) viewers)))
+
 (defn use-viewer [settings value]
   (let [set-settings!      (:set-settings! settings)
         selected-viewer    (:selected-viewer settings)
-        compatible-viewers (filter #((:predicate %) value) viewers)]
+        default-viewer     (get viewers-by-name (:portal.viewer/default (meta value)))
+        viewers            (cons default-viewer (remove #(= default-viewer %) viewers))
+        compatible-viewers (filter #(when-let [pred (:predicate %)] (pred value)) viewers)]
     {:compatible-viewers compatible-viewers
      :viewer
-     (or (some #(when (= (:name %) selected-viewer) %)
-               compatible-viewers)
-         (first compatible-viewers))
+     (or
+      (some #(when (= (:name %) selected-viewer) %)
+            compatible-viewers)
+      (first compatible-viewers))
      :set-viewer!
      (fn [viewer]
        (set-settings! {:selected-viewer viewer}))}))
