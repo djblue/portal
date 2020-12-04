@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "csv-parse": "^4.14.0",
+    "csv-parse": "^4.14.1",
     "react": "16.13.0",
     "react-dom": "16.13.0",
     "react-visibility-sensor": "^5.1.1"
