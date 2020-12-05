@@ -1,5 +1,7 @@
 (ns portal.runtime
-  (:require [clojure.datafy :refer [datafy nav]])
+  (:require [clojure.datafy :refer [datafy nav]]
+            #?(:clj  [portal.sync  :as a]
+               :cljs [portal.async :as a]))
   #?(:clj (:import [java.io File]
                    [java.net URI URL]
                    [java.util UUID])))
@@ -100,8 +102,9 @@
           (remove-watch state watch-key))))))
 
 (defn on-nav [request done]
-  (let [[coll k v] (:args request)]
-    (done {:value (if coll (nav coll k v) v)})))
+  (a/let [[coll k v] (:args request)
+          value (if coll (nav coll k v) v)]
+    (done {:value value})))
 
 (def ^:private predicates
   (merge
