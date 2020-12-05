@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [find-var])
   (:require [cognitect.transit :as transit]
             [portal.runtime :as rt])
-  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]))
+  (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
+           [java.net URL]))
 
 (defn- var->symbol [v]
   (let [m (meta v)
@@ -20,7 +21,7 @@
          {:handlers
           {(type #'var->symbol)
            (transit/write-handler "portal.transit/var" var->symbol)
-           java.net.URL
+           URL
            (transit/write-handler "r" str)}
           :transform (comp transit/write-meta rt/limit-seq)
           :default-handler
@@ -38,7 +39,8 @@
     in
     :json
     {:handlers
-     {"portal.transit/var" (transit/read-handler find-var)
+     {"r" (transit/read-handler #(URL. %))
+      "portal.transit/var" (transit/read-handler find-var)
       "portal.transit/object" (transit/read-handler (comp rt/uuid->instance :id))}})))
 
 (defn json->edn [^String json]

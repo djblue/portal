@@ -1,6 +1,8 @@
 (ns portal.runtime
   (:require [clojure.datafy :refer [datafy nav]])
-  #?(:clj (:import [java.util UUID])))
+  #?(:clj (:import [java.io File]
+                   [java.net URI URL]
+                   [java.util UUID])))
 
 #?(:clj (defn random-uuid [] (UUID/randomUUID)))
 
@@ -108,9 +110,11 @@
        :cljs #(satisfies? cljs.core.IDeref %))}
    #?(:clj
       {'clojure.core/slurp
-       #(and (instance? java.io.File %)
-             (.isFile ^java.io.File %)
-             (.canRead ^java.io.File %))})))
+       #(or (instance? URI %)
+            (instance? URL %)
+            (and (instance? File %)
+                 (.isFile ^File %)
+                 (.canRead ^File %)))})))
 
 (declare get-functions)
 
