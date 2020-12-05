@@ -13,7 +13,7 @@
    "<meta charset='UTF-8' />"
    "<meta name='viewport' content='width=device-width, initial-scale=1' />"
    "</head>"
-   "<body style=\"margin: 0\">"
+   "<body style=\"margin: 0; overflow: hidden\">"
    "<div id=\"root\"></div>"
    "<script src=\"" code-url "\"></script>"
    ;; wait.js will ensure headless chrome doesn't exit early
