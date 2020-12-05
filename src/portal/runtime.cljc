@@ -124,7 +124,8 @@
     'clojure.core/type     #'type
     'clojure.datafy/datafy #'datafy
     `get-functions #'get-functions}
-   #?(:clj {`slurp slurp})))
+   #?(:clj {`slurp slurp
+            `bean  bean})))
 
 (defn- get-functions [v]
   (keys
