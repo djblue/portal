@@ -165,6 +165,7 @@ format:
 cat deps.edn     | clojure -m portal.main edn
 cat package.json | clojure -m portal.main json
 cat transit.json | clojure -m portal.main transit
+cat pipeline.yml | clojure -m portal.main yaml
 ```
 
 I keep the following aliases handy for easier CLI use:
@@ -173,6 +174,7 @@ I keep the following aliases handy for easier CLI use:
 alias edn='clojure -A:portal -m portal.main edn'
 alias json='clojure -A:portal -m portal.main json'
 alias transit='clojure -A:portal -m portal.main transit'
+alias yaml='clojure -A:portal -m portal.main yaml'
 ```
 
 and often use the `Copy as cURL` feature in the chrome network tab to do
