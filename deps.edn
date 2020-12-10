@@ -6,6 +6,7 @@
   com.cognitect/transit-cljs {:mvn/version "0.8.264"}
   cheshire/cheshire {:mvn/version "5.10.0"
                      :exclusions [tigris/tigris]}
+  io.forward/yaml {:mvn/version "1.0.10"}
   http-kit/http-kit {:mvn/version "2.5.0"}}
  :aliases
  {:dev {:extra-paths ["dev" "test"]}
