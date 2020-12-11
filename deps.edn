@@ -56,4 +56,6 @@
   {:replace-deps
    {antq/antq           {:mvn/version "0.7.5"}
     org.slf4j/slf4j-nop {:mvn/version "1.7.30"}}
-   :main-opts  ["-m" "antq.core"]}}}
+   :main-opts  ["-m" "antq.core"]}
+  :yaml
+  {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.2"}}}}}
