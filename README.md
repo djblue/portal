@@ -244,4 +244,4 @@ out manually into a repl.
 To deploy to a release to [clojars](https://clojars.org/djblue/portal),
 bump the [version](https://github.com/djblue/portal/blob/master/Makefile#L5) and do:
 
-    make deploy
+    make set-version deploy

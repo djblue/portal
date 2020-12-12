@@ -131,7 +131,7 @@ jar: pom.xml resources/js
 install: jar
 	mvn install
 
-release: set-version clean ci jar
+release: clean ci jar
 
 deploy: release
 	mvn deploy
