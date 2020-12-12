@@ -18,8 +18,9 @@
              "yaml"     (-> System/in io/reader slurp ((read-yaml)))
              "edn"      (-> System/in io/reader read-edn)
              "transit"  (-> System/in t/json-stream->edn))]
-    (p/open)
-    (p/tap)
-    (tap> in)
+    (reset! (p/open) in)
+    (.addShutdownHook
+     (Runtime/getRuntime)
+     (Thread. #(p/close)))
     (println "Press CTRL+C to exit")
     @(promise)))
