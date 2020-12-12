@@ -158,23 +158,35 @@ perfect development environment!
 
 ## CLI Usage
 
-To use portal from the cli, do the following depending on your data
-format:
+Add a portal alias in `~/.clojure/deps.edn`
+
+```clojure
+:portal/cli
+{:main-opts ["-m" "portal.main"]
+ :extra-deps
+ {djblue/portal {:mvn/version "0.7.0"}
+  ;; optional json support
+  cheshire/cheshire {:mvn/version "5.10.0"}
+  ;; optional yaml support
+  clj-commons/clj-yaml {:mvn/version "0.7.0"}}}
+```
+
+Then do the following depending on your data format:
 
 ```bash
-cat deps.edn     | clojure -m portal.main edn
-cat package.json | clojure -m portal.main json
-cat transit.json | clojure -m portal.main transit
-cat pipeline.yml | clojure -A:yaml -m portal.main yaml
+cat deps.edn     | clojure -M:portal/cli edn
+cat package.json | clojure -M:portal/cli json
+cat transit.json | clojure -M:portal/cli transit
+cat pipeline.yml | clojure -M:portal/cli yaml
 ```
 
 I keep the following aliases handy for easier CLI use:
 
 ```bash
-alias edn='clojure -A:portal -m portal.main edn'
-alias json='clojure -A:portal -m portal.main json'
-alias transit='clojure -A:portal -m portal.main transit'
-alias yaml='clojure -A:portal:yaml -m portal.main yaml'
+alias edn='clojure -M:portal/cli edn'
+alias json='clojure -M:portal/cli json'
+alias transit='clojure -M:portal/cli transit'
+alias yaml='clojure -M:portal/cli yaml'
 ```
 
 and often use the `Copy as cURL` feature in the chrome network tab to do
