@@ -174,19 +174,19 @@ Add a portal alias in `~/.clojure/deps.edn`
 Then do the following depending on your data format:
 
 ```bash
-cat deps.edn     | clojure -M:portal/cli edn
-cat package.json | clojure -M:portal/cli json
-cat transit.json | clojure -M:portal/cli transit
-cat pipeline.yml | clojure -M:portal/cli yaml
+cat data | clojure -M:portal/cli <edn|json|transit|yaml>
+# or with babashka for faster startup
+cat data | bb -cp `clojure -Spath -M:portal/cli` -m portal.main <edn|json|transit|yaml>
 ```
 
-I keep the following aliases handy for easier CLI use:
+I keep the following bash aliases handy for easier CLI use:
 
 ```bash
-alias edn='clojure -M:portal/cli edn'
-alias json='clojure -M:portal/cli json'
-alias transit='clojure -M:portal/cli transit'
-alias yaml='clojure -M:portal/cli yaml'
+alias portal='bb -cp `clojure -Spath -M:portal/cli` -m portal.main'
+alias edn='portal edn'
+alias json='portal json'
+alias transit='portal transit'
+alias yaml='portal yaml'
 ```
 
 and often use the `Copy as cURL` feature in the chrome network tab to do
