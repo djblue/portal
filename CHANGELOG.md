@@ -1,3 +1,30 @@
+## 0.7.0 - 2020-12-12
+
+- Bump min babashka version from 0.2.2 to 0.2.4
+
+### New
+
+- Add YAML support (thanks [@yvendruscolo](https://github.com/yvendruscolo) [#27](https://github.com/djblue/portal/pull/27))
+- Add a default viewer via the metadata key `:portal.viewer/default` (thanks [@JJ-Atkinson](https://github.com/JJ-Atkinson) [#24](https://github.com/djblue/portal/pull/24))
+- Add more data manipulation commands
+  - type, deref, datafy, bean
+  - slurp for files, URL and URI
+  - first, rest, count
+  - get, get-in
+- Update scrollbar style
+
+### Fixed
+
+- Prevent weird scrolling issue on osx
+- Fix command palette css for safari
+- Close portal on process shutdown for portal.main
+- Find chrome binary from within wsl
+
+### Changed
+
+- Remove auto-datafy of objects pulled by portal
+  - You can now run datafy manually via the command palette.
+
 ## 0.6.4 - 2020-11-15
 
 - Chunk seqs into groups of 100 for serialization
