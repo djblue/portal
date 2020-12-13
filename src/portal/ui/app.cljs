@@ -68,6 +68,7 @@
         (:list
          :coll)
         (let [new-value (->> value
+                             (take 1000)
                              (map filter-data)
                              (remove #{::not-found}))]
           (if (empty? new-value)
