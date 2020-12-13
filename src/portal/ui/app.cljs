@@ -224,10 +224,12 @@
          :overflow :auto
          :box-sizing :border-box}}
        [s/div
+        {:style {:min-width :fit-content}}
         [inspect-metadata settings value]
         [s/div
          {:style
-          {:box-sizing :border-box
+          {:min-width :fit-content
+           :box-sizing :border-box
            :padding (* 2 (:spacing/padding settings))}}
          [error-boundary
           [inspector (assoc settings :component component) value]]]]]]

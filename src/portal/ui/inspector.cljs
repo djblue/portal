@@ -121,6 +121,7 @@
   [s/div
    {:style
     {:width "100%"
+     :min-width :fit-content
      :display :grid
      :background (get-background settings)
      :grid-gap (:spacing/padding settings)
