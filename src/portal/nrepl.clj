@@ -20,9 +20,9 @@
 
 (defrecord PortalTransport [transport handler-msg]
   Transport
-  (recv [this timeout]
+  (recv [_this timeout]
     (transport/recv transport timeout))
-  (send [this {:keys [value] :as msg}]
+  (send [_this {:keys [value] :as msg}]
     (transport/send transport msg)
     (when-let [code-form (read-string* (:code handler-msg))]
       (when (and (some? value)

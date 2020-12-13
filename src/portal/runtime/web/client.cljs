@@ -16,9 +16,9 @@
 
 (deftype Portal [session]
   IDeref
-  (-deref [this] (datafy session))
+  (-deref [_this] (datafy session))
   IReset
-  (-reset! [this new-value] (push-state session new-value))
+  (-reset! [_this new-value] (push-state session new-value))
   ISwap
   (-swap! [this f]
     (reset! this (f @this)))
