@@ -66,6 +66,9 @@ check/cljfmt:
 check/npm-deps:
 	npm outdated
 
+fix/npm-deps:
+	npm update
+
 check/clj-deps:
 	clojure -M:antq -m antq.core
 
