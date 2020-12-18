@@ -6,6 +6,10 @@
 (defonce tap-state (r/atom nil))
 (defonce commands  (r/atom '()))
 
+(defn notify-parent [event]
+  (when js/parent
+    (js/parent.postMessage (js/JSON.stringify (clj->js event)) "*")))
+
 (defn back [state]
   (when-let [previous-state (:portal/previous-state state)]
     (assoc previous-state :portal/next-state state)))
@@ -73,8 +77,16 @@
                          :portal/previous-state nil
                          :portal/next-state nil)))))))
 
+(defn set-theme [color]
+  (when-let [el (js/document.querySelector "meta[name=theme-color]")]
+    (.setAttribute el "content" color)))
+
 (defn set-theme! [theme]
-  (swap! tap-state assoc ::c/theme theme))
+  (swap! tap-state assoc ::c/theme theme)
+  (let [color (get-in c/themes [theme ::c/background2])]
+    (set-theme color)
+    (notify-parent
+     {:type :set-theme :color color})))
 
 (defn merge-state [new-state]
   (swap! tap-state merge new-state))

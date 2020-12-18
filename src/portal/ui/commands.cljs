@@ -322,6 +322,40 @@
                  {:portal/key f
                   :portal/value result})))})))
 
+(declare commands)
+
+(def open-command-palette
+  {:name :portal.command/open-command-palette
+   :label "Show All Commands"
+   ::shortcuts/osx #{"meta" "shift" "p"}
+   ::shortcuts/default #{"control" "shift" "p"}
+   :run (fn [settings]
+          (a/let [fns (get-functions settings)
+                  commands (remove
+                            (fn [option]
+                              (or
+                               (#{:portal.command/close-command-palette
+                                  :portal.command/open-command-palette}
+                                (:name option))
+                               (when-let [predicate (:predicate option)]
+                                 (not (predicate settings)))))
+                            (concat fns commands (:commands settings)))]
+            (open
+             (fn [settings]
+               [palette-component
+                (assoc
+                 settings
+                 ::on-select
+                 (fn [option]
+                   ((:run option) settings)))
+                (for [command commands]
+                  [palette-component-item
+                   (assoc settings
+                          :run (:run command)
+                          ::value (:name command))
+                   [inspector settings (:name command)]
+                   [shortcut settings command]])]))))})
+
 (def commands
   [{:name 'clojure.core/vals
     :predicate (comp map? :portal/value)
@@ -529,35 +563,7 @@
                        [s/div
                         {:style {:opacity 0.5}}
                         (for [a (:portal/args command)] (pr-str a))]]])])))))}
-   {:name :portal.command/open-command-palette
-    ::shortcuts/osx #{"meta" "shift" "p"}
-    ::shortcuts/default #{"control" "shift" "p"}
-    :run (fn [settings]
-           (a/let [fns (get-functions settings)
-                   commands (remove
-                             (fn [option]
-                               (or
-                                (#{:portal.command/close-command-palette
-                                   :portal.command/open-command-palette}
-                                 (:name option))
-                                (when-let [predicate (:predicate option)]
-                                  (not (predicate settings)))))
-                             (concat fns commands (:commands settings)))]
-             (open
-              (fn [settings]
-                [palette-component
-                 (assoc
-                  settings
-                  ::on-select
-                  (fn [option]
-                    ((:run option) settings)))
-                 (for [command commands]
-                   [palette-component-item
-                    (assoc settings
-                           :run (:run command)
-                           ::value (:name command))
-                    [inspector settings (:name command)]
-                    [shortcut settings command]])]))))}
+   open-command-palette
    {:name :portal.command/theme-solarized-dark
     :run (fn [_settings] (st/set-theme! ::c/solarized-dark))}
    {:name :portal.command/theme-solarized-light
@@ -618,7 +624,7 @@
   [:<>
    [with-shortcuts
     (fn [log]
-      (doseq [command commands]
+      (doseq [command (concat commands (:commands settings))]
         (when (shortcuts/match? command log)
           (shortcuts/matched! log)
           ((:run command) settings))))]
