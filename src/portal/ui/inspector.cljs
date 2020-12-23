@@ -39,6 +39,7 @@
     (case (.-tag value)
       "portal.transit/var"        :var
       "portal.transit/object"     :object
+      "ratio"                     :ratio
       :tagged)))
 
 (declare inspector)
@@ -289,6 +290,13 @@
 (defn inspect-tagged [settings value]
   [tagged-value settings (.-tag value) (.-rep value)])
 
+(defn inspect-ratio [settings value]
+  (let [[a b] (.-rep value)]
+    [s/div
+     [s/span {:style {:color (::c/number settings)}} (.-rep a)]
+     "/"
+     [s/span {:style {:color (::c/number settings)}} (.-rep b)]]))
+
 (defn inspect-default [settings value]
   [s/span {}
    (trim-string settings (pr-str value))])
@@ -319,6 +327,7 @@
     :object     preview-object
     :uri        inspect-uri
     :tagged     preview-tagged
+    :ratio      inspect-ratio
     inspect-default))
 
 (def preview-type?
@@ -346,6 +355,7 @@
     :object     inspect-object
     :uri        inspect-uri
     :tagged     inspect-tagged
+    :ratio      inspect-ratio
     inspect-default))
 
 (defn inspector [settings value]

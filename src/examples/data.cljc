@@ -14,7 +14,8 @@
        (.toByteArray out))))
 
 (def platform-data
-  #?(:clj {::class File
+  #?(:clj {::ratio 22/7
+           ::class File
            ::file (io/file "deps.edn")
            ::directory  (io/file ".")
            ::uri (URI. "https://github.com/djblue/portal")
