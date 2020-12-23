@@ -174,9 +174,9 @@ Add a portal alias in `~/.clojure/deps.edn`
 Then do the following depending on your data format:
 
 ```bash
-cat data | clojure -M:portal/cli <edn|json|transit|yaml>
+cat data | clojure -M:portal/cli [edn|json|transit|yaml]
 # or with babashka for faster startup
-cat data | bb -cp `clojure -Spath -M:portal/cli` -m portal.main <edn|json|transit|yaml>
+cat data | bb -cp `clojure -Spath -M:portal/cli` -m portal.main [edn|json|transit|yaml]
 ```
 
 I keep the following bash aliases handy for easier CLI use:
