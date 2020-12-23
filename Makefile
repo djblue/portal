@@ -55,7 +55,7 @@ dev/node: resources/js
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
 
 check/clj-check:
-	clojure -M:nrepl:check
+	clojure -M:cider:check
 
 check/clj-kondo:
 	clojure -M:kondo --lint dev src test
