@@ -7,6 +7,7 @@ resources/portal/
 .clj-kondo/.cache/
 .DS_Store
 .nrepl-port
+*.calva/
 
 # intellij files
 .idea/
