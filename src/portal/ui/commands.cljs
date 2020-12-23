@@ -163,13 +163,16 @@
    "arrowup" "⭡"
    "arrowdown" "⭣"})
 
+(defn combo-order [k]
+  (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
+
 (defn shortcut [settings command]
   (when-let [combo (shortcuts/get-shortcut command)]
     [s/div {:style
             {:display :flex
              :align-items :center
              :white-space :nowrap}}
-     (for [k combo]
+     (for [k (sort-by combo-order combo)]
        ^{:key k}
        [s/div {:style
                {:background "#0002"
