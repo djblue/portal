@@ -38,8 +38,10 @@
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.7.0"}}}
-  :nrepl
-  {:extra-deps {nrepl/nrepl {:mvn/version "0.8.3"}}}
+  :cider
+  {:extra-deps
+   {nrepl/nrepl       {:mvn/version "0.8.3"}
+    cider/cider-nrepl {:mvn/version "0.25.5"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
