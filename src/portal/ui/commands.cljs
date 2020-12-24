@@ -34,7 +34,8 @@
 (defn container [settings & children]
   (into
    [s/div
-    {:style
+    {:on-click #(.stopPropagation %)
+     :style
      {:width "80%"
       :max-height "40vh"
       :height :fit-content
