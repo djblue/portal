@@ -1,5 +1,6 @@
 (ns portal.ui.pwa
-  (:require [clojure.string :as str]
+  (:require [clojure.datafy :refer [datafy nav]]
+            [clojure.string :as str]
             [examples.data :as demo]
             [portal.async :as a]
             [portal.colors :as c]
@@ -72,8 +73,8 @@
       (done {:return e}))))
 
 (defn on-nav [request done]
-  (let [[_coll _k v] (:args request)]
-    (done {:value v})))
+  (a/let [res (apply nav (:args request))]
+    (done {:value (datafy res)})))
 
 (defn send! [value msg]
   (js/Promise.resolve
