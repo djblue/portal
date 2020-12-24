@@ -585,7 +585,6 @@
             value (:portal/value (merge @tap-state @state))]
         (copy-edn! (datafy value))))}
    {:name :portal.command/copy-path
-    ::shortcuts/default #{"shift" "c"}
     :run (fn [_settings]
            (copy-edn! (st/get-path @state)))}
    {:name :portal.command/history-back
