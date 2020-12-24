@@ -19,7 +19,12 @@
     (js/document.body.removeChild el)))
 
 (defn copy-edn! [value]
-  (copy-to-clipboard! (with-out-str (pp/pprint value))))
+  (copy-to-clipboard!
+   (with-out-str
+     (binding [*print-meta* true ;; TODO: doesn't work
+               *print-length* 1000
+               *print-level* 100]
+       (pp/pprint value)))))
 
 (defonce input (r/atom nil))
 

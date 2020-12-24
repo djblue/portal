@@ -21,7 +21,28 @@
   (-with-meta [this m]
     (t/tagged-value
      (.-tag this)
-     (assoc (.-rep this) :meta m))))
+     (assoc (.-rep this) :meta m)))
+
+  IPrintWithWriter
+  (-pr-writer [this writer _]
+    (let [tag (.-tag this)
+          rep (.-rep this)]
+      (write-all
+       writer
+       (case tag
+         "portal.transit/var"
+         (str "#'" rep)
+
+         "portal.transit/object"
+         (:string rep)
+
+         "r" rep
+
+         "ratio"
+         (let [[a b] rep]
+           (str (.-rep a) "/" (.-rep b)))
+
+         (str "#" tag rep))))))
 
 (defn- json->edn [json]
   (let [r (t/reader :json {:handlers diff/readers})]
