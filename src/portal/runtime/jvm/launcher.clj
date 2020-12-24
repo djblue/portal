@@ -1,5 +1,6 @@
 (ns portal.runtime.jvm.launcher
-  (:require [clojure.java.browse :refer [browse-url]]
+  (:require [cheshire.core :as json]
+            [clojure.java.browse :refer [browse-url]]
             [clojure.java.io :as io]
             [clojure.java.shell :refer [sh]]
             [clojure.string :as s]
@@ -30,11 +31,38 @@
 
 (defonce ^:private server (atom nil))
 
+(defn get-app-id-osx []
+  (let [info (io/file (System/getProperty "user.home")
+                      "./Applications/Chrome Apps.localized/portal.app/Contents/Info.plist")]
+    (when (.exists info)
+      (second (re-find #"com\.google\.Chrome\.app\.([^<]+)" (slurp info))))))
+
+(defn get-app-id-linux []
+  (let [preferences (io/file
+                     (System/getProperty "user.home")
+                     ".config/google-chrome/Default/Preferences")]
+    (when (.exists preferences)
+      (some
+       (fn [[id extension]]
+         (let [name (get-in extension ["manifest" "name"] "")]
+           (when (re-find #"portal" name) id)))
+       (get-in
+        (json/parse-stream (io/reader preferences))
+        ["extensions" "settings"])))))
+
+(defn get-app-id []
+  (or (get-app-id-osx) (get-app-id-linux)))
+
+(def pwa-host "http://localhost:4400")
+
 (defn- chrome-flags [url]
-  ["--incognito"
-   "--disable-features=TranslateUI"
-   "--no-first-run"
-   (str "--app=" url)])
+  (if-let [app-id (get-app-id)]
+    [(str "--app-id=" app-id)
+     (str "--app-launch-url-for-shortcuts-menu-item=" pwa-host "?" url)]
+    ["--incognito"
+     "--disable-features=TranslateUI"
+     "--no-first-run"
+     (str "--app=" url)]))
 
 (defn start [options]
   (when (nil? @server)

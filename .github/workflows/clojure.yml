@@ -22,3 +22,8 @@ jobs:
         java-version: '1.8'
     - run: make install/chrome install/clojure
     - run: make ci
+    - run: make app
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./target/pwa-release/

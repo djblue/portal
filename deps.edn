@@ -8,7 +8,10 @@
                      :exclusions [tigris/tigris]}
   http-kit/http-kit {:mvn/version "2.5.0"}}
  :aliases
- {:dev {:extra-paths ["dev" "test"]}
+ {:dev
+  {:extra-paths ["dev" "test"]
+   :extra-deps
+   {hiccup/hiccup {:mvn/version "2.0.0-alpha2"}}}
   :dev-cljs
   ;; Using clojurescript from source is required to get around
   ;; the older version (0.8.309) of transit-clj bundled in their jar.

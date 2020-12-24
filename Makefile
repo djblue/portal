@@ -49,7 +49,7 @@ resources/portal/ws.js: node_modules
 resources/js: resources/portal/main.js resources/portal/ws.js
 
 dev: resources/js
-	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch client
+	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch pwa client
 
 dev/node: resources/js
 	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
@@ -120,8 +120,11 @@ main/jvm:
 main/bb:
 	cat deps.edn | bb -cp src:resources -m portal.main edn
 
-demo: resources/js bb
-	./build-demo
+app:
+	rm -rf target/pwa-release/
+	mkdir -p target/pwa-release/
+	clojure -M:dev -m pwa target/pwa-release/
+	clojure -M:cljs:shadow-cljs release pwa
 
 set-version:
 	bb -cp dev -m version ${VERSION}

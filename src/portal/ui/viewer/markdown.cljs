@@ -5,6 +5,17 @@
             [markdown.core :refer [md->html]]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
 
+(defn parse-markdown [value]
+  (with-redefs
+   [common/escape-code   identity
+    common/escaped-chars identity
+    utils/html-escape    identity]
+    (->> (md->html value)
+         parse-fragment
+         (map as-hiccup)
+         (into [:div {:style {:max-width "1012px"
+                              :margin "0 auto"}}]))))
+
 (defn inspect-markdown [settings value]
   ;; I couldn't figure out a good way to disable html escaping, which
   ;; occurs in both markdown-clj and hickory, so I decided to manually
@@ -16,11 +27,7 @@
     utils/html-escape    identity]
     [inspect-hiccup
      settings
-     (->> (md->html value)
-          parse-fragment
-          (map as-hiccup)
-          (into [:div {:style {:max-width "1012px"
-                               :margin "0 auto"}}]))]))
+     (parse-markdown value)]))
 
 (def viewer
   {:predicate string?

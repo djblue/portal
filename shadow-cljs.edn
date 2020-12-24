@@ -1,4 +1,5 @@
 {:deps {:aliases [:cljs]}
+ :dev-http {4400 ["resources/" "target/pwa/"]}
  ;:nrepl {:middleware [portal.nrepl/wrap-portal]}
  :builds
  {:client
@@ -13,15 +14,16 @@
    :devtools {:after-load portal.ui.core/reload!
               :preloads   [cljs.user]}}
 
-  :demo
-  {:output-dir "target/demo/"
+  :pwa
+  {:output-dir "target/pwa/"
    :asset-path "."
    :target :browser
    :compiler-options
    {:infer-externs true
     :warnings-as-errors true}
-   :modules {:main {:init-fn examples.demo/main!}}
-   :devtools {:after-load examples.demo/reload!}}
+   :modules {:main {:init-fn portal.ui.pwa/main!}}
+   :release {:output-dir "target/pwa-release/"}
+   :devtools {:after-load portal.ui.pwa/reload!}}
 
   :node
   {:target :node-script

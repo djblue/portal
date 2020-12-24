@@ -1,5 +1,9 @@
 (ns portal.ui.drag-and-drop
-  (:require [portal.ui.styled :as s]
+  (:require [cljs.reader :refer [read-string]]
+            [portal.async :as a]
+            [portal.ui.state :as state]
+            [portal.ui.styled :as s]
+            [portal.ui.viewer.markdown :as md]
             [reagent.core :as r]))
 
 (defn read-file [file]
@@ -14,16 +18,30 @@
        (.addEventListener reader "error" reject)
        (.readAsText reader file)))))
 
-(defn file->map [file]
-  {:name (.-name file)
-   :size (.-size file)
-   :type (.-type file)
-   :last-modified (js/Date. (.-lastModified file))
-   :text          (read-file file)})
+(def handlers
+  {"json" (fn [content] (js->clj (js/JSON.parse content)))
+   "edn"  read-string
+   "md"   (fn [content]
+            (with-meta
+              (md/parse-markdown content)
+              {:portal.viewer/default :portal.viewer/hiccup}))})
+
+(defn handle-file [file]
+  (a/let [name    (.-name file)
+          content (read-file file)
+          [_ ext] (re-find #"\.(.+)$" name)
+          handler (get handlers ext identity)]
+    [name (handler content)]))
+
+(defn handle-files [files]
+  (a/let [value (js/Promise.all (map handle-file files))]
+    (if (= (count value) 1)
+      (second (first value))
+      (into {} value))))
 
 (defn area []
   (let [active? (r/atom false)]
-    (fn [settings children]
+    (fn [_settings children]
       [s/div
        {:on-drag-over
         (fn [e]
@@ -35,13 +53,11 @@
         :on-drop
         (fn [e]
           (.preventDefault e)
-          (let [value (for [item (.-dataTransfer.items e)
-                            :when (= (.-kind item) "file")]
-                        (.getAsFile item))]
-            ((:set-settings! settings)
-             {:portal/value (mapv file->map value)
-              :portal/previous-state nil
-              :portal/next-state nil}))
+          (a/let [value (handle-files
+                         (for [item (.-dataTransfer.items e)
+                               :when (= (.-kind item) "file")]
+                           (.getAsFile item)))]
+            (state/push {:portal/value value}))
           (reset! active? false))
         :style {:position :relative}}
        (when @active?

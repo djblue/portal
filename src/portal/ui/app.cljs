@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.commands :as commands]
-            [portal.ui.drag-and-drop :as dnd]
             [portal.ui.inspector :as ins :refer [inspector]]
             [portal.ui.state :refer [state tap-state]]
             [portal.ui.styled :as s]
@@ -352,31 +351,38 @@
           "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
           "*::-webkit-scrollbar-thumb  { border-radius: 10px; }")]))
 
-(defn app []
+(defn get-settings []
   (let [set-settings! (fn [value] (swap! state merge value))
-        theme (get c/themes (get @tap-state ::c/theme ::c/nord))
-        settings (merge theme @tap-state (assoc @state :depth 0 :set-settings! set-settings!))]
-    [dnd/area
+        theme (get c/themes (get @tap-state ::c/theme ::c/nord))]
+    (merge theme @tap-state (assoc @state :depth 0 :set-settings! set-settings!))))
+
+(defn root [settings & children]
+  (into
+   [s/div
+    {:style
+     {:display :flex
+      :flex-direction :column
+      :background (::c/background settings)
+      :color (::c/text settings)
+      :font-family (:font/family settings)
+      :font-size (:font-size settings)
+      :height "100vh"
+      :width "100vw"}}
+    [scrollbars]]
+   children))
+
+(defn app []
+  (let [settings (get-settings)]
+    [root
      settings
-     [s/div
-      {:style
-       {:display :flex
-        :flex-direction :column
-        :background (::c/background settings)
-        :color (::c/text settings)
-        :font-family (:font/family settings)
-        :font-size (:font-size settings)
-        :height "100vh"
-        :width "100vw"}}
-      [scrollbars]
-      [toolbar settings]
-      [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
-       [s/div
-        {:style
-         {:width "100%"
-          :height "100%"
-          :display :flex}}
-        (when (contains? settings :portal/value)
-          [inspect-1
-           settings
-           (:portal/value settings)])]]]]))
+     [toolbar settings]
+     [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
+      [s/div
+       {:style
+        {:width "100%"
+         :height "100%"
+         :display :flex}}
+       (when (contains? settings :portal/value)
+         [inspect-1
+          settings
+          (:portal/value settings)])]]]))
