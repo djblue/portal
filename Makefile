@@ -123,7 +123,7 @@ main/bb:
 app:
 	rm -rf target/pwa-release/
 	mkdir -p target/pwa-release/
-	clojure -M:dev -m pwa target/pwa-release/
+	clojure -M:dev -m pwa prod
 	clojure -M:cljs:shadow-cljs release pwa
 
 set-version:
