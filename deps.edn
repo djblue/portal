@@ -25,13 +25,13 @@
   :cljs
   {:extra-deps
    {org.clojure/clojurescript {:mvn/version "1.10.773"}
-    reagent/reagent {:mvn/version "0.10.0"}
+    reagent/reagent {:mvn/version "1.0.0"}
     lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.5"}
     hickory/hickory {:mvn/version "0.7.1"}}}
   :shadow-cljs
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.11.8"}}
+   {thheller/shadow-cljs {:mvn/version "2.11.10"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
@@ -59,7 +59,7 @@
      :sha "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {antq/antq           {:mvn/version "0.9.3"}
+   {antq/antq           {:mvn/version "0.10.0"}
     org.slf4j/slf4j-nop {:mvn/version "1.7.30"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.2"}}}}}
