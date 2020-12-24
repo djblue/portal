@@ -5,7 +5,9 @@
             [clojure.java.io :as io]
             [examples.data :refer [data]]
             [portal.api :as p]
-            [portal.runtime.jvm.server :as s]))
+            [portal.runtime.jvm.launcher :as l]
+            [portal.runtime.jvm.server :as s]
+            [pwa]))
 
 (defn cljs []
   ((resolve 'shadow.cljs.devtools.api/repl) :client))
@@ -44,7 +46,8 @@
 (swap-dev)
 
 (comment
-  (def portal (p/open))
+  (with-redefs [l/pwa (:dev pwa/envs)]
+    (def portal (p/open)))
   (p/tap)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
   (doseq [i (range 100)] (tap> [::index i]))

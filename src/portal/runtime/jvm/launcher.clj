@@ -31,13 +31,15 @@
 
 (defonce ^:private server (atom nil))
 
-(defn get-app-id-osx []
+(defn- get-app-id-osx [app-name]
   (let [info (io/file (System/getProperty "user.home")
-                      "./Applications/Chrome Apps.localized/portal.app/Contents/Info.plist")]
+                      "Applications/Chrome Apps.localized/"
+                      (str app-name ".app")
+                      "Contents/Info.plist")]
     (when (.exists info)
       (second (re-find #"com\.google\.Chrome\.app\.([^<]+)" (slurp info))))))
 
-(defn get-app-id-linux []
+(defn- get-app-id-linux [app-name]
   (let [preferences (io/file
                      (System/getProperty "user.home")
                      ".config/google-chrome/Default/Preferences")]
@@ -45,20 +47,22 @@
       (some
        (fn [[id extension]]
          (let [name (get-in extension ["manifest" "name"] "")]
-           (when (re-find #"portal" name) id)))
+           (when (= app-name name) id)))
        (get-in
         (json/parse-stream (io/reader preferences))
         ["extensions" "settings"])))))
 
-(defn get-app-id []
-  (or (get-app-id-osx) (get-app-id-linux)))
+(defn- get-app-id [app-name]
+  (or (get-app-id-osx app-name) (get-app-id-linux app-name)))
 
-(def pwa-host "http://localhost:4400")
+(def pwa
+  {:name "portal"
+   :host "https://djblue.github.io/portal/"})
 
 (defn- chrome-flags [url]
-  (if-let [app-id (get-app-id)]
+  (if-let [app-id (get-app-id (:name pwa))]
     [(str "--app-id=" app-id)
-     (str "--app-launch-url-for-shortcuts-menu-item=" pwa-host "?" url)]
+     (str "--app-launch-url-for-shortcuts-menu-item=" (:host pwa) "?" url)]
     ["--incognito"
      "--disable-features=TranslateUI"
      "--no-first-run"
