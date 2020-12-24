@@ -382,8 +382,7 @@
         (when (= (.-key e) "Enter")
           (.stopPropagation e)
           (on-nav)))
-      :style {:cursor :pointer
-              :width "100%"
+      :style {:width "100%"
               :padding (when (or preview? (not (coll? value)))
                          (* 0.65 (:spacing/padding settings)))
               :box-sizing :border-box

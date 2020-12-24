@@ -2,78 +2,67 @@
   (:require [clojure.walk :as w]
             [portal.colors :as c]))
 
-(defn headers [settings form]
-  (update-in
-   form
-   [1 :style]
-   assoc
-   :color
-   (::c/namespace settings)
-   :padding-top
-   (* 0.5 (:spacing/padding settings))
-   :padding-bottom
-   (* 0.5 (:spacing/padding settings))
-   :margin-bottom
-   (:spacing/padding settings)
-   :border-bottom
-   (str "1px solid " (::c/border settings))))
+(defn header-styles [settings]
+  {:color (::c/namespace settings)
+   :padding-top (:spacing/padding settings)
+   :padding-bottom (:spacing/padding settings)
+   :margin-bottom (* 2 (:spacing/padding settings))})
 
-(def hiccup-styles
-  {:h1 headers :h2 headers :h3 headers
-   :h4 headers :h5 headers :h6 headers
-   :a
-   (fn [settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :color
-      (::c/uri settings)))
-   :p
-   (fn [settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
-      :font-size (:font-size settings)))
-   :img
-   (fn [_settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :max-width "100%"))
-   :code
-   (fn [settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :background (::c/background2 settings)
-      :border-radius (:border-radius settings)))
-   :pre
-   (fn [settings form]
-     (update-in
-      form
-      [1 :style]
-      assoc
-      :overflow :auto
+(defn hiccup-styles [settings]
+  (let [h (header-styles settings)
+        border-bottom
+        {:border-bottom
+         (str "1px solid " (::c/border settings))}]
+    {:h1 (merge h border-bottom)
+     :h2 (merge h border-bottom)
+
+     :h3 h :h4 h :h5 h :h6 h
+
+     :a {:color (::c/uri settings)}
+
+     :p {:font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
+         :font-size (:font-size settings)
+         :line-height 1.5
+         :margin-top 0
+         :margin-bottom (* 2 (:spacing/padding settings))}
+
+     :img {:max-width "100%"}
+
+     :code
+     {:background (::c/background2 settings)
+      :border-radius (:border-radius settings)}
+
+     :pre
+     {:overflow :auto
       :padding (* 2 (:spacing/padding settings))
       :background (::c/background2 settings)
-      :border-radius (:border-radius settings)))})
+      :border-radius (:border-radius settings)}
+
+     :table {:color (::c/text settings)
+             :width "100%"
+             :overflow :auto
+             :border-spacing 0
+             :border-collapse :collapse}
+     :th {:padding (:spacing/padding settings)
+          :border (str "1px solid " (::c/border settings))}
+     :td {:padding (:spacing/padding settings)
+          :border (str "1px solid " (::c/border settings))}}))
 
 (defn inspect-hiccup [settings value]
-  (w/postwalk
-   (fn [x]
-     (let [f (and (vector? x)
-                  (get hiccup-styles (first x)))]
-       (if-not (fn? f)
-         x
-         (if (map? (second x))
-           (f settings x)
-           (f settings (into [(first x) {}] (rest x)))))))
-   value))
+  (let [styles (hiccup-styles settings)]
+    (w/postwalk
+     (fn [x]
+       (let [style (and (vector? x)
+                        (get styles (first x)))]
+         (if-not style
+           x
+           (update-in
+            (if (map? (second x))
+              x
+              (into [(first x) {}] (rest x)))
+            [1 :style]
+            #(merge style %)))))
+     value)))
 
 (def viewer
   {:predicate vector?
