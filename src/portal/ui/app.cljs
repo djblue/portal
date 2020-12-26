@@ -5,6 +5,7 @@
             [portal.ui.inspector :as ins :refer [inspector]]
             [portal.ui.state :refer [state tap-state]]
             [portal.ui.styled :as s]
+            [portal.ui.viewer.charts :as charts]
             [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.diff :as diff]
             [portal.ui.viewer.edn :as edn]
@@ -18,6 +19,7 @@
             [portal.ui.viewer.text :as text]
             [portal.ui.viewer.transit :as transit]
             [portal.ui.viewer.tree :as tree]
+            [portal.ui.viewer.vega-lite :as vega-lite]
             [reagent.core :as r]))
 
 (defn filter-data [settings value]
@@ -130,6 +132,10 @@
 
 (def viewers
   [ex/viewer
+   vega-lite/viewer
+   charts/line-chart
+   charts/scatter-chart
+   charts/histogram-chart
    image/viewer
    {:name :portal.viewer/map  :predicate map?  :component ins/inspect-map}
    {:name :portal.viewer/coll :predicate coll? :component ins/inspect-coll}

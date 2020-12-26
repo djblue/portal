@@ -14,7 +14,7 @@
 
 (def exclude? #{:opacity :z-index})
 
-(defn- style->css [style]
+(defn style->css [style]
   (reduce-kv
    (fn [css k v]
      (str
