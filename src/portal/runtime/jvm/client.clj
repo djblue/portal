@@ -72,3 +72,6 @@
   (print-method (into {} portal) w))
 
 (defn make-atom [session-id] (Portal. session-id))
+
+(defn open? [session-id]
+  (get @sessions session-id))

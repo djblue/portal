@@ -16,10 +16,13 @@
   (l/start options))
 
 (defn open
-  "Open a new inspector window."
+  "Open a new inspector window. A previous instance can be passed as
+  parameter to make sure it is open."
   ([] (open nil))
-  ([options]
-   (l/open options)))
+  ([portal-or-options]
+   (if (:session-id portal-or-options)
+     (l/open portal-or-options nil)
+     (l/open nil portal-or-options))))
 
 (defn close
   "Close all current inspector windows."
