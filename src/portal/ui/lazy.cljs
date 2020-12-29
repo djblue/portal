@@ -1,13 +1,14 @@
 (ns portal.ui.lazy
   (:refer-clojure :exclude [lazy-seq])
-  (:require [portal.ui.styled :as s]
-            [react-visibility-sensor :default VisibilitySensor]
+  (:require ["react-visibility-sensor" :as react-visibility-sensor]
+            [portal.ui.styled :as s]
             [reagent.core :as r]))
 
 (defn lazy-seq [_settings _ opts]
   (let [{:keys [default-take step]
          :or   {default-take 0 step 10}} opts
-        n (r/atom default-take)]
+        n (r/atom default-take)
+        VisibilitySensor (.-default react-visibility-sensor)]
     (fn [settings seqable]
       [:<>
        (take @n seqable)
