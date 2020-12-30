@@ -9,8 +9,16 @@
     "vega-lite": "^4.17.0"
   },
   "devDependencies": {
+    "@cljs-oss/module-deps": "^1.1.1",
     "browserify": "^16.5.2",
+    "envify": "^4.1.0",
+    "esbuild": "^0.8.28",
+    "parcel-bundler": "^1.12.4",
+    "rollup": "^2.35.1",
     "source-map-support": "^0.5.19",
+    "uglifyify": "^5.0.2",
+    "webpack": "^5.11.1",
+    "webpack-cli": "^4.3.0",
     "ws": "^7.4.1"
   }
 }

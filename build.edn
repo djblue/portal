@@ -1,0 +1,16 @@
+{:main portal.ui.core
+ :output-to "out/index.js"
+ :output-dir "out"
+ :target :bundle
+ :infer-externs true
+ :warnings-as-errors true
+ :bundle-cmd {:none
+              ["npx" "webpack"
+               "--entry" "./out/index.js"
+               "-o" "./out"
+               "--mode" "development"]
+              :default
+              ["npx" "webpack"
+               "--entry" "./out/index.js"
+               "-o" "./out"]}
+ :closure-defines {cljs.core/*global* "window"}} ;; needed for advanced

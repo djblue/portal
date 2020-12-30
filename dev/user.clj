@@ -43,11 +43,17 @@
    #'s/resource
    assoc "main.js" (io/file "target/resources/portal/main.js")))
 
-(swap-dev)
+#_(swap-dev)
+
+(defn nrepl [portal]
+  (require 'portal.cljs.repl)
+  ((resolve 'portal.cljs.repl/nrepl) portal)
+  portal)
 
 (comment
   (with-redefs [l/pwa (:dev pwa/envs)]
-    (def portal (p/open)))
+    (def portal (nrepl (p/open))))
+
   (p/tap)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
   (doseq [i (range 100)] (tap> [::index i]))

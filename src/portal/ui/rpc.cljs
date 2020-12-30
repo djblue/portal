@@ -77,7 +77,19 @@
 (def request (if js/window.opener web-request ws-request))
 
 (def ^:private ops
-  {:portal.rpc/response
+  {:portal.rpc/eval
+   (fn [message send!]
+     (let [value (try {:status :success
+                       :value (js/eval (:js message))}
+                      (catch :default e
+                        {:status :error
+                         :value (pr-str e)}))]
+       (js/portal.ui.core.render_app)
+       (send!
+        {:op :portal.rpc/response
+         :portal.rpc/id (:portal.rpc/id message)
+         :portal/value value})))
+   :portal.rpc/response
    (fn [message _send!]
      (let [id        (:portal.rpc/id message)
            [resolve] (get @pending-requests id)]

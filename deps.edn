@@ -25,7 +25,13 @@
   :cljs
   {:extra-deps
    {org.clojure/clojurescript {:mvn/version "1.10.773"}
-    reagent/reagent {:mvn/version "1.0.0"}
+    reagent/reagent {:mvn/version "1.0.0"
+                     ;; Needed to work with :target :bundle when building
+                     ;; with clojurescript. These deps are pulled in via
+                     ;; npm via the package.json already.
+                     :exclusions [cljsjs/react-dom
+                                  cljsjs/react
+                                  cljsjs/react-dom-server]}
     lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.5"}
     hickory/hickory {:mvn/version "0.7.1"}}}
@@ -44,7 +50,11 @@
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "0.8.3"}
-    cider/cider-nrepl {:mvn/version "0.25.5"}}}
+    cider/cider-nrepl {:mvn/version "0.25.5"}
+    cider/piggieback {:mvn/version "0.5.2"}}}
+  :repl
+  {:main-opts ["-m" "nrepl.cmdline"
+               "--middleware" "[cider.nrepl/cider-middleware,cider.piggieback/wrap-cljs-repl]"]}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps

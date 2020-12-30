@@ -144,3 +144,9 @@ release: clean ci jar
 
 deploy: release
 	mvn deploy
+
+out/index.js:
+	clojure -M:cljs -m cljs.main -co build.edn -O advanced -c
+
+bench/bundlers: out/index.js node_modules resources/js bb
+	bb -cp dev:src:resources -m bundlers
