@@ -1,9 +1,9 @@
 (ns portal.ui.viewer.csv
-  (:require [portal.ui.inspector :refer [inspector]]
-            ["csv-parse/lib/es5/sync" :as parse]))
+  (:require ["papaparse" :refer [parse]]
+            [portal.ui.inspector :refer [inspector]]))
 
 (defn- parse-csv [csv-string]
-  (try (js->clj (parse csv-string)) (catch :default _e ::invalid)))
+  (try (js->clj (.-data (parse csv-string))) (catch :default _e ::invalid)))
 
 (defn csv? [value] (string? value))
 
