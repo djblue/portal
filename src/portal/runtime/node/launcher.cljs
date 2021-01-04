@@ -56,20 +56,24 @@
 (defn- stop [handle]
   (some-> handle :http-server .close))
 
-(defn open [options]
-  (let [session-id (random-uuid)]
-    (swap! rt/state merge options)
-    (a/let [chrome-bin (get-chrome-bin)
-            {:keys [host port]} (or @server (start nil))
-            url        (str "http://" host ":" port "?" session-id)]
-      (if-not (some? chrome-bin)
-        (println "Goto" url "to view portal ui.")
-        (sh chrome-bin
-            "--incognito"
-            "--disable-features=TranslateUI"
-            "--no-first-run"
-            (str "--app=" url))))
-    {:session-id session-id}))
+(defn open
+  ([options]
+   (open nil options))
+  ([portal options]
+   (let [session-id (or (:session-id portal) (random-uuid))]
+     (swap! rt/state merge options)
+     (a/let [chrome-bin (get-chrome-bin)
+             {:keys [host port]} (or @server (start nil))
+             url        (str "http://" host ":" port "?" session-id)]
+       (when-not (c/open? session-id)
+         (if-not (some? chrome-bin)
+           (println "Goto" url "to view portal ui.")
+           (sh chrome-bin
+               "--incognito"
+               "--disable-features=TranslateUI"
+               "--no-first-run"
+               (str "--app=" url)))))
+     {:session-id session-id})))
 
 (defn close []
   (a/do

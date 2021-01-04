@@ -81,18 +81,22 @@
         :port (http/server-port http-server)
         :host host}))))
 
-(defn open [options]
-  (swap! rt/state merge options)
-  (let [session-id (random-uuid)
-        {:keys [host port]} (or @server (start nil))
-        url (str "http://" host ":" port "?" session-id)]
-    (if-let [bin (get-chrome-bin)]
-      (let [flags (chrome-flags url)]
-        (future (apply sh bin flags)))
-      (try (browse-url url)
-           (catch Exception _e
-             (println "Goto" url "to view portal ui."))))
-    (c/make-atom session-id)))
+(defn open
+  ([options]
+   (open nil options))
+  ([portal options]
+   (swap! rt/state merge options)
+   (let [session-id (or (:session-id portal) (random-uuid))
+         {:keys [host port]} (or @server (start nil))
+         url (str "http://" host ":" port "?" session-id)]
+     (when-not (c/open? session-id)
+       (if-let [bin (get-chrome-bin)]
+         (let [flags (chrome-flags url)]
+           (future (apply sh bin flags)))
+         (try (browse-url url)
+              (catch Exception _e
+                (println "Goto" url "to view portal ui.")))))
+     (c/make-atom session-id))))
 
 (defn close []
   (doseq [session-id (keys @c/sessions)]

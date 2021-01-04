@@ -31,3 +31,6 @@
                     {:session-id session-id :message message}))))
 
 (defn make-atom [_session-id])
+
+(defn open? [session-id]
+  (get @sessions session-id))
