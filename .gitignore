@@ -8,6 +8,7 @@ resources/portal/
 .DS_Store
 .nrepl-port
 *.calva/
+.lsp/
 
 # intellij files
 .idea/

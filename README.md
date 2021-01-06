@@ -222,12 +222,30 @@ curl ... | transit
 
 ## Development
 
-To start development, do:
+### vim + [vim-fireplace](https://github.com/tpope/vim-fireplace)
+
+To start the nrepl server, do:
 
     make dev
-    
-This will start shadow-cljs with a nrepl server. To get going, explore the
-[`user.clj`](https://github.com/djblue/portal/blob/master/dev/user.clj#L43) namespace.
+
+vim-fireplace should automatically connect upon evaluation, but this will
+only be for clj files, to get a cljs repl, do:
+
+    :CljEval (user/cljs)
+
+### emacs + [cider](https://cider.mx/)
+
+The best way to get started via emacs is to have cider start the repl, do:
+
+    M-x cider-jack-in-clj&cljs
+
+[.dir-locals.el](./.dir-locals.el) has all the configuration variables for
+cider.
+
+### [`user.clj`](dev/user.clj)
+
+The user.clj namespace has a bunch of useful examples and code for
+development. Take a peek to get going.
 
 ### Formatting
 

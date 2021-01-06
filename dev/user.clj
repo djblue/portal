@@ -9,11 +9,14 @@
             [portal.runtime.jvm.server :as s]
             [pwa]))
 
-(defn cljs []
-  ((resolve 'shadow.cljs.devtools.api/repl) :client))
+(defn cljs
+  ([] (cljs :client))
+  ([build-id]
+   ((requiring-resolve 'shadow.cljs.devtools.server/start!))
+   ((requiring-resolve 'shadow.cljs.devtools.api/watch)        build-id)
+   ((requiring-resolve 'shadow.cljs.devtools.api/nrepl-select) build-id)))
 
-(defn node []
-  ((resolve 'shadow.cljs.devtools.api/repl) :node))
+(defn node [] (cljs :node))
 
 (p/tap)
 

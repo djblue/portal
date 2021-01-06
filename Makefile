@@ -36,7 +36,7 @@ node_modules: package.json
 	npm ci
 
 resources/portal/main.js: node_modules
-	clojure -M:cljs:shadow-cljs release client
+	clojure -M:cljs:shadow release client
 
 resources/portal/ws.js: node_modules
 	npx browserify --node \
@@ -49,10 +49,10 @@ resources/portal/ws.js: node_modules
 resources/js: resources/portal/main.js resources/portal/ws.js
 
 dev: resources/js
-	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch pwa client
+	clojure -M:dev:cider:cljs:dev-cljs:shadow watch pwa client
 
 dev/node: resources/js
-	clojure -M:dev:cider:cljs:dev-cljs:shadow-cljs watch node client
+	clojure -M:dev:cider:cljs:dev-cljs:shadow watch node client
 
 check/clj-check:
 	clojure -M:cider:check
@@ -124,7 +124,7 @@ app:
 	rm -rf target/pwa-release/
 	mkdir -p target/pwa-release/
 	clojure -M:dev -m pwa prod
-	clojure -M:cljs:shadow-cljs release pwa
+	clojure -M:cljs:shadow release pwa
 
 set-version:
 	bb -cp dev -m version ${VERSION}
