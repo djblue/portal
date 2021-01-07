@@ -71,10 +71,8 @@
         </excludes>
       </resource>
       <resource>
-        <directory>resources</directory>
-        <excludes>
-          <exclude>**/*.png</exclude>
-        </excludes>
+        <directory>resources/portal/</directory>
+        <targetPath>portal/</targetPath>
       </resource>
     </resources>
   </build>
