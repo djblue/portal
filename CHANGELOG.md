@@ -1,3 +1,17 @@
+## 0.8.0 - 2021-01-06
+
+- Support portal parameter in portal.api/open (thanks [@rfhayashi](https://github.com/rfhayashi) [#32](https://github.com/djblue/portal/pull/32))
+  - This makes it possible to "reopen" a closed portal session
+- Initial vega-lite & portal charts viewers (thanks [@BrianChevalier](https://github.com/BrianChevalier) [#31](https://github.com/djblue/portal/pull/31))
+- Remove shift+c shortcut
+- Improve hiccup styles
+- Improve copy-as-edn by improving printing
+  - Add *print-length* and *print-level*
+- Add ratio support (thanks [@pangloss](https://github.com/pangloss) [#28](https://github.com/djblue/portal/issues/28))
+- Initial cut of reverse search for commands
+  - ctrl + r - Allows for executing previous command
+- Fix filter-data for infinite seqs
+
 ## 0.7.0 - 2020-12-12
 
 - Bump min babashka version from 0.2.2 to 0.2.4
