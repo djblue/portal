@@ -16,7 +16,8 @@
   (concat
    ["/Applications/Google Chrome.app/Contents/MacOS"
     "/mnt/c/Program Files (x86)/Google/Chrome/Application"]
-   (s/split (System/getenv "PATH") #":")))
+   (s/split (System/getenv "PATH")
+            (re-pattern (or (System/getProperty "path.separator") ":")))))
 
 (defn- find-bin [files]
   (some
