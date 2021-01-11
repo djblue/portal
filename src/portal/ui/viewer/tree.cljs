@@ -4,7 +4,7 @@
             [portal.ui.lazy :as l]
             [reagent.core :as r]))
 
-(defn delimiter [value]
+(defn- delimiter [value]
   (cond
     (map? value)    ["{" "}"]
     (set? value)    ["#{" "}"]
@@ -14,88 +14,77 @@
 (declare inspect-tree)
 (declare inspect-tree-1)
 
-(defn inspect-tree-item []
+(def cursor-pointer {:cursor :pointer})
+(def select-none	{:user-select :none})
+(def flex-wrap      {:flex-wrap :wrap})
+(def flex-row       {:display :flex :flex-direction :row})
+(def flex-col	    {:display :flex :flex-direction :column})
+(def flex-center    {:display :flex :align-items :center})
+
+(defn- styles [settings]
+  {:color (first (:portal/rainbow settings))
+   :font-weigth :bold
+   :margin-right "8px"
+   :padding-top (:spacing/padding settings)
+   :padding-bottom (:spacing/padding settings)})
+
+(defn- center [& children]
+  (into [s/div {:style flex-center}] children))
+
+(defn- inspect-tree-item []
   (let [open? (r/atom true)]
     (fn [settings opts]
       (let [value (:value opts)
             [open close] (delimiter value)
-            color (first (:portal/rainbow settings))
-            open [s/div
-                  {:style
-                   {:color color
-                    :font-weigth :bold
-                    :margin-right "8px"
-                    :padding-top (:spacing/padding settings)
-                    :padding-bottom (:spacing/padding settings)}} open]
-            close [s/div
-                   {:style
-                    {:color color
-                     :font-weigth :bold
-                     :margin-right "8px"
-                     :padding-top (:spacing/padding settings)
-                     :padding-bottom (:spacing/padding settings)}}
-                   close]
+            style  (styles settings)
+            open   [s/div {:style style} open]
+            close  [s/div {:style style} close]
             toggle [s/div
                     {:on-click #(swap! open? not)
-                     :style
-                     {:margin-right "8px"
-                      :padding-top (:spacing/padding settings)
-                      :padding-bottom (:spacing/padding settings)}}
+                     :style (merge style cursor-pointer select-none)}
                     (if @open? "▼" "▶")]
             child [s/div
                    {:style
-                    {:border-left [1 :dashed (str color "55")]
-                     :padding-right 16
-                     :margin-left "0.3em"
-                     :flex-direction :column
-                     :flex-wrap :wrap}}
+                    (merge
+                     {:border-left [1 :dashed (str (:color style) "55")]
+                      :padding-right (* 2 (:spacing/padding settings))
+                      :margin-left "0.3em"}
+                     flex-wrap
+                     flex-col)}
                    (:value-child opts)]
-            ellipsis  [s/div
-                       {:style
-                        {:margin-right "8px"}} "..."]]
+            ellipsis  [s/div {:style {:margin-right (:spacing/padding settings)}} "..."]]
         (cond
           (not (coll? value))
-          [s/div
-           {:style {:display :flex :align-items :center}}
+          [center
            (:key-child opts)
            (:value-child opts)]
 
           (not (coll? (:key opts)))
           [s/div
-           [s/div {:style {:display :flex :align-items :center}}
+           [center
             toggle
             (:key-child opts)
             open
             (when-not @open?
               [:<> ellipsis close])]
            (when @open?
-             [:<>
-              child
-              close])]
+             [:<> child close])]
 
           :else
           [s/div
-           [s/div {:style {:display :flex :align-items :center}}
+           [center
             (:key-child opts)
             (if-not @open?
+              [center toggle open ellipsis close]
               [s/div
-               {:style {:display :flex :align-items :center}}
-               toggle
-               open
-               ellipsis
-               close]
-              [s/div
-               {:style {:display :flex :flex-direction :column}}
-               [s/div {:style {:display :flex}} toggle open]
+               {:style flex-col}
+               [s/div {:style flex-row} toggle open]
                child
                close])]])))))
 
-(defn inspect-tree-map [settings value]
+(defn- inspect-tree-map [settings value]
   [s/div
-   {:style
-    {:padding-left 16
-     :flex-direction :column
-     :flex-wrap :wrap}}
+   {:style {:padding-left (* 2 (:spacing/padding settings))}}
    [l/lazy-seq
     settings
     (for [[k v] (ins/try-sort-map value)]
@@ -106,12 +95,9 @@
         :value v
         :value-child [inspect-tree settings v]}])]])
 
-(defn inspect-tree-coll [settings value]
+(defn- inspect-tree-coll [settings value]
   [s/div
-   {:style
-    {:padding-left 16
-     :flex-direction :column
-     :flex-wrap :wrap}}
+   {:style {:padding-left (* 2 (:spacing/padding settings))}}
    [l/lazy-seq
     settings
     (map-indexed
@@ -123,7 +109,7 @@
           :value-child [inspect-tree settings item]}]])
      value)]])
 
-(defn inspect-tree [settings value]
+(defn- inspect-tree [settings value]
   (let [settings (update settings :portal/rainbow rest)]
     [s/div
      {:style {:width :auto}}
