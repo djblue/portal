@@ -70,7 +70,7 @@
      :color (::c/text settings)
      :font-size  (:font-size settings)
      :border-radius (:border-radius settings)
-     :border (str "1px solid " (::c/border settings))}}
+     :border [1 :solid (::c/border settings)]}}
    (let [{:keys [via trace]} value]
      [s/div
       {:style

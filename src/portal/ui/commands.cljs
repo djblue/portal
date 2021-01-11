@@ -45,7 +45,7 @@
       :flex-direction :column
       :background (::c/background2 settings)
       :box-shadow "0 0 10px #0007"
-      :border (str "1px solid " (::c/border settings))
+      :border [1 :solid (::c/border settings)]
       :border-radius (:border-radius settings)}}]
    children))
 
@@ -77,7 +77,7 @@
      {:width "0.75em"
       :position :absolute
       :height "0.75em"
-      :border (str "2px solid " (::c/string settings))
+      :border [2 :solid (::c/string settings)]
       :border-radius "50%"}}]
    (when checked?
      [s/div
@@ -145,7 +145,7 @@
                                    (on-select option))
                        :style
                        (merge
-                        {:border-left (str "5px solid #0000")
+                        {:border-left [5 :solid "#0000"]
                          :padding-left (:spacing/padding settings)
                          :cursor :pointer
                          :box-sizing :border-box
@@ -156,7 +156,7 @@
                          :align-items :center
                          :height :fit-content}
                         (when active?
-                          {:border-left (str "5px solid " (::c/boolean settings))
+                          {:border-left [5 :solid (::c/boolean settings)]
                            :background (::c/background settings)}))}
                       (when active? [scroll-into-view])
                       [checkbox settings (some? (selected? option))]
@@ -197,14 +197,14 @@
       {:on-click on-click
        :style
        (merge
-        {:border-left (str "5px solid #0000")
+        {:border-left [5 :solid "#0000"]
          :cursor :pointer
          :display :flex
          :justify-content :space-between
          :align-items :center
          :height :fit-content}
         (when active?
-          {:border-left (str "5px solid " (::c/boolean settings))
+          {:border-left [5 :solid (::c/boolean settings)]
            :background (::c/background settings)}))
        :style/hover
        {:background (::c/background settings)}}]
@@ -235,7 +235,7 @@
          [s/div
           {:style
            {:padding (:spacing/padding settings)
-            :border-bottom (str "1px solid " (::c/border settings))}}
+            :border-bottom [1 :solid (::c/border settings)]}}
           [with-shortcuts
            (fn [log]
              (when
@@ -258,7 +258,7 @@
              :box-sizing :border-box
              :font-size (:font-size settings)
              :color (::c/text settings)
-             :border (str "1px solid " (::c/border settings))}}]]
+             :border [1 :solid (::c/border settings)]}}]]
          [s/div
           {:style
            {:height "100%"

@@ -1,4 +1,5 @@
-(ns portal.ui.styled)
+(ns portal.ui.styled
+  (:require [clojure.string :as str]))
 
 (def selectors
   {:style       #(str "." %)
@@ -10,6 +11,7 @@
   (cond
     (number? v)  (str v "px")
     (keyword? v) (name v)
+    (vector? v)  (str/join " " (map value->css v))
     :else        v))
 
 (def exclude? #{:opacity :z-index})

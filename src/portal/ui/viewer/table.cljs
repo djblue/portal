@@ -6,8 +6,8 @@
 
 (defn- get-styles [settings]
   {:white-space :nowrap
-   :border-bottom (str "1px solid " (::c/border settings))
-   :border-right (str "1px solid " (::c/border settings))})
+   :border-bottom [1 :solid (::c/border settings)]
+   :border-right [1 :solid (::c/border settings)]})
 
 (defn- table-header-row [settings child]
   [s/th
@@ -40,8 +40,8 @@
     [s/table
      {:style
       {:width "100%"
-       :border-top (str "1px solid " (::c/border settings))
-       :border-left (str "1px solid " (::c/border settings))
+       :border-top [1 :solid (::c/border settings)]
+       :border-left [1 :solid (::c/border settings)]
        :background (ins/get-background settings)
        :border-spacing 0
        :position :relative

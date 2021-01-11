@@ -14,7 +14,7 @@
      :box-sizing :border-box
      :cursor :text
      :border-radius (:border-radius settings)
-     :border (str "1px solid " (::c/border settings))}}
+     :border [1 :solid (::c/border settings)]}}
    [s/table
     [s/tbody
      [l/lazy-seq

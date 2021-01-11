@@ -14,7 +14,7 @@
        :max-width "100%"
        :user-select :none
        :border-radius (:border-radius settings)
-       :border (str "1px solid " (::c/border settings))}}]))
+       :border [1 :solid (::c/border settings)]}}]))
 
 (def viewer
   {:predicate ins/bin?

@@ -100,7 +100,7 @@
   (when-let [m (meta value)]
     [s/div
      {:style
-      {:border-bottom (str "1px solid " (::c/border settings))}}
+      {:border-bottom [1 :solid (::c/border settings)]}}
      [s/div
       {:on-click #(swap! show-meta? not)
        :style/hover {:color (::c/tag settings)}
@@ -125,7 +125,7 @@
      (when @show-meta?
        [s/div
         {:style
-         {:border-top (str "1px solid " (::c/border settings))
+         {:border-top [1 :solid (::c/border settings)]
           :box-sizing :border-box
           :padding (* 2 (:spacing/padding settings))}}
         [inspector (assoc settings :coll value :depth 0) m]])]))
@@ -246,7 +246,7 @@
         :align-items :center
         :justify-content :space-between
         :background (::c/background2 settings)
-        :border-top (str "1px solid " (::c/border settings))}}
+        :border-top [1 :solid (::c/border settings)]}}
       (if (empty? compatible-viewers)
         [s/div]
         [:select
@@ -257,10 +257,10 @@
           {:background (::c/background settings)
            :margin (:spacing/padding settings)
            :padding (:spacing/padding settings)
-           :box-sizing :border
+           :box-sizing :border-box
            :font-size (:font-size settings)
            :color (::c/text settings)
-           :border (str "1px solid " (::c/border settings))}}
+           :border [1 :solid (::c/border settings)]}}
          (for [{:keys [name]} compatible-viewers]
            [:option {:key name :value (pr-str name)} (pr-str name)])])
       [s/div
@@ -279,7 +279,7 @@
      :box-sizing :border-box
      :font-size (:font-size settings)
      :color (::c/text settings)
-     :border (str "1px solid " (::c/border settings))}}])
+     :border [1 :solid (::c/border settings)]}}])
 
 (defn button-styles [settings]
   {:background (::c/text settings)
@@ -308,8 +308,8 @@
      :background (::c/background2 settings)
      :align-items :center
      :justify-content :center
-     :border-top (str "1px solid " (::c/border settings))
-     :border-bottom (str "1px solid " (::c/border settings))}}
+     :border-top [1 :solid (::c/border settings)]
+     :border-bottom [1 :solid (::c/border settings)]}}
    (let [disabled? (nil? (:portal/previous-state settings))]
      [s/button
       {:disabled disabled?

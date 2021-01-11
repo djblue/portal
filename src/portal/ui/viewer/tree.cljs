@@ -44,7 +44,7 @@
                     (if @open? "▼" "▶")]
             child [s/div
                    {:style
-                    {:border-left (str "1px dashed " color "55")
+                    {:border-left [1 :dashed (str color "55")]
                      :padding-right 16
                      :margin-left "0.3em"
                      :flex-direction :column

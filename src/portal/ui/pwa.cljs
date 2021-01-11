@@ -141,7 +141,7 @@
            :min-width :fit-content
            :font-size "1.15em"
            :background (::c/background2 settings)
-           :border (str "1px solid " (::c/border settings))
+           :border [1 :solid (::c/border settings)]
            :border-radius (:border-radius settings)}}
          (for [command commands]
            ^{:key (hash command)}
@@ -153,10 +153,10 @@
               :justify-content :space-between
               :padding (:spacing/padding settings)
               :cursor :pointer
-              :border-left (str "5px solid #0000")}
+              :border-left [5 :solid "#0000"]}
              :style/hover
              {:background (::c/background settings)
-              :border-left (str "5px solid " (::c/boolean settings))}}
+              :border-left [5 :solid (::c/boolean settings)]}}
             [div
              {:style
               {:margin-left (:spacing/padding settings)}}

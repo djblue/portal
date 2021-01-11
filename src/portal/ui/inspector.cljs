@@ -49,7 +49,7 @@
     [s/div
      {:style {:flex 1
               :background (str color "22")
-              :border (str "1px solid " color)
+              :border [1 :solid color]
               :border-radius (:border-radius settings)}}
      [inspector settings value]]))
 
@@ -58,7 +58,7 @@
     [s/div
      {:style {:flex 1
               :background (str color "22")
-              :border (str "1px solid " color)
+              :border [1 :solid color]
               :border-radius (:border-radius settings)}}
      [inspector settings value]]))
 
@@ -131,7 +131,7 @@
      :color (::c/text settings)
      :font-size  (:font-size settings)
      :border-radius (:border-radius settings)
-     :border (str "1px solid " (::c/border settings))}} child])
+     :border [1 :solid (::c/border settings)]}} child])
 
 (defn container-map-k [_settings child]
   [s/div {:style {:grid-column "1"
@@ -179,7 +179,7 @@
      :color (::c/text settings)
      :font-size  (:font-size settings)
      :border-radius (:border-radius settings)
-     :border (str "1px solid " (::c/border settings))}} child])
+     :border [1 :solid (::c/border settings)]}} child])
 
 (defn inspect-coll [settings values]
   [container-coll
@@ -387,10 +387,10 @@
                          (* 0.65 (:spacing/padding settings)))
               :box-sizing :border-box
               :border-radius (:border-radius settings)
-              :border "1px solid rgba(0,0,0,0)"}
+              :border [1 :solid "rgba(0,0,0,0)"]}
       :tab-index (when nav-target? 0)
       :style/hover {:border
                     (when nav-target?
-                      "1px solid #D8DEE9")}}
+                      [1 :solid "#D8DEE9"])}}
      [component settings value]]))
 

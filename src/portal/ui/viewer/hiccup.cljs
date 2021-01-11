@@ -44,9 +44,9 @@
              :border-spacing 0
              :border-collapse :collapse}
      :th {:padding (:spacing/padding settings)
-          :border (str "1px solid " (::c/border settings))}
+          :border [1 :solid (::c/border settings)]}
      :td {:padding (:spacing/padding settings)
-          :border (str "1px solid " (::c/border settings))}}))
+          :border [1 :solid (::c/border settings)]}}))
 
 (defn inspect-hiccup [settings value]
   (let [styles (hiccup-styles settings)]
