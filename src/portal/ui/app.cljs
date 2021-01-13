@@ -3,7 +3,7 @@
             [portal.colors :as c]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins :refer [inspector]]
-            [portal.ui.state :refer [state tap-state]]
+            [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.viewer.charts :as charts]
             [portal.ui.viewer.csv :as csv]
@@ -155,8 +155,7 @@
   (into {} (map (juxt :name identity) viewers)))
 
 (defn use-viewer [settings value]
-  (let [set-settings!      (:set-settings! settings)
-        selected-viewer    (:selected-viewer settings)
+  (let [selected-viewer    (::selected-viewer settings)
         default-viewer     (get viewers-by-name (:portal.viewer/default (meta value)))
         viewers            (cons default-viewer (remove #(= default-viewer %) viewers))
         compatible-viewers (filter #(when-let [pred (:predicate %)] (pred value)) viewers)]
@@ -168,7 +167,7 @@
       (first compatible-viewers))
      :set-viewer!
      (fn [viewer]
-       (set-settings! {:selected-viewer viewer}))}))
+       (state/dispatch settings assoc ::selected-viewer viewer))}))
 
 (defn get-datafy [settings]
   (fn [value]
@@ -269,8 +268,11 @@
 
 (defn search-input [settings]
   [s/input
-   {:on-change #((:set-settings! settings)
-                 {:search-text (.-value (.-target %))})
+   {:on-change #(state/dispatch
+                 settings
+                 assoc
+                 :search-text
+                 (.-value (.-target %)))
     :value (:search-text settings)
     :placeholder "Type to filter..."
     :style
@@ -314,7 +316,7 @@
      [s/button
       {:disabled disabled?
        :title    "Go back in portal history."
-       :on-click (:portal/on-back settings)
+       :on-click #(state/dispatch settings state/history-back)
        :style    (merge
                   (button-styles settings)
                   (when disabled?
@@ -325,7 +327,7 @@
      [s/button
       {:disabled disabled?
        :title    "Go forward in portal history."
-       :on-click (:portal/on-forward settings)
+       :on-click #(state/dispatch settings state/history-forward)
        :style    (merge
                   (button-styles settings)
                   (when disabled?
@@ -337,7 +339,7 @@
      [s/button
       {:disabled disabled?
        :title    "Clear all values from portal."
-       :on-click (:portal/on-clear settings)
+       :on-click #(state/dispatch settings state/clear)
        :style    (merge
                   (button-styles settings)
                   (when disabled?
@@ -357,11 +359,6 @@
           "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
           "*::-webkit-scrollbar-thumb  { border-radius: 10px; }")]))
 
-(defn get-settings []
-  (let [set-settings! (fn [value] (swap! state merge value))
-        theme (get c/themes (get @tap-state ::c/theme ::c/nord))]
-    (merge theme @tap-state (assoc @state :depth 0 :set-settings! set-settings!))))
-
 (defn root [settings & children]
   (into
    [s/div
@@ -377,8 +374,8 @@
     [scrollbars]]
    children))
 
-(defn app []
-  (let [settings (get-settings)]
+(defn app [settings]
+  (let [settings (merge (state/get-settings) settings)]
     [root
      settings
      [toolbar settings]

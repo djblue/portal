@@ -10,22 +10,6 @@
             [portal.ui.styled :as s]
             [reagent.core :as r]))
 
-(defn copy-to-clipboard! [s]
-  (let [el (js/document.createElement "textarea")]
-    (set! (.-value el) s)
-    (js/document.body.appendChild el)
-    (.select el)
-    (js/document.execCommand "copy")
-    (js/document.body.removeChild el)))
-
-(defn copy-edn! [value]
-  (copy-to-clipboard!
-   (with-out-str
-     (binding [*print-meta* true ;; TODO: doesn't work
-               *print-length* 1000
-               *print-level* 100]
-       (pp/pprint value)))))
-
 (defonce input (r/atom nil))
 
 (defn open [f] (reset! input f))
@@ -88,7 +72,7 @@
         :background (::c/string settings)
         :border-radius "50%"}}])])
 
-(defn scroll-into-view []
+(defn- scroll-into-view []
   (let [el (atom nil)]
     (fn []
       (r/create-class
@@ -279,54 +263,31 @@
                              ::on-click on-click)])))
                doall)]]))))
 
-(defn coll-keys [value]
-  (into [] (set (mapcat keys value))))
+(defn- empty-args [_] nil)
 
-(defn coll-of-maps [settings]
-  (let [value (:portal/value settings)]
-    (and (not (map? value))
-         (coll? value)
-         (every? map? value))))
-
-(defn map-keys [value]
-  (coll-keys (vals value)))
-
-(defn map-of-maps [settings]
-  (let [value (:portal/value settings)]
-    (and (map? value)
-         (every? map? (vals value)))))
-
-(defn transpose-map [value]
-  (reduce
-   (fn [m path]
-     (assoc-in m (reverse path) (get-in value path)))
-   {}
-   (for [row (keys value)
-         column (map-keys value)
-         :when (contains? (get value row) column)]
-     [row column])))
-
-(defn select-columns [value ks]
-  (cond
-    (map? value)
-    (reduce-kv
-     (fn [v k m]
-       (assoc v k (select-keys m ks)))
-     value
-     value)
-    :else (map #(select-keys % ks) value)))
+(defn make-command [{:keys [name predicate args f]}]
+  (let [predicate (or predicate (constantly true))]
+    {:name name
+     :predicate (comp predicate :portal/value)
+     :run (fn [settings]
+            (a/let [v      (:portal/value settings)
+                    args   ((or args empty-args) v)
+                    result (apply f v args)]
+              (when (predicate v)
+                (st/dispatch
+                 settings
+                 st/history-push
+                 {:portal/key name
+                  :portal/f f
+                  :portal/args args
+                  :portal/value result}))))}))
 
 (defn get-functions [settings]
   (a/let [v      (:portal/value settings)
-          invoke (:portal/on-invoke settings)
+          invoke (partial st/invoke settings)
           fns    (invoke 'portal.runtime/get-functions v)]
     (for [f fns]
-      {:name f
-       :run (fn [_settings]
-              (a/let [result (invoke f v)]
-                (st/push
-                 {:portal/key f
-                  :portal/value result})))})))
+      (make-command {:name f :f #(invoke f %)}))))
 
 (declare commands)
 
@@ -362,180 +323,168 @@
                    [inspector settings (:name command)]
                    [shortcut settings command]])]))))})
 
-(def commands
-  [{:name 'clojure.core/vals
-    :predicate (comp map? :portal/value)
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (map? v)
-               (st/push
-                {:portal/key 'clojure.core/vals
-                 :portal/f vals
-                 :portal/value (vals v)}))))}
-   {:name 'clojure.core/keys
-    :predicate (comp map? :portal/value)
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (map? v)
-               (st/push
-                {:portal/key 'clojure.core/keys
-                 :portal/f keys
-                 :portal/value (keys v)}))))}
-   {:name 'clojure.core/count
-    :predicate (comp coll? :portal/value)
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (coll? v)
-               (st/push
-                {:portal/key 'clojure.core/count
-                 :portal/f count
-                 :portal/value (count v)}))))}
-   {:name 'clojure.core/first
-    :predicate (comp coll? :portal/value)
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (coll? v)
-               (st/push
-                {:portal/key 'clojure.core/first
-                 :portal/f first
-                 :portal/value (first v)}))))}
-   {:name 'clojure.core/rest
-    :predicate (comp coll? :portal/value)
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (coll? v)
-               (st/push
-                {:portal/key 'clojure.core/rest
-                 :portal/f rest
-                 :portal/value (rest v)}))))}
-   {:name 'clojure.core/get
-    :predicate (comp map? :portal/value)
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (map? v)
-               (open
-                (fn [settings]
-                  [palette-component
-                   (assoc
-                    settings
-                    ::on-select
-                    (fn [option]
-                      (st/push
-                       {:portal/key 'clojure.core/get
-                        :portal/f get
-                        :portal/args [(::value option)]
-                        :portal/value (get v (::value option))})))
-                   (for [k (keys v)]
-                     [palette-component-item
-                      (assoc settings ::value k)
-                      [inspector settings k]])])))))}
-   {:name 'clojure.core/get-in
-    :predicate (comp map? :portal/value)
-    :run (fn [settings]
-           (let [get-key
-                 (fn get-key [path v]
-                   (when (map? v)
-                     (open
-                      (fn [settings]
-                        [palette-component
-                         (assoc
-                          settings
-                          ::on-select
-                          (fn [option]
-                            (let [k (::value option)
-                                  path (conj path k)
-                                  next-value (get v k)]
-                              (cond
-                                (= k ::done)
-                                (let [path (drop-last path)]
-                                  (st/push
-                                   {:portal/key 'clojure.core/get-in
-                                    :portal/f get-in
-                                    :portal/args [path]
-                                    :portal/value v}))
+;; pick args
 
-                                (not (map? next-value))
-                                (st/push
-                                 {:portal/key 'clojure.core/get-in
-                                  :portal/f get-in
-                                  :portal/args [path]
-                                  :portal/value next-value})
+(defn pick-one [options]
+  (js/Promise.
+   (fn [resolve]
+     (open
+      (fn [settings]
+        [palette-component
+         (assoc settings ::on-select #(resolve [(::value %)]))
+         (for [option options]
+           [palette-component-item
+            (assoc settings ::value option)
+            [inspector settings option]])])))))
 
-                                :else
-                                (get-key path next-value)))))
-                         (for [k (concat [::done] (keys v))]
-                           [palette-component-item
-                            (assoc settings ::value k)
-                            [inspector settings k]])]))))]
-             (get-key [] (:portal/value settings))))}
-   {:name 'clojure.core/select-keys
-    :predicate (comp map? :portal/value)
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (map? v)
-               (open
-                (fn [settings]
-                  [selector-component
-                   settings
-                   {:options (keys v)
-                    :run
-                    (fn [options]
-                      (close)
-                      (st/push
-                       {:portal/key 'clojure.core/select-keys
-                        :portal/f select-keys
-                        :portal/args [options]
-                        :portal/value (select-keys v options)}))}])))))}
-   {:name :portal.data/select-columns
-    :predicate coll-of-maps
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
-             (when (coll? v)
-               (open
-                (fn [settings]
-                  [selector-component
-                   settings
-                   {:options (coll-keys v)
-                    :run
-                    (fn [options]
-                      (close)
-                      (st/push
-                       {:portal/key 'portal.data/select-columns
-                        :portal/f select-columns
-                        :portal/args [options]
-                        :portal/value (select-columns v options)}))}])))))}
-   {:name :portal.data/select-columns
-    :predicate map-of-maps
-    :run (fn [settings]
-           (let [v (:portal/value settings)]
+(defn pick-many [options]
+  (js/Promise.
+   (fn [resolve]
+     (open
+      (fn [settings]
+        [selector-component
+         settings
+         {:options options
+          :run
+          (fn [options]
+            (close)
+            (resolve [options]))}])))))
+
+(defn pick-in [v]
+  (js/Promise.
+   (fn [resolve]
+     (let [get-key
+           (fn get-key [path v]
              (open
               (fn [settings]
-                [selector-component
-                 settings
-                 {:options (map-keys v)
-                  :run
-                  (fn [options]
-                    (close)
-                    (st/push
-                     {:portal/key 'portal.data/select-columns
-                      :portal/f select-columns
-                      :portal/args [options]
-                      :portal/value (select-columns v options)}))}]))))}
-   {:name :portal.data/transpose-map
+                [palette-component
+                 (assoc
+                  settings
+                  ::on-select
+                  (fn [option]
+                    (let [k (::value option)
+                          path (conj path k)
+                          next-value (get v k)]
+                      (cond
+                        (= k ::done)
+                        (resolve [(drop-last path)])
+
+                        (not (map? next-value))
+                        (resolve [path])
+
+                        :else
+                        (get-key path next-value)))))
+                 (for [k (concat [::done] (keys v))]
+                   [palette-component-item
+                    (assoc settings ::value k)
+                    [inspector settings k]])])))]
+       (get-key [] v)))))
+
+;; clojure commands
+
+(def clojure-commands
+  [{:f vals
+    :predicate map?
+    :name 'clojure.core/vals}
+   {:f keys
+    :predicate map?
+    :name 'clojure.core/keys}
+   {:f count
+    :predicate coll?
+    :name 'clojure.core/count}
+   {:f first
+    :predicate coll?
+    :name 'clojure.core/first}
+   {:f rest
+    :predicate coll?
+    :name 'clojure.core/rest}
+   {:f get
+    :predicate map?
+    :args (comp pick-one keys)
+    :name 'clojure.core/get}
+   {:f get-in
+    :predicate map?
+    :args pick-in
+    :name 'clojure.core/get-in}
+   {:f select-keys
+    :predicate map?
+    :args (comp pick-many keys)
+    :name 'clojure.core/select-keys}])
+
+;; portal data commands
+
+(defn coll-of-maps [value]
+  (and (not (map? value))
+       (coll? value)
+       (every? map? value)))
+
+(defn map-of-maps [value]
+  (and (map? value) (every? map? (vals value))))
+
+(defn coll-keys [value]
+  (into [] (set (mapcat keys value))))
+
+(defn map-keys [value]
+  (coll-keys (vals value)))
+
+(defn transpose-map [value]
+  (reduce
+   (fn [m path]
+     (assoc-in m (reverse path) (get-in value path)))
+   {}
+   (for [row (keys value)
+         column (map-keys value)
+         :when (contains? (get value row) column)]
+     [row column])))
+
+(defn select-columns [value ks]
+  (cond
+    (map? value)
+    (reduce-kv
+     (fn [v k m]
+       (assoc v k (select-keys m ks)))
+     value
+     value)
+    :else (map #(select-keys % ks) value)))
+
+(def portal-data-commands
+  [{:f transpose-map
     :predicate map-of-maps
-    :run (fn [settings]
-           (st/push
-            {:portal/key 'portal.data/transpose-map
-             :portal/f transpose-map
-             :portal/value (transpose-map (:portal/value settings))}))}
-   {:name :portal.command/close-command-palette
+    :name 'portal.data/transpose-map}
+   {:f select-columns
+    :predicate coll-of-maps
+    :args (comp pick-many coll-keys)
+    :name 'portal.data/select-columns}
+   {:f select-columns
+    :predicate map-of-maps
+    :args (comp pick-many map-keys)
+    :name 'portal.data/select-columns}])
+
+(defn- copy-to-clipboard! [s]
+  (let [el (js/document.createElement "textarea")]
+    (set! (.-value el) s)
+    (js/document.body.appendChild el)
+    (.select el)
+    (js/document.execCommand "copy")
+    (js/document.body.removeChild el)))
+
+(defn copy-edn! [value]
+  (copy-to-clipboard!
+   (with-out-str
+     (binding [*print-meta* true ;; TODO: doesn't work
+               *print-length* 1000
+               *print-level* 100]
+       (pp/pprint value)))))
+
+(def portal-commands
+  [{:name :portal.command/close-command-palette
     ::shortcuts/osx ["escape"]
     ::shortcuts/default ["escape"]
     :run close}
    {:name :portal.command/redo-previous-command
     ::shortcuts/default #{"control" "r"}
-    :run (fn [_settings]
-           (a/let [commands @st/commands]
+    :run (fn [settings]
+           (a/let [commands (::st/previous-commands settings)]
              (when (seq commands)
                (open
                 (fn [settings]
@@ -544,7 +493,7 @@
                     settings
                     ::on-select
                     (fn [{::keys [command]}]
-                      (a/let [invoke (:portal/on-invoke settings)
+                      (a/let [invoke (partial st/invoke settings)
                               k (:portal/key command)
                               f (or (:portal/f command)
                                     (if (keyword? k)
@@ -552,7 +501,10 @@
                                       (partial invoke (:portal/key command))))
                               args (:portal/args command)
                               value (apply f (:portal/value settings) args)]
-                        (st/push (assoc command :portal/value value)))))
+                        (st/dispatch
+                         settings
+                         st/history-push
+                         (assoc command :portal/value value)))))
                    (for [command commands]
                      [palette-component-item
                       (assoc settings
@@ -590,23 +542,31 @@
    {:name :portal.command/history-back
     ::shortcuts/osx #{"meta" "arrowleft"}
     ::shortcuts/default #{"control" "arrowleft"}
-    :run (fn [settings] ((:portal/on-back settings)))}
+    :run (fn [settings] (st/dispatch settings st/history-back))}
    {:name :portal.command/history-forward
     ::shortcuts/osx #{"meta" "arrowright"}
     ::shortcuts/default #{"control" "arrowright"}
-    :run (fn [settings] ((:portal/on-forward settings)))}
+    :run (fn [settings] (st/dispatch settings st/history-forward))}
    {:name :portal.command/history-first
     ::shortcuts/osx #{"meta" "shift" "arrowleft"}
     ::shortcuts/default #{"control" "shift" "arrowleft"}
-    :run (fn [settings] ((:portal/on-first settings)))}
+    :run (fn [settings] (st/dispatch settings st/history-first))}
    {:name :portal.command/history-last
     ::shortcuts/osx #{"meta" "shift" "arrowright"}
     ::shortcuts/default #{"control" "shift" "arrowright"}
-    :run (fn [settings] ((:portal/on-last settings)))}
+    :run (fn [settings] (st/dispatch settings st/history-last))}
    {:name :portal.command/clear
     ::shortcuts/default #{"control" "l"}
     :run (fn [settings]
-           ((:portal/on-clear settings)))}])
+           (st/dispatch settings st/clear))}])
+
+(def commands
+  (concat
+   (map
+    make-command
+    (concat clojure-commands
+            portal-data-commands))
+   portal-commands))
 
 (defn pop-up [child]
   [s/div

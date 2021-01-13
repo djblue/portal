@@ -3,6 +3,7 @@
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
             [portal.ui.lazy :as l]
+            [portal.ui.state :as state]
             [portal.ui.styled :as s]))
 
 (defn date? [value] (instance? js/Date value))
@@ -372,7 +373,10 @@
                      (dissoc :component)
                      (assoc :value value))
         nav-target? (= 2 (:depth settings))
-        on-nav #((:portal/on-nav settings) (assoc settings :value value))]
+        on-nav #(state/dispatch
+                 settings
+                 state/nav
+                 (assoc settings :value value))]
     [s/div
      {:on-click
       (fn [e]
@@ -395,4 +399,3 @@
                     (when nav-target?
                       [1 :solid "#D8DEE9"])}}
      [component settings value]]))
-

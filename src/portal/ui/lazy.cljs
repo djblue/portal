@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [lazy-seq])
   (:require ["react-visibility-sensor" :as react-visibility-sensor]
             [portal.ui.styled :as s]
+            [portal.ui.state :as state]
             [reagent.core :as r]))
 
 (defn lazy-seq [_settings _ opts]
@@ -14,7 +15,7 @@
        (take @n seqable)
        (if-not (seq (drop @n seqable))
          (when (= (:depth settings) 1)
-           ((:portal/on-more settings) (:value settings))
+           (state/more settings (:value settings))
            nil)
          [:> VisibilitySensor
           {:key @n

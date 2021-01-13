@@ -9,12 +9,16 @@
             [portal.runtime.jvm.server :as s]
             [pwa]))
 
+(defn lazy-fn [symbol]
+  (fn [& args] (apply (requiring-resolve symbol) args)))
+
+(def start!       (lazy-fn 'shadow.cljs.devtools.server/start!))
+(def watch        (lazy-fn 'shadow.cljs.devtools.api/watch))
+(def nrepl-select (lazy-fn 'shadow.cljs.devtools.api/nrepl-select))
+
 (defn cljs
   ([] (cljs :client))
-  ([build-id]
-   ((requiring-resolve 'shadow.cljs.devtools.server/start!))
-   ((requiring-resolve 'shadow.cljs.devtools.api/watch)        build-id)
-   ((requiring-resolve 'shadow.cljs.devtools.api/nrepl-select) build-id)))
+  ([build-id] (start!) (watch build-id) (nrepl-select build-id)))
 
 (defn node [] (cljs :node))
 
@@ -49,6 +53,8 @@
 (swap-dev)
 
 (comment
+  (watch :pwa)
+
   (with-redefs [l/pwa (:dev pwa/envs)]
     (def portal (p/open)))
   (p/tap)

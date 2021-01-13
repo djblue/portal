@@ -41,7 +41,7 @@
 
 (defn area []
   (let [active? (r/atom false)]
-    (fn [_settings children]
+    (fn [settings children]
       [s/div
        {:on-drag-over
         (fn [e]
@@ -57,7 +57,7 @@
                          (for [item (.-dataTransfer.items e)
                                :when (= (.-kind item) "file")]
                            (.getAsFile item)))]
-            (state/push {:portal/value value}))
+            (state/dispatch settings state/history-push {:portal/value value}))
           (reset! active? false))
         :style {:position :relative}}
        (when @active?

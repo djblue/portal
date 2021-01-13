@@ -52,18 +52,18 @@
     ::shortcuts/osx #{"meta" "o"}
     ::shortcuts/default #{"control" "o"}
     :run #(a/let [value (open-file)]
-            (s/push {:portal/value value}))}
+            (s/dispatch % s/history-push {:portal/value value}))}
    {:name 'portal.load/clipboard
     :label "Load from clipboard"
     ::shortcuts/osx #{"meta" "v"}
     ::shortcuts/default #{"control" "v"}
     :run #(a/let [value (clipboard)]
-            (s/push {:portal/value value}))}
+            (s/dispatch % s/history-push {:portal/value value}))}
    {:name 'portal.load/demo
     :label "Load demo data"
     ::shortcuts/osx #{"meta" "d"}
     ::shortcuts/default #{"control" "d"}
-    :run #(s/push {:portal/value demo/data})}])
+    :run #(s/dispatch % s/history-push {:portal/value demo/data})}])
 
 (defn invoke [{:keys [f args]} done]
   (try
@@ -72,27 +72,24 @@
     (catch js/Error e
       (done {:return e}))))
 
-(defn on-nav [request done]
+(defn on-nav [request]
   (a/let [res (apply nav (:args request))]
-    (done {:value (datafy res)})))
+    {:value (datafy res)}))
 
-(defn send! [value msg]
+(defn send! [msg]
   (js/Promise.resolve
    (case (:op msg)
      :portal.rpc/clear-values nil
-     :portal.rpc/load-state
-     {:portal/complete? true
-      :portal/value value}
-     :portal.rpc/on-nav (on-nav msg identity)
+     :portal.rpc/on-nav (on-nav msg)
      :portal.rpc/invoke (invoke msg identity))))
 
 (defn set-title [title]
   (set! (.-title js/document) title))
 
-(defn launch-queue-consumer [item]
+(defn launch-queue-consumer [settings item]
   (a/let [files (js/Promise.all (map #(.getFile %) (.-files item)))
           value (dnd/handle-files files)]
-    (s/push {:portal/value value})))
+    (s/dispatch settings s/history-push {:portal/value value})))
 
 (defn handle-message [message]
   (let [data (.-data message)]
@@ -104,7 +101,7 @@
 (def hex-color #"#[0-9a-f]{6}")
 
 (defn splash []
-  (let [settings (app/get-settings)
+  (let [settings (merge (s/get-settings) {:send! send!})
         mapping (reduce-kv
                  (fn [mapping k v]
                    (assoc mapping v (get settings k)))
@@ -165,20 +162,12 @@
 
 (defn pwa-app []
   (if (contains? @state :portal/value)
-    [app/app]
+    [app/app {:send! send!}]
     [splash]))
 
 (defn render-app []
   (rdom/render [pwa-app]
                (.getElementById js/document "root")))
-
-(def default-settings
-  {:font/family "monospace"
-   :font-size "12pt"
-   :limits/string-length 100
-   :limits/max-depth 1
-   :spacing/padding 8
-   :border-radius "2px"})
 
 (defn get-mode []
   (let [src (js/location.search.slice 1)]
@@ -200,10 +189,8 @@
   (when js/navigator.serviceWorker
     (js/navigator.serviceWorker.register "sw.js"))
   (when js/window.launchQueue
-    (js/window.launchQueue.setConsumer #(launch-queue-consumer %)))
-  (swap! state merge
-         default-settings
-         (s/get-actions (partial send! nil)))
+    (js/window.launchQueue.setConsumer
+     #(launch-queue-consumer (s/get-settings) %)))
   (render-app))
 
 (defn main! []
