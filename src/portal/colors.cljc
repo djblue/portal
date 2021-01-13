@@ -8,7 +8,7 @@
     ::boolean "#5e81ac"
     ::string "#a3be8c"
     ::keyword "#5e81ac"
-    ::namespace "#88c0d0"
+    ::namespace "#8fbcbb"
     ::tag "#ebcb8b"
     ::symbol "#d8dee9"
     ::number "#b48ead"

@@ -240,7 +240,9 @@
 
 (defn inspect-namespace [settings value]
   (when-let [ns (namespace value)]
-    [s/span {:style {:color (::c/namespace settings)}} ns "/"]))
+    [s/span
+     [s/span {:style {:color (::c/namespace settings)}} ns]
+     [s/span {:style {:color (::c/text settings)}} "/"]]))
 
 (defn inspect-boolean [settings value]
   [s/span {:style {:color (::c/boolean settings)}}
