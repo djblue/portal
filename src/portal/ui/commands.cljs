@@ -8,6 +8,7 @@
             [portal.ui.inspector :as ins :refer [inspector]]
             [portal.ui.state :as st :refer [tap-state state]]
             [portal.ui.styled :as s]
+            [portal.ui.theme :as theme]
             [reagent.core :as r]))
 
 (defonce input (r/atom nil))
@@ -15,23 +16,24 @@
 (defn open [f] (reset! input f))
 (defn close [] (reset! input nil))
 
-(defn container [settings & children]
-  (into
-   [s/div
-    {:on-click #(.stopPropagation %)
-     :style
-     {:width "80%"
-      :max-height "40vh"
-      :height :fit-content
-      :margin "0 auto"
-      :overflow :hidden
-      :display :flex
-      :flex-direction :column
-      :background (::c/background2 settings)
-      :box-shadow "0 0 10px #0007"
-      :border [1 :solid (::c/border settings)]
-      :border-radius (:border-radius settings)}}]
-   children))
+(defn container [& children]
+  (let [theme (theme/use-theme)]
+    (into
+     [s/div
+      {:on-click #(.stopPropagation %)
+       :style
+       {:width "80%"
+        :max-height "40vh"
+        :height :fit-content
+        :margin "0 auto"
+        :overflow :hidden
+        :display :flex
+        :flex-direction :column
+        :background (::c/background2 theme)
+        :box-shadow "0 0 10px #0007"
+        :border [1 :solid (::c/border theme)]
+        :border-radius (:border-radius theme)}}]
+     children)))
 
 (defn with-shortcuts [f]
   (let [k (gensym)]
@@ -47,30 +49,31 @@
         (shortcuts/remove! k))
       :reagent-render (constantly nil)})))
 
-(defn checkbox [settings checked?]
-  [s/div
-   {:style
-    {:width "1.25em"
-     :height "1.25em"
-     :position :relative
-     :display :flex
-     :align-items :center
-     :justify-content :center}}
-   [s/div
-    {:style
-     {:width "0.75em"
-      :position :absolute
-      :height "0.75em"
-      :border [2 :solid (::c/string settings)]
-      :border-radius "50%"}}]
-   (when checked?
+(defn checkbox [checked?]
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style
+      {:width "1.25em"
+       :height "1.25em"
+       :position :relative
+       :display :flex
+       :align-items :center
+       :justify-content :center}}
      [s/div
       {:style
-       {:width "0.5em"
-        :height "0.5em"
+       {:width "0.75em"
         :position :absolute
-        :background (::c/string settings)
-        :border-radius "50%"}}])])
+        :height "0.75em"
+        :border [2 :solid (::c/string theme)]
+        :border-radius "50%"}}]
+     (when checked?
+       [s/div
+        {:style
+         {:width "0.5em"
+          :height "0.5em"
+          :position :absolute
+          :background (::c/string theme)
+          :border-radius "50%"}}])]))
 
 (defn- scroll-into-view []
   (let [el (atom nil)]
@@ -86,66 +89,65 @@
   (let [selected (r/atom #{})
         active   (r/atom 0)]
     (fn [settings input]
-      [container
-       settings
-       [s/div
-        {:style {:box-sizing :border-box
-                 :padding (:spacing/padding settings)}}
-        "(Press <space> to select, <a> to toggle all, <i> to invert selection)"]
-       (let [selected? @selected
-             on-done   (:run input)
-             options   (:options input)
-             n         (count (:options input))
-             on-select #(swap! selected (if (selected? %) disj conj) %)]
-         [:<>
-          [with-shortcuts
-           (fn [log]
-             (when
-              (condp shortcuts/match? log
-                "arrowup"   (swap! active #(mod (dec %) n))
-                "arrowdown" (swap! active #(mod (inc %) n))
+      (let [theme     (theme/use-theme)
+            selected? @selected
+            on-done   (:run input)
+            options   (:options input)
+            n         (count (:options input))
+            on-select #(swap! selected (if (selected? %) disj conj) %)]
+        [container
+         [s/div
+          {:style {:box-sizing :border-box
+                   :padding (:spacing/padding theme)}}
+          "(Press <space> to select, <a> to toggle all, <i> to invert selection)"]
+         [with-shortcuts
+          (fn [log]
+            (when
+             (condp shortcuts/match? log
+               "arrowup"   (swap! active #(mod (dec %) n))
+               "arrowdown" (swap! active #(mod (inc %) n))
 
-                "a"
-                (if (= (count @selected) (count options))
-                  (reset! selected #{})
-                  (swap! selected into options))
+               "a"
+               (if (= (count @selected) (count options))
+                 (reset! selected #{})
+                 (swap! selected into options))
 
-                "i" (swap! selected #(set/difference (into #{} options) %))
-                " " (on-select (nth options @active))
-                "enter" (on-done @selected)
+               "i" (swap! selected #(set/difference (into #{} options) %))
+               " " (on-select (nth options @active))
+               "enter" (on-done @selected)
 
-                nil)
-               (shortcuts/matched! log)))]
-          [s/div
-           {:style {:overflow :auto}}
-           (->> options
-                (map-indexed
-                 (fn [index option]
-                   (let [active? (= index @active)]
-                     [s/div
-                      {:key (hash option)
-                       :on-click (fn [e]
-                                   (.stopPropagation e)
-                                   (on-select option))
-                       :style
-                       (merge
-                        {:border-left [5 :solid "#0000"]
-                         :padding-left (:spacing/padding settings)
-                         :cursor :pointer
-                         :box-sizing :border-box
-                         :color (if (selected? option)
-                                  (::c/boolean settings)
-                                  (::c/text settings))
-                         :display :flex
-                         :align-items :center
-                         :height :fit-content}
-                        (when active?
-                          {:border-left [5 :solid (::c/boolean settings)]
-                           :background (::c/background settings)}))}
-                      (when active? [scroll-into-view])
-                      [checkbox settings (some? (selected? option))]
-                      [inspector settings option]])))
-                doall)]])])))
+               nil)
+              (shortcuts/matched! log)))]
+         [s/div
+          {:style {:overflow :auto}}
+          (->> options
+               (map-indexed
+                (fn [index option]
+                  (let [active? (= index @active)]
+                    [s/div
+                     {:key (hash option)
+                      :on-click (fn [e]
+                                  (.stopPropagation e)
+                                  (on-select option))
+                      :style
+                      (merge
+                       {:border-left [5 :solid "#0000"]
+                        :padding-left (:spacing/padding theme)
+                        :cursor :pointer
+                        :box-sizing :border-box
+                        :color (if (selected? option)
+                                 (::c/boolean theme)
+                                 (::c/text theme))
+                        :display :flex
+                        :align-items :center
+                        :height :fit-content}
+                       (when active?
+                         {:border-left [5 :solid (::c/boolean theme)]
+                          :background (::c/background theme)}))}
+                     (when active? [scroll-into-view])
+                     [checkbox (some? (selected? option))]
+                     [inspector settings option]])))
+               doall)]]))))
 
 (def shortcut->symbol
   {"arrowright" "⭢"
@@ -156,26 +158,28 @@
 (defn combo-order [k]
   (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
 
-(defn shortcut [settings command]
-  (when-let [combo (shortcuts/get-shortcut command)]
-    [s/div {:style
-            {:display :flex
-             :align-items :center
-             :white-space :nowrap}}
-     (for [k (sort-by combo-order combo)]
-       ^{:key k}
-       [s/div {:style
-               {:background "#0002"
-                :border-radius (:border-radius settings)
-                :padding-top (* 0.5 (:spacing/padding settings))
-                :padding-bottom (* 0.5 (:spacing/padding settings))
-                :padding-left (:spacing/padding settings)
-                :padding-right (:spacing/padding settings)
-                :margin-right  (:spacing/padding settings)}}
-        (get shortcut->symbol k (.toUpperCase k))])]))
+(defn shortcut [command]
+  (let [theme (theme/use-theme)]
+    (when-let [combo (shortcuts/get-shortcut command)]
+      [s/div {:style
+              {:display :flex
+               :align-items :center
+               :white-space :nowrap}}
+       (for [k (sort-by combo-order combo)]
+         ^{:key k}
+         [s/div {:style
+                 {:background "#0002"
+                  :border-radius (:border-radius theme)
+                  :padding-top (* 0.5 (:spacing/padding theme))
+                  :padding-bottom (* 0.5 (:spacing/padding theme))
+                  :padding-left (:spacing/padding theme)
+                  :padding-right (:spacing/padding theme)
+                  :margin-right  (:spacing/padding theme)}}
+          (get shortcut->symbol k (.toUpperCase k))])])))
 
 (defn palette-component-item [settings & children]
-  (let [{::keys [active? on-click]} settings]
+  (let [theme (theme/use-theme)
+        {::keys [active? on-click]} settings]
     (into
      [s/div
       {:on-click on-click
@@ -188,17 +192,18 @@
          :align-items :center
          :height :fit-content}
         (when active?
-          {:border-left [5 :solid (::c/boolean settings)]
-           :background (::c/background settings)}))
+          {:border-left [5 :solid (::c/boolean theme)]
+           :background (::c/background theme)}))
        :style/hover
-       {:background (::c/background settings)}}]
+       {:background (::c/background theme)}}]
      children)))
 
 (defn palette-component []
   (let [active (r/atom 0)
         filter-text (r/atom "")]
     (fn [settings options]
-      (let [text @filter-text
+      (let [theme (theme/use-theme)
+            text @filter-text
             options
             (keep
              (fn [option]
@@ -215,11 +220,10 @@
               (when-let [option (nth options @active)]
                 ((::on-select settings) (second option))))]
         [container
-         settings
          [s/div
           {:style
-           {:padding (:spacing/padding settings)
-            :border-bottom [1 :solid (::c/border settings)]}}
+           {:padding (:spacing/padding theme)
+            :border-bottom [1 :solid (::c/border theme)]}}
           [with-shortcuts
            (fn [log]
              (when
@@ -237,12 +241,12 @@
                           (reset! filter-text (.-value (.-target %))))
             :style
             {:width "100%"
-             :background (::c/background settings)
-             :padding (:spacing/padding settings)
+             :background (::c/background theme)
+             :padding (:spacing/padding theme)
              :box-sizing :border-box
-             :font-size (:font-size settings)
-             :color (::c/text settings)
-             :border [1 :solid (::c/border settings)]}}]]
+             :font-size (:font-size theme)
+             :color (::c/text theme)
+             :border [1 :solid (::c/border theme)]}}]]
          [s/div
           {:style
            {:height "100%"
@@ -321,7 +325,7 @@
                           :run (:run command)
                           ::value (:name command))
                    [inspector settings (:name command)]
-                   [shortcut settings command]])]))))})
+                   [shortcut command]])]))))})
 
 ;; pick args
 

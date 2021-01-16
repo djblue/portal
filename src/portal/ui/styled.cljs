@@ -75,4 +75,4 @@
 (def input  (partial styled :input))
 (def button (partial styled :button))
 (def img    (partial styled :img))
-
+(def iframe (partial styled :iframe))

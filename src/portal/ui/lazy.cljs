@@ -12,7 +12,7 @@
         VisibilitySensor (.-default react-visibility-sensor)]
     (fn [settings seqable]
       [:<>
-       (take @n seqable)
+       (doall (take @n seqable))
        (if-not (seq (drop @n seqable))
          (when (= (:depth settings) 1)
            (state/more settings (:value settings))

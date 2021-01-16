@@ -25,9 +25,9 @@
 
 (defn inspect-diff [settings value]
   (cond
-    (instance? diff/Deletion value)  [inspector (assoc settings :depth 0) (:- value)]
-    (instance? diff/Insertion value) [inspector (assoc settings :depth 0) (:+ value)]
-    (instance? diff/Mismatch value)  [inspector (assoc settings :depth 0) value]
+    (instance? diff/Deletion value)  [inspector settings (:- value)]
+    (instance? diff/Insertion value) [inspector settings (:+ value)]
+    (instance? diff/Mismatch value)  [inspector settings value]
     :else
     (let [[a b] value]
       [inspector (assoc settings :depth 0) (diff a b)])))

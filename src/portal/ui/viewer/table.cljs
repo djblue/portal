@@ -2,18 +2,20 @@
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins :refer [inspector]]
             [portal.ui.lazy :as l]
-            [portal.ui.styled :as s]))
+            [portal.ui.styled :as s]
+            [portal.ui.theme :as theme]))
 
-(defn- get-styles [settings]
-  {:white-space :nowrap
-   :border-bottom [1 :solid (::c/border settings)]
-   :border-right [1 :solid (::c/border settings)]})
+(defn- get-styles []
+  (let [theme (theme/use-theme)]
+    {:white-space :nowrap
+     :border-bottom [1 :solid (::c/border theme)]
+     :border-right [1 :solid (::c/border theme)]}))
 
 (defn- table-header-row [settings child]
   [s/th
    {:style
     (assoc
-     (get-styles settings)
+     (get-styles)
      :top 0
      :z-index 2
      :position :sticky
@@ -24,7 +26,7 @@
   [s/th
    {:style
     (assoc
-     (get-styles settings)
+     (get-styles)
      :left 0
      :z-index 1
      :position :sticky
@@ -32,22 +34,23 @@
      :background (ins/get-background settings))}
    child])
 
-(defn- table-data [settings child]
-  [s/td {:style (get-styles settings)} child])
+(defn- table-data [_settings child]
+  [s/td {:style (get-styles)} child])
 
 (defn- table [settings component rows cols]
-  (let [transpose? false]
+  (let [theme (theme/use-theme)
+        transpose? false]
     [s/table
      {:style
       {:width "100%"
-       :border-top [1 :solid (::c/border settings)]
-       :border-left [1 :solid (::c/border settings)]
+       :border-top [1 :solid (::c/border theme)]
+       :border-left [1 :solid (::c/border theme)]
        :background (ins/get-background settings)
        :border-spacing 0
        :position :relative
-       :color (::c/text settings)
-       :font-size  (:font-size settings)
-       :border-radius (:border-radius settings)}}
+       :color (::c/text theme)
+       :font-size  (:font-size theme)
+       :border-radius (:border-radius theme)}}
      [s/tbody
       [l/lazy-seq
        settings
@@ -56,7 +59,7 @@
           [s/tr
            {:key row-index
             :style/hover
-            {:background (str (::c/border settings) "55")}}
+            {:background (str (::c/border theme) "55")}}
            (map-indexed
             (fn [col-index col]
               ^{:key col-index}
@@ -174,7 +177,7 @@
 
 (defn inspect-table [settings values]
   (let [component (get-component values)]
-    [component settings values]))
+    [ins/inc-depth [component settings values]]))
 
 (def viewer
   {:predicate table-view?

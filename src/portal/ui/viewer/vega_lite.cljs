@@ -4,6 +4,7 @@
             [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.styled :as s]
+            [portal.ui.theme :as theme]
             [reagent.core :as r]
             [reagent.dom :as rd]))
 
@@ -64,10 +65,10 @@
 (defn- default-config
   "Specifies a nicer set of vega-lite specification styles.
   All defaults can be overridden by users data"
-  [settings]
-  (let [background (::c/background settings)
-        text (::c/text settings)
-        border (::c/border settings)]
+  [theme]
+  (let [background (::c/background theme)
+        text (::c/text theme)
+        border (::c/border theme)]
     {:width "container"
      :height "container"
      :padding "30"
@@ -102,22 +103,23 @@
 
 (defn- vega-lite-styles
   "CSS styles applied to the vega embed elements. Allow filling most of the container."
-  [settings]
-  [:style
-   (map->css
-    {[:.vega-embed :.chart-wrapper]
-     {:width "100%" :height "100%"}
-     [:.vega-embed]
-     {:width "100%"
-      :height "90%"
-      :border-color (::c/border settings)
-      :border-width 1
-      :border-style :solid}
-     [:.vega-embed :summary]
-     {:opacity 1
-      :cursor :default
-      :margin-right (:spacing/padding settings)
-      :margin-top (:spacing/padding settings)}})])
+  []
+  (let [theme (theme/use-theme)]
+    [:style
+     (map->css
+      {[:.vega-embed :.chart-wrapper]
+       {:width "100%" :height "100%"}
+       [:.vega-embed]
+       {:width "100%"
+        :height "90%"
+        :border-color (::c/border theme)
+        :border-width 1
+        :border-style :solid}
+       [:.vega-embed :summary]
+       {:opacity 1
+        :cursor :default
+        :margin-right (:spacing/padding theme)
+        :margin-top (:spacing/padding theme)}})]))
 
 (defn- deep-merge
   "Recursively merges maps.
@@ -153,14 +155,15 @@
       [:div.viz])}))
 
 (defn vega-lite-viewer
-  [settings value]
-  [s/div
-   [vega-lite-styles settings]
-   [:h1 (:title value)]
-   [:p (:description value)]
-   [vega-class
-    (deep-merge (default-config settings) value)
-    {:mode "vega-lite" :renderer :canvas}]])
+  [_settings value]
+  (let [theme (theme/use-theme)]
+    [s/div
+     [vega-lite-styles]
+     [:h1 (:title value)]
+     [:p (:description value)]
+     [vega-class
+      (deep-merge (default-config theme) value)
+      {:mode "vega-lite" :renderer :canvas}]]))
 
 (def viewer
   {:predicate (partial sp/valid? ::vega-lite)

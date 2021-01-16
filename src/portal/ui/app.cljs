@@ -5,6 +5,7 @@
             [portal.ui.inspector :as ins :refer [inspector]]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
+            [portal.ui.theme :as theme]
             [portal.ui.viewer.charts :as charts]
             [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.diff :as diff]
@@ -97,38 +98,39 @@
 (defonce show-meta? (r/atom false))
 
 (defn inspect-metadata [settings value]
-  (when-let [m (meta value)]
-    [s/div
-     {:style
-      {:border-bottom [1 :solid (::c/border settings)]}}
-     [s/div
-      {:on-click #(swap! show-meta? not)
-       :style/hover {:color (::c/tag settings)}
-       :style {:cursor :pointer
-               :user-select :none
-               :color (::c/namespace settings)
-               :padding-top (* 1 (:spacing/padding settings))
-               :padding-bottom (* 1 (:spacing/padding settings))
-               :padding-left (* 2 (:spacing/padding settings))
-               :padding-right (* 2 (:spacing/padding settings))
-               :font-size "16pt"
-               :font-weight 100
-               :display :flex
-               :justify-content :space-between
-               :background (::c/background2 settings)
-               :font-family "sans-serif"}}
-      "metadata"
+  (let [theme (theme/use-theme)]
+    (when-let [m (meta value)]
       [s/div
-       {:title "toggle metadata"
-        :style {:font-weight :bold}}
-       (if @show-meta?  "—" "+")]]
-     (when @show-meta?
+       {:style
+        {:border-bottom [1 :solid (::c/border theme)]}}
        [s/div
-        {:style
-         {:border-top [1 :solid (::c/border settings)]
-          :box-sizing :border-box
-          :padding (* 2 (:spacing/padding settings))}}
-        [inspector (assoc settings :coll value :depth 0) m]])]))
+        {:on-click #(swap! show-meta? not)
+         :style/hover {:color (::c/tag theme)}
+         :style {:cursor :pointer
+                 :user-select :none
+                 :color (::c/namespace theme)
+                 :padding-top (* 1 (:spacing/padding theme))
+                 :padding-bottom (* 1 (:spacing/padding theme))
+                 :padding-left (* 2 (:spacing/padding theme))
+                 :padding-right (* 2 (:spacing/padding theme))
+                 :font-size "16pt"
+                 :font-weight 100
+                 :display :flex
+                 :justify-content :space-between
+                 :background (::c/background2 theme)
+                 :font-family "sans-serif"}}
+        "metadata"
+        [s/div
+         {:title "toggle metadata"
+          :style {:font-weight :bold}}
+         (if @show-meta?  "—" "+")]]
+       (when @show-meta?
+         [s/div
+          {:style
+           {:border-top [1 :solid (::c/border theme)]
+            :box-sizing :border-box
+            :padding (* 2 (:spacing/padding theme))}}
+          [inspector (assoc settings :coll value) m]])])))
 
 (def viewers
   [ex/viewer
@@ -137,8 +139,7 @@
    charts/scatter-chart
    charts/histogram-chart
    image/viewer
-   {:name :portal.viewer/map  :predicate map?  :component ins/inspect-map}
-   {:name :portal.viewer/coll :predicate coll? :component ins/inspect-coll}
+   ins/viewer
    table/viewer
    tree/viewer
    text/viewer
@@ -176,32 +177,28 @@
        (filter-data settings value))
       (catch js/Error _e value))))
 
-(defn- error-boundary []
-  (let [error         (r/atom nil)
-        last-children (atom nil)]
-    (r/create-class
-     {:display-name "ErrorBoundary"
-      :component-did-catch
-      (fn [_e info]
-        (reset! error [@last-children info]))
-      :reagent-render
-      (fn [& children]
-        (when-not (= children (first @error))
-          (reset! last-children children)
-          (reset! error nil))
-        (if (nil? @error)
-          (into [:<>] children)
-          (let [[_ info] @error]
-            [:pre [:code (pr-str info)]])))})))
+(def error-boundary
+  (r/create-class
+   {:display-name "ErrorBoundary"
+    :constructor
+    (fn [this _props]
+      (set! (.-state this) #js {:error nil}))
+    :component-did-catch
+    (fn [_this _e _info])
+    :get-derived-state-from-error
+    (fn [error] #js {:error error})
+    :render
+    (fn [this]
+      (if-let [error (.. this -state -error)]
+        (r/as-element
+         [:div [:pre [:code (pr-str error)]]])
+        (.. this -props -children)))}))
 
 (defn inspect-1 [settings value]
-  (let [value (filter-data settings value)
+  (let [theme (theme/use-theme)
+        value (filter-data settings value)
         {:keys [compatible-viewers viewer set-viewer!]} (use-viewer settings value)
-        component (or (:component viewer) inspector)
-        settings  (assoc settings
-                         :portal/rainbow
-                         (cycle ((juxt ::c/exception ::c/keyword ::c/string
-                                       ::c/tag ::c/number ::c/uri) settings)))
+        component (:component viewer)
         commands  (map #(-> %
                             (dissoc :predicate)
                             (assoc  :run (fn [] (set-viewer! (:name %)))))
@@ -235,17 +232,16 @@
          {:style
           {:min-width :fit-content
            :box-sizing :border-box
-           :padding (* 2 (:spacing/padding settings))}}
-         [error-boundary
-          [inspector (assoc settings :component component) value]]]]]]
+           :padding (* 2 (:spacing/padding theme))}}
+         [:> error-boundary [component settings value]]]]]]
      [s/div
       {:style
        {:display :flex
         :min-height 63
         :align-items :center
         :justify-content :space-between
-        :background (::c/background2 settings)
-        :border-top [1 :solid (::c/border settings)]}}
+        :background (::c/background2 theme)
+        :border-top [1 :solid (::c/border theme)]}}
       (if (empty? compatible-viewers)
         [s/div]
         [:select
@@ -253,101 +249,104 @@
           :on-change #(set-viewer!
                        (keyword (.substr (.. % -target -value) 1)))
           :style
-          {:background (::c/background settings)
-           :margin (:spacing/padding settings)
-           :padding (:spacing/padding settings)
+          {:background (::c/background theme)
+           :margin (:spacing/padding theme)
+           :padding (:spacing/padding theme)
            :box-sizing :border-box
-           :font-size (:font-size settings)
-           :color (::c/text settings)
-           :border [1 :solid (::c/border settings)]}}
+           :font-size (:font-size theme)
+           :color (::c/text theme)
+           :border [1 :solid (::c/border theme)]}}
          (for [{:keys [name]} compatible-viewers]
            [:option {:key name :value (pr-str name)} (pr-str name)])])
       [s/div
-       {:style {:padding (:spacing/padding settings)}}
+       {:style {:padding (:spacing/padding theme)}}
        [ins/preview settings value]]]]))
 
 (defn search-input [settings]
-  [s/input
-   {:on-change #(state/dispatch
-                 settings
-                 assoc
-                 :search-text
-                 (.-value (.-target %)))
-    :value (:search-text settings)
-    :placeholder "Type to filter..."
-    :style
-    {:background (::c/background settings)
-     :padding (:spacing/padding settings)
-     :box-sizing :border-box
-     :font-size (:font-size settings)
-     :color (::c/text settings)
-     :border [1 :solid (::c/border settings)]}}])
+  (let [theme (theme/use-theme)]
+    [s/input
+     {:on-change #(state/dispatch
+                   settings
+                   assoc
+                   :search-text
+                   (.-value (.-target %)))
+      :value (or (:search-text settings) "")
+      :placeholder "Type to filter..."
+      :style
+      {:background (::c/background theme)
+       :padding (:spacing/padding theme)
+       :box-sizing :border-box
+       :font-size (:font-size theme)
+       :color (::c/text theme)
+       :border [1 :solid (::c/border theme)]}}]))
 
-(defn button-styles [settings]
-  {:background (::c/text settings)
-   :color (::c/background settings)
-   :border :none
-   :font-size (:font-size settings)
-   :font-family "Arial"
-   :box-sizing :border-box
-   :padding-left (inc (:spacing/padding settings))
-   :padding-right (inc (:spacing/padding settings))
-   :padding-top (inc (:spacing/padding settings))
-   :padding-bottom (inc (:spacing/padding settings))
-   :border-radius (:border-radius settings)
-   :cursor :pointer})
+(defn button-styles []
+  (let [theme (theme/use-theme)]
+    {:background (::c/text theme)
+     :color (::c/background theme)
+     :border :none
+     :font-size (:font-size theme)
+     :font-family "Arial"
+     :box-sizing :border-box
+     :padding-left (inc (:spacing/padding theme))
+     :padding-right (inc (:spacing/padding theme))
+     :padding-top (inc (:spacing/padding theme))
+     :padding-bottom (inc (:spacing/padding theme))
+     :border-radius (:border-radius theme)
+     :cursor :pointer}))
 
 (defn toolbar [settings]
-  [s/div
-   {:style
-    {:display :grid
-     :grid-template-columns "auto auto 1fr auto"
-     :padding-left (* 2 (:spacing/padding settings))
-     :padding-right (* 2 (:spacing/padding settings))
-     :box-sizing :border-box
-     :grid-gap (* 2 (:spacing/padding settings))
-     :height 63
-     :background (::c/background2 settings)
-     :align-items :center
-     :justify-content :center
-     :border-top [1 :solid (::c/border settings)]
-     :border-bottom [1 :solid (::c/border settings)]}}
-   (let [disabled? (nil? (:portal/previous-state settings))]
-     [s/button
-      {:disabled disabled?
-       :title    "Go back in portal history."
-       :on-click #(state/dispatch settings state/history-back)
-       :style    (merge
-                  (button-styles settings)
-                  (when disabled?
-                    {:opacity 0.45
-                     :cursor  :default}))}
-      "◄"])
-   (let [disabled? (nil? (:portal/next-state settings))]
-     [s/button
-      {:disabled disabled?
-       :title    "Go forward in portal history."
-       :on-click #(state/dispatch settings state/history-forward)
-       :style    (merge
-                  (button-styles settings)
-                  (when disabled?
-                    {:opacity 0.45
-                     :cursor  :default}))}
-      "►"])
-   [search-input settings]
-   (let [disabled? (not (contains? settings :portal/value))]
-     [s/button
-      {:disabled disabled?
-       :title    "Clear all values from portal."
-       :on-click #(state/dispatch settings state/clear)
-       :style    (merge
-                  (button-styles settings)
-                  (when disabled?
-                    {:opacity 0.45
-                     :cursor  :default})
-                  {:padding-left (* 2 (:spacing/padding settings))
-                   :padding-right (* 2 (:spacing/padding settings))})}
-      "clear"])])
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style
+      {:display :grid
+       :grid-template-columns "auto auto 1fr auto"
+       :padding-left (* 2 (:spacing/padding theme))
+       :padding-right (* 2 (:spacing/padding theme))
+       :box-sizing :border-box
+       :grid-gap (* 2 (:spacing/padding theme))
+       :height 63
+       :background (::c/background2 theme)
+       :align-items :center
+       :justify-content :center
+       :border-top [1 :solid (::c/border theme)]
+       :border-bottom [1 :solid (::c/border theme)]}}
+     (let [disabled? (nil? (:portal/previous-state settings))]
+       [s/button
+        {:disabled disabled?
+         :title    "Go back in portal history."
+         :on-click #(state/dispatch settings state/history-back)
+         :style    (merge
+                    (button-styles)
+                    (when disabled?
+                      {:opacity 0.45
+                       :cursor  :default}))}
+        "◄"])
+     (let [disabled? (nil? (:portal/next-state settings))]
+       [s/button
+        {:disabled disabled?
+         :title    "Go forward in portal history."
+         :on-click #(state/dispatch settings state/history-forward)
+         :style    (merge
+                    (button-styles)
+                    (when disabled?
+                      {:opacity 0.45
+                       :cursor  :default}))}
+        "►"])
+     [search-input settings]
+     (let [disabled? (not (contains? settings :portal/value))]
+       [s/button
+        {:disabled disabled?
+         :title    "Clear all values from portal."
+         :on-click #(state/dispatch settings state/clear)
+         :style    (merge
+                    (button-styles)
+                    (when disabled?
+                      {:opacity 0.45
+                       :cursor  :default})
+                    {:padding-left (* 2 (:spacing/padding theme))
+                     :padding-right (* 2 (:spacing/padding theme))})}
+        "clear"])]))
 
 (defn scrollbars []
   (let [thumb "rgba(0,0,0,0.3)"]
@@ -359,20 +358,26 @@
           "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
           "*::-webkit-scrollbar-thumb  { border-radius: 10px; }")]))
 
+(defn- container [children]
+  (let [theme (theme/use-theme)]
+    (into
+     [s/div
+      {:style
+       {:display :flex
+        :flex-direction :column
+        :background (::c/background theme)
+        :color (::c/text theme)
+        :font-family (:font/family theme)
+        :font-size (:font-size theme)
+        :height "100vh"
+        :width "100vw"}}
+      [scrollbars]]
+     children)))
+
 (defn root [settings & children]
-  (into
-   [s/div
-    {:style
-     {:display :flex
-      :flex-direction :column
-      :background (::c/background settings)
-      :color (::c/text settings)
-      :font-family (:font/family settings)
-      :font-size (:font-size settings)
-      :height "100vh"
-      :width "100vw"}}
-    [scrollbars]]
-   children))
+  [theme/with-theme
+   (get settings ::c/theme ::c/nord)
+   [container children]])
 
 (defn app [settings]
   (let [settings (merge (state/get-settings) settings)]

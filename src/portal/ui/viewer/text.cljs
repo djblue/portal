@@ -1,52 +1,53 @@
 (ns portal.ui.viewer.text
   (:require [clojure.string :as str]
             [portal.colors :as c]
-            [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
-            [portal.ui.styled :as s]))
+            [portal.ui.styled :as s]
+            [portal.ui.theme :as theme]))
 
 (defn inspect-text [settings value]
-  [s/div
-   {:style
-    {:overflow :auto
-     :background (ins/get-background settings)
-     :padding (:spacing/padding settings)
-     :box-sizing :border-box
-     :cursor :text
-     :border-radius (:border-radius settings)
-     :border [1 :solid (::c/border settings)]}}
-   [s/table
-    [s/tbody
-     [l/lazy-seq
-      settings
-      (->>
-       (str/split value #"\n")
-       (map-indexed
-        (fn [line line-content]
-          [(inc line) line-content]))
-       (filter
-        (fn [[_ line-content]]
-          (if-let [search-text (:search-text settings)]
-            (str/includes? line-content search-text)
-            true)))
-       (map
-        (fn [[line line-content]]
-          [s/tr
-           {:key line}
-           [s/td
-            {:style
-             {:color (::c/number settings)
-              :font-size (:font-size settings)
-              :user-select :none
-              :text-align :right
-              :padding-right (* 2 (:spacing/padding settings))}}
-            [:span line]]
-           [s/td
-            {:style
-             {:color (::c/text settings)
-              :font-size (:font-size settings)}}
-            [:pre {:style {:margin 0}} line-content]]])))
-      {:default-take 100 :step 100}]]]])
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style
+      {:overflow :auto
+       :background (::c/background2 theme)
+       :padding (:spacing/padding theme)
+       :box-sizing :border-box
+       :cursor :text
+       :border-radius (:border-radius theme)
+       :border [1 :solid (::c/border theme)]}}
+     [s/table
+      [s/tbody
+       [l/lazy-seq
+        settings
+        (->>
+         (str/split value #"\n")
+         (map-indexed
+          (fn [line line-content]
+            [(inc line) line-content]))
+         (filter
+          (fn [[_ line-content]]
+            (if-let [search-text (:search-text settings)]
+              (str/includes? line-content search-text)
+              true)))
+         (map
+          (fn [[line line-content]]
+            [s/tr
+             {:key line}
+             [s/td
+              {:style
+               {:color (::c/number theme)
+                :font-size (:font-size theme)
+                :user-select :none
+                :text-align :right
+                :padding-right (* 2 (:spacing/padding theme))}}
+              [s/span line]]
+             [s/td
+              {:style
+               {:color (::c/text theme)
+                :font-size (:font-size theme)}}
+              [:pre {:style {:margin 0}} line-content]]])))
+        {:default-take 100 :step 100}]]]]))
 
 (def viewer
   {:predicate string?

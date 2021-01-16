@@ -1,12 +1,15 @@
 (ns portal.ui.viewer.html
-  (:require [portal.colors :as c]))
+  (:require [portal.colors :as c]
+            [portal.ui.styled :as s]
+            [portal.ui.theme :as theme]))
 
-(defn inspect-html [settings value]
-  [:iframe {:style {:width "100%"
-                    :height "100%"
-                    :border-radius (:border-radius settings)
-                    :border [1 :solid (::c/border settings)]}
-            :src-doc value}])
+(defn inspect-html [_settings value]
+  (let [theme (theme/use-theme)]
+    [s/iframe {:style {:width "100%"
+                       :height "100%"
+                       :border-radius (:border-radius theme)
+                       :border [1 :solid (::c/border theme)]}
+               :src-doc value}]))
 
 (def viewer
   {:predicate string?

@@ -1,20 +1,22 @@
 (ns portal.ui.viewer.image
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
-            [portal.ui.styled :as s]))
+            [portal.ui.styled :as s]
+            [portal.ui.theme :as theme]))
 
-(defn inspect-image [settings value]
-  (let [blob (js/Blob. #js [value])
-        url  (or js/window.URL js/window.webkitURL)
-        src  (.createObjectURL url blob)]
+(defn inspect-image [_settings value]
+  (let [theme (theme/use-theme)
+        blob  (js/Blob. #js [value])
+        url   (or js/window.URL js/window.webkitURL)
+        src   (.createObjectURL url blob)]
     [s/img
      {:src src
       :style
       {:max-height "100%"
        :max-width "100%"
        :user-select :none
-       :border-radius (:border-radius settings)
-       :border [1 :solid (::c/border settings)]}}]))
+       :border-radius (:border-radius theme)
+       :border [1 :solid (::c/border theme)]}}]))
 
 (def viewer
   {:predicate ins/bin?

@@ -140,8 +140,4 @@
                         (meta more))))))))))
 
 (defn get-settings []
-  (let [theme (get c/themes (get @tap-state ::c/theme ::c/nord))]
-    (merge @tap-state
-           @state
-           theme
-           {:depth 0 ::state state})))
+  (merge @tap-state @state {::state state}))

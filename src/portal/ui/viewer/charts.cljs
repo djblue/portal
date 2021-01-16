@@ -1,6 +1,7 @@
 (ns portal.ui.viewer.charts
   (:require [clojure.spec.alpha :as sp]
             [portal.colors :as c]
+            [portal.ui.theme :as theme]
             [portal.ui.viewer.vega-lite :as v]))
 
 ;; collection of maps of [{:x 0 :y 0} ...] maps
@@ -28,33 +29,33 @@
     (sp/valid? ::numerical-collection data)
     (for [[x y] (map vector (:x data) (:y data))] {:x x :y y})))
 
-(defn line-chart-viewer
-  [settings value]
-  [v/vega-lite-viewer
-   settings
-   {:data
-    {:values (normalize-data value)}
-    :encoding
-    {:x {:field "x" :type "quantitative"}
-     :y {:field "y" :type "quantitative"}
-     :color {:value (::c/number settings)}}
-    :mark "line"
-    :selection {:grid {:type "interval" :bind "scales"}}}])
+(defn line-chart-viewer [settings value]
+  (let [theme (theme/use-theme)]
+    [v/vega-lite-viewer
+     settings
+     {:data
+      {:values (normalize-data value)}
+      :encoding
+      {:x {:field "x" :type "quantitative"}
+       :y {:field "y" :type "quantitative"}
+       :color {:value (::c/number theme)}}
+      :mark "line"
+      :selection {:grid {:type "interval" :bind "scales"}}}]))
 
-(defn scatter-chart-viewer
-  [settings value]
-  [v/vega-lite-viewer
-   settings
-   {:data {:values (normalize-data value)}
-    :encoding
-    {:x {:field "x" :type "quantitative"}
-     :y {:field "y" :type "quantitative"}
-     :color {:value (::c/number settings)}
-     :tooltip
-     [{:field "x" :type "quantitative"}
-      {:field "y" :type "quantitative"}]}
-    :mark "circle"
-    :selection {:grid {:type "interval" :bind "scales"}}}])
+(defn scatter-chart-viewer [settings value]
+  (let [theme (theme/use-theme)]
+    [v/vega-lite-viewer
+     settings
+     {:data {:values (normalize-data value)}
+      :encoding
+      {:x {:field "x" :type "quantitative"}
+       :y {:field "y" :type "quantitative"}
+       :color {:value (::c/number theme)}
+       :tooltip
+       [{:field "x" :type "quantitative"}
+        {:field "y" :type "quantitative"}]}
+      :mark "circle"
+      :selection {:grid {:type "interval" :bind "scales"}}}]))
 
 (defn histogram-chart-viewer
   [settings value]

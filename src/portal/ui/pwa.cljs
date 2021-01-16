@@ -11,7 +11,9 @@
             [portal.ui.drag-and-drop :as dnd]
             [portal.ui.state :as s :refer [state]]
             [portal.ui.styled :refer [div]]
-            [reagent.dom :as rdom]))
+            [portal.ui.theme :as theme]
+            [reagent.core :as r]
+            [reagent.dom :as dom]))
 
 (defn clipboard []
   (js/navigator.clipboard.readText))
@@ -100,74 +102,77 @@
 
 (def hex-color #"#[0-9a-f]{6}")
 
-(defn splash []
-  (let [settings (merge (s/get-settings) {:send! send!})
+(defn splash [settings]
+  (let [theme (theme/use-theme)
         mapping (reduce-kv
                  (fn [mapping k v]
-                   (assoc mapping v (get settings k)))
+                   (assoc mapping v (get theme k)))
                  {}
                  (::c/nord c/themes))
         svg (str/replace (io/resource "splash.svg") hex-color mapping)]
-    [dnd/area
-     settings
-     [app/root
-      settings
-      [commands/palette
-       (assoc settings :commands commands)]
+    [:<>
+     [commands/palette
+      (assoc settings :commands commands)]
+     [div
+      {:style
+       {:display :flex
+        :align-items :center
+        :justify-content :center
+        :height "100vh"
+        :width "100vw"}}
       [div
        {:style
         {:display :flex
-         :align-items :center
-         :justify-content :center
-         :height "100vh"
-         :width "100vw"}}
+         :flex-direction :column
+         :align-items :center}}
+       [div
+        {:style {:width :fit-content
+                 :margin "0 auto"}
+         :dangerously-set-inner-HTML {:__html svg}}]
        [div
         {:style
-         {:display :flex
-          :flex-direction :column
-          :align-items :center}}
-        [div
-         {:style {:width :fit-content
-                  :margin "0 auto"}
-          :dangerously-set-inner-HTML {:__html svg}}]
-        [div
-         {:style
-          {:margin-top "10vh"
-           :width "60vw"
-           :max-width "800px"
-           :min-width :fit-content
-           :font-size "1.15em"
-           :background (::c/background2 settings)
-           :border [1 :solid (::c/border settings)]
-           :border-radius (:border-radius settings)}}
-         (for [command commands]
-           ^{:key (hash command)}
+         {:margin-top "10vh"
+          :width "60vw"
+          :max-width "800px"
+          :min-width :fit-content
+          :font-size "1.15em"
+          :background (::c/background2 theme)
+          :border [1 :solid (::c/border theme)]
+          :border-radius (:border-radius theme)}}
+        (for [command commands]
+          ^{:key (hash command)}
+          [div
+           {:on-click #((:run command) settings)
+            :style
+            {:display :flex
+             :align-items :center
+             :justify-content :space-between
+             :padding (:spacing/padding theme)
+             :cursor :pointer
+             :border-left [5 :solid "#0000"]}
+            :style/hover
+            {:background (::c/background theme)
+             :border-left [5 :solid (::c/boolean theme)]}}
            [div
-            {:on-click #((:run command) settings)
-             :style
-             {:display :flex
-              :align-items :center
-              :justify-content :space-between
-              :padding (:spacing/padding settings)
-              :cursor :pointer
-              :border-left [5 :solid "#0000"]}
-             :style/hover
-             {:background (::c/background settings)
-              :border-left [5 :solid (::c/boolean settings)]}}
-            [div
-             {:style
-              {:margin-left (:spacing/padding settings)}}
-             (:label command)]
-            [commands/shortcut settings command]])]]]]]))
+            {:style
+             {:margin-left (:spacing/padding theme)}}
+            (:label command)]
+           [commands/shortcut settings command]])]]]]))
 
 (defn pwa-app []
   (if (contains? @state :portal/value)
     [app/app {:send! send!}]
-    [splash]))
+    (let [settings (merge (s/get-settings) {:send! send!})]
+      [app/root
+       settings
+       [dnd/area settings [splash settings]]])))
+
+(def functional-compiler (r/create-compiler {:function-components true}))
 
 (defn render-app []
-  (rdom/render [pwa-app]
-               (.getElementById js/document "root")))
+  (dom/render [pwa-app]
+              (.getElementById js/document "root")
+              functional-compiler))
 
 (defn get-mode []
   (let [src (js/location.search.slice 1)]

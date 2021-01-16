@@ -2,7 +2,8 @@
   (:require [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [portal.colors :as c]
-            [portal.ui.styled :as s]))
+            [portal.ui.styled :as s]
+            [portal.ui.theme :as theme]))
 
 (spec/def ::cause string?)
 
@@ -28,11 +29,6 @@
 (defn exception? [value]
   (spec/valid? ::exception value))
 
-(defn get-background [settings]
-  (if (even? (:depth settings))
-    (::c/background settings)
-    (::c/background2 settings)))
-
 (defn- format-trace-line [class method]
   (let [split (str/split class #"\$")]
     (if (and ('#{invokeStatic invoke doInvoke} method)
@@ -40,66 +36,68 @@
       [(str/join "/" (drop-last split)) (last split)]
       [class method])))
 
-(defn- inspect-trace-line [settings trace-line]
-  (let [[class method file line] trace-line]
+(defn- inspect-trace-line [trace-line]
+  (let [theme (theme/use-theme)
+        [class method file line] trace-line]
     [:<>
      (when file
        [s/div {:style
                {:grid-column "1"
                 :text-align :right
-                :color (::c/string settings)}}
+                :color (::c/string theme)}}
         (pr-str file)])
      [s/div {:style
              {:grid-column "2"
               :text-align :right
-              :color (::c/number settings)}}
+              :color (::c/number theme)}}
       line]
      (let [[class method] (format-trace-line class method)]
        [s/div {:style
                {:grid-column "3"}}
-        [s/span {:style {:color (::c/namespace settings)}} class "/"]
-        [s/span {:style {:color (::c/symbol settings)}} method]])]))
+        [s/span {:style {:color (::c/namespace theme)}} class "/"]
+        [s/span {:style {:color (::c/symbol theme)}} method]])]))
 
-(defn inspect-exception [settings value]
-  [s/div
-   {:style
-    {:background (get-background settings)
-     :margin "0 auto"
-     :padding (:spacing/padding settings)
-     :box-sizing :border-box
-     :color (::c/text settings)
-     :font-size  (:font-size settings)
-     :border-radius (:border-radius settings)
-     :border [1 :solid (::c/border settings)]}}
-   (let [{:keys [via trace]} value]
-     [s/div
-      {:style
-       {:display :flex
-        :justify-content :center}}
-      [s/div
-       {:style {:display    :grid
-                :grid-gap   (:spacing/padding settings)
-                :grid-template-columns "auto auto auto"}}
-       (map-indexed
-        (fn [idx {:keys [type message at]}]
-          ^{:key idx}
-          [:<>
-           [s/div
-            {:style
-             {:text-align :right
-              :grid-column "1"
-              :font-weight :bold
-              :color (::c/exception settings)}}
-            type]
-           [s/div
-            {:style {:grid-column "3"}}
-            message]
-           [inspect-trace-line settings at]])
-        via)
-       (map-indexed
-        (fn [idx trace-line]
-          ^{:key idx} [inspect-trace-line settings trace-line])
-        (rest trace))]])])
+(defn inspect-exception [_settings value]
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style
+      {:background (::c/background2 theme)
+       :margin "0 auto"
+       :padding (:spacing/padding theme)
+       :box-sizing :border-box
+       :color (::c/text theme)
+       :font-size  (:font-size theme)
+       :border-radius (:border-radius theme)
+       :border [1 :solid (::c/border theme)]}}
+     (let [{:keys [via trace]} value]
+       [s/div
+        {:style
+         {:display :flex
+          :justify-content :center}}
+        [s/div
+         {:style {:display    :grid
+                  :grid-gap   (:spacing/padding theme)
+                  :grid-template-columns "auto auto auto"}}
+         (map-indexed
+          (fn [idx {:keys [type message at]}]
+            ^{:key idx}
+            [:<>
+             [s/div
+              {:style
+               {:text-align :right
+                :grid-column "1"
+                :font-weight :bold
+                :color (::c/exception theme)}}
+              type]
+             [s/div
+              {:style {:grid-column "3"}}
+              message]
+             [inspect-trace-line at]])
+          via)
+         (map-indexed
+          (fn [idx trace-line]
+            ^{:key idx} [inspect-trace-line trace-line])
+          (rest trace))]])]))
 
 (def viewer
   {:predicate exception?
