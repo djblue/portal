@@ -11,7 +11,7 @@
      :border-bottom [1 :solid (::c/border theme)]
      :border-right [1 :solid (::c/border theme)]}))
 
-(defn- table-header-row [settings child]
+(defn- table-header-row [child]
   [s/th
    {:style
     (assoc
@@ -19,10 +19,10 @@
      :top 0
      :z-index 2
      :position :sticky
-     :background (ins/get-background settings))}
+     :background (ins/get-background))}
    child])
 
-(defn- table-header-column [settings child]
+(defn- table-header-column [child]
   [s/th
    {:style
     (assoc
@@ -31,7 +31,7 @@
      :z-index 1
      :position :sticky
      :text-align :right
-     :background (ins/get-background settings))}
+     :background (ins/get-background))}
    child])
 
 (defn- table-data [_settings child]
@@ -45,7 +45,7 @@
       {:width "100%"
        :border-top [1 :solid (::c/border theme)]
        :border-left [1 :solid (::c/border theme)]
-       :background (ins/get-background settings)
+       :background (ins/get-background)
        :border-spacing 0
        :position :relative
        :color (::c/text theme)
@@ -79,16 +79,14 @@
      (fn [context]
        (let [{:keys [row column]} context]
          (cond
-           (= column row ::header) [table-header-row settings]
+           (= column row ::header) [table-header-row]
 
            (= row ::header)
            [table-header-row
-            settings
             [inspector (assoc settings :coll values) column]]
 
            (= column ::header)
            [table-header-column
-            settings
             [inspector (assoc settings :coll values) (first row)]]
 
            :else
@@ -107,16 +105,14 @@
      (fn [context]
        (let [{:keys [row column]} context]
          (cond
-           (= column row ::header) [table-header-row settings]
+           (= column row ::header) [table-header-row]
 
            (= row ::header)
            [table-header-row
-            settings
             [inspector (assoc settings :coll values) column]]
 
            (= column ::header)
            [table-header-column
-            settings
             [inspector (assoc settings :coll values) (dec (:row-index context))]]
 
            :else
@@ -148,7 +144,6 @@
        (let [{:keys [row column]} context]
          (if (= row ::header)
            [table-header-row
-            settings
             [inspector (assoc settings :coll row) column]]
 
            [table-data

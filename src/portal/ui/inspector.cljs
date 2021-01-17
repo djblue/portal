@@ -93,7 +93,7 @@
        [s/div {:style {:flex 1}}
         [diff-added _settings added]])]))
 
-(defn get-background [_settings]
+(defn get-background []
   (let [theme (theme/use-theme)]
     (if (even? (use-depth))
       (::c/background theme)
@@ -105,7 +105,7 @@
      [s/span {:style {:color (::c/tag theme)}} "#"]
      tag]))
 
-(defn- tagged-value [settings tag value]
+(defn- tagged-value [_settings tag value]
   (let [theme (theme/use-theme)]
     [s/div
      {:style {:display :flex :align-items :center}}
@@ -113,7 +113,7 @@
      [s/div {:style {:margin-left (:spacing/padding theme)}}
       [s/div
        {:style {:margin (* -1 (:spacing/padding theme))}}
-       [inspector settings value]]]]))
+       [inspector _settings value]]]]))
 
 (defn- preview-coll [open close]
   (fn [_settings value]
@@ -139,14 +139,14 @@
 (defn preview-tagged [_settings value]
   [tagged-tag (.-tag value)])
 
-(defn- container-map [settings child]
+(defn- container-map [child]
   (let [theme (theme/use-theme)]
     [s/div
      {:style
       {:width "100%"
        :min-width :fit-content
        :display :grid
-       :background (get-background settings)
+       :background (get-background)
        :grid-gap (:spacing/padding theme)
        :padding (:spacing/padding theme)
        :box-sizing :border-box
@@ -155,12 +155,12 @@
        :border-radius (:border-radius theme)
        :border [1 :solid (::c/border theme)]}} child]))
 
-(defn- container-map-k [_settings child]
+(defn- container-map-k [child]
   [s/div {:style {:grid-column "1"
                   :display :flex
                   :align-items :center}} child])
 
-(defn- container-map-v [_settings child]
+(defn- container-map-v [child]
   [s/div {:style {:grid-column "2"
                   :display :flex
                   :align-items :center}} child])
@@ -175,27 +175,24 @@
 
 (defn- inspect-map [settings values]
   [container-map
-   settings
    [l/lazy-seq
     settings
     (for [[k v] (try-sort-map values)]
       [:<>
        {:key (hash k)}
        [container-map-k
-        settings
         [inspector (assoc settings :coll values) k]]
        [container-map-v
-        settings
         [inspector (assoc settings :coll values :k k) v]]])]])
 
-(defn- container-coll [settings child]
+(defn- container-coll [child]
   (let [theme (theme/use-theme)]
     [s/div
      {:style
       {:width "100%"
        :text-align :left
        :display :grid
-       :background (get-background settings)
+       :background (get-background)
        :grid-gap (:spacing/padding theme)
        :padding (:spacing/padding theme)
        :box-sizing :border-box
@@ -206,7 +203,6 @@
 
 (defn- inspect-coll [settings values]
   [container-coll
-   settings
    [l/lazy-seq
     settings
     (map-indexed
@@ -288,11 +284,11 @@
      [inspect-namespace _settings value]
      (name value)]))
 
-(defn- inspect-date [settings value]
-  [tagged-value settings "inst" (.toJSON value)])
+(defn- inspect-date [_settings value]
+  [tagged-value _settings "inst" (.toJSON value)])
 
-(defn- inspect-uuid [settings value]
-  [tagged-value settings "uuid" (str value)])
+(defn- inspect-uuid [_settings value]
+  [tagged-value _settings "uuid" (str value)])
 
 (defn- get-var-symbol [value]
   (cond
@@ -320,8 +316,8 @@
       :target "_blank"}
      value]))
 
-(defn- inspect-tagged [settings value]
-  [tagged-value settings (.-tag value) (.-rep value)])
+(defn- inspect-tagged [_settings value]
+  [tagged-value _settings (.-tag value) (.-rep value)])
 
 (defn- inspect-ratio [_settings value]
   (let [theme (theme/use-theme)
@@ -337,13 +333,13 @@
     [s/span
      (trim-string (pr-str value) limit)]))
 
-(defn- inspect-object [settings value]
+(defn- inspect-object [_settings value]
   (let [value (.-rep value)
         theme (theme/use-theme)
         limit (:limits/string-length theme)]
     [s/span {:title (:type value)
              :style
-             {:color (::c/text settings)}}
+             {:color (::c/text theme)}}
      (trim-string (:string value) limit)]))
 
 (defn- get-preview-component [type]
@@ -404,7 +400,6 @@
         component (if preview?
                     (get-preview-component type)
                     (get-inspect-component type))
-        settings (assoc settings :value value)
         nav-target? (= 1 depth)
         on-nav #(state/dispatch
                  settings
