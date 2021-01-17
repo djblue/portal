@@ -46,9 +46,6 @@
       (fn [e]
         (.preventDefault e)
         (set-active! true))
-      :on-drag-leave
-      (fn [_e]
-        (set-active! false))
       :on-drop
       (fn [e]
         (.preventDefault e)
@@ -60,25 +57,36 @@
         (set-active! false))
       :style {:position :relative}}
      (when active?
-       [s/div
-        {:style
-         {:position :absolute
-          :top 0
-          :left 0
-          :right 0
-          :bottom 0
-          :z-index 100
-          :padding 40
-          :box-sizing :border-box
-          :background "rgba(0,0,0,0.5)"
-          :color "white"}}
+       [:<>
         [s/div
          {:style
-          {:border "5px dashed white"
-           :border-radius 20
-           :height "calc(100% - 10px)"
-           :display :flex
-           :justify-content :center
-           :align-items :center}}
-         [:h1 {:style {:font-family "sans-serif"}} "Drag & Drop Your File Here"]]])
+          {:position :absolute
+           :top 0
+           :left 0
+           :right 0
+           :bottom 0
+           :padding 40
+           :box-sizing :border-box
+           :color "white"
+           :background "rgba(0,0,0,0.5)"}}
+         [s/div
+          {:style
+           {:user-select :none
+            :border "5px dashed white"
+            :border-radius 20
+            :height "calc(100% - 10px)"
+            :display :flex
+            :justify-content :center
+            :align-items :center}}
+          [:h1 {:style {:font-family "sans-serif"}} "Drag & Drop Your File Here"]]]
+        [s/div
+         {:style
+          {:position :absolute
+           :top 0
+           :left 0
+           :right 0
+           :bottom 0}
+          :on-drag-leave
+          (fn [_e]
+            (set-active! false))}]])
      children]))
