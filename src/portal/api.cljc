@@ -3,10 +3,16 @@
             #?(:clj  [portal.runtime.jvm.launcher :as l]
                :cljs [portal.runtime.node.launcher :as l])))
 
-(defn tap
+(defn submit
+  "Tap target function."
+  [value]
+  (rt/update-value value)
+  nil)
+
+(defn ^{:deprecated "0.9"} tap
   "Add portal as a tap> target."
   []
-  (add-tap #'rt/update-value)
+  (add-tap #'submit)
   nil)
 
 (defn start
@@ -35,4 +41,3 @@
   []
   (rt/clear-values)
   nil)
-

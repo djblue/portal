@@ -22,7 +22,7 @@
 
 (defn node [] (cljs :node))
 
-(p/tap)
+(add-tap #'p/submit)
 
 (extend-protocol Datafiable
   java.io.File
@@ -57,7 +57,7 @@
 
   (with-redefs [l/pwa (:dev pwa/envs)]
     (def portal (p/open)))
-  (p/tap)
+  (add-tap #'p/submit)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
   (doseq [i (range 100)] (tap> [::index i]))
   (p/clear)

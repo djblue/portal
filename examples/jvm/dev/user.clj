@@ -5,7 +5,7 @@
 
 (def portal (p/open))
 
-(p/tap)
+(add-tap #'p/submit)
 
 (def server (atom nil))
 

@@ -4,7 +4,7 @@
             [examples.data :refer [data]]
             [portal.web :as p]))
 
-(p/tap)
+(add-tap #'p/submit)
 
 (defn swap-dev []
   (set! js/portal.runtime.web.launcher.code_url
@@ -24,7 +24,7 @@
   (swap-dev)
 
   (def portal (p/open))
-  (p/tap)
+  (add-tap #'p/submit)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
   (doseq [i (range 100)] (tap> [::index i]))
   (p/clear)
