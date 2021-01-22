@@ -5,7 +5,7 @@
 
 (def portal (p/open))
 
-(p/tap)
+(add-tap #'p/submit)
 
 (defn js->clj+
   "For cases when built-in js->clj doesn't work. Source: https://stackoverflow.com/a/32583549/4839573"

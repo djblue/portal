@@ -7,10 +7,16 @@
 
 (def ^:export send! l/send!)
 
-(defn ^:export tap
+(defn ^:export submit
+  "Tap target function."
+  [value]
+  (rt/update-value value)
+  nil)
+
+(defn ^:export ^{:deprecated "0.9"} tap
   "Add portal as a tap> target."
   []
-  (add-tap #'rt/update-value)
+  (add-tap #'submit)
   nil)
 
 (defn ^:export open
