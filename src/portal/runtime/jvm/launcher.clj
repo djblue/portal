@@ -8,7 +8,8 @@
             [portal.runtime :as rt]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.jvm.server :as server])
-  (:import [java.util UUID]))
+  (:import [java.util UUID]
+           [java.io File FilenameFilter]))
 
 (defn- random-uuid [] (UUID/randomUUID))
 
@@ -41,7 +42,7 @@
       [(second (re-find #"com\.google\.Chrome\.app\.([^<]+)" (slurp info)))
        nil])))
 
-(defn- get-app-id-from-pref-file [pref-file app-name]
+(defn- get-app-id-from-pref-file [^File pref-file app-name]
   (when (.exists pref-file)
     (some
      (fn [[id extension]]
@@ -57,7 +58,7 @@
                            ".config/google-chrome")
         pref-dirs (.listFiles
                    chrome-config-dir
-                   (reify java.io.FilenameFilter
+                   (reify FilenameFilter
                      (accept [_ dir name]
                        (or (= "Default" name)
                            (some? (re-matches #"Profile\s\d+" name))))))
@@ -65,7 +66,7 @@
                     #(io/file % "Preferences")
                     pref-dirs)]
     (->> pref-files
-         (some (fn [pref-file]
+         (some (fn [^File pref-file]
                  (when-let [app-id (get-app-id-from-pref-file pref-file app-name)]
                    (let [profile-name (->> pref-file
                                            .getPath
