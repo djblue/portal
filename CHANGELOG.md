@@ -1,3 +1,12 @@
+## 0.9.0 - 2021-01-22
+
+- PWA startup for linux with >1 chrome profile (thanks [@brdloush](https://github.com/brdloush) [#41](https://github.com/djblue/portal/pull/41))
+- Adds portal.api/submit target function for add-tap and remove-tap. (thanks [@coyotesqrl](https://github.com/coyotesqrl) [#39](https://github.com/djblue/portal/pull/39))
+  - Now users can `(clojure.core/remove-tap #'portal.api/submit)` to stop sending `tap>`  values to portal.
+- jvm.launcher: use system prop for path separator (thanks [@bennyandresen](https://github.com/bennyandresen) [#34](https://github.com/djblue/portal/pull/34))
+  - fallback to previous value ":"
+  - This improves Windows support. Unix uses ":" and Windows uses ";"
+
 ## 0.8.0 - 2021-01-06
 
 - Support portal parameter in portal.api/open (thanks [@rfhayashi](https://github.com/rfhayashi) [#32](https://github.com/djblue/portal/pull/32))
