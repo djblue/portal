@@ -8,7 +8,8 @@
             [portal.runtime :as rt]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.jvm.server :as server])
-  (:import [java.util UUID]))
+  (:import [java.util UUID]
+           [java.io File FilenameFilter]))
 
 (defn- random-uuid [] (UUID/randomUUID))
 
@@ -32,38 +33,63 @@
 
 (defonce ^:private server (atom nil))
 
-(defn- get-app-id-osx [app-name]
+(defn- get-app-id-profile-osx [app-name]
   (let [info (io/file (System/getProperty "user.home")
                       "Applications/Chrome Apps.localized/"
                       (str app-name ".app")
                       "Contents/Info.plist")]
     (when (.exists info)
-      (second (re-find #"com\.google\.Chrome\.app\.([^<]+)" (slurp info))))))
+      [(second (re-find #"com\.google\.Chrome\.app\.([^<]+)" (slurp info)))
+       nil])))
 
-(defn- get-app-id-linux [app-name]
-  (let [preferences (io/file
-                     (System/getProperty "user.home")
-                     ".config/google-chrome/Default/Preferences")]
-    (when (.exists preferences)
-      (some
-       (fn [[id extension]]
-         (let [name (get-in extension ["manifest" "name"] "")]
-           (when (= app-name name) id)))
-       (get-in
-        (json/parse-stream (io/reader preferences))
-        ["extensions" "settings"])))))
+(defn- get-app-id-from-pref-file [^File pref-file app-name]
+  (when (.exists pref-file)
+    (some
+     (fn [[id extension]]
+       (let [name (get-in extension ["manifest" "name"] "")]
+         (when (= app-name name) id)))
+     (get-in
+      (json/parse-stream (io/reader pref-file))
+      ["extensions" "settings"]))))
 
-(defn- get-app-id [app-name]
-  (or (get-app-id-osx app-name) (get-app-id-linux app-name)))
+(defn- get-app-id-profile-linux [app-name]
+  (let [chrome-config-dir (io/file
+                           (System/getProperty "user.home")
+                           ".config/google-chrome")
+        pref-dirs (.listFiles
+                   chrome-config-dir
+                   (reify FilenameFilter
+                     (accept [_ dir name]
+                       (or (= "Default" name)
+                           (some? (re-matches #"Profile\s\d+" name))))))
+        pref-files (map
+                    #(io/file % "Preferences")
+                    pref-dirs)]
+    (->> pref-files
+         (some (fn [^File pref-file]
+                 (when-let [app-id (get-app-id-from-pref-file pref-file app-name)]
+                   (let [profile-name (->> pref-file
+                                           .getPath
+                                           (re-find #"\/([^/]+)/Preferences")
+                                           second)]
+                     [app-id profile-name])))))))
+
+(defn- get-app-id-profile
+  "Returns [app-id profile] tuple if portal is installed as `app-name` under any of the browser profiles"
+  [app-name]
+  (or (get-app-id-profile-osx app-name) (get-app-id-profile-linux app-name)))
 
 (def pwa
   {:name "portal"
    :host "https://djblue.github.io/portal/"})
 
 (defn- chrome-flags [url]
-  (if-let [app-id (get-app-id (:name pwa))]
-    [(str "--app-id=" app-id)
-     (str "--app-launch-url-for-shortcuts-menu-item=" (:host pwa) "?" url)]
+  (if-let [[app-id profile] (get-app-id-profile (:name pwa))]
+    (->> [(str "--app-id=" app-id)
+          (when profile
+            (str "--profile-directory=" profile))
+          (str "--app-launch-url-for-shortcuts-menu-item=" (:host pwa) "?" url)]
+         (filter some?))
     ["--incognito"
      "--disable-features=TranslateUI"
      "--no-first-run"
