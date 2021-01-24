@@ -3,15 +3,7 @@
             [reagent.core :as r]
             [portal.async :as a]))
 
-(def default-settings
-  {:font/family "monospace"
-   :font-size "12pt"
-   :limits/string-length 100
-   :limits/max-depth 1
-   :spacing/padding 8
-   :border-radius "2px"})
-
-(defonce state     (r/atom default-settings))
+(defonce state     (r/atom nil))
 (defonce tap-state (r/atom nil))
 
 (defn notify-parent [event]
