@@ -161,17 +161,8 @@
   (let [theme (theme/use-theme)
         value (filter-data settings value)
         {:keys [compatible-viewers viewer set-viewer!]} (use-viewer settings value)
-        component (:component viewer)
-        commands  (map #(-> %
-                            (dissoc :predicate)
-                            (assoc  :run (fn [] (set-viewer! (:name %)))))
-                       compatible-viewers)]
-    [s/div
-     {:style {:flex 1}}
-     [commands/palette
-      (assoc settings
-             :datafy (get-datafy settings)
-             :commands commands)]
+        component (:component viewer)]
+    [:<>
      [s/div
       {:style
        {:position :relative
@@ -293,19 +284,14 @@
                        :cursor  :default}))}
         "►"])
      [search-input settings]
-     (let [disabled? (not (contains? settings :portal/value))]
-       [s/button
-        {:disabled disabled?
-         :title    "Clear all values from portal."
-         :on-click #(state/dispatch settings state/clear)
-         :style    (merge
-                    (button-styles)
-                    (when disabled?
-                      {:opacity 0.45
-                       :cursor  :default})
-                    {:padding-left (* 2 (:spacing/padding theme))
-                     :padding-right (* 2 (:spacing/padding theme))})}
-        "clear"])]))
+     [s/button
+      {:title    "Clear all values from portal."
+       :on-click #(state/dispatch settings state/clear)
+       :style    (merge
+                  (button-styles)
+                  {:padding-left (* 2 (:spacing/padding theme))
+                   :padding-right (* 2 (:spacing/padding theme))})}
+      "clear"]]))
 
 (defn scrollbars []
   (let [thumb "rgba(0,0,0,0.3)"]
@@ -333,6 +319,35 @@
       [scrollbars]]
      children)))
 
+(defn- viewer-commands [settings value]
+  (let [{:keys [compatible-viewers set-viewer!]} (use-viewer settings value)]
+    (map #(-> %
+              (dissoc :predicate)
+              (assoc  :run (fn [] (set-viewer! (:name %)))))
+         compatible-viewers)))
+
+(defn- inspect-1-history [current-settings]
+  [:<>
+   [commands/palette
+    (assoc current-settings
+           :datafy (get-datafy current-settings)
+           :commands (viewer-commands
+                      current-settings
+                      (state/get-value current-settings)))]
+   (doall
+    (map-indexed
+     (fn [index settings]
+       ^{:key (str index)}
+       [s/div
+        {:style
+         {:flex 1
+          :display
+          (if (= settings current-settings)
+            :block
+            :none)}}
+        [inspect-1 settings (state/get-value settings)]])
+     (state/get-history current-settings)))])
+
 (defn root [settings & children]
   [theme/with-theme
    (get settings ::c/theme ::c/nord)
@@ -349,7 +364,4 @@
         {:width "100%"
          :height "100%"
          :display :flex}}
-       (when (contains? settings :portal/value)
-         [inspect-1
-          settings
-          (:portal/value settings)])]]]))
+       [inspect-1-history settings]]]]))
