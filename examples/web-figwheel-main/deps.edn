@@ -1,0 +1,10 @@
+{:paths ["src" "resources"]
+ :deps
+ {org.clojure/clojurescript {:mvn/version "1.10.764"}}
+ :aliases
+ {:dev
+  {:extra-paths ["dev"]
+   :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]
+   :extra-deps
+   {com.bhauman/figwheel-main {:mvn/version "0.2.11"}
+    djblue/portal {:mvn/version "0.6.1"}}}}}

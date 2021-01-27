@@ -1,0 +1,5 @@
+{
+ :target-dir "resources"
+ :watch-dirs ["dev" "src"]
+ ;:css-dirs ["resources/public/css"]
+}

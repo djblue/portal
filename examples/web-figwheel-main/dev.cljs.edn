@@ -1,0 +1,6 @@
+{:output-to "resources/public/cljs-out/dev-main.js"
+ :optimizations :none
+ :pretty-print true
+ :source-map true
+ :source-map-timestamp true
+ :main example.app}
