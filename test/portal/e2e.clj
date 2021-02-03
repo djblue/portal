@@ -7,9 +7,13 @@
   (read-line)
   (prn code))
 
+(def pane-titles '("Alice" "Mad Hatter" "The Cake is a Lie"))
+
 (def options
   {:portal.colors/theme
-   (rand-nth (keys c/themes))})
+   (rand-nth (keys c/themes))
+   :portal.launcher/window-title
+   (rand-nth pane-titles)})
 
 (defn -main [& args]
   (if (= (first args) "web")

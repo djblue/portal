@@ -1,9 +1,10 @@
-(ns portal.runtime.index)
+(ns portal.runtime.index
+  (:require [portal.runtime :as r]))
 
 (def testing? (atom false))
 
 (defn html [& {:keys [name version code-url platform]
-               :or {name     "portal"
+               :or {name     (:portal.launcher/window-title @r/state)
                     version  "0.9.0"
                     code-url "main.js"
                     platform #?(:bb "bb" :clj "jvm" :cljs "node")}}]

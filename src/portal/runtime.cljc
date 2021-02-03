@@ -43,7 +43,8 @@
   (get @instance-cache [:uuid uuid]))
 
 (defonce state (atom {:portal/state-id (random-uuid)
-                      :portal/value (list)}))
+                      :portal/value (list)
+                      :portal.launcher/window-title "portal"}))
 
 (defn update-value [new-value]
   (swap!
