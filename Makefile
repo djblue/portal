@@ -120,7 +120,7 @@ main/jvm:
 main/bb:
 	cat deps.edn | bb -cp src:resources -m portal.main edn
 
-app:
+app: node_modules
 	rm -rf target/pwa-release/
 	mkdir -p target/pwa-release/
 	clojure -M:dev -m pwa prod
