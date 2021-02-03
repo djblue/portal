@@ -93,7 +93,7 @@ test: test/jvm test/bb
 fmt:
 	clojure -M:cljfmt fix
 
-ci: lint test
+ci: lint
 
 e2e/jvm: resources/js
 	@echo "running e2e tests for jvm"
