@@ -14,7 +14,7 @@
 (deftest e2e-jvm
   (reset! index/testing? true)
   (when-let [portal (open headless-chrome-flags)]
-    (with-redefs [client/timeout 10000]
+    (with-redefs [client/timeout 60000]
       (reset! portal 0)
       (is (= @portal 0))
       (swap! portal inc)
