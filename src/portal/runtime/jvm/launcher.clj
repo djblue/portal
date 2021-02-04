@@ -23,13 +23,13 @@
 (defn- find-bin [files]
   (some
    identity
-   (for [path (get-paths) file files]
+   (for [file files path (get-paths)]
      (let [f (io/file path file)]
        (when (and (.exists f) (.canExecute f))
          (.getAbsolutePath f))))))
 
 (defn- get-chrome-bin []
-  (find-bin #{"chrome" "chrome.exe" "google-chrome-stable" "chromium" "Google Chrome"}))
+  (find-bin ["chrome" "chrome.exe" "google-chrome-stable" "chromium" "Google Chrome"]))
 
 (defonce ^:private server (atom nil))
 
