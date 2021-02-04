@@ -6,7 +6,7 @@
             [portal.runtime.jvm.launcher :as launcher]))
 
 (defn- headless-chrome-flags [url]
-  ["--headless" "--disable-gpu" url])
+  ["--headless" "--disable-gpu" "--no-sandbox" url])
 
 (defn- open [f]
   (with-redefs [launcher/chrome-flags f] (p/open)))
