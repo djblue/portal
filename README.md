@@ -123,13 +123,15 @@ Which can be passed as an option to `p/open`:
 #### Launcher
 
 By default, when `p/open` is called, an HTTP server is started on a randomly
-chosen port. To control this server's port and host, call the `p/start`
+chosen port. It is also given a default window title of the form `portal - <platform> - <version>`.
+To control this server's port, host, and window title, call the `p/start`
 function with the following options:
 
-| Option                  | Description                | If not specified     |
-|-------------------------|----------------------------|----------------------|
-| `:portal.launcher/port` | Port used to access UI     | random port selected |
-| `:portal.launcher/host` | Hostname used to access UI | "localhost"          |
+| Option                          | Description                | If not specified     |
+|---------------------------------|----------------------------|----------------------|
+| `:portal.launcher/port`         | Port used to access UI     | random port selected |
+| `:portal.launcher/host`         | Hostname used to access UI | "localhost"          |
+| `:portal.launcher/window-title` | Custom title for UI window | "portal"             |
 
 ## Datafy and Nav
 
