@@ -18,10 +18,6 @@ target/install-clojure:
 install/clojure: target/install-clojure
 	sudo ./target/install-clojure
 
-install/chrome:
-	curl -O https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-	sudo apt-get update && sudo apt-get -y install ./google-chrome-stable_current_amd64.deb
-
 target/install-babashka:
 	mkdir -p target
 	curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install -o target/install-babashka
