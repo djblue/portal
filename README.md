@@ -255,7 +255,8 @@ the following section may be of interest to you.
 - ~Markdown Viewer~
   - Any string can be viewed as markdown in portal via [yogthos/markdown-clj](https://github.com/yogthos/markdown-clj)
   - Any hiccup data structure can also be viewed as html
-- Chart Viewer
+- ~Chart Viewer~
+  - Initial chart viewers [#31](https://github.com/djblue/portal/pull/31) using [vega-lite](https://vega.github.io/vega-lite/).
 - Node+Edge Graphs Viewer
 
 ## Development
