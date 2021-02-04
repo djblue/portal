@@ -23,13 +23,13 @@
 (defn- find-bin [files]
   (some
    identity
-   (for [path (get-paths) file files]
+   (for [file files path (get-paths)]
      (let [f (io/file path file)]
        (when (and (.exists f) (.canExecute f))
          (.getAbsolutePath f))))))
 
 (defn- get-chrome-bin []
-  (find-bin #{"chrome" "chrome.exe" "google-chrome-stable" "chromium" "Google Chrome"}))
+  (find-bin ["chrome" "chrome.exe" "google-chrome-stable" "chromium" "Google Chrome"]))
 
 (defonce ^:private server (atom nil))
 
@@ -108,6 +108,14 @@
         :port (http/server-port http-server)
         :host host}))))
 
+(defn- chrome [bin flags]
+  (let [{:keys [exit err out]} (apply sh bin flags)]
+    (when-not (zero? exit)
+      (binding [*out* *err*]
+        (println "Unable to open chrome:")
+        (prn (into [bin] flags))
+        (println err out)))))
+
 (defn open
   ([options]
    (open nil options))
@@ -119,7 +127,7 @@
      (when-not (c/open? session-id)
        (if-let [bin (get-chrome-bin)]
          (let [flags (chrome-flags url)]
-           (future (apply sh bin flags)))
+           (future (chrome bin flags)))
          (try (browse-url url)
               (catch Exception _e
                 (println "Goto" url "to view portal ui.")))))

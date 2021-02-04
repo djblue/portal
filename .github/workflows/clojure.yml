@@ -20,7 +20,7 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: '1.8'
-    - run: make install/chrome install/clojure
+    - run: make install/clojure
     - run: make ci
     - run: make app
       if: ${{ github.event_name == 'push' }}

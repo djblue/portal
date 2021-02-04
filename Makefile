@@ -18,9 +18,6 @@ target/install-clojure:
 install/clojure: target/install-clojure
 	sudo ./target/install-clojure
 
-install/chrome:
-	sudo apt-get update && sudo apt-get install -y chromium-browser
-
 target/install-babashka:
 	mkdir -p target
 	curl -s https://raw.githubusercontent.com/borkdude/babashka/master/install -o target/install-babashka
@@ -93,7 +90,7 @@ test: test/jvm test/bb
 fmt:
 	clojure -M:cljfmt fix
 
-ci: lint
+ci: lint test
 
 e2e/jvm: resources/js
 	@echo "running e2e tests for jvm"
