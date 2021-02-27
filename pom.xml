@@ -21,7 +21,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.1</version>
+      <version>1.10.2</version>
     </dependency>
     <dependency>
       <groupId>com.cognitect</groupId>
@@ -57,7 +57,7 @@
     <dependency>
       <groupId>http-kit</groupId>
       <artifactId>http-kit</artifactId>
-      <version>2.5.1</version>
+      <version>2.5.3</version>
     </dependency>
   </dependencies>
   <build>

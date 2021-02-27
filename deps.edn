@@ -6,7 +6,7 @@
   com.cognitect/transit-cljs {:mvn/version "0.8.264"}
   cheshire/cheshire {:mvn/version "5.10.0"
                      :exclusions [tigris/tigris]}
-  http-kit/http-kit {:mvn/version "2.5.1"}}
+  http-kit/http-kit {:mvn/version "2.5.3"}}
  :aliases
  {:dev
   {:extra-paths ["dev" "test"]
@@ -20,8 +20,8 @@
   {:override-deps
    {org.clojure/clojurescript
     {:git/url "https://github.com/clojure/clojurescript.git"
-     :tag "1.10.758"
-     :sha "f5a9766110227c0d2a8702b32c44d52059b97a53"}}}
+     :tag "1.10.773"
+     :sha "790bcbf5f45d3775c15d597eee240fb3f3636681"}}}
   :cljs
   {:extra-deps
    {org.clojure/clojurescript {:mvn/version "1.10.773"}
@@ -29,21 +29,21 @@
     lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.5"}
     hickory/hickory {:mvn/version "0.7.1"}
-    thheller/shadow-cljs {:mvn/version "2.11.14"}}}
+    thheller/shadow-cljs {:mvn/version "2.11.18"}}}
   :shadow
   {:main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.01.20"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.02.13"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.7.0"}}}
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "0.8.3"}
-    cider/cider-nrepl {:mvn/version "0.25.7"}}}
+    cider/cider-nrepl {:mvn/version "0.25.9"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
@@ -58,7 +58,7 @@
      :sha "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {antq/antq           {:mvn/version "0.10.2"}
+   {antq/antq           {:mvn/version "0.11.1"}
     org.slf4j/slf4j-nop {:mvn/version "1.7.30"}}}
   :yaml
-  {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.2"}}}}}
+  {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.106"}}}}}

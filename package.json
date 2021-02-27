@@ -5,12 +5,12 @@
     "react-dom": "17.0.1",
     "react-visibility-sensor": "^5.1.1",
     "vega": "^5.19.1",
-    "vega-embed": "^6.15.0",
+    "vega-embed": "^6.15.2",
     "vega-lite": "^4.17.0"
   },
   "devDependencies": {
     "browserify": "^16.5.2",
     "source-map-support": "^0.5.19",
-    "ws": "^7.4.2"
+    "ws": "^7.4.3"
   }
 }
