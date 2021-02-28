@@ -1,6 +1,7 @@
 (ns portal.ui.viewer.hiccup
   (:require [clojure.walk :as w]
             [portal.colors :as c]
+            [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
 (defn header-styles [theme]
@@ -23,7 +24,7 @@
 
      :p {:font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
          :font-size (:font-size theme)
-         :line-height 1.5
+         :line-height "1.5em"
          :margin-top 0
          :margin-bottom (* 2 (:spacing/padding theme))}
 
@@ -40,7 +41,9 @@
       :border-radius (:border-radius theme)}
 
      :table {:color (::c/text theme)
-             :width "100%"
+             :font-size (:font-size theme)
+             :max-width "100%"
+             :width :max-content
              :overflow :auto
              :border-spacing 0
              :border-collapse :collapse}
@@ -58,12 +61,14 @@
                         (get styles (first x)))]
          (if-not style
            x
-           (update-in
-            (if (map? (second x))
-              x
-              (into [(first x) {}] (rest x)))
-            [1 :style]
-            #(merge style %)))))
+           (let [[tag & args] x
+                 has-attrs?   (map? (first args))]
+             (into
+              [s/styled
+               tag
+               (merge {:style style}
+                      (when has-attrs? (first args)))]
+              (if-not has-attrs? args (rest args)))))))
      value)))
 
 (def viewer
