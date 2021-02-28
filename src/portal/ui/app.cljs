@@ -257,10 +257,7 @@
            :color (::c/text theme)
            :border [1 :solid (::c/border theme)]}}
          (for [{:keys [name]} compatible-viewers]
-           [:option {:key name :value (pr-str name)} (pr-str name)])])
-      [s/div
-       {:style {:padding (:spacing/padding theme)}}
-       [ins/preview settings value]]]]))
+           [:option {:key name :value (pr-str name)} (pr-str name)])])]]))
 
 (defn search-input [settings]
   (let [theme (theme/use-theme)]

@@ -55,6 +55,7 @@
       :tagged)))
 
 (declare inspector)
+(declare preview)
 
 (defn- diff-added [_settings value]
   (let [theme (theme/use-theme)
@@ -139,21 +140,46 @@
 (defn preview-tagged [_settings value]
   [tagged-tag (.-tag value)])
 
-(defn- container-map [child]
+(defn- collection-header [values]
   (let [theme (theme/use-theme)]
     [s/div
      {:style
-      {:width "100%"
-       :min-width :fit-content
-       :display :grid
+      {:border [1 :solid (::c/border theme)]
        :background (get-background)
-       :grid-gap (:spacing/padding theme)
-       :padding (:spacing/padding theme)
-       :box-sizing :border-box
-       :color (::c/text theme)
-       :font-size  (:font-size theme)
-       :border-radius (:border-radius theme)
-       :border [1 :solid (::c/border theme)]}} child]))
+       :border-top-left-radius (:border-radius theme)
+       :border-top-right-radius (:border-radius theme)
+       :border-bottom-right-radius 0
+       :border-bottom-left-radius 0
+       :border-bottom :none}}
+     [s/div
+      {:style
+       {:display :inline-block
+        :box-sizing :border-box
+        :padding (:spacing/padding theme)
+        :border-right [1 :solid (::c/border theme)]}}
+      [preview nil values]]]))
+
+(defn- container-map [values child]
+  (let [theme (theme/use-theme)]
+    [s/div
+     [collection-header values]
+     [s/div
+      {:style
+       {:width "100%"
+        :min-width :fit-content
+        :display :grid
+        :background (get-background)
+        :grid-gap (:spacing/padding theme)
+        :padding (:spacing/padding theme)
+        :box-sizing :border-box
+        :color (::c/text theme)
+        :font-size  (:font-size theme)
+        :border-bottom-left-radius (:border-radius theme)
+        :border-bottom-right-radius (:border-radius theme)
+        :border-top-right-radius 0
+        :border-top-left-radius 0
+        :border [1 :solid (::c/border theme)]}}
+      child]]))
 
 (defn- container-map-k [child]
   [s/div {:style {:grid-column "1"
@@ -175,6 +201,7 @@
 
 (defn- inspect-map [settings values]
   [container-map
+   values
    [l/lazy-seq
     settings
     (for [[k v] (try-sort-map values)]
@@ -185,24 +212,28 @@
        [container-map-v
         [inspector (assoc settings :coll values :k k) v]]])]])
 
-(defn- container-coll [child]
+(defn- container-coll [values child]
   (let [theme (theme/use-theme)]
     [s/div
-     {:style
-      {:width "100%"
-       :text-align :left
-       :display :grid
-       :background (get-background)
-       :grid-gap (:spacing/padding theme)
-       :padding (:spacing/padding theme)
-       :box-sizing :border-box
-       :color (::c/text theme)
-       :font-size  (:font-size theme)
-       :border-radius (:border-radius theme)
-       :border [1 :solid (::c/border theme)]}} child]))
+     [collection-header values]
+     [s/div
+      {:style
+       {:width "100%"
+        :text-align :left
+        :display :grid
+        :background (get-background)
+        :grid-gap (:spacing/padding theme)
+        :padding (:spacing/padding theme)
+        :box-sizing :border-box
+        :color (::c/text theme)
+        :font-size  (:font-size theme)
+        :border-bottom-left-radius (:border-radius theme)
+        :border-bottom-right-radius (:border-radius theme)
+        :border [1 :solid (::c/border theme)]}} child]]))
 
 (defn- inspect-coll [settings values]
   [container-coll
+   values
    [l/lazy-seq
     settings
     (map-indexed
