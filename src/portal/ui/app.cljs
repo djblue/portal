@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.commands :as commands]
-            [portal.ui.inspector :as ins :refer [inspector]]
+            [portal.ui.inspector :as ins]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -94,43 +94,6 @@
           ::not-found)
 
         ::not-found))))
-
-(defonce show-meta? (r/atom false))
-
-(defn inspect-metadata [settings value]
-  (let [theme (theme/use-theme)]
-    (when-let [m (meta value)]
-      [s/div
-       {:style
-        {:border-bottom [1 :solid (::c/border theme)]}}
-       [s/div
-        {:on-click #(swap! show-meta? not)
-         :style/hover {:color (::c/tag theme)}
-         :style {:cursor :pointer
-                 :user-select :none
-                 :color (::c/namespace theme)
-                 :padding-top (* 1 (:spacing/padding theme))
-                 :padding-bottom (* 1 (:spacing/padding theme))
-                 :padding-left (* 2 (:spacing/padding theme))
-                 :padding-right (* 2 (:spacing/padding theme))
-                 :font-size "16pt"
-                 :font-weight 100
-                 :display :flex
-                 :justify-content :space-between
-                 :background (::c/background2 theme)
-                 :font-family "sans-serif"}}
-        "metadata"
-        [s/div
-         {:title "toggle metadata"
-          :style {:font-weight :bold}}
-         (if @show-meta?  "—" "+")]]
-       (when @show-meta?
-         [s/div
-          {:style
-           {:border-top [1 :solid (::c/border theme)]
-            :box-sizing :border-box
-            :padding (* 2 (:spacing/padding theme))}}
-          [inspector (assoc settings :coll value) m]])])))
 
 (def viewers
   [ex/viewer
@@ -227,7 +190,6 @@
          :box-sizing :border-box}}
        [s/div
         {:style {:min-width :fit-content}}
-        [inspect-metadata settings value]
         [s/div
          {:style
           {:min-width :fit-content

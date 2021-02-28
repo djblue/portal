@@ -12,6 +12,9 @@
 
 (defn- use-depth [] (react/useContext depth))
 
+(defn with-depth [& children]
+  (into [:r> (.-Provider depth) #js {:value 0}] children))
+
 (defn inc-depth [& children]
   (into [:r> (.-Provider depth)
          #js {:value (inc (use-depth))}]
@@ -140,8 +143,25 @@
 (defn preview-tagged [_settings value]
   [tagged-tag (.-tag value)])
 
-(defn- collection-header [values]
+(defn- toggle-metadata [set-show-meta!]
   (let [theme (theme/use-theme)]
+    [s/div
+     {:style {:border-right [1 :solid (::c/border theme)]}}
+     [s/div
+      {:on-click #(set-show-meta! not)
+       :style/hover {:color (::c/tag theme)}
+       :style {:cursor :pointer
+               :user-select :none
+               :color (::c/namespace theme)
+               :box-sizing :border-box
+               :padding (:spacing/padding theme)
+               :font-size  (:font-size theme)
+               :font-family "sans-serif"}}
+      "metadata"]]))
+
+(defn- collection-header [settings values]
+  (let [theme                       (theme/use-theme)
+        [show-meta? set-show-meta!] (react/useState false)]
     [s/div
      {:style
       {:border [1 :solid (::c/border theme)]
@@ -153,16 +173,28 @@
        :border-bottom :none}}
      [s/div
       {:style
-       {:display :inline-block
-        :box-sizing :border-box
-        :padding (:spacing/padding theme)
-        :border-right [1 :solid (::c/border theme)]}}
-      [preview nil values]]]))
+       {:display :flex}}
+      [s/div
+       {:style
+        {:display :inline-block
+         :box-sizing :border-box
+         :padding (:spacing/padding theme)
+         :border-right [1 :solid (::c/border theme)]}}
+       [preview settings values]]
+      (when (meta values)
+        [toggle-metadata set-show-meta!])]
+     (when show-meta?
+       [s/div
+        {:style
+         {:border-top [1 :solid (::c/border theme)]
+          :box-sizing :border-box
+          :padding (:spacing/padding theme)}}
+        [with-depth [inspector settings (meta values)]]])]))
 
-(defn- container-map [values child]
+(defn- container-map [settings values child]
   (let [theme (theme/use-theme)]
     [s/div
-     [collection-header values]
+     [collection-header settings values]
      [s/div
       {:style
        {:width "100%"
@@ -201,6 +233,7 @@
 
 (defn- inspect-map [settings values]
   [container-map
+   settings
    values
    [l/lazy-seq
     settings
@@ -212,10 +245,10 @@
        [container-map-v
         [inspector (assoc settings :coll values :k k) v]]])]])
 
-(defn- container-coll [values child]
+(defn- container-coll [settings values child]
   (let [theme (theme/use-theme)]
     [s/div
-     [collection-header values]
+     [collection-header settings values]
      [s/div
       {:style
        {:width "100%"
@@ -233,6 +266,7 @@
 
 (defn- inspect-coll [settings values]
   [container-coll
+   settings
    values
    [l/lazy-seq
     settings
@@ -457,7 +491,8 @@
       :style/hover {:border
                     (when nav-target?
                       [1 :solid "#D8DEE9"])}}
-     [inc-depth [component settings value]]]))
+     [inc-depth
+      [component settings value]]]))
 
 (def viewer
   {:predicate (constantly true)
