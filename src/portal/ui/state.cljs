@@ -131,11 +131,6 @@
                         (concat current more)
                         (meta more))))))))))
 
-(defn get-theme [settings]
-  (or (get settings ::c/theme)
-      (:portal/value @tap-state)
-      ::c/nord))
-
 (defn get-value [settings]
   (:portal/value settings (:portal/value @tap-state)))
 
@@ -146,4 +141,6 @@
    (take-while some? (iterate :portal/next-state settings))))
 
 (defn get-settings []
-  (merge @state {::state state}))
+  (merge (select-keys @tap-state [::c/theme])
+         @state
+         {::state state}))
