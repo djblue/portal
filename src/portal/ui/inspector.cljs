@@ -293,7 +293,8 @@
 
 (defn- inspect-string [_settings value]
   (let [theme (theme/use-theme)
-        limit (:limits/string-length theme)]
+        limit (:limits/string-length theme)
+        [expand? set-expand!] (react/useState false)]
     (cond
       (url-string? value)
       [s/span
@@ -320,9 +321,22 @@
           :color value}}
         value]]
 
+      (or (< (count value) limit) expand?)
+      [s/span {:style {:color (::c/string theme)}} (pr-str value)]
+
       :else
       [s/span {:style {:color (::c/string theme)}}
-       (pr-str (trim-string value limit))])))
+       "\""
+       (let [s (pr-str (subs value 0 limit))]
+         (subs s 1 (dec (count s))))
+       [s/span
+        {:on-click #(set-expand! true)
+         :style
+         {:cursor :pointer
+          :background "rgba(0,0,0,0.35)"
+          :border-radius (:border-radius theme)}}
+        "..."]
+       "\""])))
 
 (defn- inspect-namespace [_settings value]
   (let [theme (theme/use-theme)]
