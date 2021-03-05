@@ -303,6 +303,12 @@
           "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
           "*::-webkit-scrollbar-thumb  { border-radius: 10px; }")]))
 
+(defn text-selection []
+  (let [style "background: rgba(0,0,0,0.5)"]
+    [:style
+     (str "::selection { " style " }")
+     (str "::-moz-selection { " style " }")]))
+
 (defn- container [children]
   (let [theme (theme/use-theme)]
     (into
@@ -316,7 +322,8 @@
         :font-size (:font-size theme)
         :height "100vh"
         :width "100vw"}}
-      [scrollbars]]
+      [scrollbars]
+      [text-selection]]
      children)))
 
 (defn- viewer-commands [settings value]
