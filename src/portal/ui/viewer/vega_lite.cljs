@@ -155,7 +155,7 @@
       [:div.viz])}))
 
 (defn vega-lite-viewer
-  [_settings value]
+  [value]
   (let [theme (theme/use-theme)]
     [s/div
      [vega-lite-styles]

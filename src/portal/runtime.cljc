@@ -43,7 +43,7 @@
   (get @instance-cache [:uuid uuid]))
 
 (defonce state (atom {:portal/state-id (random-uuid)
-                      :portal/value (list)
+                      :portal/tap-list (list)
                       :portal.launcher/window-title "portal"}))
 
 (defn update-value [new-value]
@@ -53,8 +53,8 @@
      (assoc
       state
       :portal/state-id (random-uuid)
-      :portal/value
-      (let [value (:portal/value state)]
+      :portal/tap-list
+      (let [value (:portal/tap-list state)]
         (if-not (coll? value)
           (list new-value)
           (conj value new-value)))))))
@@ -65,7 +65,7 @@
    (reset! instance-cache {})
    (swap! state assoc
           :portal/state-id (random-uuid)
-          :portal/value (list))
+          :portal/tap-list (list))
    (done nil)))
 
 (defn limit-seq [value]
@@ -83,7 +83,7 @@
 
 (defn- set-limit [state]
   (update state
-          :portal/value
+          :portal/tap-list
           #(with-meta % {::more-limit 25})))
 
 (defn load-state [request done]
@@ -127,6 +127,7 @@
    {'clojure.core/deref    #'deref
     'clojure.core/type     #'type
     'clojure.datafy/datafy #'datafy
+    'clojure.datafy/nav    #'nav
     `get-functions #'get-functions}
    #?(:clj {`slurp slurp
             `bean  bean})))

@@ -4,7 +4,7 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(defn inspect-image [_settings value]
+(defn inspect-image [value]
   (let [theme (theme/use-theme)
         blob  (js/Blob. #js [value])
         url   (or js/window.URL js/window.webkitURL)

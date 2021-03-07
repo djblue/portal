@@ -8,11 +8,12 @@
 (def functional-compiler (r/create-compiler {:function-components true}))
 
 (defn render-app []
-  (dom/render [app/app {:send! rpc/request}]
+  (dom/render [app/app]
               (.getElementById js/document "root")
               functional-compiler))
 
 (defn main! []
+  (reset! state/sender rpc/request)
   (state/long-poll rpc/request)
   (render-app))
 

@@ -1,6 +1,6 @@
 (ns portal.ui.viewer.edn
   (:require [clojure.edn :as edn]
-            [portal.ui.inspector :refer [inspector]]))
+            [portal.ui.inspector :as ins]))
 
 (defn- parse-edn [edn-string]
   (try (edn/read-string edn-string)
@@ -8,11 +8,10 @@
 
 (defn edn? [value] (string? value))
 
-(defn inspect-edn [settings edn-string]
-  [inspector settings (parse-edn edn-string)])
+(defn inspect-edn [edn-string]
+  [ins/inspector (parse-edn edn-string)])
 
 (def viewer
   {:predicate edn?
-   :datafy parse-edn
    :component inspect-edn
    :name :portal.viewer/edn})

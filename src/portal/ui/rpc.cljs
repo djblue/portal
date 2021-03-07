@@ -2,8 +2,7 @@
   (:require [cognitect.transit :as t]
             [com.cognitect.transit.types :as ty]
             [portal.ui.viewer.diff :as diff]
-            [portal.ui.app :refer [get-datafy]]
-            [portal.ui.state :refer [state tap-state notify-parent]]))
+            [portal.ui.state :as state]))
 
 ;; Since any object can have metadata and all unknown objects in portal
 ;; are encoded as tagged values, if any of those objects have metadata, it
@@ -85,30 +84,23 @@
        (when (fn? resolve) (resolve message))))
    :portal.rpc/datafy
    (fn [message send!]
-     (let [value  (:portal/value (merge @tap-state @state))
-           datafy (get-datafy @state)]
+     (let [value (state/get-selected @state/state)]
        (send!
         {:op :portal.rpc/response
          :portal.rpc/id (:portal.rpc/id message)
-         :portal/value (datafy value)})))
+         :portal/value value})))
    :portal.rpc/close
    (fn [message send!]
      (js/setTimeout
       (fn []
-        (notify-parent {:type :close})
+        (state/notify-parent {:type :close})
         (js/window.close))
       100)
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/push-state
    (fn [message send!]
-     (swap! state
-            (fn [state]
-              (assoc state
-                     :portal/previous-state state
-                     :portal/next-state nil
-                     :search-text ""
-                     :portal/value (:state message))))
+     (state/dispatch! state/state state/history-push {:portal/value (:state message)})
      (send!
       {:op :portal.rpc/response
        :portal.rpc/id (:portal.rpc/id message)}))})

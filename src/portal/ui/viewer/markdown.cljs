@@ -16,7 +16,7 @@
          (into [:div {:style {:max-width "1012px"
                               :margin "0 auto"}}]))))
 
-(defn inspect-markdown [settings value]
+(defn inspect-markdown [value]
   ;; I couldn't figure out a good way to disable html escaping, which
   ;; occurs in both markdown-clj and hickory, so I decided to manually
   ;; intercepts calls into utility methods and replace their
@@ -25,9 +25,7 @@
    [common/escape-code   identity
     common/escaped-chars identity
     utils/html-escape    identity]
-    [inspect-hiccup
-     settings
-     (parse-markdown value)]))
+    [inspect-hiccup (parse-markdown value)]))
 
 (def viewer
   {:predicate string?

@@ -5,8 +5,8 @@
             [portal.async :as a]
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
-            [portal.ui.inspector :as ins :refer [inspector]]
-            [portal.ui.state :as st :refer [tap-state state]]
+            [portal.ui.inspector :as ins]
+            [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
             [reagent.core :as r]))
@@ -88,7 +88,7 @@
 (defn selector-component []
   (let [selected (r/atom #{})
         active   (r/atom 0)]
-    (fn [settings input]
+    (fn [input]
       (let [theme     (theme/use-theme)
             selected? @selected
             on-done   (:run input)
@@ -146,7 +146,7 @@
                           :background (::c/background theme)}))}
                      (when active? [scroll-into-view])
                      [checkbox (some? (selected? option))]
-                     [inspector settings option]])))
+                     [ins/inspector option]])))
                doall)]]))))
 
 (def shortcut->symbol
@@ -177,9 +177,9 @@
                   :margin-right  (:spacing/padding theme)}}
           (get shortcut->symbol k (.toUpperCase k))])])))
 
-(defn palette-component-item [settings & children]
+(defn palette-component-item [props & children]
   (let [theme (theme/use-theme)
-        {::keys [active? on-click]} settings]
+        {::keys [active? on-click]} props]
     (into
      [s/div
       {:on-click on-click
@@ -201,7 +201,7 @@
 (defn palette-component []
   (let [active (r/atom 0)
         filter-text (r/atom "")]
-    (fn [settings options]
+    (fn [{:keys [on-select options]}]
       (let [theme (theme/use-theme)
             text @filter-text
             options
@@ -218,7 +218,7 @@
               (reset! filter-text "")
               (on-close)
               (when-let [option (nth options @active)]
-                ((::on-select settings) (second option))))]
+                (on-select (second option))))]
         [container
          [s/div
           {:style
@@ -269,29 +269,41 @@
 
 (defn- empty-args [_] nil)
 
-(defn make-command [{:keys [name predicate args f]}]
-  (let [predicate (or predicate (constantly true))]
-    {:name name
-     :predicate (comp predicate :portal/value)
-     :run (fn [settings]
-            (a/let [v      (:portal/value settings)
-                    args   ((or args empty-args) v)
-                    result (apply f v args)]
-              (when (predicate v)
-                (st/dispatch
-                 settings
-                 st/history-push
-                 {:portal/key name
-                  :portal/f f
-                  :portal/args args
-                  :portal/value result}))))}))
+(defn fn->command [f]
+  (fn [state]
+    (when-let [selected (:selected @state)]
+      (state/dispatch! state f selected))))
 
-(defn get-functions [settings]
-  (a/let [v      (:portal/value settings)
-          invoke (partial st/invoke settings)
-          fns    (invoke 'portal.runtime/get-functions v)]
+(defn make-command [{:keys [name predicate args f] :as opts}]
+  (let [predicate (or predicate (constantly true))]
+    (merge
+     (select-keys opts [::shortcuts/default :shortcuts/osx])
+     {:name name
+      :predicate (comp predicate state/get-selected)
+      :run (fn [state]
+             (a/let [v      (state/get-selected @state)
+                     args   ((or args empty-args) v)
+                     result (apply f v args)]
+               (when (predicate v)
+                 (state/dispatch!
+                  state
+                  state/history-push
+                  {:portal/key name
+                   :portal/f f
+                   :portal/args args
+                   :portal/value result}))))})))
+
+(defn get-functions [state]
+  (a/let [v   (state/get-selected @state)
+          fns (state/invoke 'portal.runtime/get-functions v)]
     (for [f fns]
-      (make-command {:name f :f #(invoke f %)}))))
+      (make-command
+       {:name f
+        :f
+        (if-not (= f 'clojure.datafy/nav)
+          #(state/invoke f %)
+          #(when-let [args (state/get-nav-args @state)]
+             (apply state/invoke f args)))}))))
 
 (declare commands)
 
@@ -300,8 +312,8 @@
    :label "Show All Commands"
    ::shortcuts/osx #{"meta" "shift" "p"}
    ::shortcuts/default #{"control" "shift" "p"}
-   :run (fn [settings]
-          (a/let [fns (get-functions settings)
+   :run (fn [state]
+          (a/let [fns (get-functions state)
                   commands (remove
                             (fn [option]
                               (or
@@ -309,23 +321,21 @@
                                   :portal.command/open-command-palette}
                                 (:name option))
                                (when-let [predicate (:predicate option)]
-                                 (not (predicate settings)))))
-                            (concat fns commands (:commands settings)))]
+                                 (not (predicate @state)))))
+                            (concat fns commands (:commands @state)))]
             (open
-             (fn [settings]
+             (fn [state]
                [palette-component
-                (assoc
-                 settings
-                 ::on-select
+                {:on-select
                  (fn [option]
-                   ((:run option) settings)))
-                (for [command commands]
-                  [palette-component-item
-                   (assoc settings
-                          :run (:run command)
-                          ::value (:name command))
-                   [inspector settings (:name command)]
-                   [shortcut command]])]))))})
+                   ((:run option) state))
+                 :options
+                 (for [command commands]
+                   [palette-component-item
+                    {:run (:run command)
+                     ::value (:name command)}
+                    [ins/inspector (:name command)]
+                    [shortcut command]])}]))))})
 
 ;; pick args
 
@@ -333,21 +343,21 @@
   (js/Promise.
    (fn [resolve]
      (open
-      (fn [settings]
+      (fn [_state]
         [palette-component
-         (assoc settings ::on-select #(resolve [(::value %)]))
-         (for [option options]
-           [palette-component-item
-            (assoc settings ::value option)
-            [inspector settings option]])])))))
+         {:on-select #(resolve [(::value %)])
+          :options
+          (for [option options]
+            [palette-component-item
+             {::value option}
+             [ins/inspector option]])}])))))
 
 (defn pick-many [options]
   (js/Promise.
    (fn [resolve]
      (open
-      (fn [settings]
+      (fn []
         [selector-component
-         settings
          {:options options
           :run
           (fn [options]
@@ -360,11 +370,9 @@
      (let [get-key
            (fn get-key [path v]
              (open
-              (fn [settings]
+              (fn [_state]
                 [palette-component
-                 (assoc
-                  settings
-                  ::on-select
+                 {:on-select
                   (fn [option]
                     (let [k (::value option)
                           path (conj path k)
@@ -377,11 +385,12 @@
                         (resolve [path])
 
                         :else
-                        (get-key path next-value)))))
-                 (for [k (concat [::done] (keys v))]
-                   [palette-component-item
-                    (assoc settings ::value k)
-                    [inspector settings k]])])))]
+                        (get-key path next-value))))
+                  :options
+                  (for [k (concat [::done] (keys v))]
+                    [palette-component-item
+                     {::value k}
+                     [ins/inspector k]])}])))]
        (get-key [] v)))))
 
 ;; clojure commands
@@ -481,88 +490,88 @@
        (pp/pprint value)))))
 
 (def portal-commands
-  [{:name :portal.command/close-command-palette
+  [{:name :portal.command/focus-selected
+    ::shortcuts/default #{"control" "enter"}
+    :run (fn->command state/focus-selected)}
+   {:name :portal.command/toggle-expand
+    ::shortcuts/default #{"control" "e"}
+    :run (fn->command state/toggle-expand)}
+   {:name :portal.command/close-command-palette
     ::shortcuts/osx ["escape"]
     ::shortcuts/default ["escape"]
     :run close}
    {:name :portal.command/redo-previous-command
     ::shortcuts/default #{"control" "r"}
-    :run (fn [settings]
-           (a/let [commands (::st/previous-commands settings)]
+    :run (fn [state]
+           (a/let [commands (::state/previous-commands @state)]
              (when (seq commands)
                (open
-                (fn [settings]
+                (fn [_state]
                   [palette-component
-                   (assoc
-                    settings
-                    ::on-select
+                   {:on-select
                     (fn [{::keys [command]}]
-                      (a/let [invoke (partial st/invoke settings)
-                              k (:portal/key command)
+                      (a/let [k (:portal/key command)
                               f (or (:portal/f command)
                                     (if (keyword? k)
                                       k
-                                      (partial invoke (:portal/key command))))
+                                      (partial state/invoke (:portal/key command))))
                               args (:portal/args command)
-                              value (apply f (:portal/value settings) args)]
-                        (st/dispatch
-                         settings
-                         st/history-push
-                         (assoc command :portal/value value)))))
-                   (for [command commands]
-                     [palette-component-item
-                      (assoc settings
-                             ::command command
-                             ::value (:portal/key command))
-                      [s/div
-                       {:style {:display :flex
-                                :justify-content :space-between
-                                :overflow :hidden
-                                :align-items :center
-                                :text-overflow :ellipsis
-                                :white-space :nowrap}}
-                       [inspector settings (:portal/key command)]
+                              value (apply f (state/get-selected @state) args)]
+                        (state/dispatch!
+                         state
+                         state/history-push
+                         (assoc command :portal/value value))))
+                    :options
+                    (for [command commands]
+                      [palette-component-item
+                       {::command command
+                        ::value (:portal/key command)}
                        [s/div
-                        {:style {:opacity 0.5}}
-                        (for [a (:portal/args command)] (pr-str a))]]])])))))}
+                        {:style {:display :flex
+                                 :justify-content :space-between
+                                 :overflow :hidden
+                                 :align-items :center
+                                 :text-overflow :ellipsis
+                                 :white-space :nowrap}}
+                        [ins/inspector (:portal/key command)]
+                        [s/div
+                         {:style {:opacity 0.5}}
+                         (for [a (:portal/args command)] (pr-str a))]]])}])))))}
    open-command-palette
    {:name :portal.command/theme-solarized-dark
-    :run (fn [_settings] (st/set-theme! ::c/solarized-dark))}
+    :run (fn [_state] (state/set-theme! ::c/solarized-dark))}
    {:name :portal.command/theme-solarized-light
-    :run (fn [_settings] (st/set-theme! ::c/solarized-light))}
+    :run (fn [_state] (state/set-theme! ::c/solarized-light))}
    {:name :portal.command/theme-nord
-    :run (fn [_settings] (st/set-theme! ::c/nord))}
+    :run (fn [_state] (state/set-theme! ::c/nord))}
    {:name :portal.command/copy-as-edn
     ::shortcuts/osx #{"meta" "c"}
     ::shortcuts/default #{"control" "c"}
     :run
-    (fn [settings]
-      (let [datafy (:datafy settings)
-            value (:portal/value (merge @tap-state @state))]
-        (copy-edn! (datafy value))))}
+    (fn [state] (copy-edn! (state/get-selected @state)))}
    {:name :portal.command/copy-path
-    :run (fn [_settings]
-           (copy-edn! (st/get-path @state)))}
+    :run (fn [state]
+           (when-let [path (state/get-path @state)]
+             (copy-edn! path)))}
    {:name :portal.command/history-back
     ::shortcuts/osx #{"meta" "arrowleft"}
     ::shortcuts/default #{"control" "arrowleft"}
-    :run (fn [settings] (st/dispatch settings st/history-back))}
+    :run (fn [state] (state/dispatch! state state/history-back))}
    {:name :portal.command/history-forward
     ::shortcuts/osx #{"meta" "arrowright"}
     ::shortcuts/default #{"control" "arrowright"}
-    :run (fn [settings] (st/dispatch settings st/history-forward))}
+    :run (fn [state] (state/dispatch! state state/history-forward))}
    {:name :portal.command/history-first
     ::shortcuts/osx #{"meta" "shift" "arrowleft"}
     ::shortcuts/default #{"control" "shift" "arrowleft"}
-    :run (fn [settings] (st/dispatch settings st/history-first))}
+    :run (fn [state] (state/dispatch! state state/history-first))}
    {:name :portal.command/history-last
     ::shortcuts/osx #{"meta" "shift" "arrowright"}
     ::shortcuts/default #{"control" "shift" "arrowright"}
-    :run (fn [settings] (st/dispatch settings st/history-last))}
+    :run (fn [state] (state/dispatch! state state/history-last))}
    {:name :portal.command/clear
     ::shortcuts/default #{"control" "l"}
-    :run (fn [settings]
-           (st/dispatch settings st/clear))}])
+    :run (fn [state] (state/dispatch! state state/clear))}])
 
 (def commands
   (concat
@@ -589,13 +598,14 @@
      :overflow :hidden}}
    child])
 
-(defn palette [settings _value]
-  [:<>
-   [with-shortcuts
-    (fn [log]
-      (doseq [command (concat commands (:commands settings))]
-        (when (shortcuts/match? command log)
-          (shortcuts/matched! log)
-          ((:run command) settings))))]
-   (when-let [component @input]
-     [pop-up [component settings]])])
+(defn palette [props _value]
+  (let [state (state/use-state)]
+    [:<>
+     [with-shortcuts
+      (fn [log]
+        (doseq [command (concat commands (:commands props))]
+          (when (shortcuts/match? command log)
+            (shortcuts/matched! log)
+            ((:run command) state))))]
+     (when-let [component @input]
+       [pop-up [component state]])]))

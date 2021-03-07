@@ -29,10 +29,9 @@
     (sp/valid? ::numerical-collection data)
     (for [[x y] (map vector (:x data) (:y data))] {:x x :y y})))
 
-(defn line-chart-viewer [settings value]
+(defn line-chart-viewer [value]
   (let [theme (theme/use-theme)]
     [v/vega-lite-viewer
-     settings
      {:data
       {:values (normalize-data value)}
       :encoding
@@ -42,10 +41,9 @@
       :mark "line"
       :selection {:grid {:type "interval" :bind "scales"}}}]))
 
-(defn scatter-chart-viewer [settings value]
+(defn scatter-chart-viewer [value]
   (let [theme (theme/use-theme)]
     [v/vega-lite-viewer
-     settings
      {:data {:values (normalize-data value)}
       :encoding
       {:x {:field "x" :type "quantitative"}
@@ -57,16 +55,15 @@
       :mark "circle"
       :selection {:grid {:type "interval" :bind "scales"}}}]))
 
-(defn histogram-chart-viewer
-  [settings value]
-  [v/vega-lite-viewer
-   settings
-   {:data {:values (normalize-data value)}
-    :mark "bar"
-    :encoding
-    {:x {:bin true :field "x" :type "quantitative"}
-     :y {:aggregate "count" :type "quantitative"}
-     :color {:value (::c/number settings)}}}])
+(defn histogram-chart-viewer [value]
+  (let [theme (theme/use-theme)]
+    [v/vega-lite-viewer
+     {:data {:values (normalize-data value)}
+      :mark "bar"
+      :encoding
+      {:x {:bin true :field "x" :type "quantitative"}
+       :y {:aggregate "count" :type "quantitative"}
+       :color {:value (::c/number theme)}}}]))
 
 (def line-chart
   {:predicate (partial sp/valid? (sp/or :tabular ::tabular-data ::numerical-collection ::numerical-collection))

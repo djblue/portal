@@ -1,6 +1,6 @@
 (ns portal.ui.viewer.table
   (:require [portal.colors :as c]
-            [portal.ui.inspector :as ins :refer [inspector]]
+            [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
@@ -34,10 +34,10 @@
      :background (ins/get-background))}
    child])
 
-(defn- table-data [_settings child]
+(defn- table-data [child]
   [s/td {:style (get-styles)} child])
 
-(defn- table [settings component rows cols]
+(defn- table [component rows cols]
   (let [theme (theme/use-theme)
         transpose? false]
     [s/table
@@ -53,29 +53,30 @@
        :border-radius (:border-radius theme)}}
      [s/tbody
       [l/lazy-seq
-       settings
        (map-indexed
         (fn [row-index row]
-          [s/tr
-           {:key row-index
-            :style/hover
-            {:background (str (::c/border theme) "55")}}
-           (map-indexed
-            (fn [col-index col]
-              ^{:key col-index}
-              [component
-               (if-not transpose?
-                 {:row row    :row-index row-index
-                  :column col :column-index col-index}
-                 {:row col    :row-index col-index
-                  :column row :column-index row-index})])
-            (if transpose? rows cols))])
+          [ins/with-key
+           (when (coll? row) (first row))
+           [s/tr
+            {:key row-index
+             :style/hover
+             {:background (str (::c/border theme) "55")}}
+            (map-indexed
+             (fn [col-index col]
+               ^{:key col-index}
+               [ins/with-key col
+                [component
+                 (if-not transpose?
+                   {:row row    :row-index row-index
+                    :column col :column-index col-index}
+                   {:row col    :row-index col-index
+                    :column row :column-index row-index})]])
+             (if transpose? rows cols))]])
         (if transpose? cols rows))]]]))
 
-(defn- inspect-map-table [settings values]
+(defn- inspect-map-table [values]
   (let [columns (into #{} (mapcat keys (vals values)))]
     [table
-     settings
      (fn [context]
        (let [{:keys [row column]} context]
          (cond
@@ -83,25 +84,23 @@
 
            (= row ::header)
            [table-header-row
-            [inspector (assoc settings :coll values) column]]
+            [ins/inspector column]]
 
            (= column ::header)
            [table-header-column
-            [inspector (assoc settings :coll values) (first row)]]
+            [ins/inspector (first row)]]
 
            :else
            [table-data
-            settings
             (let [[_ row] row]
               (when (contains? row column)
-                [inspector (assoc settings :coll row :k column) (get row column)]))])))
+                [ins/inspector (get row column)]))])))
      (concat [::header] (ins/try-sort-map values))
      (concat [::header] (ins/try-sort columns))]))
 
-(defn- inspect-coll-table [settings values]
+(defn- inspect-coll-table [values]
   (let [columns (into #{} (mapcat keys values))]
     [table
-     settings
      (fn [context]
        (let [{:keys [row column]} context]
          (cond
@@ -109,47 +108,42 @@
 
            (= row ::header)
            [table-header-row
-            [inspector (assoc settings :coll values) column]]
+            [ins/inspector column]]
 
            (= column ::header)
            [table-header-column
-            [inspector (assoc settings :coll values) (dec (:row-index context))]]
+            [ins/inspector (dec (:row-index context))]]
 
            :else
            [table-data
-            settings
             (when (contains? row column)
-              [inspector (assoc settings :coll row :k column) (get row column)])])))
+              [ins/inspector (get row column)])])))
      (concat [::header] values)
      (concat [::header] (ins/try-sort columns))]))
 
-(defn- inspect-vector-table [settings values]
+(defn- inspect-vector-table [values]
   (let [n (reduce max (map count values))]
     [table
-     settings
      (fn [context]
        (let [{:keys [row column]} context]
          [table-data
-          settings
           (when (< column (count row))
-            [inspector (assoc settings :coll row :k column) (get row column)])]))
+            [ins/inspector (get row column)])]))
      values
      (range n)]))
 
-(defn- inspect-set-table [settings values]
+(defn- inspect-set-table [values]
   (let [columns (into #{} (mapcat keys values))]
     [table
-     settings
      (fn [context]
        (let [{:keys [row column]} context]
          (if (= row ::header)
            [table-header-row
-            [inspector (assoc settings :coll row) column]]
+            [ins/inspector column]]
 
            [table-data
-            settings
             (when (contains? row column)
-              [inspector (assoc settings :coll row :k column) (get row column)])])))
+              [ins/inspector (get row column)])])))
      (concat [::header] (ins/try-sort values))
      (ins/try-sort columns)]))
 
@@ -170,9 +164,10 @@
 
 (defn table-view? [value] (some? (get-component value)))
 
-(defn inspect-table [settings values]
+(defn inspect-table [values]
   (let [component (get-component values)]
-    [ins/inc-depth [component settings values]]))
+    [ins/with-collection values
+     [ins/inc-depth [component values]]]))
 
 (def viewer
   {:predicate table-view?

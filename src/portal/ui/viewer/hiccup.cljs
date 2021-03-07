@@ -52,7 +52,7 @@
      :td {:padding (:spacing/padding theme)
           :border [1 :solid (::c/border theme)]}}))
 
-(defn inspect-hiccup [_settings value]
+(defn inspect-hiccup [value]
   (let [theme (theme/use-theme)
         styles (hiccup-styles theme)]
     (w/postwalk

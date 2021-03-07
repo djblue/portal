@@ -23,9 +23,8 @@
             [portal.ui.viewer.vega-lite :as vega-lite]
             [reagent.core :as r]))
 
-(defn filter-data [settings value]
-  (let [search-text (:search-text settings)
-        filter-data (partial filter-data settings)]
+(defn filter-data [search-text value]
+  (let [filter-data (partial filter-data search-text)]
     (if (str/blank? search-text)
       value
         ;:diff
@@ -118,8 +117,9 @@
 (def viewers-by-name
   (into {} (map (juxt :name identity) viewers)))
 
-(defn use-viewer [settings value]
-  (let [selected-viewer    (::selected-viewer settings)
+(defn use-viewer [value]
+  (let [state              (state/use-state)
+        selected-viewer    (::selected-viewer @state)
         default-viewer     (get viewers-by-name (:portal.viewer/default (meta value)))
         viewers            (cons default-viewer (remove #(= default-viewer %) viewers))
         compatible-viewers (filter #(when-let [pred (:predicate %)] (pred value)) viewers)]
@@ -131,14 +131,7 @@
       (first compatible-viewers))
      :set-viewer!
      (fn [viewer]
-       (state/dispatch settings assoc ::selected-viewer viewer))}))
-
-(defn get-datafy [settings]
-  (fn [value]
-    (try
-      ((get-in (use-viewer settings (:portal/value settings)) [:viewer :datafy] identity)
-       (filter-data settings value))
-      (catch js/Error _e value))))
+       (state/dispatch! state assoc ::selected-viewer viewer))}))
 
 (def error-boundary
   (r/create-class
@@ -157,10 +150,10 @@
          [:div [:pre [:code (pr-str error)]]])
         (.. this -props -children)))}))
 
-(defn inspect-1 [settings value]
-  (let [theme (theme/use-theme)
-        value (filter-data settings value)
-        {:keys [compatible-viewers viewer set-viewer!]} (use-viewer settings value)
+(defn inspect-1 [value]
+  (let [theme   (theme/use-theme)
+        value   (filter-data (:search-text @(state/use-state)) value)
+        {:keys [compatible-viewers viewer set-viewer!]} (use-viewer value)
         component (:component viewer)]
     [:<>
      [s/div
@@ -186,7 +179,7 @@
           {:min-width :fit-content
            :box-sizing :border-box
            :padding (* 2 (:spacing/padding theme))}}
-         [:> error-boundary [component settings value]]]]]]
+         [:> error-boundary [component value]]]]]]
      [s/div
       {:style
        {:display :flex
@@ -212,15 +205,16 @@
          (for [{:keys [name]} compatible-viewers]
            [:option {:key name :value (pr-str name)} (pr-str name)])])]]))
 
-(defn search-input [settings]
-  (let [theme (theme/use-theme)]
+(defn search-input []
+  (let [theme (theme/use-theme)
+        state (state/use-state)]
     [s/input
-     {:on-change #(state/dispatch
-                   settings
+     {:on-change #(state/dispatch!
+                   state
                    assoc
                    :search-text
                    (.-value (.-target %)))
-      :value (or (:search-text settings) "")
+      :value (or (:search-text @state) "")
       :placeholder "Type to filter..."
       :style
       {:background (::c/background theme)
@@ -245,8 +239,9 @@
      :border-radius (:border-radius theme)
      :cursor :pointer}))
 
-(defn toolbar [settings]
-  (let [theme (theme/use-theme)]
+(defn toolbar []
+  (let [theme (theme/use-theme)
+        state (state/use-state)]
     [s/div
      {:style
       {:display :grid
@@ -261,32 +256,32 @@
        :justify-content :center
        :border-top [1 :solid (::c/border theme)]
        :border-bottom [1 :solid (::c/border theme)]}}
-     (let [disabled? (nil? (:portal/previous-state settings))]
+     (let [disabled? (nil? (:portal/previous-state @state))]
        [s/button
         {:disabled disabled?
          :title    "Go back in portal history."
-         :on-click #(state/dispatch settings state/history-back)
+         :on-click #(state/dispatch! state state/history-back)
          :style    (merge
                     (button-styles)
                     (when disabled?
                       {:opacity 0.45
                        :cursor  :default}))}
         "◄"])
-     (let [disabled? (nil? (:portal/next-state settings))]
+     (let [disabled? (nil? (:portal/next-state @state))]
        [s/button
         {:disabled disabled?
          :title    "Go forward in portal history."
-         :on-click #(state/dispatch settings state/history-forward)
+         :on-click #(state/dispatch! state state/history-forward)
          :style    (merge
                     (button-styles)
                     (when disabled?
                       {:opacity 0.45
                        :cursor  :default}))}
         "►"])
-     [search-input settings]
+     [search-input]
      [s/button
       {:title    "Clear all values from portal."
-       :on-click #(state/dispatch settings state/clear)
+       :on-click #(state/dispatch! state state/clear)
        :style    (merge
                   (button-styles)
                   {:padding-left (* 2 (:spacing/padding theme))
@@ -326,49 +321,46 @@
       [text-selection]]
      children)))
 
-(defn- viewer-commands [settings value]
-  (let [{:keys [compatible-viewers set-viewer!]} (use-viewer settings value)]
+(defn- viewer-commands [value]
+  (let [{:keys [compatible-viewers set-viewer!]} (use-viewer value)]
     (map #(-> %
               (dissoc :predicate)
               (assoc  :run (fn [] (set-viewer! (:name %)))))
          compatible-viewers)))
 
-(defn- inspect-1-history [current-settings]
-  [:<>
-   [commands/palette
-    (assoc current-settings
-           :datafy (get-datafy current-settings)
-           :commands (viewer-commands
-                      current-settings
-                      (state/get-value current-settings)))]
-   (doall
-    (map-indexed
-     (fn [index settings]
-       ^{:key (str index)}
-       [s/div
-        {:style
-         {:flex 1
-          :display
-          (if (= settings current-settings)
-            :block
-            :none)}}
-        [inspect-1 settings (state/get-value settings)]])
-     (state/get-history current-settings)))])
+(defn- inspect-1-history []
+  (let [current-state @(state/use-state)]
+    [:<>
+     [commands/palette
+      {:commands (viewer-commands (state/get-value current-state))}]
+     (doall
+      (map-indexed
+       (fn [index state]
+         ^{:key (str index)}
+         [s/div
+          {:style
+           {:flex 1
+            :display
+            (if (= state current-state)
+              :block
+              :none)}}
+          [inspect-1 (state/get-value state)]])
+       (state/get-history current-state)))]))
 
-(defn root [settings & children]
-  [theme/with-theme
-   (get settings ::c/theme ::c/nord)
-   [container children]])
+(defn root [& children]
+  [state/with-state
+   state/state
+   [theme/with-theme
+    (get state/state ::c/theme ::c/nord)
+    [container children]]])
 
-(defn app [settings]
-  (let [settings (merge (state/get-settings) settings)]
-    [root
-     settings
-     [toolbar settings]
-     [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
-      [s/div
-       {:style
-        {:width "100%"
-         :height "100%"
-         :display :flex}}
-       [inspect-1-history settings]]]]))
+(defn app []
+  [root
+   [toolbar]
+   [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
+    [s/div
+     {:style
+      {:width "100%"
+       :height "100%"
+       :display :flex}}
+     [inspect-1-history]]]])

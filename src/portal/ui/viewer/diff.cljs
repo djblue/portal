@@ -2,7 +2,7 @@
   (:require [cognitect.transit :as t]
             [lambdaisland.deep-diff2 :refer [diff]]
             [lambdaisland.deep-diff2.diff-impl :as diff]
-            [portal.ui.inspector :as ins :refer [inspector]]))
+            [portal.ui.inspector :as ins]))
 
 (def readers
   {"portal.transit/Deletion"  (t/read-handler #(diff/Deletion. %))
@@ -23,17 +23,16 @@
 (defn can-view? [value]
   (or (diff? value) (and (vector? value) (= 2 (count value)))))
 
-(defn inspect-diff [settings value]
+(defn inspect-diff [value]
   (cond
-    (instance? diff/Deletion value)  [inspector settings (:- value)]
-    (instance? diff/Insertion value) [inspector settings (:+ value)]
-    (instance? diff/Mismatch value)  [inspector settings value]
+    (instance? diff/Deletion value)  [ins/inspector (:- value)]
+    (instance? diff/Insertion value) [ins/inspector (:+ value)]
+    (instance? diff/Mismatch value)  [ins/inspector value]
     :else
     (let [[a b] value]
-      [inspector (assoc settings :depth 0) (diff a b)])))
+      [ins/inspector (diff a b)])))
 
 (def viewer
   {:predicate can-view?
    :component inspect-diff
-   :datafy diff
    :name :portal.viewer/diff})

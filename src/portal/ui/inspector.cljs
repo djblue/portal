@@ -20,6 +20,24 @@
          #js {:value (inc (use-depth))}]
         children))
 
+(def ^:private inspector-context (react/createContext {:depth 0}))
+
+(defn use-context [] (react/useContext inspector-context))
+
+(defn with-context [value & children]
+  (let [context (use-context)]
+    (into
+     [:r> (.-Provider inspector-context)
+      #js {:value (merge context value)}] children)))
+
+(defn with-collection [coll & children]
+  (into [with-context {:collection coll :key nil}] children))
+
+(defn with-key [k & children]
+  (let [context (use-context)
+        path    (get context :path [])]
+    (into [with-context {:key k :path (conj path k)}] children)))
+
 (defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))
 (defn bin? [value] (instance? js/Uint8Array value))
@@ -60,7 +78,7 @@
 (declare inspector)
 (declare preview)
 
-(defn- diff-added [_settings value]
+(defn- diff-added [value]
   (let [theme (theme/use-theme)
         color (::c/diff-add theme)]
     [s/div
@@ -68,9 +86,9 @@
               :background (str color "22")
               :border [1 :solid color]
               :border-radius (:border-radius theme)}}
-     [inspector _settings value]]))
+     [inspector value]]))
 
-(defn- diff-removed [_settings value]
+(defn- diff-removed [value]
   (let [theme (theme/use-theme)
         color (::c/diff-remove theme)]
     [s/div
@@ -78,9 +96,9 @@
               :background (str color "22")
               :border [1 :solid color]
               :border-radius (:border-radius theme)}}
-     [inspector _settings value]]))
+     [inspector value]]))
 
-(defn- inspect-diff [_settings value]
+(defn- inspect-diff [value]
   (let [theme (theme/use-theme)
         removed (get value :- ::not-found)
         added   (get value :+ ::not-found)]
@@ -92,10 +110,10 @@
                 :margin-right
                 (when-not (= added ::not-found)
                   (:spacing/padding theme))}}
-        [diff-removed _settings removed]])
+        [diff-removed removed]])
      (when-not (= added ::not-found)
        [s/div {:style {:flex 1}}
-        [diff-added _settings added]])]))
+        [diff-added added]])]))
 
 (defn get-background []
   (let [theme (theme/use-theme)]
@@ -109,7 +127,7 @@
      [s/span {:style {:color (::c/tag theme)}} "#"]
      tag]))
 
-(defn- tagged-value [_settings tag value]
+(defn- tagged-value [tag value]
   (let [theme (theme/use-theme)]
     [s/div
      {:style {:display :flex :align-items :center}}
@@ -117,10 +135,10 @@
      [s/div {:style {:margin-left (:spacing/padding theme)}}
       [s/div
        {:style {:margin (* -1 (:spacing/padding theme))}}
-       [inspector _settings value]]]]))
+       [inspector value]]]]))
 
 (defn- preview-coll [open close]
-  (fn [_settings value]
+  (fn [value]
     (let [theme (theme/use-theme)]
       [s/div
        {:style
@@ -135,20 +153,20 @@
 (def ^:private preview-list   (preview-coll "(" ")"))
 (def ^:private preview-set    (preview-coll "#{" "}"))
 
-(defn- preview-object [_settings value]
+(defn- preview-object [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/text theme)}}
      (:type (.-rep value))]))
 
-(defn preview-tagged [_settings value]
+(defn preview-tagged [value]
   [tagged-tag (.-tag value)])
 
-(defn- toggle-metadata [set-show-meta!]
+(defn- coll-action [props]
   (let [theme (theme/use-theme)]
     [s/div
      {:style {:border-right [1 :solid (::c/border theme)]}}
      [s/div
-      {:on-click #(set-show-meta! not)
+      {:on-click (:on-click props)
        :style/hover {:color (::c/tag theme)}
        :style {:cursor :pointer
                :user-select :none
@@ -156,10 +174,10 @@
                :box-sizing :border-box
                :padding (:spacing/padding theme)
                :font-size  (:font-size theme)
-               :font-family "sans-serif"}}
-      "metadata"]]))
+               :font-family (:font/family theme)}}
+      (:title props)]]))
 
-(defn- collection-header [settings values]
+(defn- collection-header [values]
   (let [theme                       (theme/use-theme)
         [show-meta? set-show-meta!] (react/useState false)]
     [s/div
@@ -180,38 +198,45 @@
          :box-sizing :border-box
          :padding (:spacing/padding theme)
          :border-right [1 :solid (::c/border theme)]}}
-       [preview settings values]]
+       [preview values]]
       (when (meta values)
-        [toggle-metadata set-show-meta!])]
+        [coll-action
+         {:on-click
+          (fn [e]
+            (set-show-meta! not)
+            (.stopPropagation e))
+          :title "metadata"}])]
      (when show-meta?
        [s/div
         {:style
          {:border-top [1 :solid (::c/border theme)]
           :box-sizing :border-box
           :padding (:spacing/padding theme)}}
-        [with-depth [inspector settings (meta values)]]])]))
+        [with-depth [inspector (meta values)]]])]))
 
-(defn- container-map [settings values child]
+(defn- container-map [values child]
   (let [theme (theme/use-theme)]
-    [s/div
-     [collection-header settings values]
+    [with-collection
+     values
      [s/div
-      {:style
-       {:width "100%"
-        :min-width :fit-content
-        :display :grid
-        :background (get-background)
-        :grid-gap (:spacing/padding theme)
-        :padding (:spacing/padding theme)
-        :box-sizing :border-box
-        :color (::c/text theme)
-        :font-size  (:font-size theme)
-        :border-bottom-left-radius (:border-radius theme)
-        :border-bottom-right-radius (:border-radius theme)
-        :border-top-right-radius 0
-        :border-top-left-radius 0
-        :border [1 :solid (::c/border theme)]}}
-      child]]))
+      [collection-header values]
+      [s/div
+       {:style
+        {:width "100%"
+         :min-width :fit-content
+         :display :grid
+         :background (get-background)
+         :grid-gap (:spacing/padding theme)
+         :padding (:spacing/padding theme)
+         :box-sizing :border-box
+         :color (::c/text theme)
+         :font-size  (:font-size theme)
+         :border-bottom-left-radius (:border-radius theme)
+         :border-bottom-right-radius (:border-radius theme)
+         :border-top-right-radius 0
+         :border-top-left-radius 0
+         :border [1 :solid (::c/border theme)]}}
+       child]]]))
 
 (defn- container-map-k [child]
   [s/div {:style {:grid-column "1"
@@ -231,49 +256,47 @@
   (try (sort-by first values)
        (catch :default _e values)))
 
-(defn- inspect-map [settings values]
+(defn- inspect-map [values]
   [container-map
-   settings
    values
    [l/lazy-seq
-    settings
     (for [[k v] (try-sort-map values)]
+      ^{:key {:key (hash k)}}
       [:<>
-       {:key (hash k)}
-       [container-map-k
-        [inspector (assoc settings :coll values) k]]
-       [container-map-v
-        [inspector (assoc settings :coll values :k k) v]]])]])
+       [container-map-k [inspector k]]
+       [with-key k
+        [container-map-v [inspector v]]]])]])
 
-(defn- container-coll [settings values child]
+(defn- container-coll [values child]
   (let [theme (theme/use-theme)]
-    [s/div
-     [collection-header settings values]
+    [with-collection
+     values
      [s/div
-      {:style
-       {:width "100%"
-        :text-align :left
-        :display :grid
-        :background (get-background)
-        :grid-gap (:spacing/padding theme)
-        :padding (:spacing/padding theme)
-        :box-sizing :border-box
-        :color (::c/text theme)
-        :font-size  (:font-size theme)
-        :border-bottom-left-radius (:border-radius theme)
-        :border-bottom-right-radius (:border-radius theme)
-        :border [1 :solid (::c/border theme)]}} child]]))
+      [collection-header values]
+      [s/div
+       {:style
+        {:width "100%"
+         :text-align :left
+         :display :grid
+         :background (get-background)
+         :grid-gap (:spacing/padding theme)
+         :padding (:spacing/padding theme)
+         :box-sizing :border-box
+         :color (::c/text theme)
+         :font-size  (:font-size theme)
+         :border-bottom-left-radius (:border-radius theme)
+         :border-bottom-right-radius (:border-radius theme)
+         :border [1 :solid (::c/border theme)]}}
+       child]]]))
 
-(defn- inspect-coll [settings values]
+(defn- inspect-coll [values]
   [container-coll
-   settings
    values
    [l/lazy-seq
-    settings
     (map-indexed
      (fn [idx itm]
        ^{:key idx}
-       [inspector (assoc settings :coll values :k idx) itm])
+       [with-key idx [inspector itm]])
      values)]])
 
 (defn- trim-string [string limit]
@@ -281,7 +304,7 @@
     string
     (str (subs string 0 limit) "...")))
 
-(defn- inspect-number [_settings value]
+(defn- inspect-number [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/number theme)}} value]))
 
@@ -291,10 +314,11 @@
 (defn- url-string? [string]
   (re-matches #"https?://.*" string))
 
-(defn- inspect-string [_settings value]
+(defn- inspect-string [value]
   (let [theme (theme/use-theme)
         limit (:limits/string-length theme)
-        [expand? set-expand!] (react/useState false)]
+        {:keys [expanded?]} @(state/use-state)
+        context             (use-context)]
     (cond
       (url-string? value)
       [s/span
@@ -321,53 +345,45 @@
           :color value}}
         value]]
 
-      (or (< (count value) limit) expand?)
-      [s/span {:style {:color (::c/string theme)}} (pr-str value)]
+      (or (< (count value) limit)
+          (contains? expanded? context))
+      [s/span {:style {:color (::c/string theme)}}
+       (pr-str value)]
 
       :else
       [s/span {:style {:color (::c/string theme)}}
-       "\""
-       (let [s (pr-str (subs value 0 limit))]
-         (subs s 1 (dec (count s))))
-       [s/span
-        {:on-click #(set-expand! true)
-         :style
-         {:cursor :pointer
-          :background "rgba(0,0,0,0.35)"
-          :border-radius (:border-radius theme)}}
-        "..."]
-       "\""])))
+       (pr-str (str (subs value 0 limit) "..."))])))
 
-(defn- inspect-namespace [_settings value]
+(defn- inspect-namespace [value]
   (let [theme (theme/use-theme)]
     (when-let [ns (namespace value)]
       [s/span
        [s/span {:style {:color (::c/namespace theme)}} ns]
        [s/span {:style {:color (::c/text theme)}} "/"]])))
 
-(defn- inspect-boolean [_settings value]
+(defn- inspect-boolean [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/boolean theme)}}
      (pr-str value)]))
 
-(defn- inspect-symbol [_settings value]
+(defn- inspect-symbol [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/symbol theme) :white-space :nowrap}}
-     [inspect-namespace _settings value]
+     [inspect-namespace value]
      (name value)]))
 
-(defn- inspect-keyword [_settings value]
+(defn- inspect-keyword [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/keyword theme) :white-space :nowrap}}
      ":"
-     [inspect-namespace _settings value]
+     [inspect-namespace value]
      (name value)]))
 
-(defn- inspect-date [_settings value]
-  [tagged-value _settings "inst" (.toJSON value)])
+(defn- inspect-date [value]
+  [tagged-value "inst" (.toJSON value)])
 
-(defn- inspect-uuid [_settings value]
-  [tagged-value _settings "uuid" (str value)])
+(defn- inspect-uuid [value]
+  [tagged-value "uuid" (str value)])
 
 (defn- get-var-symbol [value]
   (cond
@@ -375,18 +391,18 @@
     :else                   (let [m (meta value)]
                               (symbol (name (:ns m)) (name (:name m))))))
 
-(defn- inspect-var [_settings value]
+(defn- inspect-var [value]
   (let [theme (theme/use-theme)]
     [s/span
      [s/span {:style {:color (::c/tag theme)}} "#'"]
-     [inspect-symbol _settings (get-var-symbol value)]]))
+     [inspect-symbol (get-var-symbol value)]]))
 
 (defn- get-url-string [value]
   (cond
     (t/tagged-value? value) (.-rep value)
     :else                   (str value)))
 
-(defn- inspect-uri [_settings value]
+(defn- inspect-uri [value]
   (let [theme (theme/use-theme)
         value (get-url-string value)]
     [s/a
@@ -395,10 +411,10 @@
       :target "_blank"}
      value]))
 
-(defn- inspect-tagged [_settings value]
-  [tagged-value _settings (.-tag value) (.-rep value)])
+(defn- inspect-tagged [value]
+  [tagged-value (.-tag value) (.-rep value)])
 
-(defn- inspect-ratio [_settings value]
+(defn- inspect-ratio [value]
   (let [theme (theme/use-theme)
         [a b] (.-rep value)]
     [s/div
@@ -406,13 +422,13 @@
      "/"
      [s/span {:style {:color (::c/number theme)}} (.-rep b)]]))
 
-(defn- inspect-default [_settings value]
+(defn- inspect-default [value]
   (let [theme (theme/use-theme)
         limit (:limits/string-length theme)]
     [s/span
      (trim-string (pr-str value) limit)]))
 
-(defn- inspect-object [_settings value]
+(defn- inspect-object [value]
   (let [value (.-rep value)
         theme (theme/use-theme)
         limit (:limits/string-length theme)]
@@ -446,11 +462,11 @@
 (def ^:private preview-type?
   #{:map :set :vector :list :coll :tagged :object})
 
-(defn preview [settings value]
+(defn preview [value]
   (let [type (get-value-type value)
         component (get-preview-component type)]
     (when (preview-type? type)
-      [component settings value])))
+      [component value])))
 
 (defn- get-inspect-component [type]
   (case type
@@ -471,42 +487,47 @@
     :ratio      inspect-ratio
     inspect-default))
 
-(defn inspector [settings value]
-  (let [theme (theme/use-theme)
-        depth (use-depth)
-        preview? (> depth (:limits/max-depth theme))
-        type (get-value-type value)
-        component (if preview?
-                    (get-preview-component type)
-                    (get-inspect-component type))
-        nav-target? (= 1 depth)
-        on-nav #(state/dispatch
-                 settings
-                 state/nav
-                 (assoc settings :value value))]
-    [s/div
-     {:on-click
-      (fn [e]
-        (when nav-target?
-          (.stopPropagation e)
-          (on-nav)))
-      :on-key-down
-      (fn [e]
-        (when (= (.-key e) "Enter")
-          (.stopPropagation e)
-          (on-nav)))
-      :style {:width "100%"
-              :padding (when (or preview? (not (coll? value)))
-                         (* 0.65 (:spacing/padding theme)))
-              :box-sizing :border-box
-              :border-radius (:border-radius theme)
-              :border [1 :solid "rgba(0,0,0,0)"]}
-      :tab-index (when nav-target? 0)
-      :style/hover {:border
-                    (when nav-target?
-                      [1 :solid "#D8DEE9"])}}
-     [inc-depth
-      [component settings value]]]))
+(defn inspector [value]
+  (let [state (state/use-state)
+        {:keys [selected expanded?]} @state
+        context (assoc (use-context) :value value)
+        selected? (= selected context)]
+    [with-context
+     context
+     (let [theme (theme/use-theme)
+           depth (use-depth)
+           preview? (and (not (contains? expanded? context))
+                         (> depth (:limits/max-depth theme)))
+           type (get-value-type value)
+           component (if preview?
+                       (get-preview-component type)
+                       (get-inspect-component type))]
+       [s/div
+        {:tab-index 0
+         :on-focus
+         (fn [e]
+           (when-not selected?
+             (state/dispatch! state assoc :selected context))
+           (.stopPropagation e))
+         :on-mouse-down
+         (fn [e]
+           (when (= (.-button e) 1)
+             (state/dispatch! state state/toggle-expand context)
+             (.stopPropagation e)))
+         :on-double-click
+         (fn [e]
+           (state/dispatch! state state/history-push {:portal/value value})
+           (.stopPropagation e))
+         :style {:width "100%"
+                 :padding (when (or preview? (not (coll? value)))
+                            (* 0.65 (:spacing/padding theme)))
+                 :box-sizing :border-box
+                 :border-radius (:border-radius theme)
+                 :border (if selected?
+                           [1 :solid "#D8DEE999"]
+                           [1 :solid "rgba(0,0,0,0)"])
+                 :background (when selected? "rgba(0,0,0,0.15)")}}
+        [inc-depth [component value]]])]))
 
 (def viewer
   {:predicate (constantly true)

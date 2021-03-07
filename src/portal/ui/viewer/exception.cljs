@@ -57,7 +57,7 @@
         [s/span {:style {:color (::c/namespace theme)}} class "/"]
         [s/span {:style {:color (::c/symbol theme)}} method]])]))
 
-(defn inspect-exception [_settings value]
+(defn inspect-exception [value]
   (let [theme (theme/use-theme)]
     [s/div
      {:style

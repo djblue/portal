@@ -39,8 +39,9 @@
       (second (first value))
       (into {} value))))
 
-(defn area [settings children]
-  (let [[active? set-active!] (react/useState false)]
+(defn area [children]
+  (let [state                 (state/use-state)
+        [active? set-active!] (react/useState false)]
     [s/div
      {:on-drag-over
       (fn [e]
@@ -53,7 +54,7 @@
                        (for [item (.-dataTransfer.items e)
                              :when (= (.-kind item) "file")]
                          (.getAsFile item)))]
-          (state/dispatch settings state/history-push {:portal/value value}))
+          (state/dispatch! state state/history-push {:portal/value value}))
         (set-active! false))
       :style {:position :relative}}
      (when active?

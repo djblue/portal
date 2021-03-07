@@ -1,6 +1,6 @@
 (ns portal.ui.viewer.tree
   (:require ["react" :as react]
-            [portal.ui.inspector :as ins :refer [inspector]]
+            [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
             [portal.ui.lazy :as l]
             [portal.ui.theme :as theme]))
@@ -85,52 +85,53 @@
            child
            close])]])))
 
-(defn- inspect-tree-map [settings value]
+(defn- inspect-tree-map [value]
   (let [theme (theme/use-theme)]
     [s/div
      {:style {:padding-left (* 2 (:spacing/padding theme))}}
      [l/lazy-seq
-      settings
       (for [[k v] (ins/try-sort-map value)]
         ^{:key (hash k)}
         [inspect-tree-item
          {:key k
-          :key-child [inspect-tree-1 settings k]
+          :key-child
+          [inspect-tree-1 k]
           :value v
-          :value-child [inspect-tree settings v]}])]]))
+          :value-child
+          [ins/with-key k [inspect-tree v]]}])]]))
 
-(defn- inspect-tree-coll [settings value]
-  (let [theme (theme/use-theme)]
+(defn- inspect-tree-coll [value]
+  (let [theme   (theme/use-theme)]
     [s/div
      {:style {:padding-left (* 2 (:spacing/padding theme))}}
      [l/lazy-seq
-      settings
       (map-indexed
        (fn [idx item]
          ^{:key idx}
-         [s/div
-          [inspect-tree-item
-           {:value item
-            :value-child [inspect-tree settings item]}]])
+         [ins/with-key idx
+          [s/div
+           [inspect-tree-item
+            {:value item
+             :value-child [inspect-tree item]}]]])
        value)]]))
 
-(defn- inspect-tree [settings value]
-  (let [settings (update settings :portal/rainbow rest)]
-    [theme/cycle-rainbow
-     [s/div
-      {:style {:width :auto}}
-      (cond
-        (map? value)  [inspect-tree-map settings value]
-        (coll? value) [inspect-tree-coll settings value]
-        :else         [inspector settings value])]]))
+(defn- inspect-tree [value]
+  [ins/with-collection value
+   [theme/cycle-rainbow
+    [s/div
+     {:style {:width :auto}}
+     (cond
+       (map? value)  [inspect-tree-map value]
+       (coll? value) [inspect-tree-coll value]
+       :else         [ins/inspector value])]]])
 
-(defn inspect-tree-1 [settings value]
+(defn inspect-tree-1 [value]
   [inspect-tree-item
    {:value value
-    :value-child [inspect-tree settings value]}])
+    :value-child [inspect-tree value]}])
 
-(defn tree [settings value]
-  [ins/inc-depth [inspect-tree-1 settings value]])
+(defn tree [value]
+  [ins/inc-depth [inspect-tree-1 value]])
 
 (def viewer
   {:predicate coll?

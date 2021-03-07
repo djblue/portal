@@ -9,7 +9,7 @@
             [portal.ui.app :as app]
             [portal.ui.commands :as commands]
             [portal.ui.drag-and-drop :as dnd]
-            [portal.ui.state :as s :refer [state]]
+            [portal.ui.state :as state]
             [portal.ui.styled :refer [div]]
             [portal.ui.theme :as theme]
             [reagent.core :as r]
@@ -54,18 +54,18 @@
     ::shortcuts/osx #{"meta" "o"}
     ::shortcuts/default #{"control" "o"}
     :run #(a/let [value (open-file)]
-            (s/dispatch % s/history-push {:portal/value value}))}
+            (state/dispatch! % state/history-push {:portal/value value}))}
    {:name 'portal.load/clipboard
     :label "Load from clipboard"
     ::shortcuts/osx #{"meta" "v"}
     ::shortcuts/default #{"control" "v"}
     :run #(a/let [value (clipboard)]
-            (s/dispatch % s/history-push {:portal/value value}))}
+            (state/dispatch! % state/history-push {:portal/value value}))}
    {:name 'portal.load/demo
     :label "Load demo data"
     ::shortcuts/osx #{"meta" "d"}
     ::shortcuts/default #{"control" "d"}
-    :run #(s/dispatch % s/history-push {:portal/value demo/data})}])
+    :run #(state/dispatch! % state/history-push {:portal/value demo/data})}])
 
 (defn invoke [{:keys [f args]} done]
   (try
@@ -88,22 +88,23 @@
 (defn set-title [title]
   (set! (.-title js/document) title))
 
-(defn launch-queue-consumer [settings item]
+(defn launch-queue-consumer [item]
   (a/let [files (js/Promise.all (map #(.getFile %) (.-files item)))
           value (dnd/handle-files files)]
-    (s/dispatch settings s/history-push {:portal/value value})))
+    (state/dispatch! state/state state/history-push {:portal/value value})))
 
 (defn handle-message [message]
   (let [data (.-data message)]
     (when-let [event (and (string? data) (js/JSON.parse data))]
       (case (.-type event)
         "close" (js/window.close)
-        "set-theme" (s/set-theme (.-color event))))))
+        "set-theme" (state/set-theme (.-color event))))))
 
 (def hex-color #"#[0-9a-f]{6}")
 
-(defn splash [settings]
+(defn splash []
   (let [theme (theme/use-theme)
+        state (state/use-state)
         mapping (reduce-kv
                  (fn [mapping k v]
                    (assoc mapping v (get theme k)))
@@ -111,8 +112,7 @@
                  (::c/nord c/themes))
         svg (str/replace (io/resource "splash.svg") hex-color mapping)]
     [:<>
-     [commands/palette
-      (assoc settings :commands commands)]
+     [commands/palette {:commands commands}]
      [div
       {:style
        {:display :flex
@@ -142,7 +142,7 @@
         (for [command commands]
           ^{:key (hash command)}
           [div
-           {:on-click #((:run command) settings)
+           {:on-click #((:run command) state)
             :style
             {:display :flex
              :align-items :center
@@ -157,15 +157,13 @@
             {:style
              {:margin-left (:spacing/padding theme)}}
             (:label command)]
-           [commands/shortcut settings command]])]]]]))
+           [commands/shortcut command]])]]]]))
 
 (defn pwa-app []
-  (if (contains? @state :portal/value)
-    [app/app {:send! send!}]
-    (let [settings (merge (s/get-settings) {:send! send!})]
-      [app/root
-       settings
-       [dnd/area settings [splash settings]]])))
+  (if (contains? @state/state :portal/value)
+    [app/app]
+    [app/root
+     [dnd/area [splash]]]))
 
 (def functional-compiler (r/create-compiler {:function-components true}))
 
@@ -195,7 +193,8 @@
     (js/navigator.serviceWorker.register "sw.js"))
   (when js/window.launchQueue
     (js/window.launchQueue.setConsumer
-     #(launch-queue-consumer (s/get-settings) %)))
+     #(launch-queue-consumer %)))
+  (reset! state/sender send!)
   (render-app))
 
 (defn main! []

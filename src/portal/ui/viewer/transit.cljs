@@ -1,6 +1,6 @@
 (ns portal.ui.viewer.transit
   (:require [cognitect.transit :as t]
-            [portal.ui.inspector :refer [inspector]]))
+            [portal.ui.inspector :as ins]))
 
 (defn- parse-transit [transit-string]
   (try (t/read (t/reader :json) transit-string)
@@ -8,11 +8,10 @@
 
 (defn transit? [value] (string? value))
 
-(defn inspect-transit [settings transit-string]
-  [inspector settings (parse-transit transit-string)])
+(defn inspect-transit [transit-string]
+  [ins/inspector (parse-transit transit-string)])
 
 (def viewer
   {:predicate transit?
-   :datafy parse-transit
    :component inspect-transit
    :name :portal.viewer/transit})

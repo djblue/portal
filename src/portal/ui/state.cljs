@@ -1,24 +1,37 @@
 (ns portal.ui.state
-  (:require [portal.colors :as c]
+  (:require ["react" :as react]
+            [portal.colors :as c]
             [reagent.core :as r]
             [portal.async :as a]))
 
-(defonce state     (r/atom nil))
-(defonce tap-state (r/atom nil))
+(defonce sender (atom nil))
+(defonce state  (r/atom nil))
 
 (defn notify-parent [event]
   (when js/parent
     (js/parent.postMessage (js/JSON.stringify (clj->js event)) "*")))
 
-(defn dispatch [settings f & args]
-  (let [state (::state settings)]
-    (a/let [next-state (apply f (assoc @state :send! (:send! settings)) args)]
-      (when next-state
-        (reset! state (dissoc next-state :send!))))))
+(defn dispatch! [state f & args]
+  (a/let [next-state (apply f @state args)]
+    (when next-state (reset! state next-state))))
 
-(defn send! [settings message] ((:send! settings) message))
+(def ^:private state-context (react/createContext nil))
 
-(def no-history [::previous-commands])
+(defn use-state [] (react/useContext state-context))
+
+(defn with-state [state & children]
+  (into [:r> (.-Provider state-context) #js {:value state}] children))
+
+(defn get-selected [state]
+  (get-in state [:selected :value] (:portal/value state)))
+
+(defn get-nav-args [state]
+  (when-let [{:keys [collection key value]} (:selected state)]
+    (when collection [collection key value])))
+
+(defn- send! [message] (@sender message))
+
+(def no-history [::previous-commands :portal/tap-list])
 
 (defn history-back [state]
   (when-let [previous-state (:portal/previous-state state)]
@@ -51,56 +64,54 @@
          :portal/previous-state state
          :portal/next-state nil
          :search-text ""
+         :selected nil
          :portal/key   key
          :portal/f     f
          :portal/value value))
 
-(defn nav [settings {:keys [coll k value]}]
-  (-> (send!
-       settings
-       {:op :portal.rpc/on-nav :args [coll k value]})
-      (.then #(when-not (= (:value %) (:portal/value settings))
-                (history-push
-                 settings
-                 {:portal/key k
-                  :portal/value (:value %)})))))
+(defn toggle-expand [state context]
+  (let [expanded? (get state :expanded? #{})]
+    (assoc state :expanded?
+           (if (contains? expanded? context)
+             (disj expanded? context)
+             (conj expanded? context)))))
+
+(defn focus-selected [state context]
+  (history-push state {:portal/value (:value context)}))
 
 (defn get-path [state]
-  (->> state
-       (iterate :portal/previous-state)
-       (take-while some?)
-       drop-last
-       (map :portal/key)
-       reverse
-       (into [])))
+  (get-in state [:selected :path]))
 
-(defn clear [settings]
-  (-> (send! settings {:op :portal.rpc/clear-values})
-      (.then #(-> settings
-                  (dissoc :portal/value)
-                  (assoc
-                   :search-text ""
-                   :portal/previous-state nil
-                   :portal/next-state nil)))))
+(defn clear [state]
+  (a/do
+    (send! {:op :portal.rpc/clear-values})
+    (-> state
+        (dissoc :portal/value)
+        (assoc
+         :portal/tap-list '()
+         :search-text ""
+         :selected nil
+         :portal/previous-state nil
+         :portal/next-state nil))))
 
 (defn set-theme [color]
   (when-let [el (js/document.querySelector "meta[name=theme-color]")]
     (.setAttribute el "content" color)))
 
 (defn set-theme! [theme]
-  (swap! tap-state assoc ::c/theme theme)
+  (swap! state assoc ::c/theme theme)
   (let [color (get-in c/themes [theme ::c/background2])]
     (set-theme color)
     (notify-parent
      {:type :set-theme :color color})))
 
 (defn- merge-state [new-state]
-  (swap! tap-state merge new-state))
+  (swap! state merge new-state))
 
 (defn- load-state [send!]
   (-> (send!
        {:op              :portal.rpc/load-state
-        :portal/state-id (:portal/state-id @tap-state)})
+        :portal/state-id (:portal/state-id @state)})
       (.then merge-state)
       (.then #(:portal/complete? %))))
 
@@ -110,37 +121,29 @@
        (fn [complete?]
          (when-not complete? (long-poll send!))))))
 
-(defn invoke [settings f & args]
-  (-> (send!
-       settings
-       {:op :portal.rpc/invoke :f f :args args})
+(defn invoke [f & args]
+  (-> (send! {:op :portal.rpc/invoke :f f :args args})
       (.then #(:return %))))
 
-(defn more [settings value]
-  (let [state (::state settings)]
-    (when-let [f (-> value meta :portal.runtime/more)]
-      (-> (invoke settings f)
-          (.then
-           (fn [more]
-             (swap! (if (contains? @state :portal/value)
-                      state
-                      tap-state)
-                    update :portal/value
-                    (fn [current]
-                      (with-meta
-                        (concat current more)
-                        (meta more))))))))))
+(defn more [state]
+  (let [k (if (contains? state :portal/value)
+            :portal/value
+            :portal/tap-list)]
+    (if-let [f (-> state k meta :portal.runtime/more)]
+      (a/let [more-values (invoke f)]
+        (update state
+                k
+                (fn [current]
+                  (with-meta
+                    (concat current more-values)
+                    (meta more-values)))))
+      state)))
 
-(defn get-value [settings]
-  (:portal/value settings (:portal/value @tap-state)))
+(defn get-value [state]
+  (:portal/value state (:portal/tap-list state)))
 
-(defn get-history [settings]
+(defn get-history [state]
   (concat
    (reverse
-    (take-while some? (rest (iterate :portal/previous-state settings))))
-   (take-while some? (iterate :portal/next-state settings))))
-
-(defn get-settings []
-  (merge (select-keys @tap-state [::c/theme])
-         @state
-         {::state state}))
+    (take-while some? (rest (iterate :portal/previous-state state))))
+   (take-while some? (iterate :portal/next-state state))))

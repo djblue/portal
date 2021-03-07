@@ -52,7 +52,9 @@
    {:example/settings 'complex-key} :hello-world
    ::atom (atom ::hello)
    ::function println
-   ::range (range)})
+   ;;TODO: fix me, causes infininte loop in demo
+   ;;::range (range)
+   })
 
 (def diff-data
   (with-meta

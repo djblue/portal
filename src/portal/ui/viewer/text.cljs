@@ -5,7 +5,7 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(defn inspect-text [settings value]
+(defn inspect-text [value]
   (let [theme (theme/use-theme)]
     [s/div
      {:style
@@ -19,7 +19,6 @@
      [s/table
       [s/tbody
        [l/lazy-seq
-        settings
         (->>
          (str/split value #"\n")
          (map-indexed
@@ -27,7 +26,7 @@
             [(inc line) line-content]))
          (filter
           (fn [[_ line-content]]
-            (if-let [search-text (:search-text settings)]
+            (if-let [search-text (:search-text {})] ;; TODO fix me
               (str/includes? line-content search-text)
               true)))
          (map

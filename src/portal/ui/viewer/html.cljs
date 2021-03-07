@@ -3,7 +3,7 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(defn inspect-html [_settings value]
+(defn inspect-html [value]
   (let [theme (theme/use-theme)]
     [s/iframe {:style {:width "100%"
                        :height "100%"
