@@ -8,21 +8,22 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(def ^:private depth (react/createContext 0))
-
-(defn- use-depth [] (react/useContext depth))
-
-(defn with-depth [& children]
-  (into [:r> (.-Provider depth) #js {:value 0}] children))
-
-(defn inc-depth [& children]
-  (into [:r> (.-Provider depth)
-         #js {:value (inc (use-depth))}]
-        children))
-
 (def ^:private inspector-context (react/createContext {:depth 0}))
 
 (defn use-context [] (react/useContext inspector-context))
+
+(defn with-depth [& children]
+  (let [context (use-context)]
+    (into [:r> (.-Provider inspector-context)
+           #js {:value (assoc context :depth 0)}] children)))
+
+(defn inc-depth [& children]
+  (let [context (use-context)]
+    (into [:r> (.-Provider inspector-context)
+           #js {:value (update context :depth inc)}]
+          children)))
+
+(defn- use-depth [] (:depth (use-context)))
 
 (defn with-context [value & children]
   (let [context (use-context)]
@@ -346,13 +347,14 @@
         value]]
 
       (or (< (count value) limit)
+          (= (:depth context) 1)
           (contains? expanded? context))
       [s/span {:style {:color (::c/string theme)}}
        (pr-str value)]
 
       :else
       [s/span {:style {:color (::c/string theme)}}
-       (pr-str (str (subs value 0 limit) "..."))])))
+       (pr-str (trim-string value limit))])))
 
 (defn- inspect-namespace [value]
   (let [theme (theme/use-theme)]
@@ -490,7 +492,9 @@
 (defn inspector [value]
   (let [state (state/use-state)
         {:keys [selected expanded?]} @state
-        context (assoc (use-context) :value value)
+        context (-> (use-context)
+                    (assoc :value value)
+                    (update :depth inc))
         selected? (= selected context)]
     [with-context
      context
@@ -527,7 +531,7 @@
                            [1 :solid "#D8DEE999"]
                            [1 :solid "rgba(0,0,0,0)"])
                  :background (when selected? "rgba(0,0,0,0.15)")}}
-        [inc-depth [component value]]])]))
+        [component value]])]))
 
 (def viewer
   {:predicate (constantly true)
