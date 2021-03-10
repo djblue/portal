@@ -1,5 +1,6 @@
 (ns portal.ui.commands
-  (:require [clojure.pprint :as pp]
+  (:require ["react" :as react]
+            [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
             [portal.async :as a]
@@ -35,19 +36,13 @@
         :border-radius (:border-radius theme)}}]
      children)))
 
-(defn with-shortcuts [f]
-  (let [k (gensym)]
-    (r/create-class
-     {:component-did-mount
-      (fn []
-        (shortcuts/add! k f))
-      :component-will-receive-props
-      (fn [_this [_ f]]
-        (shortcuts/add! k f))
-      :component-will-unmount
-      (fn []
-        (shortcuts/remove! k))
-      :reagent-render (constantly nil)})))
+(defn- use-shortcuts [k f]
+  (react/useEffect
+   (fn []
+     (shortcuts/add! k f)
+     (fn []
+       (shortcuts/remove! k)))
+   #js [f]))
 
 (defn checkbox [checked?]
   (let [theme (theme/use-theme)]
@@ -95,29 +90,31 @@
             options   (:options input)
             n         (count (:options input))
             on-select #(swap! selected (if (selected? %) disj conj) %)]
+        (use-shortcuts
+         ::selector
+         (fn [log]
+           (when
+            (condp shortcuts/match? log
+              "arrowup"   (swap! active #(mod (dec %) n))
+              "arrowdown" (swap! active #(mod (inc %) n))
+
+              "a"
+              (if (= (count @selected) (count options))
+                (reset! selected #{})
+                (swap! selected into options))
+
+              "i" (swap! selected #(set/difference (into #{} options) %))
+              " " (on-select (nth options @active))
+              "enter" (on-done @selected)
+
+              nil)
+             (shortcuts/matched! log))))
+
         [container
          [s/div
           {:style {:box-sizing :border-box
                    :padding (:spacing/padding theme)}}
           "(Press <space> to select, <a> to toggle all, <i> to invert selection)"]
-         [with-shortcuts
-          (fn [log]
-            (when
-             (condp shortcuts/match? log
-               "arrowup"   (swap! active #(mod (dec %) n))
-               "arrowdown" (swap! active #(mod (inc %) n))
-
-               "a"
-               (if (= (count @selected) (count options))
-                 (reset! selected #{})
-                 (swap! selected into options))
-
-               "i" (swap! selected #(set/difference (into #{} options) %))
-               " " (on-select (nth options @active))
-               "enter" (on-done @selected)
-
-               nil)
-              (shortcuts/matched! log)))]
          [s/div
           {:style {:overflow :auto}}
           (->> options
@@ -219,20 +216,22 @@
               (on-close)
               (when-let [option (nth options @active)]
                 (on-select (second option))))]
+        (use-shortcuts
+         ::palette
+         (fn [log]
+           (when
+            (condp shortcuts/match? log
+              "arrowup"   (swap! active #(mod (dec %) n))
+              "arrowdown" (swap! active #(mod (inc %) n))
+              "enter"     (on-select)
+              nil)
+             (shortcuts/matched! log))))
         [container
          [s/div
           {:style
            {:padding (:spacing/padding theme)
             :border-bottom [1 :solid (::c/border theme)]}}
-          [with-shortcuts
-           (fn [log]
-             (when
-              (condp shortcuts/match? log
-                "arrowup"   (swap! active #(mod (dec %) n))
-                "arrowdown" (swap! active #(mod (inc %) n))
-                "enter"     (on-select)
-                nil)
-               (shortcuts/matched! log)))]
+
           [s/input
            {:auto-focus true
             :value @filter-text
@@ -600,12 +599,12 @@
 
 (defn palette [props _value]
   (let [state (state/use-state)]
-    [:<>
-     [with-shortcuts
-      (fn [log]
-        (doseq [command (concat commands (:commands props))]
-          (when (shortcuts/match? command log)
-            (shortcuts/matched! log)
-            ((:run command) state))))]
-     (when-let [component @input]
-       [pop-up [component state]])]))
+    (use-shortcuts
+     ::commands
+     (fn [log]
+       (doseq [command (concat commands (:commands props))]
+         (when (shortcuts/match? command log)
+           (shortcuts/matched! log)
+           ((:run command) state)))))
+    (when-let [component @input]
+      [pop-up [component state]])))
