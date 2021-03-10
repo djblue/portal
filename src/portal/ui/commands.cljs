@@ -490,10 +490,10 @@
 
 (def portal-commands
   [{:name :portal.command/focus-selected
-    ::shortcuts/default #{"control" "enter"}
+    ::shortcuts/default #{"enter"}
     :run (fn->command state/focus-selected)}
    {:name :portal.command/toggle-expand
-    ::shortcuts/default #{"control" "e"}
+    ::shortcuts/default #{"e"}
     :run (fn->command state/toggle-expand)}
    {:name :portal.command/close-command-palette
     ::shortcuts/osx ["escape"]
@@ -602,9 +602,10 @@
     (use-shortcuts
      ::commands
      (fn [log]
-       (doseq [command (concat commands (:commands props))]
-         (when (shortcuts/match? command log)
-           (shortcuts/matched! log)
-           ((:run command) state)))))
+       (when-not (shortcuts/input? log)
+         (doseq [command (concat commands (:commands props))]
+           (when (shortcuts/match? command log)
+             (shortcuts/matched! log)
+             ((:run command) state))))))
     (when-let [component @input]
       [ins/with-readonly [pop-up [component state]]])))

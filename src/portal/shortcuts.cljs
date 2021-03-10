@@ -47,6 +47,11 @@
           (= combo (get-shortcut definition)))
         (concat [(log->combo log)] (log->seq log))))
 
+(defn input? [log]
+  (when-let [e (first log)]
+    (#{"BUTTON" "INPUT" "SELECT"}
+     (.. e -target -tagName))))
+
 (defn- keydown [e] (swap! log #(take 5 (conj % e))))
 
 (defn- init []
