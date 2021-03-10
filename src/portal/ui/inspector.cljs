@@ -39,6 +39,9 @@
         path    (get context :path [])]
     (into [with-context {:key k :path (conj path k)}] children)))
 
+(defn with-readonly [& children]
+  (into [with-context {:readonly? true}] children))
+
 (defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))
 (defn bin? [value] (instance? js/Uint8Array value))
@@ -507,30 +510,33 @@
                        (get-preview-component type)
                        (get-inspect-component type))]
        [s/div
-        {:tab-index 0
-         :on-focus
-         (fn [e]
-           (when-not selected?
-             (state/dispatch! state assoc :selected context))
-           (.stopPropagation e))
-         :on-mouse-down
-         (fn [e]
-           (when (= (.-button e) 1)
-             (state/dispatch! state state/toggle-expand context)
-             (.stopPropagation e)))
-         :on-double-click
-         (fn [e]
-           (state/dispatch! state state/history-push {:portal/value value})
-           (.stopPropagation e))
-         :style {:width "100%"
-                 :padding (when (or preview? (not (coll? value)))
-                            (* 0.65 (:spacing/padding theme)))
-                 :box-sizing :border-box
-                 :border-radius (:border-radius theme)
-                 :border (if selected?
-                           [1 :solid "#D8DEE999"]
-                           [1 :solid "rgba(0,0,0,0)"])
-                 :background (when selected? "rgba(0,0,0,0.15)")}}
+        (merge
+         (when-not (:readonly? context)
+           {:tab-index 0
+            :on-focus
+            (fn [e]
+              (when-not selected?
+                (state/dispatch! state assoc :selected context))
+              (.stopPropagation e))
+            :on-mouse-down
+            (fn [e]
+              (when (= (.-button e) 1)
+                (state/dispatch! state state/toggle-expand context)
+                (.stopPropagation e)))
+            :on-double-click
+            (fn [e]
+              (state/dispatch! state state/history-push {:portal/value value})
+              (.stopPropagation e))})
+         {:style
+          {:width "100%"
+           :padding (when (or preview? (not (coll? value)))
+                      (* 0.65 (:spacing/padding theme)))
+           :box-sizing :border-box
+           :border-radius (:border-radius theme)
+           :border (if selected?
+                     [1 :solid "#D8DEE999"]
+                     [1 :solid "rgba(0,0,0,0)"])
+           :background (when selected? "rgba(0,0,0,0.15)")}})
         [component value]])]))
 
 (def viewer

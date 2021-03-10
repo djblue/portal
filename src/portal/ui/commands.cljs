@@ -607,4 +607,4 @@
            (shortcuts/matched! log)
            ((:run command) state)))))
     (when-let [component @input]
-      [pop-up [component state]])))
+      [ins/with-readonly [pop-up [component state]]])))
