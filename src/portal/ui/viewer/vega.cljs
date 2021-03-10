@@ -1,6 +1,5 @@
 (ns portal.ui.viewer.vega
-  (:require ["react" :as react]
-            ["vega-embed" :as vegaEmbed]
+  (:require ["vega-embed" :as vegaEmbed]
             [clojure.spec.alpha :as sp]
             [clojure.string :as str]
             [portal.colors :as c]
