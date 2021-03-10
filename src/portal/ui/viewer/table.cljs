@@ -55,6 +55,7 @@
       [l/lazy-seq
        (map-indexed
         (fn [row-index row]
+          ^{:key row-index}
           [ins/with-key
            (when (coll? row) (first row))
            [s/tr

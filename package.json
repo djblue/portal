@@ -3,7 +3,6 @@
     "papaparse": "^5.3.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "react-visibility-sensor": "^5.1.1",
     "vega": "^5.19.1",
     "vega-embed": "^6.15.2",
     "vega-lite": "^4.17.0"
