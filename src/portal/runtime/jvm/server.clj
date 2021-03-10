@@ -1,6 +1,7 @@
 (ns portal.runtime.jvm.server
   (:require [clojure.datafy :refer [datafy]]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
@@ -60,6 +61,12 @@
   (try (Thread/sleep 60000)
        (catch Exception _e {:status 200})))
 
+(defn- source-maps [request]
+  (let [uri  (subs (:uri request) 1)
+        file (io/file "target/resources/portal/" uri)]
+    (when (and (str/includes? uri ".map") (.exists file))
+      (send-resource "application/json" (slurp file)))))
+
 (defn handler [request]
   (let [paths
         {"/"        #(send-resource "text/html"       (index/html))
@@ -67,5 +74,6 @@
          "/main.js" #(send-resource "text/javascript" (slurp (resource "main.js")))
          "/rpc"     #(rpc-handler request)}
         f (get paths (:uri request))]
-    (when (fn? f) (f))))
-
+    (cond
+      (fn? f) (f)
+      :else   (source-maps request))))
