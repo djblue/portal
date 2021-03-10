@@ -363,7 +363,7 @@
   [state/with-state
    state/state
    [theme/with-theme
-    (get state/state ::c/theme ::c/nord)
+    (get @state/state ::c/theme ::c/nord)
     [container children]]])
 
 (defn app []
