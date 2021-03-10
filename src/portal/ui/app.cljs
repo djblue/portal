@@ -333,19 +333,8 @@
     [:<>
      [commands/palette
       {:commands (viewer-commands (state/get-selected-value current-state))}]
-     (doall
-      (map-indexed
-       (fn [index state]
-         ^{:key (str index)}
-         [s/div
-          {:style
-           {:flex 1
-            :display
-            (if (= state current-state)
-              :block
-              :none)}}
-          [inspect-1 (state/get-value state)]])
-       (state/get-history current-state)))]))
+     [s/div {:style {:flex 1}}
+      [inspect-1 (state/get-value current-state)]]]))
 
 (defn root [& children]
   [state/with-state
