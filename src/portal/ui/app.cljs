@@ -152,7 +152,8 @@
 
 (defn inspect-1 [value]
   (let [theme   (theme/use-theme)
-        value   (filter-data (:search-text @(state/use-state)) value)
+        state   (state/use-state)
+        value   (filter-data (:search-text @state) value)
         {:keys [compatible-viewers viewer set-viewer!]} (use-viewer value)
         component (:component viewer)]
     [:<>
@@ -187,23 +188,45 @@
         :align-items :center
         :justify-content :space-between
         :background (::c/background2 theme)
+        :box-sizing :border-box
+        :padding (:spacing/padding theme)
         :border-top [1 :solid (::c/border theme)]}}
-      (if (empty? compatible-viewers)
-        [s/div]
-        [:select
-         {:value (pr-str (:name viewer))
+      [s/button
+       {:title    "Open command palette."
+        :on-click #((:run commands/open-command-palette) state)
+        :style
+        {:min-width 60
+         :font-family (:font/family theme)
+         :background (::c/background theme)
+         :border-radius (:border-radius theme)
+         :border [1 :solid (::c/border theme)]
+         :box-sizing :border-box
+         :padding-top (:spacing/padding theme)
+         :padding-bottom (:spacing/padding theme)
+         :padding-left (:spacing/padding theme)
+         :padding-right (* 1 (:spacing/padding theme))
+         :color (::c/tag theme)
+         :font-size (:font-size theme)
+         :font-weight :bold
+         :cursor :pointer}}
+       ">_"]
+      (when-not (empty? compatible-viewers)
+        [s/select
+         {:title "Select a different viewer."
+          :value (pr-str (:name viewer))
           :on-change #(set-viewer!
                        (keyword (.substr (.. % -target -value) 1)))
           :style
           {:background (::c/background theme)
-           :margin (:spacing/padding theme)
            :padding (:spacing/padding theme)
            :box-sizing :border-box
            :font-size (:font-size theme)
            :color (::c/text theme)
+           :border-radius (:border-radius theme)
            :border [1 :solid (::c/border theme)]}}
          (for [{:keys [name]} compatible-viewers]
-           [:option {:key name :value (pr-str name)} (pr-str name)])])]]))
+           ^{:key name}
+           [s/option {:value (pr-str name)} (pr-str name)])])]]))
 
 (defn search-input []
   (let [theme (theme/use-theme)

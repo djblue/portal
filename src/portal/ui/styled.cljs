@@ -76,3 +76,5 @@
 (def button (partial styled :button))
 (def img    (partial styled :img))
 (def iframe (partial styled :iframe))
+(def select (partial styled :select))
+(def option (partial styled :option))
