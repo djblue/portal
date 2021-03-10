@@ -224,6 +224,7 @@
               "arrowup"   (swap! active #(mod (dec %) n))
               "arrowdown" (swap! active #(mod (inc %) n))
               "enter"     (on-select)
+              "escape"    (on-close)
               nil)
              (shortcuts/matched! log))))
         [container
@@ -316,8 +317,7 @@
                   commands (remove
                             (fn [option]
                               (or
-                               (#{:portal.command/close-command-palette
-                                  :portal.command/open-command-palette}
+                               (#{:portal.command/open-command-palette}
                                 (:name option))
                                (when-let [predicate (:predicate option)]
                                  (not (predicate @state)))))
@@ -495,10 +495,6 @@
    {:name :portal.command/toggle-expand
     ::shortcuts/default #{"e"}
     :run (fn->command state/toggle-expand)}
-   {:name :portal.command/close-command-palette
-    ::shortcuts/osx ["escape"]
-    ::shortcuts/default ["escape"]
-    :run close}
    {:name :portal.command/redo-previous-command
     ::shortcuts/default #{"control" "r"}
     :run (fn [state]
