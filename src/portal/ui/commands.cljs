@@ -271,7 +271,7 @@
 
 (defn fn->command [f]
   (fn [state]
-    (when-let [selected (:selected @state)]
+    (when-let [selected (state/get-selected-context @state)]
       (state/dispatch! state f selected))))
 
 (defn make-command [{:keys [name predicate args f] :as opts}]
@@ -279,9 +279,9 @@
     (merge
      (select-keys opts [::shortcuts/default :shortcuts/osx])
      {:name name
-      :predicate (comp predicate state/get-selected)
+      :predicate (comp predicate state/get-selected-value)
       :run (fn [state]
-             (a/let [v      (state/get-selected @state)
+             (a/let [v      (state/get-selected-value @state)
                      args   ((or args empty-args) v)
                      result (apply f v args)]
                (when (predicate v)
@@ -294,7 +294,7 @@
                    :portal/value result}))))})))
 
 (defn get-functions [state]
-  (a/let [v   (state/get-selected @state)
+  (a/let [v   (state/get-selected-value @state)
           fns (state/invoke 'portal.runtime/get-functions v)]
     (for [f fns]
       (make-command
@@ -516,7 +516,7 @@
                                       k
                                       (partial state/invoke (:portal/key command))))
                               args (:portal/args command)
-                              value (apply f (state/get-selected @state) args)]
+                              value (apply f (state/get-selected-value @state) args)]
                         (state/dispatch!
                          state
                          state/history-push
@@ -548,7 +548,7 @@
     ::shortcuts/osx #{"meta" "c"}
     ::shortcuts/default #{"control" "c"}
     :run
-    (fn [state] (copy-edn! (state/get-selected @state)))}
+    (fn [state] (copy-edn! (state/get-selected-value @state)))}
    {:name :portal.command/copy-path
     :run (fn [state]
            (when-let [path (state/get-path @state)]

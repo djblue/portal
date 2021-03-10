@@ -84,7 +84,7 @@
        (when (fn? resolve) (resolve message))))
    :portal.rpc/datafy
    (fn [message send!]
-     (let [value (state/get-selected @state/state)]
+     (let [value (state/get-selected-value @state/state)]
        (send!
         {:op :portal.rpc/response
          :portal.rpc/id (:portal.rpc/id message)

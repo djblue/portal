@@ -332,7 +332,7 @@
   (let [current-state @(state/use-state)]
     [:<>
      [commands/palette
-      {:commands (viewer-commands (state/get-value current-state))}]
+      {:commands (viewer-commands (state/get-selected-value current-state))}]
      (doall
       (map-indexed
        (fn [index state]

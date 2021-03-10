@@ -22,8 +22,16 @@
 (defn with-state [state & children]
   (into [:r> (.-Provider state-context) #js {:value state}] children))
 
-(defn get-selected [state]
-  (get-in state [:selected :value] (:portal/value state)))
+(defn get-selected-context [state]
+  (or (:selected state)
+      (when (contains? state :portal/value)
+        {:depth 1
+         :value (:portal/value state)})
+      (when (contains? state :portal/tap-list)
+        {:depth 1
+         :value (:portal/tap-list state)})))
+
+(defn get-selected-value [state] (:value (get-selected-context state)))
 
 (defn get-nav-args [state]
   (when-let [{:keys [collection key value]} (:selected state)]
