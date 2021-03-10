@@ -402,7 +402,7 @@
     :predicate map?
     :name 'clojure.core/keys}
    {:f count
-    :predicate coll?
+    :predicate #(or (coll? %) (string? %))
     :name 'clojure.core/count}
    {:f first
     :predicate coll?
