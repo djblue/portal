@@ -21,6 +21,7 @@
             [portal.ui.viewer.transit :as transit]
             [portal.ui.viewer.tree :as tree]
             [portal.ui.viewer.vega-lite :as vega-lite]
+            [portal.ui.viewer.vega :as vega]
             [reagent.core :as r]))
 
 (defn filter-data [search-text value]
@@ -97,6 +98,7 @@
 (def viewers
   [ex/viewer
    vega-lite/viewer
+   vega/viewer
    charts/line-chart
    charts/scatter-chart
    charts/histogram-chart
