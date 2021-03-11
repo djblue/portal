@@ -8,6 +8,37 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
+(def ^:private viewer-context (react/createContext nil))
+
+(defn- use-viewers [] (react/useContext viewer-context))
+
+(defn with-viewers [viewers & children]
+  (into [:r> (.-Provider viewer-context) #js {:value viewers}] children))
+
+(defn viewers-by-name [viewers]
+  (into {} (map (juxt :name identity) viewers)))
+
+(defn use-compatible-viewers [value]
+  (let [viewers            (use-viewers)
+        by-name            (viewers-by-name viewers)
+        default-viewer     (get by-name (:portal.viewer/default (meta value)))
+        viewers            (cons default-viewer (remove #(= default-viewer %) viewers))]
+    (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
+
+(defn use-viewer [context]
+  (let [state              (state/use-state)
+        value              (:value context)
+        selected-viewer    (get-in @state [:selected-viewers context])
+        compatible-viewers (use-compatible-viewers value)]
+    (or (some #(when (= (:name %) selected-viewer) %)
+              compatible-viewers)
+        (first compatible-viewers))))
+
+(defn set-viewer! [state context viewer-name]
+  (state/dispatch! state
+                   assoc-in [:selected-viewers context]
+                   viewer-name))
+
 (def ^:private inspector-context (react/createContext {:depth 0}))
 
 (defn use-context [] (react/useContext inspector-context))
@@ -498,6 +529,7 @@
         context (-> (use-context)
                     (assoc :value value)
                     (update :depth inc))
+        viewer    (use-viewer context)
         selected? (= selected context)]
     [with-context
      context
@@ -506,9 +538,12 @@
            preview? (and (not (contains? expanded? context))
                          (> depth (:limits/max-depth theme)))
            type (get-value-type value)
-           component (if preview?
-                       (get-preview-component type)
-                       (get-inspect-component type))]
+           component (or
+                      (when-not (= (:name viewer) :portal.viewer/inspector)
+                        (:component viewer))
+                      (if preview?
+                        (get-preview-component type)
+                        (get-inspect-component type)))]
        [s/div
         (merge
          (when-not (:readonly? context)

@@ -95,46 +95,6 @@
 
         ::not-found))))
 
-(def viewers
-  [ex/viewer
-   vega-lite/viewer
-   vega/viewer
-   charts/line-chart
-   charts/scatter-chart
-   charts/histogram-chart
-   image/viewer
-   ins/viewer
-   table/viewer
-   tree/viewer
-   text/viewer
-   json/viewer
-   edn/viewer
-   transit/viewer
-   csv/viewer
-   html/viewer
-   diff/viewer
-   md/viewer
-   hiccup/viewer])
-
-(def viewers-by-name
-  (into {} (map (juxt :name identity) viewers)))
-
-(defn use-viewer [value]
-  (let [state              (state/use-state)
-        selected-viewer    (::selected-viewer @state)
-        default-viewer     (get viewers-by-name (:portal.viewer/default (meta value)))
-        viewers            (cons default-viewer (remove #(= default-viewer %) viewers))
-        compatible-viewers (filter #(when-let [pred (:predicate %)] (pred value)) viewers)]
-    {:compatible-viewers compatible-viewers
-     :viewer
-     (or
-      (some #(when (= (:name %) selected-viewer) %)
-            compatible-viewers)
-      (first compatible-viewers))
-     :set-viewer!
-     (fn [viewer]
-       (state/dispatch! state assoc ::selected-viewer viewer))}))
-
 (def error-boundary
   (r/create-class
    {:display-name "ErrorBoundary"
@@ -156,8 +116,10 @@
   (let [theme   (theme/use-theme)
         state   (state/use-state)
         value   (filter-data (:search-text @state) value)
-        {:keys [compatible-viewers viewer set-viewer!]} (use-viewer value)
-        component (:component viewer)]
+        selected-context (state/get-selected-context @state)
+        viewer           (ins/use-viewer selected-context)
+        compatible-viewers (ins/use-compatible-viewers
+                            (:value selected-context))]
     [:<>
      [s/div
       {:style
@@ -182,7 +144,7 @@
           {:min-width :fit-content
            :box-sizing :border-box
            :padding (* 2 (:spacing/padding theme))}}
-         [:> error-boundary [component value]]]]]]
+         [:> error-boundary [ins/inspector value]]]]]]
      [s/div
       {:style
        {:display :flex
@@ -216,8 +178,12 @@
         [s/select
          {:title "Select a different viewer."
           :value (pr-str (:name viewer))
-          :on-change #(set-viewer!
-                       (keyword (.substr (.. % -target -value) 1)))
+          :on-change
+          (fn [e]
+            (ins/set-viewer!
+             state
+             selected-context
+             (keyword (.substr (.. e -target -value) 1))))
           :style
           {:background (::c/background theme)
            :padding (:spacing/padding theme)
@@ -346,27 +312,53 @@
       [text-selection]]
      children)))
 
-(defn- viewer-commands [value]
-  (let [{:keys [compatible-viewers set-viewer!]} (use-viewer value)]
+(defn- use-viewer-commands []
+  (let [state              (state/use-state)
+        selected-context   (state/get-selected-context @state)
+        compatible-viewers (ins/use-compatible-viewers (:value selected-context))]
     (map #(-> %
               (dissoc :predicate)
-              (assoc  :run (fn [] (set-viewer! (:name %)))))
+              (assoc  :run
+                      (fn [] (ins/set-viewer! state selected-context (:name %)))))
          compatible-viewers)))
 
 (defn- inspect-1-history []
-  (let [current-state @(state/use-state)]
+  (let [current-state @(state/use-state)
+        commands      (use-viewer-commands)]
     [:<>
-     [commands/palette
-      {:commands (viewer-commands (state/get-selected-value current-state))}]
+     [commands/palette {:commands commands}]
      [s/div {:style {:flex 1}}
       [inspect-1 (state/get-value current-state)]]]))
 
+(def viewers
+  [ex/viewer
+   vega-lite/viewer
+   vega/viewer
+   charts/line-chart
+   charts/scatter-chart
+   charts/histogram-chart
+   image/viewer
+   ins/viewer
+   table/viewer
+   tree/viewer
+   text/viewer
+   json/viewer
+   edn/viewer
+   transit/viewer
+   csv/viewer
+   html/viewer
+   diff/viewer
+   md/viewer
+   hiccup/viewer])
+
 (defn root [& children]
-  [state/with-state
-   state/state
-   [theme/with-theme
-    (get @state/state ::c/theme ::c/nord)
-    [container children]]])
+  [ins/with-viewers
+   viewers
+   [state/with-state
+    state/state
+    [theme/with-theme
+     (get @state/state ::c/theme ::c/nord)
+     [container children]]]])
 
 (defn app []
   [root

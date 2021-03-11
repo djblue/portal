@@ -43,7 +43,10 @@
         open   [s/div {:style style} open]
         close  [s/div {:style style} close]
         toggle [s/div
-                {:on-click #(set-open not)
+                {:on-click
+                 (fn [e]
+                   (.stopPropagation e)
+                   (set-open not))
                  :style (merge style cursor-pointer select-none)}
                 (if open? "▼" "▶")]
         child [s/div
