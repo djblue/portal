@@ -71,7 +71,11 @@
               (if-not has-attrs? args (rest args)))))))
      value)))
 
+(defn- hiccup? [value]
+  (and (vector? value)
+       (keyword? (first value))))
+
 (def viewer
-  {:predicate vector?
+  {:predicate hiccup?
    :component inspect-hiccup
    :name :portal.viewer/hiccup})
