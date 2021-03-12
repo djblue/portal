@@ -6,7 +6,25 @@
             [portal.ui.lazy :as l]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+            [portal.ui.theme :as theme]
+            [reagent.core :as r]))
+
+(def error-boundary
+  (r/create-class
+   {:display-name "ErrorBoundary"
+    :constructor
+    (fn [this _props]
+      (set! (.-state this) #js {:error nil}))
+    :component-did-catch
+    (fn [_this _e _info])
+    :get-derived-state-from-error
+    (fn [error] #js {:error error})
+    :render
+    (fn [this]
+      (if-let [error (.. this -state -error)]
+        (r/as-element
+         [:div [:pre [:code (pr-str error)]]])
+        (.. this -props -children)))}))
 
 (def ^:private viewer-context (react/createContext nil))
 
@@ -572,7 +590,7 @@
                      [1 :solid "#D8DEE999"]
                      [1 :solid "rgba(0,0,0,0)"])
            :background (when selected? "rgba(0,0,0,0.15)")}})
-        [component value]])]))
+        [:> error-boundary [component value]]])]))
 
 (def viewer
   {:predicate (constantly true)

@@ -21,8 +21,7 @@
             [portal.ui.viewer.transit :as transit]
             [portal.ui.viewer.tree :as tree]
             [portal.ui.viewer.vega-lite :as vega-lite]
-            [portal.ui.viewer.vega :as vega]
-            [reagent.core :as r]))
+            [portal.ui.viewer.vega :as vega]))
 
 (defn filter-data [search-text value]
   (let [filter-data (partial filter-data search-text)]
@@ -95,23 +94,6 @@
 
         ::not-found))))
 
-(def error-boundary
-  (r/create-class
-   {:display-name "ErrorBoundary"
-    :constructor
-    (fn [this _props]
-      (set! (.-state this) #js {:error nil}))
-    :component-did-catch
-    (fn [_this _e _info])
-    :get-derived-state-from-error
-    (fn [error] #js {:error error})
-    :render
-    (fn [this]
-      (if-let [error (.. this -state -error)]
-        (r/as-element
-         [:div [:pre [:code (pr-str error)]]])
-        (.. this -props -children)))}))
-
 (defn inspect-1 [value]
   (let [theme   (theme/use-theme)
         state   (state/use-state)
@@ -144,7 +126,7 @@
           {:min-width :fit-content
            :box-sizing :border-box
            :padding (* 2 (:spacing/padding theme))}}
-         [:> error-boundary [ins/inspector value]]]]]]
+         [:> ins/error-boundary [ins/inspector value]]]]]]
      [s/div
       {:style
        {:display :flex
