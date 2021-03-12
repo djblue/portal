@@ -308,7 +308,7 @@
 (declare commands)
 
 (def open-command-palette
-  {:name :portal.command/open-command-palette
+  {:name 'portal.command/open-command-palette
    :label "Show All Commands"
    ::shortcuts/osx #{"meta" "shift" "p"}
    ::shortcuts/default #{"control" "shift" "p"}
@@ -317,7 +317,7 @@
                   commands (remove
                             (fn [option]
                               (or
-                               (#{:portal.command/open-command-palette}
+                               (#{'portal.command/open-command-palette}
                                 (:name option))
                                (when-let [predicate (:predicate option)]
                                  (not (predicate @state)))))
@@ -489,13 +489,13 @@
        (pp/pprint value)))))
 
 (def portal-commands
-  [{:name :portal.command/focus-selected
+  [{:name 'portal.command/focus-selected
     ::shortcuts/default #{"enter"}
     :run (fn->command state/focus-selected)}
-   {:name :portal.command/toggle-expand
+   {:name 'portal.command/toggle-expand
     ::shortcuts/default #{"e"}
     :run (fn->command state/toggle-expand)}
-   {:name :portal.command/redo-previous-command
+   {:name 'portal.command/redo-previous-command
     ::shortcuts/default #{"control" "r"}
     :run (fn [state]
            (a/let [commands (::state/previous-commands @state)]
@@ -533,40 +533,40 @@
                          {:style {:opacity 0.5}}
                          (for [a (:portal/args command)] (pr-str a))]]])}])))))}
    open-command-palette
-   {:name :portal.command/theme-solarized-dark
+   {:name 'portal.command/theme-solarized-dark
     :run (fn [_state] (state/set-theme! ::c/solarized-dark))}
-   {:name :portal.command/theme-solarized-light
+   {:name 'portal.command/theme-solarized-light
     :run (fn [_state] (state/set-theme! ::c/solarized-light))}
-   {:name :portal.command/theme-nord
+   {:name 'portal.command/theme-nord
     :run (fn [_state] (state/set-theme! ::c/nord))}
-   {:name :portal.command/theme-material-ui
+   {:name 'portal.command/theme-material-ui
     :run (fn [_state] (state/set-theme! ::c/material-ui))}
-   {:name :portal.command/copy-as-edn
+   {:name 'portal.command/copy-as-edn
     ::shortcuts/osx #{"meta" "c"}
     ::shortcuts/default #{"control" "c"}
     :run
     (fn [state] (copy-edn! (state/get-selected-value @state)))}
-   {:name :portal.command/copy-path
+   {:name 'portal.command/copy-path
     :run (fn [state]
            (when-let [path (state/get-path @state)]
              (copy-edn! path)))}
-   {:name :portal.command/history-back
+   {:name 'portal.command/history-back
     ::shortcuts/osx #{"meta" "arrowleft"}
     ::shortcuts/default #{"control" "arrowleft"}
     :run (fn [state] (state/dispatch! state state/history-back))}
-   {:name :portal.command/history-forward
+   {:name 'portal.command/history-forward
     ::shortcuts/osx #{"meta" "arrowright"}
     ::shortcuts/default #{"control" "arrowright"}
     :run (fn [state] (state/dispatch! state state/history-forward))}
-   {:name :portal.command/history-first
+   {:name 'portal.command/history-first
     ::shortcuts/osx #{"meta" "shift" "arrowleft"}
     ::shortcuts/default #{"control" "shift" "arrowleft"}
     :run (fn [state] (state/dispatch! state state/history-first))}
-   {:name :portal.command/history-last
+   {:name 'portal.command/history-last
     ::shortcuts/osx #{"meta" "shift" "arrowright"}
     ::shortcuts/default #{"control" "shift" "arrowright"}
     :run (fn [state] (state/dispatch! state state/history-last))}
-   {:name :portal.command/clear
+   {:name 'portal.command/clear
     ::shortcuts/default #{"control" "l"}
     :run (fn [state] (state/dispatch! state state/clear))}])
 
