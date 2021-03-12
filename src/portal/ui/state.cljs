@@ -37,6 +37,8 @@
   (when-let [{:keys [collection key value]} (:selected state)]
     (when collection [collection key value])))
 
+(defn clear-selected [state] (dissoc state :selected))
+
 (defn- send! [message] (@sender message))
 
 (def no-history [::previous-commands :portal/tap-list])

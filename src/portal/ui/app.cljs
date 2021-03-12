@@ -111,7 +111,8 @@
         :min-width "100%"
         :box-sizing :border-box}}
       [s/div
-       {:style
+       {:on-click #(state/dispatch! state state/clear-selected)
+        :style
         {:position :absolute
          :top 0
          :left 0

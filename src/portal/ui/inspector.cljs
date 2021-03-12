@@ -576,6 +576,9 @@
               (when (= (.-button e) 1)
                 (state/dispatch! state state/toggle-expand context)
                 (.stopPropagation e)))
+            :on-click
+            (fn [e]
+              (.stopPropagation e))
             :on-double-click
             (fn [e]
               (state/dispatch! state state/history-push {:portal/value value})
