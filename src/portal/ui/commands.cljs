@@ -86,6 +86,7 @@
     (fn [input]
       (let [theme     (theme/use-theme)
             selected? @selected
+            on-close  close
             on-done   (:run input)
             options   (:options input)
             n         (count (:options input))
@@ -103,9 +104,10 @@
                 (reset! selected #{})
                 (swap! selected into options))
 
-              "i" (swap! selected #(set/difference (into #{} options) %))
-              " " (on-select (nth options @active))
-              "enter" (on-done @selected)
+              "i"       (swap! selected #(set/difference (into #{} options) %))
+              " "       (on-select (nth options @active))
+              "enter"   (on-done @selected)
+              "escape"  (on-close)
 
               nil)
              (shortcuts/matched! log))))
