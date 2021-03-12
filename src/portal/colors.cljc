@@ -51,5 +51,22 @@
     ::package "#2aa198"
     ::exception "#dc322f"
     ::diff-add "#859900"
-    ::diff-remove "#dc322f"}})
+    ::diff-remove "#dc322f"}
+   ::material-ui
+   {::text "#d8dee9"
+    ::background "#2c2d3b"
+    ::background2 "#21232f"
+    ::boolean "#5e81ac"
+    ::string "#c3e887"
+    ::keyword "#c792ea"
+    ::namespace "#ffb563"
+    ::tag "#ebcb8b"
+    ::symbol "#92bdec"
+    ::number "#f77669"
+    ::uri "#d08770"
+    ::border "#797979"
+    ::package "#ffb563"
+    ::exception "#bf616a"
+    ::diff-add "#a3be8c"
+    ::diff-remove "#bf616a"}})
 

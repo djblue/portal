@@ -539,6 +539,8 @@
     :run (fn [_state] (state/set-theme! ::c/solarized-light))}
    {:name :portal.command/theme-nord
     :run (fn [_state] (state/set-theme! ::c/nord))}
+   {:name :portal.command/theme-material-ui
+    :run (fn [_state] (state/set-theme! ::c/material-ui))}
    {:name :portal.command/copy-as-edn
     ::shortcuts/osx #{"meta" "c"}
     ::shortcuts/default #{"control" "c"}

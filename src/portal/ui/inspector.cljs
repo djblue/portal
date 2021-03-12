@@ -362,7 +362,7 @@
     [s/span {:style {:color (::c/number theme)}} value]))
 
 (defn hex-color? [string]
-  (re-matches #"#[0-9a-f]{6}|#[0-9a-f]{3}gi" string))
+  (re-matches #"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}gi" string))
 
 (defn- url-string? [string]
   (re-matches #"https?://.*" string))
