@@ -313,12 +313,15 @@
   [container-map
    values
    [l/lazy-seq
-    (for [[k v] (try-sort-map values)]
-      ^{:key {:key (hash k)}}
-      [:<>
-       [container-map-k [inspector k]]
-       [with-key k
-        [container-map-v [inspector v]]]])]])
+    (let [pairs (seq (try-sort-map values))]
+      (for [[k v] pairs]
+        ^{:key {:key (hash k)}}
+        [with-context
+         {:pairs pairs}
+         [:<>
+          [container-map-k [inspector k]]
+          [with-key k
+           [container-map-v [inspector v]]]]]))]])
 
 (defn- container-coll [values child]
   (let [theme (theme/use-theme)]
@@ -346,11 +349,12 @@
   [container-coll
    values
    [l/lazy-seq
-    (map-indexed
-     (fn [idx itm]
-       ^{:key idx}
-       [with-key idx [inspector itm]])
-     values)]])
+    (let [pairs (map-indexed vector values)]
+      (for [[idx itm] pairs]
+        ^{:key idx}
+        [with-context
+         {:pairs pairs}
+         [with-key idx [inspector itm]]]))]])
 
 (defn- trim-string [string limit]
   (if-not (> (count string) limit)
@@ -548,7 +552,8 @@
                     (assoc :value value)
                     (update :depth inc))
         viewer    (use-viewer context)
-        selected? (= selected context)]
+        selected? (= selected context)
+        ref       (react/useRef nil)]
     [with-context
      context
      (let [theme (theme/use-theme)
@@ -562,6 +567,13 @@
                       (if preview?
                         (get-preview-component type)
                         (get-inspect-component type)))]
+       (react/useEffect
+        (fn []
+          (when (and selected?
+                     (some? (.-current ref))
+                     (not= (.. js/document -activeElement -tagName) "INPUT"))
+            (.focus (.-current ref))))
+        #js [selected? (.-current ref)])
        [s/div
         (merge
          (when-not (:readonly? context)
@@ -583,7 +595,8 @@
             (fn [e]
               (state/dispatch! state state/history-push {:portal/value value})
               (.stopPropagation e))})
-         {:style
+         {:ref ref
+          :style
           {:width "100%"
            :padding (when (or preview? (not (coll? value)))
                       (* 0.65 (:spacing/padding theme)))

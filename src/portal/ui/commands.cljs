@@ -503,7 +503,13 @@
        (pp/pprint value)))))
 
 (def portal-commands
-  [{:name 'portal.command/focus-selected
+  [{:name 'portal.command/select-next
+    ::shortcuts/default #{"j"}
+    :run (fn->command state/select-next)}
+   {:name 'portal.command/select-prev
+    ::shortcuts/default #{"k"}
+    :run (fn->command state/select-prev)}
+   {:name 'portal.command/focus-selected
     ::shortcuts/default #{"enter"}
     :run (fn->command state/focus-selected)}
    {:name 'portal.command/toggle-expand

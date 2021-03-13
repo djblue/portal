@@ -89,6 +89,32 @@
 (defn focus-selected [state context]
   (history-push state {:portal/value (:value context)}))
 
+(defn- get-prev [context]
+  (let [{:keys [pairs key path]} context]
+    (when-let [[key value]
+               (some (fn [[prev curr _next]]
+                       (when (= (first curr) key) prev))
+                     (partition 3 1 (concat [nil] pairs [nil])))]
+      {:key key :value value :path (conj (pop path) key)})))
+
+(defn- get-next [context]
+  (let [{:keys [pairs key path]} context]
+    (when-let [[key value]
+               (some (fn [[_prev curr next]]
+                       (when (= (first curr) key) next))
+                     (partition 3 1 (concat [nil] pairs [nil])))]
+      {:key key :value value :path (conj (pop path) key)})))
+
+(defn select-prev [state context]
+  (if-let [next (get-prev context)]
+    (update state :selected merge next)
+    state))
+
+(defn select-next [state context]
+  (if-let [next (get-next context)]
+    (update state :selected merge next)
+    state))
+
 (defn get-path [state]
   (get-in state [:selected :path]))
 
