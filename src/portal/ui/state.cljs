@@ -41,7 +41,7 @@
 
 (defn- send! [message] (@sender message))
 
-(def no-history [::previous-commands :portal/tap-list])
+(def no-history [::previous-commands :portal/tap-list ::c/theme])
 
 (defn history-back [state]
   (when-let [previous-state (:portal/previous-state state)]
