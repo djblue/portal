@@ -36,13 +36,27 @@
         :border-radius (:border-radius theme)}}]
      children)))
 
-(defn- use-shortcuts [k f]
-  (react/useEffect
-   (fn []
-     (shortcuts/add! k f)
+(defonce ^:private handlers (atom {}))
+(def ^:private shortcut-context (react/createContext 0))
+
+(defn- dispatch [log]
+  (when-let [[_ f] (last (sort-by first < @handlers))]
+    (f log)))
+
+(defn- with-shortcuts [f & children]
+  (let [i (react/useContext shortcut-context)]
+    (react/useEffect
      (fn []
-       (shortcuts/remove! k)))
-   #js [f]))
+       (swap! handlers assoc i f)
+       (fn []
+         (swap! handlers dissoc i)))
+     #js [f])
+    (react/useEffect
+     (fn []
+       (shortcuts/add! ::with-shortcuts dispatch)
+       (fn []
+         (shortcuts/remove! ::with-shortcuts))))
+    (into [:r> (.-Provider shortcut-context) #js {:value (inc i)}] children)))
 
 (defn checkbox [checked?]
   (let [theme (theme/use-theme)]
@@ -91,8 +105,7 @@
             options   (:options input)
             n         (count (:options input))
             on-select #(swap! selected (if (selected? %) disj conj) %)]
-        (use-shortcuts
-         ::selector
+        [with-shortcuts
          (fn [log]
            (when
             (condp shortcuts/match? log
@@ -110,43 +123,43 @@
               "escape"  (on-close)
 
               nil)
-             (shortcuts/matched! log))))
+             (shortcuts/matched! log)))
 
-        [container
-         [s/div
-          {:style {:box-sizing :border-box
-                   :padding (:spacing/padding theme)}}
-          "(Press <space> to select, <a> to toggle all, <i> to invert selection)"]
-         [s/div
-          {:style {:overflow :auto}}
-          (->> options
-               (map-indexed
-                (fn [index option]
-                  (let [active? (= index @active)]
-                    [s/div
-                     {:key (hash option)
-                      :on-click (fn [e]
-                                  (.stopPropagation e)
-                                  (on-select option))
-                      :style
-                      (merge
-                       {:border-left [5 :solid "#0000"]
-                        :padding-left (:spacing/padding theme)
-                        :cursor :pointer
-                        :box-sizing :border-box
-                        :color (if (selected? option)
-                                 (::c/boolean theme)
-                                 (::c/text theme))
-                        :display :flex
-                        :align-items :center
-                        :height :fit-content}
-                       (when active?
-                         {:border-left [5 :solid (::c/boolean theme)]
-                          :background (::c/background theme)}))}
-                     (when active? [scroll-into-view])
-                     [checkbox (some? (selected? option))]
-                     [ins/inspector option]])))
-               doall)]]))))
+         [container
+          [s/div
+           {:style {:box-sizing :border-box
+                    :padding (:spacing/padding theme)}}
+           "(Press <space> to select, <a> to toggle all, <i> to invert selection)"]
+          [s/div
+           {:style {:overflow :auto}}
+           (->> options
+                (map-indexed
+                 (fn [index option]
+                   (let [active? (= index @active)]
+                     [s/div
+                      {:key (hash option)
+                       :on-click (fn [e]
+                                   (.stopPropagation e)
+                                   (on-select option))
+                       :style
+                       (merge
+                        {:border-left [5 :solid "#0000"]
+                         :padding-left (:spacing/padding theme)
+                         :cursor :pointer
+                         :box-sizing :border-box
+                         :color (if (selected? option)
+                                  (::c/boolean theme)
+                                  (::c/text theme))
+                         :display :flex
+                         :align-items :center
+                         :height :fit-content}
+                        (when active?
+                          {:border-left [5 :solid (::c/boolean theme)]
+                           :background (::c/background theme)}))}
+                      (when active? [scroll-into-view])
+                      [checkbox (some? (selected? option))]
+                      [ins/inspector option]])))
+                doall)]]]))))
 
 (def shortcut->symbol
   {"arrowright" "⭢"
@@ -218,8 +231,7 @@
               (on-close)
               (when-let [option (nth options @active)]
                 (on-select (second option))))]
-        (use-shortcuts
-         ::palette
+        [with-shortcuts
          (fn [log]
            (when
             (condp shortcuts/match? log
@@ -228,46 +240,46 @@
               "enter"     (on-select)
               "escape"    (on-close)
               nil)
-             (shortcuts/matched! log))))
-        [container
-         [s/div
-          {:style
-           {:padding (:spacing/padding theme)
-            :border-bottom [1 :solid (::c/border theme)]}}
+             (shortcuts/matched! log)))
+         [container
+          [s/div
+           {:style
+            {:padding (:spacing/padding theme)
+             :border-bottom [1 :solid (::c/border theme)]}}
 
-          [s/input
-           {:auto-focus true
-            :value @filter-text
-            :on-change #(do
-                          (reset! active 0)
-                          (reset! filter-text (.-value (.-target %))))
-            :style
-            {:width "100%"
-             :background (::c/background theme)
-             :padding (:spacing/padding theme)
-             :box-sizing :border-box
-             :font-size (:font-size theme)
-             :color (::c/text theme)
-             :border [1 :solid (::c/border theme)]}}]]
-         [s/div
-          {:style
-           {:height "100%"
-            :overflow :auto}}
-          (->> options
-               (map-indexed
-                (fn [index option]
-                  (let [active? (= index @active)
-                        on-click (fn [e]
-                                   (.stopPropagation e)
-                                   (reset! active index)
-                                   (on-select))]
-                    ^{:key index}
-                    [:<>
-                     (when active? [scroll-into-view])
-                     (update option 1 assoc
-                             ::active? active?
-                             ::on-click on-click)])))
-               doall)]]))))
+           [s/input
+            {:auto-focus true
+             :value @filter-text
+             :on-change #(do
+                           (reset! active 0)
+                           (reset! filter-text (.-value (.-target %))))
+             :style
+             {:width "100%"
+              :background (::c/background theme)
+              :padding (:spacing/padding theme)
+              :box-sizing :border-box
+              :font-size (:font-size theme)
+              :color (::c/text theme)
+              :border [1 :solid (::c/border theme)]}}]]
+          [s/div
+           {:style
+            {:height "100%"
+             :overflow :auto}}
+           (->> options
+                (map-indexed
+                 (fn [index option]
+                   (let [active? (= index @active)
+                         on-click (fn [e]
+                                    (.stopPropagation e)
+                                    (reset! active index)
+                                    (on-select))]
+                     ^{:key index}
+                     [:<>
+                      (when active? [scroll-into-view])
+                      (update option 1 assoc
+                              ::active? active?
+                              ::on-click on-click)])))
+                doall)]]]))))
 
 (defn- empty-args [_] nil)
 
@@ -599,13 +611,12 @@
 
 (defn palette [props _value]
   (let [state (state/use-state)]
-    (use-shortcuts
-     ::commands
+    [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)
          (doseq [command (concat commands (:commands props))]
            (when (shortcuts/match? command log)
              (shortcuts/matched! log)
-             ((:run command) state))))))
-    (when-let [component @input]
-      [ins/with-readonly [pop-up [component state]]])))
+             ((:run command) state)))))
+     (when-let [component @input]
+       [ins/with-readonly [pop-up [component state]]])]))
