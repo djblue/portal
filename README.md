@@ -1,3 +1,8 @@
+
+<p align="center">
+  <img width="200" style="margin: 0 auto" src="./resources/icon.svg"/>
+</p>
+
 # portal
 
 A clojure tool to navigate through your data.
