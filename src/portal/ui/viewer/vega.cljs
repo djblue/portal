@@ -1,12 +1,12 @@
 (ns portal.ui.viewer.vega
-  (:require ["vega-embed" :as vegaEmbed]
+  (:require ["react" :as react]
+            ["vega-embed" :as vegaEmbed]
             [clojure.spec.alpha :as sp]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r]
-            [reagent.dom :as rd]))
+            [portal.ui.theme :as theme]))
 
 (sp/def ::$schema
   (sp/and string? #(re-matches #"https://vega\.github\.io/schema/vega/v\d\.json" %)))
@@ -30,20 +30,42 @@
     [:style
      (map->css
       {[:.vega-embed :.chart-wrapper]
-       {:width "100%" :height "80%"}
-       [:.vega-bindings]
-       {:padding 20}
+       {:width "fit-content"
+        :height "fit-content"}
        [:.vega-embed]
-       {:width "100%"
-        :height "80%"
-        :border-color (::c/border theme)
-        :border-width 1
-        :border-style :solid}
+       {:width "100%"}
        [:.vega-embed :summary]
        {:opacity 1
         :cursor :default
-        :margin-right (:spacing/padding theme)
-        :margin-top (:spacing/padding theme)}})]))
+        :position :absolute
+        :right (:spacing/padding theme)
+        :top (:spacing/padding theme)}})]))
+
+(defn- default-config
+  "Specifies a nicer set of vega-lite specification styles.
+  All defaults can be overridden by users data"
+  [theme]
+  (let [background (ins/get-background)
+        text (::c/text theme)
+        border (::c/border theme)]
+    {:padding "30"
+     :autosize
+     {:type "fit" :resize true :contains "padding"}
+     :config
+     {:legend
+      {:labelColor text
+       :titleColor text}
+      :view
+      {:stroke "transparent"}
+      :axis
+      {:domainColor border
+       :domainWidth "3"
+       :tickColor border
+       :gridColor border
+       :gridDash [10 2]
+       :titleColor text
+       :labelColor text}}
+     :background background}))
 
 (defn- deep-merge
   "Recursively merges maps.
@@ -55,45 +77,85 @@
               (last xs)))]
     (reduce m maps)))
 
-(defn- vega-embed
-  [elem doc opts]
-  (-> (vegaEmbed elem (clj->js doc) (clj->js opts))
-      (.catch (fn [err] (js/console.error err)))))
+(defn- use-resize []
+  (let [ref              (react/useRef nil)
+        [rect set-rect!] (react/useState #js {:height 200 :width 200})]
+    (react/useEffect
+     (fn []
+       (when-let [el (.-current ref)]
+         (let [resize-observer
+               (js/ResizeObserver.
+                (fn []
+                  (set-rect! (.getBoundingClientRect el))))]
+           (.observe resize-observer el)
+           (fn []
+             (.disconnect resize-observer)))))
+     #js [(.-current ref)])
+    [ref rect]))
 
-(defn- new-size []
-  {:width (max 650 (* 0.9 (js/parseInt (.-innerWidth js/window))))
-   :height (max 200 (* 0.55 (js/parseInt (.-innerHeight js/window))))})
+(defn vega-embed [opts value]
+  (let [theme (theme/use-theme)
+        doc (deep-merge (default-config theme) value {:title ""})
 
-(def ^:private view-size
-  (r/atom (new-size)))
+        view             (react/useRef nil)
+        [init set-init!] (react/useState false)
 
-(defn- vega-class
-  "Creates React Class component for vega(-lite)"
-  [doc opts]
-  (r/create-class
-   {:display-name
-    (:mode doc)
-    :component-did-mount
-    (fn [this]
-      ;; componenet will listen to window resize events to update it's size
-      (js/window.addEventListener "resize" #(reset! view-size (new-size)))
-      (vega-embed (rd/dom-node this) doc opts))
-    :component-will-update
-    (fn [this [_ new-doc new-opts]]
-      (vega-embed (rd/dom-node this) new-doc new-opts))
-    :reagent-render
-    (fn [_]
-      [:div#viz])}))
+        [absolute absolute-rect] (use-resize)
+        height (.-height absolute-rect)
 
-(defn vega-viewer
-  [value]
-  [s/div
-   [vega-styles]
-   [:h1 (:title value)]
-   [:p (:description value)]
-   [vega-class
-    (deep-merge value @view-size {:title ""})
-    {:mode "vega" :renderer :canvas}]])
+        [relative relative-rect] (use-resize)
+        width (.-width relative-rect)]
+
+    (react/useEffect
+     (fn []
+       (when-let [el (.-current absolute)]
+         (-> (vegaEmbed el (clj->js (assoc doc :width width)) (clj->js opts))
+             (.then (fn [value]
+                      (set! (.-current view) (.-view value))
+                      (set-init! true)))
+             (.catch (fn [err] (js/console.error err)))))
+       #(when-let [view (.-current view)]
+          (.finalize view)
+          (set! (.-current view) nil)))
+     #js [])
+
+    (react/useEffect
+     (fn []
+       (when-let [view (.-current view)]
+         (let [width (- width 2
+                        (* 2 (:spacing/padding theme)))]
+           (.width view width)
+           (.height view (* width 0.8))
+           (.run view))))
+     #js [init (.-current view) width])
+
+    [s/div
+     [vega-styles]
+     (when-let [title (:title value)]
+       [:h1 title])
+     (when-let [description (:description value)]
+       [:p description])
+     [s/div
+      {:ref relative
+       :style
+       {:width "100%"
+        :min-width 400
+        :height height
+        :position :relative
+        :border [:solid 1 (::c/border theme)]
+        :background (ins/get-background)}}
+      [:div#viz
+       {:ref absolute
+        :style
+        {:position :absolute
+         :top 0
+         :right 0
+         :left 0
+         :box-sizing :border-box
+         :padding (:spacing/padding theme)
+         :overflow :hidden}}]]]))
+
+(def vega-viewer (partial vega-embed {:mode "vega" :renderer :canvas}))
 
 (def viewer
   {:predicate (partial sp/valid? ::vega)
