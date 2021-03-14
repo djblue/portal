@@ -57,7 +57,7 @@
                    assoc-in [:selected-viewers context]
                    viewer-name))
 
-(def ^:private inspector-context (react/createContext {:depth 0}))
+(def ^:private inspector-context (react/createContext {:depth 0 :path []}))
 
 (defn use-context [] (react/useContext inspector-context))
 
