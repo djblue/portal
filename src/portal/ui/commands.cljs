@@ -197,9 +197,14 @@
 
    'portal.command/select-prev {::shortcuts/default #{"arrowup"}}
    'portal.command/select-next {::shortcuts/default #{"arrowdown"}}
+   'portal.command/select-parent {::shortcuts/default #{"arrowleft"}}
+   'portal.command/select-child {::shortcuts/default #{"arrowright"}}
 
    'portal.command/focus-selected {::shortcuts/default #{"enter"}}
    'portal.command/toggle-expand {::shortcuts/default #{"e"}}
+
+   'clojure.datafy/nav    {::shortcuts/default #{"n"}}
+   'clojure.datafy/datafy {::shortcuts/default #{"d"}}
 
    'portal.command/redo-previous-command {::shortcuts/default #{"control" "r"}}
    'portal.command/clear {::shortcuts/default #{"control" "l"}}})
@@ -539,6 +544,10 @@
     :run (fn->command state/select-prev)}
    {:name 'portal.command/select-next
     :run (fn->command state/select-next)}
+   {:name 'portal.command/select-parent
+    :run (fn->command state/select-parent)}
+   {:name 'portal.command/select-child
+    :run (fn->command state/select-child)}
    {:name 'portal.command/focus-selected
     :run (fn->command state/focus-selected)}
    {:name 'portal.command/toggle-expand

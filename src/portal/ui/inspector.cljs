@@ -318,10 +318,11 @@
         ^{:key {:key (hash k)}}
         [with-context
          {:pairs pairs}
-         [:<>
-          [container-map-k [inspector k]]
-          [with-key k
-           [container-map-v [inspector v]]]]]))]])
+         [with-context
+          {:key? true}
+          [container-map-k [inspector k]]]
+         [with-key k
+          [container-map-v [inspector v]]]]))]])
 
 (defn- container-coll [values child]
   (let [theme (theme/use-theme)]
