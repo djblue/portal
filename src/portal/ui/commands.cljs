@@ -207,7 +207,18 @@
    'clojure.datafy/datafy {::shortcuts/default #{"d"}}
 
    'portal.command/redo-previous-command {::shortcuts/default #{"control" "r"}}
-   'portal.command/clear {::shortcuts/default #{"control" "l"}}})
+   'portal.command/clear {::shortcuts/default #{"control" "l"}}
+
+   ;; PWA
+   'portal.load/file
+   {::shortcuts/osx     #{"meta" "o"}
+    ::shortcuts/default #{"control" "o"}}
+   'portal.load/clipboard
+   {::shortcuts/osx     #{"meta" "v"}
+    ::shortcuts/default #{"control" "v"}}
+   'portal.load/demo
+   {::shortcuts/osx     #{"meta" "d"}
+    ::shortcuts/default #{"control" "d"}}})
 
 (defn shortcut [command]
   (let [theme (theme/use-theme)]

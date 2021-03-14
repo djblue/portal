@@ -5,7 +5,6 @@
             [portal.async :as a]
             [portal.colors :as c]
             [portal.resources :as io]
-            [portal.shortcuts :as shortcuts]
             [portal.ui.app :as app]
             [portal.ui.commands :as commands]
             [portal.ui.drag-and-drop :as dnd]
@@ -51,20 +50,14 @@
   [commands/open-command-palette
    {:name 'portal.load/file
     :label "Open a File"
-    ::shortcuts/osx #{"meta" "o"}
-    ::shortcuts/default #{"control" "o"}
     :run #(a/let [value (open-file)]
             (state/dispatch! % state/history-push {:portal/value value}))}
    {:name 'portal.load/clipboard
     :label "Load from clipboard"
-    ::shortcuts/osx #{"meta" "v"}
-    ::shortcuts/default #{"control" "v"}
     :run #(a/let [value (clipboard)]
             (state/dispatch! % state/history-push {:portal/value value}))}
    {:name 'portal.load/demo
     :label "Load demo data"
-    ::shortcuts/osx #{"meta" "d"}
-    ::shortcuts/default #{"control" "d"}
     :run #(state/dispatch! % state/history-push {:portal/value demo/data})}])
 
 (defn invoke [{:keys [f args]} done]
