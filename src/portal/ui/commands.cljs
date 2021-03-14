@@ -170,9 +170,43 @@
 (defn combo-order [k]
   (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
 
+(def ^:private keymap
+  {'portal.command/open-command-palette
+   {::shortcuts/osx     #{"meta" "shift" "p"}
+    ::shortcuts/default #{"control" "shift" "p"}}
+
+   'portal.command/copy-as-edn
+   {::shortcuts/osx     #{"meta" "c"}
+    ::shortcuts/default #{"control" "c"}}
+
+   'portal.command/history-back
+   {::shortcuts/osx     #{"meta" "arrowleft"}
+    ::shortcuts/default #{"control" "arrowleft"}}
+
+   'portal.command/history-forward
+   {::shortcuts/osx     #{"meta" "arrowright"}
+    ::shortcuts/default #{"control" "arrowright"}}
+
+   'portal.command/history-first
+   {::shortcuts/osx     #{"meta" "shift" "arrowleft"}
+    ::shortcuts/default #{"control" "shift" "arrowleft"}}
+
+   'portal.command/history-last
+   {::shortcuts/osx     #{"meta" "shift" "arrowright"}
+    ::shortcuts/default #{"control" "shift" "arrowright"}}
+
+   'portal.command/select-prev {::shortcuts/default #{"arrowup"}}
+   'portal.command/select-next {::shortcuts/default #{"arrowdown"}}
+
+   'portal.command/focus-selected {::shortcuts/default #{"enter"}}
+   'portal.command/toggle-expand {::shortcuts/default #{"e"}}
+
+   'portal.command/redo-previous-command {::shortcuts/default #{"control" "r"}}
+   'portal.command/clear {::shortcuts/default #{"control" "l"}}})
+
 (defn shortcut [command]
   (let [theme (theme/use-theme)]
-    (when-let [combo (shortcuts/get-shortcut command)]
+    (when-let [combo (shortcuts/get-shortcut (get keymap (:name command)))]
       [s/div {:style
               {:display :flex
                :align-items :center
@@ -324,8 +358,6 @@
 (def open-command-palette
   {:name 'portal.command/open-command-palette
    :label "Show All Commands"
-   ::shortcuts/osx #{"meta" "shift" "p"}
-   ::shortcuts/default #{"control" "shift" "p"}
    :run (fn [state]
           (a/let [fns (get-functions state)
                   commands (remove
@@ -504,19 +536,14 @@
 
 (def portal-commands
   [{:name 'portal.command/select-prev
-    ::shortcuts/default #{"arrowup"}
     :run (fn->command state/select-prev)}
    {:name 'portal.command/select-next
-    ::shortcuts/default #{"arrowdown"}
     :run (fn->command state/select-next)}
    {:name 'portal.command/focus-selected
-    ::shortcuts/default #{"enter"}
     :run (fn->command state/focus-selected)}
    {:name 'portal.command/toggle-expand
-    ::shortcuts/default #{"e"}
     :run (fn->command state/toggle-expand)}
    {:name 'portal.command/redo-previous-command
-    ::shortcuts/default #{"control" "r"}
     :run (fn [state]
            (a/let [commands (::state/previous-commands @state)]
              (when (seq commands)
@@ -562,8 +589,6 @@
    {:name 'portal.command/theme-material-ui
     :run (fn [_state] (state/set-theme! ::c/material-ui))}
    {:name 'portal.command/copy-as-edn
-    ::shortcuts/osx #{"meta" "c"}
-    ::shortcuts/default #{"control" "c"}
     :run
     (fn [state] (copy-edn! (state/get-selected-value @state)))}
    {:name 'portal.command/copy-path
@@ -571,23 +596,14 @@
            (when-let [path (state/get-path @state)]
              (copy-edn! path)))}
    {:name 'portal.command/history-back
-    ::shortcuts/osx #{"meta" "arrowleft"}
-    ::shortcuts/default #{"control" "arrowleft"}
     :run (fn [state] (state/dispatch! state state/history-back))}
    {:name 'portal.command/history-forward
-    ::shortcuts/osx #{"meta" "arrowright"}
-    ::shortcuts/default #{"control" "arrowright"}
     :run (fn [state] (state/dispatch! state state/history-forward))}
    {:name 'portal.command/history-first
-    ::shortcuts/osx #{"meta" "shift" "arrowleft"}
-    ::shortcuts/default #{"control" "shift" "arrowleft"}
     :run (fn [state] (state/dispatch! state state/history-first))}
    {:name 'portal.command/history-last
-    ::shortcuts/osx #{"meta" "shift" "arrowright"}
-    ::shortcuts/default #{"control" "shift" "arrowright"}
     :run (fn [state] (state/dispatch! state state/history-last))}
    {:name 'portal.command/clear
-    ::shortcuts/default #{"control" "l"}
     :run (fn [state] (state/dispatch! state state/clear))}])
 
 (def commands
@@ -621,7 +637,7 @@
      (fn [log]
        (when-not (shortcuts/input? log)
          (doseq [command (concat commands (:commands props))]
-           (when (shortcuts/match? command log)
+           (when (shortcuts/match? (get keymap (:name command)) log)
              (shortcuts/matched! log)
              ((:run command) state)))))
      (when-let [component @input]
