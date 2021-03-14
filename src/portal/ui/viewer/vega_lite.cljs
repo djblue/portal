@@ -1,12 +1,6 @@
 (ns portal.ui.viewer.vega-lite
-  (:require ["vega-embed" :as vegaEmbed]
-            [clojure.spec.alpha :as sp]
-            [clojure.string :as str]
-            [portal.colors :as c]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r]
-            [reagent.dom :as rd]))
+  (:require [clojure.spec.alpha :as sp]
+            [portal.ui.viewer.vega :as vega]))
 
 ;; Vega-lite spec
 ;; https://vega.github.io/vega-lite/docs/spec.html
@@ -62,108 +56,9 @@
 (sp/def ::vega-lite
   (sp/or :single-view ::single-view :layered-view ::layered-view))
 
-(defn- default-config
-  "Specifies a nicer set of vega-lite specification styles.
-  All defaults can be overridden by users data"
-  [theme]
-  (let [background (::c/background theme)
-        text (::c/text theme)
-        border (::c/border theme)]
-    {:width "container"
-     :height "container"
-     :padding "30"
-     :autosize
-     {:type "fit"
-      :resize true
-      :contains "padding"}
-     :config
-     {:legend
-      {:labelColor text
-       :titleColor text}
-      :view
-      {:stroke "transparent"}
-      :axis
-      {:domainColor border
-       :domainWidth "3"
-       :tickColor border
-       :gridColor border
-       :gridDash [10 2]
-       :titleColor text
-       :labelColor text}}
-     :background background}))
-
-(defn- map->css [m]
-  (reduce-kv
-   (fn [css k v]
-     (str css
-          (str/join " " (map name k))
-          "{" (s/style->css v) "}\n"))
-   ""
-   m))
-
-(defn- vega-lite-styles
-  "CSS styles applied to the vega embed elements. Allow filling most of the container."
-  []
-  (let [theme (theme/use-theme)]
-    [:style
-     (map->css
-      {[:.vega-embed :.chart-wrapper]
-       {:width "100%" :height "100%"}
-       [:.vega-embed]
-       {:width "100%"
-        :height "90%"
-        :border-color (::c/border theme)
-        :border-width 1
-        :border-style :solid}
-       [:.vega-embed :summary]
-       {:opacity 1
-        :cursor :default
-        :margin-right (:spacing/padding theme)
-        :margin-top (:spacing/padding theme)}})]))
-
-(defn- deep-merge
-  "Recursively merges maps.
-   http://dnaeon.github.io/recursively-merging-maps-in-clojure/"
-  [& maps]
-  (letfn [(m [& xs]
-            (if (some #(and (map? %) (not (record? %))) xs)
-              (apply merge-with m xs)
-              (last xs)))]
-    (reduce m maps)))
-
-;; The following is based on Oz to avoid bringing in extra deps
-;; https://github.com/metasoarous/oz/blob/master/src/cljs/oz/core.cljs
-(defn- vega-embed
-  [elem doc opts]
-  (-> (vegaEmbed elem (clj->js doc) (clj->js opts))
-      (.catch (fn [err] (js/console.error err)))))
-
-(defn- vega-class
-  "Creates React Class component for vega(-lite)"
-  [doc opts]
-  (r/create-class
-   {:display-name
-    (:mode doc)
-    :component-did-mount
-    (fn [this]
-      (vega-embed (rd/dom-node this) doc opts))
-    :component-will-update
-    (fn [this [_ new-doc new-opts]]
-      (vega-embed (rd/dom-node this) new-doc new-opts))
-    :reagent-render
-    (fn [_]
-      [:div.viz])}))
-
-(defn vega-lite-viewer
-  [value]
-  (let [theme (theme/use-theme)]
-    [s/div
-     [vega-lite-styles]
-     [:h1 (:title value)]
-     [:p (:description value)]
-     [vega-class
-      (deep-merge (default-config theme) value)
-      {:mode "vega-lite" :renderer :canvas}]]))
+(def vega-lite-viewer
+  (partial vega/vega-embed
+           {:mode "vega-lite" :renderer :canvas}))
 
 (def viewer
   {:predicate (partial sp/valid? ::vega-lite)
