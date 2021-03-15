@@ -7,8 +7,13 @@ VERSION := 0.9.0
 
 all: dev
 
-clean:
-	rm -rf target resources/portal/
+clean/js:
+	rm -rf resources/portal/
+
+clean/target:
+	rm -rf target
+
+clean: clean/target clean/js
 
 target/install-clojure:
 	mkdir -p target
@@ -90,7 +95,7 @@ test: test/jvm test/bb
 fmt:
 	clojure -M:cljfmt fix
 
-ci: lint test
+ci: clean/js lint test
 
 e2e/jvm: resources/js
 	@echo "running e2e tests for jvm"
