@@ -36,7 +36,7 @@
 (defn ^:export clear
   "Clear all values."
   []
-  (rt/clear-values)
+  (l/clear)
   nil)
 
 (defonce init? (atom false))

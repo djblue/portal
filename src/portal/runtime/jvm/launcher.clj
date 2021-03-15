@@ -133,6 +133,10 @@
                 (println "Goto" url "to view portal ui.")))))
      (c/make-atom session-id))))
 
+(defn clear []
+  (doseq [session-id (keys @c/sessions)]
+    (c/request session-id {:op :portal.rpc/clear})))
+
 (defn close []
   (doseq [session-id (keys @c/sessions)]
     (c/request session-id {:op :portal.rpc/close}))

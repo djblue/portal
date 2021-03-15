@@ -39,5 +39,5 @@
 (defn clear
   "Clear all values."
   []
-  (rt/clear-values)
+  (l/clear)
   nil)

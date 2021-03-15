@@ -2,7 +2,8 @@
   (:require [portal.resources :as io]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
-            [portal.runtime.transit :as t]))
+            [portal.runtime.transit :as t]
+            [portal.runtime.web.client :as c]))
 
 (defn- str->src [value content-type]
   (let [blob (js/Blob. #js [value] #js {:type content-type})
@@ -48,6 +49,9 @@
     (if (< (- (js/Date.now) (js/parseInt string)) 5000)
       (open nil)
       (remove-item ":portal/open"))))
+
+(defn clear []
+  (c/request child-window {:op :portal.rpc/clear}))
 
 (defn close []
   (when-let [child @child-window]

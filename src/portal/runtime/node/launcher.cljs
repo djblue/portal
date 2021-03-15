@@ -75,6 +75,11 @@
                (str "--app=" url)))))
      {:session-id session-id})))
 
+(defn clear []
+  (js/Promise.all
+   (for [session-id (keys @c/sessions)]
+     (c/request session-id {:op :portal.rpc/clear}))))
+
 (defn close []
   (a/do
     (js/Promise.all
