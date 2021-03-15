@@ -66,8 +66,9 @@
              (into
               [s/styled
                tag
-               (merge {:style style}
-                      (when has-attrs? (first args)))]
+               (if-not has-attrs?
+                 {:style style}
+                 (update (first args) :style #(merge style (s/parse-style %))))]
               (if-not has-attrs? args (rest args)))))))
      value)))
 
