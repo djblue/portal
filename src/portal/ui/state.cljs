@@ -26,9 +26,11 @@
   (or (:selected state)
       (when (contains? state :portal/value)
         {:depth 1
+         :path []
          :value (:portal/value state)})
       (when (contains? state :portal/tap-list)
         {:depth 1
+         :path []
          :value (:portal/tap-list state)})))
 
 (defn get-selected-value [state] (:value (get-selected-context state)))
