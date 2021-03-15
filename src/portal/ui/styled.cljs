@@ -2,7 +2,10 @@
   (:require [clojure.string :as str]))
 
 (defn parse-style [style]
-  (when-not (str/blank? style)
+  (cond
+    (map? style) style
+
+    (not (str/blank? style))
     (reduce
      (fn [m rule]
        (if-let [[k v] (str/split rule ":")]
