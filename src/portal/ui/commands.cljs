@@ -600,14 +600,13 @@
                          {:style {:opacity 0.5}}
                          (for [a (:portal/args command)] (pr-str a))]]])}])))))}
    open-command-palette
-   {:name 'portal.command/theme-solarized-dark
-    :run (fn [_state] (state/set-theme! ::c/solarized-dark))}
-   {:name 'portal.command/theme-solarized-light
-    :run (fn [_state] (state/set-theme! ::c/solarized-light))}
-   {:name 'portal.command/theme-nord
-    :run (fn [_state] (state/set-theme! ::c/nord))}
-   {:name 'portal.command/theme-material-ui
-    :run (fn [_state] (state/set-theme! ::c/material-ui))}
+   {:name 'portal.command/set-theme
+    :run (fn [state]
+           (a/let [[theme] (pick-one [::c/nord
+                                      ::c/solarized-dark
+                                      ::c/solarized-light
+                                      ::c/material-ui])]
+             (state/dispatch! state state/set-theme! theme)))}
    {:name 'portal.command/copy-as-edn
     :run
     (fn [state] (copy-edn! (state/get-selected-value @state)))}

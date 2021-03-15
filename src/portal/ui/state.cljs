@@ -201,12 +201,12 @@
   (when-let [el (js/document.querySelector "meta[name=theme-color]")]
     (.setAttribute el "content" color)))
 
-(defn set-theme! [theme]
-  (swap! state assoc ::c/theme theme)
+(defn set-theme! [state theme]
   (let [color (get-in c/themes [theme ::c/background2])]
     (set-theme color)
     (notify-parent
-     {:type :set-theme :color color})))
+     {:type :set-theme :color color}))
+  (assoc state ::c/theme theme))
 
 (defn- merge-state [new-state]
   (swap! state merge new-state))
