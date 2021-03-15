@@ -35,10 +35,6 @@
 
 (defn get-selected-value [state] (:value (get-selected-context state)))
 
-(defn get-nav-args [state]
-  (when-let [{:keys [collection key value]} (:selected state)]
-    (when collection [collection key value])))
-
 (defn clear-selected [state] (dissoc state :selected))
 
 (defn- send! [message] (@sender message))
@@ -227,6 +223,13 @@
 (defn invoke [f & args]
   (-> (send! {:op :portal.rpc/invoke :f f :args args})
       (.then #(:return %))))
+
+(defn nav [state context]
+  (let [{:keys [collection key value]} context
+        key (when (or (map? collection) (vector? collection)) key)]
+    (when collection
+      (a/let [value (invoke 'clojure.datafy/nav collection key value)]
+        (history-push state {:portal/value value})))))
 
 (defn more [state]
   (let [k (if (contains? state :portal/value)

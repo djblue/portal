@@ -102,11 +102,6 @@
         (fn [_status]
           (remove-watch state watch-key))))))
 
-(defn on-nav [request done]
-  (a/let [[coll k v] (:args request)
-          value (if coll (nav coll k v) v)]
-    (done {:value value})))
-
 (def ^:private predicates
   (merge
    {'clojure.core/deref
@@ -139,18 +134,20 @@
       (if (predicate v)
         fns
         (dissoc fns s)))
-    (dissoc fns `get-functions)
+    (dissoc fns
+            `get-functions
+            'clojure.datafy/nav)
     predicates)))
 
 (defn invoke [{:keys [f args]} done]
   (try
     (let [f (if (symbol? f) (get fns f) f)]
-      (done {:return (apply f args)}))
+      (a/let [return (apply f args)]
+        (done {:return return})))
     (catch #?(:clj Exception :cljs js/Error) e
       (done {:return e}))))
 
 (def ops
   {:portal.rpc/clear-values #'clear-values
    :portal.rpc/load-state   #'load-state
-   :portal.rpc/on-nav       #'on-nav
    :portal.rpc/invoke       #'invoke})

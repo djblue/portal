@@ -594,7 +594,7 @@
               (.stopPropagation e))
             :on-double-click
             (fn [e]
-              (state/dispatch! state state/history-push {:portal/value value})
+              (state/dispatch! state state/nav context)
               (.stopPropagation e))})
          {:ref ref
           :style

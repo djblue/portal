@@ -200,11 +200,10 @@
    'portal.command/select-parent {::shortcuts/default #{"arrowleft"}}
    'portal.command/select-child {::shortcuts/default #{"arrowright"}}
 
-   'portal.command/focus-selected {::shortcuts/default #{"enter"}}
+   'portal.command/focus-selected {::shortcuts/default #{"control" "enter"}}
    'portal.command/toggle-expand {::shortcuts/default #{"e"}}
 
-   'clojure.datafy/nav    {::shortcuts/default #{"n"}}
-   'clojure.datafy/datafy {::shortcuts/default #{"d"}}
+   'clojure.datafy/nav {::shortcuts/default #{"enter"}}
 
    'portal.command/redo-previous-command {::shortcuts/default #{"control" "r"}}
    'portal.command/clear {::shortcuts/default #{"control" "l"}}
@@ -360,12 +359,7 @@
           fns (state/invoke 'portal.runtime/get-functions v)]
     (for [f fns]
       (make-command
-       {:name f
-        :f
-        (if-not (= f 'clojure.datafy/nav)
-          #(state/invoke f %)
-          #(when-let [args (state/get-nav-args @state)]
-             (apply state/invoke f args)))}))))
+       {:name f :f #(state/invoke f %)}))))
 
 (declare commands)
 
@@ -549,7 +543,13 @@
        (pp/pprint value)))))
 
 (def portal-commands
-  [{:name 'portal.command/select-prev
+  [{:name 'clojure.datafy/nav
+    :run (fn [state]
+           (state/dispatch!
+            state
+            state/nav
+            (state/get-selected-context @state)))}
+   {:name 'portal.command/select-prev
     :run (fn->command state/select-prev)}
    {:name 'portal.command/select-next
     :run (fn->command state/select-next)}

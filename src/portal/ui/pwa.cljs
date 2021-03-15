@@ -44,7 +44,14 @@
        (.click input)))))
 
 (def ^:private fns
-  {'portal.runtime/get-functions (constantly [])})
+  {'clojure.datafy/nav           #'nav
+   'clojure.datafy/datafy        #'datafy
+   'portal.runtime/get-functions
+   (fn []
+     (keys
+      (dissoc fns
+              'clojure.datafy/nav
+              'portal.runtime/get-functions)))})
 
 (def commands
   [commands/open-command-palette
@@ -67,15 +74,10 @@
     (catch js/Error e
       (done {:return e}))))
 
-(defn on-nav [request]
-  (a/let [res (apply nav (:args request))]
-    {:value (datafy res)}))
-
 (defn send! [msg]
   (js/Promise.resolve
    (case (:op msg)
      :portal.rpc/clear-values nil
-     :portal.rpc/on-nav (on-nav msg)
      :portal.rpc/invoke (invoke msg identity))))
 
 (defn set-title [title]
