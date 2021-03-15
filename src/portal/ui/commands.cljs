@@ -338,24 +338,22 @@
     (when-let [selected (state/get-selected-context @state)]
       (state/dispatch! state f selected))))
 
-(defn make-command [{:keys [name predicate args f] :as opts}]
+(defn make-command [{:keys [name predicate args f]}]
   (let [predicate (or predicate (constantly true))]
-    (merge
-     (select-keys opts [::shortcuts/default :shortcuts/osx])
-     {:name name
-      :predicate (comp predicate state/get-selected-value)
-      :run (fn [state]
-             (a/let [v      (state/get-selected-value @state)
-                     args   ((or args empty-args) v)
-                     result (apply f v args)]
-               (when (predicate v)
-                 (state/dispatch!
-                  state
-                  state/history-push
-                  {:portal/key name
-                   :portal/f f
-                   :portal/args args
-                   :portal/value result}))))})))
+    {:name name
+     :predicate (comp predicate state/get-selected-value)
+     :run (fn [state]
+            (a/let [v      (state/get-selected-value @state)
+                    args   ((or args empty-args) v)
+                    result (apply f v args)]
+              (when (predicate v)
+                (state/dispatch!
+                 state
+                 state/history-push
+                 {:portal/key name
+                  :portal/f f
+                  :portal/args args
+                  :portal/value result}))))}))
 
 (defn get-functions [state]
   (a/let [v   (state/get-selected-value @state)
