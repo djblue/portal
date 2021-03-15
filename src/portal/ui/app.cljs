@@ -138,25 +138,6 @@
         :box-sizing :border-box
         :padding (:spacing/padding theme)
         :border-top [1 :solid (::c/border theme)]}}
-      [s/button
-       {:title    "Open command palette."
-        :on-click #((:run commands/open-command-palette) state)
-        :style
-        {:min-width 60
-         :font-family (:font/family theme)
-         :background (::c/background theme)
-         :border-radius (:border-radius theme)
-         :border [1 :solid (::c/border theme)]
-         :box-sizing :border-box
-         :padding-top (:spacing/padding theme)
-         :padding-bottom (:spacing/padding theme)
-         :padding-left (:spacing/padding theme)
-         :padding-right (* 1 (:spacing/padding theme))
-         :color (::c/tag theme)
-         :font-size (:font-size theme)
-         :font-weight :bold
-         :cursor :pointer}}
-       ">_"]
       (when-not (empty? compatible-viewers)
         [s/select
          {:title "Select a different viewer."
@@ -177,7 +158,26 @@
            :border [1 :solid (::c/border theme)]}}
          (for [{:keys [name]} compatible-viewers]
            ^{:key name}
-           [s/option {:value (pr-str name)} (pr-str name)])])]]))
+           [s/option {:value (pr-str name)} (pr-str name)])])
+      [s/button
+       {:title    "Open command palette."
+        :on-click #((:run commands/open-command-palette) state)
+        :style
+        {:min-width 60
+         :font-family (:font/family theme)
+         :background (::c/background theme)
+         :border-radius (:border-radius theme)
+         :border [1 :solid (::c/border theme)]
+         :box-sizing :border-box
+         :padding-top (:spacing/padding theme)
+         :padding-bottom (:spacing/padding theme)
+         :padding-left (:spacing/padding theme)
+         :padding-right (* 1 (:spacing/padding theme))
+         :color (::c/tag theme)
+         :font-size (:font-size theme)
+         :font-weight :bold
+         :cursor :pointer}}
+       ">_"]]]))
 
 (defn search-input []
   (let [theme (theme/use-theme)
