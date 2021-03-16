@@ -1,3 +1,42 @@
+## 0.10.0 - 2021-03-15
+
+- Add command button to improve discoverability (bottom right)
+- Expand items without nav-ing into them
+  - Allow string expansion
+  - Middle click to expand items
+- Add preview type to each collection as header
+
+### Item Selection
+
+- Add the concept of a selection
+  - Single click to select an item
+  - Double click to select + nav into an item
+  - Use arrow keys to move selection around
+    - Limited to `:portal.viewers/inspector` for now
+  - Change the viewer for a selected item
+
+### Vega Viewer
+
+- Initial Vega Viewer
+  - Added by [@BrianChevalier](https://github.com/BrianChevalier)
+  - In PR [#44](https://github.com/djblue/portal/pull/44)
+  - Thanks!
+
+### Material UI Theme
+
+- Added material-ui theme
+  - Added by [@rzwiefel](https://github.com/rzwiefel)
+  - In PR [#45](https://github.com/djblue/portal/pull/45)
+    - Also fixed hex color regex
+  - Thanks!
+
+### Window Title
+
+- Adds an option to set a custom window title when opening portal
+  - Added by [@coyotesqrl](https://github.com/coyotesqrl)
+  - In PR [#42](https://github.com/djblue/portal/pull/42)
+  - Thanks!
+
 ## 0.9.0 - 2021-01-22
 
 - PWA startup for linux with >1 chrome profile (thanks [@brdloush](https://github.com/brdloush) [#41](https://github.com/djblue/portal/pull/41))
