@@ -29,14 +29,14 @@
     lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.5"}
     hickory/hickory {:mvn/version "0.7.1"}
-    thheller/shadow-cljs {:mvn/version "2.11.23"}}}
+    thheller/shadow-cljs {:mvn/version "2.11.26"}}}
   :shadow
   {:main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.03.03"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.03.22"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.7.0"}}}

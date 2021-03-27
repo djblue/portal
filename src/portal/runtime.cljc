@@ -106,7 +106,7 @@
   (merge
    {'clojure.core/deref
     #?(:clj  #(instance? clojure.lang.IRef %)
-       :cljs #(satisfies? cljs.core.IDeref %))}
+       :cljs #(satisfies? cljs.core/IDeref %))}
    #?(:clj
       {'clojure.core/slurp
        #(or (instance? URI %)
