@@ -26,19 +26,13 @@
          [:div [:pre [:code (pr-str error)]]])
         (.. this -props -children)))}))
 
-(def ^:private viewer-context (react/createContext nil))
-
-(defn- use-viewers [] (react/useContext viewer-context))
-
-(defn with-viewers [viewers & children]
-  (into [:r> (.-Provider viewer-context) #js {:value viewers}] children))
+(defonce viewers (atom []))
 
 (defn viewers-by-name [viewers]
   (into {} (map (juxt :name identity) viewers)))
 
-(defn use-compatible-viewers [value]
-  (let [viewers            (use-viewers)
-        by-name            (viewers-by-name viewers)
+(defn get-compatible-viewers [viewers value]
+  (let [by-name            (viewers-by-name viewers)
         default-viewer     (get by-name (:portal.viewer/default (meta value)))
         viewers            (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
@@ -47,7 +41,7 @@
   (let [state              (state/use-state)
         value              (:value context)
         selected-viewer    (get-in @state [:selected-viewers context])
-        compatible-viewers (use-compatible-viewers value)]
+        compatible-viewers (get-compatible-viewers @viewers value)]
     (or (some #(when (= (:name %) selected-viewer) %)
               compatible-viewers)
         (first compatible-viewers))))

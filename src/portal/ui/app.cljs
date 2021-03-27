@@ -100,7 +100,8 @@
         value   (filter-data (:search-text @state) value)
         selected-context (state/get-selected-context @state)
         viewer           (ins/use-viewer selected-context)
-        compatible-viewers (ins/use-compatible-viewers
+        compatible-viewers (ins/get-compatible-viewers
+                            @ins/viewers
                             (:value selected-context))]
     [:<>
      [s/div
@@ -298,7 +299,7 @@
 (defn- use-viewer-commands []
   (let [state              (state/use-state)
         selected-context   (state/get-selected-context @state)
-        compatible-viewers (ins/use-compatible-viewers (:value selected-context))]
+        compatible-viewers (ins/get-compatible-viewers @ins/viewers (:value selected-context))]
     (map #(-> %
               (dissoc :predicate)
               (assoc  :run
@@ -334,14 +335,14 @@
    md/viewer
    hiccup/viewer])
 
+(reset! ins/viewers viewers)
+
 (defn root [& children]
-  [ins/with-viewers
-   viewers
-   [state/with-state
-    state/state
-    [theme/with-theme
-     (get @state/state ::c/theme ::c/nord)
-     [container children]]]])
+  [state/with-state
+   state/state
+   [theme/with-theme
+    (get @state/state ::c/theme ::c/nord)
+    [container children]]])
 
 (defn app []
   [root

@@ -195,6 +195,7 @@
    {::shortcuts/osx     #{"meta" "shift" "arrowright"}
     ::shortcuts/default #{"control" "shift" "arrowright"}}
 
+   'portal.command/select-viewer {::shortcuts/default #{"v"}}
    'portal.command/select-prev {::shortcuts/default #{"arrowup"}}
    'portal.command/select-next {::shortcuts/default #{"arrowdown"}}
    'portal.command/select-parent {::shortcuts/default #{"arrowleft"}}
@@ -279,7 +280,8 @@
               (reset! filter-text "")
               (on-close)
               (when-let [option (nth options @active)]
-                (on-select (second option))))]
+                ;; Give react time to close command palette
+                (js/setTimeout #(on-select (second option)) 25)))]
         [with-shortcuts
          (fn [log]
            (when
@@ -542,6 +544,13 @@
                *print-level* 100]
        (pp/pprint value)))))
 
+(defn select-viewer [state]
+  (when-let [selected-context (state/get-selected-context @state)]
+    (let [viewers (ins/get-compatible-viewers @ins/viewers (:value selected-context))]
+      (when (> (count viewers) 1)
+        (a/let [[selected-viewer] (pick-one (map :name viewers))]
+          (ins/set-viewer! state selected-context selected-viewer))))))
+
 (def portal-commands
   [{:name 'clojure.datafy/nav
     :run (fn [state]
@@ -549,6 +558,8 @@
             state
             state/nav
             (state/get-selected-context @state)))}
+   {:name 'portal.command/select-viewer
+    :run  select-viewer}
    {:name 'portal.command/select-prev
     :run (fn->command state/select-prev)}
    {:name 'portal.command/select-next
