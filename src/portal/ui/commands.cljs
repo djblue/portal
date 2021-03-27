@@ -239,9 +239,9 @@
                   :margin-right  (:spacing/padding theme)}}
           (get shortcut->symbol k (.toUpperCase k))])])))
 
-(defn palette-component-item [props & children]
+(defn- palette-component-item [props & children]
   (let [theme (theme/use-theme)
-        {::keys [active? on-click]} props]
+        {:keys [active? on-click]} props]
     (into
      [s/div
       {:on-click on-click
@@ -263,14 +263,16 @@
 (defn palette-component []
   (let [active (r/atom 0)
         filter-text (r/atom "")]
-    (fn [{:keys [on-select options]}]
+    (fn [{:keys [on-select component filter-by options]
+          :or   {component ins/inspector
+                 filter-by identity}}]
       (let [theme (theme/use-theme)
             text @filter-text
             options
             (keep
              (fn [option]
                (when (or (str/blank? text)
-                         (str/includes? (pr-str (::value (second option))) text))
+                         (str/includes? (pr-str (filter-by option)) text))
                  option))
              options)
             n (count options)
@@ -281,7 +283,7 @@
               (on-close)
               (when-let [option (nth options @active)]
                 ;; Give react time to close command palette
-                (js/setTimeout #(on-select (second option)) 25)))]
+                (js/setTimeout #(on-select option) 25)))]
         [with-shortcuts
          (fn [log]
            (when
@@ -297,7 +299,6 @@
            {:style
             {:padding (:spacing/padding theme)
              :border-bottom [1 :solid (::c/border theme)]}}
-
            [s/input
             {:placeholder "Typ to filter, <up> and <down> to move selection, <enter> to confirm."
              :auto-focus true
@@ -328,9 +329,13 @@
                      ^{:key index}
                      [:<>
                       (when active? [scroll-into-view])
-                      (update option 1 assoc
-                              ::active? active?
-                              ::on-click on-click)])))
+                      [palette-component-item
+                       {:active? active?
+                        :on-click on-click}
+                       [component
+                        option
+                        {:active? active?
+                         :on-click on-click}]]])))
                 doall)]]]))))
 
 (defn- empty-args [_] nil)
@@ -340,9 +345,10 @@
     (when-let [selected (state/get-selected-context @state)]
       (state/dispatch! state f selected))))
 
-(defn make-command [{:keys [name predicate args f]}]
+(defn make-command [{:keys [name doc predicate args f]}]
   (let [predicate (or predicate (constantly true))]
     {:name name
+     :doc doc
      :predicate (comp predicate state/get-selected-value)
      :run (fn [state]
             (a/let [v      (state/get-selected-value @state)
@@ -366,6 +372,26 @@
 
 (declare commands)
 
+(defn- command-item [command {:keys [active?]}]
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style {:width "100%"}}
+     [s/div
+      {:style
+       {:width "100%"
+        :display :flex
+        :justify-content :space-between}}
+      [ins/inspector (:name command)]
+      [shortcut command]]
+     (when active?
+       (when-let [doc (:doc command)]
+         [s/div
+          {:style
+           {:box-sizing :border-box
+            :padding (:spacing/padding theme)
+            :background "rgba(0,0,0,0.20)"}}
+          doc]))]))
+
 (def open-command-palette
   {:name 'portal.command/open-command-palette
    :label "Show All Commands"
@@ -382,16 +408,12 @@
             (open
              (fn [state]
                [palette-component
-                {:on-select
-                 (fn [option]
-                   ((:run option) state))
-                 :options
-                 (for [command commands]
-                   [palette-component-item
-                    {:run (:run command)
-                     ::value (:name command)}
-                    [ins/inspector (:name command)]
-                    [shortcut command]])}]))))})
+                {:filter-by :name
+                 :options commands
+                 :component command-item
+                 :on-select
+                 (fn [command]
+                   ((:run command) state))}]))))})
 
 ;; pick args
 
@@ -401,12 +423,8 @@
      (open
       (fn [_state]
         [palette-component
-         {:on-select #(resolve [(::value %)])
-          :options
-          (for [option options]
-            [palette-component-item
-             {::value option}
-             [ins/inspector option]])}])))))
+         {:on-select #(resolve [%])
+          :options options}])))))
 
 (defn pick-many [options]
   (js/Promise.
@@ -428,10 +446,10 @@
              (open
               (fn [_state]
                 [palette-component
-                 {:on-select
-                  (fn [option]
-                    (let [k (::value option)
-                          path (conj path k)
+                 {:options (concat [::done] (keys v))
+                  :on-select
+                  (fn [k]
+                    (let [path (conj path k)
                           next-value (get v k)]
                       (cond
                         (= k ::done)
@@ -441,12 +459,7 @@
                         (resolve [path])
 
                         :else
-                        (get-key path next-value))))
-                  :options
-                  (for [k (concat [::done] (keys v))]
-                    [palette-component-item
-                     {::value k}
-                     [ins/inspector k]])}])))]
+                        (get-key path next-value))))}])))]
        (get-key [] v)))))
 
 ;; clojure commands
@@ -454,31 +467,39 @@
 (def clojure-commands
   [{:f vals
     :predicate map?
-    :name 'clojure.core/vals}
+    :name 'clojure.core/vals
+    :doc (:doc (meta #'clojure.core/vals))}
    {:f keys
     :predicate map?
-    :name 'clojure.core/keys}
+    :name 'clojure.core/keys
+    :doc (:doc (meta #'clojure.core/keys))}
    {:f count
     :predicate #(or (coll? %) (string? %))
-    :name 'clojure.core/count}
+    :name 'clojure.core/count
+    :doc (:doc (meta #'clojure.core/count))}
    {:f first
     :predicate coll?
-    :name 'clojure.core/first}
+    :name 'clojure.core/first
+    :doc (:doc (meta #'clojure.core/first))}
    {:f rest
     :predicate coll?
-    :name 'clojure.core/rest}
+    :name 'clojure.core/rest
+    :doc (:doc (meta #'clojure.core/rest))}
    {:f get
     :predicate map?
     :args (comp pick-one keys)
-    :name 'clojure.core/get}
+    :name 'clojure.core/get
+    :doc (:doc (meta #'clojure.core/get))}
    {:f get-in
     :predicate map?
     :args pick-in
-    :name 'clojure.core/get-in}
+    :name 'clojure.core/get-in
+    :doc (:doc (meta #'clojure.core/get-in))}
    {:f select-keys
     :predicate map?
     :args (comp pick-many keys)
-    :name 'clojure.core/select-keys}])
+    :name 'clojure.core/select-keys
+    :doc (:doc (meta #'clojure.core/select-keys))}])
 
 ;; portal data commands
 
@@ -580,8 +601,10 @@
                (open
                 (fn [_state]
                   [palette-component
-                   {:on-select
-                    (fn [{::keys [command]}]
+                   {:options commands
+                    :filter-by :portal/key
+                    :on-select
+                    (fn [command]
                       (a/let [k (:portal/key command)
                               f (or (:portal/f command)
                                     (if (keyword? k)
@@ -593,22 +616,19 @@
                          state
                          state/history-push
                          (assoc command :portal/value value))))
-                    :options
-                    (for [command commands]
-                      [palette-component-item
-                       {::command command
-                        ::value (:portal/key command)}
+                    :component
+                    (fn [command]
+                      [s/div
+                       {:style {:display :flex
+                                :justify-content :space-between
+                                :overflow :hidden
+                                :align-items :center
+                                :text-overflow :ellipsis
+                                :white-space :nowrap}}
+                       [ins/inspector (:portal/key command)]
                        [s/div
-                        {:style {:display :flex
-                                 :justify-content :space-between
-                                 :overflow :hidden
-                                 :align-items :center
-                                 :text-overflow :ellipsis
-                                 :white-space :nowrap}}
-                        [ins/inspector (:portal/key command)]
-                        [s/div
-                         {:style {:opacity 0.5}}
-                         (for [a (:portal/args command)] (pr-str a))]]])}])))))}
+                        {:style {:opacity 0.5}}
+                        (for [a (:portal/args command)] (pr-str a))]])}])))))}
    open-command-palette
    {:name 'portal.command/set-theme
     :run (fn [state]
