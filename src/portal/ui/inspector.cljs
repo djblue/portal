@@ -286,14 +286,26 @@
        child]]]))
 
 (defn- container-map-k [child]
-  [s/div {:style {:grid-column "1"
-                  :display :flex
-                  :align-items :center}} child])
+  [s/div {:style
+          {:grid-column "1"
+           :display :flex
+           :align-items :center}}
+   [s/div {:style
+           {:width "100%"
+            :top 0
+            :position :sticky}}
+    child]])
 
 (defn- container-map-v [child]
-  [s/div {:style {:grid-column "2"
-                  :display :flex
-                  :align-items :center}} child])
+  [s/div {:style
+          {:grid-column "2"
+           :display :flex
+           :align-items :center}}
+   [s/div {:style
+           {:width "100%"
+            :top 0
+            :position :sticky}}
+    child]])
 
 (defn try-sort [values]
   (try (sort values)
