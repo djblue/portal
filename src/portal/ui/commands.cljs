@@ -109,8 +109,10 @@
          (fn [log]
            (when
             (condp shortcuts/match? log
-              "arrowup"   (swap! active #(mod (dec %) n))
-              "arrowdown" (swap! active #(mod (inc %) n))
+              "arrowup"        (swap! active #(mod (dec %) n))
+              #{"shift" "tab"} (swap! active #(mod (dec %) n))
+              "arrowdown"      (swap! active #(mod (inc %) n))
+              "tab"            (swap! active #(mod (inc %) n))
 
               "a"
               (if (= (count @selected) (count options))
@@ -288,10 +290,12 @@
          (fn [log]
            (when
             (condp shortcuts/match? log
-              "arrowup"   (swap! active #(mod (dec %) n))
-              "arrowdown" (swap! active #(mod (inc %) n))
-              "enter"     (on-select)
-              "escape"    (on-close)
+              "arrowup"        (swap! active #(mod (dec %) n))
+              #{"shift" "tab"} (swap! active #(mod (dec %) n))
+              "arrowdown"      (swap! active #(mod (inc %) n))
+              "tab"            (swap! active #(mod (inc %) n))
+              "enter"          (on-select)
+              "escape"         (on-close)
               nil)
              (shortcuts/matched! log)))
          [container
