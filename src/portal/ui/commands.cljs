@@ -299,7 +299,8 @@
              :border-bottom [1 :solid (::c/border theme)]}}
 
            [s/input
-            {:auto-focus true
+            {:placeholder "Typ to filter, <up> and <down> to move selection, <enter> to confirm."
+             :auto-focus true
              :value @filter-text
              :on-change #(do
                            (reset! active 0)
