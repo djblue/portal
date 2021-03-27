@@ -9,6 +9,8 @@
                     code-url "main.js"
                     platform #?(:bb "bb" :clj "jvm" :cljs "node")}}]
   (str
+   "<!DOCTYPE html>"
+   "<html lang=\"en\">"
    "<head>"
    "<title>" (str name " - " platform " - " version) "</title>"
    "<meta charset='UTF-8' />"
@@ -19,4 +21,5 @@
    "<script src=\"" code-url "\"></script>"
    ;; wait.js will ensure headless chrome doesn't exit early
    (when @testing? "<script src=\"wait.js\"></script>")
-   "</body>"))
+   "</body>"
+   "</html>"))
