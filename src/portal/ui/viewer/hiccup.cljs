@@ -1,6 +1,6 @@
 (ns portal.ui.viewer.hiccup
-  (:require [clojure.walk :as w]
-            [portal.colors :as c]
+  (:require [portal.colors :as c]
+            [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
@@ -52,25 +52,30 @@
      :td {:padding (:spacing/padding theme)
           :border [1 :solid (::c/border theme)]}}))
 
+(defn- process-hiccup [context hiccup]
+  (if-not (vector? hiccup)
+    hiccup
+    (let [[tag & args]  hiccup
+          style         (get-in context [:styles tag])
+          component     (get-in context [:viewers tag :component])
+          has-attrs?    (map? (first args))]
+      (if component
+        (into [component] args)
+        (into
+         [s/styled
+          tag
+          (if-not has-attrs?
+            {:style style}
+            (update (first args) :style #(merge style (s/parse-style %))))]
+         (map #(process-hiccup context %)
+              (if-not has-attrs? args (rest args))))))))
+
 (defn inspect-hiccup [value]
-  (let [theme (theme/use-theme)
-        styles (hiccup-styles theme)]
-    (w/postwalk
-     (fn [x]
-       (let [style (and (vector? x)
-                        (get styles (first x)))]
-         (if-not style
-           x
-           (let [[tag & args] x
-                 has-attrs?   (map? (first args))]
-             (into
-              [s/styled
-               tag
-               (if-not has-attrs?
-                 {:style style}
-                 (update (first args) :style #(merge style (s/parse-style %))))]
-              (if-not has-attrs? args (rest args)))))))
-     value)))
+  (let [theme   (theme/use-theme)
+        styles  (hiccup-styles theme)
+        viewers (ins/viewers-by-name @ins/viewers)]
+    [ins/inc-depth
+     (process-hiccup {:styles styles :viewers viewers} value)]))
 
 (defn- hiccup? [value]
   (and (vector? value)
