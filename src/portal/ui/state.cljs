@@ -179,7 +179,8 @@
     state))
 
 (defn get-path [state]
-  (get-in state [:selected :path]))
+  (when-let [{:keys [key? path value]} (get-selected-context state)]
+    (if-not key? path (conj path value))))
 
 (defn clear [state]
   (a/do
