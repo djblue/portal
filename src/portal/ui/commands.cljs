@@ -304,7 +304,7 @@
             {:padding (:spacing/padding theme)
              :border-bottom [1 :solid (::c/border theme)]}}
            [s/input
-            {:placeholder "Typ to filter, <up> and <down> to move selection, <enter> to confirm."
+            {:placeholder "Type to filter, <up> and <down> to move selection, <enter> to confirm."
              :auto-focus true
              :value @filter-text
              :on-change #(do

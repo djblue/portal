@@ -289,7 +289,7 @@
   [s/div {:style
           {:grid-column "1"
            :display :flex
-           :align-items :center}}
+           :align-items :flex-start}}
    [s/div {:style
            {:width "100%"
             :top 0
@@ -300,7 +300,7 @@
   [s/div {:style
           {:grid-column "2"
            :display :flex
-           :align-items :center}}
+           :align-items :flex-start}}
    [s/div {:style
            {:width "100%"
             :top 0
