@@ -248,6 +248,8 @@ the following section may be of interest to you.
 
 ## Prior Art
 
+- [Clouseau](https://common-lisp.net/project/mcclim/static/manual/mcclim.html)
+  - [Demo Video](https://youtu.be/-1LzFxTbU9E)
 - [clojure.inspector](https://clojuredocs.org/clojure.inspector/inspect)
 - [REBL](https://github.com/cognitect-labs/REBL-distro)
 - [punk](https://github.com/Lokeh/punk)
