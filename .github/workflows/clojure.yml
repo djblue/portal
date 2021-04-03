@@ -20,9 +20,9 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: '1.8'
-    - run: make install/clojure
-    - run: make ci
-    - run: make app
+    - run: curl -s https://raw.githubusercontent.com/babashka/babashka/master/install | sudo bash
+    - run: bb -m tasks/ci
+    - run: bb -m tasks/app
       if: ${{ github.event_name == 'push' }}
     - uses: peaceiris/actions-gh-pages@v3
       if: ${{ github.event_name == 'push' }}
