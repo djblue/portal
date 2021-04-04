@@ -20,7 +20,9 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: '1.8'
-    - run: curl -s https://raw.githubusercontent.com/babashka/babashka/master/install | sudo bash
+    - uses: turtlequeue/setup-babashka@v1.2.1
+      with:
+        babashka-version: 0.3.2
     - run: bb -m tasks/ci
     - run: bb -m tasks/app
       if: ${{ github.event_name == 'push' }}
