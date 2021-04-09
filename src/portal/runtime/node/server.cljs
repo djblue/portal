@@ -3,18 +3,17 @@
             [portal.resources :as io]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
-            [portal.runtime.node.client :as c]
-            [portal.runtime.transit :as t]))
+            [portal.runtime.node.client :as c]))
 
 (defn- not-found [_request done]
   (done {:status :not-found}))
 
 (defn- edn->json [value]
   (try
-    (t/edn->json
+    (rt/write
      (assoc value :portal.rpc/exception nil))
     (catch js/Error e
-      (t/edn->json
+      (rt/write
        {:portal/state-id (:portal/state-id value)
         :portal.rpc/exception e}))))
 
@@ -43,7 +42,7 @@
          (swap! c/sessions assoc session-id send!)
          (.on ws "message"
               (fn [message]
-                (a/let [req  (t/json->edn message)
+                (a/let [req  (rt/read message)
                         id   (:portal.rpc/id req)
                         op   (get ops (get req :op) not-found)
                         done #(send! (assoc %

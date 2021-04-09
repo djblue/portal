@@ -1,3 +1,5 @@
 {:lint-as
  {portal.async/let clojure.core/let
-  portal.sync/let  clojure.core/let}}
+  portal.sync/let  clojure.core/let
+  cljs.core/simple-benchmark                clojure.core/let
+  portal.runtime.cson-test/simple-benchmark clojure.core/let}}

@@ -1,8 +1,20 @@
 (ns portal.ui.rpc
+  (:refer-clojure :exclude [read])
   (:require [cognitect.transit :as t]
             [com.cognitect.transit.types :as ty]
-            [portal.ui.viewer.diff :as diff]
+            [portal.runtime.cson :as cson]
             [portal.ui.state :as state]))
+
+(defn read [string]
+  (cson/read
+   string
+   (fn [value]
+     (case (first value)
+       "object" (t/tagged-value
+                 "portal.transit/object"
+                 (cson/json-> (second value)))))))
+
+(defn write [value] (cson/write value))
 
 ;; Since any object can have metadata and all unknown objects in portal
 ;; are encoded as tagged values, if any of those objects have metadata, it
@@ -12,6 +24,10 @@
 ;; now. The crux of the problem is that write-meta gets to the metadata
 ;; before it can be hidden in the representation.
 (extend-type ty/TaggedValue
+  cson/ToJson
+  (-to-json [this]
+    #js ["object" (cson/to-json (.-rep this))])
+
   IMeta
   (-meta [this]
     (:meta (.-rep this)))
@@ -43,17 +59,6 @@
 
          (str "#" tag rep))))))
 
-(defn- json->edn [json]
-  (let [r (t/reader :json {:handlers diff/readers})]
-    (t/read r json)))
-
-(defn- edn->json [edn]
-  (let [w (t/writer
-           :json
-           {:transform t/write-meta
-            :handlers diff/writers})]
-    (t/write w edn)))
-
 (defonce ^:private id (atom 0))
 (defonce ^:private pending-requests (atom {}))
 
@@ -69,9 +74,9 @@
        (send! (assoc message :portal.rpc/id id))))))
 
 (defn- web-request [message]
-  (-> (edn->json message)
+  (-> (write message)
       js/window.opener.portal.web.send_BANG_
-      (.then json->edn)))
+      (.then read)))
 
 (def request (if js/window.opener web-request ws-request))
 
@@ -114,7 +119,7 @@
   (when-let [f (get ops (:op message))] (f message send!)))
 
 (defn ^:export handler [request]
-  (edn->json (dispatch (json->edn request) identity)))
+  (write (dispatch (read request) identity)))
 
 (defonce ^:private ws-promise (atom nil))
 
@@ -129,7 +134,7 @@
       (fn [resolve]
         (when-let [chan (js/WebSocket.
                          (str "ws://" js/location.host "/rpc?" (get-session)))]
-          (set! (.-onmessage chan) #(dispatch (json->edn (.-data %))
+          (set! (.-onmessage chan) #(dispatch (read (.-data %))
                                               (fn [message]
                                                 (send! message))))
           (set! (.-onerror chan)   #(reset!  ws-promise nil))
@@ -137,4 +142,4 @@
           (set! (.-onopen chan)    #(resolve chan))))))))
 
 (defn send! [message]
-  (.then (connect) #(.send % (edn->json message))))
+  (.then (connect) #(.send % (write message))))

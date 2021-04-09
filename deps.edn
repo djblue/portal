@@ -12,16 +12,6 @@
   {:extra-paths ["dev" "test"]
    :extra-deps
    {hiccup/hiccup {:mvn/version "2.0.0-alpha2"}}}
-  :dev-cljs
-  ;; Using clojurescript from source is required to get around
-  ;; the older version (0.8.309) of transit-clj bundled in their jar.
-  ;; This is necessary because the :default-handler for transit-clj
-  ;; wasn't added until 0.8.319
-  {:override-deps
-   {org.clojure/clojurescript
-    {:git/url "https://github.com/clojure/clojurescript.git"
-     :tag "1.10.773"
-     :sha "790bcbf5f45d3775c15d597eee240fb3f3636681"}}}
   :cljs
   {:extra-deps
    {org.clojure/clojurescript {:mvn/version "1.10.773"}

@@ -1,5 +1,7 @@
 (ns portal.runtime
+  (:refer-clojure :exclude [read])
   (:require [clojure.datafy :refer [datafy nav]]
+            [portal.runtime.cson :as cson]
             #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a]))
   #?(:clj (:import [java.io File]
@@ -41,6 +43,32 @@
 
 (defn uuid->instance [uuid]
   (get @instance-cache [:uuid uuid]))
+
+(extend-type #?(:clj Object :cljs default)
+  cson/ToJson
+  (-to-json [o]
+    (let [id (instance->uuid o)]
+      (cson/tag
+       "object"
+       (cson/to-json
+        {:id id
+         :type (pr-str (type o))
+         :string (binding [*print-length* 10
+                           *print-level* 2]
+                   (pr-str o))})))))
+
+(defn write [value] (cson/write value))
+
+(defn- object-> [value]
+  (let [rep (cson/json-> (second value))]
+    (uuid->instance (:id rep))))
+
+(defn read [string]
+  (cson/read
+   string
+   (fn [value]
+     (case (first value)
+       "object" (object-> value)))))
 
 (defonce state (atom {:portal/state-id (random-uuid)
                       :portal/tap-list (list)

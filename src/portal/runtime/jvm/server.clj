@@ -5,15 +5,14 @@
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
-            [portal.runtime.jvm.client :as c]
-            [portal.runtime.transit :as t])
+            [portal.runtime.jvm.client :as c])
   (:import [java.util UUID]))
 
 (defn- edn->json [value]
   (try
-    (t/edn->json value)
+    (rt/write value)
     (catch Exception e
-      (t/edn->json
+      (rt/write
        {:portal.rpc/id (:portal.rpc/id value)
         :op :portal.rpc/response
         :portal/state-id (:portal/state-id value)
@@ -30,7 +29,7 @@
      request
      {:on-receive
       (fn [ch message]
-        (let [body  (t/json->edn message)
+        (let [body  (rt/read message)
               id    (:portal.rpc/id body)
               op    (get ops (:op body) not-found)]
           (future

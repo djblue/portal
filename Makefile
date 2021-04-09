@@ -51,10 +51,10 @@ resources/portal/ws.js: node_modules
 resources/js: resources/portal/main.js resources/portal/ws.js
 
 dev: resources/js
-	clojure -M:dev:cider:cljs:dev-cljs:shadow watch pwa client
+	clojure -M:dev:cider:cljs:shadow watch pwa client
 
 dev/node: resources/js
-	clojure -M:dev:cider:cljs:dev-cljs:shadow watch node client
+	clojure -M:dev:cider:cljs:shadow watch node client
 
 check/clj-check:
 	clojure -M:cider:check

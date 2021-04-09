@@ -52,6 +52,7 @@
    {:example/settings 'complex-key} :hello-world
    ::atom (atom ::hello)
    ::function println
+   (with-meta 'symbol-key-with-meta {:a :b}) ::value
    ;;TODO: fix me, causes infininte loop in demo
    ;;::range (range)
    })

@@ -25,6 +25,7 @@
 (def cljs (partial clj "-M:cljs:shadow"))
 (def git  (partial sh :git))
 (def mvn  (partial sh :mvn))
+(def node (partial sh :node))
 (def npm  (partial sh :npm))
 (def npx  (partial sh :npx))
 
@@ -68,6 +69,8 @@
 
 (defn test []
   (build)
+  (clj "-M:cljs:test:shadow" :compile :test)
+  (node "target/test.js")
   (clj "-M:test" "-m" :portal.test-runner)
   (bb "-m" :portal.test-runner))
 

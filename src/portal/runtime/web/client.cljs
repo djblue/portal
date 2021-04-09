@@ -1,10 +1,10 @@
 (ns portal.runtime.web.client
-  (:require [portal.runtime.transit :as t]))
+  (:require [portal.runtime :as rt]))
 
 (defn request [session message]
   (if-let [child-window @session]
-    (t/json->edn
-     (.portal.ui.rpc.handler ^js child-window (t/edn->json message)))
+    (rt/read
+     (.portal.ui.rpc.handler ^js child-window (rt/write message)))
     (throw (ex-info "Portal not open" message))))
 
 (defn- push-state [session new-value]
