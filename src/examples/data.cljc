@@ -25,11 +25,13 @@
            ::user-exception (Exception. "hi")
            ::uuid (UUID/randomUUID)
            ::date (java.util.Date.)
-           ::binary (slurp-bytes (io/resource "screenshot.png"))}
+           ::binary (slurp-bytes (io/resource "screenshot.png"))
+           ::bigint 42N}
      :cljs {::promise (js/Promise.resolve 123)
             ::url (js/URL. "https://github.com/djblue/portal")
             ::uuid (random-uuid)
-            ::date (js/Date.)}))
+            ::date (js/Date.)
+            ::bigint (js/BigInt "42")}))
 
 (def basic-data
   {::booleans #{true false}

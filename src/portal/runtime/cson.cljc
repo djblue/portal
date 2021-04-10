@@ -7,7 +7,7 @@
                     [java.util Base64 Date UUID])))
 
 (defn- primitive? [value]
-  (or (integer? value)
+  (or (int? value)
       (float? value)
       (double? value)
       (nil? value)
@@ -67,6 +67,15 @@
 (defn- ratio-> [value]
   (let [[_ numerator denominator] value]
     (/ numerator denominator)))
+
+(extend-type #?(:clj  clojure.lang.BigInt
+                :cljs js/BigInt)
+  ToJson
+  (-to-json [value] (tag "bigint" (str value))))
+
+(defn- bigint-> [value]
+  #?(:clj  (bigint    (second value))
+     :cljs (js/BigInt (second value))))
 
 #?(:clj
    (extend-type Character
@@ -292,6 +301,7 @@
 
 (defn- dispatch-value [value]
   (case (first value)
+    "bigint"  (bigint-> value)
     "bin"     (bin-> value)
     "char"    (char-> value)
     "inst"    (inst-> value)

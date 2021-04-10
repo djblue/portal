@@ -88,6 +88,7 @@
 (defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))
 (defn bin? [value] (instance? js/Uint8Array value))
+(defn bigint? [value] (= (type value) js/BigInt))
 
 (defn get-value-type [value]
   (cond
@@ -104,6 +105,7 @@
     (coll? value)     :coll
     (boolean? value)  :boolean
     (symbol? value)   :symbol
+    (bigint? value)   :bigint
     (number? value)   :number
     (string? value)   :string
     (keyword? value)  :keyword
@@ -372,6 +374,10 @@
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/number theme)}} value]))
 
+(defn- inspect-bigint [value]
+  (let [theme (theme/use-theme)]
+    [s/span {:style {:color (::c/number theme)}} (str value) "N"]))
+
 (defn hex-color? [string]
   (re-matches #"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}gi" string))
 
@@ -513,6 +519,7 @@
     :boolean    inspect-boolean
     :symbol     inspect-symbol
     :number     inspect-number
+    :bigint     inspect-bigint
     :string     inspect-string
     :keyword    inspect-keyword
     :date       inspect-date
@@ -541,6 +548,7 @@
     :boolean    inspect-boolean
     :symbol     inspect-symbol
     :number     inspect-number
+    :bigint     inspect-bigint
     :string     inspect-string
     :keyword    inspect-keyword
     :date       inspect-date

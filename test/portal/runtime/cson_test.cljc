@@ -14,6 +14,7 @@
     0
     1.0
     #?(:clj 1/2 :cljs 0.5)
+    #?(:clj 42N :cljs (js/BigInt "42"))
     \newline
     true
     false
