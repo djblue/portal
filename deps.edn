@@ -14,32 +14,32 @@
    {hiccup/hiccup {:mvn/version "2.0.0-alpha2"}}}
   :cljs
   {:extra-deps
-   {org.clojure/clojurescript {:mvn/version "1.10.773"}
+   {org.clojure/clojurescript {:mvn/version "1.10.844"}
     reagent/reagent {:mvn/version "1.0.0"}
     lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.5"}
     hickory/hickory {:mvn/version "0.7.1"}
-    thheller/shadow-cljs {:mvn/version "2.11.26"}}}
+    thheller/shadow-cljs {:mvn/version "2.12.4"}}}
   :shadow
   {:main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.03.22"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.03.31"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.7.0"}}}
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "0.8.3"}
-    cider/cider-nrepl {:mvn/version "0.25.9"}}}
+    cider/cider-nrepl {:mvn/version "0.25.10"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
    {athos/clj-check
     {:git/url "https://github.com/athos/clj-check.git"
-     :sha "cd1f25456de5eebda0a69602dd3445905382b3a4"}}}
+     :sha "518d5a1cbfcd7c952f548e6dbfcb9a4a5faf9062"}}}
   :test
   {:extra-paths ["test"]
    :extra-deps
@@ -48,7 +48,7 @@
      :sha "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {antq/antq           {:mvn/version "0.12.2"}
-    org.slf4j/slf4j-nop {:mvn/version "1.7.30"}}}
+   {com.github.liquidz/antq {:mvn/version "0.12.4"}
+    org.slf4j/slf4j-nop     {:mvn/version "1.7.30"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.106"}}}}}
