@@ -2,7 +2,6 @@
   (:require [portal.resources :as io]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
-            [portal.runtime.transit :as t]
             [portal.runtime.web.client :as c]))
 
 (defn- str->src [value content-type]
@@ -26,9 +25,9 @@
 (defn send! [message]
   (js/Promise.
    (fn [resolve _reject]
-     (let [body (t/json->edn message)
+     (let [body (rt/read message)
            f    (get rt/ops (:op body))]
-       (f body #(resolve (t/edn->json %)))))))
+       (f body #(resolve (rt/write %)))))))
 
 (defn open [options]
   (swap! rt/state merge options)
