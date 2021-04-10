@@ -20,14 +20,14 @@
     (p/check ps))
   nil)
 
-(def bb   (partial sh :bb))
-(def clj  (partial sh :clojure))
-(def cljs (partial clj "-M:cljs:shadow"))
-(def git  (partial sh :git))
-(def mvn  (partial sh :mvn))
-(def node (partial sh :node))
-(def npm  (partial sh :npm))
-(def npx  (partial sh :npx))
+(def bb     (partial sh :bb))
+(def clj    (partial sh :clojure))
+(def git    (partial sh :git))
+(def mvn    (partial sh :mvn))
+(def node   (partial sh :node))
+(def npm    (partial sh :npm))
+(def npx    (partial sh :npx))
+(def shadow (partial clj "-M:cljs:shadow"))
 
 (defn install []
   (when-not (fs/exists? "node_modules")
@@ -51,7 +51,7 @@
 (defn main-js []
   (install)
   (when-not (fs/exists? "resources/portal/main.js")
-    (cljs :release :client)))
+    (shadow :release :client)))
 
 (defn ws-js []
   (install)
@@ -67,10 +67,25 @@
 
 (defn build [] (main-js) (ws-js))
 
+(defn test-cljs [version]
+  (let [out (str "target/test." version ".js")]
+    (clj "-Sdeps"
+         (pr-str
+          {:deps
+           {'org.clojure/clojurescript
+            {:mvn/version version}}})
+         "-M:test"
+         "-m" :cljs.main
+         "--output-dir" (str "target/cljs-output-" version)
+         "--target" :node
+         "--output-to" out
+         "--compile" :portal.test-runner)
+    (node out)))
+
 (defn test []
+  (test-cljs "1.10.773")
+  (test-cljs "1.10.844")
   (build)
-  (clj "-M:cljs:test:shadow" :compile :test)
-  (node "target/test.js")
   (clj "-M:test" "-m" :portal.test-runner)
   (bb "-m" :portal.test-runner))
 
@@ -88,8 +103,20 @@
 
 (def e2e-envs
   {:jvm  [:clojure "-M" "-e" "(set! *warn-on-reflection* true)" "-r"]
-   :node [:clojure "-M:cljs" "-m" :cljs.main "-re" :node]
-   :web  [:clojure "-M:cljs" "-m" :cljs.main]
+   :node [:clojure
+          "-Sdeps"
+          (pr-str
+           {:deps
+            {'org.clojure/clojurescript
+             {:mvn/version "1.10.844"}}})
+          "-M" "-m" :cljs.main "-re" :node]
+   :web  [:clojure
+          "-Sdeps"
+          (pr-str
+           {:deps
+            {'org.clojure/clojurescript
+             {:mvn/version "1.10.844"}}})
+          "-M" "-m" :cljs.main]
    :bb   [:bb]})
 
 (defn e2e [env]
@@ -108,8 +135,8 @@
 
 (defn app []
   (fs/create-dirs "target/pwa-release/")
-	(pwa/-main :prod)
-  (cljs :release :pwa))
+  (pwa/-main :prod)
+  (shadow :release :pwa))
 
 (defn set-version []
   (version/-main version)

@@ -14,14 +14,14 @@
    {hiccup/hiccup {:mvn/version "2.0.0-alpha2"}}}
   :cljs
   {:extra-deps
-   {org.clojure/clojurescript {:mvn/version "1.10.844"}
-    reagent/reagent {:mvn/version "1.0.0"}
+   {reagent/reagent {:mvn/version "1.0.0"}
     lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.5"}
-    hickory/hickory {:mvn/version "0.7.1"}
-    thheller/shadow-cljs {:mvn/version "2.12.4"}}}
+    hickory/hickory {:mvn/version "0.7.1"}}}
   :shadow
-  {:main-opts ["-m" "shadow.cljs.devtools.cli"]}
+  {:extra-deps
+   {thheller/shadow-cljs {:mvn/version "2.12.4"}}
+   :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo

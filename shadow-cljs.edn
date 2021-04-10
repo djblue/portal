@@ -25,10 +25,6 @@
    :release {:output-dir "target/pwa-release/"}
    :devtools {:after-load portal.ui.pwa/reload!}}
 
-  :test
-  {:target    :node-test
-   :output-to "target/test.js"}
-
   :node
   {:target :node-script
    :main portal.main/-main
