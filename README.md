@@ -23,13 +23,13 @@ To get an overview of portal, you can watch the following recording of a live de
 
 ## Usage
 
-To start a repl with portal, run the [**clojure** >= 1.10.0](https://github.com/clojure/clojure/blob/master/changes.md#changes-to-clojure-in-version-110) cli with:
+To start a repl with portal, run the **clojure >= 1.10.0** cli with:
 
 ```bash
 clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.10.0"}}}'
 ```
 
-or for a **web** [**clojurescript** >= 1.10.844](https://github.com/clojure/clojurescript/blob/master/changes.md#110844) repl, do:
+or for a **web** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
 clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.10.0"}
@@ -37,7 +37,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.10.0"}
     -m cljs.main
 ```
 
-or for a **node** [**clojurescript** >= 1.10.844](https://github.com/clojure/clojurescript/blob/master/changes.md#110844) repl, do:
+or for a **node** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
 clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.10.0"}
@@ -45,7 +45,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.10.0"}
     -m cljs.main -re node
 ```
 
-or for a [**babashka** >=0.2.4](https://github.com/borkdude/babashka/blob/master/CHANGELOG.md#v024) repl, do:
+or for a **babashka >=0.2.4** repl, do:
 
 ```bash
 bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.10.0"}}}'`
