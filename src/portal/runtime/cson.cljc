@@ -171,10 +171,10 @@
   ToJson
   (-to-json [value] (tagged-list "list" value)))
 
-#?(:clj
-   (extend-type clojure.lang.LongRange
-     ToJson
-     (-to-json [value] (tagged-list "list" value))))
+(extend-type #?(:clj  clojure.lang.LongRange
+                :cljs cljs.core/IntegerRange)
+  ToJson
+  (-to-json [value] (tagged-list "list" value)))
 
 (extend-type #?(:clj  clojure.lang.Range
                 :cljs cljs.core/Range)

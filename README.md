@@ -33,7 +33,7 @@ or for a **web** clojurescript repl, do:
 
 ```bash
 clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.10.0"}
-                    org.clojure/clojurescript {:mvn/version "1.10.758"}}}' \
+                    org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main
 ```
 
@@ -41,7 +41,7 @@ or for a **node** clojurescript repl, do:
 
 ```bash
 clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.10.0"}
-                    org.clojure/clojurescript {:mvn/version "1.10.758"}}}' \
+                    org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main -re node
 ```
 
