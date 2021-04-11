@@ -77,6 +77,14 @@
        (= value (pass value))
     (range 10)))
 
+(deftest seq-collections
+  (are [value]
+       (= (seq value) (pass (seq value)))
+    '(0)
+    [0]
+    #{0}
+    {0 0}))
+
 #?(:clj (defn random-uuid []
           (java.util.UUID/randomUUID)))
 

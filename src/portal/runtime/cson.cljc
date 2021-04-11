@@ -147,6 +147,7 @@
 #?(:bb (def clojure.lang.APersistentVector$SubVector (type (subvec [1 2] 0 1))))
 #?(:bb (def clojure.lang.ArraySeq ((fn [& args] (type args)) 1)))
 #?(:bb (def clojure.lang.LongRange (type (range 1))))
+#?(:bb (def clojure.lang.PersistentArrayMap$Seq (type (seq {0 0}))))
 #?(:bb (def clojure.lang.PersistentList$EmptyList (type (list))))
 #?(:bb (def clojure.lang.PersistentVector$ChunkedSeq (type (seq [1]))))
 #?(:bb (def clojure.lang.Range (type (range 1.0))))
@@ -222,20 +223,20 @@
      ToJson
      (-to-json [value] (tagged-list "list" value))))
 
-#?(:cljs
-   (extend-type cljs.core/ChunkedSeq
-     ToJson
-     (-to-json [value] (tagged-list "list" value))))
+(extend-type #?(:clj  clojure.lang.PersistentVector$ChunkedSeq
+                :cljs cljs.core/ChunkedSeq)
+  ToJson
+  (-to-json [value] (tagged-list "list" value)))
 
 #?(:cljs
    (extend-type cljs.core/PersistentQueueSeq
      ToJson
      (-to-json [value] (tagged-list "list" value))))
 
-#?(:cljs
-   (extend-type cljs.core/PersistentArrayMapSeq
-     ToJson
-     (-to-json [value] (tagged-list "list" value))))
+(extend-type #?(:clj  clojure.lang.PersistentArrayMap$Seq
+                :cljs cljs.core/PersistentArrayMapSeq)
+  ToJson
+  (-to-json [value] (tagged-list "list" value)))
 
 #?(:cljs
    (extend-type cljs.core/PersistentTreeMapSeq
@@ -263,6 +264,11 @@
                 :cljs cljs.core/Subvec)
   ToJson
   (-to-json [value] (tagged-list "vec" value)))
+
+(extend-type #?(:clj clojure.lang.MapEntry
+                :cljs cljs.core/MapEntry)
+  ToJson
+  (-to-json [value] (tagged-list "vec" (into [] value))))
 
 (defn- vec-> [value] (into [] (map json->) (rest value)))
 
