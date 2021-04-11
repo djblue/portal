@@ -202,11 +202,6 @@
 (def ^:private preview-list   (preview-coll "(" ")"))
 (def ^:private preview-set    (preview-coll "#{" "}"))
 
-(defn- preview-object [value]
-  (let [theme (theme/use-theme)]
-    [s/span {:style {:color (::c/text theme)}}
-     (:type (.-rep value))]))
-
 (defn preview-tagged [value]
   [tagged-tag (.-tag value)])
 
@@ -502,11 +497,17 @@
 (defn- inspect-object [value]
   (let [value (.-rep value)
         theme (theme/use-theme)
-        limit (:limits/string-length theme)]
+        limit (:limits/string-length theme)
+        {:keys [expanded?]} @(state/use-state)
+        context             (use-context)]
     [s/span {:title (:type value)
              :style
              {:color (::c/text theme)}}
-     (trim-string (:string value) limit)]))
+     (if (or (< (count (:string value)) limit)
+             (= (:depth context) 1)
+             (contains? expanded? context))
+       (:string value)
+       (trim-string (:string value) limit))]))
 
 (defn- get-preview-component [type]
   (case type
@@ -525,7 +526,7 @@
     :date       inspect-date
     :uuid       inspect-uuid
     :var        inspect-var
-    :object     preview-object
+    :object     inspect-object
     :uri        inspect-uri
     :tagged     preview-tagged
     :ratio      inspect-ratio
