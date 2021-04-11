@@ -99,7 +99,7 @@
   (rm "resources/portal/")
   (rm "target/"))
 
-(defn ci [] (clean) (check) (test))
+(defn ci [] (rm "resources/portal/") (check) (test))
 
 (def e2e-envs
   {:jvm  [:clojure "-M" "-e" "(set! *warn-on-reflection* true)" "-r"]
