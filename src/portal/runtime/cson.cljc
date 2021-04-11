@@ -197,10 +197,10 @@
   ToJson
   (-to-json [value] (tagged-list "list" value)))
 
-#?(:clj
-   (extend-type clojure.lang.Repeat
-     ToJson
-     (-to-json [value] (tagged-list "list" value))))
+(extend-type #?(:clj  clojure.lang.Repeat
+                :cljs cljs.core/Repeat)
+  ToJson
+  (-to-json [value] (tagged-list "list" value)))
 
 (extend-type #?(:clj  clojure.lang.PersistentList
                 :cljs cljs.core/List)
