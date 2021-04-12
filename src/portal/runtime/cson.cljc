@@ -59,16 +59,6 @@
 
 (defn- bin-> [value] (base64-decode (second value)))
 
-#?(:clj
-   (extend-type clojure.lang.Ratio
-     ToJson
-     (-to-json [value]
-       (tag "ratio" (numerator value) (denominator value)))))
-
-(defn- ratio-> [value]
-  (let [[_ numerator denominator] value]
-    (/ numerator denominator)))
-
 (extend-type #?(:clj  clojure.lang.BigInt
                 :cljs js/BigInt)
   ToJson
@@ -322,7 +312,6 @@
     "list"    (list-> value)
     "map"     (map-> value)
     "meta"    (meta-> value)
-    "ratio"   (ratio-> value)
     "set"     (set-> value)
     "sym"     (sym-> value)
     "url"     (url-> value)
