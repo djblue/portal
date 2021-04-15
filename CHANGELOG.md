@@ -1,3 +1,37 @@
+## 0.11.0 - 2021-04-14
+
+- Alert user when disconnected from host runtime
+
+### Viewer Updates
+
+- Preview generic objects like strings
+  - Allow users to expand / collapse the pr-str version of the object with `e`
+- Allow users to render viewers from hiccup (experimental)
+  - Checkout the [pwa](https://djblue.github.io/portal/) hiccup example for a
+    demo
+- Sticky keys / values in inspector map view
+  - Align keys / values at the top of a map entry pair instead of the middle
+- Include the key in path if the key is selected when calling
+  `portal.command/copy-path`
+- Add bigint support
+
+### Command Palette Updates
+
+- Add placeholder help to command-palette
+- Add tab to command palette shortcuts
+  - This prevents tabbing / shift+tabbing focus of selected elements when
+    command palette is open.
+- Put docs in command palette when an item is active
+- Add select-viewer command
+
+### Implementation Updates
+
+- Switch to custom serialization format `cson`
+  - Fixes transit error when encoding symbol keys with metadata
+    [#11](https://github.com/djblue/portal/issues/11)
+  - Fixes issues with older version of transit-clj (0.8.309) brought in with
+    ClojureScript
+
 ## 0.10.0 - 2021-03-15
 
 - Add command button to improve discoverability (bottom right)

@@ -1,7 +1,7 @@
 export BABASHKA_CLASSPATH := $(shell clojure -A:test -Spath)
 export PATH := $(PWD)/target:$(PATH)
 SHELL := bash
-VERSION := 0.10.0
+VERSION := 0.11.0
 
 .PHONY: dev test
 
