@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.commands :as commands]
+            [portal.ui.connecton-status :as status]
             [portal.ui.inspector :as ins]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
@@ -20,8 +21,8 @@
             [portal.ui.viewer.text :as text]
             [portal.ui.viewer.transit :as transit]
             [portal.ui.viewer.tree :as tree]
-            [portal.ui.viewer.vega-lite :as vega-lite]
-            [portal.ui.viewer.vega :as vega]))
+            [portal.ui.viewer.vega :as vega]
+            [portal.ui.viewer.vega-lite :as vega-lite]))
 
 (defn filter-data [search-text value]
   (let [filter-data (partial filter-data search-text)]
@@ -95,9 +96,10 @@
         ::not-found))))
 
 (defn inspect-1 [value]
-  (let [theme   (theme/use-theme)
-        state   (state/use-state)
-        value   (filter-data (:search-text @state) value)
+  (let [theme      (theme/use-theme)
+        state      (state/use-state)
+        connected? (status/use-status)
+        value      (filter-data (:search-text @state) value)
         selected-context (state/get-selected-context @state)
         viewer           (ins/use-viewer selected-context)
         compatible-viewers (ins/get-compatible-viewers
@@ -135,7 +137,9 @@
         :min-height 63
         :align-items :center
         :justify-content :space-between
-        :background (::c/background2 theme)
+        :background (if connected?
+                      (::c/background2 theme)
+                      (::c/exception theme))
         :box-sizing :border-box
         :padding (:spacing/padding theme)
         :border-top [1 :solid (::c/border theme)]}}
@@ -160,6 +164,8 @@
          (for [{:keys [name]} compatible-viewers]
            ^{:key name}
            [s/option {:value (pr-str name)} (pr-str name)])])
+      (when-not connected?
+        [s/div "ERROR: Disconnected from runtime!"])
       [s/button
        {:title    "Open command palette."
         :on-click #((:run commands/open-command-palette) state)

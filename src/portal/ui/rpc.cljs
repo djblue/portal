@@ -74,9 +74,14 @@
        (send! (assoc message :portal.rpc/id id))))))
 
 (defn- web-request [message]
-  (-> (write message)
-      js/window.opener.portal.web.send_BANG_
-      (.then read)))
+  (js/Promise.
+   (fn [resolve reject]
+     (try
+       (-> (write message)
+           js/window.opener.portal.web.send_BANG_
+           (.then read)
+           resolve)
+       (catch :default e (reject e))))))
 
 (def request (if js/window.opener web-request ws-request))
 
@@ -131,13 +136,16 @@
     (reset!
      ws-promise
      (js/Promise.
-      (fn [resolve]
+      (fn [resolve reject]
         (when-let [chan (js/WebSocket.
                          (str "ws://" js/location.host "/rpc?" (get-session)))]
           (set! (.-onmessage chan) #(dispatch (read (.-data %))
                                               (fn [message]
                                                 (send! message))))
-          (set! (.-onerror chan)   #(reset!  ws-promise nil))
+          (set! (.-onerror chan)   (fn [e]
+                                     (reject e)
+                                     (doseq [[_ [_ reject]] @pending-requests]
+                                       (reject e))))
           (set! (.-onclose chan)   #(reset!  ws-promise nil))
           (set! (.-onopen chan)    #(resolve chan))))))))
 

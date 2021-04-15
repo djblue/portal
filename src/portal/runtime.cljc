@@ -144,15 +144,11 @@
                  (.isFile ^File %)
                  (.canRead ^File %)))})))
 
-(declare get-functions)
-
-(def ^:private fns
+(def ^:private public-fns
   (merge
    {'clojure.core/deref    #'deref
     'clojure.core/type     #'type
-    'clojure.datafy/datafy #'datafy
-    'clojure.datafy/nav    #'nav
-    `get-functions #'get-functions}
+    'clojure.datafy/datafy #'datafy}
    #?(:clj {`slurp slurp
             `bean  bean})))
 
@@ -163,10 +159,17 @@
       (if (predicate v)
         fns
         (dissoc fns s)))
-    (dissoc fns
-            `get-functions
-            'clojure.datafy/nav)
+    public-fns
     predicates)))
+
+(defn- ping [] ::pong)
+
+(def ^:private fns
+  (merge
+   public-fns
+   {'clojure.datafy/nav  #'nav
+    `ping                #'ping
+    `get-functions       #'get-functions}))
 
 (defn invoke [{:keys [f args]} done]
   (try

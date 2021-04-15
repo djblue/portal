@@ -1,5 +1,6 @@
 (ns portal.ui.core
   (:require [portal.ui.app :as app]
+            [portal.ui.connecton-status :as conn]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [reagent.core :as r]
@@ -7,8 +8,11 @@
 
 (def functional-compiler (r/create-compiler {:function-components true}))
 
+(defn connected-app []
+  [conn/with-status [app/app]])
+
 (defn render-app []
-  (dom/render [app/app]
+  (dom/render [connected-app]
               (.getElementById js/document "root")
               functional-compiler))
 
