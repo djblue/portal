@@ -27,15 +27,18 @@
 
 (declare json->)
 
+(def ^:dynamic *transform* nil)
+
 (defn to-json [value]
-  (if (primitive? value)
-    value
-    (if-let [m (when (can-meta? value) (meta value))]
-      (tag
-       "meta"
-       (-to-json value)
-       (-to-json m))
-      (-to-json value))))
+  (let [value (*transform* value)]
+    (if (primitive? value)
+      value
+      (if-let [m (when (can-meta? value) (meta value))]
+        (tag
+         "meta"
+         (-to-json value)
+         (-to-json m))
+        (-to-json value)))))
 
 (defn- meta-> [value]
   (let [[_ obj m] value]
@@ -325,9 +328,12 @@
     (dispatch-value value)
     value))
 
-(defn write [value]
-  #?(:clj  (json/generate-string (to-json value))
-     :cljs (.stringify js/JSON (to-json value))))
+(defn write
+  ([value] (write value identity))
+  ([value transform]
+   (binding [*transform* transform]
+     #?(:clj  (json/generate-string (to-json value))
+        :cljs (.stringify js/JSON (to-json value))))))
 
 (defn read
   ([string] (read string identity))

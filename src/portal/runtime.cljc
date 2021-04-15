@@ -57,7 +57,21 @@
                            *print-level* 2]
                    (pr-str o))})))))
 
-(defn write [value] (cson/write value))
+(defn limit-seq [value]
+  (if-not (seq? value)
+    value
+    (let [m     (meta value)
+          limit (get m ::more-limit 100)
+          [realized remaining] (split-at limit value)]
+      (with-meta
+        realized
+        (merge
+         m
+         (when (seq remaining)
+           {::more #(limit-seq (with-meta remaining m))}))))))
+
+(defn write [value]
+  (cson/write value limit-seq))
 
 (defn- object-> [value]
   (let [rep (cson/json-> (second value))]
@@ -95,19 +109,6 @@
           :portal/state-id (random-uuid)
           :portal/tap-list (list))
    (done nil)))
-
-(defn limit-seq [value]
-  (if-not (seq? value)
-    value
-    (let [m     (meta value)
-          limit (get m ::more-limit 100)
-          [realized remaining] (split-at limit value)]
-      (with-meta
-        realized
-        (merge
-         m
-         (when (seq remaining)
-           {::more #(limit-seq (with-meta remaining m))}))))))
 
 (defn- set-limit [state]
   (update state
