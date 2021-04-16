@@ -1,37 +1,76 @@
 (ns portal.ui.drag-and-drop
   (:require ["react" :as react]
             [cljs.reader :refer [read-string]]
+            [clojure.string :as string]
             [portal.async :as a]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
+            [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.markdown :as md]))
 
-(defn read-file [file]
-  (js/Promise.
-   (fn [resolve reject]
-     (let [reader (js/window.FileReader.)]
-       (.addEventListener
-        reader
-        "load"
-        (fn [e]
-          (resolve (.-result (.-target e)))))
-       (.addEventListener reader "error" reject)
-       (.readAsText reader file)))))
+(defn read-file
+  ([file]
+   (read-file file :text))
+  ([file type]
+   (js/Promise.
+    (fn [resolve reject]
+      (let [reader (js/window.FileReader.)]
+        (.addEventListener
+         reader
+         "load"
+         (fn [e]
+           (resolve (.-result (.-target e)))))
+        (.addEventListener reader "error" reject)
+        (case type
+          :text (.readAsText reader file)
+          :bin  (.readAsArrayBuffer reader file)))))))
+
+(defn- read-binary
+  [file]
+  (a/let [content (read-file file :bin)]
+    (js/Uint8Array. content)))
+
+(defn- read-html
+  [file]
+  (a/let [content (read-file file)]
+    (with-meta
+      [:portal.viewer/html content]
+      {:portal.viewer/default :portal.viewer/hiccup})))
 
 (def handlers
-  {"json" (fn [content] (js->clj (js/JSON.parse content)))
-   "edn"  read-string
-   "md"   (fn [content]
-            (with-meta
-              (md/parse-markdown content)
-              {:portal.viewer/default :portal.viewer/hiccup}))})
+  {"json" (fn [file]
+            (a/let [content (read-file file)]
+              (js->clj (js/JSON.parse content))))
+   "edn"  (fn [file]
+            (a/let [content (read-file file)]
+              (read-string content)))
+   "md"   (fn [file]
+            (a/let [content (read-file file)]
+              (with-meta
+                (md/parse-markdown content)
+                {:portal.viewer/default :portal.viewer/hiccup})))
+   "csv"  (fn [file]
+            (a/let [content (read-file file)]
+              (with-meta
+                (csv/parse-csv content)
+                {:portal.viewer/default :portal.viewer/table})))
+   "txt"  read-file
+   "svg"  read-html
+   "htm"  read-html
+   "html" read-html
+   "png"  read-binary
+   "jpg"  read-binary
+   "jpeg" read-binary
+   "gif"  read-binary
+   "pdf"  read-binary})
 
 (defn handle-file [file]
   (a/let [name    (.-name file)
-          content (read-file file)
           [_ ext] (re-find #"\.(.+)$" name)
-          handler (get handlers ext identity)]
-    [name (handler content)]))
+          ext     (when ext (string/lower-case ext))
+          handler (get handlers ext read-file)
+          content (handler file)]
+    [name content]))
 
 (defn handle-files [files]
   (a/let [value (js/Promise.all (map handle-file files))]
