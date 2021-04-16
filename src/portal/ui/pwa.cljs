@@ -23,15 +23,10 @@
      (let [id      "open-file-dialog"
            input   (or
                     (js/document.getElementById id)
-                    (js/document.createElement "input"))
-           accept   (->> dnd/handlers
-                         keys
-                         (map (partial str "."))
-                         (str/join ", "))]
+                    (js/document.createElement "input"))]
        (set! (.-id input) id)
        (set! (.-type input) "file")
        (set! (.-multiple input) "true")
-       (set! (.-accept input) accept)
        (set! (.-style input) "visibility:hidden")
        (.addEventListener
         input
