@@ -92,7 +92,7 @@
         (fn []
           (when-let [el @el] (.scrollIntoView el #js {:block "center"})))
         :reagent-render
-        (fn [] [:div {:ref #(reset! el %) :style {:height "100%"}}])}))))
+        (fn [] [:div {:ref #(reset! el %)}])}))))
 
 (defn selector-component []
   (let [selected (r/atom #{})
@@ -173,58 +173,66 @@
   (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
 
 (def ^:private keymap
-  {'portal.command/open-command-palette
-   {::shortcuts/osx     #{"meta" "shift" "p"}
+  {{::shortcuts/osx     #{"meta" "shift" "p"}
     ::shortcuts/default #{"control" "shift" "p"}}
+   'portal.command/open-command-palette
 
-   'portal.command/copy-as-edn
+   {::shortcuts/default #{"control" "j"}}
+   'portal.command/open-command-palette
+
    {::shortcuts/osx     #{"meta" "c"}
     ::shortcuts/default #{"control" "c"}}
+   'portal.command/copy-as-edn
 
-   'portal.command/history-back
    {::shortcuts/osx     #{"meta" "arrowleft"}
     ::shortcuts/default #{"control" "arrowleft"}}
+   'portal.command/history-back
 
-   'portal.command/history-forward
    {::shortcuts/osx     #{"meta" "arrowright"}
     ::shortcuts/default #{"control" "arrowright"}}
+   'portal.command/history-forward
 
-   'portal.command/history-first
    {::shortcuts/osx     #{"meta" "shift" "arrowleft"}
     ::shortcuts/default #{"control" "shift" "arrowleft"}}
+   'portal.command/history-first
 
-   'portal.command/history-last
    {::shortcuts/osx     #{"meta" "shift" "arrowright"}
     ::shortcuts/default #{"control" "shift" "arrowright"}}
+   'portal.command/history-last
 
-   'portal.command/select-viewer {::shortcuts/default #{"v"}}
-   'portal.command/select-prev {::shortcuts/default #{"arrowup"}}
-   'portal.command/select-next {::shortcuts/default #{"arrowdown"}}
-   'portal.command/select-parent {::shortcuts/default #{"arrowleft"}}
-   'portal.command/select-child {::shortcuts/default #{"arrowright"}}
+   {::shortcuts/default #{"v"}}                 'portal.command/select-viewer
+   {::shortcuts/default #{"arrowup"}}           'portal.command/select-prev
+   {::shortcuts/default #{"arrowdown"}}         'portal.command/select-next
+   {::shortcuts/default #{"arrowleft"}}         'portal.command/select-parent
+   {::shortcuts/default #{"arrowright"}}        'portal.command/select-child
 
-   'portal.command/focus-selected {::shortcuts/default #{"control" "enter"}}
-   'portal.command/toggle-expand {::shortcuts/default #{"e"}}
+   {::shortcuts/default #{"control" "enter"}}   'portal.command/focus-selected
+   {::shortcuts/default #{"e"}}                 'portal.command/toggle-expand
 
-   'clojure.datafy/nav {::shortcuts/default #{"enter"}}
+   {::shortcuts/default #{"enter"}}             'clojure.datafy/nav
 
-   'portal.command/redo-previous-command {::shortcuts/default #{"control" "r"}}
-   'portal.command/clear {::shortcuts/default #{"control" "l"}}
+   {::shortcuts/default #{"control" "r"}}       'portal.command/redo-previous-command
+   {::shortcuts/default #{"control" "l"}}       'portal.command/clear
 
    ;; PWA
-   'portal.load/file
    {::shortcuts/osx     #{"meta" "o"}
-    ::shortcuts/default #{"control" "o"}}
-   'portal.load/clipboard
+    ::shortcuts/default #{"control" "o"}}       'portal.load/file
    {::shortcuts/osx     #{"meta" "v"}
-    ::shortcuts/default #{"control" "v"}}
-   'portal.load/demo
+    ::shortcuts/default #{"control" "v"}}       'portal.load/clipboard
    {::shortcuts/osx     #{"meta" "d"}
-    ::shortcuts/default #{"control" "d"}}})
+    ::shortcuts/default #{"control" "d"}}       'portal.load/demo})
+
+(defn- find-combos [command]
+  (let [command-name (:name command)]
+    (some
+     (fn [[combo f]]
+       (when (= f command-name)
+         (shortcuts/get-shortcut combo)))
+     keymap)))
 
 (defn shortcut [command]
   (let [theme (theme/use-theme)]
-    (when-let [combo (shortcuts/get-shortcut (get keymap (:name command)))]
+    (when-let [combo (find-combos command)]
       [s/div {:style
               {:display :flex
                :align-items :center
@@ -689,9 +697,13 @@
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)
-         (doseq [command (concat commands (:commands props))]
-           (when (shortcuts/match? (get keymap (:name command)) log)
-             (shortcuts/matched! log)
-             ((:run command) state)))))
+         (first
+          (for [[shortcut f] keymap
+                command      (concat commands (:commands props))
+                :when        (and (= (:name command) f)
+                                  (shortcuts/match? shortcut log))]
+            (do
+              (shortcuts/matched! log)
+              ((:run command) state))))))
      (when-let [component @input]
        [ins/with-readonly [pop-up [component state]]])]))
