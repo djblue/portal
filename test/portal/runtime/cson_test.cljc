@@ -1,8 +1,27 @@
 (ns portal.runtime.cson-test
   (:require [clojure.test :refer [deftest are is]]
+            [cognitect.transit :as transit]
             [portal.runtime.cson :as cson]
-            [portal.runtime.transit :as transit]
-            #?(:clj [cheshire.core :as json])))
+            #?(:clj [cheshire.core :as json]))
+  #?(:clj (:import [java.io ByteArrayOutputStream ByteArrayInputStream])))
+
+(defn- transit-read [^String string]
+  #?(:clj  (-> string
+               .getBytes
+               ByteArrayInputStream.
+               (transit/reader :json)
+               transit/read)
+     :cljs (transit/read (transit/reader :json) string)))
+
+(defn- transit-write [value]
+  #?(:clj (let [out (ByteArrayOutputStream. 1024)]
+            (transit/write
+             (transit/writer out :json {:transform transit/write-meta})
+             value)
+            (.toString out))
+     :cljs (transit/write
+            (transit/writer :json {:transform transit/write-meta})
+            value)))
 
 (defn pass [v]
   (cson/read (cson/write v)))
@@ -138,7 +157,7 @@
      100)
     (simple-benchmark
      [v input]
-     (transit/edn->json v)
+     (transit-write v)
      100)
     (simple-benchmark
      [v input]
@@ -152,8 +171,8 @@
      (json-parse v)
      100)
     (simple-benchmark
-     [v (transit/edn->json composite-value)]
-     (transit/json->edn v)
+     [v (transit-write composite-value)]
+     (transit-read v)
      1000)
     (simple-benchmark
      [v (cson/write composite-value)]
@@ -163,7 +182,7 @@
 (deftest rich-benchmark
   (simple-benchmark
    [v composite-value]
-   (transit/edn->json v)
+   (transit-write v)
    1000)
   (simple-benchmark
    [v composite-value]
