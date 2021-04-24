@@ -1,4 +1,5 @@
-(ns portal.runtime.node.client)
+(ns portal.runtime.node.client
+  (:require [portal.runtime :as rt]))
 
 (defonce sessions (atom {}))
 
@@ -17,20 +18,27 @@
        (when-let [[resolve] (get @pending-requests id)]
          (resolve message))))})
 
-(defn request [session-id message]
-  (if-let [send! (get-session session-id)]
-    (let [id      (next-id)
-          message (assoc message :portal.rpc/id id)]
-      (.then
-       (js/Promise.
-        (fn [resolve reject]
-          (swap! pending-requests assoc id [resolve reject])
-          (send! message)))
-       #(do (swap! pending-requests dissoc id) %)))
-    (throw (ex-info "No such portal session"
-                    {:session-id session-id :message message}))))
+(defn request
+  ([message]
+   (js/Promise.all
+    (for [session-id (keys @sessions)]
+      (request session-id message))))
+  ([session-id message]
+   (if-let [send! (get-session session-id)]
+     (let [id      (next-id)
+           message (assoc message :portal.rpc/id id)]
+       (.then
+        (js/Promise.
+         (fn [resolve reject]
+           (swap! pending-requests assoc id [resolve reject])
+           (send! message)))
+        #(do (swap! pending-requests dissoc id) %)))
+     (throw (ex-info "No such portal session"
+                     {:session-id session-id :message message})))))
 
 (defn make-atom [_session-id])
 
 (defn open? [session-id]
   (get @sessions session-id))
+
+(reset! rt/request request)

@@ -94,15 +94,11 @@
      {:session-id session-id})))
 
 (defn clear []
-  (js/Promise.all
-   (for [session-id (keys @c/sessions)]
-     (c/request session-id {:op :portal.rpc/clear}))))
+  (c/request {:op :portal.rpc/clear}))
 
 (defn close []
   (a/do
-    (js/Promise.all
-     (for [session-id (keys @c/sessions)]
-       (c/request session-id {:op :portal.rpc/close})))
+    (c/request {:op :portal.rpc/close})
     (doseq [socket @sockets] (.destroy socket))
     (reset! sockets #{})
     (stop @server)

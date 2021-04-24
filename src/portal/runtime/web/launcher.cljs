@@ -44,7 +44,8 @@
           (fn []
             (when-not (.-closed child)
               (set-item ":portal/open" (js/Date.now)))))
-    (reset! child-window child))
+    (reset! child-window child)
+    (reset! rt/request (partial c/request child-window)))
   true)
 
 (defn init []
@@ -59,5 +60,6 @@
 (defn close []
   (when-let [child @child-window]
     (reset! child-window nil)
+    (reset! rt/request nil)
     (.close child)))
 

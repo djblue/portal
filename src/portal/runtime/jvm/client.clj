@@ -1,4 +1,5 @@
 (ns portal.runtime.jvm.client
+  (:require [portal.runtime :as rt])
   (:import [clojure.lang IAtom IDeref]))
 
 (defonce sessions (atom {}))
@@ -32,21 +33,25 @@
       (remove-watch sessions watch-key)
       result)))
 
-(defn request [session-id message]
-  (if-let [send! (get-session session-id)]
-    (let [id       (next-id)
-          response (promise)
-          message  (assoc message :portal.rpc/id id)]
-      (swap! pending-requests assoc id response)
-      (send! message)
-      (let [response (deref response timeout ::timeout)]
-        (swap! pending-requests dissoc id)
-        (if-not (= response ::timeout)
-          response
-          (throw (ex-info "Portal request timeout"
-                          {:session-id session-id :message message})))))
-    (throw (ex-info "No such portal session"
-                    {:session-id session-id :message message}))))
+(defn request
+  ([message]
+   (doseq [session-id (keys @sessions)]
+     (request session-id message)))
+  ([session-id message]
+   (if-let [send! (get-session session-id)]
+     (let [id       (next-id)
+           response (promise)
+           message  (assoc message :portal.rpc/id id)]
+       (swap! pending-requests assoc id response)
+       (send! message)
+       (let [response (deref response timeout ::timeout)]
+         (swap! pending-requests dissoc id)
+         (if-not (= response ::timeout)
+           response
+           (throw (ex-info "Portal request timeout"
+                           {:session-id session-id :message message})))))
+     (throw (ex-info "No such portal session"
+                     {:session-id session-id :message message})))))
 
 (defn- push-state [session-id new-value]
   (request session-id {:op :portal.rpc/push-state :state new-value})
@@ -75,3 +80,5 @@
 
 (defn open? [session-id]
   (get @sessions session-id))
+
+(reset! rt/request request)

@@ -13,6 +13,7 @@
 (defonce instance-cache (atom {}))
 
 (declare object->value)
+(defonce request (atom nil))
 
 (defn instance->uuid [instance]
   (let [k [:instance instance]]
