@@ -136,6 +136,7 @@ function with the following options:
 |---------------------------------|----------------------------|----------------------|
 | `:portal.launcher/port`         | Port used to access UI     | random port selected |
 | `:portal.launcher/host`         | Hostname used to access UI | "localhost"          |
+| `:portal.launcher/app`          | Launch as separate window  | true                 |
 | `:portal.launcher/window-title` | Custom title for UI window | "portal"             |
 
 ## Datafy and Nav

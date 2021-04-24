@@ -32,7 +32,11 @@
 (defn open [options]
   (swap! rt/state merge options)
   (let [url   (str->src (index/html :code-url code-url :platform "web") "text/html")
-        child (js/window.open url "portal", "resizable,scrollbars,status")]
+        child (js/window.open
+               url
+               "portal"
+               (when (:portal.launcher/app options true)
+                 "resizable,scrollbars,status"))]
     (set! (.-onunload child)
           (fn []
             (remove-item ":portal/open")))

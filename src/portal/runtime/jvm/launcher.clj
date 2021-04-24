@@ -96,17 +96,18 @@
      (str "--app=" url)]))
 
 (defn start [options]
-  (when (nil? @server)
-    (let [{:portal.launcher/keys [port host] :or {port 0 host "localhost"}} options
-          http-server (http/run-server #'server/handler
-                                       {:port port
-                                        :max-ws (* 1024 1024 1024)
-                                        :legacy-return-value? false})]
-      (reset!
-       server
-       {:http-server http-server
-        :port (http/server-port http-server)
-        :host host}))))
+  (or @server
+      (let [{:portal.launcher/keys [port host]
+             :or {port 0 host "localhost"}} options
+            http-server (http/run-server #'server/handler
+                                         {:port port
+                                          :max-ws (* 1024 1024 1024)
+                                          :legacy-return-value? false})]
+        (reset!
+         server
+         {:http-server http-server
+          :port (http/server-port http-server)
+          :host host}))))
 
 (defn- chrome [bin flags]
   (let [{:keys [exit err out]} (apply sh bin flags)]
@@ -121,13 +122,15 @@
    (open nil options))
   ([portal options]
    (swap! rt/state merge options)
-   (let [session-id (or (:session-id portal) (random-uuid))
-         {:keys [host port]} (or @server (start nil))
-         url (str "http://" host ":" port "?" session-id)]
+   (let [{:keys [host port]} (start options)
+         session-id (or (:session-id portal) (random-uuid))
+         url        (str "http://" host ":" port "?" session-id)
+         chrome-bin (get-chrome-bin)]
      (when-not (c/open? session-id)
-       (if-let [bin (get-chrome-bin)]
+       (if (and (some? chrome-bin)
+                (:portal.launcher/app options true))
          (let [flags (chrome-flags url)]
-           (future (chrome bin flags)))
+           (future (chrome chrome-bin flags)))
          (try (browse-url url)
               (catch Exception _e
                 (println "Goto" url "to view portal ui.")))))

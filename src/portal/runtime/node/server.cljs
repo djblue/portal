@@ -65,4 +65,4 @@
          "/rpc"     #(rpc-handler request response)}
         [path] (.split (.-url request) "?")
         f (get paths path #(-> response (.writeHead 404) .end))]
-    (when (fn? f) (f))))
+    (f)))
