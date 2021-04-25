@@ -9,7 +9,7 @@
             [pwa]
             [version]))
 
-(def version "0.11.0")
+(def version "0.11.1")
 
 (defn- sh [& args]
   (println "=>" (str/join " " (map name args)))

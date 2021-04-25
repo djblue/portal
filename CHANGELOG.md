@@ -1,3 +1,13 @@
+## 0.11.1 - 2021-04-25
+
+- Fix firefox issues
+  - Fix command palette css issue
+  - Add `ctrl+j` shortcut, `ctrl+shift+p` is already mapped to launch private
+    window
+- Add `:portal.launcher/app` option
+  - Allows users to opt-out of the default standalone chrome app mode
+    - NOTE: this is already the case when chrome isn't installed
+
 ## 0.11.0 - 2021-04-14
 
 - Alert user when disconnected from host runtime
