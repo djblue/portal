@@ -22,7 +22,7 @@
    "src/portal/runtime/index.cljc"])
 
 (defn- version-updates [next-version]
-  (let [current-version (find-version "README.md")]
+  (let [current-version (find-version "src/portal/runtime/index.cljc")]
     (merge
      (changelog next-version)
      (zipmap
