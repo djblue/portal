@@ -26,7 +26,7 @@
     <dependency>
       <groupId>com.cognitect</groupId>
       <artifactId>transit-cljs</artifactId>
-      <version>0.8.264</version>
+      <version>0.8.269</version>
     </dependency>
     <dependency>
       <groupId>com.cognitect</groupId>
@@ -82,7 +82,7 @@
       <url>https://repo.clojars.org/</url>
     </repository>
   </repositories>
-  <!-- Essential for pushing to Clojars -->
+  
   <distributionManagement>
     <repository>
       <id>clojars</id>

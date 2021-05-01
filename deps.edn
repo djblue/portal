@@ -3,7 +3,7 @@
  {com.cognitect/transit-clj {:mvn/version "1.0.324"
                              :exclusions [org.msgpack/msgpack
                                           javax.xml.bind/jaxb-api]}
-  com.cognitect/transit-cljs {:mvn/version "0.8.264"}
+  com.cognitect/transit-cljs {:mvn/version "0.8.269"}
   cheshire/cheshire {:mvn/version "5.10.0"
                      :exclusions [tigris/tigris]}
   http-kit/http-kit {:mvn/version "2.5.3"}}
@@ -20,20 +20,20 @@
     hickory/hickory {:mvn/version "0.7.1"}}}
   :shadow
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.12.4"}}
+   {thheller/shadow-cljs {:mvn/version "2.12.5"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.03.31"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.04.23"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.7.0"}}}
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "0.8.3"}
-    cider/cider-nrepl {:mvn/version "0.25.10"}}}
+    cider/cider-nrepl {:mvn/version "0.26.0"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
@@ -48,7 +48,7 @@
      :sha "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "0.12.4"}
+   {com.github.liquidz/antq {:mvn/version "0.13.0"}
     org.slf4j/slf4j-nop     {:mvn/version "1.7.30"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.106"}}}}}
