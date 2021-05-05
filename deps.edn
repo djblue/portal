@@ -1,11 +1,8 @@
 {:paths ["src" "resources"]
  :deps
- {com.cognitect/transit-clj {:mvn/version "1.0.324"
-                             :exclusions [org.msgpack/msgpack
-                                          javax.xml.bind/jaxb-api]}
+ {com.cognitect/transit-clj {:mvn/version "1.0.324"}
   com.cognitect/transit-cljs {:mvn/version "0.8.269"}
-  cheshire/cheshire {:mvn/version "5.10.0"
-                     :exclusions [tigris/tigris]}
+  cheshire/cheshire {:mvn/version "5.10.0"}
   http-kit/http-kit {:mvn/version "2.5.3"}}
  :aliases
  {:dev

@@ -32,27 +32,11 @@
       <groupId>com.cognitect</groupId>
       <artifactId>transit-clj</artifactId>
       <version>1.0.324</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.msgpack</groupId>
-          <artifactId>msgpack</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.xml.bind</groupId>
-          <artifactId>jaxb-api</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>cheshire</groupId>
       <artifactId>cheshire</artifactId>
       <version>5.10.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>tigris</groupId>
-          <artifactId>tigris</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>http-kit</groupId>
