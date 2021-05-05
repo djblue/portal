@@ -1,3 +1,7 @@
+## 0.11.2 - 2021-05-05
+
+- Stop excluding transitive deps
+
 ## 0.11.1 - 2021-04-25
 
 - Fix firefox issues
