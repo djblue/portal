@@ -67,6 +67,10 @@
 
 (defn build [] (main-js) (ws-js))
 
+(defn dev []
+  (build)
+  (clj "-M:dev:cider:cljs:shadow" :watch :pwa :client))
+
 (defn test-cljs [version]
   (let [out (str "target/test." version ".js")]
     (clj "-Sdeps"
