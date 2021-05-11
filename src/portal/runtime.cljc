@@ -11,6 +11,8 @@
 #?(:clj (defn random-uuid [] (UUID/randomUUID)))
 
 (defonce instance-cache (atom {}))
+(defonce ^:private id (atom 0))
+(defn- next-id [] (swap! id inc))
 
 (declare object->value)
 (defonce request (atom nil))
@@ -22,8 +24,8 @@
          (fn [cache]
            (if (contains? cache k)
              cache
-             (let [uuid (random-uuid)]
-               (assoc cache [:uuid uuid] instance k uuid)))))
+             (let [id (next-id)]
+               (assoc cache [:id id] instance k id)))))
         (get k))))
 
 (defn- can-meta? [o]
@@ -43,7 +45,7 @@
               (pr-str o))}))
 
 (defn uuid->instance [uuid]
-  (get @instance-cache [:uuid uuid]))
+  (get @instance-cache [:id uuid]))
 
 (extend-type #?(:clj Object :cljs default)
   cson/ToJson
@@ -105,6 +107,7 @@
 (defn clear-values
   ([] (clear-values nil identity))
   ([_request done]
+   (reset! id 0)
    (reset! instance-cache {})
    (swap! state assoc
           :portal/state-id (random-uuid)
