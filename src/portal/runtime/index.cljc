@@ -7,7 +7,7 @@
                :or {name     (:portal.launcher/window-title @r/state)
                     version  "0.11.2"
                     code-url "main.js"
-                    platform #?(:bb "bb" :clj "jvm" :cljs "node")}}]
+                    platform #?(:bb "bb" :clj "jvm" :cljs "node" :clje "erlang")}}]
   (str
    "<!DOCTYPE html>"
    "<html lang=\"en\">"

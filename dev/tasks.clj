@@ -27,6 +27,7 @@
 (def node   (partial sh :node))
 (def npm    (partial sh :npm))
 (def npx    (partial sh :npx))
+(def rlwrap (partial sh :rlwrap))
 (def shadow (partial clj "-M:cljs:shadow"))
 
 (defn install []
@@ -71,6 +72,9 @@
   (build)
   (clj "-M:dev:cider:cljs:shadow" :watch :pwa :client))
 
+(defn clje []
+  (rlwrap :rebar3 :clojerl :repl "--apps" :portal))
+
 (defn test-cljs [version]
   (let [out (str "target/test." version ".js")]
     (clj "-Sdeps"
@@ -86,12 +90,16 @@
          "--compile" :portal.test-runner)
     (node out)))
 
+(defn test-clje []
+  (sh :rebar3 :clojerl :test))
+
 (defn test []
   (test-cljs "1.10.773")
   (test-cljs "1.10.844")
   (build)
   (clj "-M:test" "-m" :portal.test-runner)
-  (bb "-m" :portal.test-runner))
+  (bb "-m" :portal.test-runner)
+  (test-clje))
 
 (defn rm [path]
   (when (fs/exists? path)

@@ -1,9 +1,17 @@
 (ns examples.hacker-news
-  (:require #?(:clj [cheshire.core :as json])
-            [clojure.core.protocols :refer [nav]]
-            #?(:clj  [portal.sync  :as a]
-               :cljs [portal.async :as a])
-            #?(:cljs [examples.fetch :refer [fetch]])))
+  #?(:clj
+     (:require [cheshire.core :as json]
+               [clojure.core.protocols :refer [nav]]
+               [portal.sync :as a])
+     :cljs
+     (:require [clojure.core.protocols :refer [nav]]
+               [portal.async :as a]
+               [examples.fetch :refer [fetch]])
+     :clje
+     (:require [portal.sync :as a])))
+
+#?(:clje (defn nav [coll k v] v))
+#?(:clje (defn fetch [url] nil))
 
 (def root "https://hacker-news.firebaseio.com/v0")
 
@@ -41,8 +49,8 @@
 (defn as-url [s]
   #?(:clj (java.net.URL. s) :cljs (js/URL. s)))
 
-(defn as-date [^long timestamp]
-  #?(:clj (java.util.Date. timestamp) :cljs (js/Date. timestamp)))
+(defn as-date [timestamp]
+  #?(:clj (java.util.Date. ^long timestamp) :cljs (js/Date. timestamp)))
 
 (defn fetch-hn [path]
   (a/let [url   (as-url (str root path))

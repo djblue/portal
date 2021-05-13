@@ -3,6 +3,8 @@
             #?(:clj  [portal.runtime.jvm.launcher :as l]
                :cljs [portal.runtime.node.launcher :as l])))
 
+#?(:clje (defn add-tap [_] _))
+
 (defn submit
   "Tap target function."
   [value]

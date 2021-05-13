@@ -14,7 +14,7 @@
        (.toByteArray out))))
 
 (def platform-data
-  #?(:clj {::ratio 22/7
+  #?(:clj {::ratio (/ 22 7)
            ::class File
            ::file (io/file "deps.edn")
            ::directory  (io/file ".")
@@ -91,9 +91,14 @@
      [:portal.viewer/inspector {:hello :world}]]
     {:portal.viewer/default :portal.viewer/hiccup}))
 
+(defn- sin [value]
+  #?(:clj  (Math/sin value)
+     :cljs (Math/sin value)
+     :clje (math/sin value)))
+
 (def line-chart
-  {:data {:values (map #(-> {:time % :value (Math/sin %)})
-                       (range 0 (* 2 3.14) 0.25))}
+  {:data {:values (doall (map #(-> {:time % :value (sin %)})
+                              (range 0 (* 2 3.14) 0.25)))}
    :encoding {:x {:field "time" :type "quantitative"}
               :y {:field "value" :type "quantitative"}}
    :mark "line"})
@@ -144,15 +149,13 @@
    :view {:stroke nil}})
 
 (def tabular-data
-  (map #(-> {:x %
-             :y (#?(:clj Math/sin
-                    :cljs js/Math.sin) %)})
-       (range 0 (* 2 3.14) 0.25)))
+  (doall (map #(-> {:x % :y (sin %)})
+              (range 0 (* 2 3.14) 0.25))))
 
 (def numerical-collection
-  {:x (range -3.12 3.14 0.1)
-   :y (map #(+ % (/ (* -1 % % %) 6))
-           (range -3.14 3.14 0.1))})
+  {:x (doall (range -3.12 3.14 0.1))
+   :y (doall (map #(+ % (/ (* -1 % % %) 6))
+                  (range -3.14 3.14 0.1)))})
 
 (def scatter-chart
   {:$schema

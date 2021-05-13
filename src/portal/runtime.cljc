@@ -1,14 +1,19 @@
 (ns portal.runtime
   (:refer-clojure :exclude [read])
-  (:require [clojure.datafy :refer [datafy nav]]
-            [portal.runtime.cson :as cson]
-            #?(:clj  [portal.sync  :as a]
-               :cljs [portal.async :as a]))
+  #?(:clj (:require [clojure.datafy :refer [datafy nav]]
+                    [portal.runtime.cson :as cson]
+                    [portal.sync  :as a])
+     :cljs (:require [clojure.datafy :refer [datafy nav]]
+                     [portal.runtime.cson :as cson]
+                     [portal.async :as a])
+     :clje (:require [portal.runtime.cson :as cson]
+                     [portal.sync :as a]))
   #?(:clj (:import [java.io File]
                    [java.net URI URL]
                    [java.util UUID])))
 
-#?(:clj (defn random-uuid [] (UUID/randomUUID)))
+#?(:clj  (defn random-uuid [] (UUID/randomUUID))
+   :clje (defn random-uuid [] (erlang.util.UUID/random)))
 
 (defonce instance-cache (atom {}))
 (defonce ^:private id (atom 0))
@@ -47,7 +52,7 @@
 (defn uuid->instance [uuid]
   (get @instance-cache [:id uuid]))
 
-(extend-type #?(:clj Object :cljs default)
+(extend-type #?(:clj Object :cljs default :clje nil)
   cson/ToJson
   (-to-json [o]
     (let [id (instance->uuid o)]
@@ -135,11 +140,14 @@
         (fn [_status]
           (remove-watch state watch-key))))))
 
+(defn- deref? [value]
+  #?(:clj  (instance? clojure.lang.IRef value)
+     :cljs (satisfies? cljs.core/IDeref value)
+     :clje (satisfies? clojerl.IDeref value)))
+
 (def ^:private predicates
   (merge
-   {'clojure.core/deref
-    #?(:clj  #(instance? clojure.lang.IRef %)
-       :cljs #(satisfies? cljs.core/IDeref %))}
+   {'clojure.core/deref #'deref?}
    #?(:clj
       {'clojure.core/slurp
        #(or (instance? URI %)
@@ -147,6 +155,9 @@
             (and (instance? File %)
                  (.isFile ^File %)
                  (.canRead ^File %)))})))
+
+#?(:clje (defn datafy [value] value))
+#?(:clje (defn nav    [value] value))
 
 (def ^:private public-fns
   (merge
@@ -180,7 +191,7 @@
     (let [f (if (symbol? f) (get fns f) f)]
       (a/let [return (apply f args)]
         (done {:return return})))
-    (catch #?(:clj Exception :cljs js/Error) e
+    (catch #?(:clj Exception :cljs :default :clje clojerl.Error) e
       (done {:return e}))))
 
 (def ops

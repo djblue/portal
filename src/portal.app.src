@@ -1,0 +1,14 @@
+{ application, 'portal'
+, [ {vsn, git}
+  , {description, "A clojure tool to navigate through your data."}
+  , {modules, []}
+  , { applications
+    , [ stdlib
+      , kernel
+      , clojerl
+      , cowboy
+      ]
+    }
+  , {mod, {'portal.api', []}}
+  ]
+}.

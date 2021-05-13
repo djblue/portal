@@ -1,12 +1,22 @@
 (ns portal.runtime.cson-test
-  (:require [clojure.test :refer [deftest are is]]
-            [cognitect.transit :as transit]
-            [portal.runtime.cson :as cson]
-            #?(:clj [cheshire.core :as json]))
+  #?(:clj
+     (:require [clojure.test :refer [deftest are is]]
+               [cognitect.transit :as transit]
+               [portal.runtime.cson :as cson]
+               [cheshire.core :as json])
+     :cljs
+     (:require [clojure.test :refer [deftest are is]]
+               [cognitect.transit :as transit]
+               [portal.runtime.cson :as cson])
+     :clje
+     (:require [clojure.test :refer [deftest are is]]
+               [portal.runtime.cson :as cson]
+               [jiffy]))
+
   #?(:clj (:import [java.io ByteArrayOutputStream ByteArrayInputStream])))
 
-(defn- transit-read [^String string]
-  #?(:clj  (-> string
+(defn- transit-read [string]
+  #?(:clj  (-> ^String string
                .getBytes
                ByteArrayInputStream.
                (transit/reader :json)
@@ -103,12 +113,13 @@
     #{0}
     {0 0}))
 
-#?(:clj (defn random-uuid []
-          (java.util.UUID/randomUUID)))
+#?(:clj  (defn random-uuid [] (java.util.UUID/randomUUID))
+   :clje (defn random-uuid [] (erlang.util.UUID/random)))
 
 (deftest tagged-objects
   (let [inst #?(:clj  (java.util.Date.)
-                :cljs (js/Date.))]
+                :cljs (js/Date.)
+                :clje (erlang.util.Date.))]
     (is (= inst (pass inst))))
   (let [inst (random-uuid)]
     (is (= inst (pass inst)))))
@@ -140,11 +151,13 @@
 
 (defn json-parse [string]
   #?(:clj  (dorun (json/parse-string string))
-     :cljs (.parse js/JSON string)))
+     :cljs (.parse js/JSON string)
+     :clje (jiffy/decode string)))
 
 (defn json-stringify [value]
   #?(:clj  (json/generate-string value)
-     :cljs (.stringify js/JSON value)))
+     :cljs (.stringify js/JSON value)
+     :clje (jiffy/encode value)))
 
 (def input (into [] (range 100000)))
 
