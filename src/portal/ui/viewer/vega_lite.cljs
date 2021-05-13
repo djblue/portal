@@ -56,9 +56,11 @@
 (sp/def ::vega-lite
   (sp/or :single-view ::single-view :layered-view ::layered-view))
 
-(def vega-lite-viewer
-  (partial vega/vega-embed
-           {:mode "vega-lite" :renderer :canvas}))
+(defn vega-lite-viewer [value]
+  ^{:key (hash value)}
+  [vega/vega-embed
+   {:mode "vega-lite" :renderer :canvas}
+   value])
 
 (def viewer
   {:predicate (partial sp/valid? ::vega-lite)

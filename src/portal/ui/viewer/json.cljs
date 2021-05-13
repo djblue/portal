@@ -8,7 +8,9 @@
 (defn json? [value] (string? value))
 
 (defn inspect-json [json-string]
-  [ins/inspector (parse-json json-string)])
+  [ins/tabs
+   {:portal.viewer/json (parse-json json-string)
+    "..."               json-string}])
 
 (def viewer
   {:predicate json?

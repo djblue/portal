@@ -74,8 +74,10 @@
   (let [theme   (theme/use-theme)
         styles  (hiccup-styles theme)
         viewers (ins/viewers-by-name @ins/viewers)]
-    [ins/inc-depth
-     (process-hiccup {:styles styles :viewers viewers} value)]))
+    [ins/with-key
+     :portal.viewer/hiccup
+     [ins/inc-depth
+      (process-hiccup {:styles styles :viewers viewers} value)]]))
 
 (defn- hiccup? [value]
   (and (vector? value)

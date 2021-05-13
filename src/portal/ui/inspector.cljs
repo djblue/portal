@@ -127,6 +127,56 @@
 (declare inspector)
 (declare preview)
 
+(defn get-background []
+  (let [theme (theme/use-theme)]
+    (if (even? (use-depth))
+      (::c/background theme)
+      (::c/background2 theme))))
+
+(defn tabs [value]
+  (let [theme   (theme/use-theme)
+        options (keys value)
+        [option set-option!] (react/useState (first options))
+        background (get-background)]
+    [s/div
+     {:style
+      {:background background
+       :border [1 :solid (::c/border theme)]
+       :border-radius (:border-radius theme)}}
+     [with-readonly
+      [s/div
+       {:style
+        {:display :flex
+         :align-items :stretch
+         :border-bottom [1 :solid (::c/border theme)]}}
+       (for [value options]
+         ^{:key (hash value)}
+         [s/div
+          {:style
+           {:flex "1"
+            :cursor :pointer
+            :border-right
+            (if (= value (last options))
+              :none
+              [1 :solid (::c/border theme)])}
+           :on-click
+           (fn [e]
+             (set-option! value)
+             (.stopPropagation e))}
+          [s/div
+           {:style {:box-sizing :border-box
+                    :padding (:spacing/padding theme)
+                    :border-bottom
+                    (if (= value option)
+                      [5 :solid (::c/boolean theme)]
+                      [5 :solid (::c/border theme)])}}
+           [preview value]]])]]
+     [s/div
+      {:style
+       {:box-sizing :border-box
+        :padding (:spacing/padding theme)}}
+      [with-key option [inspector (get value option)]]]]))
+
 (defn- diff-added [value]
   (let [theme (theme/use-theme)
         color (::c/diff-add theme)]
@@ -163,12 +213,6 @@
      (when-not (= added ::not-found)
        [s/div {:style {:flex 1}}
         [diff-added added]])]))
-
-(defn get-background []
-  (let [theme (theme/use-theme)]
-    (if (even? (use-depth))
-      (::c/background theme)
-      (::c/background2 theme))))
 
 (defn- tagged-tag [tag]
   (let [theme (theme/use-theme)]
@@ -532,14 +576,10 @@
     :ratio      inspect-ratio
     inspect-default))
 
-(def ^:private preview-type?
-  #{:map :set :vector :list :coll :tagged :object})
-
 (defn preview [value]
-  (let [type (get-value-type value)
+  (let [type      (get-value-type value)
         component (get-preview-component type)]
-    (when (preview-type? type)
-      [component value])))
+    [component value]))
 
 (defn- get-inspect-component [type]
   (case type

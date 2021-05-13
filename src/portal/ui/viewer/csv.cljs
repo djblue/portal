@@ -8,7 +8,9 @@
 (defn csv? [value] (string? value))
 
 (defn inspect-csv [csv-string]
-  [ins/inspector (parse-csv csv-string)])
+  [ins/tabs
+   {:portal.viewer/csv (parse-csv csv-string)
+    "..."              csv-string}])
 
 (def viewer
   {:predicate csv?

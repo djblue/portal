@@ -9,7 +9,9 @@
 (defn edn? [value] (string? value))
 
 (defn inspect-edn [edn-string]
-  [ins/inspector (parse-edn edn-string)])
+  [ins/tabs
+   {:portal.viewer/edn (parse-edn edn-string)
+    "..."              edn-string}])
 
 (def viewer
   {:predicate edn?

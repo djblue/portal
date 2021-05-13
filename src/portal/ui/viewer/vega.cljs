@@ -155,7 +155,9 @@
          :padding (:spacing/padding theme)
          :overflow :hidden}}]]]))
 
-(def vega-viewer (partial vega-embed {:mode "vega" :renderer :canvas}))
+(defn vega-viewer [value]
+  ^{:key (hash value)}
+  [vega-embed {:mode "vega" :renderer :canvas} value])
 
 (def viewer
   {:predicate (partial sp/valid? ::vega)
