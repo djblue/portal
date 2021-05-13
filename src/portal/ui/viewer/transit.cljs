@@ -9,7 +9,9 @@
 (defn transit? [value] (string? value))
 
 (defn inspect-transit [transit-string]
-  [ins/inspector (parse-transit transit-string)])
+  [ins/tabs
+   {:portal.viewer/transit (parse-transit transit-string)
+    "..."                  transit-string}])
 
 (def viewer
   {:predicate transit?
