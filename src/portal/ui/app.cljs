@@ -130,7 +130,7 @@
           :box-sizing :border-box
           :padding (:spacing/padding theme)
           :border-right [1 :solid (::c/border theme)]}}
-        [icons/fa-copy]]
+        [icons/copy]]
        [s/div
         {:style
          {:cursor :pointer
@@ -246,7 +246,7 @@
          :font-size (:font-size theme)
          :font-weight :bold
          :cursor :pointer}}
-       ">_"]]
+       [icons/terminal]]]
      [selected-context-view]]))
 
 (defn search-input []
@@ -310,7 +310,7 @@
                     (when disabled?
                       {:opacity 0.45
                        :cursor  :default}))}
-        "◄"])
+        [icons/arrow-left]])
      (let [disabled? (nil? (:portal/next-state @state))]
        [s/button
         {:disabled disabled?
@@ -321,7 +321,7 @@
                     (when disabled?
                       {:opacity 0.45
                        :cursor  :default}))}
-        "►"])
+        [icons/arrow-right]])
      [search-input]
      [s/button
       {:title    "Clear all values from portal."
