@@ -1,8 +1,10 @@
 (ns portal.ui.app
-  (:require [clojure.string :as str]
+  (:require ["react" :as react]
+            [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.commands :as commands]
             [portal.ui.connecton-status :as status]
+            [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
@@ -97,6 +99,61 @@
 
         ::not-found))))
 
+(defn- selected-context-view []
+  (let [theme            (theme/use-theme)
+        [type set-type!] (react/useState ::init)
+        state            (state/use-state)
+        value            (state/get-selected-value @state)
+        path             (state/get-path @state)]
+    (react/useEffect
+     (fn []
+       (-> (state/invoke 'clojure.core/type value)
+           (.then set-type!)))
+     #js [value])
+    (when-not (= type ::init)
+      [s/div
+       {:style
+        {:max-width "100vw"
+         :display :flex
+         :align-items :center
+         :justify-content :space-between
+         :background (::c/background2 theme)
+         :color (::c/text theme)
+         :border-top [1 :solid (::c/border theme)]}}
+       [s/div
+        {:title "Copy path."
+         :on-click #(commands/copy-path state)
+         :style/hover {:color (::c/tag theme)}
+         :style
+         {:color (::c/border theme)
+          :cursor :pointer
+          :box-sizing :border-box
+          :padding (:spacing/padding theme)
+          :border-right [1 :solid (::c/border theme)]}}
+        [icons/fa-copy]]
+       [s/div
+        {:style
+         {:cursor :pointer
+          :overflow :auto
+          :display :grid
+          :box-sizing :border-box
+          :padding (:spacing/padding theme)
+          :grid-gap (:spacing/padding theme)}}
+        [s/div {:style {:grid-row "1"}} "["]
+        (map-indexed
+         (fn [idx k]
+           ^{:key idx}
+           [s/div {:style {:grid-row "1"}} [ins/preview k]])
+         path)
+        [s/div {:style {:grid-row "1"}} "]"]]
+       [s/div {:style {:flex "1"}}]
+       [s/div
+        {:style
+         {:border-left [1 :solid (::c/border theme)]
+          :box-sizing :border-box
+          :padding (:spacing/padding theme)}}
+        (or type "nil")]])))
+
 (defn inspect-1 [value]
   (let [theme      (theme/use-theme)
         state      (state/use-state)
@@ -107,12 +164,15 @@
         compatible-viewers (ins/get-compatible-viewers
                             @ins/viewers
                             (:value selected-context))]
-    [:<>
+    [s/div
+     {:style
+      {:height "calc(100vh - 64px)"
+       :display :flex
+       :flex-direction :column}}
      [s/div
       {:style
-       {:position :relative
-        :min-height "calc(100% - 64px)"
-        :max-height "calc(100% - 64px)"
+       {:flex "1"
+        :position :relative
         :min-width "100%"
         :box-sizing :border-box}}
       [s/div
@@ -186,7 +246,8 @@
          :font-size (:font-size theme)
          :font-weight :bold
          :cursor :pointer}}
-       ">_"]]]))
+       ">_"]]
+     [selected-context-view]]))
 
 (defn search-input []
   (let [theme (theme/use-theme)

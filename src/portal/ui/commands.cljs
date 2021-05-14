@@ -585,6 +585,10 @@
         (a/let [[selected-viewer] (pick-one (map :name viewers))]
           (ins/set-viewer! state selected-context selected-viewer))))))
 
+(defn copy-path [state]
+  (when-let [path (state/get-path @state)]
+    (copy-edn! path)))
+
 (def portal-commands
   [{:name 'clojure.datafy/nav
     :run (fn [state]
@@ -653,9 +657,7 @@
     :run
     (fn [state] (copy-edn! (state/get-selected-value @state)))}
    {:name 'portal.command/copy-path
-    :run (fn [state]
-           (when-let [path (state/get-path @state)]
-             (copy-edn! path)))}
+    :run copy-path}
    {:name 'portal.command/history-back
     :run (fn [state] (state/dispatch! state state/history-back))}
    {:name 'portal.command/history-forward

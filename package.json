@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.35",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@fortawesome/react-fontawesome": "^0.1.14",
     "papaparse": "^5.3.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
