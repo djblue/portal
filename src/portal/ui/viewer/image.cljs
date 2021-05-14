@@ -15,6 +15,7 @@
       {:max-height "100%"
        :max-width "100%"
        :user-select :none
+       :background (ins/get-background)
        :border-radius (:border-radius theme)
        :border [1 :solid (::c/border theme)]}}]))
 
