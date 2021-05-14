@@ -17,6 +17,7 @@
             [portal.ui.viewer.image :as image]
             [portal.ui.viewer.json :as json]
             [portal.ui.viewer.markdown :as md]
+            [portal.ui.viewer.relative-time :as relative-time]
             [portal.ui.viewer.table :as table]
             [portal.ui.viewer.text :as text]
             [portal.ui.viewer.transit :as transit]
@@ -339,7 +340,8 @@
    html/viewer
    diff/viewer
    md/viewer
-   hiccup/viewer])
+   hiccup/viewer
+   relative-time/viewer])
 
 (reset! ins/viewers viewers)
 

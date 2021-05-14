@@ -1,0 +1,80 @@
+(ns portal.ui.viewer.relative-time
+  (:refer-clojure :exclude [second])
+  (:require ["react" :as react]
+            [portal.ui.styled :as s]))
+
+(defn date? [value] (instance? js/Date value))
+
+(def millisecond 1)
+(def second     (* 1000 millisecond))
+(def minute     (* 60 second))
+(def hour       (* 60 minute))
+(def day        (* 24 hour))
+(def week       (* 7 day))
+(def month      (* 30 day))
+(def year       (* 365 day))
+
+(def ^:private time-scales
+  [:year        year
+   :month       month
+   :week        week
+   :day         day
+   :hour        hour
+   :minute      minute
+   :second      second
+   :millisecond millisecond])
+
+(defn- relative-time
+  ([b]
+   (relative-time (js/Date.) b))
+  ([a b]
+   (let [diff (- (.getTime b) (.getTime a))
+         ms   (Math/abs diff)]
+     (some
+      (fn [[unit scale]]
+        (when (> ms scale)
+          {:scale (Math/floor (/ ms scale))
+           :unit  unit
+           :direction
+           (cond
+             (neg? diff) :past
+             (pos? diff) :future
+             :else       :now)}))
+      (partition 2 time-scales)))))
+
+(defn- format-relative-time [{:keys [scale unit direction]}]
+  (if (= direction :now)
+    "now"
+    (str scale
+         " "
+         (name unit)
+         (when (> scale 1) "s")
+         " "
+         (case direction
+           :past "ago"
+           :future "in the future"))))
+
+(defn parse [date]
+  (if (date? date)
+    date
+    (let [date (.parse js/Date date)]
+      (when-not (js/isNaN date) (js/Date. date)))))
+
+(defn inspect-relative [value]
+  (let [value          (parse value)
+        [now set-now!] (react/useState (js/Date.))]
+    (react/useEffect
+     (fn []
+       (let [i (js/setInterval
+                (fn []
+                  (set-now! (js/Date.)))
+                1000)]
+         (fn []
+           (js/clearInterval i))))
+     #js [])
+    [s/div (format-relative-time (relative-time now value))]))
+
+(def viewer
+  {:predicate parse
+   :component inspect-relative
+   :name :portal.viewer/relative-time})
