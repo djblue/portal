@@ -9,6 +9,7 @@
             [portal.ui.theme :as theme]
             [portal.ui.viewer.charts :as charts]
             [portal.ui.viewer.csv :as csv]
+            [portal.ui.viewer.date-time :as date-time]
             [portal.ui.viewer.diff :as diff]
             [portal.ui.viewer.edn :as edn]
             [portal.ui.viewer.exception :as ex]
@@ -341,6 +342,7 @@
    diff/viewer
    md/viewer
    hiccup/viewer
+   date-time/viewer
    relative-time/viewer])
 
 (reset! ins/viewers viewers)

@@ -1,9 +1,8 @@
 (ns portal.ui.viewer.relative-time
   (:refer-clojure :exclude [second])
   (:require ["react" :as react]
-            [portal.ui.styled :as s]))
-
-(defn date? [value] (instance? js/Date value))
+            [portal.ui.styled :as s]
+            [portal.ui.viewer.date-time :as date-time]))
 
 (def millisecond 1)
 (def second     (* 1000 millisecond))
@@ -54,14 +53,8 @@
            :past "ago"
            :future "in the future"))))
 
-(defn parse [date]
-  (if (date? date)
-    date
-    (let [date (.parse js/Date date)]
-      (when-not (js/isNaN date) (js/Date. date)))))
-
 (defn inspect-relative [value]
-  (let [value          (parse value)
+  (let [value          (date-time/parse value)
         [now set-now!] (react/useState (js/Date.))]
     (react/useEffect
      (fn []
@@ -75,6 +68,6 @@
     [s/div (format-relative-time (relative-time now value))]))
 
 (def viewer
-  {:predicate parse
+  {:predicate date-time/parse
    :component inspect-relative
    :name :portal.viewer/relative-time})
