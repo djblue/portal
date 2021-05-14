@@ -77,7 +77,8 @@
         :align-items :center}}
       [s/span
        {:title "Hour" :style style}
-       (mod hour 12)]
+       (let [hour (mod hour 12)]
+         (if (= hour 0) 12 hour))]
       [s/span {:style border} ":"]
       [s/span
        {:title "Minute" :style style}
