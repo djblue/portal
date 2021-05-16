@@ -12,13 +12,13 @@
       (when-not (js/isNaN date) (js/Date. date)))))
 
 (def ^:private days
-  ["Monday"
+  ["Sunday"
+   "Monday"
    "Tuesday"
    "Wednesday"
    "Thursday"
    "Friday"
-   "Saturday"
-   "Sunday"])
+   "Saturday"])
 
 (def ^:private months
   ["January"
@@ -61,7 +61,7 @@
        (inc month)]
       [s/span {:style border} "/"]
       [s/span
-       {:title (nth days (dec day)) :style style}
+       {:title (nth days day) :style style}
        (when (< date 10) "0") date]
       [s/span {:style border} "/"]
       [s/span
