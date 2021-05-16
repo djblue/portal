@@ -1,7 +1,8 @@
 (ns portal.api
   (:require [portal.runtime :as rt]
             #?(:clj  [portal.runtime.jvm.launcher :as l]
-               :cljs [portal.runtime.node.launcher :as l])))
+               :cljs [portal.runtime.node.launcher :as l]
+               :clje [portal.runtime.erl.launcher :as l])))
 
 #?(:clje (defn add-tap [_] _))
 

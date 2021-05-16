@@ -9,6 +9,6 @@
       , cowboy
       ]
     }
-  , {mod, {'portal.api', []}}
+  , {mod, {'portal.runtime.erl.launcher', []}}
   ]
 }.

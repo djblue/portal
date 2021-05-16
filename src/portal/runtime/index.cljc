@@ -23,3 +23,9 @@
    (when @testing? "<script src=\"wait.js\"></script>")
    "</body>"
    "</html>"))
+
+#?(:clje
+   (defn init [req _]
+     (let [[_ req-body req] (cowboy_req/read_body req)
+           req (cowboy_req/reply 200 #erl {} (html) req)]
+       (clj->erl [:ok req nil]))))

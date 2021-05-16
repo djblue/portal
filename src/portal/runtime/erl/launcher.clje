@@ -1,0 +1,48 @@
+(ns portal.runtime.erl.launcher
+  (:require [cowboy]
+            [maps]))
+
+(def sup-flags #erl{:strategy  :one_for_one
+                    :intensity 1
+                    :period    5})
+
+(def child-specs #erl())
+
+(defn start-link []
+  (supervisor/start_link #erl[:local :portal.runtime.erl.launcher]
+                         :portal.runtime.erl.launcher
+                         #erl()))
+
+(def routes
+  (-> '{:_ (["/" :portal.runtime.index nil]
+            ["/rpc" :portal.runtime.erl.server nil]
+            ["/[...]" :cowboy_static [:dir "resources/portal"]])}
+      clj->erl
+      maps/to_list))
+
+(defn init [_]
+  #erl[:ok #erl[sup-flags child-specs]])
+
+(defn handler [req _]
+  #erl [:ok req "hello, world"])
+
+(defn start-cowboy []
+  (cowboy/start_clear :portal.listener
+                      (-> {:port 3000}
+                          clj->erl
+                          maps/to_list)
+                      (clj->erl
+                       {:env
+                        {:dispatch
+                         (cowboy_router/compile routes)}})))
+
+(defn start [type args]
+  (start-cowboy)
+  (start-link))
+
+(defn open [options])
+
+(defn clear [])
+
+(defn close [state]
+  state)
