@@ -204,6 +204,7 @@
           {:background (::c/background theme)
            :padding (:spacing/padding theme)
            :box-sizing :border-box
+           :font-family (:font/family theme)
            :font-size (:font-size theme)
            :color (::c/text theme)
            :border-radius (:border-radius theme)

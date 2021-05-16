@@ -4,7 +4,7 @@
 
 (defn- get-theme [theme-name]
   (merge
-   {:font/family "monospace"
+   {:font/family "Monaco, monospace"
     :font-size "12pt"
     :limits/string-length 100
     :limits/max-depth 1
