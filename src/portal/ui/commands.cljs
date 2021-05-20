@@ -167,7 +167,8 @@
   {"arrowright" "⭢"
    "arrowleft" "⭠"
    "arrowup" "⭡"
-   "arrowdown" "⭣"})
+   "arrowdown" "⭣"
+   "meta" "⌘"})
 
 (defn combo-order [k]
   (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
