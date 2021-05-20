@@ -109,7 +109,8 @@
         :align-items :center
         :justify-content :center
         :height "100vh"
-        :width "100vw"}}
+        :width "100vw"
+        :border-top [1 :solid (::c/border theme)]}}
       [div
        {:style
         {:display :flex
