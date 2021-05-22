@@ -1,152 +1,172 @@
 (ns portal.ui.viewer.table
-  (:require [portal.colors :as c]
+  (:require ["react" :as react]
+            [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(defn- get-styles []
+(defonce ^:private hover (react/createContext nil))
+
+(defn- with-hover [& children]
+  (let [state (react/useState nil)]
+    (into [:r> (.-Provider hover) #js {:value state}] children)))
+
+(defn- use-hover [] (react/useContext hover))
+
+(defn table [& children]
   (let [theme (theme/use-theme)]
-    {:white-space :nowrap
-     :border-bottom [1 :solid (::c/border theme)]
-     :border-right [1 :solid (::c/border theme)]}))
+    (into
+     [s/div
+      {:style
+       {:display :grid
+        :grid-gap 1
+        :background (::c/border theme)
+        :border [1 :solid (::c/border theme)]
+        :border-radius (:border-radius theme)}}]
+     children)))
 
-(defn- table-header-row [child]
-  [s/th
-   {:style
-    (assoc
-     (get-styles)
-     :top 0
-     :z-index 2
-     :position :sticky
-     :background (ins/get-background))}
-   child])
+(defn- cell [row column child]
+  (let [background (ins/get-background)
+        theme (theme/use-theme)
+        [hover set-hover!] (use-hover)]
+    [s/div
+     {:on-mouse-over
+      (fn []
+        (set-hover! [row column]))
+      :style
+      {:background background
+       :grid-row (str (inc row))
+       :grid-column (str (inc column))}}
+     [s/div
+      {:style
+       (when (and (= (first hover) row)
+                  (= (second hover) column))
+         {:height "100%"
+          :width "100%"
+          :background (str (::c/border theme) "55")})}
+      child]]))
 
-(defn- table-header-column [child]
-  [s/th
-   {:style
-    (assoc
-     (get-styles)
-     :left 0
-     :z-index 1
-     :position :sticky
-     :text-align :right
-     :background (ins/get-background))}
-   child])
-
-(defn- table-data [child]
-  [s/td {:style (get-styles)} child])
-
-(defn- table [component rows cols]
-  (let [theme (theme/use-theme)
-        transpose? false]
-    [s/table
+(defn- special [row column child]
+  (let [background (ins/get-background)
+        theme      (theme/use-theme)
+        [hover]    (use-hover)]
+    [s/div
      {:style
-      {:width "100%"
-       :border-top [1 :solid (::c/border theme)]
-       :border-left [1 :solid (::c/border theme)]
-       :background (ins/get-background)
-       :border-spacing 0
-       :position :relative
-       :color (::c/text theme)
-       :font-size  (:font-size theme)
-       :border-radius (:border-radius theme)}}
-     [s/tbody
-      [l/lazy-seq
-       (map-indexed
-        (fn [row-index row]
-          ^{:key row-index}
-          [ins/with-key
-           (when (coll? row) (first row))
-           [s/tr
-            {:key row-index
-             :style/hover
-             {:background (str (::c/border theme) "55")}}
-            (map-indexed
-             (fn [col-index col]
-               ^{:key col-index}
-               [ins/with-key col
-                [component
-                 (if-not transpose?
-                   {:row row    :row-index row-index
-                    :column col :column-index col-index}
-                   {:row col    :row-index col-index
-                    :column row :column-index row-index})]])
-             (if transpose? rows cols))]])
-        (if transpose? cols rows))]]]))
+      (merge
+       (cond
+         (= 0 row column)
+         {:z-index 3
+          :top 0
+          :left 0
+          :border-bottom [3 :solid (::c/border theme)]
+          :border-right [3 :solid (::c/border theme)]}
+         (zero? row)
+         {:z-index 2
+          :top 0
+          :text-align :center
+          :border-bottom [3 :solid (::c/border theme)]}
+         (zero? column)
+         {:z-index 1
+          :left 0
+          :text-align :right
+          :border-right [3 :solid (::c/border theme)]})
+       (cond
+         (= (first hover) row)
+         {:border-right [3 :solid (::c/boolean theme)]}
+         (= (second hover) column)
+         {:border-bottom [3 :solid (::c/boolean theme)]})
+       {:position :sticky
+        :background background
+        :grid-row (str (inc row))
+        :grid-column (str (inc column))})}
+     child]))
+
+(defn- columns [cols]
+  [:<>
+   [special 0 0]
+   (map-indexed
+    (fn [col-index column]
+      ^{:key (hash column)}
+      [ins/with-key column
+       [special 0 (inc col-index) [ins/inspector column]]])
+    cols)])
 
 (defn- inspect-map-table [values]
-  (let [columns (into #{} (mapcat keys (vals values)))]
+  (let [rows (seq (ins/try-sort (keys values)))
+        cols (seq (ins/try-sort (into #{} (mapcat keys (vals values)))))]
     [table
-     (fn [context]
-       (let [{:keys [row column]} context]
-         (cond
-           (= column row ::header) [table-header-row]
-
-           (= row ::header)
-           [table-header-row
-            [ins/inspector column]]
-
-           (= column ::header)
-           [table-header-column
-            [ins/inspector (first row)]]
-
-           :else
-           [table-data
-            (let [[_ row] row]
-              (when (contains? row column)
-                [ins/inspector (get row column)]))])))
-     (concat [::header] (ins/try-sort-map values))
-     (concat [::header] (ins/try-sort columns))]))
+     [columns cols]
+     [l/lazy-seq
+      (map-indexed
+       (fn [row-index row]
+         [:<>
+          {:key (hash row)}
+          [ins/with-key row
+           [special (inc row-index) 0 [ins/inspector row]]]
+          [ins/inc-depth
+           [ins/with-key row
+            (map-indexed
+             (fn [col-index column]
+               (let [coll (get values row)]
+                 ^{:key col-index}
+                 [ins/with-collection coll
+                  [ins/with-key column
+                   [cell
+                    (inc row-index)
+                    (inc col-index)
+                    (when (contains? coll column) [ins/inspector (get coll column)])]]]))
+             cols)]]])
+       rows)]]))
 
 (defn- inspect-coll-table [values]
-  (let [columns (into #{} (mapcat keys values))]
+  (let [rows (seq values)
+        cols (seq (ins/try-sort (into #{} (mapcat keys values))))]
     [table
-     (fn [context]
-       (let [{:keys [row column]} context]
-         (cond
-           (= column row ::header) [table-header-row]
-
-           (= row ::header)
-           [table-header-row
-            [ins/inspector column]]
-
-           (= column ::header)
-           [table-header-column
-            [ins/inspector (dec (:row-index context))]]
-
-           :else
-           [table-data
-            (when (contains? row column)
-              [ins/inspector (get row column)])])))
-     (concat [::header] values)
-     (concat [::header] (ins/try-sort columns))]))
+     [columns cols]
+     [l/lazy-seq
+      (map-indexed
+       (fn [row-index row]
+         ^{:key row-index}
+         [:<>
+          [ins/with-key row-index
+           [special (inc row-index) 0 [ins/inspector row-index]]]
+          [ins/inc-depth
+           [ins/with-key row-index
+            (map-indexed
+             (fn [col-index column]
+               ^{:key col-index}
+               [ins/with-collection row
+                [ins/with-key column
+                 [cell
+                  (inc row-index)
+                  (inc col-index)
+                  (when (contains? row column) [ins/inspector (get row column)])]]])
+             cols)]]])
+       rows)]]))
 
 (defn- inspect-vector-table [values]
-  (let [n (reduce max (map count values))]
-    [table
-     (fn [context]
-       (let [{:keys [row column]} context]
-         [table-data
-          (when (< column (count row))
-            [ins/inspector (get row column)])]))
-     values
-     (range n)]))
-
-(defn- inspect-set-table [values]
-  (let [columns (into #{} (mapcat keys values))]
-    [table
-     (fn [context]
-       (let [{:keys [row column]} context]
-         (if (= row ::header)
-           [table-header-row
-            [ins/inspector column]]
-
-           [table-data
-            (when (contains? row column)
-              [ins/inspector (get row column)])])))
-     (concat [::header] (ins/try-sort values))
-     (ins/try-sort columns)]))
+  [table
+   [l/lazy-seq
+    (map-indexed
+     (fn [row-index row]
+       ^{:key row-index}
+       [:<>
+        [ins/with-key row-index
+         [special (inc row-index) 0 [ins/inspector row-index]]]
+        [ins/inc-depth
+         [ins/with-key row-index
+          (map-indexed
+           (fn [col-index value]
+             ^{:key col-index}
+             [ins/with-collection row
+              [ins/with-key col-index
+               [cell
+                (inc row-index)
+                (inc col-index)
+                [ins/inspector value]]]])
+           row)]]])
+     values)]])
 
 (defn- get-component [value]
   (cond
@@ -157,9 +177,6 @@
     (and (map? value) (every? map? (vals value)))
     inspect-map-table
 
-    (and (set? value) (every? map? value))
-    inspect-set-table
-
     (and (coll? value) (every? map? value))
     inspect-coll-table))
 
@@ -168,7 +185,8 @@
 (defn inspect-table [values]
   (let [component (get-component values)]
     [ins/with-collection values
-     [ins/inc-depth [component values]]]))
+     [with-hover
+      [component values]]]))
 
 (def viewer
   {:predicate table-view?
