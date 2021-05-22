@@ -182,18 +182,6 @@
   (when-let [{:keys [key? path value]} (get-selected-context state)]
     (if-not key? path (conj path value))))
 
-(defn clear [state]
-  (a/do
-    (send! {:op :portal.rpc/clear-values})
-    (-> state
-        (dissoc :portal/value)
-        (assoc
-         :portal/tap-list '()
-         :search-text ""
-         :selected nil
-         :portal/previous-state nil
-         :portal/next-state nil))))
-
 (defn set-theme [color]
   (when-let [el (js/document.querySelector "meta[name=theme-color]")]
     (.setAttribute el "content" color)))
@@ -204,6 +192,10 @@
     (notify-parent
      {:type :set-theme :color color}))
   (assoc state ::c/theme theme))
+
+(defn invoke [f & args]
+  (-> (send! {:op :portal.rpc/invoke :f f :args args})
+      (.then #(:return %))))
 
 (defn- merge-state [new-state]
   (swap! state merge new-state))
@@ -221,9 +213,17 @@
        (fn [complete?]
          (when-not complete? (long-poll send!))))))
 
-(defn invoke [f & args]
-  (-> (send! {:op :portal.rpc/invoke :f f :args args})
-      (.then #(:return %))))
+(defn clear [state]
+  (a/do
+    (invoke 'portal.runtime/clear-values)
+    (-> state
+        (dissoc :portal/value)
+        (assoc
+         :portal/tap-list '()
+         :search-text ""
+         :selected nil
+         :portal/previous-state nil
+         :portal/next-state nil))))
 
 (defn nav [state context]
   (let [{:keys [collection key value]} context

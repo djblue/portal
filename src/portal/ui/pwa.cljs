@@ -72,7 +72,6 @@
 (defn send! [msg]
   (js/Promise.resolve
    (case (:op msg)
-     :portal.rpc/clear-values nil
      :portal.rpc/invoke (invoke msg identity))))
 
 (defn set-title [title]

@@ -173,6 +173,8 @@
    public-fns
    {'clojure.datafy/nav  #'nav
     `ping                #'ping
+    `clear-values        #'clear-values
+    `load-state          #'load-state
     `get-functions       #'get-functions}))
 
 (defn invoke [{:keys [f args]} done]
@@ -184,6 +186,5 @@
       (done {:return e}))))
 
 (def ops
-  {:portal.rpc/clear-values #'clear-values
-   :portal.rpc/load-state   #'load-state
+  {:portal.rpc/load-state   #'load-state
    :portal.rpc/invoke       #'invoke})
