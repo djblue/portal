@@ -14,7 +14,6 @@
 (defonce ^:private id (atom 0))
 (defn- next-id [] (swap! id inc))
 
-(declare object->value)
 (defonce request (atom nil))
 
 (defn instance->uuid [instance]
@@ -27,22 +26,6 @@
              (let [id (next-id)]
                (assoc cache [:id id] instance k id)))))
         (get k))))
-
-(defn- can-meta? [o]
-  #?(:clj (instance? clojure.lang.IObj o)
-     :cljs (implements? IMeta o)))
-
-(defn object->value
-  ([o]
-   (object->value o (instance->uuid o)))
-  ([o id]
-   {:id id
-    :meta (when (can-meta? o) (meta o))
-    :type (pr-str (type o))
-    :string (binding
-             [*print-length* 10
-              *print-level* 2]
-              (pr-str o))}))
 
 (defn uuid->instance [uuid]
   (get @instance-cache [:id uuid]))
