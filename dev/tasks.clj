@@ -124,6 +124,7 @@
    :bb   [:bb]})
 
 (defn e2e [env]
+  (build)
   (let [env (if (keyword? env) env (read-string env))
         ps  (p/process (map name (get e2e-envs env)) {:out :inherit :err :inherit})]
     (println "running e2e tests for" env)
