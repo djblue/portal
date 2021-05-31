@@ -7,7 +7,8 @@
             [portal.api :as p]
             [portal.runtime.browser :as browser]
             [portal.runtime.jvm.server :as s]
-            [pwa]))
+            [pwa]
+            [tracker]))
 
 (defn lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
@@ -54,6 +55,9 @@
 
 (comment
   (watch :pwa)
+
+  (tracker/start)
+  (tracker/stop)
 
   (with-redefs [browser/pwa (:dev pwa/envs)]
     (def portal (p/open)))
