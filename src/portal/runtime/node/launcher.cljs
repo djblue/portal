@@ -1,38 +1,9 @@
 (ns portal.runtime.node.launcher
-  (:require ["child_process" :as cp]
-            ["fs" :as fs]
-            ["http" :as http]
-            ["path" :as path]
-            [clojure.string :as s]
+  (:require ["http" :as http]
             [portal.async :as a]
-            [portal.runtime :as rt]
+            [portal.runtime.browser :as browser]
             [portal.runtime.node.client :as c]
             [portal.runtime.node.server :as server]))
-
-(defn- get-paths []
-  (concat
-   ["/Applications/Google Chrome.app/Contents/MacOS"
-    "/mnt/c/Program Files (x86)/Google/Chrome/Application"]
-   (s/split (.-PATH js/process.env) #":")))
-
-(defn- find-bin [files]
-  (some
-   identity
-   (for [path (get-paths) file files]
-     (let [f (path/join path file)]
-       (when-not (try (fs/accessSync f fs/constants.X_OK)
-                      (catch js/Error _e true))
-         f)))))
-
-(defn- get-chrome-bin []
-  (find-bin #{"chrome" "chrome.exe" "google-chrome-stable" "chromium" "Google Chrome"}))
-
-(defn- sh [bin & args]
-  (js/Promise.
-   (fn [resolve reject]
-     (let [ps (cp/spawn bin (clj->js args))]
-       (.on ps "error" reject)
-       (.on ps "close" resolve)))))
 
 (defonce ^:private server (atom nil))
 (defonce ^:private sockets (atom #{}))
@@ -60,38 +31,18 @@
       (a/let [{:portal.launcher/keys [port host]
                :or {port 0 host "localhost"}} options
               instance (create-server #'server/handler port host)]
-
         (reset! server instance))))
 
 (defn- stop [handle]
   (some-> handle :http-server .close))
 
-(defn browse-url [url]
-  (case (.-platform js/process)
-    ("android" "linux") (sh "xdg-open" url)
-    "darwin"            (sh "open" url)
-    "win32"             (sh "cmd" "/c" "start" url)
-    (println "Goto" url "to view portal ui.")))
-
 (defn open
   ([options]
-   (open nil options))
+   (open {:session-id (random-uuid)} options))
   ([portal options]
-   (let [session-id (or (:session-id portal) (random-uuid))]
-     (swap! rt/state merge options)
-     (a/let [{:keys [host port]} (start options)
-             url        (str "http://" host ":" port "?" session-id)
-             chrome-bin (get-chrome-bin)]
-       (when-not (c/open? session-id)
-         (if (and (some? chrome-bin)
-                  (:portal.launcher/app options true))
-           (sh chrome-bin
-               "--incognito"
-               "--disable-features=TranslateUI"
-               "--no-first-run"
-               (str "--app=" url))
-           (browse-url url))))
-     {:session-id session-id})))
+   (a/let [server (start options)]
+     (browser/open {:portal portal :options options :server server}))
+   portal))
 
 (defn clear []
   (c/request {:op :portal.rpc/clear}))
@@ -104,4 +55,3 @@
     (stop @server)
     (reset! server nil))
   true)
-

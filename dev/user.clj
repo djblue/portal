@@ -5,7 +5,7 @@
             [clojure.java.io :as io]
             [examples.data :refer [data]]
             [portal.api :as p]
-            [portal.runtime.jvm.launcher :as l]
+            [portal.runtime.browser :as browser]
             [portal.runtime.jvm.server :as s]
             [pwa]))
 
@@ -55,7 +55,7 @@
 (comment
   (watch :pwa)
 
-  (with-redefs [l/pwa (:dev pwa/envs)]
+  (with-redefs [browser/pwa (:dev pwa/envs)]
     (def portal (p/open)))
   (add-tap #'p/submit)
   (remove-tap #'p/submit)

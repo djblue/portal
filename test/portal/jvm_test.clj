@@ -1,15 +1,15 @@
 (ns portal.jvm-test
   (:require [clojure.test :refer [deftest is]]
             [portal.api :as p]
+            [portal.runtime.browser :as browser]
             [portal.runtime.index :as index]
-            [portal.runtime.jvm.client :as client]
-            [portal.runtime.jvm.launcher :as launcher]))
+            [portal.runtime.jvm.client :as client]))
 
 (defn- headless-chrome-flags [url]
   ["--headless" "--disable-gpu" url])
 
 (defn- open [f]
-  (with-redefs [launcher/chrome-flags f] (p/open)))
+  (with-redefs [browser/flags f] (p/open)))
 
 (deftest e2e-jvm
   (reset! index/testing? true)
