@@ -8,15 +8,6 @@
 (defn- not-found [_request done]
   (done {:status :not-found}))
 
-(defn- edn->json [value]
-  (try
-    (rt/write
-     (assoc value :portal.rpc/exception nil))
-    (catch js/Error e
-      (rt/write
-       {:portal/state-id (:portal/state-id value)
-        :portal.rpc/exception e}))))
-
 (defn require-string [src file-name]
   (let [Module (js/require "module")
         m (Module.)]
@@ -38,7 +29,7 @@
      (fn [ws]
        (let [send!
              (fn send! [message]
-               (.send ws (edn->json message)))]
+               (.send ws (rt/write message)))]
          (swap! c/sessions assoc session-id send!)
          (.on ws "message"
               (fn [message]

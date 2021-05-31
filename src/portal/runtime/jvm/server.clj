@@ -1,22 +1,11 @@
 (ns portal.runtime.jvm.server
-  (:require [clojure.datafy :refer [datafy]]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
             [portal.runtime.jvm.client :as c])
   (:import [java.util UUID]))
-
-(defn- edn->json [value]
-  (try
-    (rt/write value)
-    (catch Exception e
-      (rt/write
-       {:portal.rpc/id (:portal.rpc/id value)
-        :op :portal.rpc/response
-        :portal/state-id (:portal/state-id value)
-        :portal/value (datafy (Exception. "Transit failed to encode a value. Clear portal to proceed." e))}))))
 
 (defn- not-found [_request done]
   (done {:status :not-found}))
@@ -35,7 +24,7 @@
           (future
             (op body #(server/send!
                        ch
-                       (edn->json
+                       (rt/write
                         (assoc %
                                :portal.rpc/id id
                                :op :portal.rpc/response)))))))
@@ -44,7 +33,7 @@
         (swap! c/sessions
                assoc session-id
                (fn send! [message]
-                 (server/send! ch (edn->json message)))))
+                 (server/send! ch (rt/write message)))))
       :on-close
       (fn [_ch _status] (swap! c/sessions dissoc session-id))})))
 
