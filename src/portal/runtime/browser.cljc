@@ -44,8 +44,8 @@
       (parse-json (fs/slurp path))
       ["extensions" "settings"]))))
 
-(defn- chrome-profile? [path]
-  (re-matches #"Default|Profile\s\d+$" path))
+(defn- chrome-profile [path]
+  (re-find #"Default|Profile\s\d+$" path))
 
 (defn- get-app-id-profile-linux [app-name]
   (when-let [chrome-config-dir (-> (fs/home)
@@ -53,14 +53,11 @@
                                    fs/exists)]
     (first
      (for [file  (fs/list chrome-config-dir)
-           :when (chrome-profile? file)
-           :let  [preferences (fs/join file "Preferences")
+           :let  [profile     (chrome-profile file)
+                  preferences (fs/join file "Preferences")
                   app-id      (get-app-id-from-pref-file preferences app-name)]
-           :when app-id]
-       {:app-id  app-id
-        :profile (->> preferences
-                      (re-find #"/([^/]+)/Preferences")
-                      second)}))))
+           :when (and profile app-id)]
+       {:app-id app-id :profile profile}))))
 
 (defn- get-app-id-profile
   "Returns app-id and profile if portal is installed as `app-name` under any of the browser profiles"
