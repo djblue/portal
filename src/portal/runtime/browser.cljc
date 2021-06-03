@@ -75,10 +75,7 @@
             (str "--profile-directory=" profile))
           (str "--app-launch-url-for-shortcuts-menu-item=" (:host pwa) "?" url)]
          (filter some?))
-    ["--incognito"
-     "--disable-features=TranslateUI"
-     "--no-first-run"
-     (str "--app=" url)]))
+    [(str "--app=" url)]))
 
 (defn- sh [bin & args]
   #?(:clj
