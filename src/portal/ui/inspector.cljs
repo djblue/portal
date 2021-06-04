@@ -1,6 +1,5 @@
 (ns portal.ui.inspector
   (:require ["react" :as react]
-            [cognitect.transit :as t]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
             [portal.ui.lazy :as l]
@@ -112,17 +111,8 @@
     (var? value)      :var
 
     (uuid? value)     :uuid
-    (t/uuid? value)   :uuid
     (url? value)      :uri
-    (t/uri? value)    :uri
-    (date? value)     :date
-
-    (t/tagged-value? value)
-    (case (.-tag value)
-      "portal.transit/var"        :var
-      "portal.transit/object"     :object
-      "ratio"                     :ratio
-      :tagged)))
+    (date? value)     :date))
 
 (declare inspector)
 (declare preview)
@@ -496,10 +486,8 @@
   [tagged-value "uuid" (str value)])
 
 (defn- get-var-symbol [value]
-  (cond
-    (t/tagged-value? value) (.-rep value)
-    :else                   (let [m (meta value)]
-                              (symbol (name (:ns m)) (name (:name m))))))
+  (let [m (meta value)]
+    (symbol (name (:ns m)) (name (:name m)))))
 
 (defn- inspect-var [value]
   (let [theme (theme/use-theme)]
@@ -507,14 +495,9 @@
      [s/span {:style {:color (::c/tag theme)}} "#'"]
      [inspect-symbol (get-var-symbol value)]]))
 
-(defn- get-url-string [value]
-  (cond
-    (t/tagged-value? value) (.-rep value)
-    :else                   (str value)))
-
 (defn- inspect-uri [value]
   (let [theme (theme/use-theme)
-        value (get-url-string value)]
+        value (str value)]
     [s/a
      {:href value
       :style {:color (::c/uri theme)}
@@ -532,26 +515,19 @@
      "/"
      [s/span {:style {:color (::c/number theme)}} (.-rep b)]]))
 
-(defn- inspect-default [value]
-  (let [theme (theme/use-theme)
-        limit (:limits/string-length theme)]
-    [s/span
-     (trim-string (pr-str value) limit)]))
-
 (defn- inspect-object [value]
-  (let [value (.-rep value)
-        theme (theme/use-theme)
-        limit (:limits/string-length theme)
+  (let [theme  (theme/use-theme)
+        string (pr-str value)
+        limit  (:limits/string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]
-    [s/span {:title (:type value)
-             :style
+    [s/span {:style
              {:color (::c/text theme)}}
-     (if (or (< (count (:string value)) limit)
+     (if (or (< (count string) limit)
              (= (:depth context) 1)
              (contains? expanded? context))
-       (:string value)
-       (trim-string (:string value) limit))]))
+       string
+       (trim-string string limit))]))
 
 (defn- get-preview-component [type]
   (case type
@@ -570,11 +546,10 @@
     :date       inspect-date
     :uuid       inspect-uuid
     :var        inspect-var
-    :object     inspect-object
     :uri        inspect-uri
     :tagged     preview-tagged
     :ratio      inspect-ratio
-    inspect-default))
+    inspect-object))
 
 (defn preview [value]
   (let [type      (get-value-type value)
@@ -595,11 +570,10 @@
     :date       inspect-date
     :uuid       inspect-uuid
     :var        inspect-var
-    :object     inspect-object
     :uri        inspect-uri
     :tagged     inspect-tagged
     :ratio      inspect-ratio
-    inspect-default))
+    inspect-object))
 
 (defn inspector [value]
   (let [state (state/use-state)

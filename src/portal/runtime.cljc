@@ -37,9 +37,10 @@
       (cson/tag
        "object"
        (cson/to-json
-        {:id id
+        {:id   id
+         :meta (meta o)
          :type (pr-str (type o))
-         :string (binding [*print-length* 10
+         :pr-str (binding [*print-length* 10
                            *print-level* 2]
                    (pr-str o))})))))
 
@@ -63,12 +64,16 @@
   (let [rep (cson/json-> (second value))]
     (uuid->instance (:id rep))))
 
+(defn- ref-> [value]
+  (uuid->instance (second value)))
+
 (defn read [string]
   (cson/read
    string
    (fn [value]
      (case (first value)
-       "object" (object-> value)))))
+       "object" (object-> value)
+       "ref"    (ref-> value)))))
 
 (defonce state (atom {:portal/state-id (random-uuid)
                       :portal/tap-list (list)

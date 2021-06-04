@@ -1,63 +1,31 @@
 (ns portal.ui.rpc
   (:refer-clojure :exclude [read])
-  (:require [cognitect.transit :as t]
-            [com.cognitect.transit.types :as ty]
-            [portal.runtime.cson :as cson]
+  (:require [portal.runtime.cson :as cson]
             [portal.ui.state :as state]))
+
+(deftype RuntimeObject [rep]
+  cson/ToJson
+  (-to-json [_]
+    #js ["ref" (:id rep)])
+
+  IWithMeta
+  (-with-meta [_this m]
+    (RuntimeObject.
+     (assoc rep :meta m)))
+
+  IPrintWithWriter
+  (-pr-writer [_ writer _]
+    (write-all writer (:pr-str rep))))
 
 (defn read [string]
   (cson/read
    string
    (fn [value]
      (case (first value)
-       "object" (t/tagged-value
-                 "portal.transit/object"
+       "object" (RuntimeObject.
                  (cson/json-> (second value)))))))
 
 (defn write [value] (cson/write value))
-
-;; Since any object can have metadata and all unknown objects in portal
-;; are encoded as tagged values, if any of those objects have metadata, it
-;; will be problematic. Tagged values are represented in transit with
-;; ty/TaggedValue which doesn't support metadata, leading to error when
-;; reading. Implementing the metadata protocols will fix the issue for
-;; now. The crux of the problem is that write-meta gets to the metadata
-;; before it can be hidden in the representation.
-(extend-type ty/TaggedValue
-  cson/ToJson
-  (-to-json [this]
-    #js ["object" (cson/to-json (.-rep this))])
-
-  IMeta
-  (-meta [this]
-    (:meta (.-rep this)))
-
-  IWithMeta
-  (-with-meta [this m]
-    (t/tagged-value
-     (.-tag this)
-     (assoc (.-rep this) :meta m)))
-
-  IPrintWithWriter
-  (-pr-writer [this writer _]
-    (let [tag (.-tag this)
-          rep (.-rep this)]
-      (write-all
-       writer
-       (case tag
-         "portal.transit/var"
-         (str "#'" rep)
-
-         "portal.transit/object"
-         (:string rep)
-
-         "r" rep
-
-         "ratio"
-         (let [[a b] rep]
-           (str (.-rep a) "/" (.-rep b)))
-
-         (str "#" tag rep))))))
 
 (defonce ^:private id (atom 0))
 (defonce ^:private pending-requests (atom {}))
