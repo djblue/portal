@@ -24,6 +24,7 @@
   (html
    [:html
     [:head
+     [:title "portal"]
      [:meta {:charset "UTF-8"}]
      [:link {:rel :manifest :href "manifest.json"}]
      [:meta {:name "theme-color" :content (::c/background2 settings)}]]
