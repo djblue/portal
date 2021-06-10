@@ -1,0 +1,29 @@
+(ns portal.runtime.erl.server
+  (:require [portal.runtime :as rt]))
+
+(defn init [req state]
+  (clj->erl [:cowboy_websocket req state]))
+
+(defn websocket_init [state]
+  (clj->erl [:ok state]))
+
+(def ops (merge #_c/ops rt/ops))
+
+(defn dispatch [message]
+  (let [req  (rt/read message)
+        id   (:portal.rpc/id req)
+        op   (get ops (get req :op))
+        done (fn [res]
+               (rt/write
+                (assoc res
+                       :portal.rpc/id id
+                       :op :portal.rpc/response)))]
+    (op req done)))
+
+(defn websocket_handle [req state]
+  (let [res (dispatch (second req))]
+    (clj->erl [(list [:text res]) state])))
+
+(defn websocket_info [req state])
+
+(defn websocket_terminate [_reason _req _state])

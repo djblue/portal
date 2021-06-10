@@ -7,7 +7,7 @@
                :or {name     (:portal.launcher/window-title @r/state)
                     version  "0.11.2"
                     code-url "main.js"
-                    platform #?(:bb "bb" :clj "jvm" :cljs "node")}}]
+                    platform #?(:bb "bb" :clj "jvm" :cljs "node" :clje "erlang")}}]
   (str
    "<!DOCTYPE html>"
    "<html lang=\"en\">"
@@ -23,3 +23,9 @@
    (when @testing? "<script src=\"wait.js\"></script>")
    "</body>"
    "</html>"))
+
+#?(:clje
+   (defn init [req _]
+     (let [[_ req-body req] (cowboy_req/read_body req)
+           req (cowboy_req/reply 200 #erl {} (html) req)]
+       (clj->erl [:ok req nil]))))
