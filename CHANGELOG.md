@@ -1,3 +1,19 @@
+## 0.12.0 - 2021-06-12
+
+- Records can now be viewed as maps
+- Remove incognito chrome flag for chrome app
+- Improve table viewer
+  - Distinguish header rows / columns from data
+  - Highlight row / column as you hover over elements
+  - Fix path for selected value
+- Map `META` in shortcuts to `⌘` for mac users
+- Add selected path with copy button to bottom of portal
+- Add `:portal.viewer/relative-time` for instants
+  - ex: `1 day ago`
+- Add `:portal.viewer/date-time` for instants
+  - ex: `6/12/2021 6:32:28 PM`
+- Viewers that parse data have a tab to get back to the original value
+
 ## 0.11.2 - 2021-05-05
 
 - Stop excluding transitive deps
