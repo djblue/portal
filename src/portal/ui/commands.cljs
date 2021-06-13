@@ -243,8 +243,9 @@
          [s/div {:style
                  {:background "#0002"
                   :border-radius (:border-radius theme)
-                  :padding-top (* 0.5 (:spacing/padding theme))
-                  :padding-bottom (* 0.5 (:spacing/padding theme))
+                  :box-sizing :border-box
+                  :padding-top (* 0.25 (:spacing/padding theme))
+                  :padding-bottom (* 0.25 (:spacing/padding theme))
                   :padding-left (:spacing/padding theme)
                   :padding-right (:spacing/padding theme)
                   :margin-right  (:spacing/padding theme)}}
@@ -263,7 +264,11 @@
          :display :flex
          :justify-content :space-between
          :align-items :center
-         :height :fit-content}
+         :height :fit-content
+         :box-sizing     :border-box
+         :padding-left   (:spacing/padding theme)
+         :padding-top    (* 0.5 (:spacing/padding theme))
+         :padding-bottom (* 0.5 (:spacing/padding theme))}
         (when active?
           {:border-left [5 :solid (::c/boolean theme)]
            :background (::c/background theme)}))
@@ -393,6 +398,7 @@
       {:style
        {:width "100%"
         :display :flex
+        :align-items :center
         :justify-content :space-between}}
       [ins/inspector (:name command)]
       [shortcut command]]

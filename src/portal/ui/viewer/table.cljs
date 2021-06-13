@@ -78,6 +78,8 @@
          {:border-bottom [3 :solid (::c/boolean theme)]})
        {:position :sticky
         :background background
+        :box-sizing :border-box
+        :padding (:spacing/padding theme)
         :grid-row (str (inc row))
         :grid-column (str (inc column))})}
      child]))

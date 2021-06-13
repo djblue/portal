@@ -3,6 +3,7 @@
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
             [portal.ui.lazy :as l]
+            [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -112,7 +113,10 @@
 
     (uuid? value)     :uuid
     (url? value)      :uri
-    (date? value)     :date))
+    (date? value)     :date
+
+    (rpc/runtime-object? value)
+    (rpc/tag value)))
 
 (declare inspector)
 (declare preview)
@@ -255,7 +259,7 @@
                :font-family (:font/family theme)}}
       (:title props)]]))
 
-(defn- collection-header [values]
+(defn- collection-header [values type]
   (let [theme                       (theme/use-theme)
         [show-meta? set-show-meta!] (react/useState false)]
     [s/div
@@ -269,7 +273,8 @@
        :border-bottom :none}}
      [s/div
       {:style
-       {:display :flex}}
+       {:display :flex
+        :align-items :center}}
       [s/div
        {:style
         {:display :inline-block
@@ -283,7 +288,13 @@
           (fn [e]
             (set-show-meta! not)
             (.stopPropagation e))
-          :title "metadata"}])]
+          :title "metadata"}])
+      (when type
+        [s/div {:style
+                {:box-sizing :border-box
+                 :padding (:spacing/padding theme)
+                 :border-right [1 :solid (::c/border theme)]}}
+         type])]
      (when show-meta?
        [s/div
         {:style
@@ -291,30 +302,6 @@
           :box-sizing :border-box
           :padding (:spacing/padding theme)}}
         [with-depth [inspector (meta values)]]])]))
-
-(defn- container-map [values child]
-  (let [theme (theme/use-theme)]
-    [with-collection
-     values
-     [s/div
-      [collection-header values]
-      [s/div
-       {:style
-        {:width "100%"
-         :min-width :fit-content
-         :display :grid
-         :background (get-background)
-         :grid-gap (:spacing/padding theme)
-         :padding (:spacing/padding theme)
-         :box-sizing :border-box
-         :color (::c/text theme)
-         :font-size  (:font-size theme)
-         :border-bottom-left-radius (:border-radius theme)
-         :border-bottom-right-radius (:border-radius theme)
-         :border-top-right-radius 0
-         :border-top-left-radius 0
-         :border [1 :solid (::c/border theme)]}}
-       child]]]))
 
 (defn- container-map-k [child]
   [s/div {:style
@@ -346,9 +333,28 @@
   (try (sort-by first values)
        (catch :default _e values)))
 
-(defn- inspect-map [values]
+(defn- container-map [child]
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style
+      {:width "100%"
+       :min-width :fit-content
+       :display :grid
+       :background (get-background)
+       :grid-gap (:spacing/padding theme)
+       :padding (:spacing/padding theme)
+       :box-sizing :border-box
+       :color (::c/text theme)
+       :font-size  (:font-size theme)
+       :border-bottom-left-radius (:border-radius theme)
+       :border-bottom-right-radius (:border-radius theme)
+       :border-top-right-radius 0
+       :border-top-left-radius 0
+       :border [1 :solid (::c/border theme)]}}
+     child]))
+
+(defn- inspect-map-k-v [values]
   [container-map
-   values
    [l/lazy-seq
     (let [pairs (seq (try-sort-map values))]
       (for [[k v] pairs]
@@ -360,6 +366,13 @@
           [container-map-k [inspector k]]]
          [with-key k
           [container-map-v [inspector v]]]]))]])
+
+(defn- inspect-map [values]
+  [with-collection
+   values
+   [:<>
+    [collection-header values]
+    [inspect-map-k-v values]]])
 
 (defn- container-coll [values child]
   (let [theme (theme/use-theme)]
@@ -486,14 +499,24 @@
   [tagged-value "uuid" (str value)])
 
 (defn- get-var-symbol [value]
-  (let [m (meta value)]
-    (symbol (name (:ns m)) (name (:name m)))))
+  (if (rpc/runtime-object? value)
+    (rpc/rep value)
+    (let [m (meta value)]
+      (symbol (name (:ns m)) (name (:name m))))))
 
 (defn- inspect-var [value]
   (let [theme (theme/use-theme)]
     [s/span
      [s/span {:style {:color (::c/tag theme)}} "#'"]
      [inspect-symbol (get-var-symbol value)]]))
+
+(defn- inspect-record [value]
+  (let [values (rpc/rep value)]
+    [with-collection
+     values
+     [:<>
+      [collection-header values (rpc/type value)]
+      [inspect-map-k-v values]]]))
 
 (defn- inspect-uri [value]
   (let [theme (theme/use-theme)
@@ -508,12 +531,11 @@
   [tagged-value (.-tag value) (.-rep value)])
 
 (defn- inspect-ratio [value]
-  (let [theme (theme/use-theme)
-        [a b] (.-rep value)]
+  (let [[a b] (rpc/rep value)]
     [s/div
-     [s/span {:style {:color (::c/number theme)}} (.-rep a)]
+     [inspect-number a]
      "/"
-     [s/span {:style {:color (::c/number theme)}} (.-rep b)]]))
+     [inspect-number b]]))
 
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
@@ -549,6 +571,7 @@
     :uri        inspect-uri
     :tagged     preview-tagged
     :ratio      inspect-ratio
+    :record     inspect-record
     inspect-object))
 
 (defn preview [value]
@@ -573,6 +596,7 @@
     :uri        inspect-uri
     :tagged     inspect-tagged
     :ratio      inspect-ratio
+    :record     inspect-record
     inspect-object))
 
 (defn inspector [value]
@@ -628,9 +652,6 @@
          {:ref ref
           :style
           {:width "100%"
-           :padding (when (or preview? (not (coll? value)))
-                      (* 0.65 (:spacing/padding theme)))
-           :box-sizing :border-box
            :border-radius (:border-radius theme)
            :border (if selected?
                      [1 :solid "#D8DEE999"]

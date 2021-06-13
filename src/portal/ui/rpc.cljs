@@ -1,21 +1,30 @@
 (ns portal.ui.rpc
-  (:refer-clojure :exclude [read])
+  (:refer-clojure :exclude [read type])
   (:require [portal.runtime.cson :as cson]
             [portal.ui.state :as state]))
 
-(deftype RuntimeObject [rep]
+(deftype RuntimeObject [object]
   cson/ToJson
   (-to-json [_]
-    #js ["ref" (:id rep)])
+    #js ["ref" (:id object)])
 
   IWithMeta
   (-with-meta [_this m]
     (RuntimeObject.
-     (assoc rep :meta m)))
+     (assoc object :meta m)))
 
   IPrintWithWriter
   (-pr-writer [_ writer _]
-    (write-all writer (:pr-str rep))))
+    (write-all writer (:pr-str object))))
+
+(defn runtime-object? [value]
+  (instance? RuntimeObject value))
+
+(defn type [value] (:type (.-object value)))
+
+(defn tag [value] (:tag (.-object value)))
+
+(defn rep [value] (:rep (.-object value)))
 
 (defn read [string]
   (cson/read

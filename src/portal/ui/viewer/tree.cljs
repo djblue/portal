@@ -28,8 +28,8 @@
     {:color color
      :font-weigth :bold
      :margin-right "8px"
-     :padding-top (:spacing/padding theme)
-     :padding-bottom (:spacing/padding theme)}))
+     :padding-top (* 0.5 (:spacing/padding theme))
+     :padding-bottom (* 0.5 (:spacing/padding theme))}))
 
 (defn- center [& children]
   (into [s/div {:style flex-center}] children))
@@ -53,7 +53,7 @@
                {:style
                 (merge
                  {:border-left [1 :dashed (str (:color style) "55")]
-                  :padding-right (* 2 (:spacing/padding theme))
+                  :padding-right (:spacing/padding theme)
                   :margin-left "0.3em"}
                  flex-wrap
                  flex-col)}
@@ -91,14 +91,16 @@
 (defn- inspect-tree-map [value]
   (let [theme (theme/use-theme)]
     [s/div
-     {:style {:padding-left (* 2 (:spacing/padding theme))}}
+     {:style {:padding-left (:spacing/padding theme)}}
      [l/lazy-seq
       (for [[k v] (ins/try-sort-map value)]
         ^{:key (hash k)}
         [inspect-tree-item
          {:key k
           :key-child
-          [inspect-tree-1 k]
+          [s/div
+           {:style {:padding-right (:spacing/padding theme)}}
+           [inspect-tree-1 k]]
           :value v
           :value-child
           [ins/with-key k [inspect-tree v]]}])]]))

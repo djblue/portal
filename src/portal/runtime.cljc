@@ -30,19 +30,49 @@
 (defn uuid->instance [uuid]
   (get @instance-cache [:id uuid]))
 
+(defn- to-object [value tag rep]
+  (cson/tag
+   "object"
+   (cson/to-json
+    {:id     (instance->uuid value)
+     :type   (pr-str (type value))
+     :tag    tag
+     :rep    rep
+     :pr-str (binding [*print-length* 10
+                       *print-level* 2]
+               (pr-str value))})))
+
 (extend-type #?(:clj Object :cljs default)
   cson/ToJson
-  (-to-json [o]
-    (let [id (instance->uuid o)]
-      (cson/tag
-       "object"
-       (cson/to-json
-        {:id   id
-         :meta (meta o)
-         :type (pr-str (type o))
-         :pr-str (binding [*print-length* 10
-                           *print-level* 2]
-                   (pr-str o))})))))
+  (-to-json [value]
+    (to-object value :object nil)))
+
+(defn- var->symbol [v]
+  (let [m (meta v)]
+    (symbol (str (:ns m)) (str (:name m)))))
+
+#?(:bb (def clojure.lang.Var (type #'type)))
+
+(extend-type #?(:clj  clojure.lang.Var
+                :cljs cljs.core/Var)
+  cson/ToJson
+  (-to-json [value]
+    (to-object value :var (var->symbol value))))
+
+#?(:clj
+   (extend-type clojure.lang.Ratio
+     cson/ToJson
+     (-to-json [value]
+       (to-object value
+                  :ratio
+                  [(numerator value)
+                   (denominator value)]))))
+
+(extend-type #?(:clj  clojure.lang.IRecord
+                :cljs cljs.core/IRecord)
+  cson/ToJson
+  (-to-json [value]
+    (to-object value :record (into {} value))))
 
 (defn limit-seq [value]
   (if-not (seq? value)
