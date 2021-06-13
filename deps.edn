@@ -46,7 +46,7 @@
      :sha "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "0.15.1"}
+   {com.github.liquidz/antq {:mvn/version "0.15.2"}
     org.slf4j/slf4j-nop     {:mvn/version "1.7.30"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.106"}}}}}
