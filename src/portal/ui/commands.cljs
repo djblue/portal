@@ -146,9 +146,11 @@
                        :style
                        (merge
                         {:border-left [5 :solid "#0000"]
-                         :padding-left (:spacing/padding theme)
+                         :box-sizing     :border-box
+                         :padding-left   (:spacing/padding theme)
+                         :padding-top    (* 0.5 (:spacing/padding theme))
+                         :padding-bottom (* 0.5 (:spacing/padding theme))
                          :cursor :pointer
-                         :box-sizing :border-box
                          :color (if (selected? option)
                                   (::c/boolean theme)
                                   (::c/text theme))
@@ -160,6 +162,7 @@
                            :background (::c/background theme)}))}
                       (when active? [scroll-into-view])
                       [checkbox (some? (selected? option))]
+                      [s/div {:style {:width (:spacing/padding theme)}}]
                       [ins/inspector option]])))
                 doall)]]]))))
 
