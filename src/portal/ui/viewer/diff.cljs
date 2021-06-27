@@ -1,18 +1,7 @@
 (ns portal.ui.viewer.diff
-  (:require [cognitect.transit :as t]
-            [lambdaisland.deep-diff2 :refer [diff]]
+  (:require [lambdaisland.deep-diff2 :refer [diff]]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.ui.inspector :as ins]))
-
-(def readers
-  {"portal.transit/Deletion"  (t/read-handler #(diff/Deletion. %))
-   "portal.transit/Insertion" (t/read-handler #(diff/Insertion. %))
-   "portal.transit/Mismatch"  (t/read-handler #(let [[a b] %] (diff/Mismatch. a b)))})
-
-(def writers
-  {diff/Deletion  (t/write-handler (constantly "portal.transit/Deletion") :-)
-   diff/Insertion (t/write-handler (constantly "portal.transit/Insertion") :+)
-   diff/Mismatch  (t/write-handler (constantly "portal.transit/Mismatch") (juxt :- :+))})
 
 (defn diff? [value]
   (or

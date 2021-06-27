@@ -90,10 +90,6 @@
 (defn write [value]
   (cson/write value limit-seq))
 
-(defn- object-> [value]
-  (let [rep (cson/json-> (second value))]
-    (uuid->instance (:id rep))))
-
 (defn- ref-> [value]
   (uuid->instance (second value)))
 
@@ -102,8 +98,8 @@
    string
    (fn [value]
      (case (first value)
-       "object" (object-> value)
-       "ref"    (ref-> value)))))
+       "ref"    (ref-> value)
+       (cson/->Tagged (first value) (cson/json-> (second value)))))))
 
 (defonce state (atom {:portal/state-id (random-uuid)
                       :portal/tap-list (list)

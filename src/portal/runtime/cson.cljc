@@ -40,6 +40,10 @@
          (-to-json m))
         (-to-json value)))))
 
+(defrecord Tagged [-tag value]
+  ToJson
+  (-to-json [_] (tag -tag (to-json value))))
+
 (defn- meta-> [value]
   (let [[_ obj m] value]
     (with-meta

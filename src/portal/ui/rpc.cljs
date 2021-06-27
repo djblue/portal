@@ -1,6 +1,7 @@
 (ns portal.ui.rpc
   (:refer-clojure :exclude [read type])
-  (:require [portal.runtime.cson :as cson]
+  (:require [lambdaisland.deep-diff2.diff-impl :as diff]
+            [portal.runtime.cson :as cson]
             [portal.ui.state :as state]))
 
 (deftype RuntimeObject [object]
@@ -26,13 +27,34 @@
 
 (defn rep [value] (:rep (.-object value)))
 
+(defn- -tag [tag value]
+  #js [tag (cson/to-json value)])
+
+(extend-protocol cson/ToJson
+  diff/Deletion
+  (-to-json [this] (-tag "diff/Deletion" (:- this)))
+
+  diff/Insertion
+  (-to-json [this] (-tag "diff/Insertion" (:+ this)))
+
+  diff/Mismatch
+  (-to-json [this] (-tag "diff/Mismatch" ((juxt :- :+) this))))
+
+(defn diff-> [value]
+  (case (first value)
+    "diff/Deletion"  (diff/Deletion.  (cson/json-> (second value)))
+    "diff/Insertion" (diff/Insertion. (cson/json-> (second value)))
+    "diff/Mismatch"  (let [[a b] (cson/json-> (second value))]
+                       (diff/Mismatch. a b))))
+
 (defn read [string]
   (cson/read
    string
    (fn [value]
      (case (first value)
        "object" (RuntimeObject.
-                 (cson/json-> (second value)))))))
+                 (cson/json-> (second value)))
+       (diff-> value)))))
 
 (defn write [value] (cson/write value))
 
