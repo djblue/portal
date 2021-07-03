@@ -58,12 +58,9 @@
   (request session-id {:op :portal.rpc/push-state :state new-value})
   new-value)
 
-(defn- datafy [session-id]
-  (:portal/value (request session-id {:op :portal.rpc/datafy})))
-
 (defrecord Portal [session-id]
   IDeref
-  (deref [_this] (datafy session-id))
+  (deref [_this] @rt/selected)
 
   IAtom
   (reset [_this new-value] (push-state session-id new-value))

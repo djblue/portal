@@ -12,6 +12,7 @@
 (defn- next-id [] (swap! id inc))
 
 (defonce request (atom nil))
+(defonce selected (atom nil))
 
 (defn- set-timeout [f timeout]
   #?(:clj  (future (Thread/sleep timeout) (f))
@@ -168,6 +169,9 @@
    (reset! watch-registry {})
    (done nil)))
 
+(defn- update-selected [value]
+  (reset! selected value))
+
 (def ^:private predicates
   (merge
    {'clojure.core/deref
@@ -211,6 +215,7 @@
     `ping                #'ping
     `get-tap-atom        #'get-tap-atom
     `clear-values        #'clear-values
+    `update-selected     #'update-selected
     `get-functions       #'get-functions}))
 
 (defn invoke [{:keys [f args]} done]

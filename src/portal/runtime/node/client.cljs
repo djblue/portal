@@ -36,7 +36,26 @@
      (throw (ex-info "No such portal session"
                      {:session-id session-id :message message})))))
 
-(defn make-atom [_session-id])
+(defn- push-state [session-id new-value]
+  (request session-id {:op :portal.rpc/push-state :state new-value})
+  new-value)
+
+(defrecord Portal [session-id]
+  IDeref
+  (-deref [_this] @rt/selected)
+  IReset
+  (-reset! [_this new-value] (push-state session-id new-value))
+  ISwap
+  (-swap! [this f]
+    (reset! this (f @this)))
+  (-swap! [this f a]
+    (reset! this (f @this a)))
+  (-swap! [this f a b]
+    (reset! this (f @this a b)))
+  (-swap! [this f a b xs]
+    (reset! this (apply f @this a b xs))))
+
+(defn make-atom [session-id] (Portal. session-id))
 
 (defn open? [session-id]
   (get @sessions session-id))
