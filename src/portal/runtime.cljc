@@ -15,6 +15,7 @@
 (defn- next-id [] (swap! id inc))
 
 (defonce request (atom nil))
+(defonce selected (atom nil))
 
 (defn instance->uuid [instance]
   (let [k [:instance instance]]
@@ -128,6 +129,9 @@
           :portal/tap-list (list))
    (done nil)))
 
+(defn update-selected [value]
+  (reset! selected value))
+
 (defn- set-limit [state]
   (update state
           :portal/tap-list
@@ -188,6 +192,7 @@
    {'clojure.datafy/nav  #'nav
     `ping                #'ping
     `clear-values        #'clear-values
+    `update-selected     #'update-selected
     `load-state          #'load-state
     `get-functions       #'get-functions}))
 

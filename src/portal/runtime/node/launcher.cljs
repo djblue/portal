@@ -40,9 +40,10 @@
   ([options]
    (open {:session-id (random-uuid)} options))
   ([portal options]
-   (a/let [server (start options)]
-     (browser/open {:portal portal :options options :server server}))
-   portal))
+   (let [portal (or portal (c/make-atom (random-uuid)))]
+     (a/let [server (start options)]
+       (browser/open {:portal portal :options options :server server}))
+     portal)))
 
 (defn clear []
   (c/request {:op :portal.rpc/clear}))
