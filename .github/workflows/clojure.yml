@@ -26,9 +26,9 @@ jobs:
         java-version: ${{ matrix.java }}
     - uses: turtlequeue/setup-babashka@v1.3.0
       with:
-        babashka-version: 0.3.2
-    - run: bb -m tasks/ci
-    - run: bb -m tasks/app
+        babashka-version: 0.5.0
+    - run: bb ci
+    - run: bb app
       if: ${{ github.event_name == 'push' }}
     - uses: peaceiris/actions-gh-pages@v3
       if: ${{ github.event_name == 'push' }}

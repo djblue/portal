@@ -1,5 +1,6 @@
 (ns tasks
-  (:refer-clojure :exclude [test])
+  "All portal project tasks."
+  (:refer-clojure :exclude [test format])
   (:require [babashka.deps :as deps]
             [babashka.fs :as fs]
             [babashka.process :as p]
@@ -30,15 +31,21 @@
 (def shadow (partial clj "-M:cljs:shadow"))
 
 (defn install []
-  (when-not (fs/exists? "node_modules")
+  (when (seq
+         (fs/modified-since
+          "node_modules"
+          ["package.json" "package-lock.json"]))
     (npm :ci)))
 
 (defn check []
   (clj "-M:cider:check")
   (clj "-M:kondo" "--lint" :dev :src :test)
-  (clj "-M:cljfmt" :check))
+  (clj "-M:cljfmt" :check :dev :src :test))
 
-(defn fmt [] (clj "-M:cljfmt" :fix))
+(defn format
+  "Run cljfmt formatter."
+  []
+  (clj "-M:cljfmt" :fix :dev :src :test))
 
 (defn check-deps []
   (npm :outdated)
@@ -50,13 +57,24 @@
 
 (defn main-js []
   (install)
-  (when-not (fs/exists? "resources/portal/main.js")
+  (when (seq
+         (fs/modified-since
+          "resources/portal/main.js"
+          (concat
+           ["deps.edn"
+            "package.json"
+            "package-lock.json"
+            "shadow-cljs.edn"]
+           (fs/glob "src/portal/ui" "**.cljs"))))
     (shadow :release :client)))
 
 (defn ws-js []
   (install)
   (let [out "resources/portal/ws.js"]
-    (when-not (fs/exists? out)
+    (when (seq
+           (fs/modified-since
+            out
+            ["package.json" "package-lock.json"]))
       (npx :browserify
            "--node"
            "--exclude" :bufferutil
@@ -67,26 +85,36 @@
 
 (defn build [] (main-js) (ws-js))
 
-(defn dev []
+(defn dev
+  "Start dev server."
+  []
   (build)
   (clj "-M:dev:cider:cljs:shadow" :watch :pwa :client))
 
 (defn test-cljs [version]
   (let [out (str "target/test." version ".js")]
-    (clj "-Sdeps"
-         (pr-str
-          {:deps
-           {'org.clojure/clojurescript
-            {:mvn/version version}}})
-         "-M:test"
-         "-m" :cljs.main
-         "--output-dir" (str "target/cljs-output-" version)
-         "--target" :node
-         "--output-to" out
-         "--compile" :portal.test-runner)
+    (when (seq
+           (fs/modified-since
+            out
+            (concat
+             (fs/glob "src" "**")
+             (fs/glob "test" "**"))))
+      (clj "-Sdeps"
+           (pr-str
+            {:deps
+             {'org.clojure/clojurescript
+              {:mvn/version version}}})
+           "-M:test"
+           "-m" :cljs.main
+           "--output-dir" (str "target/cljs-output-" version)
+           "--target" :node
+           "--output-to" out
+           "--compile" :portal.test-runner))
     (node out)))
 
-(defn test []
+(defn test
+  "Run all clj/s tests."
+  []
   (test-cljs "1.10.773")
   (test-cljs "1.10.844")
   (build)
@@ -99,11 +127,16 @@
     (fs/delete-tree path))
   nil)
 
-(defn clean []
+(defn clean
+  "Remove target and resources/portal"
+  []
   (rm "resources/portal/")
   (rm "target/"))
 
-(defn ci [] (rm "resources/portal/") (check) (test))
+(defn ci
+  "Run all CI Checks."
+  []
+  (rm "resources/portal/") (check) (test))
 
 (def e2e-envs
   {:jvm  [:clojure "-M" "-e" "(set! *warn-on-reflection* true)" "-r"]
@@ -136,9 +169,14 @@
     (p/check ps)
     nil))
 
-(defn e2e-all [] (dorun (map e2e (keys e2e-envs))))
+(defn e2e-all
+  "Run e2e tests in all envs."
+  []
+  (dorun (map e2e (keys e2e-envs))))
 
-(defn app []
+(defn app
+  "Build portal PWA. (djblue.github.io/portal)"
+  []
   (fs/create-dirs "target/pwa-release/")
   (pwa/-main :prod)
   (shadow :release :pwa))
@@ -148,11 +186,25 @@
   (git :add ".")
   (git :commit "-m" (str "Release " version)))
 
-(defn pom [] (clj "-Spom"))
+(defn pom []
+  (when (seq
+         (fs/modified-since
+          "pom.xml"
+          ["deps.edn"]))
+    (clj "-Spom")))
 
-(defn jar []
+(defn jar
+  "Build a jar."
+  []
   (build)
-  (when-not (fs/exists? (str "target/portal-" version ".jar"))
+  (pom)
+  (when (seq
+         (fs/modified-since
+          (str "target/portal-" version ".jar")
+          (concat
+           ["pom.xml"]
+           (fs/glob "src" "**")
+           (fs/glob "resources" "**"))))
     (mvn :package)))
 
 (defn release [] (clean) (ci) (jar))

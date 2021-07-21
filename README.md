@@ -273,7 +273,7 @@ the following section may be of interest to you.
 
 To start the nrepl server, do:
 
-    make dev
+    bb dev
 
 vim-fireplace should automatically connect upon evaluation, but this will
 only be for clj files, to get a cljs repl, do:
@@ -298,19 +298,19 @@ development. Take a peek to get going.
 
 To format source code, do:
 
-    make fmt
+    bb fmt
 
 ### CI Checks
 
 To run all ci checks, do:
 
-    make ci
+    bb ci
 
 ### E2E Testing
 
 To run the e2e tests in the jvm, node and web environments, do:
 
-    make e2e
+    bb e2e
 
 NOTE: these aren't fully automated tests. They depend on a human for
 verification and synchronization but it beats having to type everything
