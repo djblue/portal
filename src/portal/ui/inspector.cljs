@@ -260,8 +260,13 @@
       (:title props)]]))
 
 (defn- collection-header [values type]
-  (let [theme                       (theme/use-theme)
-        [show-meta? set-show-meta!] (react/useState false)]
+  (let [[show-meta? set-show-meta!] (react/useState false)
+        theme    (theme/use-theme)
+        metadata (dissoc
+                  (meta values)
+                  :portal.runtime/id
+                  :portal.runtime/more
+                  :portal.runtime/more-limit)]
     [s/div
      {:style
       {:border [1 :solid (::c/border theme)]
@@ -282,7 +287,7 @@
          :padding (:spacing/padding theme)
          :border-right [1 :solid (::c/border theme)]}}
        [preview values]]
-      (when (meta values)
+      (when (seq metadata)
         [coll-action
          {:on-click
           (fn [e]
@@ -301,7 +306,7 @@
          {:border-top [1 :solid (::c/border theme)]
           :box-sizing :border-box
           :padding (:spacing/padding theme)}}
-        [with-depth [inspector (meta values)]]])]))
+        [with-depth [inspector metadata]]])]))
 
 (defn- container-map-k [child]
   [s/div {:style
