@@ -21,10 +21,6 @@
   ([tag a]   #?(:clj [tag a]   :cljs #js [tag a]))
   ([tag a b] #?(:clj [tag a b] :cljs #js [tag a b])))
 
-(defn- can-meta? [value]
-  #?(:clj  (instance? clojure.lang.IObj value)
-     :cljs (implements? IMeta value)))
-
 (declare json->)
 
 (def ^:dynamic *transform* nil)
@@ -33,12 +29,7 @@
   (let [value (*transform* value)]
     (if (primitive? value)
       value
-      (if-let [m (when (can-meta? value) (meta value))]
-        (tag
-         "meta"
-         (-to-json value)
-         (-to-json m))
-        (-to-json value)))))
+      (-to-json value))))
 
 (defrecord Tagged [-tag value]
   ToJson
@@ -49,6 +40,11 @@
     (with-meta
       (json-> obj)
       (json-> m))))
+
+(defn- tagged-meta [value json]
+  (if-let [m (meta value)]
+    (tag "meta" json (to-json m))
+    json))
 
 (defn- base64-encode [byte-array]
   #?(:clj  (.encodeToString (Base64/getEncoder) byte-array)
@@ -127,17 +123,21 @@
                 :cljs cljs.core/Symbol)
   ToJson
   (-to-json [value]
-    (if-let [ns (namespace value)]
-      (tag "sym" ns (name value))
-      (tag "sym" (name value)))))
+    (tagged-meta
+     value
+     (if-let [ns (namespace value)]
+       (tag "sym" ns (name value))
+       (tag "sym" (name value))))))
 
 (defn- sym-> [value]
   (let [[_ ns name] value]
     (if-not name (symbol ns) (symbol ns name))))
 
 (defn- tagged-list [tag value]
-  #?(:clj  (into [tag] (map to-json) value)
-     :cljs (.concat #js [tag] (.from js/Array value to-json))))
+  (tagged-meta
+   value
+   #?(:clj  (into [tag] (map to-json) value)
+      :cljs (.concat #js [tag] (.from js/Array value to-json)))))
 
 #?(:bb (def clojure.lang.APersistentMap$KeySeq (type (keys {0 0}))))
 #?(:bb (def clojure.lang.APersistentMap$ValSeq (type (vals {0 0}))))
@@ -282,7 +282,9 @@
 (defn- set-> [value] (into #{} (map json->) (rest value)))
 
 (defn- tagged-map [value]
-  (tagged-list "map" (mapcat identity value)))
+  (tagged-meta
+   value
+   (tagged-list "map" (mapcat identity value))))
 
 (extend-type #?(:clj  clojure.lang.PersistentHashMap
                 :cljs cljs.core/PersistentHashMap)
