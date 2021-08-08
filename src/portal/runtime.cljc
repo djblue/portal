@@ -5,10 +5,7 @@
             #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a]))
   #?(:clj (:import [java.io File]
-                   [java.net URI URL]
-                   [java.util UUID])))
-
-#?(:clj (defn random-uuid [] (UUID/randomUUID)))
+                   [java.net URI URL])))
 
 (defonce instance-cache (atom {}))
 (defonce ^:private id (atom 0))
@@ -106,8 +103,7 @@
        "ref"    (ref-> value)
        (cson/->Tagged (first value) (cson/json-> (second value)))))))
 
-(defonce state (atom {:portal/state-id (random-uuid)
-                      :portal/tap-list (list)
+(defonce state (atom {:portal/tap-list (list)
                       :portal.launcher/window-title "portal"}))
 
 (defn update-value [new-value]
@@ -116,7 +112,6 @@
    (fn [state]
      (assoc
       state
-      :portal/state-id (random-uuid)
       :portal/tap-list
       (let [value (:portal/tap-list state)]
         (if-not (coll? value)
@@ -129,7 +124,6 @@
    (reset! id 0)
    (reset! instance-cache {})
    (swap! state assoc
-          :portal/state-id (random-uuid)
           :portal/tap-list (list))
    (done nil)))
 
@@ -140,8 +134,8 @@
 
 (defn load-state [request done]
   (let [state-value @state
-        id (:portal/state-id request)
-        in-sync? (= id (:portal/state-id state-value))]
+        in-sync? (= (:portal/tap-list request)
+                    (:portal/tap-list state-value))]
     (if-not in-sync?
       (done (set-limit state-value))
       (let [watch-key (keyword (gensym))]

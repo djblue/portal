@@ -203,7 +203,7 @@
 (defn- load-state [send!]
   (-> (send!
        {:op              :portal.rpc/load-state
-        :portal/state-id (:portal/state-id @state)})
+        :portal/tap-list (:portal/tap-list @state)})
       (.then merge-state)
       (.then #(:portal/complete? %))))
 
