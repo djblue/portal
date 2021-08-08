@@ -13,25 +13,28 @@
 
 (defonce request (atom nil))
 
-(defn instance->uuid [instance]
-  (let [k [:instance instance]]
+(defn- value->id [value]
+  (let [k [:value value]]
     (-> (:value-cache *options*)
         (swap!
          (fn [cache]
            (if (contains? cache k)
              cache
              (let [id (next-id)]
-               (assoc cache [:id id] instance k id)))))
+               (assoc cache [:id id] value k id)))))
         (get k))))
 
-(defn uuid->instance [uuid]
-  (get @(:value-cache *options*) [:id uuid]))
+(defn- value->id? [value]
+  (get @(:value-cache *options*) [:value value]))
+
+(defn- id->value [id]
+  (get @(:value-cache *options*) [:id id]))
 
 (defn- to-object [value tag rep]
   (cson/tag
    "object"
    (cson/to-json
-    {:id     (instance->uuid value)
+    {:id     (value->id value)
      :type   (pr-str (type value))
      :tag    tag
      :rep    rep
@@ -92,7 +95,9 @@
   (if-not (and (coll? value)
                (can-meta? value))
     value
-    (vary-meta value assoc ::id (instance->uuid value))))
+    (if-let [id (value->id? value)]
+      (cson/->Tagged "ref" id)
+      (vary-meta value assoc ::id (value->id value)))))
 
 (defn write [value options]
   (binding [*options* options]
@@ -101,7 +106,7 @@
      {:transform (comp limit-seq id-coll)})))
 
 (defn- ref-> [value]
-  (uuid->instance (second value)))
+  (id->value (second value)))
 
 (defn read [string options]
   (binding [*options* options]
