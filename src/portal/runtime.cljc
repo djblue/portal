@@ -84,8 +84,13 @@
          (when (seq remaining)
            {::more #(limit-seq (with-meta remaining m))}))))))
 
+(defn- can-meta? [value]
+  #?(:clj  (instance? clojure.lang.IObj value)
+     :cljs (implements? IMeta value)))
+
 (defn- id-coll [value]
-  (if-not (coll? value)
+  (if-not (and (coll? value)
+               (can-meta? value))
     value
     (vary-meta value assoc ::id (instance->uuid value))))
 
