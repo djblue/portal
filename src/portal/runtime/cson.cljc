@@ -43,7 +43,7 @@
 
 (defn- tagged-meta [value json]
   (if-let [m (meta value)]
-    (tag "meta" json (to-json m))
+    (tag "meta" json (-to-json m))
     json))
 
 (defn- base64-encode [byte-array]

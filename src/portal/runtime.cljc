@@ -87,8 +87,13 @@
          (when (seq remaining)
            {::more #(limit-seq (with-meta remaining m))}))))))
 
+(defn- id-coll [value]
+  (if-not (coll? value)
+    value
+    (vary-meta value assoc ::id (instance->uuid value))))
+
 (defn write [value]
-  (cson/write value limit-seq))
+  (cson/write value (comp limit-seq id-coll)))
 
 (defn- ref-> [value]
   (uuid->instance (second value)))

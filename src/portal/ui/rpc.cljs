@@ -56,7 +56,13 @@
                  (cson/json-> (second value)))
        (diff-> value)))))
 
-(defn write [value] (cson/write value))
+(defn write [value]
+  (cson/write
+   value
+   (fn [value]
+     (if-let [id (-> value meta :portal.runtime/id)]
+       (RuntimeObject. {:id id})
+       value))))
 
 (defonce ^:private id (atom 0))
 (defonce ^:private pending-requests (atom {}))
