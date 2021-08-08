@@ -23,7 +23,7 @@
 
 (declare json->)
 
-(def ^{:dynamic true :private :true} *options* nil)
+(defonce ^{:dynamic true :private :true} *options* nil)
 
 (defn- transform [value]
   (if-let [f (:transform *options*)]

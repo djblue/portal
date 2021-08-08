@@ -7,7 +7,7 @@
   #?(:clj (:import [java.io File]
                    [java.net URI URL])))
 
-(defonce instance-cache (atom {}))
+(defonce ^:dynamic *options* nil)
 (defonce ^:private id (atom 0))
 (defn- next-id [] (swap! id inc))
 
@@ -15,7 +15,7 @@
 
 (defn instance->uuid [instance]
   (let [k [:instance instance]]
-    (-> instance-cache
+    (-> (:value-cache *options*)
         (swap!
          (fn [cache]
            (if (contains? cache k)
@@ -25,7 +25,7 @@
         (get k))))
 
 (defn uuid->instance [uuid]
-  (get @instance-cache [:id uuid]))
+  (get @(:value-cache *options*) [:id uuid]))
 
 (defn- to-object [value tag rep]
   (cson/tag
@@ -94,20 +94,24 @@
     value
     (vary-meta value assoc ::id (instance->uuid value))))
 
-(defn write [value]
-  (cson/write value {:transform (comp limit-seq id-coll)}))
+(defn write [value options]
+  (binding [*options* options]
+    (cson/write
+     value
+     {:transform (comp limit-seq id-coll)})))
 
 (defn- ref-> [value]
   (uuid->instance (second value)))
 
-(defn read [string]
-  (cson/read
-   string
-   {:default-handler
-    (fn [value]
-      (case (first value)
-        "ref"    (ref-> value)
-        (cson/->Tagged (first value) (cson/json-> (second value)))))}))
+(defn read [string options]
+  (binding [*options* options]
+    (cson/read
+     string
+     {:default-handler
+      (fn [value]
+        (case (first value)
+          "ref"    (ref-> value)
+          (cson/->Tagged (first value) (cson/json-> (second value)))))})))
 
 (defonce state (atom {:portal/tap-list (list)
                       :portal.launcher/window-title "portal"}))
@@ -128,7 +132,7 @@
   ([] (clear-values nil identity))
   ([_request done]
    (reset! id 0)
-   (reset! instance-cache {})
+   (reset! (:value-cache *options*) {})
    (swap! state assoc
           :portal/tap-list (list))
    (done nil)))

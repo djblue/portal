@@ -27,19 +27,21 @@
      (.-socket request)
      (.-headers request)
      (fn [ws]
-       (let [send!
+       (let [options {:value-cache (atom {})}
+             send!
              (fn send! [message]
-               (.send ws (rt/write message)))]
+               (.send ws (rt/write message options)))]
          (swap! c/sessions assoc session-id send!)
          (.on ws "message"
               (fn [message]
-                (a/let [req  (rt/read message)
+                (a/let [req  (rt/read message options)
                         id   (:portal.rpc/id req)
                         op   (get ops (get req :op) not-found)
                         done #(send! (assoc %
                                             :portal.rpc/id id
                                             :op :portal.rpc/response))]
-                  (op req done))))
+                  (binding [rt/*options* options]
+                    (op req done)))))
          (.on ws "close"
               (fn []
                 (swap! c/sessions dissoc session-id))))))))

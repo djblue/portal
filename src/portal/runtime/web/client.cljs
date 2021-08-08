@@ -1,10 +1,13 @@
 (ns portal.runtime.web.client
   (:require [portal.runtime :as rt]))
 
+(defonce options {:value-cache (atom {})})
+
 (defn request [session message]
   (if-let [child-window @session]
     (rt/read
-     (.portal.ui.rpc.handler ^js child-window (rt/write message)))
+     (.portal.ui.rpc.handler ^js child-window (rt/write message options))
+     options)
     (throw (ex-info "Portal not open" message))))
 
 (defn- push-state [session new-value]

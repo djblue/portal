@@ -13,27 +13,30 @@
 (def ^:private ops (merge c/ops rt/ops))
 
 (defn- rpc-handler [request]
-  (let [session-id (UUID/fromString (:query-string request))]
+  (let [session-id (UUID/fromString (:query-string request))
+        options    {:value-cache (atom {})}]
     (server/as-channel
      request
      {:on-receive
       (fn [ch message]
-        (let [body  (rt/read message)
+        (let [body  (rt/read message options)
               id    (:portal.rpc/id body)
               op    (get ops (:op body) not-found)]
           (future
-            (op body #(server/send!
-                       ch
-                       (rt/write
-                        (assoc %
-                               :portal.rpc/id id
-                               :op :portal.rpc/response)))))))
+            (binding [rt/*options* options]
+              (op body #(server/send!
+                         ch
+                         (rt/write
+                          (assoc %
+                                 :portal.rpc/id id
+                                 :op :portal.rpc/response)
+                          options)))))))
       :on-open
       (fn [ch]
         (swap! c/sessions
                assoc session-id
                (fn send! [message]
-                 (server/send! ch (rt/write message)))))
+                 (server/send! ch (rt/write message options)))))
       :on-close
       (fn [_ch _status] (swap! c/sessions dissoc session-id))})))
 

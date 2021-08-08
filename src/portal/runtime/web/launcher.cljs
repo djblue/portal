@@ -25,9 +25,10 @@
 (defn send! [message]
   (js/Promise.
    (fn [resolve _reject]
-     (let [body (rt/read message)
+     (let [body (rt/read message c/options)
            f    (get rt/ops (:op body))]
-       (f body #(resolve (rt/write %)))))))
+       (binding [rt/*options* c/options]
+         (f body #(resolve (rt/write % c/options))))))))
 
 (defn open [options]
   (swap! rt/state merge options)
