@@ -23,10 +23,12 @@
 
 (declare json->)
 
-(def ^:dynamic *transform* nil)
+(def ^{:dynamic true :private :true} *options* nil)
 
 (defn to-json [value]
-  (let [value (*transform* value)]
+  (let [value (if-let [f (:transform *options*)]
+                (f value)
+                value)]
     (if (primitive? value)
       value
       (-to-json value))))
@@ -309,8 +311,6 @@
 (defn- map-> [value]
   (apply hash-map (map json-> (rest value))))
 
-(def ^:dynamic *default-handler* nil)
-
 (defn- dispatch-value [value]
   (case (first value)
     "bigint"  (bigint-> value)
@@ -326,7 +326,7 @@
     "url"     (url-> value)
     "uuid"    (uuid-> value)
     "vec"     (vec-> value)
-    (*default-handler* value)))
+    ((:default-handler *options*) value)))
 
 (defn json-> [value]
   (if #?(:clj  (not (primitive? value))
@@ -335,16 +335,16 @@
     value))
 
 (defn write
-  ([value] (write value identity))
-  ([value transform]
-   (binding [*transform* transform]
+  ([value] (write value nil))
+  ([value options]
+   (binding [*options* options]
      #?(:clj  (json/generate-string (to-json value))
         :cljs (.stringify js/JSON (to-json value))))))
 
 (defn read
-  ([string] (read string identity))
-  ([string default-handler]
-   (binding [*default-handler* default-handler]
+  ([string] (read string nil))
+  ([string options]
+   (binding [*options* options]
      (json->
       #?(:clj  (json/parse-string string)
          :cljs (.parse js/JSON string))))))

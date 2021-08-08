@@ -95,7 +95,7 @@
     (vary-meta value assoc ::id (instance->uuid value))))
 
 (defn write [value]
-  (cson/write value (comp limit-seq id-coll)))
+  (cson/write value {:transform (comp limit-seq id-coll)}))
 
 (defn- ref-> [value]
   (uuid->instance (second value)))
@@ -103,10 +103,11 @@
 (defn read [string]
   (cson/read
    string
-   (fn [value]
-     (case (first value)
-       "ref"    (ref-> value)
-       (cson/->Tagged (first value) (cson/json-> (second value)))))))
+   {:default-handler
+    (fn [value]
+      (case (first value)
+        "ref"    (ref-> value)
+        (cson/->Tagged (first value) (cson/json-> (second value)))))}))
 
 (defonce state (atom {:portal/tap-list (list)
                       :portal.launcher/window-title "portal"}))
