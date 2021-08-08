@@ -25,10 +25,13 @@
 
 (def ^{:dynamic true :private :true} *options* nil)
 
+(defn- transform [value]
+  (if-let [f (:transform *options*)]
+    (f value)
+    value))
+
 (defn to-json [value]
-  (let [value (if-let [f (:transform *options*)]
-                (f value)
-                value)]
+  (let [value (transform value)]
     (if (primitive? value)
       value
       (-to-json value))))
@@ -329,10 +332,11 @@
     ((:default-handler *options*) value)))
 
 (defn json-> [value]
-  (if #?(:clj  (not (primitive? value))
-         :cljs ^boolean (.isArray js/Array value))
-    (dispatch-value value)
-    value))
+  (transform
+   (if #?(:clj  (not (primitive? value))
+          :cljs ^boolean (.isArray js/Array value))
+     (dispatch-value value)
+     value)))
 
 (defn write
   ([value] (write value nil))

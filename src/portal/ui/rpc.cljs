@@ -47,12 +47,23 @@
     "diff/Mismatch"  (let [[a b] (cson/json-> (second value))]
                        (diff/Mismatch. a b))))
 
+(defonce ^:private value-cache (atom {}))
+
+(defn- ref-> [value]
+  (get @value-cache (second value)))
+
 (defn read [string]
   (cson/read
    string
-   {:default-handler
+   {:transform
+    (fn [value]
+      (when-let [id (-> value meta :portal.runtime/id)]
+        (swap! value-cache assoc id value))
+      value)
+    :default-handler
     (fn [value]
       (case (first value)
+        "ref"    (ref-> value)
         "object" (RuntimeObject.
                   (cson/json-> (second value)))
         (diff-> value)))}))
@@ -117,6 +128,7 @@
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/clear
    (fn [message send!]
+     (reset! value-cache {})
      (state/dispatch! state/state state/clear)
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
