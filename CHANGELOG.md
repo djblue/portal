@@ -1,3 +1,9 @@
+## 0.13.0 - 2021-08-08
+
+- Hide `portal.runtime` metadata
+- Improve portal viewer performance
+- Leverage connection level caching to improve serialization performance
+
 ## 0.12.0 - 2021-06-12
 
 - Records can now be viewed as maps
