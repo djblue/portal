@@ -78,4 +78,4 @@
   (tap> (with-meta (range) {:hello :world}))
   (tap> (json/parse-stream (io/reader "package-lock.json")))
   (tap> (io/file "deps.edn"))
-  (tap> data))
+  (dotimes [_i 25] (tap> data)))

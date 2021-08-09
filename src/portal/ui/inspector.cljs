@@ -42,8 +42,7 @@
         value              (:value context)
         selected-viewer    (get-in @state [:selected-viewers context])
         compatible-viewers (get-compatible-viewers @viewers value)]
-    (or (some #(when (= (:name %) selected-viewer) %)
-              compatible-viewers)
+    (or (some #(when (= (:name %) selected-viewer) %) @viewers)
         (first compatible-viewers))))
 
 (defn set-viewer! [state context viewer-name]
