@@ -36,7 +36,7 @@
     <dependency>
       <groupId>cheshire</groupId>
       <artifactId>cheshire</artifactId>
-      <version>5.10.0</version>
+      <version>5.10.1</version>
     </dependency>
     <dependency>
       <groupId>http-kit</groupId>
