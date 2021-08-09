@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [read type])
   (:require [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.runtime.cson :as cson]
-            [portal.ui.state :as state]))
+            [portal.ui.state :as state]
+            [reagent.core :as r]))
 
 (deftype RuntimeObject [object]
   cson/ToJson
@@ -47,25 +48,30 @@
     "diff/Mismatch"  (let [[a b] (cson/json-> (second value))]
                        (diff/Mismatch. a b))))
 
-(defonce ^:private value-cache (atom {}))
-
 (defn- ref-> [value]
-  (get @value-cache (second value)))
+  (get @state/value-cache (second value)))
+
+(defn- runtime-id [value]
+  (or (-> value meta :portal.runtime/id)
+      (when (runtime-object? value)
+        (:id (.-object value)))))
 
 (defn read [string]
   (cson/read
    string
    {:transform
     (fn [value]
-      (when-let [id (-> value meta :portal.runtime/id)]
-        (swap! value-cache assoc id value))
+      (when-let [id (runtime-id value)]
+        (swap! state/value-cache assoc id value))
       value)
     :default-handler
     (fn [value]
       (case (first value)
         "ref"    (ref-> value)
-        "object" (RuntimeObject.
-                  (cson/json-> (second value)))
+        "object" (let [object (cson/json-> (second value))]
+                   (or
+                    (get @state/value-cache (:id object))
+                    (RuntimeObject. object)))
         (diff-> value)))}))
 
 (defn write [value]
@@ -102,6 +108,7 @@
        (catch :default e (reject e))))))
 
 (def request (if js/window.opener web-request ws-request))
+(defonce versions (r/atom {}))
 
 (def ^:private ops
   {:portal.rpc/response
@@ -110,6 +117,11 @@
            [resolve] (get @pending-requests id)]
        (swap! pending-requests dissoc id)
        (when (fn? resolve) (resolve message))))
+   :portal.rpc/update-versions
+   (fn [message send!]
+     (reset! versions (:body message))
+     (send! {:op :portal.rpc/response
+             :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/datafy
    (fn [message send!]
      (let [value (state/get-selected-value @state/state)]
@@ -128,8 +140,8 @@
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/clear
    (fn [message send!]
-     (reset! value-cache {})
      (state/dispatch! state/state state/clear)
+     (reset! versions {})
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/push-state

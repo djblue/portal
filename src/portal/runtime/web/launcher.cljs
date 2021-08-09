@@ -40,6 +40,7 @@
                  "resizable,scrollbars,status"))]
     (set! (.-onunload child)
           (fn []
+            (reset! (:value-cache c/options) {})
             (remove-item ":portal/open")))
     (set! (.-onunload js/window)
           (fn []

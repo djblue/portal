@@ -13,6 +13,40 @@
 
 (defonce request (atom nil))
 
+(defn- set-timeout [f timeout]
+  #?(:clj  (future (Thread/sleep timeout) (f))
+     :cljs (js/setTimeout f timeout)))
+
+(defn broadcast-change [_watch-key a old new]
+  (when-not (= old new)
+    (set-timeout
+     #(when (= @a new)
+        (when-let [request @request]
+          (request {:op :portal.rpc/update-versions :body new})))
+     100)))
+
+(defn- atom? [o]
+  #?(:clj  (instance? clojure.lang.Atom o)
+     :cljs (satisfies? cljs.core/IAtom o)))
+
+(defonce ^:private watch-registry (atom {}))
+(add-watch watch-registry ::watch-key #'broadcast-change)
+
+(defn- watch-atom [a]
+  (when-not (contains? @watch-registry a)
+    (swap!
+     watch-registry
+     (fn [atoms]
+       (if (contains? atoms a)
+         atoms
+         (do
+           (add-watch
+            a
+            ::watch-key
+            (fn [_watch-key a _old _new]
+              (swap! watch-registry update a inc)))
+           (assoc atoms a 0)))))))
+
 (defn- value->id [value]
   (let [k [:value value]]
     (-> (:value-cache *options*)
@@ -31,6 +65,7 @@
   (get @(:value-cache *options*) [:id id]))
 
 (defn- to-object [value tag rep]
+  (when (atom? value) (watch-atom value))
   (cson/tag
    "object"
    (cson/to-json
@@ -118,50 +153,22 @@
           "ref"    (ref-> value)
           (cson/->Tagged (first value) (cson/json-> (second value)))))})))
 
-(defonce state (atom {:portal/tap-list (list)
-                      :portal.launcher/window-title "portal"}))
+(defonce state    (atom {:portal.launcher/window-title "portal"}))
+(defonce tap-list (atom (list)))
 
 (defn update-value [new-value]
-  (swap!
-   state
-   (fn [state]
-     (assoc
-      state
-      :portal/tap-list
-      (let [value (:portal/tap-list state)]
-        (if-not (coll? value)
-          (list new-value)
-          (conj value new-value)))))))
+  (swap! tap-list conj new-value))
 
 (defn clear-values
   ([] (clear-values nil identity))
   ([_request done]
    (reset! id 0)
+   (reset! tap-list (list))
    (reset! (:value-cache *options*) {})
-   (swap! state assoc
-          :portal/tap-list (list))
+   (doseq [[a] @watch-registry]
+     (remove-watch a ::watch-key))
+   (reset! watch-registry {})
    (done nil)))
-
-(defn- set-limit [state]
-  (update state
-          :portal/tap-list
-          #(with-meta % {::more-limit 25})))
-
-(defn load-state [request done]
-  (let [state-value @state
-        in-sync? (= (:portal/tap-list request)
-                    (:portal/tap-list state-value))]
-    (if-not in-sync?
-      (done (set-limit state-value))
-      (let [watch-key (keyword (gensym))]
-        (add-watch
-         state
-         watch-key
-         (fn [_ _ _old _new]
-           (remove-watch state watch-key)
-           (done (set-limit @state))))
-        (fn [_status]
-          (remove-watch state watch-key))))))
 
 (def ^:private predicates
   (merge
@@ -178,7 +185,8 @@
 
 (def ^:private public-fns
   (merge
-   {'clojure.core/deref    #'deref
+   {'clojure.core/pr-str   #'pr-str
+    'clojure.core/deref    #'deref
     'clojure.core/type     #'type
     'clojure.datafy/datafy #'datafy}
    #?(:clj {`slurp slurp
@@ -194,6 +202,8 @@
     public-fns
     predicates)))
 
+(defn- get-tap-atom [] tap-list)
+
 (defn- ping [] ::pong)
 
 (def ^:private fns
@@ -201,8 +211,8 @@
    public-fns
    {'clojure.datafy/nav  #'nav
     `ping                #'ping
+    `get-tap-atom        #'get-tap-atom
     `clear-values        #'clear-values
-    `load-state          #'load-state
     `get-functions       #'get-functions}))
 
 (defn invoke [{:keys [f args]} done]
@@ -213,6 +223,4 @@
     (catch #?(:clj Exception :cljs js/Error) e
       (done {:return e}))))
 
-(def ops
-  {:portal.rpc/load-state   #'load-state
-   :portal.rpc/invoke       #'invoke})
+(def ops {:portal.rpc/invoke #'invoke})

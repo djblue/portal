@@ -197,29 +197,15 @@
   (-> (send! {:op :portal.rpc/invoke :f f :args args})
       (.then #(:return %))))
 
-(defn- merge-state [new-state]
-  (swap! state merge new-state))
-
-(defn- load-state [send!]
-  (-> (send!
-       {:op              :portal.rpc/load-state
-        :portal/tap-list (:portal/tap-list @state)})
-      (.then merge-state)
-      (.then #(:portal/complete? %))))
-
-(defn long-poll [send!]
-  (-> (load-state send!)
-      (.then
-       (fn [complete?]
-         (when-not complete? (long-poll send!))))))
+(defonce value-cache (r/atom {}))
 
 (defn clear [state]
   (a/do
     (invoke 'portal.runtime/clear-values)
+    (reset! value-cache (with-meta {} {:key (.now js/Date)}))
     (-> state
         (dissoc :portal/value)
         (assoc
-         :portal/tap-list '()
          :search-text ""
          :selected nil
          :portal/previous-state nil

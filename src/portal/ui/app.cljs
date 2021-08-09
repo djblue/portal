@@ -361,13 +361,13 @@
                       (fn [] (ins/set-viewer! state selected-context (:name %)))))
          compatible-viewers)))
 
-(defn- inspect-1-history []
+(defn- inspect-1-history [default-value]
   (let [current-state @(state/use-state)
         commands      (use-viewer-commands)]
     [:<>
      [commands/palette {:commands commands}]
      [s/div {:style {:flex 1}}
-      [inspect-1 (state/get-value current-state)]]]))
+      [inspect-1 (or (state/get-value current-state) default-value)]]]))
 
 (def viewers
   [ex/viewer
@@ -401,7 +401,7 @@
     (get @state/state ::c/theme ::c/nord)
     [container children]]])
 
-(defn app []
+(defn app [value]
   [root
    [toolbar]
    [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
@@ -410,4 +410,4 @@
       {:width "100%"
        :height "100%"
        :display :flex}}
-     [inspect-1-history]]]])
+     [inspect-1-history value]]]])
