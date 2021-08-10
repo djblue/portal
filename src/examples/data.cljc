@@ -47,6 +47,8 @@
    ::nested-vector [1 2 3 [4 5 6]]
    ::url-string "https://github.com/djblue/portal"})
 
+(defrecord Point [x y])
+
 (def clojure-data
   {::regex #"hello-world"
    ::var #'portal.colors/themes
@@ -57,7 +59,7 @@
    (with-meta 'symbol-key-with-meta {:a :b}) ::value
    ;;TODO: fix me, causes infininte loop in demo
    ;;::range (range)
-   })
+   ::record (->Point 0 0)})
 
 (def diff-data
   (with-meta
