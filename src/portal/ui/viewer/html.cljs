@@ -6,7 +6,7 @@
 (defn inspect-html [value]
   (let [theme (theme/use-theme)]
     [s/iframe {:style {:width "100%"
-                       :height "100%"
+                       :height "75vh"
                        :border-radius (:border-radius theme)
                        :border [1 :solid (::c/border theme)]}
                :src-doc value}]))
