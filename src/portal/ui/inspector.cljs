@@ -258,12 +258,13 @@
                :font-family (:font/family theme)}}
       (:title props)]]))
 
-(defn- collection-header [values type]
+(defn- collection-header [values]
   (let [[show-meta? set-show-meta!] (react/useState false)
         theme    (theme/use-theme)
         metadata (dissoc
                   (meta values)
                   :portal.runtime/id
+                  :portal.runtime/type
                   :portal.runtime/more
                   :portal.runtime/more-limit)]
     [s/div
@@ -293,7 +294,8 @@
             (set-show-meta! not)
             (.stopPropagation e))
           :title "metadata"}])
-      (when type
+
+      (when-let [type (-> values meta :portal.runtime/type)]
         [s/div {:style
                 {:box-sizing :border-box
                  :padding (:spacing/padding theme)
@@ -514,14 +516,6 @@
      [s/span {:style {:color (::c/tag theme)}} "#'"]
      [inspect-symbol (get-var-symbol value)]]))
 
-(defn- inspect-record [value]
-  (let [values (rpc/rep value)]
-    [with-collection
-     values
-     [:<>
-      [collection-header values (rpc/type value)]
-      [inspect-map-k-v values]]]))
-
 (defn- inspect-uri [value]
   (let [theme (theme/use-theme)
         value (str value)]
@@ -575,7 +569,6 @@
     :uri        inspect-uri
     :tagged     preview-tagged
     :ratio      inspect-ratio
-    :record     inspect-record
     inspect-object))
 
 (defn preview [value]
@@ -600,7 +593,6 @@
     :uri        inspect-uri
     :tagged     inspect-tagged
     :ratio      inspect-ratio
-    :record     inspect-record
     inspect-object))
 
 (defn inspector [value]

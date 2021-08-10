@@ -103,12 +103,6 @@
                   [(numerator value)
                    (denominator value)]))))
 
-(extend-type #?(:clj  clojure.lang.IRecord
-                :cljs cljs.core/IRecord)
-  cson/ToJson
-  (-to-json [value]
-    (to-object value :record (into {} value))))
-
 (defn limit-seq [value]
   (if-not (seq? value)
     value
@@ -132,7 +126,11 @@
     value
     (if-let [id (value->id? value)]
       (cson/->Tagged "ref" id)
-      (vary-meta value assoc ::id (value->id value)))))
+      (vary-meta value
+                 merge
+                 (cond-> {::id (value->id value)}
+                   (record? value)
+                   (assoc ::type (type value)))))))
 
 (defn write [value options]
   (binding [*options* options]

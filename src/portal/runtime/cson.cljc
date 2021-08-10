@@ -311,6 +311,11 @@
   ToJson
   (-to-json [value] (tagged-map value)))
 
+(extend-type #?(:clj  clojure.lang.IRecord
+                :cljs cljs.core/IRecord)
+  ToJson
+  (-to-json [value] (tagged-map value)))
+
 (defn- map-> [value]
   (apply hash-map (map json-> (rest value))))
 
