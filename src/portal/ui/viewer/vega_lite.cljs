@@ -13,8 +13,7 @@
            :opt-un [::type ::title ::axis]))
 
 (sp/def ::y
-  (sp/keys :req-un [::field]
-           :opt-un [::type ::title ::axis]))
+  (sp/key :opt-un [::field ::type ::title ::axis]))
 
 (sp/def ::encoding
   (sp/keys :opt-un [::x ::y ::theta]))
