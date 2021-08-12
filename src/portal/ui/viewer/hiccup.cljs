@@ -64,9 +64,12 @@
         (into
          [s/styled
           tag
-          (if-not has-attrs?
-            {:style style}
-            (update (first args) :style #(merge style (s/parse-style %))))]
+          (cond->
+           (if-not has-attrs?
+             {:style style}
+             (update (first args) :style #(merge style (s/parse-style %))))
+            (or (= tag :a) (= tag "a"))
+            (assoc :target "_blank"))]
          (map #(process-hiccup context %)
               (if-not has-attrs? args (rest args))))))))
 
