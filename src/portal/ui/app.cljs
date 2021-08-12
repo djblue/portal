@@ -145,7 +145,7 @@
         connected? (status/use-status)
         value      (filter-data (:search-text @state) value)
         selected-context (state/get-selected-context @state)
-        viewer           (ins/use-viewer selected-context)
+        viewer           (ins/get-viewer state selected-context)
         compatible-viewers (ins/get-compatible-viewers
                             @ins/viewers
                             (:value selected-context))]

@@ -32,18 +32,15 @@
   (into {} (map (juxt :name identity) viewers)))
 
 (defn get-compatible-viewers [viewers value]
-  (let [by-name            (viewers-by-name viewers)
-        default-viewer     (get by-name (:portal.viewer/default (meta value)))
-        viewers            (cons default-viewer (remove #(= default-viewer %) viewers))]
+  (let [by-name        (viewers-by-name viewers)
+        default-viewer (get by-name (:portal.viewer/default (meta value)))
+        viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
 
-(defn use-viewer [context]
-  (let [state              (state/use-state)
-        value              (:value context)
-        selected-viewer    (get-in @state [:selected-viewers context])
-        compatible-viewers (get-compatible-viewers @viewers value)]
-    (or (some #(when (= (:name %) selected-viewer) %) @viewers)
-        (first compatible-viewers))))
+(defn get-viewer [state context]
+  (if-let [selected-viewer (get-in @state [:selected-viewers context])]
+    (some #(when (= (:name %) selected-viewer) %) @viewers)
+    (first (get-compatible-viewers @viewers (:value context)))))
 
 (defn set-viewer! [state context viewer-name]
   (state/dispatch! state
@@ -595,20 +592,26 @@
     :ratio      inspect-ratio
     inspect-object))
 
+(defn get-info [state context]
+  (let [{:keys [selected expanded?]} @state]
+    {:selected? (= selected context)
+     :expanded? (contains? expanded? context)
+     :viewer    (get-viewer state context)}))
+
 (defn inspector [value]
-  (let [state (state/use-state)
-        {:keys [selected expanded?]} @state
-        context (-> (use-context)
-                    (assoc :value value)
-                    (update :depth inc))
-        viewer    (use-viewer context)
-        selected? (= selected context)
-        ref       (react/useRef nil)]
+  (let [ref   (react/useRef nil)
+        state (state/use-state)
+        context
+        (-> (use-context)
+            (assoc :value value)
+            (update :depth inc))
+        {:keys [viewer selected? expanded?]}
+        @(r/track get-info state context)]
     [with-context
      context
      (let [theme (theme/use-theme)
            depth (use-depth)
-           preview? (and (not (contains? expanded? context))
+           preview? (and (not expanded?)
                          (> depth (:limits/max-depth theme)))
            type (get-value-type value)
            component (or
