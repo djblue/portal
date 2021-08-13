@@ -1,4 +1,4 @@
-(ns portal.nrepl
+(ns ^:no-doc portal.nrepl
   (:require [portal.api :as p]
             [portal.runtime :as rt]
             [nrepl.middleware :refer [set-descriptor!]]
