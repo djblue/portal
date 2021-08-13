@@ -1,5 +1,6 @@
 (ns portal.runtime.jvm.client
-  (:require [portal.runtime :as rt])
+  (:require [clojure.pprint :as pprint]
+            [portal.runtime :as rt])
   (:import [clojure.lang IAtom IDeref]))
 
 (defonce sessions (atom {}))
@@ -75,6 +76,8 @@
 
 (defmethod print-method Portal [portal w]
   (print-method (into {} portal) w))
+
+(defmethod pprint/simple-dispatch Portal [portal] (pr portal))
 
 (defn make-atom [session-id] (Portal. session-id))
 
