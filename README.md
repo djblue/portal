@@ -84,6 +84,17 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 (p/close) ; Close the inspector when done
 ```
 
+#### Known Issue & Solution
+
+When launching Portal from a REPL, in some cases an error is thrown due 
+to conflicing multimethods in `clojure.pprint`. The error doesn't prevent 
+Portal from functioning, but can be annoying. Add this to your Portal 
+startup code to prevent the error.
+
+```clojure
+(prefer-method clojure.pprint/simple-dispatch clojure.lang.IPersistentMap clojure.lang.IDeref)
+```
+
 ### Portal Atom
 
 For the `jvm`, `bb` and `web` platforms, you can pull values from portal back
