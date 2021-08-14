@@ -21,22 +21,27 @@
    {:pretty true}))
 
 (defn- index-html [settings]
-  (html
-   [:html
-    [:head
-     [:title "portal"]
-     [:meta {:charset "UTF-8"}]
-     [:link {:rel :manifest :href "manifest.json"}]
-     [:meta {:name "theme-color" :content (::c/background2 settings)}]]
-    [:body
-     {:style
-      (identity ;; because hiccup is a macro
-       {:margin 0
-        :overflow "hidden"
-        :min-height "100vh"
-        :background (::c/background settings)})}
-     [:div {:id "root"}]
-     [:script {:src "main.js"}]]]))
+  (str
+   "<!DOCTYPE html>"
+   (html
+    [:html
+     {:lang "en"}
+     [:head
+      [:title "portal"]
+      [:meta {:charset "UTF-8"}]
+      [:meta {:name "viewport"
+              :content "width=device-width, initial-scale=1"}]
+      [:link {:rel :manifest :href "manifest.json"}]
+      [:meta {:name "theme-color" :content (::c/background2 settings)}]]
+     [:body
+      {:style
+       (identity ;; because hiccup is a macro
+        {:margin 0
+         :overflow "hidden"
+         :min-height "100vh"
+         :background (::c/background settings)})}
+      [:div {:id "root"}]
+      [:script {:src "main.js"}]]])))
 
 (defn- get-files [settings]
   (let [settings (merge settings (::c/nord c/themes))]
