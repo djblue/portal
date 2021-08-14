@@ -56,6 +56,7 @@
 
 (defn- push-state [session-id new-value]
   (request session-id {:op :portal.rpc/push-state :state new-value})
+  (reset! rt/selected new-value)
   new-value)
 
 (defrecord Portal [session-id]

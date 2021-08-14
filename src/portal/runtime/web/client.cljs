@@ -12,6 +12,7 @@
 
 (defn- push-state [session new-value]
   (request session {:op :portal.rpc/push-state :state new-value})
+  (reset! rt/selected new-value)
   new-value)
 
 (defn- datafy [session]
