@@ -38,7 +38,9 @@
           ["package.json" "package-lock.json"]))
     (npm :ci)))
 
-(defn check []
+(defn check
+  "Run all static analysis checks."
+  []
   (clj "-M:cider:check")
   (clj "-M:kondo" "--lint" :dev :src :test)
   (clj "-M:cljfmt" :check :dev :src :test))
@@ -52,7 +54,9 @@
   (npm :outdated)
   (clj "-M:antq" "-m" :antq.core))
 
-(defn fix-deps []
+(defn fix-deps
+  "Update npm and clj dependencies."
+  []
   (npm :update)
   (clj "-M:antq" "-m" :antq.core "--upgrade"))
 
