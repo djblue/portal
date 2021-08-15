@@ -27,11 +27,7 @@
       (when (contains? state :portal/value)
         {:depth 1
          :path []
-         :value (:portal/value state)})
-      (when (contains? state :portal/tap-list)
-        {:depth 1
-         :path []
-         :value (:portal/tap-list state)})))
+         :value (:portal/value state)})))
 
 (defn get-selected-value [state] (:value (get-selected-context state)))
 
@@ -39,7 +35,7 @@
 
 (defn- send! [message] (@sender message))
 
-(def no-history [::previous-commands :portal/tap-list ::c/theme])
+(def no-history [::previous-commands ::c/theme])
 
 (defn history-back [state]
   (when-let [previous-state (:portal/previous-state state)]
@@ -227,18 +223,15 @@
         (history-push state {:portal/value value})))))
 
 (defn more [state]
-  (let [k (if (contains? state :portal/value)
-            :portal/value
-            :portal/tap-list)]
-    (if-let [f (-> state k meta :portal.runtime/more)]
-      (a/let [more-values (invoke f)]
-        (update state
-                k
-                (fn [current]
-                  (with-meta
-                    (concat current more-values)
-                    (meta more-values)))))
-      state)))
+  (if-let [f (-> state :portal/value meta :portal.runtime/more)]
+    (a/let [more-values (invoke f)]
+      (update state
+              :portal/value
+              (fn [current]
+                (with-meta
+                  (concat current more-values)
+                  (meta more-values)))))
+    state))
 
 (defn get-value [state default]
   (:portal/value state default))
