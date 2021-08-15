@@ -1,12 +1,13 @@
 {:paths ["src" "resources" "dev" "test"]
  :min-bb-version "0.5.0"
- :tasks {app   tasks/app
-         deps  tasks/fix-deps
-         ci    tasks/ci
-         clean tasks/clean
-         check tasks/check
-         dev   tasks/dev
-         e2e   tasks/e2e-all
-         fmt   tasks/format
-         jar   tasks/jar
-         test  tasks/test}}
+ :tasks {app    tasks/app
+         deps   tasks/fix-deps
+         ci     tasks/ci
+         clean  tasks/clean
+         check  tasks/check
+         dev    tasks/dev
+         e2e    tasks/e2e-all
+         fmt    tasks/format
+         jar    tasks/jar
+         test   tasks/test
+         deploy tasks/deploy}}

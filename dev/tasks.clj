@@ -186,7 +186,9 @@
   (pwa/-main :prod)
   (shadow :release :pwa))
 
-(defn set-version []
+(defn set-version
+  "Set release commit."
+  []
   (version/-main version)
   (git :add ".")
   (git :commit "-m" (str "Release " version)))
@@ -242,4 +244,7 @@
 
 (defn release [] (clean) (ci) (jar))
 
-(defn deploy [] (release) (mvn :deploy))
+(defn deploy
+  "Deploy to clojars."
+  []
+  (release) (mvn :deploy))
