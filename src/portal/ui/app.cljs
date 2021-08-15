@@ -366,8 +366,19 @@
         commands      (use-viewer-commands)]
     [:<>
      [commands/palette {:commands commands}]
-     [s/div {:style {:flex 1}}
-      [inspect-1 (or (state/get-value current-state) default-value)]]]))
+     (doall
+      (map-indexed
+       (fn [index state]
+         ^{:key index}
+         [s/div
+          {:style
+           {:flex 1
+            :display
+            (if (= state current-state)
+              :block
+              :none)}}
+          [inspect-1 (state/get-value state default-value)]])
+       (state/get-history current-state)))]))
 
 (def viewers
   [ex/viewer

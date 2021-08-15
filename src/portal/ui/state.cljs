@@ -5,7 +5,7 @@
             [portal.async :as a]))
 
 (defonce sender (atom nil))
-(defonce state  (r/atom nil))
+(defonce state  (r/atom {}))
 
 (defn notify-parent [event]
   (when js/parent
@@ -240,8 +240,8 @@
                     (meta more-values)))))
       state)))
 
-(defn get-value [state]
-  (:portal/value state (:portal/tap-list state)))
+(defn get-value [state default]
+  (:portal/value state default))
 
 (defn get-history [state]
   (concat
