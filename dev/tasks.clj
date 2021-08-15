@@ -6,6 +6,7 @@
             [babashka.process :as p]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [pom]
             [portal.e2e :as e2e]
             [pwa]
             [version]))
@@ -186,12 +187,40 @@
   (git :add ".")
   (git :commit "-m" (str "Release " version)))
 
+(def deps (read-string (slurp "deps.edn")))
+
+(defn git-hash []
+  (-> ["git" "rev-parse" "HEAD"]
+      (p/process {:out :string})
+      p/check
+      :out
+      str/trim))
+
+(def options
+  {:lib 'djblue/portal
+   :description "A clojure tool to navigate through your data."
+   :version version
+   :url "https://github.com/djblue/portal"
+   :src-dirs ["src"]
+   :resource-dirs [""]
+   :resources
+   {"src" {:excludes ["portal/ui/**" "examples/**"]}
+    "resources/portal/" {:target "portal/"}}
+   :repos {"clojars" {:url "https://repo.clojars.org/"}}
+   :scm {:tag (git-hash)}
+   :license
+   {:name "MIT License"
+    :url  "https://opensource.org/licenses/MIT"}
+   :deps (:deps deps)})
+
 (defn pom []
-  (when (seq
-         (fs/modified-since
-          "pom.xml"
-          ["deps.edn"]))
-    (clj "-Spom")))
+  (let [target "pom.xml"]
+    (when (seq
+           (fs/modified-since
+            target
+            ["deps.edn"]))
+      (println "=>" "writing" target)
+      (spit target (pom/generate options)))))
 
 (defn jar
   "Build a jar."
