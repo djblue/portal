@@ -186,12 +186,13 @@
   (pwa/-main :prod)
   (shadow :release :pwa))
 
-(defn set-version
-  "Set release commit."
+(defn tag
+  "Commit and tag a version."
   []
   (version/-main version)
   (git :add ".")
-  (git :commit "-m" (str "Release " version)))
+  (git :commit "-m" (str "Release " version))
+  (git :tag version))
 
 (def deps (read-string (slurp "deps.edn")))
 

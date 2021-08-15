@@ -10,4 +10,5 @@
          fmt    tasks/format
          jar    tasks/jar
          test   tasks/test
+         tag    tasks/tag
          deploy tasks/deploy}}

@@ -18,7 +18,6 @@
 
 (def files
   ["README.md"
-   "pom.xml"
    "src/portal/runtime/index.cljc"])
 
 (defn- version-updates [next-version]

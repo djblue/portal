@@ -319,7 +319,7 @@ out manually into a repl.
 
 ### Deployment
 
-To deploy to a release to [clojars](https://clojars.org/djblue/portal),
-bump the [version](https://github.com/djblue/portal/blob/master/Makefile#L5) and do:
+To deploy to a release to [clojars](https://clojars.org/djblue/portal), do:
 
-    make set-version deploy
+    bb tag
+    bb deploy
