@@ -104,7 +104,16 @@
             on-done   (:run input)
             options   (:options input)
             n         (count (:options input))
-            on-select #(swap! selected (if (selected? %) disj conj) %)]
+            on-select #(swap! selected (if (selected? %) disj conj) %)
+            on-toggle (fn toggle-all []
+                        (if (= (count @selected) (count options))
+                          (reset! selected #{})
+                          (swap! selected into options)))
+            on-invert (fn invert []
+                        (swap! selected #(set/difference (into #{} options) %)))
+            style     {:font   :bold
+                       :cursor :pointer
+                       :color  (::c/string theme)}]
         [with-shortcuts
          (fn [log]
            (when
@@ -113,13 +122,8 @@
               #{"shift" "tab"} (swap! active #(mod (dec %) n))
               "arrowdown"      (swap! active #(mod (inc %) n))
               "tab"            (swap! active #(mod (inc %) n))
-
-              "a"
-              (if (= (count @selected) (count options))
-                (reset! selected #{})
-                (swap! selected into options))
-
-              "i"       (swap! selected #(set/difference (into #{} options) %))
+              "a"       (on-toggle)
+              "i"       (on-invert)
               " "       (on-select (nth options @active))
               "enter"   (on-done @selected)
               "escape"  (on-close)
@@ -130,8 +134,30 @@
          [container
           [s/div
            {:style {:box-sizing :border-box
-                    :padding (:spacing/padding theme)}}
-           "(Press <space> to select, <a> to toggle all, <i> to invert selection)"]
+                    :padding (:spacing/padding theme)
+                    :user-select :none
+                    :border-bottom [1 :solid (::c/border theme)]}}
+           "Press "
+           [:span
+            {:style    style
+             :on-click #(on-select (nth options @active))}
+            "space"]
+           " to select, "
+           [:span
+            {:style    style
+             :on-click on-toggle}
+            "a"]
+           " to toggle all, "
+           [:span
+            {:style    style
+             :on-click on-invert}
+            "i"]
+           " to invert and "
+           [:span
+            {:style    style
+             :on-click #(on-done @selected)}
+            "enter"]
+           " to accept"]
           [s/div
            {:style {:overflow :auto}}
            (->> options
