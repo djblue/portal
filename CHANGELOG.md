@@ -1,3 +1,26 @@
+## 0.14.0 - 2021-08-15
+
+- Preserve scroll history
+- Make :field optional in vega lite spec [#62](https://github.com/djblue/portal/pull/62)
+  - Thanks [@rfhayashi](https://github.com/rfhayashi)!
+- Client pushes selected value back to Portal Atom [#60](https://github.com/djblue/portal/pull/60)
+  - This enables the portal atom for the node.js runtime.
+  - Thanks [@andyhorng](https://github.com/andyhorng)!
+- Add solution for multimethod precedence error [#63](https://github.com/djblue/portal/pull/63)
+  - Thanks [@BrianChevalier](https://github.com/BrianChevalier)!
+- Links open in new window for hiccup viewer.
+- Treat records as simple maps in portal client, useful if you have a list of
+  records and want to view them in a table.
+- Add `clojure.core/dissoc` to command palette.
+
+### Performance
+
+- The runtime will now wait for a stable tap-list before pushing it to the
+  client.
+- Leverage
+  [`reagent.core/track`](https://github.com/reagent-project/reagent/blob/master/doc/ManagingState.md#the-track-function)
+  to improve performance of portal interactions with large collections.
+
 ## 0.13.0 - 2021-08-08
 
 - Hide `portal.runtime` metadata
