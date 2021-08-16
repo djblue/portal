@@ -521,7 +521,12 @@
     :predicate map?
     :args (comp pick-many keys)
     :name 'clojure.core/select-keys
-    :doc (:doc (meta #'clojure.core/select-keys))}])
+    :doc (:doc (meta #'clojure.core/select-keys))}
+   {:f (partial apply dissoc)
+    :predicate map?
+    :args (comp pick-many keys)
+    :name 'clojure.core/dissoc
+    :doc (:doc (meta #'clojure.core/dissoc))}])
 
 ;; portal data commands
 
