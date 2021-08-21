@@ -137,7 +137,9 @@
   (binding [*options* options]
     (cson/write
      value
-     {:transform (comp limit-seq id-coll)})))
+     (merge
+      options
+      {:transform (comp limit-seq id-coll)}))))
 
 (defn- ref-> [value]
   (id->value (second value)))
@@ -146,11 +148,13 @@
   (binding [*options* options]
     (cson/read
      string
-     {:default-handler
-      (fn [value]
-        (case (first value)
-          "ref"    (ref-> value)
-          (cson/->Tagged (first value) (cson/json-> (second value)))))})))
+     (merge
+      options
+      {:default-handler
+       (fn [value]
+         (case (first value)
+           "ref"    (ref-> value)
+           (cson/->Tagged (first value) (cson/json-> (second value)))))}))))
 
 (defonce state    (atom {:portal.launcher/window-title "portal"}))
 (defonce tap-list (atom (list)))

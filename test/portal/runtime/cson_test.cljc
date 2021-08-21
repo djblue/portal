@@ -1,5 +1,6 @@
 (ns portal.runtime.cson-test
   (:require [clojure.test :refer [deftest are is]]
+            [clojure.edn :as edn]
             [cognitect.transit :as transit]
             [portal.runtime.cson :as cson]
             #?(:clj [cheshire.core :as json]))
@@ -124,6 +125,13 @@
         value {(with-meta 'k m) 'v}]
     (is (= value (pass value)))
     (is (= m (meta (first (keys (pass value))))))))
+
+(deftest cson-over-edn
+  (is
+   (-> composite-value
+       (cson/write {:stringify pr-str})
+       (cson/read  {:parse edn/read-string})
+       (= composite-value))))
 
 #?(:clj
    (defmacro simple-benchmark
