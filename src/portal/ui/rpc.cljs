@@ -8,7 +8,7 @@
 (deftype RuntimeObject [object]
   cson/ToJson
   (-to-json [_]
-    #js ["ref" (:id object)])
+    (cson/tag "ref" (:id object)))
 
   IWithMeta
   (-with-meta [_this m]
@@ -29,7 +29,7 @@
 (defn rep [value] (:rep (.-object value)))
 
 (defn- -tag [tag value]
-  #js [tag (cson/to-json value)])
+  (cson/tag tag (cson/to-json value)))
 
 (extend-protocol cson/ToJson
   diff/Deletion
