@@ -337,10 +337,9 @@
 
 (defn json-> [value]
   (transform
-   (if #?(:clj  (not (primitive? value))
-          :cljs ^boolean (.isArray js/Array value))
-     (dispatch-value value)
-     value)))
+   (if (primitive? value)
+     value
+     (dispatch-value value))))
 
 (defn- stringify [value options]
   ((or (:stringify options)
