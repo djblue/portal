@@ -22,11 +22,14 @@
 (defonce code (io/resource "portal/main.js"))
 (defonce code-url (str->src code "text/javascript"))
 
+(defn- not-found [_request done]
+  (done {:status :not-found}))
+
 (defn send! [message]
   (js/Promise.
    (fn [resolve _reject]
      (let [body (rt/read message c/options)
-           f    (get rt/ops (:op body))]
+           f    (get rt/ops (:op body) not-found)]
        (binding [rt/*options* c/options]
          (f body #(resolve (rt/write % c/options))))))))
 
