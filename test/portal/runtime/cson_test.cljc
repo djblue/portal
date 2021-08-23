@@ -2,6 +2,7 @@
   (:require [clojure.test :refer [deftest are is]]
             [clojure.edn :as edn]
             [cognitect.transit :as transit]
+            [portal.bench :as b]
             [portal.runtime.cson :as cson]
             #?(:clj [cheshire.core :as json]))
   #?(:clj (:import [java.io ByteArrayOutputStream ByteArrayInputStream])))
@@ -68,6 +69,8 @@
   ['hello
    'hello/world
    '(1 2 3)
+   ""
+   3.14
    true
    false
    #inst "2021-04-07T22:43:59.393-00:00"
@@ -133,19 +136,6 @@
        (cson/read  {:parse edn/read-string})
        (= composite-value))))
 
-#?(:clj
-   (defmacro simple-benchmark
-     [bindings expr iterations & {:keys [print-fn] :or {print-fn 'println}}]
-     (let [bs-str   (pr-str bindings)
-           expr-str (pr-str expr)]
-       `(let ~bindings
-          (let [start#   (System/currentTimeMillis)
-                ret#     (dotimes [_# ~iterations] ~expr)
-                end#     (System/currentTimeMillis)
-                elapsed# (- end# start#)]
-            (~print-fn (str ~bs-str ", " ~expr-str ", "
-                            ~iterations " runs, " elapsed# " msecs")))))))
-
 (defn json-parse [string]
   #?(:clj  (dorun (json/parse-string string))
      :cljs (.parse js/JSON string)))
@@ -154,45 +144,23 @@
   #?(:clj  (json/generate-string value)
      :cljs (.stringify js/JSON value)))
 
-(def input (into [] (range 100000)))
+(def n 10000)
+(def v composite-value)
 
-(comment
-  (deftest write-benchmark
-    (simple-benchmark
-     [v #?(:clj  input
-           :cljs (clj->js input))]
-     (json-stringify v)
-     100)
-    (simple-benchmark
-     [v input]
-     (transit-write v)
-     100)
-    (simple-benchmark
-     [v input]
-     (cson/write v)
-     100))
-
-  (deftest read-benchmark
-    (simple-benchmark
-     [v (json-stringify #?(:clj  input
-                           :cljs (clj->js input)))]
-     (json-parse v)
-     100)
-    (simple-benchmark
-     [v (transit-write composite-value)]
-     (transit-read v)
-     1000)
-    (simple-benchmark
-     [v (cson/write composite-value)]
-     (cson/read v)
-     1000)))
+(def edn
+  {:parse     edn/read-string
+   :stringify pr-str})
 
 (deftest rich-benchmark
-  (simple-benchmark
-   [v composite-value]
-   (transit-write v)
-   1000)
-  (simple-benchmark
-   [v composite-value]
-   (cson/write v)
-   1000))
+  (b/simple-benchmark [] (transit-write v) n)
+  (b/simple-benchmark [] (cson/write v edn) n)
+  (b/simple-benchmark [] (cson/write v) n)
+
+  (prn)
+
+  (b/simple-benchmark
+   [v (transit-write v)] (transit-read v) n)
+  (b/simple-benchmark
+   [v (cson/write v edn)] (cson/read v edn) n)
+  (b/simple-benchmark
+   [v (cson/write v)] (cson/read v) n))
