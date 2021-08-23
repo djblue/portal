@@ -4,7 +4,8 @@
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
-            [portal.runtime.jvm.client :as c])
+            [portal.runtime.jvm.client :as c]
+            [portal.runtime.remote.socket :as socket])
   (:import [java.util UUID]))
 
 (defn- not-found [_request done]
@@ -12,7 +13,25 @@
 
 (def ^:private ops (merge c/ops rt/ops))
 
-(defn- rpc-handler [request]
+(def options {:hostname "localhost" :port 5555})
+
+(defn rpc-handler-remote [request]
+  (socket/setup options)
+  (let [socket (socket/create-socket options)]
+    (server/as-channel
+     request
+     {:on-receive
+      (fn [_ch message]
+        (socket/handler socket message))
+      :on-open
+      (fn [ch]
+        (doseq [message (socket/responses socket)]
+          (server/send! ch message)))
+      :on-close
+      (fn [_ch _status]
+        (socket/quit socket))})))
+
+(defn- rpc-handler-local [request]
   (let [session-id (UUID/fromString (:query-string request))
         options    {:value-cache (atom {})}]
     (server/as-channel
@@ -39,6 +58,9 @@
                  (server/send! ch (rt/write message options)))))
       :on-close
       (fn [_ch _status] (swap! c/sessions dissoc session-id))})))
+
+(defn- rpc-handler [request]
+  (rpc-handler-local request))
 
 (def ^:private resource
   {"main.js" (io/resource "portal/main.js")})
