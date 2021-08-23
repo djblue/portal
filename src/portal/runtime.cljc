@@ -123,7 +123,8 @@
 
 (defn- id-coll [value]
   (if-not (and (coll? value)
-               (can-meta? value))
+               (can-meta? value)
+               (-> value :portal.rpc/id nil?))
     value
     (if-let [id (value->id? value)]
       (cson/->Tagged "ref" id)
