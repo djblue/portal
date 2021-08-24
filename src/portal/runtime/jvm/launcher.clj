@@ -32,5 +32,6 @@
 
 (defn close []
   (c/request {:op :portal.rpc/close})
-  (some-> server deref :http-server http/server-stop!)
+  (future
+    (some-> server deref :http-server http/server-stop!))
   (reset! server nil))
