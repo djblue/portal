@@ -33,7 +33,9 @@
 
 (defn- rpc-handler-local [request]
   (let [session-id (UUID/fromString (:query-string request))
-        options    {:value-cache (atom {})}]
+        options    {:value-cache (atom {})}
+        send!      (fn send! [ch message]
+                     (server/send! ch (rt/write message options)))]
     (server/as-channel
      request
      {:on-receive
@@ -41,21 +43,16 @@
         (let [body  (rt/read message options)
               id    (:portal.rpc/id body)
               op    (get ops (:op body) not-found)]
-          (future
-            (binding [rt/*options* options]
-              (op body #(server/send!
-                         ch
-                         (rt/write
-                          (assoc %
-                                 :portal.rpc/id id
-                                 :op :portal.rpc/response)
-                          options)))))))
+          (binding [rt/*options* options]
+            (op body (fn [response]
+                       (send!
+                        ch
+                        (assoc response
+                               :portal.rpc/id id
+                               :op :portal.rpc/response)))))))
       :on-open
       (fn [ch]
-        (swap! c/sessions
-               assoc session-id
-               (fn send! [message]
-                 (server/send! ch (rt/write message options)))))
+        (swap! c/sessions assoc session-id (partial send! ch)))
       :on-close
       (fn [_ch _status] (swap! c/sessions dissoc session-id))})))
 
