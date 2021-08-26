@@ -11,13 +11,10 @@
 (defn- not-found [_request done]
   (done {:status :not-found}))
 
-(def ^:private ops (merge c/ops rt/ops))
-
-(def options {:hostname "localhost" :port 5555})
-
-(defn rpc-handler-remote [request]
-  (socket/setup options)
-  (let [socket (socket/create-socket options)]
+(defn- rpc-handler-remote [request]
+  (let [options (get-in request [:session :runtime])
+        _       (socket/setup options)
+        socket  (socket/create-socket options)]
     (server/as-channel
      request
      {:on-receive
@@ -30,6 +27,8 @@
       :on-close
       (fn [_ch _status]
         (socket/quit socket))})))
+
+(def ^:private ops (merge c/ops rt/ops))
 
 (defn- rpc-handler-local [request]
   (let [options (-> request
@@ -59,7 +58,9 @@
         (swap! c/sessions dissoc (:session-id options)))})))
 
 (defn- rpc-handler [request]
-  (rpc-handler-local request))
+  (if (get-in request [:session :runtime])
+    (rpc-handler-remote request)
+    (rpc-handler-local request)))
 
 (defn- send-resource [content-type resource]
   {:status  200
