@@ -8,7 +8,8 @@
   (:import (java.net Socket)))
 
 (defn create-socket
-  [{:keys [^String hostname ^Integer port]}]
+  [{:keys [^String hostname ^Integer port]
+    :or   {hostname "localhost"}}]
   (Socket. hostname port))
 
 (defn- write-line [socket message]
