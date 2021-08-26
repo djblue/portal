@@ -32,10 +32,11 @@
         (socket/quit socket))})))
 
 (defn- rpc-handler-local [request]
-  (let [session-id (UUID/fromString (:query-string request))
-        options    {:value-cache (atom {})}
-        send!      (fn send! [ch message]
-                     (server/send! ch (rt/write message options)))]
+  (let [options (-> request
+                    :session
+                    (assoc :value-cache (atom {})))
+        send!   (fn send! [ch message]
+                  (server/send! ch (rt/write message options)))]
     (server/as-channel
      request
      {:on-receive
@@ -52,15 +53,13 @@
                                :op :portal.rpc/response)))))))
       :on-open
       (fn [ch]
-        (swap! c/sessions assoc session-id (partial send! ch)))
+        (swap! c/sessions assoc (:session-id options) (partial send! ch)))
       :on-close
-      (fn [_ch _status] (swap! c/sessions dissoc session-id))})))
+      (fn [_ch _status]
+        (swap! c/sessions dissoc (:session-id options)))})))
 
 (defn- rpc-handler [request]
   (rpc-handler-local request))
-
-(def ^:private resource
-  {"main.js" (io/resource "portal/main.js")})
 
 (defn- send-resource [content-type resource]
   {:status  200
@@ -77,11 +76,36 @@
     (when (and (str/includes? uri ".map") (.exists file))
       (send-resource "application/json" (slurp file)))))
 
+(defn- main-js [request]
+  {:status  200
+   :headers {"Content-Type" "text/javascript"}
+   :body
+   (io/file
+    (case (-> request :session :mode)
+      :dev "target/resources/portal/main.js"
+      (io/resource "portal/main.js")))})
+
+(defn- get-session [request]
+  (some->
+   (or (:query-string request)
+       (when-let [referer (get-in request [:headers "referer"])]
+         (last (str/split referer #"\?"))))
+   UUID/fromString))
+
+(defn- with-session [request]
+  (if-let [session-id (get-session request)]
+    (assoc request :session
+           (-> @rt/sessions
+               (get session-id)
+               (assoc :session-id session-id)))
+    request))
+
 (defn handler [request]
-  (let [paths
-        {"/"        #(send-resource "text/html"       (index/html))
+  (let [request (with-session request)
+        paths
+        {"/"        #(send-resource "text/html" (index/html))
          "/wait.js" wait
-         "/main.js" #(send-resource "text/javascript" (slurp (resource "main.js")))
+         "/main.js" #(main-js request)
          "/rpc"     #(rpc-handler request)}
         f (get paths (:uri request))]
     (cond

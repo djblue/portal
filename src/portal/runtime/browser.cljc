@@ -113,6 +113,7 @@
         session-id (:session-id portal)
         url        (str "http://" host ":" port "?" session-id)
         chrome-bin (get-chrome-bin)]
+    (swap! rt/sessions assoc session-id options)
     (when-not (c/open? session-id)
       (if (and (some? chrome-bin)
                (:portal.launcher/app options true))

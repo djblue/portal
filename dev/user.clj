@@ -6,7 +6,6 @@
             [examples.data :refer [data]]
             [portal.api :as p]
             [portal.runtime.browser :as browser]
-            [portal.runtime.jvm.server :as s]
             [pwa]
             [tracker]))
 
@@ -46,21 +45,17 @@
      :files         (seq (.listFiles this))
      :parent        (.getParentFile this)}))
 
-(defn swap-dev []
-  (alter-var-root
-   #'s/resource
-   assoc "main.js" (io/file "target/resources/portal/main.js")))
-
-(swap-dev)
-
 (comment
   (watch :pwa)
 
   (tracker/start)
   (tracker/stop)
 
+  (def portal     (p/open))
+  (def portal-dev (p/open {:mode :dev}))
+
   (with-redefs [browser/pwa (:dev pwa/envs)]
-    (def portal (p/open)))
+    (def portal (p/open {:mode :dev})))
   (add-tap #'p/submit)
   (remove-tap #'p/submit)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])

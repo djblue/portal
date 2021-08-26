@@ -1,6 +1,7 @@
 (ns portal.runtime.node.launcher
   (:require ["http" :as http]
             [portal.async :as a]
+            [portal.runtime :as rt]
             [portal.runtime.browser :as browser]
             [portal.runtime.node.client :as c]
             [portal.runtime.node.server :as server]))
@@ -46,7 +47,8 @@
      portal)))
 
 (defn clear []
-  (c/request {:op :portal.rpc/clear}))
+  (c/request {:op :portal.rpc/clear})
+  (swap! rt/sessions select-keys (keys @c/sessions)))
 
 (defn close []
   (a/do
@@ -54,5 +56,6 @@
     (doseq [socket @sockets] (.destroy socket))
     (reset! sockets #{})
     (stop @server)
-    (reset! server nil))
+    (reset! server nil)
+    (reset! rt/sessions {}))
   true)

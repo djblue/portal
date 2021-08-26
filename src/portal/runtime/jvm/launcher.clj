@@ -1,5 +1,6 @@
 (ns portal.runtime.jvm.launcher
   (:require [org.httpkit.server :as http]
+            [portal.runtime :as rt]
             [portal.runtime.browser :as browser]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.jvm.server :as server]))
@@ -28,10 +29,12 @@
      (browser/open {:portal portal :options options :server server}))))
 
 (defn clear []
-  (c/request {:op :portal.rpc/clear}))
+  (c/request {:op :portal.rpc/clear})
+  (swap! rt/sessions select-keys (keys @c/sessions)))
 
 (defn close []
   (c/request {:op :portal.rpc/close})
   (future
     (some-> server deref :http-server http/server-stop!))
-  (reset! server nil))
+  (reset! server nil)
+  (reset! rt/sessions {}))

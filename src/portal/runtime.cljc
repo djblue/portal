@@ -10,6 +10,7 @@
 (defonce ^:dynamic *options* nil)
 (defonce ^:private id (atom 0))
 (defn- next-id [] (swap! id inc))
+(defonce sessions (atom {}))
 
 (defonce request (atom nil))
 (defonce selected (atom nil))
