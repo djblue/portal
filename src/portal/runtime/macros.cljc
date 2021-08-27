@@ -7,5 +7,10 @@
 
 #?(:clj
    (defmacro extend-type? [type & args]
-     (when (:type (resolve-var &env type))
-       `(extend-type ~type ~@args))))
+     (when (or (= (namespace type) "js")
+               (:type (resolve-var &env type)))
+       `(extend-type ~type ~@args)))
+   :cljs
+   (defmacro extend-type? [type & args]
+     `(when (exists? ~type)
+        (extend-type ~type ~@args))))

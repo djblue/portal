@@ -66,10 +66,16 @@
 
 (defn- bin-> [value] (base64-decode (second value)))
 
-(extend-type #?(:clj  clojure.lang.BigInt
-                :cljs js/BigInt)
-  ToJson
-  (-to-json [value] (tag "bigint" (str value))))
+#?(:clj
+   (extend-type clojure.lang.BigInt
+     ToJson
+     (-to-json [value] (tag "bigint" (str value)))))
+
+#?(:cljs
+   (m/extend-type?
+    js/BigInt
+    ToJson
+    (-to-json [value] (tag "bigint" (str value)))))
 
 (defn- bigint-> [value]
   #?(:clj  (bigint    (second value))
@@ -102,10 +108,16 @@
   #?(:clj  (UUID/fromString (second value))
      :cljs (uuid (second value))))
 
-(extend-type #?(:clj  URL
-                :cljs js/URL)
-  ToJson
-  (-to-json [value] (tag "url" (str value))))
+#?(:clj
+   (extend-type URL
+     ToJson
+     (-to-json [value] (tag "url" (str value)))))
+
+#?(:cljs
+   (m/extend-type?
+    js/URL
+    ToJson
+    (-to-json [value] (tag "url" (str value)))))
 
 (defn- url-> [value]
   #?(:clj  (URL. (second value))
@@ -190,6 +202,7 @@
 
 #?(:cljs
    (m/extend-type?
+    ^:cljs.analyzer/no-resolve
     cljs.core/IntegerRange
     ToJson
     (-to-json [value] (tagged-list "list" value))))
