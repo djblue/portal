@@ -27,6 +27,7 @@ jobs:
     - uses: turtlequeue/setup-babashka@v1.3.0
       with:
         babashka-version: 0.5.0
+    - run: bb -m tasks/setup-planck
     - run: bb ci
     - run: bb app
       if: ${{ github.event_name == 'push' }}

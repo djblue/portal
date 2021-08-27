@@ -1,6 +1,7 @@
 (ns portal.runtime.cson-test
   (:require [clojure.test :refer [deftest are is]]
-            [clojure.edn :as edn]
+            #?(:clj  [clojure.edn :as edn]
+               :cljs [cljs.reader :as edn])
             [cognitect.transit :as transit]
             [portal.bench :as b]
             [portal.runtime.cson :as cson]
@@ -34,7 +35,9 @@
     nil
     0
     1.0
-    #?(:clj 42N :cljs (js/BigInt "42"))
+    #?(:clj 42N
+       :cljs (when (exists? js/BigInt)
+               (js/BigInt "42")))
     \newline
     true
     false

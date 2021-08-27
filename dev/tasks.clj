@@ -96,6 +96,11 @@
   (build)
   (clj "-M:dev:cider:cljs:shadow" :watch :pwa :client))
 
+(defn setup-planck []
+  (sh :sudo :add-apt-repository "ppa:mfikes/planck")
+  (sh :sudo :apt-get :update)
+  (sh :sudo :apt-get :install :planck))
+
 (defn test-cljs [version]
   (let [out (str "target/test." version ".js")]
     (when (seq
@@ -122,6 +127,7 @@
   []
   (test-cljs "1.10.773")
   (test-cljs "1.10.844")
+  (sh :planck "-c" "src:test" "-m" :portal.test-planck)
   (build)
   (clj "-M:test" "-m" :portal.test-runner)
   (bb "-m" :portal.test-runner))
