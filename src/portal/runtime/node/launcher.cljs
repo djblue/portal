@@ -59,3 +59,5 @@
     (reset! server nil)
     (reset! rt/sessions {}))
   true)
+
+(reset! rt/request c/request)

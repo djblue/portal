@@ -38,3 +38,5 @@
     (some-> server deref :http-server http/server-stop!))
   (reset! server nil)
   (reset! rt/sessions {}))
+
+(reset! rt/request c/request)

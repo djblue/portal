@@ -54,6 +54,7 @@
   (def portal (p/open))
   (def dev    (p/open {:mode :dev}))
   (def remote (p/open {:runtime {:type :socket :port 5555}}))
+  (def remote (p/open {:runtime {:type :socket :port 6666}}))
 
   (with-redefs [browser/pwa (:dev pwa/envs)]
     (def portal (p/open {:mode :dev})))

@@ -81,5 +81,3 @@
 
 (defn open? [session-id]
   (get @sessions session-id))
-
-(reset! rt/request request)

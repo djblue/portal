@@ -12,21 +12,21 @@
   (done {:status :not-found}))
 
 (defn- rpc-handler-remote [request]
-  (let [options (get-in request [:session :runtime])
-        _       (socket/setup options)
-        socket  (socket/create-socket options)]
+  (let [conn (socket/open (:session request))]
     (server/as-channel
      request
      {:on-receive
       (fn [_ch message]
-        (socket/handler socket message))
+        (socket/handler conn message))
       :on-open
       (fn [ch]
-        (doseq [message (socket/responses socket)]
-          (server/send! ch message)))
+        (try
+          (doseq [message (socket/responses conn)]
+            (server/send! ch message))
+          (catch Exception _e)))
       :on-close
       (fn [_ch _status]
-        (socket/quit socket))})))
+        (socket/close conn))})))
 
 (def ^:private ops (merge c/ops rt/ops))
 
