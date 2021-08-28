@@ -122,10 +122,18 @@
   #?(:clj  (instance? clojure.lang.IObj value)
      :cljs (implements? IMeta value)))
 
+(defn- has? [m k]
+  (try
+    (k m)
+    (catch #?(:clj Exception :cljs :default) _e)))
+
+(defn- no-cache [value]
+  (or (not (coll? value))
+      (not (can-meta? value))
+      (has? value :portal.rpc/id)))
+
 (defn- id-coll [value]
-  (if-not (and (coll? value)
-               (can-meta? value)
-               (-> value :portal.rpc/id nil?))
+  (if (no-cache value)
     value
     (if-let [id (value->id? value)]
       (cson/->Tagged "ref" id)
