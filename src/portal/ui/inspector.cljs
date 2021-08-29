@@ -649,6 +649,7 @@
               (state/dispatch! state state/nav context)
               (.stopPropagation e))})
          {:ref ref
+          :title (-> value meta :doc)
           :style
           {:width "100%"
            :border-radius (:border-radius theme)

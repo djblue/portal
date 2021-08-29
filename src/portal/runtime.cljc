@@ -75,6 +75,7 @@
      :type   (pr-str (type value))
      :tag    tag
      :rep    rep
+     :meta   (meta value)
      :pr-str (binding [*print-length* 10
                        *print-level* 2]
                (pr-str value))})))
@@ -119,7 +120,8 @@
            {::more #(limit-seq (with-meta remaining m))}))))))
 
 (defn- can-meta? [value]
-  #?(:clj  (instance? clojure.lang.IObj value)
+  #?(:clj  (or (instance? clojure.lang.IObj value)
+               (instance? clojure.lang.Var value))
      :cljs (implements? IMeta value)))
 
 (defn- has? [m k]
@@ -190,7 +192,8 @@
   (merge
    {'clojure.core/deref
     #?(:clj  #(instance? clojure.lang.IRef %)
-       :cljs #(satisfies? cljs.core/IDeref %))}
+       :cljs #(satisfies? cljs.core/IDeref %))
+    'clojure.core/meta can-meta?}
    #?(:clj
       {'clojure.core/slurp
        #(or (instance? URI %)
@@ -204,6 +207,7 @@
    {'clojure.core/pr-str   #'pr-str
     'clojure.core/deref    #'deref
     'clojure.core/type     #'type
+    'clojure.core/meta     #'meta
     'clojure.datafy/datafy #'datafy}
    #?(:clj {`slurp slurp
             `bean  bean})))

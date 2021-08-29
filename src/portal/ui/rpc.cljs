@@ -10,6 +10,9 @@
   (-to-json [_]
     (cson/tag "ref" (:id object)))
 
+  IMeta
+  (-meta [_this] (:meta object))
+
   IWithMeta
   (-with-meta [_this m]
     (RuntimeObject.
