@@ -18,7 +18,7 @@
     hickory/hickory {:mvn/version "0.7.1"}}}
   :shadow
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.15.5"}}
+   {thheller/shadow-cljs {:mvn/version "2.15.6"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
