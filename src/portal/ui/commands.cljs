@@ -305,21 +305,29 @@
        {:background (::c/background theme)}}]
      children)))
 
+(defn- stringify [props option]
+  (pr-str
+   (if-let [filter-by (:filter-by props)]
+     (filter-by option)
+     option)))
+
+(defn- filter-options [props text]
+  (if (str/blank? text)
+    (:options props)
+    (let [words (str/split text #"\s+")]
+      (for [option  (:options props)
+            :let    [s (stringify props option)]
+            :when   (every? #(str/includes? s %) words)]
+        option))))
+
 (defn palette-component []
   (let [active (r/atom 0)
         filter-text (r/atom "")]
-    (fn [{:keys [on-select component filter-by options]
-          :or   {component ins/inspector
-                 filter-by identity}}]
+    (fn [{:keys [on-select component]
+          :or   {component ins/inspector}
+          :as options}]
       (let [theme (theme/use-theme)
-            text @filter-text
-            options
-            (keep
-             (fn [option]
-               (when (or (str/blank? text)
-                         (str/includes? (pr-str (filter-by option)) text))
-                 option))
-             options)
+            options (filter-options options @filter-text)
             n (count options)
             on-close close
             on-select
