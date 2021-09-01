@@ -2,8 +2,11 @@
   (:require [clojure.spec.alpha :as spec]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.icons :as icon]
+            [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+            [portal.ui.theme :as theme]
+            [reagent.core :as r]))
 
 (spec/def ::cause string?)
 
@@ -29,33 +32,92 @@
 (defn exception? [value]
   (spec/valid? ::exception value))
 
-(defn- format-trace-line [class method]
-  (let [split (str/split class #"\$")]
-    (if (and ('#{invokeStatic invoke doInvoke} method)
-             (< 1 (count split)))
-      [(str/join "/" (drop-last split)) (last split)]
-      [class method])))
+(defn- inspect-sub-trace [trace]
+  (r/with-let [expanded? (r/atom (zero? (:index (first trace))))]
+    (let [theme (theme/use-theme)
+          {:keys [clj? sym class file]} (first trace)]
+      [:<>
+       [(if @expanded?
+          icon/chevron-down
+          icon/chevron-right)
+        {:size "sm"
+         :style
+         {:grid-column "1"
+          :width       (* 3 (:spacing/padding theme))
+          :color       (::c/border theme)}}]
+       [s/div
+        {:on-click #(swap! expanded? not)
+         :style
+         {:grid-column "2"
+          :cursor      :pointer}}
 
-(defn- inspect-trace-line [trace-line]
+        [s/span
+         {:title file
+          :style {:color (if clj?
+                           (::c/namespace theme)
+                           (::c/package theme))}}
+         (if-not clj? class (namespace sym))]]
+       [s/span
+        {:style
+         {:grid-column "3"
+          :color       (::c/border theme)}}
+        " [" (count trace) "]"]
+       (when @expanded?
+         (for [{:keys [clj? sym method line index]} trace]
+           [:<>
+            {:key index}
+            [s/div]
+            [s/div
+             (if clj?
+               (name sym)
+               [s/div method])]
+            [ins/inspector line]]))])))
+
+(defn- analyze-trace-item [index trace]
+  (let [[class method file line] trace
+        clj-name (demunge class)
+        clj? (or (str/ends-with? file ".clj")
+                 (not= clj-name class))]
+    (merge
+     {:class  class
+      :method method
+      :file   file
+      :line   line
+      :index  index}
+     (when clj?
+       {:clj? true
+        :sym  clj-name}))))
+
+(defn- inspect-stack-trace [trace]
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style
+      {:display :grid
+       :grid-template-columns "auto 1fr auto"
+       :align-items :center
+       :grid-gap [0 (:spacing/padding theme)]}}
+     (->> trace
+          (map-indexed
+           analyze-trace-item)
+          (partition-by :file)
+          (map
+           (fn [trace]
+             ^{:key (hash trace)}
+             [inspect-sub-trace trace])))]))
+
+(defn- inspect-via [via]
   (let [theme (theme/use-theme)
-        [class method file line] trace-line]
+        {:keys [type message]} (first via)]
     [:<>
-     (when file
-       [s/div {:style
-               {:grid-column "1"
-                :text-align :right
-                :color (::c/string theme)}}
-        (pr-str file)])
-     [s/div {:style
-             {:grid-column "2"
-              :text-align :right
-              :color (::c/number theme)}}
-      line]
-     (let [[class method] (format-trace-line class method)]
-       [s/div {:style
-               {:grid-column "3"}}
-        [s/span {:style {:color (::c/namespace theme)}} class "/"]
-        [s/span {:style {:color (::c/symbol theme)}} method]])]))
+     [s/div
+      {:style {:text-align :center}}
+      [s/span
+       {:style
+        {:font-weight :bold
+         :margin-right (:spacing/padding theme)
+         :color (::c/exception theme)}}
+       type]
+      message]]))
 
 (defn inspect-exception [value]
   (let [theme (theme/use-theme)]
@@ -69,35 +131,12 @@
        :font-size  (:font-size theme)
        :border-radius (:border-radius theme)
        :border [1 :solid (::c/border theme)]}}
-     (let [{:keys [via trace]} value]
-       [s/div
-        {:style
-         {:display :flex
-          :justify-content :center}}
-        [s/div
-         {:style {:display    :grid
-                  :grid-gap   (:spacing/padding theme)
-                  :grid-template-columns "auto auto auto"}}
-         (map-indexed
-          (fn [idx {:keys [type message at]}]
-            ^{:key idx}
-            [:<>
-             [s/div
-              {:style
-               {:text-align :right
-                :grid-column "1"
-                :font-weight :bold
-                :color (::c/exception theme)}}
-              type]
-             [s/div
-              {:style {:grid-column "3"}}
-              message]
-             [inspect-trace-line at]])
-          via)
-         (map-indexed
-          (fn [idx trace-line]
-            ^{:key idx} [inspect-trace-line trace-line])
-          (rest trace))]])]))
+     [s/div
+      {:style
+       {:margin [0 :auto]
+        :width  :fit-content}}
+      [inspect-via (:via value)]
+      [inspect-stack-trace (:trace value)]]]))
 
 (def viewer
   {:predicate exception?

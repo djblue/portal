@@ -23,6 +23,7 @@
            ::exception (try (/ 1 0) (catch Exception e e))
            ::io-exception (try (slurp "/hello") (catch Exception e e))
            ::user-exception (Exception. "hi")
+           ::ex-info (ex-info "My message" {:my :data})
            ::uuid (UUID/randomUUID)
            ::date (java.util.Date.)
            ::binary (slurp-bytes (io/resource "screenshot.png"))
