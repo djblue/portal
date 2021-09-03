@@ -17,7 +17,7 @@
     :scope (:host settings)
     :start_url (:host settings)
     :display "standalone"
-    :display_override ["tabbed" "minimal-ui"]}
+    :display_override ["minimal-ui"]}
    {:pretty true}))
 
 (defn- index-html [settings]
