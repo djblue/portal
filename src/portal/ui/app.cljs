@@ -8,6 +8,7 @@
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
+            [portal.ui.viewer.bin :as bin]
             [portal.ui.viewer.charts :as charts]
             [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.date-time :as date-time]
@@ -389,6 +390,7 @@
    charts/histogram-chart
    image/viewer
    ins/viewer
+   bin/viewer
    table/viewer
    tree/viewer
    text/viewer
