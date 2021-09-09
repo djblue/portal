@@ -621,11 +621,12 @@
 
 (defn copy-edn! [value]
   (copy-to-clipboard!
-   (with-out-str
-     (binding [*print-meta* true ;; TODO: doesn't work
-               *print-length* 1000
-               *print-level* 100]
-       (pp/pprint value)))))
+   (str/trim
+    (with-out-str
+      (binding [*print-meta* true
+                *print-length* 1000
+                *print-level* 100]
+        (pp/pprint value))))))
 
 (defn select-viewer [state]
   (when-let [selected-context (state/get-selected-context @state)]
