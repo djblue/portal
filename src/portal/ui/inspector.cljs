@@ -2,6 +2,7 @@
   (:require ["react" :as react]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
+            [portal.ui.filter :as f]
             [portal.ui.lazy :as l]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
@@ -38,13 +39,14 @@
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
 
 (defn get-viewer [state context]
-  (if-let [selected-viewer (get-in @state [:selected-viewers context])]
+  (if-let [selected-viewer
+           (get-in @state [:selected-viewers (state/get-location context)])]
     (some #(when (= (:name %) selected-viewer) %) @viewers)
     (first (get-compatible-viewers @viewers (:value context)))))
 
 (defn set-viewer! [state context viewer-name]
   (state/dispatch! state
-                   assoc-in [:selected-viewers context]
+                   assoc-in [:selected-viewers (state/get-location context)]
                    viewer-name))
 
 (def ^:private inspector-context (react/createContext {:depth 0 :path []}))
@@ -71,7 +73,10 @@
       #js {:value (merge context value)}] children)))
 
 (defn with-collection [coll & children]
-  (into [with-context {:collection coll :key nil}] children))
+  (into [with-context
+         {:key nil
+          :collection (:portal.ui.filter/value (meta coll) coll)}]
+        children))
 
 (defn with-key [k & children]
   (let [context (use-context)
@@ -462,7 +467,7 @@
 
       (or (< (count value) limit)
           (= (:depth context) 1)
-          (contains? expanded? context))
+          (contains? expanded? (state/get-location context)))
       [s/span {:style {:color (::c/string theme)}}
        (pr-str value)]
 
@@ -542,7 +547,7 @@
              {:color (::c/text theme)}}
      (if (or (< (count string) limit)
              (= (:depth context) 1)
-             (contains? expanded? context))
+             (contains? expanded? (state/get-location context)))
        string
        (trim-string string limit))]))
 
@@ -593,9 +598,10 @@
     inspect-object))
 
 (defn get-info [state context]
-  (let [{:keys [selected expanded?]} @state]
+  (let [{:keys [selected expanded?]} @state
+        location (state/get-location context)]
     {:selected? (= selected context)
-     :expanded? (contains? expanded? context)
+     :expanded? (contains? expanded? location)
      :viewer    (get-viewer state context)}))
 
 (defn inspector [value]
@@ -605,8 +611,12 @@
         (-> (use-context)
             (assoc :value value)
             (update :depth inc))
+        location (state/get-location context)
         {:keys [viewer selected? expanded?]}
-        @(r/track get-info state context)]
+        @(r/track get-info state context)
+        value (f/filter-value
+               value
+               (get-in @state [:search-text location] ""))]
     [with-context
      context
      (let [theme (theme/use-theme)
@@ -634,12 +644,13 @@
             :on-focus
             (fn [e]
               (when-not selected?
+                (tap> context)
                 (state/dispatch! state assoc :selected context))
               (.stopPropagation e))
             :on-mouse-down
             (fn [e]
               (when (= (.-button e) 1)
-                (state/dispatch! state state/toggle-expand context)
+                (state/dispatch! state state/toggle-expand location)
                 (.stopPropagation e)))
             :on-click
             (fn [e]

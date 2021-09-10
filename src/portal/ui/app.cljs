@@ -28,81 +28,10 @@
             [portal.ui.viewer.vega :as vega]
             [portal.ui.viewer.vega-lite :as vega-lite]))
 
-(defn filter-data [search-text value]
-  (let [filter-data (partial filter-data search-text)]
-    (if (str/blank? search-text)
-      value
-        ;:diff
-      (case (ins/get-value-type value)
-        :map
-        (let [new-value (->>
-                         (for [[k v] value]
-                           (let [filter-k (filter-data k)
-                                 filter-v (filter-data v)]
-                             (if (= ::not-found filter-k filter-v)
-                               ::not-found
-                               [(if (= filter-k ::not-found)
-                                  k
-                                  filter-k)
-                                (if (= filter-v ::not-found)
-                                  v
-                                  filter-v)])))
-                         (remove #{::not-found})
-                         (into {}))]
-          (if (empty? new-value)
-            ::not-found
-            (with-meta new-value (meta value))))
-
-        :set
-        (let [new-value (->> value
-                             (map filter-data)
-                             (remove #{::not-found})
-                             (into #{}))]
-          (if (empty? new-value)
-            ::not-found
-            (with-meta new-value (meta value))))
-
-        :vector
-        (let [new-value  (->> value
-                              (map filter-data)
-                              (remove #{::not-found})
-                              (into []))]
-          (if (empty? new-value)
-            ::not-found
-            (with-meta new-value (meta value))))
-
-        (:list
-         :coll)
-        (let [new-value (->> value
-                             (take 1000)
-                             (map filter-data)
-                             (remove #{::not-found}))]
-          (if (empty? new-value)
-            ::not-found
-            (with-meta new-value (meta value))))
-
-        (:boolean
-         :symbol
-         :number
-         :string
-         :keyword
-         :var
-         :exception
-         :object
-         :uuid
-         :uri
-         :date
-         :tagged)
-        (if (str/includes? (pr-str value) search-text)
-          value
-          ::not-found)
-
-        ::not-found))))
-
 (defn- selected-context-view []
-  (let [theme            (theme/use-theme)
-        state            (state/use-state)
-        path             (state/get-path @state)]
+  (let [theme (theme/use-theme)
+        state (state/use-state)
+        path  (state/get-path @state)]
     [s/div
      {:style
       {:max-width "100vw"
@@ -144,7 +73,6 @@
   (let [theme      (theme/use-theme)
         state      (state/use-state)
         connected? (status/use-status)
-        value      (filter-data (:search-text @state) value)
         selected-context (state/get-selected-context @state)
         viewer           (ins/get-viewer state selected-context)
         compatible-viewers (ins/get-compatible-viewers
@@ -162,8 +90,7 @@
         :min-width "100%"
         :box-sizing :border-box}}
       [s/div
-       {:on-click #(state/dispatch! state state/clear-selected)
-        :style
+       {:style
         {:position :absolute
          :top 0
          :left 0
@@ -237,16 +164,24 @@
      [selected-context-view]]))
 
 (defn search-input []
-  (let [theme (theme/use-theme)
-        state (state/use-state)]
+  (let [theme    (theme/use-theme)
+        state    (state/use-state)
+        context  (state/get-selected-context @state)
+        location (state/get-location context)]
     [s/input
-     {:on-change #(state/dispatch!
-                   state
-                   assoc
-                   :search-text
-                   (.-value (.-target %)))
-      :value (or (:search-text @state) "")
-      :placeholder "Type to filter..."
+     {:disabled  (nil? context)
+      :on-change #(let [value (.-value (.-target %))]
+                    (when context
+                      (state/dispatch!
+                       state
+                       update
+                       :search-text
+                       (fn [filters]
+                         (if (str/blank? value)
+                           (dissoc filters location)
+                           (assoc filters location value))))))
+      :value (get-in @state [:search-text location] "")
+      :placeholder "Click to select, type to filter..."
       :style
       {:background (::c/background theme)
        :padding (:spacing/padding theme)

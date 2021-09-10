@@ -1,12 +1,17 @@
 (ns portal.ui.viewer.text
   (:require [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
+            [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
 (defn inspect-text [value]
-  (let [theme (theme/use-theme)]
+  (let [theme    (theme/use-theme)
+        state    (state/use-state)
+        context  (ins/use-context)
+        location (state/get-location context)]
     [s/div
      {:style
       {:overflow :auto
@@ -26,7 +31,7 @@
             [(inc line) line-content]))
          (filter
           (fn [[_ line-content]]
-            (if-let [search-text (:search-text {})] ;; TODO fix me
+            (if-let [search-text (get-in @state [:search-text location])]
               (str/includes? line-content search-text)
               true)))
          (map

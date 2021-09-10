@@ -31,6 +31,11 @@
 
 (defn get-selected-value [state] (:value (get-selected-context state)))
 
+(defn get-location
+  "Get a stable location for a given context."
+  [context]
+  (select-keys context [:value :path]))
+
 (defn clear-selected [state] (dissoc state :selected))
 
 (defn- send! [message] (@sender message))
@@ -67,18 +72,18 @@
   (assoc (push-command state entry)
          :portal/previous-state state
          :portal/next-state nil
-         :search-text ""
          :selected nil
          :portal/key   key
          :portal/f     f
          :portal/value value))
 
 (defn toggle-expand [state context]
-  (let [expanded? (get state :expanded? #{})]
+  (let [expanded? (get state :expanded? #{})
+        location  (get-location context)]
     (assoc state :expanded?
-           (if (contains? expanded? context)
-             (disj expanded? context)
-             (conj expanded? context)))))
+           (if (contains? expanded? location)
+             (disj expanded? location)
+             (conj expanded? location)))))
 
 (defn focus-selected [state context]
   (history-push state {:portal/value (:value context)}))
@@ -200,10 +205,11 @@
     (invoke 'portal.runtime/clear-values)
     (reset! value-cache (with-meta {} {:key (.now js/Date)}))
     (-> state
-        (dissoc :portal/value)
+        (dissoc :portal/value
+                :search-text
+                :selected
+                :selected-viewers)
         (assoc
-         :search-text ""
-         :selected nil
          :portal/previous-state nil
          :portal/next-state nil))))
 
