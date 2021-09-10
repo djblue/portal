@@ -1,9 +1,11 @@
 (ns portal.ui.core
   (:require ["react" :as react]
+            [clojure.string :as str]
             [portal.ui.app :as app]
             [portal.ui.connecton-status :as conn]
             [portal.ui.options :as opts]
             [portal.ui.rpc :as rpc]
+            [portal.ui.sci :as sci]
             [portal.ui.state :as state]
             [reagent.core :as r]
             [reagent.dom :as dom]))
@@ -32,9 +34,31 @@
   (let [a (use-invoke 'portal.runtime/get-tap-atom)]
     (use-invoke 'clojure.core/deref a)))
 
+(defn- default-app [] [app/app (use-tap-list)])
+
+(defn- ns->url [ns]
+  (str "/"
+       (str/replace (name ns) #"\." "/")
+       ".cljs"))
+
+(defn- custom-app [opts]
+  (let [[app set-app!] (react/useState nil)]
+    (react/useEffect
+     (fn []
+       (-> (js/fetch (ns->url (:main opts)))
+           (.then #(.text %))
+           (.then sci/eval-string)
+           (.then set-app!)))
+     #js [])
+    (when app [app/root [app]])))
+
 (defn connected-app []
-  [conn/with-status
-   [app/app (use-tap-list)]])
+  (let [opts (opts/use-options)]
+    [conn/with-status
+     (cond
+       (= opts ::opts/loading) nil
+       (contains? opts :main) [custom-app opts]
+       :else [default-app])]))
 
 (defn with-cache [& children]
   (into [:<> (meta @state/value-cache)] children))

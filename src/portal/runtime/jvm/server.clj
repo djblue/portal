@@ -69,11 +69,14 @@
   (try (Thread/sleep 60000)
        (catch Exception _e {:status 200})))
 
-(defn- source-maps [request]
-  (let [uri  (subs (:uri request) 1)
-        file (io/file "target/resources/portal/" uri)]
-    (when (and (str/includes? uri ".map") (.exists file))
-      (send-resource "application/json" (slurp file)))))
+(defn- resource [request]
+  (let [uri (subs (:uri request) 1)]
+    (some
+     (fn [^java.io.File file]
+       (when (and file (.exists file))
+         (send-resource "application/json" (slurp file))))
+     [(io/file "target/resources/portal/" uri)
+      (io/file (io/resource uri))])))
 
 (defn- main-js [request]
   {:status  200
@@ -106,4 +109,4 @@
         f (get paths (:uri request))]
     (cond
       (fn? f) (f)
-      :else   (source-maps request))))
+      :else   (resource request))))

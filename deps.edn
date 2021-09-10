@@ -12,7 +12,8 @@
     ns-tracker/ns-tracker {:mvn/version "0.4.0"}}}
   :cljs
   {:extra-deps
-   {reagent/reagent {:mvn/version "1.1.0"}
+   {borkdude/sci {:mvn/version "0.2.6"}
+    reagent/reagent {:mvn/version "1.1.0"}
     lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.6"}
     hickory/hickory {:mvn/version "0.7.1"}}}

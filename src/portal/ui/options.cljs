@@ -5,7 +5,7 @@
 (defonce ^:private options-context (react/createContext nil))
 
 (defn with-options [& children]
-  (let [[options set-options!] (react/useState nil)]
+  (let [[options set-options!] (react/useState ::loading)]
     (react/useEffect
      (fn []
        (-> (state/invoke `portal.runtime/get-options)
