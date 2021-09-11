@@ -27,7 +27,7 @@
      (.-socket request)
      (.-headers request)
      (fn [ws]
-       (let [session {:value-cache (atom {})}
+       (let [session (rt/create-session)
              send!
              (fn send! [message]
                (.send ws (rt/write message session)))]

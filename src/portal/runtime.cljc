@@ -12,6 +12,9 @@
 (defn- next-id [] (swap! id inc))
 (defonce sessions (atom {}))
 
+(defn create-session []
+  {:value-cache (atom {})})
+
 (defonce request (atom nil))
 (defonce selected (atom nil))
 

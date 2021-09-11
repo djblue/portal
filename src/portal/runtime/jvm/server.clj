@@ -31,9 +31,7 @@
 (def ^:private ops (merge c/ops rt/ops))
 
 (defn- rpc-handler-local [request]
-  (let [session (-> request
-                    :session
-                    (assoc :value-cache (atom {})))
+  (let [session (merge (:session request) (rt/create-session))
         send!   (fn send! [ch message]
                   (server/send! ch (rt/write message session)))]
     (server/as-channel
