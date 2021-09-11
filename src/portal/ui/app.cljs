@@ -364,14 +364,16 @@
 
 (defn root [& children]
   (let [opts  (opts/use-options)
-        state (state/use-state)
-        theme (::c/theme opts ::c/nord)]
+        state state/state
+        theme (or (::c/theme @state)
+                  (::c/theme opts)
+                  ::c/nord)]
     (react/useEffect
      (fn []
-       (state/set-theme! state theme))
+       (state/dispatch! state state/set-theme! theme))
      #js [theme])
     [state/with-state
-     state/state
+     state
      [theme/with-theme
       theme
       [container children]]]))
