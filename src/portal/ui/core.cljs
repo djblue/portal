@@ -2,6 +2,7 @@
   (:require ["react" :as react]
             [portal.ui.app :as app]
             [portal.ui.connecton-status :as conn]
+            [portal.ui.options :as opts]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [reagent.core :as r]
@@ -39,7 +40,9 @@
   (into [:<> (meta @state/value-cache)] children))
 
 (defn render-app []
-  (dom/render [with-cache [connected-app]]
+  (dom/render [with-cache
+               [opts/with-options
+                [connected-app]]]
               (.getElementById js/document "root")
               functional-compiler))
 

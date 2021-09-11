@@ -228,6 +228,8 @@
 
 (defn- get-tap-atom [] tap-list)
 
+(defn- get-options [] (:options *session*))
+
 (defn- ping [] ::pong)
 
 (def ^:private fns
@@ -236,6 +238,7 @@
    {'clojure.datafy/nav  #'nav
     `ping                #'ping
     `get-tap-atom        #'get-tap-atom
+    `get-options         #'get-options
     `clear-values        #'clear-values
     `update-selected     #'update-selected
     `get-functions       #'get-functions}))
