@@ -236,7 +236,18 @@
 
 (defn- get-tap-atom [] tap-list)
 
-(defn- get-options [] (:options *session*))
+(defn- get-options []
+  (merge
+   {:name "portal"
+    :version "0.14.0"
+    :platform
+    #?(:bb   "bb"
+       :clj  "jvm"
+       :cljs (cond
+               (exists? js/process)        "node"
+               (exists? js/PLANCK_VERSION) "planck"
+               :else                        "web"))}
+   (:options *session*)))
 
 (defn- ping [] ::pong)
 
