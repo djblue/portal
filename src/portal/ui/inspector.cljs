@@ -598,11 +598,13 @@
     inspect-object))
 
 (defn get-info [state context]
-  (let [{:keys [selected expanded?]} @state
+  (let [{:keys [search-text selected expanded?]} @state
         location (state/get-location context)]
     {:selected? (= selected context)
      :expanded? (contains? expanded? location)
-     :viewer    (get-viewer state context)}))
+     :viewer    (get-viewer state context)
+     :value     (f/filter-value (:value context)
+                                (get search-text location ""))}))
 
 (defn inspector [value]
   (let [ref   (react/useRef nil)
@@ -612,11 +614,8 @@
             (assoc :value value)
             (update :depth inc))
         location (state/get-location context)
-        {:keys [viewer selected? expanded?]}
-        @(r/track get-info state context)
-        value (f/filter-value
-               value
-               (get-in @state [:search-text location] ""))]
+        {:keys [value viewer selected? expanded?]}
+        @(r/track get-info state context)]
     [with-context
      context
      (let [theme (theme/use-theme)
