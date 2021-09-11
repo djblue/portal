@@ -8,11 +8,11 @@
     "react-dom": "17.0.2",
     "vega": "^5.20.2",
     "vega-embed": "^6.18.2",
-    "vega-lite": "^5.1.0"
+    "vega-lite": "^5.1.1"
   },
   "devDependencies": {
     "browserify": "^16.5.2",
-    "source-map-support": "^0.5.19",
-    "ws": "^8.2.1"
+    "source-map-support": "^0.5.20",
+    "ws": "^8.2.2"
   }
 }
