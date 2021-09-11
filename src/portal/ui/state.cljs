@@ -194,6 +194,14 @@
      {:type :set-theme :color color}))
   (assoc state ::c/theme theme))
 
+(defn set-title [title]
+  (set! (.-title js/document) title))
+
+(defn set-title! [title]
+  (set-title title)
+  (notify-parent
+   {:type :set-title :title title}))
+
 (defn invoke [f & args]
   (-> (send! {:op :portal.rpc/invoke :f f :args args})
       (.then #(:return %))))

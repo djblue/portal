@@ -71,10 +71,24 @@
       [s/div {:style {:grid-row "1"}} "]"]]
      [s/div {:style {:flex "1"}}]]))
 
+(defn- runtime-info []
+  (let [opts       (opts/use-options)
+        theme      (theme/use-theme)
+        connected? (status/use-status)]
+    (react/useEffect
+     (fn []
+       (when-let [{:keys [name platform version]} opts]
+         (state/set-title!
+          (str name " - " platform " - " version))))
+     #js [opts])
+    (when-not connected?
+      [s/div
+       {:style {:color (::c/exception theme)}}
+       "ERROR: Disconnected from runtime!"])))
+
 (defn inspect-1 [value]
   (let [theme      (theme/use-theme)
         state      (state/use-state)
-        connected? (status/use-status)
         selected-context (state/get-selected-context @state)
         viewer           (ins/get-viewer state selected-context)
         compatible-viewers (ins/get-compatible-viewers
@@ -115,9 +129,6 @@
         :min-height 63
         :align-items :center
         :justify-content :space-between
-        :background (if connected?
-                      (::c/background2 theme)
-                      (::c/exception theme))
         :box-sizing :border-box
         :padding (:spacing/padding theme)
         :border-top [1 :solid (::c/border theme)]}}
@@ -143,8 +154,7 @@
          (for [{:keys [name]} compatible-viewers]
            ^{:key name}
            [s/option {:value (pr-str name)} (pr-str name)])])
-      (when-not connected?
-        [s/div "ERROR: Disconnected from runtime!"])
+      [runtime-info]
       [s/button
        {:title    "Open command palette."
         :on-click #((:run commands/open-command-palette) state)

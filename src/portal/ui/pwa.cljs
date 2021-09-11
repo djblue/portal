@@ -74,9 +74,6 @@
    (case (:op msg)
      :portal.rpc/invoke (invoke msg identity))))
 
-(defn set-title [title]
-  (set! (.-title js/document) title))
-
 (defn launch-queue-consumer [item]
   (a/let [files (js/Promise.all (map #(.getFile %) (.-files item)))
           value (dnd/handle-files files)]
@@ -87,6 +84,7 @@
     (when-let [event (and (string? data) (js/JSON.parse data))]
       (case (.-type event)
         "close" (js/window.close)
+        "set-title" (state/set-title (.-title event))
         "set-theme" (state/set-theme (.-color event))))))
 
 (def hex-color #"#[0-9a-f]{6}")
