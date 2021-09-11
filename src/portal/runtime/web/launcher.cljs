@@ -28,10 +28,10 @@
 (defn send! [message]
   (js/Promise.
    (fn [resolve _reject]
-     (let [body (rt/read message c/options)
+     (let [body (rt/read message c/session)
            f    (get rt/ops (:op body) not-found)]
-       (binding [rt/*options* c/options]
-         (f body #(resolve (rt/write % c/options))))))))
+       (binding [rt/*session* c/session]
+         (f body #(resolve (rt/write % c/session))))))))
 
 (defn open [options]
   (swap! rt/state merge options)
@@ -43,7 +43,7 @@
                  "resizable,scrollbars,status"))]
     (set! (.-onunload child)
           (fn []
-            (reset! (:value-cache c/options) {})
+            (reset! (:value-cache c/session) {})
             (remove-item ":portal/open")))
     (set! (.-onunload js/window)
           (fn []

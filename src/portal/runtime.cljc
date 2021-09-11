@@ -7,7 +7,7 @@
   #?(:clj (:import [java.io File]
                    [java.net URI URL])))
 
-(defonce ^:dynamic *options* nil)
+(defonce ^:dynamic *session* nil)
 (defonce ^:private id (atom 0))
 (defn- next-id [] (swap! id inc))
 (defonce sessions (atom {}))
@@ -51,7 +51,7 @@
 
 (defn- value->id [value]
   (let [k [:value value]]
-    (-> (:value-cache *options*)
+    (-> (:value-cache *session*)
         (swap!
          (fn [cache]
            (if (contains? cache k)
@@ -61,10 +61,10 @@
         (get k))))
 
 (defn- value->id? [value]
-  (get @(:value-cache *options*) [:value value]))
+  (get @(:value-cache *session*) [:value value]))
 
 (defn- id->value [id]
-  (get @(:value-cache *options*) [:id id]))
+  (get @(:value-cache *session*) [:id id]))
 
 (defn- to-object [value tag rep]
   (when (atom? value) (watch-atom value))
@@ -145,23 +145,23 @@
                    (record? value)
                    (assoc ::type (type value)))))))
 
-(defn write [value options]
-  (binding [*options* options]
+(defn write [value session]
+  (binding [*session* session]
     (cson/write
      value
      (merge
-      options
+      session
       {:transform (comp limit-seq id-coll)}))))
 
 (defn- ref-> [value]
   (id->value (second value)))
 
-(defn read [string options]
-  (binding [*options* options]
+(defn read [string session]
+  (binding [*session* session]
     (cson/read
      string
      (merge
-      options
+      session
       {:default-handler
        (fn [value]
          (case (first value)
@@ -179,7 +179,7 @@
   ([_request done]
    (reset! id 0)
    (reset! tap-list (list))
-   (reset! (:value-cache *options*) {})
+   (reset! (:value-cache *session*) {})
    (doseq [[a] @watch-registry]
      (remove-watch a ::watch-key))
    (reset! watch-registry {})

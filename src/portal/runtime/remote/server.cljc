@@ -8,21 +8,21 @@
 
 (defn open [session-id]
   (let [queue   (atom [])
-        options {:responses   queue
+        session {:responses   queue
                  :value-cache (atom {})
                  :session-id  session-id}
         send!   (fn send! [message]
                   (swap! queue conj message))
-        session (assoc options :send! send!)]
+        session (assoc session :send! send!)]
     (swap! rt/sessions assoc session-id session)
     (swap! c/sessions assoc session-id send!)
     nil))
 
 (defn responses [session-id]
-  (let [options   (get @rt/sessions session-id)
-        responses (:responses options)]
+  (let [session   (get @rt/sessions session-id)
+        responses (:responses session)]
     (doseq [message @responses]
-      (println (rt/write message options)))
+      (println (rt/write message session)))
     (reset! responses [])
     nil))
 
@@ -34,12 +34,12 @@
 (def ^:private ops (merge rt/ops))
 
 (defn request [session-id message]
-  (let [options (get @rt/sessions session-id)
-        body    (rt/read message options)
+  (let [session (get @rt/sessions session-id)
+        body    (rt/read message session)
         id      (:portal.rpc/id body)
         op      (get ops (:op body) not-found)]
-    (binding [rt/*options* options]
-      (op body #((:send! options)
+    (binding [rt/*session* session]
+      (op body #((:send! session)
                  (assoc %
                         :portal.rpc/id id
                         :op :portal.rpc/response)))))

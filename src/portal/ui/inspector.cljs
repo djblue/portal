@@ -644,7 +644,6 @@
             :on-focus
             (fn [e]
               (when-not selected?
-                (tap> context)
                 (state/dispatch! state assoc :selected context))
               (.stopPropagation e))
             :on-mouse-down

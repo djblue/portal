@@ -31,19 +31,19 @@
 (def ^:private ops (merge c/ops rt/ops))
 
 (defn- rpc-handler-local [request]
-  (let [options (-> request
+  (let [session (-> request
                     :session
                     (assoc :value-cache (atom {})))
         send!   (fn send! [ch message]
-                  (server/send! ch (rt/write message options)))]
+                  (server/send! ch (rt/write message session)))]
     (server/as-channel
      request
      {:on-receive
       (fn [ch message]
-        (let [body  (rt/read message options)
+        (let [body  (rt/read message session)
               id    (:portal.rpc/id body)
               op    (get ops (:op body) not-found)]
-          (binding [rt/*options* options]
+          (binding [rt/*session* session]
             (op body (fn [response]
                        (send!
                         ch
@@ -52,10 +52,10 @@
                                :op :portal.rpc/response)))))))
       :on-open
       (fn [ch]
-        (swap! c/sessions assoc (:session-id options) (partial send! ch)))
+        (swap! c/sessions assoc (:session-id session) (partial send! ch)))
       :on-close
       (fn [_ch _status]
-        (swap! c/sessions dissoc (:session-id options)))})))
+        (swap! c/sessions dissoc (:session-id session)))})))
 
 (defn- rpc-handler [request]
   (if (get-in request [:session :runtime])
