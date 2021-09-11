@@ -129,6 +129,7 @@
         :min-height 63
         :align-items :center
         :justify-content :space-between
+        :background (::c/background2 theme)
         :box-sizing :border-box
         :padding (:spacing/padding theme)
         :border-top [1 :solid (::c/border theme)]}}
