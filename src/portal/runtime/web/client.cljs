@@ -1,7 +1,7 @@
 (ns portal.runtime.web.client
   (:require [portal.runtime :as rt]))
 
-(defonce session {:value-cache (atom {})})
+(defonce session {:session-id ::id :value-cache (atom {})})
 
 (defn request [session-handle message]
   (if-let [child-window @session-handle]
@@ -12,15 +12,12 @@
 
 (defn- push-state [session new-value]
   (request session {:op :portal.rpc/push-state :state new-value})
-  (reset! rt/selected new-value)
+  (rt/update-selected ::id new-value)
   new-value)
-
-(defn- datafy [session]
-  (:portal/value (request session {:op :portal.rpc/datafy})))
 
 (deftype Portal [session]
   IDeref
-  (-deref [_this] (datafy session))
+  (-deref [_this] (get-in @rt/sessions [::id :selected]))
   IReset
   (-reset! [_this new-value] (push-state session new-value))
   ISwap

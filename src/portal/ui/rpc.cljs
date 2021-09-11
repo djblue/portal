@@ -125,13 +125,6 @@
      (reset! versions (:body message))
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
-   :portal.rpc/datafy
-   (fn [message send!]
-     (let [value (state/get-selected-value @state/state)]
-       (send!
-        {:op :portal.rpc/response
-         :portal.rpc/id (:portal.rpc/id message)
-         :portal/value value})))
    :portal.rpc/close
    (fn [message send!]
      (js/setTimeout

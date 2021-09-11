@@ -16,7 +16,6 @@
   {:value-cache (atom {})})
 
 (defonce request (atom nil))
-(defonce selected (atom nil))
 
 (defn- set-timeout [f timeout]
   #?(:clj  (future (Thread/sleep timeout) (f))
@@ -188,8 +187,11 @@
    (reset! watch-registry {})
    (done nil)))
 
-(defn- update-selected [value]
-  (reset! selected value))
+(defn update-selected
+  ([value]
+   (update-selected (:session-id *session*) value))
+  ([session-id value]
+   (swap! sessions assoc-in [session-id :selected] value)))
 
 (def ^:private predicates
   (merge

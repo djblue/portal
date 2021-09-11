@@ -35,12 +35,12 @@
 
 (defn- push-state [session-id new-value]
   (request session-id {:op :portal.rpc/push-state :state new-value})
-  (reset! rt/selected new-value)
+  (rt/update-selected session-id new-value)
   new-value)
 
 (defrecord Portal [session-id]
   IDeref
-  (-deref [_this] @rt/selected)
+  (-deref [_this] (get-in @rt/sessions [session-id :selected]))
   IReset
   (-reset! [_this new-value] (push-state session-id new-value))
   ISwap
