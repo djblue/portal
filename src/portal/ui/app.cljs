@@ -187,9 +187,12 @@
       {:background (::c/background theme)
        :padding (:spacing/padding theme)
        :box-sizing :border-box
+       :font-family (:font/family theme)
        :font-size (:font-size theme)
-       :color (::c/text theme)
-       :border [1 :solid (::c/border theme)]}}]))
+       :color (::c/boolean theme)
+       :border [1 :solid (::c/border theme)]
+       :border-radius (:border-radius theme)}
+      :style/placeholder {:color (::c/border theme)}}]))
 
 (defn button-styles []
   (let [theme (theme/use-theme)]

@@ -367,8 +367,10 @@
               :padding (:spacing/padding theme)
               :box-sizing :border-box
               :font-size (:font-size theme)
+              :font-family (:font/family theme)
               :color (::c/text theme)
-              :border [1 :solid (::c/border theme)]}}]]
+              :border [1 :solid (::c/border theme)]}
+             :style/placeholder {:color (::c/border theme)}}]]
           [s/div
            {:style
             {:height "100%"

@@ -17,8 +17,9 @@
      (str/split style #";"))))
 
 (def selectors
-  {:style       #(str "." %)
-   :style/hover #(str "." % ":hover")})
+  {:style             #(str "." %)
+   :style/hover       #(str "." % ":hover")
+   :style/placeholder #(str "." % "::placeholder")})
 
 (defonce cache (atom {}))
 
