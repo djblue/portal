@@ -23,7 +23,7 @@
        (match v text))
      value)
 
-    :else false))
+    :else (match (pr-str value) text)))
 
 (defn- add-filter-meta [value old-value]
   (with-meta
