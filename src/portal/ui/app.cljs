@@ -182,7 +182,9 @@
                            (dissoc filters location)
                            (assoc filters location value))))))
       :value (get-in @state [:search-text location] "")
-      :placeholder "Click to select, type to filter..."
+      :placeholder (if-not context
+                     "Select a value to enable filtering"
+                     "Type here to begin filtering")
       :style
       {:background (::c/background theme)
        :padding (:spacing/padding theme)
@@ -192,7 +194,8 @@
        :color (::c/boolean theme)
        :border [1 :solid (::c/border theme)]
        :border-radius (:border-radius theme)}
-      :style/placeholder {:color (::c/border theme)}}]))
+      :style/placeholder
+      {:color (if-not context (::c/border theme) (::c/text theme))}}]))
 
 (defn button-styles []
   (let [theme (theme/use-theme)]
