@@ -28,10 +28,11 @@
 (defn send! [message]
   (js/Promise.
    (fn [resolve _reject]
-     (let [body (rt/read message c/session)
-           f    (get rt/ops (:op body) not-found)]
-       (binding [rt/*session* c/session]
-         (f body #(resolve (rt/write % c/session))))))))
+     (let [session (rt/open-session c/session)
+           body    (rt/read message session)
+           f       (get rt/ops (:op body) not-found)]
+       (binding [rt/*session* session]
+         (f body #(resolve (rt/write % session))))))))
 
 (defn open [options]
   (swap! rt/sessions assoc-in [(:session-id c/session) :options] options)

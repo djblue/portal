@@ -31,7 +31,7 @@
 (def ^:private ops (merge c/ops rt/ops))
 
 (defn- rpc-handler-local [request]
-  (let [session (merge (:session request) (rt/create-session))
+  (let [session (rt/open-session (:session request))
         send!   (fn send! [ch message]
                   (server/send! ch (rt/write message session)))]
     (server/as-channel
@@ -84,7 +84,7 @@
       :dev "target/resources/portal/main.js"
       (io/resource "portal/main.js")))})
 
-(defn- get-session [request]
+(defn- get-session-id [request]
   (some->
    (or (:query-string request)
        (when-let [referer (get-in request [:headers "referer"])]
@@ -92,11 +92,8 @@
    UUID/fromString))
 
 (defn- with-session [request]
-  (if-let [session-id (get-session request)]
-    (assoc request :session
-           (-> @rt/sessions
-               (get session-id)
-               (assoc :session-id session-id)))
+  (if-let [session-id (get-session-id request)]
+    (assoc request :session (rt/get-session session-id))
     request))
 
 (defn handler [request]

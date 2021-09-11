@@ -12,8 +12,16 @@
 (defn- next-id [] (swap! id inc))
 (defonce sessions (atom {}))
 
-(defn create-session []
-  {:value-cache (atom {})})
+(defn get-session [session-id]
+  (-> @sessions
+      (get session-id)
+      (assoc :session-id session-id)))
+
+(defn open-session [{:keys [session-id] :as session}]
+  (merge
+   (get-session session-id)
+   {:value-cache (atom {})}
+   session))
 
 (defonce request (atom nil))
 
