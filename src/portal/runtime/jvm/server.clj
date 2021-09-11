@@ -56,7 +56,7 @@
         (swap! c/connections dissoc (:session-id session)))})))
 
 (defn- rpc-handler [request]
-  (if (get-in request [:session :runtime])
+  (if (get-in request [:session :options :runtime])
     (rpc-handler-remote request)
     (rpc-handler-local request)))
 
@@ -80,7 +80,7 @@
    :headers {"Content-Type" "text/javascript"}
    :body
    (io/file
-    (case (-> request :session :mode)
+    (case (-> request :session :options :mode)
       :dev "target/resources/portal/main.js"
       (io/resource "portal/main.js")))})
 

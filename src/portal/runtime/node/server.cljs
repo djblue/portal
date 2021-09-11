@@ -19,15 +19,21 @@
 
 (def ops (merge c/ops rt/ops))
 
+(defn- get-session [session-id]
+  (-> @rt/sessions
+      (get session-id)
+      (assoc :session-id session-id)))
+
 (defn- rpc-handler [request _response]
-  (let [[_ session-id] (.split (.-url request) "?")]
+  (let [[_ session-id] (.split (.-url request) "?")
+        session-id     (uuid session-id)]
     (.handleUpgrade
      (Server. #js {:noServer true})
      request
      (.-socket request)
      (.-headers request)
      (fn [ws]
-       (let [session (rt/create-session)
+       (let [session (merge (get-session session-id) (rt/create-session))
              send!
              (fn send! [message]
                (.send ws (rt/write message session)))]

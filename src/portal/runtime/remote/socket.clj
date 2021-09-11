@@ -9,10 +9,10 @@
   (:import (java.net Socket)))
 
 (defn- create-socket
-  ^Socket [{:keys [runtime]}]
+  ^Socket [{:keys [options]}]
   (Socket.
-   ^String  (:hostname runtime "localhost")
-   ^Integer (:port runtime)))
+   ^String  (get-in options [:runtime :hostname] "localhost")
+   ^Integer (get-in options [:runtime :port])))
 
 (defn- write-line [socket message]
   (let [out (io/writer socket)]

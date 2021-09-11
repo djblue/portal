@@ -107,13 +107,12 @@
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
 
 (defn open [{:keys [portal options server]}]
-  (swap! rt/state merge options)
   (let [{:keys [host port]} server
         portal     (or portal (c/make-atom (random-uuid)))
         session-id (:session-id portal)
         url        (str "http://" host ":" port "?" session-id)
         chrome-bin (get-chrome-bin)]
-    (swap! rt/sessions assoc session-id options)
+    (swap! rt/sessions assoc-in [session-id :options] options)
     (when-not (c/open? session-id)
       (if (and (some? chrome-bin)
                (:portal.launcher/app options true))

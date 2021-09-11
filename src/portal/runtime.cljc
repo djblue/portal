@@ -170,7 +170,6 @@
            "ref"    (ref-> value)
            (cson/->Tagged (first value) (cson/json-> (second value)))))}))))
 
-(defonce state    (atom {:portal.launcher/window-title "portal"}))
 (defonce tap-list (atom (list)))
 
 (defn update-value [new-value]

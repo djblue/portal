@@ -34,7 +34,7 @@
          (f body #(resolve (rt/write % c/session))))))))
 
 (defn open [options]
-  (swap! rt/state merge options)
+  (swap! rt/sessions assoc-in [(:session-id c/session) :options] options)
   (let [url   (str->src (index/html :code-url code-url :platform "web") "text/html")
         child (js/window.open
                url
