@@ -31,7 +31,7 @@
              send!
              (fn send! [message]
                (.send ws (rt/write message session)))]
-         (swap! c/sessions assoc session-id send!)
+         (swap! c/connections assoc session-id send!)
          (.on ws "message"
               (fn [message]
                 (a/let [req  (rt/read message session)
@@ -44,7 +44,7 @@
                     (op req done)))))
          (.on ws "close"
               (fn []
-                (swap! c/sessions dissoc session-id))))))))
+                (swap! c/connections dissoc session-id))))))))
 
 (defn- send-resource [response content-type body]
   (-> response

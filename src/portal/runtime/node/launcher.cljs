@@ -48,7 +48,7 @@
 
 (defn clear []
   (c/request {:op :portal.rpc/clear})
-  (swap! rt/sessions select-keys (keys @c/sessions)))
+  (swap! rt/sessions select-keys (keys @c/connections)))
 
 (defn close []
   (a/do

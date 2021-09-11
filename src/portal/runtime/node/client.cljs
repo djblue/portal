@@ -1,15 +1,12 @@
 (ns portal.runtime.node.client
   (:require [portal.runtime :as rt]))
 
-(defonce sessions (atom {}))
+(defonce connections (atom {}))
 
 (defonce ^:private id (atom 0))
 (defonce ^:private pending-requests (atom {}))
 
 (defn- next-id [] (swap! id inc))
-
-(defn- get-session [session-id]
-  (get @sessions session-id))
 
 (def ops
   {:portal.rpc/response
@@ -21,10 +18,10 @@
 (defn request
   ([message]
    (js/Promise.all
-    (for [session-id (keys @sessions)]
+    (for [session-id (keys @connections)]
       (request session-id message))))
   ([session-id message]
-   (if-let [send! (get-session session-id)]
+   (if-let [send! (@connections session-id)]
      (let [id      (next-id)
            message (assoc message :portal.rpc/id id)]
        (.then
@@ -59,4 +56,4 @@
 (defn make-atom [session-id] (Portal. session-id))
 
 (defn open? [session-id]
-  (get @sessions session-id))
+  (contains? @connections session-id))

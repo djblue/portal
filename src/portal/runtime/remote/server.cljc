@@ -15,7 +15,7 @@
                   (swap! queue conj message))
         session (assoc session :send! send!)]
     (swap! rt/sessions assoc session-id session)
-    (swap! c/sessions assoc session-id send!)
+    (swap! c/connections assoc session-id send!)
     nil))
 
 (defn responses [session-id]
@@ -28,7 +28,7 @@
 
 (defn close [session-id]
   (swap! rt/sessions dissoc session-id)
-  (swap! c/sessions dissoc session-id)
+  (swap! c/connections dissoc session-id)
   nil)
 
 (def ^:private ops (merge rt/ops))

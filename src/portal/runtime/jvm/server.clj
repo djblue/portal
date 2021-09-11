@@ -52,10 +52,10 @@
                                :op :portal.rpc/response)))))))
       :on-open
       (fn [ch]
-        (swap! c/sessions assoc (:session-id session) (partial send! ch)))
+        (swap! c/connections assoc (:session-id session) (partial send! ch)))
       :on-close
       (fn [_ch _status]
-        (swap! c/sessions dissoc (:session-id session)))})))
+        (swap! c/connections dissoc (:session-id session)))})))
 
 (defn- rpc-handler [request]
   (if (get-in request [:session :runtime])

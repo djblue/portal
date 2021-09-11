@@ -3,7 +3,7 @@
             [portal.runtime :as rt])
   (:import [clojure.lang IAtom IDeref]))
 
-(defonce sessions (atom {}))
+(defonce connections (atom {}))
 
 (defonce ^:private id (atom 0))
 (defonce ^:private pending-requests (atom {}))
@@ -19,27 +19,27 @@
 
 (def timeout 10000)
 
-(defn- get-session [session-id]
+(defn- get-connection [session-id]
   (let [p (promise)
         watch-key (keyword (gensym))]
-    (if-let [send! (get @sessions session-id)]
+    (if-let [send! (get @connections session-id)]
       (deliver p send!)
       (add-watch
-       sessions
+       connections
        watch-key
        (fn [_ _ _old new]
          (when-let [send! (get new session-id)]
            (deliver p send!)))))
     (let [result (deref p timeout nil)]
-      (remove-watch sessions watch-key)
+      (remove-watch connections watch-key)
       result)))
 
 (defn request
   ([message]
-   (doseq [session-id (keys @sessions)]
+   (doseq [session-id (keys @connections)]
      (request session-id message)))
   ([session-id message]
-   (if-let [send! (get-session session-id)]
+   (if-let [send! (get-connection session-id)]
      (let [id       (next-id)
            response (promise)
            message  (assoc message :portal.rpc/id id)]
@@ -80,4 +80,4 @@
 (defn make-atom [session-id] (Portal. session-id))
 
 (defn open? [session-id]
-  (get @sessions session-id))
+  (contains? @connections session-id))
