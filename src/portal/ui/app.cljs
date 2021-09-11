@@ -1,10 +1,12 @@
 (ns portal.ui.app
-  (:require [clojure.string :as str]
+  (:require ["react" :as react]
+            [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.commands :as commands]
             [portal.ui.connecton-status :as status]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
+            [portal.ui.options :as opts]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -350,11 +352,18 @@
 (reset! ins/viewers viewers)
 
 (defn root [& children]
-  [state/with-state
-   state/state
-   [theme/with-theme
-    (get @state/state ::c/theme ::c/nord)
-    [container children]]])
+  (let [opts  (opts/use-options)
+        state (state/use-state)
+        theme (::c/theme opts ::c/nord)]
+    (react/useEffect
+     (fn []
+       (state/set-theme! state theme))
+     #js [theme])
+    [state/with-state
+     state/state
+     [theme/with-theme
+      theme
+      [container children]]]))
 
 (defn app [value]
   [root
