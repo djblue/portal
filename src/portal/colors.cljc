@@ -4,7 +4,7 @@
   {::nord
    {::text "#d8dee9"
     ::background "#2e3440"
-    ::background2 "#2a2e39"
+    ::background2 "#272c36"
     ::boolean "#5e81ac"
     ::string "#a3be8c"
     ::keyword "#5e81ac"
