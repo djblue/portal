@@ -39,9 +39,9 @@
   (l/clear)
   nil)
 
-(defonce init? (atom false))
+(defonce ^:private init? (atom false))
 
-(defn init []
+(defn- init []
   (when-not @init?
     (reset! init? true)
     (l/init)
