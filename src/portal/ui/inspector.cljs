@@ -10,6 +10,27 @@
             [portal.ui.theme :as theme]
             [reagent.core :as r]))
 
+(defn- inspect-error [error]
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style
+      {:color         (::c/exception theme)
+       :border        [1 :solid (::c/exception theme)]
+       :background    (str (::c/exception theme) "22")
+       :border-radius (:border-radius theme)}}
+     [s/div
+      {:style
+       {:padding       (:padding theme)
+        :border-bottom [1 :solid (::c/exception theme)]}}
+      "Rendering error: "]
+     [s/div
+      {:style
+       {:padding (:padding theme)}}
+      [:pre
+       [:code (.-stack error)]]]]))
+
+(defn- inspect-error* [error] [:f> inspect-error error])
+
 (def error-boundary
   (r/create-class
    {:display-name "ErrorBoundary"
@@ -23,8 +44,7 @@
     :render
     (fn [this]
       (if-let [error (.. this -state -error)]
-        (r/as-element
-         [:div [:pre [:code (pr-str error)]]])
+        (r/as-element [inspect-error* error])
         (.. this -props -children)))}))
 
 (defonce viewers (atom []))
