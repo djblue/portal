@@ -28,8 +28,8 @@
     {:color color
      :font-weigth :bold
      :margin-right "8px"
-     :padding-top (* 0.5 (:spacing/padding theme))
-     :padding-bottom (* 0.5 (:spacing/padding theme))}))
+     :padding-top (* 0.5 (:padding theme))
+     :padding-bottom (* 0.5 (:padding theme))}))
 
 (defn- center [& children]
   (into [s/div {:style flex-center}] children))
@@ -53,12 +53,12 @@
                {:style
                 (merge
                  {:border-left [1 :dashed (str (:color style) "55")]
-                  :padding-right (:spacing/padding theme)
+                  :padding-right (:padding theme)
                   :margin-left "0.3em"}
                  flex-wrap
                  flex-col)}
                (:value-child opts)]
-        ellipsis  [s/div {:style {:margin-right (:spacing/padding theme)}} "..."]]
+        ellipsis  [s/div {:style {:margin-right (:padding theme)}} "..."]]
     (cond
       (not (coll? value))
       [center
@@ -91,7 +91,7 @@
 (defn- inspect-tree-map [value]
   (let [theme (theme/use-theme)]
     [s/div
-     {:style {:padding-left (:spacing/padding theme)}}
+     {:style {:padding-left (:padding theme)}}
      [l/lazy-seq
       (for [[k v] (ins/try-sort-map value)]
         ^{:key (hash k)}
@@ -99,7 +99,7 @@
          {:key k
           :key-child
           [s/div
-           {:style {:padding-right (:spacing/padding theme)}}
+           {:style {:padding-right (:padding theme)}}
            [inspect-tree-1 k]]
           :value v
           :value-child
@@ -108,7 +108,7 @@
 (defn- inspect-tree-coll [value]
   (let [theme   (theme/use-theme)]
     [s/div
-     {:style {:padding-left (* 2 (:spacing/padding theme))}}
+     {:style {:padding-left (* 2 (:padding theme))}}
      [l/lazy-seq
       (map-indexed
        (fn [idx item]

@@ -160,7 +160,7 @@
              (.stopPropagation e))}
           [s/div
            {:style {:box-sizing :border-box
-                    :padding (:spacing/padding theme)
+                    :padding (:padding theme)
                     :border-bottom
                     (if (= value option)
                       [5 :solid (::c/boolean theme)]
@@ -169,7 +169,7 @@
      [s/div
       {:style
        {:box-sizing :border-box
-        :padding (:spacing/padding theme)}}
+        :padding (:padding theme)}}
       [with-key option [inspector (get value option)]]]]))
 
 (defn- diff-added [value]
@@ -203,7 +203,7 @@
                {:flex 1
                 :margin-right
                 (when-not (= added ::not-found)
-                  (:spacing/padding theme))}}
+                  (:padding theme))}}
         [diff-removed removed]])
      (when-not (= added ::not-found)
        [s/div {:style {:flex 1}}
@@ -220,9 +220,9 @@
     [s/div
      {:style {:display :flex :align-items :center}}
      [tagged-tag tag]
-     [s/div {:style {:margin-left (:spacing/padding theme)}}
+     [s/div {:style {:margin-left (:padding theme)}}
       [s/div
-       {:style {:margin (* -1 (:spacing/padding theme))}}
+       {:style {:margin (* -1 (:padding theme))}}
        [inspector value]]]]))
 
 (defn- preview-coll [open close]
@@ -255,9 +255,9 @@
                :user-select :none
                :color (::c/namespace theme)
                :box-sizing :border-box
-               :padding (:spacing/padding theme)
+               :padding (:padding theme)
                :font-size  (:font-size theme)
-               :font-family (:font/family theme)}}
+               :font-family (:font-family theme)}}
       (:title props)]]))
 
 (defn- collection-header [values]
@@ -286,7 +286,7 @@
        {:style
         {:display :inline-block
          :box-sizing :border-box
-         :padding (:spacing/padding theme)
+         :padding (:padding theme)
          :border-right [1 :solid (::c/border theme)]}}
        [preview values]]
       (when (seq metadata)
@@ -300,7 +300,7 @@
       (when-let [type (-> values meta :portal.runtime/type)]
         [s/div {:style
                 {:box-sizing :border-box
-                 :padding (:spacing/padding theme)
+                 :padding (:padding theme)
                  :border-right [1 :solid (::c/border theme)]}}
          type])]
      (when show-meta?
@@ -308,7 +308,7 @@
         {:style
          {:border-top [1 :solid (::c/border theme)]
           :box-sizing :border-box
-          :padding (:spacing/padding theme)}}
+          :padding (:padding theme)}}
         [with-depth [inspector metadata]]])]))
 
 (defn- container-map-k [child]
@@ -349,8 +349,8 @@
        :min-width :fit-content
        :display :grid
        :background (get-background)
-       :grid-gap (:spacing/padding theme)
-       :padding (:spacing/padding theme)
+       :grid-gap (:padding theme)
+       :padding (:padding theme)
        :box-sizing :border-box
        :color (::c/text theme)
        :font-size  (:font-size theme)
@@ -394,8 +394,8 @@
          :text-align :left
          :display :grid
          :background (get-background)
-         :grid-gap (:spacing/padding theme)
-         :padding (:spacing/padding theme)
+         :grid-gap (:padding theme)
+         :padding (:padding theme)
          :box-sizing :border-box
          :color (::c/text theme)
          :font-size  (:font-size theme)
@@ -436,7 +436,7 @@
 
 (defn- inspect-string [value]
   (let [theme (theme/use-theme)
-        limit (:limits/string-length theme)
+        limit (:string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]
     (cond
@@ -454,7 +454,7 @@
       (hex-color? value)
       [s/div
        {:style
-        {:padding (* 0.65 (:spacing/padding theme))
+        {:padding (* 0.65 (:padding theme))
          :box-sizing :border-box
          :background value}}
        [s/div
@@ -540,7 +540,7 @@
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
         string (pr-str value)
-        limit  (:limits/string-length theme)
+        limit  (:string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]
     [s/span {:style
@@ -621,7 +621,7 @@
      (let [theme (theme/use-theme)
            depth (use-depth)
            preview? (and (not expanded?)
-                         (> depth (:limits/max-depth theme)))
+                         (> depth (:max-depth theme)))
            type (get-value-type value)
            component (or
                       (when-not (= (:name viewer) :portal.viewer/inspector)

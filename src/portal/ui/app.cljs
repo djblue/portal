@@ -51,7 +51,7 @@
        {:color (::c/border theme)
         :cursor :pointer
         :box-sizing :border-box
-        :padding (:spacing/padding theme)
+        :padding (:padding theme)
         :border-right [1 :solid (::c/border theme)]}}
       [icons/copy]]
      [s/div
@@ -60,8 +60,8 @@
         :overflow :auto
         :display :grid
         :box-sizing :border-box
-        :padding (:spacing/padding theme)
-        :grid-gap (:spacing/padding theme)}}
+        :padding (:padding theme)
+        :grid-gap (:padding theme)}}
       [s/div {:style {:grid-row "1"}} "["]
       (map-indexed
        (fn [idx k]
@@ -121,7 +121,7 @@
          {:style
           {:min-width :fit-content
            :box-sizing :border-box
-           :padding (* 2 (:spacing/padding theme))}}
+           :padding (* 2 (:padding theme))}}
          [:> ins/error-boundary [ins/inspector value]]]]]]
      [s/div
       {:style
@@ -131,7 +131,7 @@
         :justify-content :space-between
         :background (::c/background2 theme)
         :box-sizing :border-box
-        :padding (:spacing/padding theme)
+        :padding (:padding theme)
         :border-top [1 :solid (::c/border theme)]}}
       (when-not (empty? compatible-viewers)
         [s/select
@@ -145,9 +145,9 @@
              (keyword (.substr (.. e -target -value) 1))))
           :style
           {:background (::c/background theme)
-           :padding (:spacing/padding theme)
+           :padding (:padding theme)
            :box-sizing :border-box
-           :font-family (:font/family theme)
+           :font-family (:font-family theme)
            :font-size (:font-size theme)
            :color (::c/text theme)
            :border-radius (:border-radius theme)
@@ -161,15 +161,15 @@
         :on-click #((:run commands/open-command-palette) state)
         :style
         {:min-width 60
-         :font-family (:font/family theme)
+         :font-family (:font-family theme)
          :background (::c/background theme)
          :border-radius (:border-radius theme)
          :border [1 :solid (::c/border theme)]
          :box-sizing :border-box
-         :padding-top (:spacing/padding theme)
-         :padding-bottom (:spacing/padding theme)
-         :padding-left (:spacing/padding theme)
-         :padding-right (* 1 (:spacing/padding theme))
+         :padding-top (:padding theme)
+         :padding-bottom (:padding theme)
+         :padding-left (:padding theme)
+         :padding-right (* 1 (:padding theme))
          :color (::c/tag theme)
          :font-size (:font-size theme)
          :font-weight :bold
@@ -200,9 +200,9 @@
                      "Type here to begin filtering")
       :style
       {:background (::c/background theme)
-       :padding (:spacing/padding theme)
+       :padding (:padding theme)
        :box-sizing :border-box
-       :font-family (:font/family theme)
+       :font-family (:font-family theme)
        :font-size (:font-size theme)
        :color (::c/boolean theme)
        :border [1 :solid (::c/border theme)]
@@ -218,10 +218,10 @@
      :font-size (:font-size theme)
      :font-family "Arial"
      :box-sizing :border-box
-     :padding-left (inc (:spacing/padding theme))
-     :padding-right (inc (:spacing/padding theme))
-     :padding-top (inc (:spacing/padding theme))
-     :padding-bottom (inc (:spacing/padding theme))
+     :padding-left (inc (:padding theme))
+     :padding-right (inc (:padding theme))
+     :padding-top (inc (:padding theme))
+     :padding-bottom (inc (:padding theme))
      :border-radius (:border-radius theme)
      :cursor :pointer}))
 
@@ -232,10 +232,10 @@
      {:style
       {:display :grid
        :grid-template-columns "auto auto 1fr auto"
-       :padding-left (* 2 (:spacing/padding theme))
-       :padding-right (* 2 (:spacing/padding theme))
+       :padding-left (* 2 (:padding theme))
+       :padding-right (* 2 (:padding theme))
        :box-sizing :border-box
-       :grid-gap (* 2 (:spacing/padding theme))
+       :grid-gap (* 2 (:padding theme))
        :height 63
        :background (::c/background2 theme)
        :align-items :center
@@ -270,8 +270,8 @@
        :on-click #(state/dispatch! state state/clear)
        :style    (merge
                   (button-styles)
-                  {:padding-left (* 2 (:spacing/padding theme))
-                   :padding-right (* 2 (:spacing/padding theme))})}
+                  {:padding-left (* 2 (:padding theme))
+                   :padding-right (* 2 (:padding theme))})}
       "clear"]]))
 
 (defn scrollbars []
@@ -299,7 +299,7 @@
         :flex-direction :column
         :background (::c/background theme)
         :color (::c/text theme)
-        :font-family (:font/family theme)
+        :font-family (:font-family theme)
         :font-size (:font-size theme)
         :height "100vh"
         :width "100vw"}}

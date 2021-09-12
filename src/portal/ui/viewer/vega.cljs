@@ -38,8 +38,8 @@
        {:opacity 1
         :cursor :default
         :position :absolute
-        :right (:spacing/padding theme)
-        :top (:spacing/padding theme)}})]))
+        :right (:padding theme)
+        :top (:padding theme)}})]))
 
 (defn- default-config
   "Specifies a nicer set of vega-lite specification styles.
@@ -123,7 +123,7 @@
      (fn []
        (when-let [view (.-current view)]
          (let [width (- width 2
-                        (* 2 (:spacing/padding theme)))]
+                        (* 2 (:padding theme)))]
            (.width view width)
            (.height view (* width 0.8))
            (.run view))))
@@ -152,7 +152,7 @@
          :right 0
          :left 0
          :box-sizing :border-box
-         :padding (:spacing/padding theme)
+         :padding (:padding theme)
          :overflow :hidden}}]]]))
 
 (defn vega-viewer [value]

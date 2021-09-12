@@ -6,9 +6,9 @@
 
 (defn header-styles [theme]
   {:color (::c/namespace theme)
-   :padding-top (:spacing/padding theme)
-   :padding-bottom (:spacing/padding theme)
-   :margin-bottom (* 2 (:spacing/padding theme))})
+   :padding-top (:padding theme)
+   :padding-bottom (:padding theme)
+   :margin-bottom (* 2 (:padding theme))})
 
 (defn hiccup-styles [theme]
   (let [h (header-styles theme)
@@ -26,7 +26,7 @@
          :font-size (:font-size theme)
          :line-height "1.5em"
          :margin-top 0
-         :margin-bottom (* 2 (:spacing/padding theme))}
+         :margin-bottom (* 2 (:padding theme))}
 
      :img {:max-width "100%"}
 
@@ -36,7 +36,7 @@
 
      :pre
      {:overflow :auto
-      :padding (* 2 (:spacing/padding theme))
+      :padding (* 2 (:padding theme))
       :background (::c/background2 theme)
       :border-radius (:border-radius theme)}
 
@@ -47,9 +47,9 @@
              :overflow :auto
              :border-spacing 0
              :border-collapse :collapse}
-     :th {:padding (:spacing/padding theme)
+     :th {:padding (:padding theme)
           :border [1 :solid (::c/border theme)]}
-     :td {:padding (:spacing/padding theme)
+     :td {:padding (:padding theme)
           :border [1 :solid (::c/border theme)]}}))
 
 (defn- process-hiccup [context hiccup]

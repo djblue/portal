@@ -134,7 +134,7 @@
          [container
           [s/div
            {:style {:box-sizing :border-box
-                    :padding (:spacing/padding theme)
+                    :padding (:padding theme)
                     :user-select :none
                     :border-bottom [1 :solid (::c/border theme)]}}
            "Press "
@@ -173,9 +173,9 @@
                        (merge
                         {:border-left [5 :solid "#0000"]
                          :box-sizing     :border-box
-                         :padding-left   (:spacing/padding theme)
-                         :padding-top    (* 0.5 (:spacing/padding theme))
-                         :padding-bottom (* 0.5 (:spacing/padding theme))
+                         :padding-left   (:padding theme)
+                         :padding-top    (* 0.5 (:padding theme))
+                         :padding-bottom (* 0.5 (:padding theme))
                          :cursor :pointer
                          :color (if (selected? option)
                                   (::c/boolean theme)
@@ -188,7 +188,7 @@
                            :background (::c/background theme)}))}
                       (when active? [scroll-into-view])
                       [checkbox (some? (selected? option))]
-                      [s/div {:style {:width (:spacing/padding theme)}}]
+                      [s/div {:style {:width (:padding theme)}}]
                       [ins/inspector option]])))
                 doall)]]]))))
 
@@ -273,11 +273,11 @@
                  {:background "#0002"
                   :border-radius (:border-radius theme)
                   :box-sizing :border-box
-                  :padding-top (* 0.25 (:spacing/padding theme))
-                  :padding-bottom (* 0.25 (:spacing/padding theme))
-                  :padding-left (:spacing/padding theme)
-                  :padding-right (:spacing/padding theme)
-                  :margin-right  (:spacing/padding theme)}}
+                  :padding-top (* 0.25 (:padding theme))
+                  :padding-bottom (* 0.25 (:padding theme))
+                  :padding-left (:padding theme)
+                  :padding-right (:padding theme)
+                  :margin-right  (:padding theme)}}
           (get shortcut->symbol k (.toUpperCase k))])])))
 
 (defn- palette-component-item [props & children]
@@ -295,9 +295,9 @@
          :align-items :center
          :height :fit-content
          :box-sizing     :border-box
-         :padding-left   (:spacing/padding theme)
-         :padding-top    (* 0.5 (:spacing/padding theme))
-         :padding-bottom (* 0.5 (:spacing/padding theme))}
+         :padding-left   (:padding theme)
+         :padding-top    (* 0.5 (:padding theme))
+         :padding-bottom (* 0.5 (:padding theme))}
         (when active?
           {:border-left [5 :solid (::c/boolean theme)]
            :background (::c/background theme)}))
@@ -352,7 +352,7 @@
          [container
           [s/div
            {:style
-            {:padding (:spacing/padding theme)
+            {:padding (:padding theme)
              :border-bottom [1 :solid (::c/border theme)]}}
            [s/input
             {:placeholder "Type to filter, <up> and <down> to move selection, <enter> to confirm."
@@ -364,10 +364,10 @@
              :style
              {:width "100%"
               :background (::c/background theme)
-              :padding (:spacing/padding theme)
+              :padding (:padding theme)
               :box-sizing :border-box
               :font-size (:font-size theme)
-              :font-family (:font/family theme)
+              :font-family (:font-family theme)
               :color (::c/text theme)
               :border [1 :solid (::c/border theme)]}
              :style/placeholder {:color (::c/border theme)}}]]
@@ -446,7 +446,7 @@
          [s/div
           {:style
            {:box-sizing :border-box
-            :padding (:spacing/padding theme)
+            :padding (:padding theme)
             :background "rgba(0,0,0,0.20)"}}
           doc]))]))
 

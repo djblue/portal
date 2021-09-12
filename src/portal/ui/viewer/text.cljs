@@ -16,7 +16,7 @@
      {:style
       {:overflow :auto
        :background (::c/background2 theme)
-       :padding (:spacing/padding theme)
+       :padding (:padding theme)
        :box-sizing :border-box
        :cursor :text
        :border-radius (:border-radius theme)
@@ -44,7 +44,7 @@
                 :font-size (:font-size theme)
                 :user-select :none
                 :text-align :right
-                :padding-right (* 2 (:spacing/padding theme))}}
+                :padding-right (* 2 (:padding theme))}}
               [s/span line]]
              [s/td
               {:style

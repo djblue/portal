@@ -43,7 +43,7 @@
         {:size "sm"
          :style
          {:grid-column "1"
-          :width       (* 3 (:spacing/padding theme))
+          :width       (* 3 (:padding theme))
           :color       (::c/border theme)}}]
        [s/div
         {:on-click #(swap! expanded? not)
@@ -95,7 +95,7 @@
       {:display :grid
        :grid-template-columns "auto 1fr auto"
        :align-items :center
-       :grid-gap [0 (:spacing/padding theme)]}}
+       :grid-gap [0 (:padding theme)]}}
      (->> trace
           (map-indexed
            analyze-trace-item)
@@ -114,7 +114,7 @@
       [s/span
        {:style
         {:font-weight :bold
-         :margin-right (:spacing/padding theme)
+         :margin-right (:padding theme)
          :color (::c/exception theme)}}
        type]
       message]]))
@@ -125,7 +125,7 @@
      {:style
       {:background (::c/background2 theme)
        :margin "0 auto"
-       :padding (:spacing/padding theme)
+       :padding (:padding theme)
        :box-sizing :border-box
        :color (::c/text theme)
        :font-size  (:font-size theme)

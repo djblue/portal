@@ -4,11 +4,11 @@
 
 (defn- get-theme [theme-name]
   (merge
-   {:font/family "Monaco, monospace"
+   {:font-family "Monaco, monospace"
     :font-size "12pt"
-    :limits/string-length 100
-    :limits/max-depth 1
-    :spacing/padding 8
+    :string-length 100
+    :max-depth 1
+    :padding 8
     :border-radius 2}
    (get c/themes theme-name)))
 

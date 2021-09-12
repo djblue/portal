@@ -43,7 +43,7 @@
      {:style {:display :flex}}
      [s/div
       {:style {:display :grid
-               :grid-gap (:spacing/padding theme)
+               :grid-gap (:padding theme)
                :grid-template-columns
                (str "repeat(" (+ 1 1 8 1 16) ", auto)")}}
       [l/lazy-seq

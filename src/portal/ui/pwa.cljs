@@ -135,7 +135,7 @@
             {:display :flex
              :align-items :center
              :justify-content :space-between
-             :padding (:spacing/padding theme)
+             :padding (:padding theme)
              :cursor :pointer
              :border-left [5 :solid "#0000"]}
             :style/hover
@@ -143,7 +143,7 @@
              :border-left [5 :solid (::c/boolean theme)]}}
            [div
             {:style
-             {:margin-left (:spacing/padding theme)}}
+             {:margin-left (:padding theme)}}
             (:label command)]
            [commands/shortcut command]])]]]]))
 

@@ -15,11 +15,11 @@
        {:style
         {:border :none
          :cursor :pointer
-         :padding (:spacing/padding theme)
+         :padding (:padding theme)
          :font-size (:font-size theme)
          :border-radius (:border-radius theme)
          :background (::c/boolean theme)
-         :font-family (:font/family theme)
+         :font-family (:font-family theme)
          :color (::c/text theme)}}
        props)]
      children)))
@@ -29,7 +29,7 @@
     [s/div
      {:style
       {:border-top [1 :solid (::c/border theme)]
-       :padding (* 2 (:spacing/padding theme))}}
+       :padding (* 2 (:padding theme))}}
      [s/h1 {:style
             {:display :flex
              :color (::c/boolean theme)}}
