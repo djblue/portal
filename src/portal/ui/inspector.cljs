@@ -550,15 +550,6 @@
 (defn- inspect-tagged [value]
   [tagged-value (.-tag value) (.-rep value)])
 
-(defn- inspect-ratio [value]
-  (let [[a b] (rpc/rep value)]
-    [with-readonly
-     [s/div
-      {:style {:display :flex}}
-      [s/div {:flex "0"} [inspector a]]
-      "/"
-      [s/div {:flex "0"} [inspector b]]]]))
-
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
         string (rpc/use-invoke 'clojure.core/pr-str value)
@@ -593,7 +584,6 @@
     :var        inspect-var
     :uri        inspect-uri
     :tagged     preview-tagged
-    :ratio      inspect-ratio
     inspect-object))
 
 (defn preview [value]
@@ -617,7 +607,6 @@
     :var        inspect-var
     :uri        inspect-uri
     :tagged     inspect-tagged
-    :ratio      inspect-ratio
     inspect-object))
 
 (defn get-info [state context]

@@ -104,15 +104,6 @@
   (-to-json [value]
     (to-object value :var (var->symbol value))))
 
-#?(:clj
-   (extend-type clojure.lang.Ratio
-     cson/ToJson
-     (-to-json [value]
-       (to-object value
-                  :ratio
-                  [(numerator value)
-                   (denominator value)]))))
-
 (defn limit-seq [value]
   (if-not (seq? value)
     value
