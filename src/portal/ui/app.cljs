@@ -79,7 +79,9 @@
      (fn []
        (when-let [{:keys [name platform version]} opts]
          (state/set-title!
-          (str name " - " platform " - " version))))
+          (str/join
+           " - "
+           [(:portal.launcher/window-title opts name) platform version]))))
      #js [opts])
     (when-not connected?
       [s/div
