@@ -552,10 +552,12 @@
 
 (defn- inspect-ratio [value]
   (let [[a b] (rpc/rep value)]
-    [s/div
-     [inspect-number a]
-     "/"
-     [inspect-number b]]))
+    [with-readonly
+     [s/div
+      {:style {:display :flex}}
+      [s/div {:flex "0"} [inspector a]]
+      "/"
+      [s/div {:flex "0"} [inspector b]]]]))
 
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
