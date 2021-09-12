@@ -17,11 +17,7 @@
   IWithMeta
   (-with-meta [_this m]
     (RuntimeObject.
-     (assoc object :meta m)))
-
-  IPrintWithWriter
-  (-pr-writer [_ writer _]
-    (write-all writer (:pr-str object))))
+     (assoc object :meta m))))
 
 (defn runtime-object? [value]
   (instance? RuntimeObject value))

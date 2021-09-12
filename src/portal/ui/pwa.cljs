@@ -41,6 +41,7 @@
 (def ^:private fns
   {'clojure.datafy/nav           #'nav
    'clojure.datafy/datafy        #'datafy
+   'clojure.core/pr-str          #'pr-str
    'portal.runtime/get-functions
    (fn []
      (keys

@@ -85,10 +85,7 @@
      :type   (pr-str (type value))
      :tag    tag
      :rep    rep
-     :meta   (meta value)
-     :pr-str (binding [*print-length* 10
-                       *print-level* 2]
-               (pr-str value))})))
+     :meta   (meta value)})))
 
 (extend-type #?(:clj Object :cljs default)
   cson/ToJson

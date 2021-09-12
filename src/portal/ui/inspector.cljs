@@ -539,17 +539,18 @@
 
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
-        string (pr-str value)
+        string (rpc/use-invoke 'clojure.core/pr-str value)
         limit  (:string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]
-    [s/span {:style
-             {:color (::c/text theme)}}
-     (if (or (< (count string) limit)
-             (= (:depth context) 1)
-             (contains? expanded? (state/get-location context)))
-       string
-       (trim-string string limit))]))
+    (when-not (= string ::rpc/loading)
+      [s/span {:style
+               {:color (::c/text theme)}}
+       (if (or (< (count string) limit)
+               (= (:depth context) 1)
+               (contains? expanded? (state/get-location context)))
+         string
+         (trim-string string limit))])))
 
 (defn- get-preview-component [type]
   (case type
