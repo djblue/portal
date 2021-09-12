@@ -1,6 +1,7 @@
 (ns portal.ui.rpc
   (:refer-clojure :exclude [read type])
-  (:require [lambdaisland.deep-diff2.diff-impl :as diff]
+  (:require ["react" :as react]
+            [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.runtime.cson :as cson]
             [portal.ui.state :as state]
             [reagent.core :as r]))
@@ -111,7 +112,26 @@
        (catch :default e (reject e))))))
 
 (def request (if js/window.opener web-request ws-request))
-(defonce versions (r/atom {}))
+
+(defonce ^:private versions (r/atom {}))
+
+(defn use-invoke [f & args]
+  (let [[value set-value!] (react/useState ::loading)
+        versions           (.from
+                            js/Array
+                            (map
+                             (fn [value]
+                               (get @versions
+                                    value
+                                    (if (= value ::loading) -1 0)))
+                             args))]
+    (react/useEffect
+     (fn []
+       (when (not-any? #{::loading} args)
+         (-> (apply state/invoke f args)
+             (.then #(set-value! %)))))
+     versions)
+    value))
 
 (def ^:private ops
   {:portal.rpc/response

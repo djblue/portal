@@ -12,27 +12,9 @@
 
 (def functional-compiler (r/create-compiler {:function-components true}))
 
-(defn use-invoke [f & args]
-  (let [[value set-value!] (react/useState ::loading)
-        versions           (.from
-                            js/Array
-                            (map
-                             (fn [value]
-                               (get @rpc/versions
-                                    value
-                                    (if (= value ::loading) -1 0)))
-                             args))]
-    (react/useEffect
-     (fn []
-       (when (not-any? #{::loading} args)
-         (-> (apply state/invoke f args)
-             (.then #(set-value! %)))))
-     versions)
-    value))
-
 (defn use-tap-list []
-  (let [a (use-invoke 'portal.runtime/get-tap-atom)]
-    (use-invoke 'clojure.core/deref a)))
+  (let [a (rpc/use-invoke 'portal.runtime/get-tap-atom)]
+    (rpc/use-invoke 'clojure.core/deref a)))
 
 (defn- default-app [] [app/app (use-tap-list)])
 
