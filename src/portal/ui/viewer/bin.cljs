@@ -11,14 +11,17 @@
   (let [theme (theme/use-theme)]
     [s/div
      {:style {:color (::c/number theme)}}
-     (.padStart (.toString a 16) 2 "0")
-     (.padStart (.toString b 16) 2 "0")]))
+     (when a (.padStart (.toString a 16) 2 "0"))
+     (when b (.padStart (.toString b 16) 2 "0"))]))
+
+(defn- pad-8 [row]
+  (take 8 (concat row (repeat nil))))
 
 (defn- inspect-hex [value]
-  (for [[idx row] (indexed (partition 16 value))]
+  (for [[idx row] (indexed (partition-all 16 value))]
     [:<>
      {:key idx}
-     (for [[idx hex] (indexed (partition 2 row))]
+     (for [[idx hex] (indexed (pad-8 (partition-all 2 row)))]
        ^{:key idx} [hex-value hex])]))
 
 (defn- ascii-value [c]
@@ -29,7 +32,7 @@
        (String/fromCharCode c)])))
 
 (defn- inspect-ascii [value]
-  (for [[idx row] (indexed (partition 16 value))]
+  (for [[idx row] (indexed (partition-all 16 value))]
     [:<>
      {:key idx}
      (for [[idx c] (indexed row)]
