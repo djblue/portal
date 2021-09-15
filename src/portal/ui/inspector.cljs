@@ -323,7 +323,7 @@
                 {:box-sizing :border-box
                  :padding (:padding theme)
                  :border-right [1 :solid (::c/border theme)]}}
-         type])]
+         [inspector type]])]
      (when show-meta?
        [s/div
         {:style
