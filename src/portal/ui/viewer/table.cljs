@@ -3,6 +3,7 @@
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
+            [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
@@ -45,7 +46,7 @@
          {:height "100%"
           :width "100%"
           :background (str (::c/border theme) "55")})}
-      child]]))
+      [select/with-position {:row row :column column} child]]]))
 
 (defn- special [row column child]
   (let [background (ins/get-background)
@@ -82,7 +83,7 @@
         :padding (:padding theme)
         :grid-row (str (inc row))
         :grid-column (str (inc column))})}
-     child]))
+     [select/with-position {:row row :column column} child]]))
 
 (defn- columns [cols]
   [:<>
