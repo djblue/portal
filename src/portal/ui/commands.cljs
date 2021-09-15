@@ -232,9 +232,13 @@
 
    {::shortcuts/default #{"v"}}                 'portal.command/select-viewer
    {::shortcuts/default #{"arrowup"}}           'portal.command/select-prev
+   {::shortcuts/default #{"k"}}                 'portal.command/select-prev
    {::shortcuts/default #{"arrowdown"}}         'portal.command/select-next
+   {::shortcuts/default #{"j"}}                 'portal.command/select-next
    {::shortcuts/default #{"arrowleft"}}         'portal.command/select-parent
+   {::shortcuts/default #{"h"}}                 'portal.command/select-parent
    {::shortcuts/default #{"arrowright"}}        'portal.command/select-child
+   {::shortcuts/default #{"l"}}                 'portal.command/select-child
 
    {::shortcuts/default #{"control" "enter"}}   'portal.command/focus-selected
    {::shortcuts/default #{"e"}}                 'portal.command/toggle-expand
