@@ -1,8 +1,9 @@
 (ns portal.ui.state
   (:require ["react" :as react]
+            [portal.async :as a]
             [portal.colors :as c]
-            [reagent.core :as r]
-            [portal.async :as a]))
+            [portal.ui.select :as select]
+            [reagent.core :as r]))
 
 (defonce sender (atom nil))
 (defonce state  (r/atom {}))
@@ -88,94 +89,23 @@
 (defn focus-selected [state context]
   (history-push state {:portal/value (:value context)}))
 
-(defn- get-prev-value [context]
-  (let [{:keys [pairs key path]} context]
-    (when-let [[key value]
-               (some (fn [[prev curr _next]]
-                       (when (= (first curr) key) prev))
-                     (partition 3 1 (concat [nil] pairs [nil])))]
-      (assoc context
-             :key key
-             :value value
-             :path (conj (pop path) key)))))
-
-(defn- get-prev-key [context]
-  (let [{:keys [pairs value]} context]
-    (when-let [[key]
-               (some (fn [[prev curr _next]]
-                       (when (= (first curr) value) prev))
-                     (partition 3 1 (concat [nil] pairs [nil])))]
-      (assoc context :value key))))
-
-(defn- get-prev [context]
-  (if (:key? context)
-    (get-prev-key context)
-    (get-prev-value context)))
-
 (defn select-prev [state context]
-  (if-let [next (get-prev context)]
+  (if-let [next (select/get-prev context)]
     (assoc state :selected next)
     state))
-
-(defn- get-next-key [context]
-  (let [{:keys [pairs value]} context]
-    (when-let [[key]
-               (some (fn [[_prev curr next]]
-                       (when (= (first curr) value) next))
-                     (partition 3 1 (concat [nil] pairs [nil])))]
-      (assoc context :value key))))
-
-(defn- get-next-value [context]
-  (let [{:keys [pairs key path]} context]
-    (when-let [[key value]
-               (some (fn [[_prev curr next]]
-                       (when (= (first curr) key) next))
-                     (partition 3 1 (concat [nil] pairs [nil])))]
-      (assoc context
-             :key key
-             :value value
-             :path (conj (pop path) key)))))
-
-(defn- get-next [context]
-  (if (:key? context)
-    (get-next-key context)
-    (get-next-value context)))
 
 (defn select-next [state context]
-  (if-let [next (get-next context)]
+  (if-let [next (select/get-next context)]
     (assoc state :selected next)
     state))
 
-(defn get-parent [context]
-  (let [{:keys [collection key path]} context]
-    (cond
-      (and (map? collection)
-           (not (:key? context)))
-      (assoc context
-             :key nil
-             :value key
-             :key? true
-             :path (pop path)))))
-
 (defn select-parent [state context]
-  (if-let [parent (get-parent context)]
+  (if-let [parent (select/get-parent context)]
     (assoc state :selected parent)
     state))
 
-(defn get-child [context]
-  (let [{:keys [collection value path]} context]
-    (cond
-      (and (map? collection)
-           (:key? context))
-      (-> context
-          (dissoc :key?)
-          (assoc
-           :key value
-           :value (get collection value)
-           :path (conj path value))))))
-
 (defn select-child [state context]
-  (if-let [child (get-child context)]
+  (if-let [child (select/get-child context)]
     (assoc state :selected child)
     state))
 

@@ -5,6 +5,7 @@
             [portal.ui.filter :as f]
             [portal.ui.lazy :as l]
             [portal.ui.rpc :as rpc]
+            [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -384,16 +385,20 @@
 (defn- inspect-map-k-v [values]
   [container-map
    [l/lazy-seq
-    (let [pairs (seq (try-sort-map values))]
-      (for [[k v] pairs]
-        ^{:key {:key (hash k)}}
-        [with-context
-         {:pairs pairs}
+    (map-indexed
+     (fn [index [k v]]
+       ^{:key (hash k)}
+       [:<>
+        [select/with-position
+         {:row index :column 0}
          [with-context
           {:key? true}
-          [container-map-k [inspector k]]]
+          [container-map-k [inspector k]]]]
+        [select/with-position
+         {:row index :column 1}
          [with-key k
-          [container-map-v [inspector v]]]]))]])
+          [container-map-v [inspector v]]]]])
+     (try-sort-map values))]])
 
 (defn- inspect-map [values]
   [with-collection
@@ -428,12 +433,13 @@
   [container-coll
    values
    [l/lazy-seq
-    (let [pairs (map-indexed vector values)]
-      (for [[idx itm] pairs]
-        ^{:key idx}
-        [with-context
-         {:pairs pairs}
-         [with-key idx [inspector itm]]]))]])
+    (map-indexed
+     (fn [index value]
+       ^{:key index}
+       [select/with-position
+        {:row index :column 0}
+        [with-key index [inspector value]]])
+     values)]])
 
 (defn- trim-string [string limit]
   (if-not (> (count string) limit)
@@ -628,6 +634,7 @@
         location (state/get-location context)
         {:keys [value viewer selected? expanded?]}
         @(r/track get-info state context)]
+    (select/use-register-context context)
     [with-context
      context
      (let [theme (theme/use-theme)
