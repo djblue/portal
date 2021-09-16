@@ -168,17 +168,6 @@
       (a/let [value (invoke 'clojure.datafy/nav collection key value)]
         (history-push state {:portal/value value})))))
 
-(defn more [state]
-  (if-let [f (-> state :portal/value meta :portal.runtime/more)]
-    (a/let [more-values (invoke f)]
-      (update state
-              :portal/value
-              (fn [current]
-                (with-meta
-                  (concat current more-values)
-                  (meta more-values)))))
-    state))
-
 (defn get-value [state default]
   (:portal/value state default))
 

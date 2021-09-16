@@ -254,7 +254,6 @@
         {:color (::c/diff-remove theme)}}
        open
        (count value)
-       (when (-> value meta :portal.runtime/more) "+")
        close])))
 
 (def ^:private preview-map    (preview-coll "{" "}"))
@@ -287,9 +286,7 @@
         metadata (dissoc
                   (meta values)
                   :portal.runtime/id
-                  :portal.runtime/type
-                  :portal.runtime/more
-                  :portal.runtime/more-limit)]
+                  :portal.runtime/type)]
     [s/div
      {:style
       {:border [1 :solid (::c/border theme)]

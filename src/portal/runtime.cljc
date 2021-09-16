@@ -104,19 +104,6 @@
   (-to-json [value]
     (to-object value :var (var->symbol value))))
 
-(defn limit-seq [value]
-  (if-not (seq? value)
-    value
-    (let [m     (meta value)
-          limit (get m ::more-limit 100)
-          [realized remaining] (split-at limit value)]
-      (with-meta
-        realized
-        (merge
-         m
-         (when (seq remaining)
-           {::more #(limit-seq (with-meta remaining m))}))))))
-
 (defn- can-meta? [value]
   #?(:clj  (or (instance? clojure.lang.IObj value)
                (instance? clojure.lang.Var value))
@@ -149,7 +136,7 @@
      value
      (merge
       session
-      {:transform (comp limit-seq id-coll)}))))
+      {:transform id-coll}))))
 
 (defn- ref-> [value]
   (id->value (second value)))

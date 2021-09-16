@@ -1,7 +1,6 @@
 (ns portal.ui.lazy
   (:refer-clojure :exclude [lazy-seq])
   (:require ["react" :as react]
-            [portal.ui.state :as state]
             [reagent.core :as r]))
 
 (defn- visible? [entries]
@@ -31,13 +30,7 @@
          :or   {default-take 0 step 10}} opts
         n (r/atom default-take)]
     (fn [seqable]
-      (let [state (state/use-state)
-            more? (seq (drop @n seqable))]
-        (react/useEffect
-         (fn []
-           (when-not more?
-             (state/dispatch! state state/more)))
-         #js [@n])
+      (let [more? (seq (drop @n seqable))]
         [:<>
          (doall (take @n seqable))
          (when more?
