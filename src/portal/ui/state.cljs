@@ -100,12 +100,14 @@
     state))
 
 (defn select-parent [state context]
-  (if-let [parent (select/get-parent context)]
+  (if-let [parent (or (select/get-left context)
+                      (select/get-parent context))]
     (assoc state :selected parent)
     state))
 
 (defn select-child [state context]
-  (if-let [child (select/get-child context)]
+  (if-let [child (or (select/get-right context)
+                     (select/get-child context))]
     (assoc state :selected child)
     state))
 

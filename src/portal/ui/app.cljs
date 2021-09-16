@@ -7,6 +7,7 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
+            [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -124,7 +125,10 @@
           {:min-width :fit-content
            :box-sizing :border-box
            :padding (* 2 (:padding theme))}}
-         [:> ins/error-boundary [ins/inspector value]]]]]]
+         [:> ins/error-boundary
+          [select/with-position
+           {:row 0 :column 0}
+           [ins/inspector value]]]]]]]
      [s/div
       {:style
        {:display :flex
@@ -335,7 +339,9 @@
             (if (= state current-state)
               :block
               :none)}}
-          [inspect-1 (state/get-value state default-value)]])
+          [select/with-position
+           {:row 0 :column index}
+           [inspect-1 (state/get-value state default-value)]]])
        (state/get-history current-state)))]))
 
 (def viewers
