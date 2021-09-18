@@ -6,8 +6,9 @@
 (defn date? [value] (instance? js/Date value))
 
 (defn parse [date]
-  (if (date? date)
-    date
+  (cond
+    (date? date) date
+    (string? date)
     (let [date (.parse js/Date date)]
       (when-not (js/isNaN date) (js/Date. date)))))
 
