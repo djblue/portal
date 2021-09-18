@@ -5,15 +5,18 @@
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+            [portal.ui.theme :as theme]
+            [reagent.core :as r]))
 
 (defonce ^:private hover (react/createContext nil))
 
 (defn- with-hover [& children]
-  (let [state (react/useState nil)]
-    (into [:r> (.-Provider hover) #js {:value state}] children)))
+  (r/with-let [value (r/atom nil)]
+    (into [:r> (.-Provider hover) #js {:value value}] children)))
 
 (defn- use-hover [] (react/useContext hover))
+
+(defn- hover? [hover selector value] (= (selector @hover) value))
 
 (defn table [& children]
   (let [theme (theme/use-theme)]
@@ -29,29 +32,26 @@
 
 (defn- cell [row column child]
   (let [background (ins/get-background)
-        theme (theme/use-theme)
-        [hover set-hover!] (use-hover)]
+        theme      (theme/use-theme)
+        hover      (use-hover)]
     [s/div
      {:on-mouse-over
       (fn []
-        (set-hover! [row column]))
+        (reset! hover [row column]))
       :style
       {:background background
        :grid-row (str (inc row))
        :grid-column (str (inc column))}}
      [s/div
-      {:style
-       (when (and (= (first hover) row)
-                  (= (second hover) column))
-         {:height "100%"
-          :width "100%"
-          :background (str (::c/border theme) "55")})}
+      {:style {:height "100%" :width "100%"}
+       :style/hover
+       {:background (str (::c/border theme) "55")}}
       [select/with-position {:row row :column column} child]]]))
 
 (defn- special [row column child]
   (let [background (ins/get-background)
         theme      (theme/use-theme)
-        [hover]    (use-hover)]
+        hover      (use-hover)]
     [s/div
      {:style
       (merge
@@ -73,9 +73,9 @@
           :text-align :right
           :border-right [3 :solid (::c/border theme)]})
        (cond
-         (= (first hover) row)
+         @(r/track hover? hover first row)
          {:border-right [3 :solid (::c/boolean theme)]}
-         (= (second hover) column)
+         @(r/track hover? hover second column)
          {:border-bottom [3 :solid (::c/boolean theme)]})
        {:position :sticky
         :background background
