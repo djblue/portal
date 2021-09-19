@@ -9,7 +9,7 @@
 
 (def pane-titles '("Alice" "Mad Hatter" "The Cake is a Lie"))
 
-(def options
+(defn options []
   {:portal.colors/theme
    (rand-nth (keys c/themes))
    :portal.launcher/window-title
@@ -20,7 +20,7 @@
     (step '(require '[portal.web :as p]))
     (step '(require '[portal.api :as p])))
   (step `(do (add-tap #'p/submit)
-             (p/open ~options)))
+             (p/open ~(options))))
   (step '(tap> :hello-world))
   (step '(p/clear))
   (step '(require '[examples.data :refer [data]]))
