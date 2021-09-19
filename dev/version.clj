@@ -18,6 +18,7 @@
 
 (def files
   ["README.md"
+   "src/portal/runtime.cljc"
    "src/portal/runtime/index.cljc"])
 
 (defn- version-updates [next-version]
