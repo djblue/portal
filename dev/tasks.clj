@@ -11,7 +11,7 @@
             [pwa]
             [version]))
 
-(def version "0.14.0")
+(def version "0.15.0")
 
 (defn- sh [& args]
   (println "=>" (str/join " " (map name args)))
@@ -196,7 +196,7 @@
   "Commit and tag a version."
   []
   (version/-main version)
-  (git :add ".")
+  (git :add "-u")
   (git :commit "-m" (str "Release " version))
   (git :tag version))
 

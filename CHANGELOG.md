@@ -1,3 +1,22 @@
+## 0.15.0 - 2021-09-19
+
+- Initial bin hex/ascii viewer for binary data
+
+### UX Changes
+
+- Only filter currently selected value
+  - Improve filtering instructions
+- Improve relative selection
+  - Bring relative selection to the table viewer
+  - Add hjkl vim style shortcuts
+  - Allow selecting parents / children
+- Disable lazy loading
+
+### Experimental
+
+- First cut of remote repl integration
+  - Support for clj/planck over socket repl
+
 ## 0.14.0 - 2021-08-15
 
 - Preserve scroll history
