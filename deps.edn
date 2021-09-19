@@ -19,13 +19,13 @@
     hickory/hickory {:mvn/version "0.7.1"}}}
   :shadow
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.15.9"}}
+   {thheller/shadow-cljs {:mvn/version "2.15.10"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.08.06"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.09.15"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}}
@@ -47,7 +47,7 @@
      :sha "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "1.0.0"}
+   {com.github.liquidz/antq {:mvn/version "1.1.0"}
     org.slf4j/slf4j-nop     {:mvn/version "1.7.32"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.107"}}}}}
