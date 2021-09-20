@@ -1,3 +1,7 @@
+## 0.15.1 - 2021-09-19
+
+- Fix issue with resource files
+
 ## 0.15.0 - 2021-09-19
 
 - Initial bin hex/ascii viewer for binary data
