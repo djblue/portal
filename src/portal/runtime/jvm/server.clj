@@ -82,10 +82,9 @@
   {:status  200
    :headers {"Content-Type" "text/javascript"}
    :body
-   (io/file
-    (case (-> request :session :options :mode)
-      :dev "target/resources/portal/main.js"
-      (io/resource "portal/main.js")))})
+   (case (-> request :session :options :mode)
+     :dev (io/file "target/resources/portal/main.js")
+     (slurp (io/resource "portal/main.js")))})
 
 (defn- get-session-id [request]
   (some->
