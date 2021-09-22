@@ -94,7 +94,7 @@
   "Start dev server."
   []
   (build)
-  (clj "-M:dev:cider:cljs:shadow" :watch :pwa :client))
+  (clj "-M:dev:cider:cljs:shadow" :watch :pwa :client :vs-code))
 
 (defn setup-planck []
   (sh :sudo :add-apt-repository "ppa:mfikes/planck")
@@ -217,7 +217,9 @@
    :src-dirs ["src"]
    :resource-dirs [""]
    :resources
-   {"src" {:excludes ["portal/ui/**" "examples/**"]}
+   {"src" {:excludes ["portal/extensions/**"
+                      "portal/ui/**"
+                      "examples/**"]}
     "resources/portal/" {:target "portal/"}}
    :repos {"clojars" {:url "https://repo.clojars.org/"}}
    :scm {:tag (git-hash)}

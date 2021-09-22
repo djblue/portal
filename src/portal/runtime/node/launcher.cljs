@@ -20,12 +20,10 @@
               (.on socket
                    "close"
                    (fn [] (swap! sockets disj sockets)))))
-       (.listen server port
-                #(let [port (.-port (.address server))
-                       result {:http-server server
-                               :port port
-                               :host host}]
-                   (resolve result)))))))
+       (.listen server #js {:port port :host host}
+                #(resolve {:http-server server
+                           :port (.-port (.address server))
+                           :host (.-address (.address server))}))))))
 
 (defn start [options]
   (or @server
