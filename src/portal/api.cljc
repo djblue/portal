@@ -4,12 +4,16 @@
                :cljs [portal.runtime.node.launcher :as l])))
 
 (defn submit
-  "Tap target function."
+  "Tap target function.
+
+  Usage:
+    (add-tap #'portal.api/submit)
+    (remove-tap #'portal.api/submit)"
   [value]
   (rt/update-value value)
   nil)
 
-(defn ^{:deprecated "0.9"} tap
+(defn ^{:deprecated "0.9" :superseded-by "submit"} tap
   "Add portal as a tap> target."
   []
   (add-tap #'submit)
