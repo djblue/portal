@@ -192,16 +192,6 @@
                       [ins/inspector option]])))
                 doall)]]]))))
 
-(def shortcut->symbol
-  {"arrowright" "⭢"
-   "arrowleft" "⭠"
-   "arrowup" "⭡"
-   "arrowdown" "⭣"
-   "meta" "⌘"})
-
-(defn combo-order [k]
-  (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
-
 (def ^:private keymap
   {{::shortcuts/osx     #{"meta" "shift" "p"}
     ::shortcuts/default #{"control" "shift" "p"}}
@@ -260,31 +250,62 @@
 
 (defn- find-combos [command]
   (let [command-name (:name command)]
-    (some
-     (fn [[combo f]]
-       (when (= f command-name)
-         (shortcuts/get-shortcut combo)))
-     keymap)))
+    (sort-by
+     #(into [] (sort %))
+     (keep
+      (fn [[combo f]]
+        (when (= f command-name)
+          (shortcuts/get-shortcut combo)))
+      keymap))))
+
+(def shortcut->symbol
+  {"arrowright" "⭢"
+   "arrowleft" "⭠"
+   "arrowup" "⭡"
+   "arrowdown" "⭣"
+   "meta" "⌘"})
+
+(defn combo-order [k]
+  (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
+
+(defn separate [coll]
+  (let [theme (theme/use-theme)]
+    [:<>
+     (drop-last
+      (interleave
+       coll
+       (for [i (-> coll count range)]
+         ^{:key i}
+         [s/div
+          {:style {:box-sizing :border-box
+                   :padding-left (:padding theme)
+                   :padding-right (:padding theme)}}
+          [s/div {:style {:height "100%"
+                          :border-right [1 :solid (::c/border theme)]}}]])))]))
 
 (defn shortcut [command]
   (let [theme (theme/use-theme)]
-    (when-let [combo (find-combos command)]
-      [s/div {:style
-              {:display :flex
-               :align-items :center
-               :white-space :nowrap}}
-       (for [k (sort-by combo-order combo)]
-         ^{:key k}
-         [s/div {:style
-                 {:background "#0002"
-                  :border-radius (:border-radius theme)
-                  :box-sizing :border-box
-                  :padding-top (* 0.25 (:padding theme))
-                  :padding-bottom (* 0.25 (:padding theme))
-                  :padding-left (:padding theme)
-                  :padding-right (:padding theme)
-                  :margin-right  (:padding theme)}}
-          (get shortcut->symbol k (.toUpperCase k))])])))
+    [s/div {:style
+            {:display :flex
+             :align-items :stretch
+             :white-space :nowrap}}
+     [separate
+      (for [combo (find-combos command)]
+        ^{:key (hash combo)}
+        [:<>
+         (for [k (sort-by combo-order combo)]
+           ^{:key k}
+           [s/div {:style
+                   {:background "#0002"
+                    :border-radius (:border-radius theme)
+                    :box-sizing :border-box
+                    :padding-top (* 0.25 (:padding theme))
+                    :padding-bottom (* 0.25 (:padding theme))
+                    :padding-left (:padding theme)
+                    :padding-right (:padding theme)
+                    :margin-right  (* 0.5 (:padding theme))
+                    :margin-left  (* 0.5 (:padding theme))}}
+            (get shortcut->symbol k (.toUpperCase k))])])]]))
 
 (defn- palette-component-item [props & children]
   (let [theme (theme/use-theme)
