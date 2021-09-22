@@ -189,7 +189,8 @@
         context  (state/get-selected-context @state)
         location (state/get-location context)]
     [s/input
-     {:disabled  (nil? context)
+     {:ref commands/filter-input
+      :disabled  (nil? context)
       :on-change #(let [value (.-value (.-target %))]
                     (when context
                       (state/dispatch!
@@ -200,6 +201,9 @@
                          (if (str/blank? value)
                            (dissoc filters location)
                            (assoc filters location value))))))
+      :on-key-down (fn [e]
+                     (when (= (.-key e) "Enter")
+                       (ins/focus-selected)))
       :value (get-in @state [:search-text location] "")
       :placeholder (if-not context
                      "Select a value to enable filtering"

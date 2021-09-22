@@ -230,6 +230,8 @@
     ::shortcuts/default #{"control" "shift" "arrowright"}}
    'portal.command/history-last
 
+   {::shortcuts/default ["/"]}                  'portal.command/focus-filter
+
    {::shortcuts/default #{"v"}}                 'portal.command/select-viewer
    {::shortcuts/default #{"arrowup"}}           'portal.command/select-prev
    {::shortcuts/default #{"k"}}                 'portal.command/select-prev
@@ -645,6 +647,12 @@
   (when-let [path (state/get-path @state)]
     (copy-edn! path)))
 
+(def filter-input (react/createRef))
+
+(defn focus-filter [_]
+  (when-let [input (.-current filter-input)]
+    (.focus input)))
+
 (def portal-commands
   [{:name 'clojure.datafy/nav
     :run (fn [state]
@@ -652,6 +660,8 @@
             state
             state/nav
             (state/get-selected-context @state)))}
+   {:name 'portal.command/focus-filter
+    :run  focus-filter}
    {:name 'portal.command/select-viewer
     :run  select-viewer}
    {:name 'portal.command/select-prev

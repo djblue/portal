@@ -621,6 +621,11 @@
      :value     (f/filter-value (:value context)
                                 (get search-text location ""))}))
 
+(def ^:private selected-ref (atom nil))
+
+(defn focus-selected []
+  (some-> selected-ref deref .-current .focus))
+
 (defn inspector [value]
   (let [ref   (react/useRef nil)
         state (state/use-state)
@@ -648,9 +653,9 @@
        (react/useEffect
         (fn []
           (when (and selected?
-                     (some? (.-current ref))
                      (not= (.. js/document -activeElement -tagName) "INPUT"))
-            (.focus (.-current ref))))
+            (reset! selected-ref ref)
+            (some-> ref .-current .focus)))
         #js [selected? (.-current ref)])
        [s/div
         (merge
