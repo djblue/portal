@@ -482,14 +482,16 @@
    :label "Show All Commands"
    :run (fn [state]
           (a/let [fns (get-functions state)
-                  commands (remove
-                            (fn [option]
-                              (or
-                               (#{'portal.command/open-command-palette}
-                                (:name option))
-                               (when-let [predicate (:predicate option)]
-                                 (not (predicate @state)))))
-                            (concat fns commands (:commands @state)))]
+                  commands (sort-by
+                            :name
+                            (remove
+                             (fn [option]
+                               (or
+                                (#{'portal.command/open-command-palette}
+                                 (:name option))
+                                (when-let [predicate (:predicate option)]
+                                  (not (predicate @state)))))
+                             (concat fns commands (:commands @state))))]
             (open
              (fn [state]
                [palette-component
