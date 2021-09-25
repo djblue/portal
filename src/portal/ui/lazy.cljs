@@ -25,14 +25,14 @@
        #js [(.-current ref) f]))
     [:div {:ref ref :style {:height "1em" :width "1em"}}]))
 
-(defn lazy-seq [_ opts]
+(defn lazy-seq [_coll opts]
   (let [{:keys [default-take step]
          :or   {default-take 0 step 10}} opts
         n (r/atom default-take)]
-    (fn [seqable]
-      (let [more? (seq (drop @n seqable))]
+    (fn [coll _opts]
+      (let [[head tail] (split-at @n coll)]
         [:<>
-         (doall (take @n seqable))
-         (when more?
+         head
+         (when (seq tail)
            [visible-sensor
             (fn [] (swap! n + step))])]))))
