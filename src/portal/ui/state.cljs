@@ -9,7 +9,7 @@
 (defonce state  (r/atom {}))
 
 (defn notify-parent [event]
-  (when js/parent
+  (when (exists? js/parent)
     (js/parent.postMessage (js/JSON.stringify (clj->js event)) "*")))
 
 (defn dispatch! [state f & args]

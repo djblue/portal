@@ -14,7 +14,8 @@
    :modules {:main {:init-fn portal.ui.core/main!}}
    :release {:output-dir "resources/portal/"}
    :devtools {:after-load portal.ui.core/reload!
-              :preloads   [cljs.user]}}
+              :preloads   [portal.setup]
+              :use-document-host false}}
 
   :pwa
   {:output-dir "target/pwa/"
@@ -26,6 +27,15 @@
    :modules {:main {:init-fn portal.ui.pwa/main!}}
    :release {:output-dir "target/pwa-release/"}
    :devtools {:after-load portal.ui.pwa/reload!}}
+
+  :vs-code
+  {:exports-var portal.extensions.vs-code/exports
+   :target :node-library
+   :compiler-options
+   {:infer-externs true
+    :warnings-as-errors true}
+   :output-to "target/vs-code.js"
+   :devtools {:after-load portal.extensions.vs-code/reload}}
 
   :node
   {:target :node-script

@@ -171,7 +171,13 @@
 
 (defonce ^:private ws-promise (atom nil))
 
-(defn- get-session [] (subs js/window.location.search 1))
+(defn- get-session []
+  (if (exists? js/PORTAL_SESSION)
+    js/PORTAL_SESSION
+    (subs js/window.location.search 1)))
+
+(defn- get-host []
+  (if (exists? js/PORTAL_HOST) js/PORTAL_HOST js/location.host))
 
 (defn- connect []
   (if-let [ws @ws-promise]
@@ -181,7 +187,7 @@
      (js/Promise.
       (fn [resolve reject]
         (when-let [chan (js/WebSocket.
-                         (str "ws://" js/location.host "/rpc?" (get-session)))]
+                         (str "ws://" (get-host) "/rpc?" (get-session)))]
           (set! (.-onmessage chan) #(dispatch (read (.-data %))
                                               (fn [message]
                                                 (send! message))))

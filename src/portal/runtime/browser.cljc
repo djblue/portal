@@ -10,6 +10,8 @@
                      [portal.runtime.fs :as fs]
                      [portal.runtime.node.client :as c])))
 
+(defmulti -open (comp :launcher :options))
+
 (defn- get-chrome-bin []
   (fs/find-bin
    (concat
@@ -106,16 +108,18 @@
 
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
 
-(defn open [{:keys [portal options server]}]
-  (let [{:keys [host port]} server
-        portal     (or portal (c/make-atom (random-uuid)))
-        session-id (:session-id portal)
-        url        (str "http://" host ":" port "?" session-id)
+(defmethod -open :default [{:keys [portal options server]}]
+  (let [url (str "http://" (:host server) ":" (:port server) "?" (:session-id portal))
         chrome-bin (get-chrome-bin)]
+    (if (and (some? chrome-bin)
+             (:portal.launcher/app options true))
+      (apply sh chrome-bin (flags url))
+      (browse url))))
+
+(defn open [{:keys [portal options] :as args}]
+  (let [portal     (or portal (c/make-atom (random-uuid)))
+        session-id (:session-id portal)]
     (swap! rt/sessions assoc-in [session-id :options] options)
     (when-not (c/open? session-id)
-      (if (and (some? chrome-bin)
-               (:portal.launcher/app options true))
-        (apply sh chrome-bin (flags url))
-        (browse url)))
+      (-open (assoc args :portal portal)))
     portal))

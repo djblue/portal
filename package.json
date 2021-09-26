@@ -1,4 +1,26 @@
 {
+  "name": "portal",
+  "version": "0.15.1",
+  "main": "./target/vs-code.js",
+  "engines": {
+    "vscode": "^1.25.0"
+  },
+  "activationEvents": [
+    "onCommand:extension.portalOpen",
+    "onCommand:extension.portalOpenDev"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.portalOpen",
+        "title": "Open Portal"
+      },
+      {
+        "command": "extension.portalOpenDev",
+        "title": "Open Portal (DEV)"
+      }
+    ]
+  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
