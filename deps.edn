@@ -25,7 +25,7 @@
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.09.15"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.09.25"}}}
   :cljfmt
   {:main-opts ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}}
