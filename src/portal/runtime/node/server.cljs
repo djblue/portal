@@ -10,18 +10,15 @@
 (defn- not-found [_request done]
   (done {:status :not-found}))
 
-(defn- try-require-ws []
-  (try (.-Server (js/require "ws")) (catch :default _)))
-
 (defn- require-string [src file-name]
   (let [Module (js/require "module")
-        m (Module.)]
+        m (Module. file-name js/module.parent)]
+    (set! (.-filename m) file-name)
     (._compile m src file-name)
     (.-exports m)))
 
-(def Server (or (try-require-ws)
-                (-> (io/resource "portal/ws.js")
-                    (require-string "portal/ws.js") .-Server)))
+(def Server (-> (io/resource "portal/ws.js")
+                (require-string "portal/ws.js") .-Server))
 
 (def ops (merge c/ops rt/ops))
 
