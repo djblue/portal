@@ -10,4 +10,12 @@
   (is (some? (seq (fs/paths))))
   (is (contains?
        (into #{} (fs/list (fs/cwd)))
-       (fs/join (fs/cwd) "deps.edn"))))
+       (fs/join (fs/cwd) "deps.edn")))
+  (let [dir  (str "target/" (gensym))
+        file (str dir "/" (gensym))]
+    (fs/mkdir dir)
+    (fs/spit file "hello")
+    (is (= (fs/slurp file) "hello"))
+    (fs/rm dir)
+    (is (nil? (fs/exists file)))
+    (is (nil? (fs/exists dir)))))

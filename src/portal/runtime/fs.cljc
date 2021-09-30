@@ -1,5 +1,5 @@
 (ns portal.runtime.fs
-  (:refer-clojure :exclude [slurp list])
+  (:refer-clojure :exclude [slurp spit list])
   #?(:clj  (:require [clojure.java.io :as io]
                      [clojure.string :as s])
      :cljs (:require ["fs" :as fs]
@@ -14,6 +14,14 @@
 (defn slurp [path]
   #?(:clj  (clojure.core/slurp path)
      :cljs (fs/readFileSync path "utf8")))
+
+(defn spit [path content]
+  #?(:clj  (clojure.core/spit path content)
+     :cljs (fs/writeFileSync path content)))
+
+(defn mkdir [path]
+  #?(:clj  (.mkdirs (io/file path))
+     :cljs (fs/mkdirSync path #js {:recursive true})))
 
 (defn path []
   #?(:clj  (System/getenv "PATH")
@@ -58,3 +66,9 @@
              (.getAbsolutePath f))
      :cljs (for [f (fs/readdirSync path)]
              (join path f))))
+
+(defn rm [path]
+  #?(:clj  (let [children (list path)]
+             (doseq [child children] (rm child))
+             (io/delete-file path))
+     :cljs (fs/rmdirSync path #js {:recursive true})))
