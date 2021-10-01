@@ -33,6 +33,7 @@
    :target :node-library
    :compiler-options
    {:infer-externs true
+    :source-map    true
     :warnings-as-errors true}
    :output-to "target/vs-code.js"
    :devtools {:after-load portal.extensions.vs-code/reload}}
