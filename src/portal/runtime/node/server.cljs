@@ -12,7 +12,7 @@
 
 (defn- require-string [src file-name]
   (let [Module (js/require "module")
-        m (Module. file-name js/module.parent)]
+        ^js m (Module. file-name js/module.parent)]
     (set! (.-filename m) file-name)
     (._compile m src file-name)
     (.-exports m)))
@@ -22,23 +22,23 @@
 
 (def ops (merge c/ops rt/ops))
 
-(defn- get-session-id [request]
+(defn- get-session-id [^js req]
   (some->
-   (or (last (.split (.-url request) "?"))
-       (when-let [referer (.getHeader request "referer")]
+   (or (last (str/split (.-url req) #"\?"))
+       (when-let [referer (.getHeader req "referer")]
          (last (str/split referer #"\?"))))
    uuid))
 
-(defn- get-session [request]
-  (rt/get-session (get-session-id request)))
+(defn- get-session [req]
+  (rt/get-session (get-session-id req)))
 
-(defn- rpc-handler [request _response]
-  (let [session (get-session request)]
+(defn- rpc-handler [^js req _res]
+  (let [session (get-session req)]
     (.handleUpgrade
      (Server. #js {:noServer true})
-     request
-     (.-socket request)
-     (.-headers request)
+     req
+     (.-socket req)
+     (.-headers req)
      (fn [ws]
        (let [session (rt/open-session session)
              send!
@@ -59,22 +59,28 @@
               (fn []
                 (swap! c/connections dissoc (:session-id session)))))))))
 
-(defn- send-resource [response content-type body]
-  (-> response
+(defn- send-resource [^js res content-type body]
+  (-> res
       (.writeHead 200 #js {"Content-Type" content-type})
       (.end body)))
 
-(defn- main-js [request]
-  (let [options (-> request get-session :options)]
+(defn- main-js [req]
+  (let [options (-> req get-session :options)]
     (case (:mode options)
       :dev (fs/slurp (get-in options [:resource "main.js"]))
       (io/resource "portal/main.js"))))
 
-(defn handler [request response]
-  (let [paths
-        {"/"        #(send-resource response "text/html"       (index/html))
-         "/main.js" #(send-resource response "text/javascript" (main-js %))
-         "/rpc"     #(rpc-handler request response)}
-        [path] (.split (.-url request) "?")
-        f (get paths path #(-> response (.writeHead 404) .end))]
-    (f request)))
+(defn- get-path [^js req _res]
+  (-> req .-url (str/split #"\?") first))
+
+(defmulti handler #'get-path)
+
+(defmethod handler "/" [_req res]
+  (send-resource res "text/html" (index/html)))
+
+(defmethod handler "/main.js" [req res]
+  (send-resource res "text/javascript" (main-js req)))
+
+(defmethod handler "/rpc" [req res] (rpc-handler req res))
+
+(defmethod handler :default [_req ^js res] (-> res (.writeHead 404) .end))
