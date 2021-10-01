@@ -1,7 +1,7 @@
 
 
 <p align="center">
-  <img width="200" style="margin: 0 auto" src="https://raw.githubusercontent.com/djblue/portal/master/resources/icon.svg"/>
+  <img width="200" style="margin: 0 auto" src="https://raw.githubusercontent.com/djblue/portal/master/resources/icon.png"/>
 </p>
 
 # portal
@@ -10,9 +10,9 @@ A clojure tool to navigate through your data.
 
 [![Clojars Project](https://img.shields.io/clojars/v/djblue/portal?color=2a2e39&style=for-the-badge)](https://clojars.org/djblue/portal)
 
-[![Get help on Slack](http://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/portal)
+[![Get help on Slack](https://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?logo=slack&style=for-the-badge)](https://clojurians.slack.com/channels/portal)
 
-[![screenshot](https://user-images.githubusercontent.com/1986211/129153169-4018d586-d747-48f9-8193-d267ea5e288a.png)](http://djblue.github.io/portal/)
+[![screenshot](https://user-images.githubusercontent.com/1986211/129153169-4018d586-d747-48f9-8193-d267ea5e288a.png)](https://djblue.github.io/portal/)
 
 The portal UI can be used to inspect values of various shapes and sizes. The UX will probably evolve over time and user feedback is welcome!
 

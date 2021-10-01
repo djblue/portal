@@ -90,6 +90,26 @@
 
 (defn build [] (main-js) (ws-js))
 
+(defn vs-code-extension
+  "Build vs-code extension."
+  []
+  (ws-js)
+  (when (seq
+         (fs/modified-since
+          "target/vs-code.js"
+          (concat
+           ["deps.edn"
+            "package.json"
+            "package-lock.json"
+            "shadow-cljs.edn"]
+           (fs/glob "src/portal/" "**.cljs"))))
+    (shadow :release :vs-code))
+  (when (seq
+         (fs/modified-since
+          (str "portal-" version ".vsix")
+          ["target/vs-code.js"]))
+    (npx :vsce :package)))
+
 (defn dev
   "Start dev server."
   []

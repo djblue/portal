@@ -1,20 +1,23 @@
 (ns portal.extensions.vs-code
   (:require ["vscode" :as vscode]
+            [clojure.edn :as edn]
             [clojure.string :as str]
             [portal.api :as p]
+            [portal.async :as a]
             [portal.runtime.browser :as browser]
             [portal.runtime.fs :as fs]
-            [portal.runtime.index :as index]))
+            [portal.runtime.index :as index]
+            [portal.runtime.node.server :as server]))
 
 (defn reload
   []
   (.log js/console "Reloading...")
   (js-delete js/require.cache (js/require.resolve "./vs-code")))
 
-(defmethod browser/-open :vs-code [{:keys [portal options server]}]
+(defn- -open [{:keys [portal options server]}]
   (let [{:keys [host port]} server
         session-id          (:session-id portal)
-        panel               (.createWebviewPanel
+        ^js panel           (.createWebviewPanel
                              vscode/window
                              "portal"
                              (str/join
@@ -29,32 +32,61 @@
                       :host       (str host ":" port)
                       :session-id (str session-id)))))
 
-(defn- get-commands [context]
-  (keep
-   identity
-   [(.registerCommand
-     vscode/commands
-     "extension.portalOpen"
-     (fn []
-       (p/open {:launcher :vs-code})))
-    (when-let [path (fs/exists (.asAbsolutePath context "target/resources/portal/main.js"))]
-      (.registerCommand
-       vscode/commands
-       "extension.portalOpenDev"
-       (fn []
-         (p/open
-          {:mode         :dev
-           :window-title "vs-code-dev"
-           :resource     {"main.js" path}
-           :launcher     :vs-code}))))]))
+(defmethod browser/-open :vs-code [args] (-open args))
+
+(defn- get-workspace-folder []
+  (-> vscode/workspace
+      .-workspaceFolders
+      (aget 0)
+      (.. -uri -path)))
+
+(defn- get-commands []
+  {:extension.portalOpen
+   (fn []
+     (p/open {:launcher :vs-code}))
+   :extension.portalOpenDev
+   (fn []
+     (let [path (fs/exists (str (get-workspace-folder) "/target/resources/portal/main.js"))]
+       (p/open
+        {:mode         :dev
+         :window-title "vs-code-dev"
+         :resource     {"main.js" path}
+         :launcher     :vs-code})))})
+
+(defn- get-body [^js req]
+  (js/Promise.
+   (fn [resolve reject]
+     (let [body (atom "")]
+       (.on req "data" #(swap! body str %))
+       (.on req "end"  #(resolve @body))
+       (.on req "error" reject)))))
+
+(defmethod server/handler "/open" [req res]
+  (a/let [body (get-body req)]
+    (-open (edn/read-string body))
+    (.end res)))
+
+(defn- set-status [workspace]
+  (when (fs/exists (str workspace "/target/resources/portal/main.js"))
+    (.executeCommand vscode/commands "setContext" "portal:is-dev" true)))
 
 (defn activate
-  [context]
+  [^js context]
+  (a/let [workspace (get-workspace-folder)
+          folder    (str workspace "/.portal")
+          info      (p/start {})]
+    (set-status workspace)
+    (fs/mkdir folder)
+    (fs/spit (str folder "/vs-code.edn")
+             (pr-str (select-keys info [:host :port]))))
   (add-tap #'p/submit)
-  (doseq [command (get-commands context)]
-    (.push (.-subscriptions context) command)))
+  (doseq [[command f] (get-commands)]
+    (.push (.-subscriptions context)
+           (.registerCommand vscode/commands (name command) f))))
 
-(defn deactivate [])
+(defn deactivate
+  []
+  (remove-tap #'p/submit))
 
 (def exports #js {:activate activate
                   :deactivate deactivate})

@@ -8,8 +8,12 @@ resources/portal/
 .clj-kondo/.cache/
 .DS_Store
 .nrepl-port
+
+# vscode
 *.calva/
 .lsp/
+.portal/
+*.vsix
 
 # intellij files
 .idea/

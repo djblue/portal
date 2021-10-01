@@ -1,9 +1,22 @@
 (ns portal.runtime.jvm.launcher
-  (:require [org.httpkit.server :as http]
+  (:require [clojure.edn :as edn]
+            [org.httpkit.client :as client]
+            [org.httpkit.server :as http]
             [portal.runtime :as rt]
             [portal.runtime.browser :as browser]
+            [portal.runtime.fs :as fs]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.jvm.server :as server]))
+
+(defn- vs-code-config []
+  (some-> ".portal/vs-code.edn" fs/exists slurp edn/read-string))
+
+(defmethod browser/-open :vs-code [{:keys [portal options server]}]
+  (when-let [{:keys [host port]} (vs-code-config)]
+    (client/post (str "http://" host ":" port "/open")
+                 {:body (pr-str {:portal  portal
+                                 :options options
+                                 :server  (select-keys server [:host :port])})})))
 
 (defonce ^:private server (atom nil))
 
