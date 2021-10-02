@@ -1,14 +1,14 @@
 (ns portal.runtime.browser
   #?(:clj  (:require [cheshire.core :as json]
                      [clojure.java.browse :refer [browse-url]]
-                     [clojure.java.shell :as shell]
                      [portal.runtime :as rt]
                      [portal.runtime.fs :as fs]
-                     [portal.runtime.jvm.client :as c])
-     :cljs (:require ["child_process" :as cp]
-                     [portal.runtime :as rt]
+                     [portal.runtime.jvm.client :as c]
+                     [portal.runtime.shell :as shell])
+     :cljs (:require [portal.runtime :as rt]
                      [portal.runtime.fs :as fs]
-                     [portal.runtime.node.client :as c])))
+                     [portal.runtime.node.client :as c]
+                     [portal.runtime.shell :as shell])))
 
 (defmulti -open (comp :launcher :options))
 
@@ -79,21 +79,6 @@
          (filter some?))
     [(str "--app=" url)]))
 
-(defn- sh [bin & args]
-  #?(:clj
-     (future
-       (let [{:keys [exit err out]} (apply shell/sh bin args)]
-         (when-not (zero? exit)
-           (println "Unable to open chrome:")
-           (prn (into [bin] args))
-           (println err out))))
-     :cljs
-     (js/Promise.
-      (fn [resolve reject]
-        (let [ps (cp/spawn bin (clj->js args))]
-          (.on ps "error" reject)
-          (.on ps "close" resolve))))))
-
 (defn- browse [url]
   #?(:clj
      (try (browse-url url)
@@ -101,9 +86,9 @@
             (println "Goto" url "to view portal ui.")))
      :cljs
      (case (.-platform js/process)
-       ("android" "linux") (sh "xdg-open" url)
-       "darwin"            (sh "open" url)
-       "win32"             (sh "cmd" "/c" "start" url)
+       ("android" "linux") (shell/sh "xdg-open" url)
+       "darwin"            (shell/sh "open" url)
+       "win32"             (shell/sh "cmd" "/c" "start" url)
        (println "Goto" url "to view portal ui."))))
 
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
@@ -113,7 +98,7 @@
         chrome-bin (get-chrome-bin)]
     (if (and (some? chrome-bin)
              (:portal.launcher/app options true))
-      (apply sh chrome-bin (flags url))
+      (apply shell/sh chrome-bin (flags url))
       (browse url))))
 
 (defn open [{:keys [portal options] :as args}]
