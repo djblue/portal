@@ -1,5 +1,6 @@
 (ns user
-  (:require [cheshire.core :as json]
+  (:require [c]
+            [cheshire.core :as json]
             [clojure.core.protocols :refer [Datafiable]]
             [clojure.datafy :refer [datafy]]
             [clojure.java.io :as io]

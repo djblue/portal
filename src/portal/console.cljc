@@ -10,7 +10,7 @@
     (catch #?(:clj Exception :cljs :default) ex#
       [:throw ex#])))
 
-(defn- capture [level form expr]
+(defn capture [level form expr]
   (let [{:keys [line column]} (meta form)]
     `(let [[flow# result#] (run (fn [] ~expr))]
        (tap>
