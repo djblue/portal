@@ -296,7 +296,9 @@
          (for [k (sort-by combo-order combo)]
            ^{:key k}
            [s/div {:style
-                   {:background "#0002"
+                   {:display :flex
+                    :align-items :center
+                    :background "#0002"
                     :border-radius (:border-radius theme)
                     :box-sizing :border-box
                     :padding-top (* 0.25 (:padding theme))
