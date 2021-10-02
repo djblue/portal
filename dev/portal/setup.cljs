@@ -2,6 +2,7 @@
   (:require [clojure.core.protocols :refer [Datafiable]]
             [clojure.datafy :refer [datafy]]
             [examples.data :refer [data]]
+            [portal.console :as c]
             [portal.web :as p]))
 
 (add-tap #'p/submit)
@@ -40,4 +41,8 @@
   (tap> (js/Promise.resolve 123))
 
   (tap> (with-meta (range) {:hello :world}))
-  (tap> data))
+  (tap> data)
+
+  ;; console
+  (c/log "log")
+  (c/error "error"))
