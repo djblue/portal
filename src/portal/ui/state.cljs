@@ -136,7 +136,10 @@
 
 (defn invoke [f & args]
   (-> (send! {:op :portal.rpc/invoke :f f :args args})
-      (.then #(:return %))))
+      (.then (fn [{:keys [return error]}]
+               (if-not error
+                 return
+                 (throw (ex-info "invoke exception" error)))))))
 
 (defonce value-cache (r/atom {}))
 
