@@ -549,9 +549,12 @@
                         (get-key path next-value))))}])))]
        (get-key [] v)))))
 
-(defn var->name [var]
-  (let [{:keys [name ns]} (meta var)]
-    (symbol (str ns) (str name))))
+(def aliases {"cljs.core" "clojure.core"})
+
+(defn- var->name [var]
+  (let [{:keys [name ns]} (meta var)
+        ns                (str ns)]
+    (symbol (aliases ns ns) (str name))))
 
 (defn ->command [m]
   (for [[var opts] m]

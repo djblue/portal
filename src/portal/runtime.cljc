@@ -226,16 +226,19 @@
 
 (def ops {:portal.rpc/invoke #'invoke})
 
+(def aliases {"cljs.core" "clojure.core"})
+
 (defn- var->name [var]
-  (let [{:keys [name ns]} (meta var)]
-    (symbol (str ns) (str name))))
+  (let [{:keys [name ns]} (meta var)
+        ns                (str ns)]
+    (symbol (aliases ns ns) (str name))))
 
 (defn register!
   ([var] (register! var {}))
   ([var opts]
    (swap! registry
           assoc
-          (or (:name opts) (var->name var))
+          (var->name var)
           (merge {:var var} opts))))
 
 (defn- deref? [value]
@@ -251,8 +254,8 @@
              #'datafy]]
   (register! var))
 
-(doseq [[var opts] {#'deref           {:name 'clojure.core/deref :predicate deref?}
-                    #'meta            {:name 'clojure.core/meta  :predicate can-meta?}
+(doseq [[var opts] {#'deref           {:predicate deref?}
+                    #'meta            {:predicate can-meta?}
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
                     #'nav             {:private true}}]
