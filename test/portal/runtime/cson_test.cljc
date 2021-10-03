@@ -154,16 +154,17 @@
   {:parse     edn/read-string
    :stringify pr-str})
 
-(deftest rich-benchmark
-  (b/simple-benchmark [] (transit-write v) n)
-  (b/simple-benchmark [] (cson/write v edn) n)
-  (b/simple-benchmark [] (cson/write v) n)
+(comment
+  (deftest rich-benchmark
+    (b/simple-benchmark [] (transit-write v) n)
+    (b/simple-benchmark [] (cson/write v edn) n)
+    (b/simple-benchmark [] (cson/write v) n)
 
-  (prn)
+    (prn)
 
-  (b/simple-benchmark
-   [v (transit-write v)] (transit-read v) n)
-  (b/simple-benchmark
-   [v (cson/write v edn)] (cson/read v edn) n)
-  (b/simple-benchmark
-   [v (cson/write v)] (cson/read v) n))
+    (b/simple-benchmark
+     [v (transit-write v)] (transit-read v) n)
+    (b/simple-benchmark
+     [v (cson/write v edn)] (cson/read v edn) n)
+    (b/simple-benchmark
+     [v (cson/write v)] (cson/read v) n)))
