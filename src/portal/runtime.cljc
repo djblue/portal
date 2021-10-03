@@ -228,7 +228,9 @@
   ([var] (register! var {}))
   ([var opts]
    (swap! registry
-          assoc (var->name var) (merge opts {:var var}))))
+          assoc
+          (or (:name opts) (var->name var))
+          (merge {:var var} opts))))
 
 (defn- deref? [value]
   #?(:clj  (instance? clojure.lang.IRef value)
@@ -243,8 +245,8 @@
              #'datafy]]
   (register! var))
 
-(doseq [[var opts] {#'deref           {:predicate deref?}
-                    #'meta            {:predicate can-meta?}
+(doseq [[var opts] {#'deref           {:name 'clojure.core/deref :predicate deref?}
+                    #'meta            {:name 'clojure.core/meta  :predicate can-meta?}
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
                     #'nav             {:private true}}]
