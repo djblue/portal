@@ -746,6 +746,8 @@
 (defn ^:command clear [state]
   (state/dispatch! state state/clear))
 
+(defn- then-first [value] (.then value first))
+
 (def clojure-commands
   {#'clojure.core/vals        {:predicate map?}
    #'clojure.core/keys        {:predicate map?}
@@ -755,7 +757,7 @@
    #'clojure.core/get         {:predicate map? :args (comp pick-one keys)}
    #'clojure.core/get-in      {:predicate map? :args pick-in}
    #'clojure.core/select-keys {:predicate map? :args (comp pick-many keys)}
-   #'clojure.core/dissoc      {:predicate map? :args (comp pick-many keys)}})
+   #'clojure.core/dissoc      {:predicate map? :args (comp then-first pick-many keys)}})
 
 (def portal-data-commands
   {#'transpose-map  {:name 'portal.data/transpose-map}
