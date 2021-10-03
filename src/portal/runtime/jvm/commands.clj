@@ -5,7 +5,8 @@
            [java.net URI URL]))
 
 (defn- can-slurp? [value]
-  (or (instance? URI value)
+  (or (string? value)
+      (instance? URI value)
       (instance? URL value)
       (and (instance? File value)
            (.isFile ^File value)
