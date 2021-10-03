@@ -294,23 +294,26 @@
              :white-space :nowrap}}
      [separate
       (for [combo (find-combos command)]
-        ^{:key (hash combo)}
         [:<>
-         (for [k (sort-by combo-order combo)]
-           ^{:key k}
-           [s/div {:style
-                   {:display :flex
-                    :align-items :center
-                    :background "#0002"
-                    :border-radius (:border-radius theme)
-                    :box-sizing :border-box
-                    :padding-top (* 0.25 (:padding theme))
-                    :padding-bottom (* 0.25 (:padding theme))
-                    :padding-left (:padding theme)
-                    :padding-right (:padding theme)
-                    :margin-right  (* 0.5 (:padding theme))
-                    :margin-left  (* 0.5 (:padding theme))}}
-            (get shortcut->symbol k (.toUpperCase k))])])]]))
+         {:key (hash combo)}
+         (map-indexed
+          (fn [index k]
+            [s/div
+             {:key index
+              :style
+              {:display :flex
+               :align-items :center
+               :background "#0002"
+               :border-radius (:border-radius theme)
+               :box-sizing :border-box
+               :padding-top (* 0.25 (:padding theme))
+               :padding-bottom (* 0.25 (:padding theme))
+               :padding-left (:padding theme)
+               :padding-right (:padding theme)
+               :margin-right  (* 0.5 (:padding theme))
+               :margin-left  (* 0.5 (:padding theme))}}
+             (get shortcut->symbol k (.toUpperCase k))])
+          (sort-by combo-order combo))])]]))
 
 (defn- palette-component-item [props & children]
   (let [theme (theme/use-theme)
