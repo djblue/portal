@@ -22,6 +22,7 @@
             [portal.ui.viewer.html :as html]
             [portal.ui.viewer.image :as image]
             [portal.ui.viewer.json :as json]
+            [portal.ui.viewer.log :as log]
             [portal.ui.viewer.markdown :as md]
             [portal.ui.viewer.relative-time :as relative-time]
             [portal.ui.viewer.table :as table]
@@ -356,6 +357,7 @@
    charts/line-chart
    charts/scatter-chart
    charts/histogram-chart
+   log/viewer
    image/viewer
    ins/viewer
    bin/viewer
