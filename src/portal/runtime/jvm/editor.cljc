@@ -3,8 +3,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [portal.runtime.shell :refer [sh]])
-  (:import (clojure.lang Namespace Symbol Var PersistentArrayMap)
-           (java.io File)
+  (:import (java.io File)
            (java.net URL URI)))
 
 (defprotocol IResolve (resolve [this]))
@@ -12,25 +11,28 @@
 (defn- exists [path]
   (when (.exists (io/file path)) {:file path}))
 
+#?(:bb (def clojure.lang.Var (type #'exists)))
+#?(:bb (def clojure.lang.Namespace (type *ns*)))
+
 (extend-protocol IResolve
-  PersistentArrayMap
+  clojure.lang.PersistentArrayMap
   (resolve [m]
     (when-let [file (:file m)]
       (when-let [resolved (resolve file)]
         (merge m resolved))))
-  Var
-  (resolve [^Var v]
+  clojure.lang.Var
+  (resolve [v]
     (let [m (meta v)]
       (merge m (resolve (:file m)))))
-  Namespace
-  (resolve [^Namespace ns]
+  clojure.lang.Namespace
+  (resolve [ns]
     (let [base (str/escape (str ns) {\. "/" \- "_"})]
       (some
        (fn [ext]
          (when-let [url (io/resource (str base ext))]
            (resolve url)))
        [".cljc" ".clj"])))
-  Symbol
+  clojure.lang.Symbol
   (resolve [^Symbol s]
     (resolve (find-ns s)))
   URL
@@ -71,7 +73,7 @@
   (open :foo)
   (open 'clojure.core)
 
-  (open *ns*)
+  (open (tap> *ns*))
   (open "/tmp")
   (open #'open)
 
