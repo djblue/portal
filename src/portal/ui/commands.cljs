@@ -434,7 +434,7 @@
     (when-let [selected (state/get-selected-context @state)]
       (state/dispatch! state f selected))))
 
-(defn make-command [{:keys [name predicate args f] :as opts}]
+(defn make-command [{:keys [name command predicate args f] :as opts}]
   (let [predicate (or predicate (constantly true))]
     (assoc opts
            :predicate (comp predicate state/get-selected-value)
@@ -442,7 +442,7 @@
                   (a/let [v      (state/get-selected-value @state)
                           args   ((or args empty-args) v)
                           result (apply f v args)]
-                    (when (predicate v)
+                    (when-not command
                       (state/dispatch!
                        state
                        state/history-push
@@ -454,11 +454,9 @@
 (defn get-functions [state]
   (a/let [v   (state/get-selected-value @state)
           fns (state/invoke 'portal.runtime/get-functions v)]
-    (for [{:keys [name doc]} fns]
+    (for [{:keys [name] :as opts} fns]
       (make-command
-       {:name name
-        :doc  doc
-        :f    #(state/invoke name %)}))))
+       (assoc opts :f #(state/invoke name %))))))
 
 (declare commands)
 

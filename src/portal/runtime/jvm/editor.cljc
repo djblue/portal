@@ -62,7 +62,7 @@
 (defn can-open [input]
   (and (satisfies? IResolve input) (resolve input)))
 
-(defn ^{:predicate can-open} open
+(defn ^{:predicate can-open :command true} open
   "Open value in editor."
   [input]
   (when-let [location (can-open input)]

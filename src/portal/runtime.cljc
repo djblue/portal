@@ -182,7 +182,8 @@
   (keep
    (fn [[name opts]]
      (let [m      (merge (meta (:var opts)) opts)
-           result {:name name :doc (:doc m)}]
+           result (merge {:name name}
+                         (select-keys m [:doc :command]))]
        (when-not (:private m)
          (if-let [predicate (:predicate m)]
            (when (predicate v) result)
