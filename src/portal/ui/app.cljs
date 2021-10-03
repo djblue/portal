@@ -165,7 +165,7 @@
       [runtime-info]
       [s/button
        {:title    "Open command palette."
-        :on-click #((:run commands/open-command-palette) state)
+        :on-click #(commands/open-command-palette state)
         :style
         {:min-width 60
          :font-family (:font-family theme)

@@ -195,34 +195,34 @@
 (def ^:private keymap
   {{::shortcuts/osx     #{"meta" "shift" "p"}
     ::shortcuts/default #{"control" "shift" "p"}}
-   'portal.command/open-command-palette
+   `open-command-palette
 
    {::shortcuts/default #{"control" "j"}}
-   'portal.command/open-command-palette
+   `open-command-palette
 
    {::shortcuts/osx     #{"meta" "c"}
     ::shortcuts/default #{"control" "c"}}
-   'portal.command/copy-as-edn
+   `copy-as-edn
 
    {::shortcuts/osx     #{"meta" "arrowleft"}
     ::shortcuts/default #{"control" "arrowleft"}}
-   'portal.command/history-back
+   `history-back
 
    {::shortcuts/osx     #{"meta" "arrowright"}
     ::shortcuts/default #{"control" "arrowright"}}
-   'portal.command/history-forward
+   `history-forward
 
    {::shortcuts/osx     #{"meta" "shift" "arrowleft"}
     ::shortcuts/default #{"control" "shift" "arrowleft"}}
-   'portal.command/history-first
+   `history-first
 
    {::shortcuts/osx     #{"meta" "shift" "arrowright"}
     ::shortcuts/default #{"control" "shift" "arrowright"}}
-   'portal.command/history-last
+   `history-last
 
-   {::shortcuts/default ["/"]}                  'portal.command/focus-filter
+   {::shortcuts/default ["/"]}                  `focus-filter
 
-   {::shortcuts/default #{"v"}}                 'portal.command/select-viewer
+   {::shortcuts/default #{"v"}}                 `select-viewer
    {::shortcuts/default #{"arrowup"}}           'portal.command/select-prev
    {::shortcuts/default #{"k"}}                 'portal.command/select-prev
    {::shortcuts/default #{"arrowdown"}}         'portal.command/select-next
@@ -237,11 +237,11 @@
 
    {::shortcuts/default #{"enter"}}             'clojure.datafy/nav
 
-   {::shortcuts/default #{"control" "r"}}       'portal.command/redo-previous-command
-   {::shortcuts/default #{"control" "l"}}       'portal.command/clear
+   {::shortcuts/default #{"control" "r"}}       `redo-previous-command
+   {::shortcuts/default #{"control" "l"}}       `clear
 
-   {::shortcuts/default ["g" "g"]}              'portal.command/scroll-top
-   {::shortcuts/default #{"shift" "g"}}         'portal.command/scroll-bottom
+   {::shortcuts/default ["g" "g"]}              `scroll-top
+   {::shortcuts/default #{"shift" "g"}}         `scroll-bottom
 
    ;; PWA
    {::shortcuts/osx     #{"meta" "o"}
@@ -483,30 +483,31 @@
             :background "rgba(0,0,0,0.20)"}}
           doc]))]))
 
-(def open-command-palette
-  {:name 'portal.command/open-command-palette
-   :label "Show All Commands"
-   :run (fn [state]
-          (a/let [fns (get-functions state)
-                  commands (sort-by
-                            :name
-                            (remove
-                             (fn [option]
-                               (or
-                                (#{'portal.command/open-command-palette}
-                                 (:name option))
-                                (when-let [predicate (:predicate option)]
-                                  (not (predicate @state)))))
-                             (concat fns commands (:commands @state))))]
-            (open
-             (fn [state]
-               [palette-component
-                {:filter-by :name
-                 :options commands
-                 :component command-item
-                 :on-select
-                 (fn [command]
-                   ((:run command) state))}]))))})
+(def registry (atom {}))
+
+(defn ^:command open-command-palette
+  "Show All Commands"
+  [state]
+  (a/let [fns (get-functions state)
+          commands (sort-by
+                    :name
+                    (remove
+                     (fn [option]
+                       (or
+                        (#{`open-command-palette}
+                         (:name option))
+                        (when-let [predicate (:predicate option)]
+                          (not (predicate @state)))))
+                     (concat fns commands (:commands @state) (vals @registry))))]
+    (open
+     (fn [state]
+       [palette-component
+        {:filter-by :name
+         :options commands
+         :component command-item
+         :on-select
+         (fn [command]
+           ((:run command) state))}]))))
 
 ;; pick args
 
@@ -554,17 +555,6 @@
                         :else
                         (get-key path next-value))))}])))]
        (get-key [] v)))))
-
-(def clojure-commands
-  {#'clojure.core/vals        {:predicate map?}
-   #'clojure.core/keys        {:predicate map?}
-   #'clojure.core/count       {:predicate #(or (coll? %) (string? %))}
-   #'clojure.core/first       {:predicate coll?}
-   #'clojure.core/rest        {:predicate coll?}
-   #'clojure.core/get         {:predicate map? :args (comp pick-one keys)}
-   #'clojure.core/get-in      {:predicate map? :args pick-in}
-   #'clojure.core/select-keys {:predicate map? :args (comp pick-many keys)}
-   #'clojure.core/dissoc      {:predicate map? :args (comp pick-many keys)}})
 
 (defn var->name [var]
   (let [{:keys [name ns]} (meta var)]
@@ -621,12 +611,6 @@
      value)
     :else (map #(select-keys % ks) value)))
 
-(def portal-data-commands
-  {#'transpose-map  {:name 'portal.data/transpose-map}
-   #'select-columns {:predicate (some-fn coll-of-maps map-of-maps)
-                     :args      (comp pick-many columns)
-                     :name      'portal.data/select-columns}})
-
 (defn- copy-to-clipboard! [s]
   (let [el (js/document.createElement "textarea")]
     (set! (.-value el) s)
@@ -635,7 +619,7 @@
     (js/document.execCommand "copy")
     (js/document.body.removeChild el)))
 
-(defn copy-edn! [value]
+(defn- copy-edn! [value]
   (copy-to-clipboard!
    (str/trim
     (with-out-str
@@ -644,30 +628,33 @@
                 *print-level* 100]
         (pp/pprint value))))))
 
-(defn select-viewer [state]
+(defn ^:command copy-as-edn [state]
+  (copy-edn! (state/get-selected-value @state)))
+
+(defn ^:command select-viewer [state]
   (when-let [selected-context (state/get-selected-context @state)]
     (let [viewers (ins/get-compatible-viewers @ins/viewers (:value selected-context))]
       (when (> (count viewers) 1)
         (a/let [[selected-viewer] (pick-one (map :name viewers))]
           (ins/set-viewer! state selected-context selected-viewer))))))
 
-(defn copy-path [state]
+(defn ^:command copy-path [state]
   (when-let [path (state/get-path @state)]
     (copy-edn! path)))
 
 (def filter-input (react/createRef))
 
-(defn focus-filter [_]
+(defn ^:command focus-filter [_]
   (when-let [input (.-current filter-input)]
     (.focus input)))
 
 (def scroll-div (react/createRef))
 
-(defn scroll-top [_]
+(defn ^:command scroll-top [_]
   (when-let [div (.-current scroll-div)]
     (.scroll div #js {:top 0})))
 
-(defn scroll-bottom [_]
+(defn ^:command scroll-bottom [_]
   (when-let [div (.-current scroll-div)]
     (.scroll div #js {:top (+ (.-scrollHeight div) 1000)})))
 
@@ -678,10 +665,6 @@
             state
             state/nav
             (state/get-selected-context @state)))}
-   {:name 'portal.command/focus-filter
-    :run  focus-filter}
-   {:name 'portal.command/select-viewer
-    :run  select-viewer}
    {:name 'portal.command/select-prev
     :run (fn->command state/select-prev)}
    {:name 'portal.command/select-next
@@ -693,69 +676,77 @@
    {:name 'portal.command/focus-selected
     :run (fn->command state/focus-selected)}
    {:name 'portal.command/toggle-expand
-    :run (fn->command state/toggle-expand)}
-   {:name 'portal.command/redo-previous-command
-    :run (fn [state]
-           (a/let [commands (::state/previous-commands @state)]
-             (when (seq commands)
-               (open
-                (fn [_state]
-                  [palette-component
-                   {:options commands
-                    :filter-by :portal/key
-                    :on-select
-                    (fn [command]
-                      (a/let [k (:portal/key command)
-                              f (or (:portal/f command)
-                                    (if (keyword? k)
-                                      k
-                                      (partial state/invoke (:portal/key command))))
-                              args (:portal/args command)
-                              value (apply f (state/get-selected-value @state) args)]
-                        (state/dispatch!
-                         state
-                         state/history-push
-                         (assoc command :portal/value value))))
-                    :component
-                    (fn [command]
-                      [s/div
-                       {:style {:display :flex
-                                :justify-content :space-between
-                                :overflow :hidden
-                                :align-items :center
-                                :text-overflow :ellipsis
-                                :white-space :nowrap}}
-                       [ins/inspector (:portal/key command)]
-                       [s/div
-                        {:style {:opacity 0.5}}
-                        (for [a (:portal/args command)] (pr-str a))]])}])))))}
-   open-command-palette
-   {:name 'portal.command/set-theme
-    :run (fn [state]
-           (a/let [[theme] (pick-one [::c/nord
-                                      ::c/solarized-dark
-                                      ::c/solarized-light
-                                      ::c/material-ui])]
-             (state/dispatch! state state/set-theme! theme)))}
-   {:name 'portal.command/copy-as-edn
-    :run
-    (fn [state] (copy-edn! (state/get-selected-value @state)))}
-   {:name 'portal.command/copy-path
-    :run copy-path}
-   {:name 'portal.command/history-back
-    :run (fn [state] (state/dispatch! state state/history-back))}
-   {:name 'portal.command/history-forward
-    :run (fn [state] (state/dispatch! state state/history-forward))}
-   {:name 'portal.command/history-first
-    :run (fn [state] (state/dispatch! state state/history-first))}
-   {:name 'portal.command/history-last
-    :run (fn [state] (state/dispatch! state state/history-last))}
-   {:name 'portal.command/clear
-    :run (fn [state] (state/dispatch! state state/clear))}
-   {:name 'portal.command/scroll-top
-    :run scroll-top}
-   {:name 'portal.command/scroll-bottom
-    :run scroll-bottom}])
+    :run (fn->command state/toggle-expand)}])
+
+(defn ^:command redo-previous-command [state]
+  (a/let [commands (::state/previous-commands @state)]
+    (when (seq commands)
+      (open
+       (fn [_state]
+         [palette-component
+          {:options commands
+           :filter-by :portal/key
+           :on-select
+           (fn [command]
+             (a/let [k (:portal/key command)
+                     f (or (:portal/f command)
+                           (if (keyword? k)
+                             k
+                             (partial state/invoke (:portal/key command))))
+                     args (:portal/args command)
+                     value (apply f (state/get-selected-value @state) args)]
+               (state/dispatch!
+                state
+                state/history-push
+                (assoc command :portal/value value))))
+           :component
+           (fn [command]
+             [s/div
+              {:style {:display :flex
+                       :justify-content :space-between
+                       :overflow :hidden
+                       :align-items :center
+                       :text-overflow :ellipsis
+                       :white-space :nowrap}}
+              [ins/inspector (:portal/key command)]
+              [s/div
+               {:style {:opacity 0.5}}
+               (for [a (:portal/args command)] (pr-str a))]])}])))))
+
+(defn ^:command set-theme [state]
+  (a/let [[theme] (pick-one [::c/nord
+                             ::c/solarized-dark
+                             ::c/solarized-light
+                             ::c/material-ui])]
+    (state/dispatch! state state/set-theme! theme)))
+
+(defn ^:command history-back [state]
+  (state/dispatch! state state/history-back))
+(defn ^:command history-forward [state]
+  (state/dispatch! state state/history-forward))
+(defn ^:command history-first [state]
+  (state/dispatch! state state/history-first))
+(defn ^:command history-last [state]
+  (state/dispatch! state state/history-last))
+(defn ^:command clear [state]
+  (state/dispatch! state state/clear))
+
+(def clojure-commands
+  {#'clojure.core/vals        {:predicate map?}
+   #'clojure.core/keys        {:predicate map?}
+   #'clojure.core/count       {:predicate #(or (coll? %) (string? %))}
+   #'clojure.core/first       {:predicate coll?}
+   #'clojure.core/rest        {:predicate coll?}
+   #'clojure.core/get         {:predicate map? :args (comp pick-one keys)}
+   #'clojure.core/get-in      {:predicate map? :args pick-in}
+   #'clojure.core/select-keys {:predicate map? :args (comp pick-many keys)}
+   #'clojure.core/dissoc      {:predicate map? :args (comp pick-many keys)}})
+
+(def portal-data-commands
+  {#'transpose-map  {:name 'portal.data/transpose-map}
+   #'select-columns {:predicate (some-fn coll-of-maps map-of-maps)
+                     :args      (comp pick-many columns)
+                     :name      'portal.data/select-columns}})
 
 (def commands
   (concat
@@ -764,6 +755,18 @@
     (concat (->command clojure-commands)
             (->command portal-data-commands)))
    portal-commands))
+
+(defn register!
+  ([var] (register! var {}))
+  ([var opts]
+   (let [name (var->name var)]
+     (swap! registry
+            assoc name (merge {:name name :var var :run var} opts)))))
+
+(doseq [var (vals (ns-publics 'portal.ui.commands))
+        :let [m (meta var)]
+        :when (:command m)]
+  (register! var))
 
 (defn pop-up [child]
   [s/div
@@ -789,7 +792,7 @@
        (when-not (shortcuts/input? log)
          (first
           (for [[shortcut f] keymap
-                command      (concat commands (:commands props))
+                command      (concat commands (vals @registry) (:commands props))
                 :when        (and (= (:name command) f)
                                   (shortcuts/match? shortcut log))]
             (do
