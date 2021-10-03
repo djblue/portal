@@ -431,30 +431,31 @@
     (when-let [selected (state/get-selected-context @state)]
       (state/dispatch! state f selected))))
 
-(defn make-command [{:keys [name doc predicate args f]}]
+(defn make-command [{:keys [name predicate args f] :as opts}]
   (let [predicate (or predicate (constantly true))]
-    {:name name
-     :doc doc
-     :predicate (comp predicate state/get-selected-value)
-     :run (fn [state]
-            (a/let [v      (state/get-selected-value @state)
-                    args   ((or args empty-args) v)
-                    result (apply f v args)]
-              (when (predicate v)
-                (state/dispatch!
-                 state
-                 state/history-push
-                 {:portal/key name
-                  :portal/f f
-                  :portal/args args
-                  :portal/value result}))))}))
+    (assoc opts
+           :predicate (comp predicate state/get-selected-value)
+           :run (fn [state]
+                  (a/let [v      (state/get-selected-value @state)
+                          args   ((or args empty-args) v)
+                          result (apply f v args)]
+                    (when (predicate v)
+                      (state/dispatch!
+                       state
+                       state/history-push
+                       {:portal/key name
+                        :portal/f f
+                        :portal/args args
+                        :portal/value result})))))))
 
 (defn get-functions [state]
   (a/let [v   (state/get-selected-value @state)
           fns (state/invoke 'portal.runtime/get-functions v)]
-    (for [f fns]
+    (for [{:keys [name doc]} fns]
       (make-command
-       {:name f :f #(state/invoke f %)}))))
+       {:name name
+        :doc  doc
+        :f    #(state/invoke name %)}))))
 
 (declare commands)
 
@@ -551,49 +552,26 @@
                         (get-key path next-value))))}])))]
        (get-key [] v)))))
 
-;; clojure commands
-
 (def clojure-commands
-  [{:f vals
-    :predicate map?
-    :name 'clojure.core/vals
-    :doc (:doc (meta #'clojure.core/vals))}
-   {:f keys
-    :predicate map?
-    :name 'clojure.core/keys
-    :doc (:doc (meta #'clojure.core/keys))}
-   {:f count
-    :predicate #(or (coll? %) (string? %))
-    :name 'clojure.core/count
-    :doc (:doc (meta #'clojure.core/count))}
-   {:f first
-    :predicate coll?
-    :name 'clojure.core/first
-    :doc (:doc (meta #'clojure.core/first))}
-   {:f rest
-    :predicate coll?
-    :name 'clojure.core/rest
-    :doc (:doc (meta #'clojure.core/rest))}
-   {:f get
-    :predicate map?
-    :args (comp pick-one keys)
-    :name 'clojure.core/get
-    :doc (:doc (meta #'clojure.core/get))}
-   {:f get-in
-    :predicate map?
-    :args pick-in
-    :name 'clojure.core/get-in
-    :doc (:doc (meta #'clojure.core/get-in))}
-   {:f select-keys
-    :predicate map?
-    :args (comp pick-many keys)
-    :name 'clojure.core/select-keys
-    :doc (:doc (meta #'clojure.core/select-keys))}
-   {:f (partial apply dissoc)
-    :predicate map?
-    :args (comp pick-many keys)
-    :name 'clojure.core/dissoc
-    :doc (:doc (meta #'clojure.core/dissoc))}])
+  {#'clojure.core/vals        {:predicate map?}
+   #'clojure.core/keys        {:predicate map?}
+   #'clojure.core/count       {:predicate #(or (coll? %) (string? %))}
+   #'clojure.core/first       {:predicate coll?}
+   #'clojure.core/rest        {:predicate coll?}
+   #'clojure.core/get         {:predicate map? :args (comp pick-one keys)}
+   #'clojure.core/get-in      {:predicate map? :args pick-in}
+   #'clojure.core/select-keys {:predicate map? :args (comp pick-many keys)}
+   #'clojure.core/dissoc      {:predicate map? :args (comp pick-many keys)}})
+
+(defn var->name [var]
+  (let [{:keys [name ns]} (meta var)]
+    (symbol (str ns) (str name))))
+
+(defn ->command [m]
+  (for [[var opts] m]
+    (merge (meta var)
+           {:f var :name (var->name var)}
+           opts)))
 
 ;; portal data commands
 
@@ -611,7 +589,14 @@
 (defn map-keys [value]
   (coll-keys (vals value)))
 
-(defn transpose-map [value]
+(defn columns [value]
+  (cond
+    (map? value) (map-keys value)
+    :else        (coll-keys value)))
+
+(defn ^{:predicate map-of-maps} transpose-map
+  "Transpose a map."
+  [value]
   (reduce
    (fn [m path]
      (assoc-in m (reverse path) (get-in value path)))
@@ -621,7 +606,9 @@
          :when (contains? (get value row) column)]
      [row column])))
 
-(defn select-columns [value ks]
+(defn select-columns
+  "Select column from list-of-maps or map-of-maps."
+  [value ks]
   (cond
     (map? value)
     (reduce-kv
@@ -632,17 +619,10 @@
     :else (map #(select-keys % ks) value)))
 
 (def portal-data-commands
-  [{:f transpose-map
-    :predicate map-of-maps
-    :name 'portal.data/transpose-map}
-   {:f select-columns
-    :predicate coll-of-maps
-    :args (comp pick-many coll-keys)
-    :name 'portal.data/select-columns}
-   {:f select-columns
-    :predicate map-of-maps
-    :args (comp pick-many map-keys)
-    :name 'portal.data/select-columns}])
+  {#'transpose-map  {:name 'portal.data/transpose-map}
+   #'select-columns {:predicate (some-fn coll-of-maps map-of-maps)
+                     :args      (comp pick-many columns)
+                     :name      'portal.data/select-columns}})
 
 (defn- copy-to-clipboard! [s]
   (let [el (js/document.createElement "textarea")]
@@ -764,8 +744,8 @@
   (concat
    (map
     make-command
-    (concat clojure-commands
-            portal-data-commands))
+    (concat (->command clojure-commands)
+            (->command portal-data-commands)))
    portal-commands))
 
 (defn pop-up [child]
