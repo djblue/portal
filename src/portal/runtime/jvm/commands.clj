@@ -1,0 +1,16 @@
+(ns portal.runtime.jvm.commands
+  (:require [portal.runtime :as rt]
+            [portal.runtime.jvm.editor :as editor])
+  (:import [java.io File]
+           [java.net URI URL]))
+
+(defn- can-slurp? [value]
+  (or (instance? URI value)
+      (instance? URL value)
+      (and (instance? File value)
+           (.isFile ^File value)
+           (.canRead ^File value))))
+
+(rt/register! #'bean)
+(rt/register! #'slurp {:predicate can-slurp?})
+(rt/register! #'editor/open)

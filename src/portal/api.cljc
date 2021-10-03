@@ -1,7 +1,9 @@
 (ns portal.api
   (:require [portal.runtime :as rt]
             #?(:clj  [portal.runtime.jvm.launcher :as l]
-               :cljs [portal.runtime.node.launcher :as l])))
+               :cljs [portal.runtime.node.launcher :as l])
+            #?(:clj
+               [portal.runtime.jvm.commands])))
 
 (defn submit
   "Tap target function.
