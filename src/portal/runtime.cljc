@@ -181,11 +181,10 @@
 (defn- get-functions [v]
   (keep
    (fn [[name opts]]
-     (let [m      (meta (:var opts))
+     (let [m      (merge (meta (:var opts)) opts)
            result {:name name :doc (:doc m)}]
        (when-not (:private m)
-         (if-let [predicate
-                  (or (:predicate opts) (:predicate m))]
+         (if-let [predicate (:predicate m)]
            (when (predicate v) result)
            result))))
    @registry))
@@ -234,18 +233,18 @@
   #?(:clj  (instance? clojure.lang.IRef value)
      :cljs (satisfies? cljs.core/IDeref value)))
 
-(doseq [var [#'nav
-             #'ping
+(doseq [var [#'ping
              #'get-tap-atom
              #'get-options
-             #'clear-values
-             #'update-selected
              #'get-functions
              #'pr-str
              #'type
              #'datafy]]
   (register! var))
 
-(doseq [[var opts] {#'deref {:predicate deref?}
-                    #'meta  {:predicate can-meta?}}]
+(doseq [[var opts] {#'deref           {:predicate deref?}
+                    #'meta            {:predicate can-meta?}
+                    #'update-selected {:private true}
+                    #'clear-values    {:private true}
+                    #'nav             {:private true}}]
   (register! var opts))
