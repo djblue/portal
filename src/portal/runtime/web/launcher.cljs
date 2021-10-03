@@ -34,9 +34,21 @@
        (binding [rt/*session* session]
          (f body #(resolve (rt/write % session))))))))
 
+(defn- get-session []
+  (if (exists? js/PORTAL_SESSION)
+    js/PORTAL_SESSION
+    (subs js/window.location.search 1)))
+
+(defn- main-js [options]
+  (case (:mode options)
+    :dev (str js/window.location.origin "/main.js?" (get-session))
+    code-url))
+
 (defn open [options]
   (swap! rt/sessions assoc-in [(:session-id c/session) :options] options)
-  (let [url   (str->src (index/html :code-url code-url :platform "web") "text/html")
+  (let [url   (str->src (index/html :code-url (main-js options)
+                                    :platform "web")
+                        "text/html")
         child (js/window.open
                url
                "portal"

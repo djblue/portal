@@ -7,10 +7,6 @@
 
 (add-tap #'p/submit)
 
-(defn swap-dev []
-  (set! js/portal.runtime.web.launcher.code_url
-        (str js/window.location.origin "/main.js")))
-
 (extend-protocol Datafiable
   js/Promise
   (datafy [this] (.then this identity))
@@ -22,9 +18,9 @@
      :stack    (.-stack this)}))
 
 (comment
-  (swap-dev)
-
   (def portal (p/open))
+  (def portal (p/open {:mode :dev}))
+
   (add-tap #'p/submit)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])
   (doseq [i (range 100)] (tap> [::index i]))
