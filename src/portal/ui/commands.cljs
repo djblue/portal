@@ -245,14 +245,22 @@
 
    ;; PWA
    {::shortcuts/osx     #{"meta" "o"}
-    ::shortcuts/default #{"control" "o"}}       'portal.load/file
+    ::shortcuts/default #{"control" "o"}}       `portal.ui.pwa/open-file
    {::shortcuts/osx     #{"meta" "v"}
-    ::shortcuts/default #{"control" "v"}}       'portal.load/clipboard
+    ::shortcuts/default #{"control" "v"}}       `portal.ui.pwa/load-clipboard
    {::shortcuts/osx     #{"meta" "d"}
-    ::shortcuts/default #{"control" "d"}}       'portal.load/demo})
+    ::shortcuts/default #{"control" "d"}}       `portal.ui.pwa/open-demo})
+
+(def aliases {"cljs.core" "clojure.core"})
+
+(defn- var->name [var]
+  (let [{:keys [name ns]} (meta var)
+        ns                (str ns)]
+    (symbol (aliases ns ns) (str name))))
 
 (defn- find-combos [command]
-  (let [command-name (:name command)]
+  (let [command-name (or (:name command)
+                         (var->name command))]
     (sort-by
      #(into [] (sort %))
      (keep
@@ -551,13 +559,6 @@
                         :else
                         (get-key path next-value))))}])))]
        (get-key [] v)))))
-
-(def aliases {"cljs.core" "clojure.core"})
-
-(defn- var->name [var]
-  (let [{:keys [name ns]} (meta var)
-        ns                (str ns)]
-    (symbol (aliases ns ns) (str name))))
 
 (defn ->command [m]
   (for [[var opts] m]

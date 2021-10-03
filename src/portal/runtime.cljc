@@ -160,12 +160,13 @@
 (defn clear-values
   ([] (clear-values nil identity))
   ([_request done]
-   (reset! id 0)
-   (reset! tap-list (list))
-   (reset! (:value-cache *session*) {})
-   (doseq [[a] @watch-registry]
-     (remove-watch a ::watch-key))
-   (reset! watch-registry {})
+   (when *session*
+     (reset! id 0)
+     (reset! tap-list (list))
+     (reset! (:value-cache *session*) {})
+     (doseq [[a] @watch-registry]
+       (remove-watch a ::watch-key))
+     (reset! watch-registry {}))
    (done nil)))
 
 (defn update-selected

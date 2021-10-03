@@ -1,10 +1,10 @@
 (ns portal.ui.pwa
-  (:require [clojure.datafy :refer [datafy nav]]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [examples.data :as demo]
             [portal.async :as a]
             [portal.colors :as c]
             [portal.resources :as io]
+            [portal.runtime :as rt]
             [portal.ui.app :as app]
             [portal.ui.commands :as commands]
             [portal.ui.drag-and-drop :as dnd]
@@ -17,7 +17,7 @@
 (defn clipboard []
   (js/navigator.clipboard.readText))
 
-(defn open-file []
+(defn- prompt-file []
   (js/Promise.
    (fn [resolve _reject]
      (let [id      "open-file-dialog"
@@ -38,42 +38,36 @@
        (js/document.body.appendChild input)
        (.click input)))))
 
-(def ^:private fns
-  {'clojure.datafy/nav           #'nav
-   'clojure.datafy/datafy        #'datafy
-   'clojure.core/pr-str          #'pr-str
-   'portal.runtime/get-functions
-   (fn []
-     (keys
-      (dissoc fns
-              'clojure.datafy/nav
-              'portal.runtime/get-functions)))})
+(defn open-file
+  "Open a File"
+  [state]
+  (a/let [value (prompt-file)]
+    (state/dispatch! state state/history-push {:portal/value value})))
+
+(defn load-clipboard
+  "Load from clipboard"
+  [state]
+  (a/let [value (clipboard)]
+    (state/dispatch! state state/history-push {:portal/value value})))
+
+(defn open-demo
+  "Load demo data"
+  [state]
+  (state/dispatch! state state/history-push {:portal/value demo/data}))
 
 (def commands
-  [commands/open-command-palette
-   {:name 'portal.load/file
-    :label "Open a File"
-    :run #(a/let [value (open-file)]
-            (state/dispatch! % state/history-push {:portal/value value}))}
-   {:name 'portal.load/clipboard
-    :label "Load from clipboard"
-    :run #(a/let [value (clipboard)]
-            (state/dispatch! % state/history-push {:portal/value value}))}
-   {:name 'portal.load/demo
-    :label "Load demo data"
-    :run #(state/dispatch! % state/history-push {:portal/value demo/data})}])
+  [#'commands/open-command-palette
+   #'open-file
+   #'load-clipboard
+   #'open-demo])
 
-(defn invoke [{:keys [f args]} done]
-  (try
-    (let [f (if (symbol? f) (get fns f) f)]
-      (done {:return (apply f args)}))
-    (catch js/Error e
-      (done {:return e}))))
+(doseq [var commands] (commands/register! var))
 
 (defn send! [msg]
-  (js/Promise.resolve
-   (case (:op msg)
-     :portal.rpc/invoke (invoke msg identity))))
+  (when-let [f (get rt/ops (:op msg))]
+    (js/Promise.
+     (fn [resolve]
+       (f msg resolve)))))
 
 (defn launch-queue-consumer [item]
   (a/let [files (js/Promise.all (map #(.getFile %) (.-files item)))
@@ -100,7 +94,7 @@
                  (::c/nord c/themes))
         svg (str/replace (io/resource "splash.svg") hex-color mapping)]
     [:<>
-     [commands/palette {:commands commands}]
+     [commands/palette]
      [div
       {:style
        {:display :flex
@@ -131,7 +125,7 @@
         (for [command commands]
           ^{:key (hash command)}
           [div
-           {:on-click #((:run command) state)
+           {:on-click #(command state)
             :style
             {:display :flex
              :align-items :center
@@ -145,7 +139,7 @@
            [div
             {:style
              {:margin-left (:padding theme)}}
-            (:label command)]
+            (-> command meta :doc)]
            [commands/shortcut command]])]]]]))
 
 (defn pwa-app []
