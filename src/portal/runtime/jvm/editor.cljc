@@ -47,7 +47,7 @@
   String
   (resolve [file]
     (or (exists file)
-        (resolve (io/resource file)))))
+        (some-> file io/resource resolve))))
 
 (defmulti -open-editor :editor)
 
