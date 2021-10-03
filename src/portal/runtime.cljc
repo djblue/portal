@@ -1,11 +1,10 @@
 (ns portal.runtime
+  #?(:cljs (:require-macros portal.runtime))
   (:refer-clojure :exclude [read])
   (:require [clojure.datafy :refer [datafy nav]]
             [portal.runtime.cson :as cson]
             #?(:clj  [portal.sync  :as a]
-               :cljs [portal.async :as a]))
-  #?(:clj (:import [java.io File]
-                   [java.net URI URL])))
+               :cljs [portal.async :as a])))
 
 (defonce ^:dynamic *session* nil)
 (defonce ^:private id (atom 0))
@@ -175,39 +174,21 @@
   ([session-id value]
    (swap! sessions assoc-in [session-id :selected] value)))
 
-(def ^:private predicates
-  (merge
-   {'clojure.core/deref
-    #?(:clj  #(instance? clojure.lang.IRef %)
-       :cljs #(satisfies? cljs.core/IDeref %))
-    'clojure.core/meta can-meta?}
-   #?(:clj
-      {'clojure.core/slurp
-       #(or (instance? URI %)
-            (instance? URL %)
-            (and (instance? File %)
-                 (.isFile ^File %)
-                 (.canRead ^File %)))})))
-
-(def ^:private public-fns
-  (merge
-   {'clojure.core/pr-str   #'pr-str
-    'clojure.core/deref    #'deref
-    'clojure.core/type     #'type
-    'clojure.core/meta     #'meta
-    'clojure.datafy/datafy #'datafy}
-   #?(:clj {`slurp slurp
-            `bean  bean})))
+(def ^{:deprecated "0.16.0"} public-fns {})
+(def ^{:deprecated "0.16.0"} fns {})
+(def ^:private registry (atom {}))
 
 (defn- get-functions [v]
-  (keys
-   (reduce-kv
-    (fn [fns s predicate]
-      (if (predicate v)
-        fns
-        (dissoc fns s)))
-    public-fns
-    predicates)))
+  (keep
+   (fn [[name opts]]
+     (let [m      (meta (:var opts))
+           result {:name name :doc (:doc m)}]
+       (when-not (:private m)
+         (if-let [predicate
+                  (or (:predicate opts) (:predicate m))]
+           (when (predicate v) result)
+           result))))
+   @registry))
 
 (defn- get-tap-atom [] tap-list)
 
@@ -226,23 +207,45 @@
 
 (defn- ping [] ::pong)
 
-(def ^:private fns
-  (merge
-   public-fns
-   {'clojure.datafy/nav  #'nav
-    `ping                #'ping
-    `get-tap-atom        #'get-tap-atom
-    `get-options         #'get-options
-    `clear-values        #'clear-values
-    `update-selected     #'update-selected
-    `get-functions       #'get-functions}))
+(defn- get-function [f]
+  (get-in @registry [f :var]))
 
 (defn invoke [{:keys [f args]} done]
   (try
-    (let [f (if (symbol? f) (get fns f) f)]
+    (let [f (if (symbol? f) (get-function f) f)]
       (a/let [return (apply f args)]
         (done {:return return})))
     (catch #?(:clj Exception :cljs js/Error) e
       (done {:return e}))))
 
 (def ops {:portal.rpc/invoke #'invoke})
+
+(defn- var->name [var]
+  (let [{:keys [name ns]} (meta var)]
+    (symbol (str ns) (str name))))
+
+(defn register!
+  ([var] (register! var {}))
+  ([var opts]
+   (swap! registry
+          assoc (var->name var) (merge opts {:var var}))))
+
+(defn- deref? [value]
+  #?(:clj  (instance? clojure.lang.IRef value)
+     :cljs (satisfies? cljs.core/IDeref value)))
+
+(doseq [var [#'nav
+             #'ping
+             #'get-tap-atom
+             #'get-options
+             #'clear-values
+             #'update-selected
+             #'get-functions
+             #'pr-str
+             #'type
+             #'datafy]]
+  (register! var))
+
+(doseq [[var opts] {#'deref {:predicate deref?}
+                    #'meta  {:predicate can-meta?}}]
+  (register! var opts))
