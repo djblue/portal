@@ -240,6 +240,9 @@
    {::shortcuts/default #{"control" "r"}}       'portal.command/redo-previous-command
    {::shortcuts/default #{"control" "l"}}       'portal.command/clear
 
+   {::shortcuts/default ["g" "g"]}              'portal.command/scroll-top
+   {::shortcuts/default #{"shift" "g"}}         'portal.command/scroll-bottom
+
    ;; PWA
    {::shortcuts/osx     #{"meta" "o"}
     ::shortcuts/default #{"control" "o"}}       'portal.load/file
@@ -658,6 +661,16 @@
   (when-let [input (.-current filter-input)]
     (.focus input)))
 
+(def scroll-div (react/createRef))
+
+(defn scroll-top [_]
+  (when-let [div (.-current scroll-div)]
+    (.scroll div #js {:top 0})))
+
+(defn scroll-bottom [_]
+  (when-let [div (.-current scroll-div)]
+    (.scroll div #js {:top (+ (.-scrollHeight div) 1000)})))
+
 (def portal-commands
   [{:name 'clojure.datafy/nav
     :run (fn [state]
@@ -738,7 +751,11 @@
    {:name 'portal.command/history-last
     :run (fn [state] (state/dispatch! state state/history-last))}
    {:name 'portal.command/clear
-    :run (fn [state] (state/dispatch! state state/clear))}])
+    :run (fn [state] (state/dispatch! state state/clear))}
+   {:name 'portal.command/scroll-top
+    :run scroll-top}
+   {:name 'portal.command/scroll-bottom
+    :run scroll-bottom}])
 
 (def commands
   (concat

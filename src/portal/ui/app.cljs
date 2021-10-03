@@ -109,7 +109,8 @@
         :min-width "100%"
         :box-sizing :border-box}}
       [s/div
-       {:on-click #(state/dispatch! state state/clear-selected)
+       {:ref commands/scroll-div
+        :on-click #(state/dispatch! state state/clear-selected)
         :style
         {:position :absolute
          :top 0
