@@ -628,17 +628,23 @@
                 *print-level* 100]
         (pp/pprint value))))))
 
-(defn ^:command copy-as-edn [state]
+(defn ^:command copy-as-edn
+  "Copy selected value as an edn string to the clipboard."
+  [state]
   (copy-edn! (state/get-selected-value @state)))
 
-(defn ^:command select-viewer [state]
+(defn ^:command select-viewer
+  "Set the viewer for the currently selected value."
+  [state]
   (when-let [selected-context (state/get-selected-context @state)]
     (let [viewers (ins/get-compatible-viewers @ins/viewers (:value selected-context))]
       (when (> (count viewers) 1)
         (a/let [[selected-viewer] (pick-one (map :name viewers))]
           (ins/set-viewer! state selected-context selected-viewer))))))
 
-(defn ^:command copy-path [state]
+(defn ^:command copy-path
+  "Copy the path from the root value to the currently selected item."
+  [state]
   (when-let [path (state/get-path @state)]
     (copy-edn! path)))
 
@@ -761,11 +767,14 @@
   ([var opts]
    (let [name (var->name var)]
      (swap! registry
-            assoc name (merge {:name name :var var :run var} opts)))))
+            assoc name (merge {:name name
+                               :var var
+                               :run var
+                               :doc (:doc (meta var))}
+                              opts)))))
 
 (doseq [var (vals (ns-publics 'portal.ui.commands))
-        :let [m (meta var)]
-        :when (:command m)]
+        :when (-> var meta :command)]
   (register! var))
 
 (defn pop-up [child]
