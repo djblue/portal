@@ -243,6 +243,9 @@
    {::shortcuts/default ["g" "g"]}              `scroll-top
    {::shortcuts/default #{"shift" "g"}}         `scroll-bottom
 
+   ;; TODO Move to metadata of var when possible
+   {::shortcuts/default ["g" "d"]}              `portal.runtime.jvm.editor/open
+
    ;; PWA
    {::shortcuts/osx     #{"meta" "o"}
     ::shortcuts/default #{"control" "o"}}       `portal.ui.pwa/open-file
@@ -457,13 +460,6 @@
                         :portal/args args
                         :portal/value result})))))))
 
-(defn get-functions [state]
-  (a/let [v   (state/get-selected-value @state)
-          fns (state/invoke 'portal.runtime/get-functions v)]
-    (for [{:keys [name] :as opts} fns]
-      (make-command
-       (assoc opts :f #(state/invoke name %))))))
-
 (declare commands)
 
 (defn- command-item [command {:keys [active?]}]
@@ -488,12 +484,15 @@
           doc]))]))
 
 (def registry (atom {}))
+(def runtime-registry (atom nil))
+
+(defn- get-commands []
+  (concat @runtime-registry (vals @registry)))
 
 (defn ^:command open-command-palette
   "Show All Commands"
   [state]
-  (a/let [fns (get-functions state)
-          commands (sort-by
+  (a/let [commands (sort-by
                     :name
                     (remove
                      (fn [option]
@@ -502,7 +501,7 @@
                          (:name option))
                         (when-let [predicate (:predicate option)]
                           (not (predicate @state)))))
-                     (concat fns commands (:commands @state) (vals @registry))))]
+                     (concat @runtime-registry commands (:commands @state) (vals @registry))))]
     (open
      (fn [state]
        [palette-component
@@ -559,12 +558,6 @@
                         :else
                         (get-key path next-value))))}])))]
        (get-key [] v)))))
-
-(defn ->command [m]
-  (for [[var opts] m]
-    (merge (meta var)
-           {:f var :name (var->name var)}
-           opts)))
 
 ;; portal data commands
 
@@ -766,6 +759,12 @@
                      :args      (comp pick-many columns)
                      :name      'portal.data/select-columns}})
 
+(defn- ->command [m]
+  (for [[var opts] m]
+    (merge (meta var)
+           {:f var :name (var->name var)}
+           opts)))
+
 (def commands
   (concat
    (map
@@ -806,14 +805,24 @@
      :overflow :hidden}}
    child])
 
-(defn palette [props _value]
-  (let [state (state/use-state)]
+(defn palette [props]
+  (let [state (state/use-state)
+        value (state/get-selected-value @state)]
+    (react/useEffect
+     (fn []
+       (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
+         (reset!
+          runtime-registry
+          (for [{:keys [name] :as opts} fns]
+            (make-command
+             (assoc opts :f #(state/invoke name %)))))))
+     #js [(hash value)])
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)
          (first
           (for [[shortcut f] keymap
-                command      (concat commands (vals @registry) (:commands props))
+                command      (concat (get-commands) (:commands props))
                 :when        (and (= (:name command) f)
                                   (shortcuts/match? shortcut log))]
             (do
