@@ -223,17 +223,17 @@
    {::shortcuts/default ["/"]}                  `focus-filter
 
    {::shortcuts/default #{"v"}}                 `select-viewer
-   {::shortcuts/default #{"arrowup"}}           'portal.command/select-prev
-   {::shortcuts/default #{"k"}}                 'portal.command/select-prev
-   {::shortcuts/default #{"arrowdown"}}         'portal.command/select-next
-   {::shortcuts/default #{"j"}}                 'portal.command/select-next
-   {::shortcuts/default #{"arrowleft"}}         'portal.command/select-parent
-   {::shortcuts/default #{"h"}}                 'portal.command/select-parent
-   {::shortcuts/default #{"arrowright"}}        'portal.command/select-child
-   {::shortcuts/default #{"l"}}                 'portal.command/select-child
+   {::shortcuts/default #{"arrowup"}}           `select-prev
+   {::shortcuts/default #{"k"}}                 `select-prev
+   {::shortcuts/default #{"arrowdown"}}         `select-next
+   {::shortcuts/default #{"j"}}                 `select-next
+   {::shortcuts/default #{"arrowleft"}}         `select-parent
+   {::shortcuts/default #{"h"}}                 `select-parent
+   {::shortcuts/default #{"arrowright"}}        `select-child
+   {::shortcuts/default #{"l"}}                 `select-child
 
-   {::shortcuts/default #{"control" "enter"}}   'portal.command/focus-selected
-   {::shortcuts/default #{"e"}}                 'portal.command/toggle-expand
+   {::shortcuts/default #{"control" "enter"}}   `focus-selected
+   {::shortcuts/default #{"e"}}                 `toggle-expand
 
    {::shortcuts/default #{"enter"}}             'clojure.datafy/nav
 
@@ -428,11 +428,6 @@
                 doall)]]]))))
 
 (defn- empty-args [_] nil)
-
-(defn fn->command [f]
-  (fn [state]
-    (when-let [selected (state/get-selected-context @state)]
-      (state/dispatch! state f selected))))
 
 (defn make-command [{:keys [name command predicate args f] :as opts}]
   (let [predicate (or predicate (constantly true))]
@@ -662,25 +657,35 @@
   (when-let [div (.-current scroll-div)]
     (.scroll div #js {:top (+ (.-scrollHeight div) 1000)})))
 
+(defn- apply-selected [state f]
+  (when-let [selected (state/get-selected-context @state)]
+    (state/dispatch! state f selected)))
+
+(defn ^:command select-prev [state]
+  (apply-selected state state/select-prev))
+
+(defn ^:command select-next [state]
+  (apply-selected state state/select-next))
+
+(defn ^:command select-parent [state]
+  (apply-selected state state/select-parent))
+
+(defn ^:command select-child [state]
+  (apply-selected state state/select-child))
+
+(defn ^:command focus-selected [state]
+  (apply-selected state state/focus-selected))
+
+(defn ^:command toggle-expand [state]
+  (apply-selected state state/toggle-expand))
+
 (def portal-commands
   [{:name 'clojure.datafy/nav
     :run (fn [state]
            (state/dispatch!
             state
             state/nav
-            (state/get-selected-context @state)))}
-   {:name 'portal.command/select-prev
-    :run (fn->command state/select-prev)}
-   {:name 'portal.command/select-next
-    :run (fn->command state/select-next)}
-   {:name 'portal.command/select-parent
-    :run (fn->command state/select-parent)}
-   {:name 'portal.command/select-child
-    :run (fn->command state/select-child)}
-   {:name 'portal.command/focus-selected
-    :run (fn->command state/focus-selected)}
-   {:name 'portal.command/toggle-expand
-    :run (fn->command state/toggle-expand)}])
+            (state/get-selected-context @state)))}])
 
 (defn ^:command redo-previous-command [state]
   (a/let [commands (::state/previous-commands @state)]
