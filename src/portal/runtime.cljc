@@ -216,7 +216,13 @@
       (a/let [return (apply f args)]
         (done {:return return})))
     (catch #?(:clj Exception :cljs js/Error) e
-      (done {:error (datafy e)}))))
+      (done {:error (datafy
+                     (ex-info
+                      "invoke exception"
+                      {:function f
+                       :args     args
+                       :found?   (boolean (get-function f))}
+                      e))}))))
 
 (def ops {:portal.rpc/invoke #'invoke})
 
