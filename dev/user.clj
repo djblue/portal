@@ -75,6 +75,14 @@
 
   (tap> (datafy java.io.File))
 
+  (require '[portal.console :as log])
+
+  (do (log/trace ::trace)
+      (log/debug ::debug)
+      (log/info  ::info)
+      (log/warn  ::warn)
+      (log/error ::error))
+
   (tap> (with-meta (range) {:hello :world}))
   (tap> (json/parse-stream (io/reader "package-lock.json")))
   (tap> (io/file "deps.edn"))

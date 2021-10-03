@@ -29,19 +29,29 @@
 (defn log? [value]
   (sp/valid? ::log value))
 
+(def level->color
+  {:trace  ::c/text
+   :debug  ::c/string
+   :info   ::c/boolean
+   :warn   ::c/tag
+   :error  ::c/exception
+   :fatal  ::c/exception
+   :report ::c/border})
+
 (defn inspect-log [log]
   (let [theme      (theme/use-theme)
-        background (ins/get-background)]
+        background (ins/get-background)
+        color      (-> log :level level->color theme)]
     [s/div
      {:style
       {:display :grid
-       :grid-template-columns "auto 1fr auto"}}
+       :grid-template-columns "auto 1fr auto"
+       :border-left [5 :solid color]}}
      [s/div
       {:style
        {:box-sizing :border-box
         :padding (:padding theme)
         :background background
-        :border-left [1 :solid (::c/border theme)]
         :border-top [1 :solid (::c/border theme)]
         :border-bottom [1 :solid (::c/border theme)]}}
       [date-time/inspect-time (:time log)]]
