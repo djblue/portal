@@ -90,12 +90,20 @@
   (history-push state {:portal/value (:value context)}))
 
 (defn select-prev [state context]
-  (if-let [next (select/get-prev context)]
+  (if-let [next (or (select/get-prev context)
+                    (-> context
+                        select/get-parent
+                        select/get-prev
+                        select/get-child))]
     (assoc state :selected next)
     state))
 
 (defn select-next [state context]
-  (if-let [next (select/get-next context)]
+  (if-let [next (or (select/get-next context)
+                    (-> context
+                        select/get-parent
+                        select/get-next
+                        select/get-child))]
     (assoc state :selected next)
     state))
 
