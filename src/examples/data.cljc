@@ -60,7 +60,7 @@
    (with-meta 'symbol-key-with-meta {:a :b}) ::value
    ;;TODO: fix me, causes infininte loop in demo
    ;;::range (range)
-   ::record (->Point 0 0)})
+   ::record #?(:bb {:x 0 :y 0} :default (->Point 0 0))})
 
 (def diff-data
   (with-meta

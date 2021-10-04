@@ -239,7 +239,7 @@
   ([var opts]
    (swap! registry
           assoc
-          (var->name var)
+          (or (:name opts) (var->name var))
           (merge {:var var} opts))))
 
 (defn- deref? [value]
@@ -250,12 +250,12 @@
              #'get-tap-atom
              #'get-options
              #'get-functions
-             #'pr-str
              #'type
              #'datafy]]
   (register! var))
 
-(doseq [[var opts] {#'deref           {:predicate deref?}
+(doseq [[var opts] {#'pr-str          {:name `clojure.core/pr-str}
+                    #'deref           {:name `clojure.core/deref :predicate deref?}
                     #'meta            {:predicate can-meta?}
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
