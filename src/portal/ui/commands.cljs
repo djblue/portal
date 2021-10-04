@@ -202,7 +202,7 @@
 
    {::shortcuts/osx     #{"meta" "c"}
     ::shortcuts/default #{"control" "c"}}
-   `copy-as-edn
+   `copy
 
    {::shortcuts/osx     #{"meta" "arrowleft"}
     ::shortcuts/default #{"control" "arrowleft"}}
@@ -621,10 +621,12 @@
                 *print-level* 100]
         (pp/pprint value))))))
 
-(defn ^:command copy-as-edn
+(defn ^:command copy
   "Copy selected value as an edn string to the clipboard."
   [state]
-  (copy-edn! (state/get-selected-value @state)))
+  (if-let [selection (not-empty (.. js/window getSelection toString))]
+    (copy-to-clipboard! selection)
+    (copy-edn! (state/get-selected-value @state))))
 
 (defn ^:command select-viewer
   "Set the viewer for the currently selected value."
