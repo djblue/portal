@@ -93,7 +93,7 @@
 (defn vs-code-extension
   "Build vs-code extension."
   []
-  (ws-js)
+  (build)
   (when (seq
          (fs/modified-since
           "target/vs-code.js"
