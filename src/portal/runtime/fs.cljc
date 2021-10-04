@@ -39,12 +39,13 @@
 (defn exists [f]
   (when #?(:clj (.exists (io/file f)) :cljs (fs/existsSync f)) f))
 
-(defn can-execute? [f]
-  #?(:clj  (let [f (io/file f)]
-             (and (.exists f) (.canExecute f)))
-     :cljs (not
-            (try (fs/accessSync f fs/constants.X_OK)
-                 (catch js/Error _e true)))))
+(defn can-execute [f]
+  #?(:clj  (let [file (io/file f)]
+             (and (.exists file) (.canExecute file) f))
+     :cljs (when (not
+                  (try (fs/accessSync f fs/constants.X_OK)
+                       (catch js/Error _e true)))
+             f)))
 
 (defn paths []
   (s/split (path) (re-pattern (separator))))
@@ -54,7 +55,7 @@
    (for [file files
          path paths
          :let [f (join path file)]
-         :when (can-execute? f)]
+         :when (can-execute f)]
      f)))
 
 (defn home []

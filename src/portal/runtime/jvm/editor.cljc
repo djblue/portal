@@ -2,6 +2,8 @@
   (:refer-clojure :exclude [resolve])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [portal.runtime :as rt]
+            [portal.runtime.fs :as fs]
             [portal.runtime.shell :refer [sh]])
   (:import (java.io File)
            (java.net URL URI)))
@@ -56,8 +58,13 @@
     (sh "emacsclient" file)
     (sh "emacsclient" "-n" (str "+" line ":" column) file)))
 
+(defn- get-vs-code []
+  (some fs/can-execute
+        ["code"
+         "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"]))
+
 (defmethod -open-editor :vs-code [{:keys [line column file]}]
-  (sh "code" "--goto" (str file ":" line ":" column)))
+  (sh (get-vs-code) "--goto" (str file ":" line ":" column)))
 
 (defn can-open [input]
   (and (satisfies? IResolve input) (resolve input)))
@@ -66,7 +73,10 @@
   "Open value in editor."
   [input]
   (when-let [location (can-open input)]
-    (-open-editor (assoc location :editor :emacs))))
+    (-open-editor
+     (assoc location
+            :editor
+            (get-in rt/*session* [:options :launcher] :emacs)))))
 
 (comment
   ;; unsupported
