@@ -26,7 +26,8 @@
                                (get options :window-title "vs-code")
                                "0.15.1"])
                              (.-One vscode/ViewColumn)
-                             #js {:enableScripts true})]
+                             #js {:enableScripts           true
+                                  :retainContextWhenHidden true})]
     (set! (.. panel -webview -html)
           (index/html :code-url   (str "http://" host ":" port "/main.js?" session-id)
                       :host       (str host ":" port)
