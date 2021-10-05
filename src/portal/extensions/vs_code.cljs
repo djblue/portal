@@ -14,6 +14,8 @@
   (.log js/console "Reloading...")
   (js-delete js/require.cache (js/require.resolve "./vs-code")))
 
+(defonce ^:private context (atom nil))
+
 (defn- -open [{:keys [portal options server]}]
   (let [{:keys [host port]} server
         session-id          (:session-id portal)
@@ -27,11 +29,21 @@
                                "0.15.1"])
                              (.-One vscode/ViewColumn)
                              #js {:enableScripts           true
-                                  :retainContextWhenHidden true})]
-    (set! (.. panel -webview -html)
+                                  :retainContextWhenHidden true})
+        ^js web-view        (.-webview panel)]
+    (set! (.-html web-view)
           (index/html :code-url   (str "http://" host ":" port "/main.js?" session-id)
                       :host       (str host ":" port)
-                      :session-id (str session-id)))))
+                      :session-id (str session-id)))
+    (.onDidReceiveMessage
+     web-view
+     (fn handle-message [^js message]
+       (when-let [^js event (and (string? message) (js/JSON.parse message))]
+         (case (.-type event)
+           "close"     (.dispose panel)
+           "set-title" (set! (.-title panel) (.-title event)))))
+     js/undefined
+     (.-subscriptions ^js @context))))
 
 (defmethod browser/-open :vs-code [args] (-open args))
 
@@ -72,7 +84,8 @@
     (.executeCommand vscode/commands "setContext" "portal:is-dev" true)))
 
 (defn activate
-  [^js context]
+  [^js ctx]
+  (reset! context ctx)
   (a/let [workspace (get-workspace-folder)
           folder    (str workspace "/.portal")
           info      (p/start {})]
@@ -82,7 +95,7 @@
              (pr-str (select-keys info [:host :port]))))
   (add-tap #'p/submit)
   (doseq [[command f] (get-commands)]
-    (.push (.-subscriptions context)
+    (.push (.-subscriptions ctx)
            (.registerCommand vscode/commands (name command) f))))
 
 (defn deactivate

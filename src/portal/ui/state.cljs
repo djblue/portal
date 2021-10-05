@@ -8,9 +8,17 @@
 (defonce sender (atom nil))
 (defonce state  (r/atom {}))
 
+(defn- get-parent []
+  (cond
+    (exists? js/parent)           js/parent
+    (exists? js/acquireVsCodeApi) (js/acquireVsCodeApi)))
+
+(defonce ^:private parent (get-parent))
+
 (defn notify-parent [event]
-  (when (exists? js/parent)
-    (js/parent.postMessage (js/JSON.stringify (clj->js event)) "*")))
+  (let [message (js/JSON.stringify (clj->js event))]
+    (when parent
+      (.postMessage ^js parent message "*"))))
 
 (defn dispatch! [state f & args]
   (a/let [next-state (apply f @state args)]
