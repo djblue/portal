@@ -31,6 +31,8 @@
                              #js {:enableScripts           true
                                   :retainContextWhenHidden true})
         ^js web-view        (.-webview panel)]
+    (set! (.-iconPath panel)
+          (.file vscode/Uri (.asAbsolutePath ^js @context "resources/icon.png")))
     (set! (.-html web-view)
           (index/html :code-url   (str "http://" host ":" port "/main.js?" session-id)
                       :host       (str host ":" port)
@@ -41,7 +43,8 @@
        (when-let [^js event (and (string? message) (js/JSON.parse message))]
          (case (.-type event)
            "close"     (.dispose panel)
-           "set-title" (set! (.-title panel) (.-title event)))))
+           "set-title" (set! (.-title panel) (.-title event))
+           "set-theme" :unsupported)))
      js/undefined
      (.-subscriptions ^js @context))))
 
