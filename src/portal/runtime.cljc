@@ -254,8 +254,8 @@
              #'datafy]]
   (register! var))
 
-(doseq [[var opts] {#'pr-str          {:name `clojure.core/pr-str}
-                    #'deref           {:name `clojure.core/deref :predicate deref?}
+(doseq [[var opts] {#'pr-str          {:name 'clojure.core/pr-str}
+                    #'deref           {:name 'clojure.core/deref :predicate deref?}
                     #'meta            {:predicate can-meta?}
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
