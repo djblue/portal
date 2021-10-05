@@ -7,6 +7,7 @@
 
 (defonce sender (atom nil))
 (defonce state  (r/atom {}))
+(defonce errors (atom nil))
 
 (defn- get-parent []
   (cond
@@ -153,7 +154,8 @@
 (defn invoke [f & args]
   (-> (send! {:op :portal.rpc/invoke :f f :args args})
       (.then (fn [{:keys [return error]}]
-               (when error (tap> error))
+               (when error
+                 (reset! errors (take 5 (conj @errors error))))
                (if-not error
                  return
                  (throw (ex-info "invoke exception" (clj->js error))))))))

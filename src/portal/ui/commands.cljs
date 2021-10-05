@@ -742,6 +742,9 @@
 (defn ^:command clear [state]
   (state/dispatch! state state/clear))
 
+(defn ^:command show-client-errors [state]
+  (state/dispatch! state state/history-push {:portal/value @state/errors}))
+
 (defn- then-first [value] (.then value first))
 
 (def clojure-commands
