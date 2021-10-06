@@ -580,7 +580,7 @@
     (map? value) (map-keys value)
     :else        (coll-keys value)))
 
-(defn ^{:predicate map-of-maps} transpose-map
+(defn transpose-map
   "Transpose a map."
   [value]
   (reduce
@@ -759,7 +759,8 @@
    #'clojure.core/dissoc      {:predicate map? :args (comp then-first pick-many keys)}})
 
 (def portal-data-commands
-  {#'transpose-map  {:name 'portal.data/transpose-map}
+  {#'transpose-map  {:predicate map-of-maps
+                     :name      'portal.data/transpose-map}
    #'select-columns {:predicate (some-fn coll-of-maps map-of-maps)
                      :args      (comp pick-many columns)
                      :name      'portal.data/select-columns}})
