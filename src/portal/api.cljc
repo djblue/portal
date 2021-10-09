@@ -15,8 +15,9 @@
   (rt/update-value value)
   nil)
 
-(defn ^{:deprecated "0.9" :superseded-by "submit"} tap
+(defn tap
   "Add portal as a tap> target."
+  {:deprecated "0.9" :superseded-by "submit"}
   []
   (add-tap #'submit)
   nil)
