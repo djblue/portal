@@ -381,12 +381,7 @@
   (let [opts  (opts/use-options)
         state state/state
         theme (or (::c/theme @state)
-                  (::c/theme opts)
-                  ::c/nord)]
-    (react/useEffect
-     (fn []
-       (state/dispatch! state state/set-theme! theme))
-     #js [theme])
+                  (::c/theme opts))]
     [state/with-state
      state
      [theme/with-theme

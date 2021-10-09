@@ -2,31 +2,12 @@
   (:require ["react" :as react]
             [portal.colors :as c]))
 
-(defn- is-vs-code? []
+(defn is-vs-code? []
   (-> js/document
       .-documentElement
       js/getComputedStyle
       (.getPropertyValue "--vscode-font-size")
       (not= "")))
-
-(defn- vs-code-vars []
-  (when (is-vs-code?)
-    {:font-size "var(--vscode-font-size)"
-     :font-family "var(--vscode-editor-font-family)"
-     :border-radius 0
-     :padding 8
-     ::c/background "var(--vscode-menu-background)"
-     ::c/background2 "var(--vscode-editor-background)"
-     ::c/border "var(--vscode-editorWidget-border)"
-     ::c/text "var(--vscode-foreground)"
-     ::c/string "var(--vscode-debugTokenExpression-string)"
-     ::c/number "var(--vscode-debugTokenExpression-number)"
-     ::c/boolean "var(--vscode-debugTokenExpression-boolean)"
-     ::c/keyword "var(--vscode-debugTokenExpression-value)"
-     ::c/symbol "var(--vscode-debugTokenExpression-name)"
-     ::c/exception "var(--vscode-errorForeground)"
-     ::c/diff-add "var(--vscode-terminal-ansiGreen)"
-     ::c/diff-remove "var(--vscode-debugTokenExpression-name)"}))
 
 (defn- get-theme [theme-name]
   (merge
@@ -36,15 +17,16 @@
     :max-depth 1
     :padding 8
     :border-radius 2}
-   (get c/themes theme-name)
-   (vs-code-vars)))
+   (get c/themes theme-name)))
 
-(defonce ^:private theme
-  (react/createContext (get-theme ::c/nord)))
+(defn- default-theme []
+  (if (is-vs-code?) ::c/vs-code-embedded ::c/nord))
+
+(defonce ^:private theme (react/createContext nil))
 
 (defn with-theme [theme-name & children]
   (into [:r> (.-Provider theme)
-         #js {:value (get-theme theme-name)}]
+         #js {:value (get-theme (or theme-name (default-theme)))}]
         children))
 
 (defn use-theme [] (react/useContext theme))
