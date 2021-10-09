@@ -244,7 +244,7 @@
    {::shortcuts/default #{"shift" "g"}}         `scroll-bottom
 
    ;; TODO Move to metadata of var when possible
-   {::shortcuts/default ["g" "d"]}              `portal.runtime.jvm.editor/open
+   {::shortcuts/default ["g" "d"]}              `portal.runtime.jvm.editor/goto-definition
 
    ;; PWA
    {::shortcuts/osx     #{"meta" "o"}

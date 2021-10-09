@@ -14,4 +14,4 @@
 
 (rt/register! #'bean)
 (rt/register! #'slurp {:predicate can-slurp?})
-(rt/register! #'editor/open)
+(rt/register! #'editor/goto-definition)

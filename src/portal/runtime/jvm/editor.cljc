@@ -66,31 +66,15 @@
 (defmethod -open-editor :vs-code [{:keys [line column file]}]
   (sh (get-vs-code) "--goto" (str file ":" line ":" column)))
 
-(defn can-open [input]
+(defn can-goto [input]
   (and (satisfies? IResolve input) (resolve input)))
 
-(defn ^{:predicate can-open :command true} open
-  "Open value in editor."
+(defn goto-definition
+  "Goto the definition of a value in an editor."
+  {:predicate can-goto :command true}
   [input]
-  (when-let [location (can-open input)]
+  (when-let [location (can-goto input)]
     (-open-editor
      (assoc location
             :editor
             (get-in rt/*session* [:options :launcher] :emacs)))))
-
-(comment
-  ;; unsupported
-  (open :foo)
-  (open 'clojure.core)
-
-  (open (tap> *ns*))
-  (open "/tmp")
-  (open #'open)
-
-  ;; user
-  (open 'user)
-  (open (io/resource "user.clj"))
-  (open (io/file "dev/user.clj"))
-  (open "user.clj")
-  (open "dev/user.clj")
-  (open (find-ns 'user)))
