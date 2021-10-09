@@ -48,3 +48,13 @@
   []
   (l/clear)
   nil)
+
+(defn register!
+  "Register a var with portal. For now, the var should be a 1 arity fn.
+
+  Example: `(register! #'identity)`
+
+  The function name and doc string will show up in the command palette."
+  [var]
+  (rt/register! var)
+  nil)
