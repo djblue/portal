@@ -1,3 +1,46 @@
+## 0.16.0 - 2021-10-03
+
+- Add `portal.api/register!` 97dbeb2
+
+### UX Changes
+
+- Focus filter input on `/` dcbb084
+  - Press `enter` to re-focus the currently selected value
+- Display multiple shortcuts in command palette d73f5f3
+- Improve portal.api docs c7c77a6 4a5012a
+- Sort commands by name 2d971f2
+- Slurp should now work with strings d9e3b68
+- Add scroll-top/bottom commands 0cbe016
+  - The new `g g` shortcut will scroll to the top
+  - The new `shift+g` shortcut will scroll to the bottom
+- Prefer selected text when copying a7dd105
+- Add `portal.runtime.jvm.editor/goto-definition` c926846 8d51f39
+  - It will try and resolve the currently selected value to a file/line/column
+    location and open it in an editor
+  - emacs and vs-code are the currently supported editors
+  - Works on many types including vars/files/strings
+  - The new `g d` shortcut will also trigger this fn
+
+###  VS Code extension
+
+- Initial vs-code extension implementation (#66) c16978e
+  - Save connection info in .portal/ 79457d8
+  - Leverage session info on file open abc8bfa
+  - Retain state in vs-code extension 0fa40f7
+  - Recursively find a .portal directory upwards 9231004
+  - Allow setting window title in vs-code tab ce9a50d
+  - Set vs-code extension icon ddc35eb
+
+Big thanks to [@seancorfield](https://github.com/seancorfield) for helping test
+the VS Code extension!
+
+### Experimental
+
+- Add portal.console ns 7dcf526
+  - Produces maps that will work with `goto-definition`
+- First cut of log viewer fcdbd24
+  - Correlate log level with color 7eff3d3
+
 ## 0.15.1 - 2021-09-19
 
 - Fix issue with resource files
