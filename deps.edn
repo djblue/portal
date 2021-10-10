@@ -12,14 +12,14 @@
     ns-tracker/ns-tracker {:mvn/version "0.4.0"}}}
   :cljs
   {:extra-deps
-   {borkdude/sci {:mvn/version "0.2.6"}
+   {borkdude/sci {:mvn/version "0.2.7"}
     reagent/reagent {:mvn/version "1.1.0"}
     lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.6"}
     hickory/hickory {:mvn/version "0.7.1"}}}
   :shadow
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.15.10"}}
+   {thheller/shadow-cljs {:mvn/version "2.15.11"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
@@ -32,7 +32,7 @@
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "0.8.3"}
-    cider/cider-nrepl {:mvn/version "0.26.0"}}}
+    cider/cider-nrepl {:mvn/version "0.27.2"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
