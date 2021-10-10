@@ -1,5 +1,6 @@
 (ns portal.runtime.jvm.launcher
   (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [org.httpkit.client :as client]
             [org.httpkit.server :as http]
             [portal.runtime :as rt]
@@ -8,8 +9,19 @@
             [portal.runtime.jvm.client :as c]
             [portal.runtime.jvm.server :as server]))
 
+(defn- get-parent [s] (.getParent (io/file s)))
+
 (defn- vs-code-config []
-  (some-> ".portal/vs-code.edn" fs/exists slurp edn/read-string))
+  (->> (System/getProperty "user.dir")
+       (iterate get-parent)
+       (take-while some?)
+       (some
+        (fn [parent]
+          (some-> parent
+                  (fs/join ".portal/vs-code.edn")
+                  fs/exists
+                  slurp
+                  edn/read-string)))))
 
 (defmethod browser/-open :vs-code [{:keys [portal options server]}]
   (when-let [{:keys [host port]} (vs-code-config)]
