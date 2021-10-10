@@ -821,7 +821,7 @@
      :overflow :hidden}}
    child])
 
-(defn palette [props]
+(defn palette []
   (let [state (state/use-state)
         value (state/get-selected-value @state)]
     (react/useEffect
@@ -838,7 +838,7 @@
        (when-not (shortcuts/input? log)
          (first
           (for [[shortcut f] keymap
-                command      (concat (get-commands) (:commands props))
+                command      (get-commands)
                 :when        (and (= (:name command) f)
                                   (shortcuts/match? shortcut log))]
             (do

@@ -325,21 +325,10 @@
       [text-selection]]
      children)))
 
-(defn- use-viewer-commands []
-  (let [state              (state/use-state)
-        selected-context   (state/get-selected-context @state)
-        compatible-viewers (ins/get-compatible-viewers @ins/viewers (:value selected-context))]
-    (map #(-> %
-              (dissoc :predicate)
-              (assoc  :run
-                      (fn [] (ins/set-viewer! state selected-context (:name %)))))
-         compatible-viewers)))
-
 (defn- inspect-1-history [default-value]
-  (let [current-state @(state/use-state)
-        commands      (use-viewer-commands)]
+  (let [current-state @(state/use-state)]
     [:<>
-     [commands/palette {:commands commands}]
+     [commands/palette]
      (doall
       (map-indexed
        (fn [index state]
