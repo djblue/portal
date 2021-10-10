@@ -460,8 +460,6 @@
                         :portal/args args
                         :portal/value result})))))))
 
-(declare commands)
-
 (defn- command-item [command {:keys [active?]}]
   (let [theme (theme/use-theme)]
     [s/div
@@ -501,7 +499,7 @@
                          (:name option))
                         (when-let [predicate (:predicate option)]
                           (not (predicate @state)))))
-                     (concat @runtime-registry commands (:commands @state) (vals @registry))))]
+                     (get-commands)))]
     (open
      (fn [state]
        [palette-component
@@ -681,14 +679,6 @@
 (defn ^:command toggle-expand [state]
   (apply-selected state state/toggle-expand))
 
-(def portal-commands
-  [{:name 'clojure.datafy/nav
-    :run (fn [state]
-           (state/dispatch!
-            state
-            state/nav
-            (state/get-selected-context @state)))}])
-
 (defn ^:command redo-previous-command [state]
   (a/let [commands (::state/previous-commands @state)]
     (when (seq commands)
@@ -762,20 +752,6 @@
                      :args      (comp pick-many columns)
                      :name      'portal.data/select-columns}})
 
-(defn- ->command [m]
-  (for [[var opts] m]
-    (merge (meta var)
-           {:f var :name (var->name var)}
-           opts)))
-
-(def commands
-  (concat
-   (map
-    make-command
-    (concat (->command clojure-commands)
-            (->command portal-data-commands)))
-   portal-commands))
-
 (defn register!
   ([var] (register! var {}))
   ([var opts]
@@ -790,6 +766,15 @@
 (doseq [var (vals (ns-publics 'portal.ui.commands))
         :when (-> var meta :command)]
   (register! var))
+
+(defn- nav [state]
+  (state/dispatch!
+   state
+   state/nav
+   (state/get-selected-context @state)))
+
+(register! #'nav {:name      'clojure.datafy/nav
+                  :predicate (comp :collection state/get-selected-context)})
 
 (defn- get-style []
   (some-> js/document
