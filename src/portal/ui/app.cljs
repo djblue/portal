@@ -76,7 +76,13 @@
 (defn- runtime-info []
   (let [opts       (opts/use-options)
         theme      (theme/use-theme)
-        connected? (status/use-status)]
+        connected? (status/use-status)
+        background (::c/background2 theme)]
+    (react/useEffect
+     (fn []
+       (state/notify-parent
+        {:type :set-theme :color background}))
+     #js [background])
     (react/useEffect
      (fn []
        (when-let [{:keys [name platform version]} opts]
