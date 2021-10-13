@@ -4,14 +4,14 @@
 (defonce ^:private selection-index (atom {}))
 (defonce ^:private index-context (react/createContext []))
 
-(defn use-register-context [context]
+(defn use-register-context [context viewer]
   (let [index (react/useContext index-context)]
     (react/useEffect
      (fn []
        (swap! selection-index assoc index context context index)
        (fn []
          (swap! selection-index dissoc index context)))
-     #js [(hash index) (hash context)])))
+     #js [(hash index) (hash context) (hash viewer)])))
 
 (defn with-position [position & children]
   (let [index (conj (react/useContext index-context) position)]

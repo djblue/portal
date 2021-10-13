@@ -636,7 +636,7 @@
         location (state/get-location context)
         {:keys [value viewer selected? expanded?]}
         @(r/track get-info state context)]
-    (select/use-register-context context)
+    (select/use-register-context context viewer)
     [with-context
      context
      (let [theme (theme/use-theme)
