@@ -758,14 +758,18 @@
    (let [name (var->name var)]
      (swap! registry
             assoc name (merge {:name name
-                               :var var
-                               :run var
-                               :doc (:doc (meta var))}
+                               :run  var
+                               :doc  (:doc (meta var))}
                               opts)))))
 
 (doseq [var (vals (ns-publics 'portal.ui.commands))
         :when (-> var meta :command)]
   (register! var))
+
+(doseq [[var opts] (merge clojure-commands portal-data-commands)]
+  (let [name (var->name var)]
+    (swap! registry
+           assoc name (make-command (merge (meta var) {:f var :name name} opts)))))
 
 (defn- nav [state]
   (state/dispatch!
