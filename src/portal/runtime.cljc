@@ -175,8 +175,6 @@
   ([session-id value]
    (swap! sessions assoc-in [session-id :selected] value)))
 
-(def ^{:deprecated "0.16.0"} public-fns {})
-(def ^{:deprecated "0.16.0"} fns {})
 (def ^:private registry (atom {}))
 
 (defn- get-functions [v]
