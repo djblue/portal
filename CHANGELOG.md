@@ -1,3 +1,15 @@
+## 0.16.1 - 2021-10-12
+
+### Bug Fixes
+
+- Scroll commands should respect history b385779
+  - Prevent scroll-top / scroll-bottom from only working on the last rendered
+    page.
+- Allow command predicates to fail independently 61d8760
+  - This would prevent other runtime functions from working in the command
+    palette
+- Fix clojure.datafy/nav `enter` shortcut 71f09a8
+
 ## 0.16.0 - 2021-10-03
 
 - Add `portal.api/register!` 97dbeb2
