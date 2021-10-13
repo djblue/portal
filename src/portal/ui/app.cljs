@@ -97,13 +97,20 @@
        "ERROR: Disconnected from runtime!"])))
 
 (defn inspect-1 [value]
-  (let [theme      (theme/use-theme)
-        state      (state/use-state)
+  (let [theme (theme/use-theme)
+        state (state/use-state)
+        ref   (react/useRef)
+
         selected-context (state/get-selected-context @state)
         viewer           (ins/get-viewer state selected-context)
         compatible-viewers (ins/get-compatible-viewers
                             @ins/viewers
                             (:value selected-context))]
+    (react/useEffect
+     (fn []
+       (when-let [el (.-current ref)]
+         (state/dispatch! state assoc :scroll-element el)))
+     #js [(.-current ref)])
     [s/div
      {:style
       {:height "calc(100vh - 64px)"
@@ -116,7 +123,7 @@
         :min-width "100%"
         :box-sizing :border-box}}
       [s/div
-       {:ref commands/scroll-div
+       {:ref ref
         :on-click #(state/dispatch! state state/clear-selected)
         :style
         {:position :absolute

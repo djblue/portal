@@ -647,15 +647,13 @@
   (when-let [input (.-current filter-input)]
     (.focus input)))
 
-(def scroll-div (react/createRef))
+(defn ^:command scroll-top [state]
+  (when-let [el (:scroll-element @state)]
+    (.scroll el #js {:top 0})))
 
-(defn ^:command scroll-top [_]
-  (when-let [div (.-current scroll-div)]
-    (.scroll div #js {:top 0})))
-
-(defn ^:command scroll-bottom [_]
-  (when-let [div (.-current scroll-div)]
-    (.scroll div #js {:top (+ (.-scrollHeight div) 1000)})))
+(defn ^:command scroll-bottom [state]
+  (when-let [el (:scroll-element @state)]
+    (.scroll el #js {:top (+ (.-scrollHeight el) 1000)})))
 
 (defn- apply-selected [state f]
   (when-let [selected (state/get-selected-context @state)]
