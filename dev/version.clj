@@ -18,8 +18,10 @@
 
 (def files
   ["README.md"
+   "package.json"
    "src/portal/runtime.cljc"
-   "src/portal/runtime/index.cljc"])
+   "src/portal/runtime/index.cljc"
+   "src/portal/extensions/vs_code.cljs"])
 
 (defn- version-updates [next-version]
   (let [current-version (find-version "src/portal/runtime/index.cljc")]
