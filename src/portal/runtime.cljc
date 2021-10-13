@@ -187,7 +187,9 @@
                          (select-keys m [:doc :command]))]
        (when-not (:private m)
          (if-let [predicate (:predicate m)]
-           (when (predicate v) result)
+           (try
+             (when (predicate v) result)
+             (catch #?(:clj Exception :cljs :default) _ex))
            result))))
    @registry))
 
