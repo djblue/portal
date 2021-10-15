@@ -4,7 +4,7 @@
             [portal.colors :as c]
             [examples.hacker-news :as hn])
   #?(:clj (:import [java.io File ByteArrayOutputStream]
-                   [java.net URI URL]
+                   [java.net URI]
                    [java.util UUID])))
 
 #?(:clj
