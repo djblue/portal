@@ -4,7 +4,7 @@
 (require '[clojure.java.io :as io])
 (require '[cheshire.core :as json])
 
-(deps/add-deps '{:deps {djblue/portal {:mvn/version "0.15.1"}}})
+(deps/add-deps '{:deps {djblue/portal {:mvn/version "0.16.1"}}})
 
 (require '[portal.api :as p])
 

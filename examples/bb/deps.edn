@@ -4,4 +4,4 @@
  {:dev
   {:extra-paths ["dev"]
    :extra-deps
-   {djblue/portal {:mvn/version "0.6.1"}}}}}
+   {djblue/portal {:mvn/version "0.16.1"}}}}}
