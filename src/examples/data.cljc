@@ -19,7 +19,6 @@
            ::file (io/file "deps.edn")
            ::directory  (io/file ".")
            ::uri (URI. "https://github.com/djblue/portal")
-           ::url (URL. "https://github.com/djblue/portal")
            ::exception (try (/ 1 0) (catch Exception e e))
            ::io-exception (try (slurp "/hello") (catch Exception e e))
            ::user-exception (Exception. "hi")
