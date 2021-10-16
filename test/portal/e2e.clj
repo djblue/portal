@@ -11,7 +11,7 @@
 
 (defn options []
   {:portal.colors/theme
-   (rand-nth (keys c/themes))
+   (rand-nth (keys (dissoc c/themes ::c/vs-code-embedded)))
    :portal.launcher/window-title
    (rand-nth pane-titles)})
 
