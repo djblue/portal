@@ -1,3 +1,14 @@
+## 0.16.2 - 2021-10-15
+
+### Bug Fixes
+
+- Special representation of java longs, fixes #69 4120fab
+  - When the value of a java long falls out of the range of a javascript number,
+    switch to a tagged string representation. The advantage of trying to keep
+    numbers, numbers is for chart / graph like viewers.
+  - Thanks [@esp1](https://github.com/esp1)!
+- Selection should consider the current viewer e4d5ffd
+
 ## 0.16.1 - 2021-10-12
 
 ### Bug Fixes
