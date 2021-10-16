@@ -74,8 +74,11 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 (require '[portal.web :as p])
 
 
+(def p (p/open)) ; Open a new inspector
 
-(p/open) ; Open a new inspector
+;; or with the vs-code extension installed, do:
+(def p (p/open {:launcher :vs-code})) ; JVM only for now
+
 
 (add-tap #'p/submit) ; Add portal as a tap> target
 
@@ -84,6 +87,8 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 (p/clear) ; Clear all values
 
 (tap> :world) ; Tap out more values
+
+(prn @p) ; bring selected value back into repl
 
 (remove-tap #'p/submit) ; Remove portal from tap> targetset
 
@@ -95,20 +100,21 @@ cleared from the UI.
 
 ### Portal Atom
 
-To get a value from portal back into the repl, use the portal atom:
+In addition to getting the selected value back in the repl, the portal atom also
+allows direct manipulation of portal [history](#history). For example:
 
 ```clojure
 (def a (p/open))
 
-; push the value 0 into portal
+; push the value 0 into portal history
 (reset! a 0)
 
-@a ;=> 0
+@a ;=> 0 - get current value
 
 ; inc the current value in portal
 (swap! a inc)
 
-@a ;=> 1
+@a ;=> 1 - get current value
 ```
 
 ### Options
@@ -292,7 +298,9 @@ the following:
 curl ... | transit
 ```
 
-## Emacs Integration
+## Editor Integration
+
+### Emacs
 
 If you are an emacs + cider user and would like tighter integration with portal,
 the following section may be of interest to you.
@@ -325,6 +333,22 @@ the following section may be of interest to you.
 ;; how is via a clj user or project alias.
 (setq cider-clojure-cli-global-options "-A:portal")
 ```
+
+### VS Code
+
+If you are using vs-code, try out the
+[vs-code-extension](https://marketplace.visualstudio.com/items?itemName=djblue.portal).
+It allows launching portal in an embedded
+[webview](https://code.visualstudio.com/api/extension-guides/webview) within
+vs-code.
+
+For a more in depth look at customizing vs-code for use with portal,
+particularly with
+[mauricioszabo/clover](https://github.com/mauricioszabo/clover), take a look at
+[seancorfield/vscode-clover-setup](https://github.com/seancorfield/vscode-clover-setup).
+
+**NOTE:** The version of portal being run in the webview is still decided by the
+runtime in which `(portal.api/open {:launcher :vs-code})` is run.
 
 ## Principles
 
