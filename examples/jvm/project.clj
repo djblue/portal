@@ -2,4 +2,4 @@
   :dependencies [[ring "1.8.2"]]
   :profiles
   {:dev {:source-paths ["dev"]
-         :dependencies [[djblue/portal "0.6.1"]]}})
+         :dependencies [[djblue/portal "0.16.1"]]}})

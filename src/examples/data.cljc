@@ -4,7 +4,7 @@
             [portal.colors :as c]
             [examples.hacker-news :as hn])
   #?(:clj (:import [java.io File ByteArrayOutputStream]
-                   [java.net URI URL]
+                   [java.net URI]
                    [java.util UUID])))
 
 #?(:clj
@@ -19,7 +19,6 @@
            ::file (io/file "deps.edn")
            ::directory  (io/file ".")
            ::uri (URI. "https://github.com/djblue/portal")
-           ::url (URL. "https://github.com/djblue/portal")
            ::exception (try (/ 1 0) (catch Exception e e))
            ::io-exception (try (slurp "/hello") (catch Exception e e))
            ::user-exception (Exception. "hi")
