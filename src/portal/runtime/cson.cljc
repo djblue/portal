@@ -29,11 +29,26 @@
     (f value)
     value))
 
-(defn to-json [value]
-  (let [value (transform value)]
-    (if (primitive? value)
-      value
-      (-to-json value))))
+(defn to-json [value] (-to-json (transform value)))
+
+#?(:clj (extend-type Integer ToJson (-to-json [value] value)))
+#?(:clj (extend-type Long    ToJson (-to-json [value] value)))
+#?(:clj (extend-type Float   ToJson (-to-json [value] value)))
+#?(:clj (extend-type Double  ToJson (-to-json [value] value)))
+
+#?(:cljs (extend-type number ToJson (-to-json [value] value)))
+
+(extend-type #?(:clj  String
+                :cljs string)
+  ToJson
+  (-to-json [value] value))
+
+(extend-type #?(:clj  Boolean
+                :cljs boolean)
+  ToJson
+  (-to-json [value] value))
+
+(extend-type nil ToJson (-to-json [value] value))
 
 (defrecord Tagged [-tag value]
   ToJson
