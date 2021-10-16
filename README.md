@@ -14,7 +14,10 @@ A clojure tool to navigate through your data.
 
 [![screenshot](https://user-images.githubusercontent.com/1986211/129153169-4018d586-d747-48f9-8193-d267ea5e288a.png)](https://djblue.github.io/portal/)
 
-The portal UI can be used to inspect values of various shapes and sizes. The UX will probably evolve over time and user feedback is welcome!
+The portal UI can be used to inspect values of various shapes and sizes. The UX
+will probably evolve over time and user feedback is welcome!
+
+For an in-depth explanation of the UX, jump to [UX Concepts](#ux-concepts).
 
 ## Apropos Demo
 
@@ -54,6 +57,9 @@ bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.16.2"}}}'`
 
 or for examples on how to integrate portal into an existing project, look through the [examples](./examples) directory. 
 
+**NOTE** Portal can also be used without a runtime via the [standalone
+version](https://djblue.github.io/portal/).
+
 ### API
 
 Try the [portal api](./src/portal/api.cljc) with the following commands:
@@ -84,10 +90,12 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 (p/close) ; Close the inspector when done
 ```
 
+**NOTE**: portal will keep objects from being garbage collected until they are
+cleared from the UI.
+
 ### Portal Atom
 
-For the `jvm`, `bb` and `web` platforms, you can pull values from portal back
-into your runtime by treating portal as an atom:
+To get a value from portal back into the repl, use the portal atom:
 
 ```clojure
 (def a (p/open))
@@ -102,12 +110,6 @@ into your runtime by treating portal as an atom:
 
 @a ;=> 1
 ```
-
-The currently selected viewer has the ability to intercept and transform
-values returned by `deref`. For example, given a map in portal, you may
-decide to view it as a coll, and with that viewer selected, `deref` would
-return a list of pairs. Not many viewers implement this functionality
-currently, but expect more to do so in the future.
 
 ### Options
 
@@ -139,6 +141,89 @@ function with the following options:
 | `:portal.launcher/host`         | Hostname used to access UI | "localhost"          |
 | `:portal.launcher/app`          | Launch as separate window  | true                 |
 | `:portal.launcher/window-title` | Custom title for UI window | "portal"             |
+
+## UX Concepts
+
+The portal ux can be broken down into the following components:
+
+### Selection
+
+A single click will select a value. The arrow keys, (`⭠` `⭣` `⭡` `⭢`) or (`h`
+`j` `k` `l`) will change the selection relative to the currently selected value.
+Relative selection is based on the viewer.
+
+### Viewers
+
+A viewer takes a raw value and renders it to the screen. A single value can have
+many viewers. Most viewers have a `:predicate` function to define what values
+they support. A `:predicate` can be as simple as a type check to as complex as a
+[`clojure.spec.alpha/valid?`](https://clojuredocs.org/clojure.spec.alpha/valid_q)
+assertion. The bottom-left dropdown displays the viewer for the currently
+selected value and contains all viewers for the value.
+
+A default viewer can be set via metadata. For example:
+
+```clojure
+^{:portal.viewer/default :portal.viewer/hiccup} [:h1 "hello, world"]
+```
+
+### Commands
+
+The bottom-right yellow button will open the command palette. Commands can have
+a `:predicate` function like viewers, so only relevant commands will be visible
+which is based on the currently selected value. They will be sorted
+alphabetically by name and can quickly be filtered.
+
+The filter string is split by white space and all words must appear in a name to
+be considered a match.
+
+To register your own command, use the `portal.api/register!` function. For example:
+
+``` clojure
+;; Currently, only single arity vars can be registerd as commands.
+(portal.api/register! #'identity)
+```
+
+**NOTES:**
+
+- Commands manipulating the UI itself will live under the `portal.ui.commands`
+  namespace.
+- A very useful command is `portal.ui.commands/copy` which will copy the
+  currently selected value as an edn string to the clipbaord.
+- The `cljs.core` namespace will be aliased as `clojure.core` when using a
+  clojurescript runtime.
+
+### History
+
+The top-left arrow buttons (`⭠` `⭢`) can be used to navigate through history.
+History is built up from commands pushing values into it. For example, anytime a
+value is double clicked,
+[`clojure.datafy/nav`](https://clojuredocs.org/clojure.datafy/nav) is applied to
+that value and the result is pushed onto the history stack. All commands that
+produce a new value will do the same.
+
+To quickly navigation through history, checkout the following commands:
+
+- `portal.ui.commands/history-back`
+- `portal.ui.commands/history-forward`
+- `portal.ui.commands/history-first`
+- `portal.ui.commands/history-last`
+
+### Shortcuts
+
+To run a command without having to open the command palette, you can use the
+commands shortcut. They will be listed in the command palette next to the
+command. When multiple shortcuts are available, they are separated by a vertical
+bar.
+
+**NOTE:** shortcuts aren't currently user definable.
+
+### Filtering
+
+Like many concepts listed above, filtering is relative to the currently selected
+value. If no value is selected, filtering is disabled. When a collection is
+selected, the filter text will act to remove elements from that collection,
+similar to the command palette.
 
 ## Datafy and Nav
 
@@ -270,11 +355,24 @@ the following section may be of interest to you.
 
 ## Development
 
+### Dependencies
+
+To start the development server, make sure you have the following dependencies
+installed on your system:
+
+- [babashka](https://babashka.org/) - for build scripting
+  - for osx, do: `brew install borkdude/brew/babashka`
+  - to list all build tasks, do: `bb tasks`
+- [node, npm](https://nodejs.org/) - for javascript dependencies
+  - for osx, do: `brew install node`
+
 ### vim + [vim-fireplace](https://github.com/tpope/vim-fireplace)
 
 To start the nrepl server, do:
 
-    bb dev
+```bash
+bb dev
+```
 
 vim-fireplace should automatically connect upon evaluation, but this will
 only be for clj files, to get a cljs repl, do:
@@ -295,6 +393,12 @@ cider.
 The user.clj namespace has a bunch of useful examples and code for
 development. Take a peek to get going.
 
+To launch the dev client version of portal, make sure to do:
+
+```clojure
+(portal.api/open {:mode :dev})
+```
+
 ### Formatting
 
 To format source code, do:
@@ -303,23 +407,40 @@ To format source code, do:
 
 ### CI Checks
 
-To run all ci checks, do:
+To run ci checks, do:
 
-    bb ci
+```bash
+bb ci    # run all ci check
+
+bb check # run just the static analysis
+bb test  # run just the tests
+```
 
 ### E2E Testing
 
 To run the e2e tests in the jvm, node and web environments, do:
 
-    bb e2e
+```bash
+bb e2e
+```
 
-NOTE: these aren't fully automated tests. They depend on a human for
-verification and synchronization but it beats having to type everything
-out manually into a repl.
+**NOTE:** these aren't fully automated tests. They depend on a human for
+verification and synchronization but it beats having to type everything out
+manually into a repl.
+
+## VS Code Extension
+
+To build the vs-code extension, do:
+
+```bash
+bb ext
+```
 
 ### Deployment
 
 To deploy to a release to [clojars](https://clojars.org/djblue/portal), do:
 
-    bb tag
-    bb deploy
+```bash
+bb tag
+bb deploy
+```
