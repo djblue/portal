@@ -39,6 +39,8 @@
          value
          (tag "long" (Long/toString value))))))
 
+#?(:clj (extend-type Byte    ToJson (-to-json [value] value)))
+#?(:clj (extend-type Short   ToJson (-to-json [value] value)))
 #?(:clj (extend-type Integer ToJson (-to-json [value] value)))
 #?(:clj (extend-type Long    ToJson (-to-json [value] (box-long value))))
 #?(:clj (extend-type Float   ToJson (-to-json [value] value)))

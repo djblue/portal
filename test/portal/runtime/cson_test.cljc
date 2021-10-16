@@ -171,4 +171,8 @@
 
 #?(:clj
    (deftest java-longs
+     (is (= 1 (byte 1)  (pass (byte 1))))
+     (is (= 1 (short 1) (pass (short 1))))
+     (is (= 1 (int 1)   (pass (int 1))))
+     (is (= 1 (long 1)  (pass (long 1))))
      (is (= 4611681620380904123 (pass 4611681620380904123)))))
