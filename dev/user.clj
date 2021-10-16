@@ -83,6 +83,7 @@
       (log/warn  ::warn)
       (log/error ::error))
 
+  (tap> 4611681620380904123)
   (tap> (with-meta (range) {:hello :world}))
   (tap> (json/parse-stream (io/reader "package-lock.json")))
   (tap> (io/file "deps.edn"))

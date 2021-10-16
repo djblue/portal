@@ -31,8 +31,16 @@
 
 (defn to-json [value] (-to-json (transform value)))
 
+#?(:clj
+   (defn- box-long [value]
+     (let [js-min-int -9007199254740991
+           js-max-int  9007199254740991]
+       (if (<= js-min-int value js-max-int)
+         value
+         (tag "long" (Long/toString value))))))
+
 #?(:clj (extend-type Integer ToJson (-to-json [value] value)))
-#?(:clj (extend-type Long    ToJson (-to-json [value] value)))
+#?(:clj (extend-type Long    ToJson (-to-json [value] (box-long value))))
 #?(:clj (extend-type Float   ToJson (-to-json [value] value)))
 #?(:clj (extend-type Double  ToJson (-to-json [value] value)))
 
@@ -50,9 +58,14 @@
 
 (extend-type nil ToJson (-to-json [value] value))
 
-(defrecord Tagged [-tag value]
+(defrecord Tagged [tag rep]
   ToJson
-  (-to-json [_] (tag -tag (to-json value))))
+  (-to-json [_]
+    #?(:clj [tag rep] :cljs #js [tag rep])))
+
+(defn tagged-value [tag rep] (->Tagged tag rep))
+
+(defn tagged-value? [x] (instance? Tagged x))
 
 (defn- meta-> [value]
   (let [[_ obj m] value]
@@ -346,6 +359,10 @@
 (defn- map-> [value]
   (apply hash-map (map json-> (rest value))))
 
+(defn long-> [value]
+  #?(:clj  (Long/parseLong (second value))
+     :cljs (tagged-value "long" (second value))))
+
 (defn- dispatch-value [value]
   (case (first value)
     "bigint"  (bigint-> value)
@@ -361,6 +378,7 @@
     "url"     (url-> value)
     "uuid"    (uuid-> value)
     "vec"     (vec-> value)
+    "long"    (long-> value)
     ((:default-handler *options*) value)))
 
 (defn json-> [value]

@@ -2,6 +2,7 @@
   (:require ["react" :as react]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
+            [portal.runtime.cson :as cson]
             [portal.ui.filter :as f]
             [portal.ui.lazy :as l]
             [portal.ui.rpc :as rpc]
@@ -114,6 +115,9 @@
 
 (defn get-value-type [value]
   (cond
+    (cson/tagged-value? value)
+    (:tag value)
+
     (instance? diff/Deletion value)   :diff
     (instance? diff/Insertion value)  :diff
     (instance? diff/Mismatch value)   :diff
@@ -568,6 +572,9 @@
          string
          (trim-string string limit))])))
 
+(defn inspect-long [value]
+  [inspect-number (:rep value)])
+
 (defn- get-preview-component [type]
   (case type
     :diff       inspect-diff
@@ -587,6 +594,7 @@
     :var        inspect-var
     :uri        inspect-uri
     :tagged     preview-tagged
+    "long"      inspect-long
     inspect-object))
 
 (defn preview [value]
@@ -610,6 +618,7 @@
     :var        inspect-var
     :uri        inspect-uri
     :tagged     inspect-tagged
+    "long"      inspect-long
     inspect-object))
 
 (defn get-info [state context]

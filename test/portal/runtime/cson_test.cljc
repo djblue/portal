@@ -168,3 +168,7 @@
      [v (cson/write v edn)] (cson/read v edn) n)
     (b/simple-benchmark
      [v (cson/write v)] (cson/read v) n)))
+
+#?(:clj
+   (deftest java-longs
+     (is (= 4611681620380904123 (pass 4611681620380904123)))))
