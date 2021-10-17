@@ -91,19 +91,19 @@
     ::diff-add    "var(--vscode-terminal-ansiGreen)"
     ::diff-remove "var(--vscode-debugTokenExpression-name)"}
    ::zerodark
-   {::text        "#a3be8c"
-    ::background  "#2e3440"
-    ::background2 "#272c36"
+   {::text        "#abb2bf"
+    ::background  "#282c34"
+    ::background2 "#22252c"
     ::boolean     "#da8548"
     ::string      "#98be65"
     ::keyword     "#61afef"
     ::namespace   "#61afef"
     ::tag         "#ccd4e3"
-    ::symbol      "#d8dee9"
+    ::symbol      "#abb2bf"
     ::number      "#da8548"
-    ::uri         "#d08770"
+    ::uri         "#da8548"
     ::border      "#4c566a"
     ::package     "#88c0d0"
     ::exception   "#ff6c6b"
     ::diff-add    "#a3be8c"
-    ::diff-remove "#bf616a"}})
+    ::diff-remove "#ff6c6b"}})
