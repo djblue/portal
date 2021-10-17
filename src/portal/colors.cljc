@@ -89,4 +89,21 @@
     ::package     "var(--vscode-descriptionForeground)"
     ::exception   "var(--vscode-editorError-foreground)"
     ::diff-add    "var(--vscode-terminal-ansiGreen)"
-    ::diff-remove "var(--vscode-debugTokenExpression-name)"}})
+    ::diff-remove "var(--vscode-debugTokenExpression-name)"}
+   ::zerodark
+   {::text        "#a3be8c"
+    ::background  "#2e3440"
+    ::background2 "#272c36"
+    ::boolean     "#da8548"
+    ::string      "#98be65"
+    ::keyword     "#61afef"
+    ::namespace   "#61afef"
+    ::tag         "#ccd4e3"
+    ::symbol      "#d8dee9"
+    ::number      "#da8548"
+    ::uri         "#d08770"
+    ::border      "#4c566a"
+    ::package     "#88c0d0"
+    ::exception   "#ff6c6b"
+    ::diff-add    "#a3be8c"
+    ::diff-remove "#bf616a"}})
