@@ -55,7 +55,7 @@ or for a **babashka >=0.2.4** repl, do:
 bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.16.2"}}}'`
 ```
 
-or for examples on how to integrate portal into an existing project, look through the [examples](./examples) directory. 
+or for examples on how to integrate portal into an existing project, look through the [examples](./examples) directory.
 
 **NOTE** Portal can also be used without a runtime via the [standalone
 version](https://djblue.github.io/portal/).
@@ -126,6 +126,7 @@ There are currently three built-in themes:
 - [`:portal.colors/nord`](https://www.nordtheme.com/) (default)
 - [`:portal.colors/solarized-dark`](https://ethanschoonover.com/solarized/)
 - [`:portal.colors/solarized-light`](https://ethanschoonover.com/solarized/)
+- [`:portal.colors/zerodark`](https://github.com/NicolasPetton/zerodark-theme)
 
 Which can be passed as an option to `p/open`:
 
