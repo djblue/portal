@@ -1,3 +1,17 @@
+## 0.16.3 - 2021-10-18
+
+### Bug Fixes
+
+- Switch to `data.json` for jvm serialization 6a25a70
+  - Avoid [jackson](https://github.com/FasterXML/jackson) transitive dependency
+  - Thanks [@arichiardi](https://github.com/arichiardi)!
+
+### Themes
+
+- Add initial port of zerodark color theme (#72) fea9668
+  - Thanks [@burinc](https://github.com/burinc)!
+    - Use latest version in the examples 73b5f86
+
 ## 0.16.2 - 2021-10-15
 
 ### Bug Fixes
