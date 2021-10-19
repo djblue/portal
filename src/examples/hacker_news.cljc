@@ -1,6 +1,6 @@
 (ns examples.hacker-news
-  (:require #?(:clj [cheshire.core :as json])
-            [clojure.core.protocols :refer [nav]]
+  (:require [clojure.core.protocols :refer [nav]]
+            [portal.runtime.json :as json]
             #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a])
             #?(:cljs [examples.fetch :refer [fetch]])))
@@ -33,9 +33,9 @@
    :submitted "List of the user's stories, polls and comments."})
 
 (defn fetch-json [url]
-  #?(:clj  (-> url slurp (json/parse-string true))
+  #?(:clj  (-> url slurp json/read)
      :cljs (-> (fetch url)
-               (.then #(js/JSON.parse %))
+               (.then #(json/read %))
                (.then #(js->clj % :keywordize-keys true)))))
 
 (defn as-url [s]

@@ -1,12 +1,13 @@
 (ns portal.runtime.browser
-  #?(:clj  (:require [cheshire.core :as json]
-                     [clojure.java.browse :refer [browse-url]]
+  #?(:clj  (:require [clojure.java.browse :refer [browse-url]]
                      [portal.runtime :as rt]
                      [portal.runtime.fs :as fs]
+                     [portal.runtime.json :as json]
                      [portal.runtime.jvm.client :as c]
                      [portal.runtime.shell :as shell])
      :cljs (:require [portal.runtime :as rt]
                      [portal.runtime.fs :as fs]
+                     [portal.runtime.json :as json]
                      [portal.runtime.node.client :as c]
                      [portal.runtime.shell :as shell])))
 
@@ -33,9 +34,6 @@
             (re-find #"com\.google\.Chrome\.app\.([^<]+)")
             second)})))
 
-(defn- parse-json [string]
-  #?(:clj (json/parse-string string) :cljs (js->clj (.parse js/JSON string))))
-
 (defn- get-app-id-from-pref-file [path app-name]
   (when (fs/exists path)
     (some
@@ -43,7 +41,7 @@
        (let [name (get-in extension ["manifest" "name"] "")]
          (when (= app-name name) id)))
      (get-in
-      (parse-json (fs/slurp path))
+      (json/read (fs/slurp path))
       ["extensions" "settings"]))))
 
 (defn- chrome-profile [path]

@@ -4,8 +4,7 @@
                :cljs [cljs.reader :as edn])
             [cognitect.transit :as transit]
             [portal.bench :as b]
-            [portal.runtime.cson :as cson]
-            #?(:clj [cheshire.core :as json]))
+            [portal.runtime.cson :as cson])
   #?(:clj (:import [java.io ByteArrayOutputStream ByteArrayInputStream])))
 
 (defn- transit-read [^String string]
@@ -138,14 +137,6 @@
        (cson/write {:stringify pr-str})
        (cson/read  {:parse edn/read-string})
        (= composite-value))))
-
-(defn json-parse [string]
-  #?(:clj  (dorun (json/parse-string string))
-     :cljs (.parse js/JSON string)))
-
-(defn json-stringify [value]
-  #?(:clj  (json/generate-string value)
-     :cljs (.stringify js/JSON value)))
 
 (def n 10000)
 (def v composite-value)

@@ -1,22 +1,22 @@
 {:paths ["src" "resources"]
  :deps
- {com.cognitect/transit-clj {:mvn/version "1.0.324"}
+ {com.cognitect/transit-clj  {:mvn/version "1.0.324"}
   com.cognitect/transit-cljs {:mvn/version "0.8.269"}
-  cheshire/cheshire {:mvn/version "5.10.1"}
-  http-kit/http-kit {:mvn/version "2.5.3"}}
+  org.clojure/data.json      {:mvn/version "2.4.0"}
+  http-kit/http-kit          {:mvn/version "2.5.3"}}
  :aliases
  {:dev
   {:extra-paths ["dev" "test"]
    :extra-deps
-   {hiccup/hiccup {:mvn/version "2.0.0-alpha2"}
+   {hiccup/hiccup         {:mvn/version "2.0.0-alpha2"}
     ns-tracker/ns-tracker {:mvn/version "0.4.0"}}}
   :cljs
   {:extra-deps
-   {borkdude/sci {:mvn/version "0.2.7"}
-    reagent/reagent {:mvn/version "1.1.0"}
-    lambdaisland/deep-diff2 {:mvn/version "2.0.108"}
+   {borkdude/sci              {:mvn/version "0.2.7"}
+    reagent/reagent           {:mvn/version "1.1.0"}
+    lambdaisland/deep-diff2   {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.6"}
-    hickory/hickory {:mvn/version "0.7.1"}}}
+    hickory/hickory           {:mvn/version "0.7.1"}}}
   :shadow
   {:extra-deps
    {thheller/shadow-cljs {:mvn/version "2.15.12"}}
@@ -24,10 +24,10 @@
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
-  {:main-opts ["-m" "clj-kondo.main"]
+  {:main-opts  ["-m" "clj-kondo.main"]
    :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.09.25"}}}
   :cljfmt
-  {:main-opts ["-m" "cljfmt.main"]
+  {:main-opts  ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}}
   :cider
   {:extra-deps
@@ -38,13 +38,13 @@
    :extra-deps
    {athos/clj-check
     {:git/url "https://github.com/athos/clj-check.git"
-     :sha "518d5a1cbfcd7c952f548e6dbfcb9a4a5faf9062"}}}
+     :sha     "518d5a1cbfcd7c952f548e6dbfcb9a4a5faf9062"}}}
   :test
   {:extra-paths ["test"]
    :extra-deps
    {babashka/clj-http-lite
     {:git/url "https://github.com/babashka/clj-http-lite.git"
-     :sha "a75db6db60eadcf609104a979b29499f54b3665b"}}}
+     :sha     "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
    {com.github.liquidz/antq {:mvn/version "1.1.0"}

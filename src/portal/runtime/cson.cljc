@@ -2,7 +2,9 @@
   "Clojure/Script Object Notation"
   (:refer-clojure :exclude [read])
   #?(:cljs (:require [goog.crypt.base64 :as Base64]
+                     [portal.runtime.json :as json]
                      [portal.runtime.macros :as m]))
+  #?(:clj (:require [portal.runtime.json :as json]))
   #?(:clj  (:import [java.net URL]
                     [java.util Base64 Date UUID])))
 
@@ -389,26 +391,14 @@
      value
      (dispatch-value value))))
 
-(defn- stringify [value options]
-  ((or (:stringify options)
-       #?(:clj  (requiring-resolve 'cheshire.core/generate-string)
-          :cljs #(.stringify js/JSON %)))
-   value))
-
 (defn write
   ([value] (write value nil))
   ([value options]
    (binding [*options* options]
-     (stringify (to-json value) options))))
-
-(defn- parse [string options]
-  ((or (:parse options)
-       #?(:clj  (requiring-resolve 'cheshire.core/parse-string)
-          :cljs #(.parse js/JSON %)))
-   string))
+     ((:stringify options json/write) (to-json value)))))
 
 (defn read
   ([string] (read string nil))
   ([string options]
    (binding [*options* options]
-     (json-> (parse string options)))))
+     (json-> ((:parse options json/read) string)))))
