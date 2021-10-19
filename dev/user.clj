@@ -1,12 +1,12 @@
 (ns user
   (:require [c]
-            [cheshire.core :as json]
             [clojure.core.protocols :refer [Datafiable]]
             [clojure.datafy :refer [datafy]]
             [clojure.java.io :as io]
             [examples.data :refer [data]]
             [portal.api :as p]
             [portal.runtime.browser :as browser]
+            [portal.runtime.json :as json]
             [pwa]
             [tracker]))
 
@@ -85,6 +85,6 @@
 
   (tap> 4611681620380904123)
   (tap> (with-meta (range) {:hello :world}))
-  (tap> (json/parse-stream (io/reader "package-lock.json")))
+  (tap> (json/read (slurp "package-lock.json")))
   (tap> (io/file "deps.edn"))
   (dotimes [_i 25] (tap> data)))

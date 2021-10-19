@@ -1,12 +1,12 @@
 (ns pwa
-  (:require [cheshire.core :as json]
-            [clojure.java.browse :refer [browse-url]]
+  (:require [clojure.java.browse :refer [browse-url]]
             [clojure.java.io :as io]
             [hiccup.core :refer [html]]
-            [portal.colors :as c]))
+            [portal.colors :as c]
+            [portal.runtime.json :as json]))
 
 (defn- manifest-json [settings]
-  (json/generate-string
+  (json/write
    {:short_name "Portal"
     :name (:name settings)
     :description "A clojure tool to navigate through your data."
@@ -17,8 +17,7 @@
     :scope (:host settings)
     :start_url (:host settings)
     :display "standalone"
-    :display_override ["minimal-ui"]}
-   {:pretty true}))
+    :display_override ["minimal-ui"]}))
 
 (defn- index-html [settings]
   (str

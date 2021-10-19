@@ -7,10 +7,10 @@
 (defn lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
 
+(def ^:private read-json      (lazy-fn 'portal.runtime.json/read))
 (def ^:private read-yaml      (lazy-fn 'clj-yaml.core/parse-string))
-(def ^:private read-json      (lazy-fn 'cheshire.core/parse-stream))
-(def ^:private transit-reader (lazy-fn 'cognitect.transit/reader))
 (def ^:private transit-read   (lazy-fn 'cognitect.transit/read))
+(def ^:private transit-reader (lazy-fn 'cognitect.transit/reader))
 
 (defn- read-transit [in]
   (transit-read (transit-reader in :json)))
