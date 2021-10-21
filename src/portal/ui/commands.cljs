@@ -204,6 +204,9 @@
     ::shortcuts/default #{"control" "c"}}
    `copy
 
+   {::shortcuts/default #{"shift" "c"}}
+   `copy-str
+
    {::shortcuts/osx     #{"meta" "arrowleft"}
     ::shortcuts/default #{"control" "arrowleft"}}
    `history-back
@@ -805,6 +808,13 @@
    {:portal/value (get-vs-code-css-vars)}))
 
 (register! #'vs-code-vars {:predicate theme/is-vs-code?})
+
+(defn copy-str
+  "Copy string to the clipboard."
+  [state]
+  (copy-to-clipboard! (state/get-selected-value @state)))
+
+(register! #'copy-str {:predicate (comp string? state/get-selected-value)})
 
 (defn pop-up [child]
   [s/div
