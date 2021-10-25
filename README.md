@@ -21,7 +21,7 @@ For an in-depth explanation of the UX, jump to [UX Concepts](#ux-concepts).
 
 ## Apropos Demo
 
-To get an overview of portal, you can watch the following recording of a live demo I gave on [Apropos](https://www.youtube.com/channel/UC1UxEQuBvfLJgWR5tk_XIXA/featured).
+To get an overview of portal, you can watch the following recording of a [live demo](https://www.youtube.com/watch?v=gByyg-m0XOg) I gave on [Apropos](https://www.youtube.com/channel/UC1UxEQuBvfLJgWR5tk_XIXA/featured).
 
 [![Apropos](https://img.youtube.com/vi/gByyg-m0XOg/hqdefault.jpg)](https://www.youtube.com/watch?v=gByyg-m0XOg "Apropos")
 
