@@ -1,8 +1,9 @@
 (ns portal.ui.viewer.tree
   (:require ["react" :as react]
             [portal.ui.inspector :as ins]
-            [portal.ui.styled :as s]
             [portal.ui.lazy :as l]
+            [portal.ui.select :as select]
+            [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
 (defn- delimiter [value]
@@ -11,9 +12,6 @@
     (set? value)    ["#{" "}"]
     (vector? value) ["[" "]"]
     :else           ["(" ")"]))
-
-(declare inspect-tree)
-(declare inspect-tree-1)
 
 (def cursor-pointer {:cursor :pointer})
 (def select-none	{:user-select :none})
@@ -54,6 +52,7 @@
                 (merge
                  {:border-left [1 :dashed (str (:color style) "55")]
                   :padding-right (:padding theme)
+                  :padding-left (:padding theme)
                   :margin-left "0.3em"}
                  flex-wrap
                  flex-col)}
@@ -78,6 +77,7 @@
 
       :else
       [s/div
+       {:style {:padding-left (:padding theme)}}
        [center
         (:key-child opts)
         (if-not open?
@@ -88,55 +88,70 @@
            child
            close])]])))
 
+(defn- parent-tree? [context]
+  (and (not (true? (:key? context)))
+       (map? (:collection context))
+       (= (:portal.viewer/default context)
+          :portal.viewer/tree)))
+
+(defn with-tree-item [child]
+  (let [context (ins/use-context)]
+    (if (parent-tree? context)
+      child
+      [ins/with-default-viewer
+       :portal.viewer/tree
+       [inspect-tree-item
+        {:value (:value context)
+         :value-child child}]])))
+
 (defn- inspect-tree-map [value]
+  (select/use-register-context (ins/use-context) :portal.viewer/tree)
   (let [theme (theme/use-theme)]
-    [s/div
-     {:style {:padding-left (:padding theme)}}
-     [l/lazy-seq
-      (for [[k v] (ins/try-sort-map value)]
-        ^{:key (hash k)}
-        [inspect-tree-item
-         {:key k
-          :key-child
-          [s/div
-           {:style {:padding-right (:padding theme)}}
-           [inspect-tree-1 k]]
-          :value v
-          :value-child
-          [ins/with-key k [inspect-tree v]]}])]]))
+    [with-tree-item
+     [theme/cycle-rainbow
+      [ins/with-collection value
+       [l/lazy-seq
+        (map-indexed
+         (fn [index [k v]]
+           ^{:key index}
+           [inspect-tree-item
+            {:key k
+             :key-child
+             [ins/with-context
+              {:key? true}
+              [select/with-position
+               {:row index :column 0}
+               [s/div
+                {:style {:padding-right (:padding theme)}}
+                [ins/inspector k]]]]
+             :value v
+             :value-child
+             [ins/with-key k
+              [select/with-position
+               {:row index :column 1}
+               [ins/inspector v]]]}])
+         (ins/try-sort-map value))]]]]))
 
 (defn- inspect-tree-coll [value]
-  (let [theme   (theme/use-theme)]
-    [s/div
-     {:style {:padding-left (* 2 (:padding theme))}}
+  (select/use-register-context (ins/use-context) :portal.viewer/tree)
+  [with-tree-item
+   [theme/cycle-rainbow
+    [ins/with-collection value
      [l/lazy-seq
       (map-indexed
        (fn [idx item]
          ^{:key idx}
          [ins/with-key idx
-          [s/div
-           [inspect-tree-item
-            {:value item
-             :value-child [inspect-tree item]}]]])
-       value)]]))
-
-(defn- inspect-tree [value]
-  [ins/with-collection value
-   [theme/cycle-rainbow
-    [s/div
-     {:style {:width :auto}}
-     (cond
-       (map? value)  [inspect-tree-map value]
-       (coll? value) [inspect-tree-coll value]
-       :else         [ins/inspector value])]]])
-
-(defn inspect-tree-1 [value]
-  [inspect-tree-item
-   {:value value
-    :value-child [inspect-tree value]}])
+          [select/with-position
+           {:row idx :column 0}
+           [ins/inspector item]]])
+       value)]]]])
 
 (defn tree [value]
-  [ins/inc-depth [inspect-tree-1 value]])
+  [ins/inc-depth
+   (cond
+     (map? value)  [inspect-tree-map value]
+     (coll? value) [inspect-tree-coll value])])
 
 (def viewer
   {:predicate ins/coll?
