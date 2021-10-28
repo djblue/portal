@@ -246,9 +246,7 @@
      {:style {:display :flex :align-items :center}}
      [tagged-tag tag]
      [s/div {:style {:margin-left (:padding theme)}}
-      [s/div
-       {:style {:margin (* -1 (:padding theme))}}
-       [inspector value]]]]))
+      [select/with-position {:row 0 :column 0} [inspector value]]]]))
 
 (defn- preview-coll [open close]
   (fn [value]
