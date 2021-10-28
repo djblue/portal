@@ -1,5 +1,4 @@
 (ns portal.runtime
-  #?(:cljs (:require-macros portal.runtime))
   (:refer-clojure :exclude [read])
   (:require [clojure.datafy :refer [datafy nav]]
             [portal.runtime.cson :as cson]
