@@ -96,107 +96,66 @@
        {:style {:color (::c/exception theme)}}
        "ERROR: Disconnected from runtime!"])))
 
-(defn inspect-1 [value]
+(defn inspect-footer []
   (let [theme (theme/use-theme)
         state (state/use-state)
-        ref   (react/useRef)
-
         selected-context (state/get-selected-context @state)
         viewer           (ins/get-viewer state selected-context)
         compatible-viewers (ins/get-compatible-viewers
                             @ins/viewers
                             (:value selected-context))]
-    (react/useEffect
-     (fn []
-       (when-let [el (.-current ref)]
-         (state/dispatch! state assoc :scroll-element el)))
-     #js [(.-current ref)])
     [s/div
      {:style
-      {:height "calc(100vh - 64px)"
-       :display :flex
-       :flex-direction :column}}
-     [s/div
-      {:style
-       {:flex "1"
-        :position :relative
-        :min-width "100%"
-        :box-sizing :border-box}}
-      [s/div
-       {:ref ref
-        :on-click #(state/dispatch! state state/clear-selected)
-        :style
-        {:position :absolute
-         :top 0
-         :left 0
-         :right 0
-         :bottom 0
-         :overflow :auto
-         :box-sizing :border-box}}
-       [s/div
-        {:style {:min-width :fit-content}}
-        [s/div
-         {:style
-          {:min-width :fit-content
-           :box-sizing :border-box
-           :padding (* 2 (:padding theme))}}
-         [:> ins/error-boundary
-          [select/with-position
-           {:row 0 :column 0}
-           [ins/inspector value]]]]]]]
-     [s/div
-      {:style
-       {:display :flex
-        :min-height 63
-        :align-items :center
-        :justify-content :space-between
-        :background (::c/background2 theme)
-        :box-sizing :border-box
+      {:display :flex
+       :padding-top (:padding theme)
+       :padding-bottom (:padding theme)
+       :padding-right (* 1.5 (:padding theme))
+       :padding-left (* 1.5 (:padding theme))
+       :align-items :stretch
+       :justify-content :space-between
+       :background (::c/background2 theme)
+       :box-sizing :border-box
+       :border-top [1 :solid (::c/border theme)]}}
+     [s/select
+      {:title "Select a different viewer."
+       :value (pr-str (:name viewer))
+       :on-change
+       (fn [e]
+         (ins/set-viewer!
+          state
+          selected-context
+          (keyword (.substr (.. e -target -value) 1))))
+       :style
+       {:background (::c/background theme)
         :padding (:padding theme)
-        :border-top [1 :solid (::c/border theme)]}}
-      (when-not (empty? compatible-viewers)
-        [s/select
-         {:title "Select a different viewer."
-          :value (pr-str (:name viewer))
-          :on-change
-          (fn [e]
-            (ins/set-viewer!
-             state
-             selected-context
-             (keyword (.substr (.. e -target -value) 1))))
-          :style
-          {:background (::c/background theme)
-           :padding (:padding theme)
-           :box-sizing :border-box
-           :font-family (:font-family theme)
-           :font-size (:font-size theme)
-           :color (::c/text theme)
-           :border-radius (:border-radius theme)
-           :border [1 :solid (::c/border theme)]}}
-         (for [{:keys [name]} compatible-viewers]
-           ^{:key name}
-           [s/option {:value (pr-str name)} (pr-str name)])])
-      [runtime-info]
-      [s/button
-       {:title    "Open command palette."
-        :on-click #(commands/open-command-palette state)
-        :style
-        {:min-width 60
-         :font-family (:font-family theme)
-         :background (::c/background theme)
-         :border-radius (:border-radius theme)
-         :border [1 :solid (::c/border theme)]
-         :box-sizing :border-box
-         :padding-top (:padding theme)
-         :padding-bottom (:padding theme)
-         :padding-left (:padding theme)
-         :padding-right (* 1 (:padding theme))
-         :color (::c/tag theme)
-         :font-size (:font-size theme)
-         :font-weight :bold
-         :cursor :pointer}}
-       [icons/terminal]]]
-     [selected-context-view]]))
+        :box-sizing :border-box
+        :font-family (:font-family theme)
+        :font-size (:font-size theme)
+        :color (::c/text theme)
+        :border-radius (:border-radius theme)
+        :border [1 :solid (::c/border theme)]}}
+      (for [{:keys [name]} compatible-viewers]
+        ^{:key name}
+        [s/option {:value (pr-str name)} (pr-str name)])]
+     [runtime-info]
+     [s/button
+      {:title    "Open command palette."
+       :on-click #(commands/open-command-palette state)
+       :style
+       {:font-family (:font-family theme)
+        :background (::c/background theme)
+        :border-radius (:border-radius theme)
+        :border [1 :solid (::c/border theme)]
+        :box-sizing :border-box
+        :padding-top (:padding theme)
+        :padding-bottom (:padding theme)
+        :padding-left (* 2.5 (:padding theme))
+        :padding-right (* 2.5 (:padding theme))
+        :color (::c/tag theme)
+        :font-size (:font-size theme)
+        :font-weight :bold
+        :cursor :pointer}}
+      [icons/terminal]]]))
 
 (defn search-input []
   (let [theme    (theme/use-theme)
@@ -243,10 +202,10 @@
      :font-size (:font-size theme)
      :font-family "Arial"
      :box-sizing :border-box
-     :padding-left (inc (:padding theme))
-     :padding-right (inc (:padding theme))
-     :padding-top (inc (:padding theme))
-     :padding-bottom (inc (:padding theme))
+     :padding-left (:padding theme)
+     :padding-right (:padding theme)
+     :padding-top (:padding theme)
+     :padding-bottom (:padding theme)
      :border-radius (:border-radius theme)
      :cursor :pointer}))
 
@@ -257,13 +216,14 @@
      {:style
       {:display :grid
        :grid-template-columns "auto auto 1fr auto"
-       :padding-left (* 2 (:padding theme))
-       :padding-right (* 2 (:padding theme))
        :box-sizing :border-box
-       :grid-gap (* 2 (:padding theme))
-       :height 63
+       :padding-top (:padding theme)
+       :padding-bottom (:padding theme)
+       :padding-right (* 1.5 (:padding theme))
+       :padding-left (* 1.5 (:padding theme))
+       :grid-gap (* 1.5 (:padding theme))
        :background (::c/background2 theme)
-       :align-items :center
+       :align-items :stretch
        :justify-content :center
        :border-top [1 :solid (::c/border theme)]
        :border-bottom [1 :solid (::c/border theme)]}}
@@ -295,9 +255,55 @@
        :on-click #(state/dispatch! state state/clear)
        :style    (merge
                   (button-styles)
-                  {:padding-left (* 2 (:padding theme))
-                   :padding-right (* 2 (:padding theme))})}
+                  {:padding-left (* 2.5 (:padding theme))
+                   :padding-right (* 2.5 (:padding theme))})}
       "clear"]]))
+
+(defn inspect-1 [value]
+  (let [theme (theme/use-theme)
+        state (state/use-state)
+        ref   (react/useRef)]
+    (react/useEffect
+     (fn []
+       (when-let [el (.-current ref)]
+         (state/dispatch! state assoc :scroll-element el)))
+     #js [(.-current ref)])
+    [s/div
+     {:style
+      {:height "100vh"
+       :display :flex
+       :flex-direction :column}}
+     [toolbar]
+     [s/div
+      {:style
+       {:flex "1"
+        :position :relative
+        :min-width "100%"
+        :box-sizing :border-box}}
+      [s/div
+       {:ref ref
+        :on-click #(state/dispatch! state state/clear-selected)
+        :style
+        {:position :absolute
+         :top 0
+         :left 0
+         :right 0
+         :bottom 0
+         :overflow :auto
+         :box-sizing :border-box}}
+       [s/div
+        {:style {:min-width :fit-content}}
+        [s/div
+         {:style
+          {:min-width :fit-content
+           :box-sizing :border-box
+           :padding (* 2 (:padding theme))}}
+         [:> ins/error-boundary
+          [select/with-position
+           {:row 0 :column 0}
+           [ins/inspector value]]]]]]]
+     [inspect-footer]
+     [selected-context-view]]))
 
 (defn scrollbars []
   (let [thumb "rgba(0,0,0,0.3)"]
@@ -392,11 +398,9 @@
 
 (defn app [value]
   [root
-   [toolbar]
-   [s/div {:style {:height "calc(100vh - 64px)" :width "100vw"}}
-    [s/div
-     {:style
-      {:width "100%"
-       :height "100%"
-       :display :flex}}
-     [inspect-1-history value]]]])
+   [s/div
+    {:style
+     {:width "100%"
+      :height "100%"
+      :display :flex}}
+    [inspect-1-history value]]])
