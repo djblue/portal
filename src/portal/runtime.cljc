@@ -121,7 +121,7 @@
   (if (no-cache value)
     value
     (if-let [id (value->id? value)]
-      (cson/->Tagged "ref" id)
+      (cson/tagged-value "ref" id)
       (vary-meta value
                  merge
                  (cond-> {::id (value->id value)}
@@ -149,7 +149,7 @@
        (fn [value]
          (case (first value)
            "ref"    (ref-> value)
-           (cson/->Tagged (first value) (cson/json-> (second value)))))}))))
+           (cson/tagged-value (first value) (cson/json-> (second value)))))}))))
 
 (defonce tap-list (atom (list)))
 

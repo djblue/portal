@@ -2,13 +2,11 @@
   (:refer-clojure :exclude [read]))
 
 (defn write [value]
-  (#?(:bb   cheshire.core/generate-string
-      :clj  (requiring-resolve 'clojure.data.json/write-str)
-      :cljs #(.stringify js/JSON %))
-   value))
+  #?(:bb   (cheshire.core/generate-string value)
+     :clj  ((requiring-resolve 'clojure.data.json/write-str) value)
+     :cljs (.stringify js/JSON value)))
 
 (defn read [string]
-  (#?(:bb   cheshire.core/parse-string
-      :clj  (requiring-resolve 'clojure.data.json/read-str)
-      :cljs #(.parse js/JSON %))
-   string))
+  #?(:bb   (cheshire.core/parse-string string)
+     :clj  ((requiring-resolve 'clojure.data.json/read-str) string)
+     :cljs (.parse js/JSON string)))
