@@ -115,6 +115,9 @@
 
 (defn get-value-type [value]
   (cond
+    (tagged-literal? value)
+    :tagged
+
     (cson/tagged-value? value)
     (:tag value)
 
@@ -234,19 +237,25 @@
        [s/div {:style {:flex 1}}
         [diff-added added]])]))
 
-(defn- tagged-tag [tag]
-  (let [theme (theme/use-theme)]
-    [s/div
-     [s/span {:style {:color (::c/tag theme)}} "#"]
-     tag]))
-
 (defn- tagged-value [tag value]
-  (let [theme (theme/use-theme)]
+  (let [theme (theme/use-theme)
+        depth (dec (use-depth))]
     [s/div
      {:style {:display :flex :align-items :center}}
-     [tagged-tag tag]
-     [s/div {:style {:margin-left (:padding theme)}}
-      [select/with-position {:row 0 :column 0} [inspector value]]]]))
+     [s/div
+      {:style {:display :flex
+               :align-items :center}}
+      [s/span {:style {:color (::c/tag theme)}} "#"]
+      [with-readonly [inspector tag]]]
+     [s/div {:style
+             {:flex "1"
+              :margin-left (:padding theme)}}
+      [with-key
+       tag
+       [select/with-position {:row 0 :column 0}
+        [with-context
+         {:depth depth}
+         [inspector value]]]]]]))
 
 (defn- preview-coll [open close]
   (fn [value]
@@ -262,9 +271,6 @@
 (def ^:private preview-vector (preview-coll "[" "]"))
 (def ^:private preview-list   (preview-coll "(" ")"))
 (def ^:private preview-set    (preview-coll "#{" "}"))
-
-(defn preview-tagged [value]
-  [tagged-tag (.-tag value)])
 
 (defn- coll-action [props]
   (let [theme (theme/use-theme)]
@@ -526,10 +532,10 @@
      (name value)]))
 
 (defn- inspect-date [value]
-  [tagged-value "inst" (.toJSON value)])
+  [tagged-value 'inst (.toJSON value)])
 
 (defn- inspect-uuid [value]
-  [tagged-value "uuid" (str value)])
+  [tagged-value 'uuid (str value)])
 
 (defn- get-var-symbol [value]
   (if (rpc/runtime-object? value)
@@ -553,7 +559,7 @@
      value]))
 
 (defn- inspect-tagged [value]
-  [tagged-value (.-tag value) (.-rep value)])
+  [tagged-value (:tag value) (:form value)])
 
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
@@ -591,7 +597,7 @@
     :uuid       inspect-uuid
     :var        inspect-var
     :uri        inspect-uri
-    :tagged     preview-tagged
+    :tagged     inspect-tagged
     "long"      inspect-long
     inspect-object))
 

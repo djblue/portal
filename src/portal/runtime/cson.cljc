@@ -367,6 +367,18 @@
   #?(:clj  (Long/parseLong (second value))
      :cljs (tagged-value "long" (second value))))
 
+#?(:bb (def clojure.lang.TaggedLiteral (type (tagged-literal 'a :a))))
+
+(extend-type #?(:clj  clojure.lang.TaggedLiteral
+                :cljs cljs.core/TaggedLiteral)
+  ToJson
+  (-to-json [value]
+    (tag "tag" (str (:tag value)) (to-json (:form value)))))
+
+(defn tag-> [value]
+  (let [[_ tag value] value]
+    (tagged-literal (symbol tag) (json-> value))))
+
 (defn- dispatch-value [value]
   (case (first value)
     "bigint"  (bigint-> value)
@@ -382,6 +394,7 @@
     "url"     (url-> value)
     "uuid"    (uuid-> value)
     "vec"     (vec-> value)
+    "tag"     (tag-> value)
     "long"    (long-> value)
     ((:default-handler *options*) value)))
 

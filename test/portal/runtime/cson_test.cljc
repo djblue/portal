@@ -5,7 +5,9 @@
             [cognitect.transit :as transit]
             [portal.bench :as b]
             [portal.runtime.cson :as cson])
-  #?(:clj (:import [java.io ByteArrayOutputStream ByteArrayInputStream])))
+  #?(:clj (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
+                   [java.util Date]
+                   [java.util UUID])))
 
 (defn- transit-read [^String string]
   #?(:clj  (-> string
@@ -109,15 +111,16 @@
     #{0}
     {0 0}))
 
-#?(:clj (defn random-uuid []
-          (java.util.UUID/randomUUID)))
+(def tagged
+  [#?(:clj  (Date.)
+      :cljs (js/Date.))
+   #?(:clj  (UUID/randomUUID)
+      :cljs (random-uuid))
+   (tagged-literal 'tag :value)])
 
 (deftest tagged-objects
-  (let [inst #?(:clj  (java.util.Date.)
-                :cljs (js/Date.))]
-    (is (= inst (pass inst))))
-  (let [inst (random-uuid)]
-    (is (= inst (pass inst)))))
+  (doseq [value tagged]
+    (is (= value (pass value)))))
 
 (deftest metadata
   (doseq [value ['hello {} [] #{}]]

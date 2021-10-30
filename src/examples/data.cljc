@@ -4,6 +4,7 @@
             [portal.colors :as c]
             [examples.hacker-news :as hn])
   #?(:clj (:import [java.io File ByteArrayOutputStream]
+                   [java.util Date]
                    [java.net URI]
                    [java.util UUID])))
 
@@ -24,7 +25,7 @@
            ::user-exception (Exception. "hi")
            ::ex-info (ex-info "My message" {:my :data})
            ::uuid (UUID/randomUUID)
-           ::date (java.util.Date.)
+           ::date (Date.)
            ::binary (slurp-bytes (io/resource "screenshot.png"))
            ::bigint 42N}
      :cljs {::promise (js/Promise.resolve 123)
@@ -53,6 +54,7 @@
   {::regex #"hello-world"
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
+   ::tagged (tagged-literal 'my/tag ["hello, world"])
    {:example/settings 'complex-key} :hello-world
    ::atom (atom ::hello)
    ::function println
