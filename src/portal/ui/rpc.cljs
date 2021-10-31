@@ -17,7 +17,14 @@
   IWithMeta
   (-with-meta [_this m]
     (RuntimeObject.
-     (assoc object :meta m))))
+     (assoc object :meta m)))
+
+  IHash
+  (-hash [_] (hash object))
+
+  IPrintWithWriter
+  (-pr-writer [_o writer _opts]
+    (-write writer (str "#portal/runtime " (pr-str object)))))
 
 (defn runtime-object? [value]
   (instance? RuntimeObject value))
@@ -93,7 +100,7 @@
 (defn- ws-request [message]
   (js/Promise.
    (fn [resolve reject]
-     (let [id (next-id)]
+     (let [id (:portal.rpc/id message)]
        (swap! pending-requests assoc id [resolve reject])
        (send! (assoc message :portal.rpc/id id))))))
 
@@ -107,26 +114,23 @@
            resolve)
        (catch :default e (reject e))))))
 
-(def request (if js/window.opener web-request ws-request))
+(defn request [message]
+  (let [message (assoc message :portal.rpc/id (next-id))]
+    ;; (tap> (assoc me ssage :type :request))
+    ((if js/window.opener web-request ws-request) message)))
 
 (defonce ^:private versions (r/atom {}))
 
 (defn use-invoke [f & args]
   (let [[value set-value!] (react/useState ::loading)
-        versions           (.from
-                            js/Array
-                            (map
-                             (fn [value]
-                               (get @versions
-                                    value
-                                    (if (= value ::loading) -1 0)))
-                             args))]
+        versions           (for [arg args]
+                             (str (hash arg) (get @versions arg)))]
     (react/useEffect
      (fn []
        (when (not-any? #{::loading} args)
          (-> (apply state/invoke f args)
              (.then #(set-value! %)))))
-     versions)
+     (.from js/Array versions))
     value))
 
 (def ^:private ops
@@ -164,6 +168,7 @@
        :portal.rpc/id (:portal.rpc/id message)}))})
 
 (defn- dispatch [message send!]
+  ;; (tap> (assoc message :type :response))
   (when-let [f (get ops (:op message))] (f message send!)))
 
 (defn ^:export handler [request]

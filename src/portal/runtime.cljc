@@ -76,14 +76,15 @@
 
 (defn- to-object [value tag rep]
   (when (atom? value) (watch-atom value))
-  (cson/tag
-   "object"
-   (cson/to-json
-    {:id     (value->id value)
-     :type   (pr-str (type value))
-     :tag    tag
-     :rep    rep
-     :meta   (meta value)})))
+  (let [m (meta value)]
+    (cson/tag
+     "object"
+     (cson/to-json
+      (cond-> {:id     (value->id value)
+               :type   (pr-str (type value))
+               :tag    tag}
+        m   (assoc :meta m)
+        rep (assoc :rep rep))))))
 
 (extend-type #?(:clj Object :cljs default)
   cson/ToJson
