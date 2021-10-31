@@ -156,12 +156,17 @@
       [icons/terminal]]]))
 
 (defn search-input []
-  (let [theme    (theme/use-theme)
+  (let [ref      (react/useRef nil)
+        theme    (theme/use-theme)
         state    (state/use-state)
         context  (state/get-selected-context @state)
         location (state/get-location context)]
+    (react/useEffect
+     (fn []
+       (state/dispatch! state assoc :filter-input (.-current ref)))
+     #js [(.-current ref)])
     [s/input
-     {:ref commands/filter-input
+     {:ref ref
       :disabled  (nil? context)
       :on-change #(let [value (.-value (.-target %))]
                     (when context

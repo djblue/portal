@@ -644,10 +644,8 @@
   (when-let [path (state/get-path @state)]
     (copy-edn! path)))
 
-(def filter-input (react/createRef))
-
-(defn ^:command focus-filter [_]
-  (when-let [input (.-current filter-input)]
+(defn ^:command focus-filter [state]
+  (when-let [input (:filter-input @state)]
     (.focus input)))
 
 (defn ^:command scroll-top [state]
