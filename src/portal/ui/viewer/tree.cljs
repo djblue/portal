@@ -105,7 +105,6 @@
          :value-child child}]])))
 
 (defn- inspect-tree-map [value]
-  (select/use-register-context (ins/use-context) :portal.viewer/tree)
   (let [theme (theme/use-theme)]
     [with-tree-item
      [theme/cycle-rainbow
@@ -133,7 +132,6 @@
          (ins/try-sort-map value))]]]]))
 
 (defn- inspect-tree-coll [value]
-  (select/use-register-context (ins/use-context) :portal.viewer/tree)
   [with-tree-item
    [theme/cycle-rainbow
     [ins/with-collection value
