@@ -633,7 +633,7 @@
   "Set the viewer for the currently selected value."
   [state]
   (when-let [selected-context (state/get-selected-context @state)]
-    (let [viewers (ins/get-compatible-viewers @ins/viewers (:value selected-context))]
+    (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
       (when (> (count viewers) 1)
         (a/let [[selected-viewer] (pick-one (map :name viewers))]
           (ins/set-viewer! state selected-context selected-viewer))))))

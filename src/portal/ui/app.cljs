@@ -101,9 +101,7 @@
         state (state/use-state)
         selected-context (state/get-selected-context @state)
         viewer           (ins/get-viewer state selected-context)
-        compatible-viewers (ins/get-compatible-viewers
-                            @ins/viewers
-                            (:value selected-context))]
+        compatible-viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
     [s/div
      {:style
       {:display :flex

@@ -55,9 +55,11 @@
 (defn viewers-by-name [viewers]
   (into {} (map (juxt :name identity) viewers)))
 
-(defn get-compatible-viewers [viewers value]
+(defn get-compatible-viewers [viewers {:keys [value] :as context}]
   (let [by-name        (viewers-by-name viewers)
-        default-viewer (get by-name (:portal.viewer/default (meta value)))
+        default-viewer (get by-name
+                            (or (:portal.viewer/default (meta value))
+                                (:portal.viewer/default context)))
         viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
 
@@ -65,7 +67,7 @@
   (if-let [selected-viewer
            (get-in @state [:selected-viewers (state/get-location context)])]
     (some #(when (= (:name %) selected-viewer) %) @viewers)
-    (first (get-compatible-viewers @viewers (:value context)))))
+    (first (get-compatible-viewers @viewers context))))
 
 (defn set-viewer! [state context viewer-name]
   (state/dispatch! state
@@ -94,6 +96,9 @@
     (into
      [:r> (.-Provider inspector-context)
       #js {:value (merge context value)}] children)))
+
+(defn with-default-viewer [viewer & children]
+  (into [with-context {:portal.viewer/default viewer}] children))
 
 (defn with-collection [coll & children]
   (into [with-context
