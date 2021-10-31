@@ -1,4 +1,5 @@
 (ns portal.ui.inspector
+  (:refer-clojure :exclude [coll? map?])
   (:require ["react" :as react]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
@@ -112,6 +113,14 @@
 (defn url? [value] (instance? js/URL value))
 (defn bin? [value] (instance? js/Uint8Array value))
 (defn bigint? [value] (= (type value) js/BigInt))
+
+(defn coll? [value]
+  (and (clojure.core/coll? value)
+       (not (cson/tagged-value? value))))
+
+(defn map? [value]
+  (and (clojure.core/map? value)
+       (not (cson/tagged-value? value))))
 
 (defn get-value-type [value]
   (cond

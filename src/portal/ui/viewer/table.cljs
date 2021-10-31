@@ -177,10 +177,10 @@
          (every? vector? value))
     inspect-vector-table
 
-    (and (map? value) (every? map? (vals value)))
+    (and (ins/map? value) (every? ins/map? (vals value)))
     inspect-map-table
 
-    (and (coll? value) (every? map? value))
+    (and (ins/coll? value) (every? ins/map? value))
     inspect-coll-table))
 
 (defn table-view? [value] (some? (get-component value)))

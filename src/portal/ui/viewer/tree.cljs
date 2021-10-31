@@ -139,6 +139,6 @@
   [ins/inc-depth [inspect-tree-1 value]])
 
 (def viewer
-  {:predicate coll?
+  {:predicate ins/coll?
    :component tree
    :name :portal.viewer/tree})
