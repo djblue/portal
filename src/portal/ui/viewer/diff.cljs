@@ -1,6 +1,7 @@
 (ns portal.ui.viewer.diff
   (:require [lambdaisland.deep-diff2 :refer [diff]]
             [lambdaisland.deep-diff2.diff-impl :as diff]
+            [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]))
 
 (defn diff? [value]
@@ -25,3 +26,12 @@
   {:predicate can-view?
    :component inspect-diff
    :name :portal.viewer/diff})
+
+(let [var  #'diff
+      name (#'commands/var->name var)]
+  (swap! commands/registry
+         assoc name (commands/make-command
+                     (merge (meta var)
+                            {:predicate (fn [& args] (= 2 (count args)))
+                             :f var
+                             :name name}))))

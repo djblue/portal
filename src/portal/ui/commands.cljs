@@ -444,24 +444,24 @@
                          :on-click on-click}]]])))
                 doall)]]]))))
 
-(defn- empty-args [_] nil)
-
 (defn make-command [{:keys [name command predicate args f] :as opts}]
-  (let [predicate (or predicate (constantly true))]
-    (assoc opts
-           :predicate (comp predicate state/get-selected-value)
-           :run (fn [state]
-                  (a/let [v      (state/get-selected-value @state)
-                          args   ((or args empty-args) v)
-                          result (apply f v args)]
-                    (when-not command
-                      (state/dispatch!
-                       state
-                       state/history-push
-                       {:portal/key name
-                        :portal/f f
-                        :portal/args args
-                        :portal/value result})))))))
+  (assoc opts
+         :predicate (fn [state]
+                      (if-not predicate
+                        true
+                        (apply predicate (state/selected-values state))))
+         :run (fn [state]
+                (a/let [selected (state/selected-values @state)
+                        args     (when args (apply args selected))
+                        result   (apply f (concat selected args))]
+                  (when-not command
+                    (state/dispatch!
+                     state
+                     state/history-push
+                     {:portal/key   name
+                      :portal/f     f
+                      :portal/args  args
+                      :portal/value result}))))))
 
 (defn- command-item [command {:keys [active?]}]
   (let [theme (theme/use-theme)]
@@ -742,7 +742,12 @@
    #'clojure.core/get         {:predicate map? :args (comp pick-one keys)}
    #'clojure.core/get-in      {:predicate map? :args pick-in}
    #'clojure.core/select-keys {:predicate map? :args (comp pick-many keys)}
-   #'clojure.core/dissoc      {:predicate map? :args (comp then-first pick-many keys)}})
+   #'clojure.core/dissoc      {:predicate map? :args (comp then-first pick-many keys)}
+   #'clojure.core/vector      {}
+   #'clojure.core/str         {}
+   #'clojure.core/concat      {:predicate (fn [& args] (every? coll? args))}
+   #'clojure.core/contains?   {:predicate (fn [coll & args]
+                                            (and (coll? coll) (= (count args) 1)))}})
 
 (def portal-data-commands
   {#'transpose-map  {:predicate map-of-maps

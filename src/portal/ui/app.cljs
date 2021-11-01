@@ -180,7 +180,7 @@
                            (assoc filters location value))))))
       :on-key-down (fn [e]
                      (when (= (.-key e) "Enter")
-                       (ins/focus-selected)))
+                       (.blur (.-current ref))))
       :value (get-in @state [:search-text location] "")
       :placeholder (if-not context
                      "Select a value to enable filtering"

@@ -33,13 +33,36 @@
   (into [:r> (.-Provider state-context) #js {:value state}] children))
 
 (defn get-selected-context [state]
-  (or (:selected state)
-      (when (contains? state :portal/value)
-        {:depth 1
-         :path []
-         :value (:portal/value state)})))
+  (if-let [selected (:selected state)]
+    (first selected)
+    (when (contains? state :portal/value)
+      {:depth 1
+       :path []
+       :value (:portal/value state)})))
 
 (defn get-selected-value [state] (:value (get-selected-context state)))
+
+(defn selected-values [state] (map :value (:selected state)))
+
+(defn select-context
+  ([state context]
+   (select-context state context false))
+  ([state context multi?]
+   (if-not multi?
+     (assoc state :selected [context])
+     (update state :selected conj context))))
+
+(defn deselect-context
+  [state context multi?]
+  (if-not multi?
+    (dissoc state :selected)
+    (update state :selected #(remove #{context} %))))
+
+(defn selected [state context]
+  (some (fn [[index context']]
+          (when (= context' context)
+            index))
+        (map-indexed vector (:selected state))))
 
 (defn get-location
   "Get a stable location for a given context."
@@ -79,13 +102,13 @@
              (take 100 (conj (remove #{entry} (::previous-commands state)) entry))))))
 
 (defn history-push [state {:portal/keys [key value f] :as entry}]
-  (assoc (push-command state entry)
-         :portal/previous-state state
-         :portal/next-state nil
-         :selected nil
-         :portal/key   key
-         :portal/f     f
-         :portal/value value))
+  (-> (push-command state entry)
+      (assoc
+       :portal/previous-state state
+       :portal/key   key
+       :portal/f     f
+       :portal/value value)
+      (dissoc :portal/next-state :selected)))
 
 (defn toggle-expand [state context]
   (let [expanded? (get state :expanded? #{})
@@ -99,12 +122,12 @@
   (history-push state {:portal/value (:value context)}))
 
 (defn select-prev [state context]
-  (if-let [next (or (select/get-prev context)
+  (if-let [prev (or (select/get-prev context)
                     (-> context
                         select/get-parent
                         select/get-prev
                         select/get-child))]
-    (assoc state :selected next)
+    (select-context state prev)
     state))
 
 (defn select-next [state context]
@@ -113,19 +136,19 @@
                         select/get-parent
                         select/get-next
                         select/get-child))]
-    (assoc state :selected next)
+    (select-context state next)
     state))
 
 (defn select-parent [state context]
   (if-let [parent (or (select/get-left context)
                       (select/get-parent context))]
-    (assoc state :selected parent)
+    (select-context state parent)
     state))
 
 (defn select-child [state context]
   (if-let [child (or (select/get-right context)
                      (select/get-child context))]
-    (assoc state :selected child)
+    (select-context state child)
     state))
 
 (defn get-path [state]

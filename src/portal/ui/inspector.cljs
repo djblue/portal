@@ -164,11 +164,14 @@
 (declare inspector)
 (declare preview)
 
-(defn get-background []
-  (let [theme (theme/use-theme)]
-    (if (even? (use-depth))
-      (::c/background theme)
-      (::c/background2 theme))))
+(defn get-background
+  ([]
+   (get-background (use-depth)))
+  ([depth]
+   (let [theme (theme/use-theme)]
+     (if (even? depth)
+       (::c/background theme)
+       (::c/background2 theme)))))
 
 (defn tabs [value]
   (let [theme   (theme/use-theme)
@@ -640,18 +643,13 @@
     inspect-object))
 
 (defn get-info [state context]
-  (let [{:keys [search-text selected expanded?]} @state
+  (let [{:keys [search-text expanded?]} @state
         location (state/get-location context)]
-    {:selected? (= selected context)
+    {:selected  (state/selected @state context)
      :expanded? (contains? expanded? location)
      :viewer    (get-viewer state context)
      :value     (f/filter-value (:value context)
                                 (get search-text location ""))}))
-
-(def ^:private selected-ref (atom nil))
-
-(defn focus-selected []
-  (some-> selected-ref deref .-current .focus))
 
 (defn inspector [value]
   (let [ref   (react/useRef nil)
@@ -661,7 +659,7 @@
             (assoc :value value)
             (update :depth inc))
         location (state/get-location context)
-        {:keys [value viewer selected? expanded?]}
+        {:keys [value viewer selected expanded?]}
         @(r/track get-info state context)]
     (select/use-register-context context viewer)
     [with-context
@@ -679,27 +677,24 @@
                         (get-inspect-component type)))]
        (react/useEffect
         (fn []
-          (when (and selected?
+          (when (and selected
                      (not= (.. js/document -activeElement -tagName) "INPUT"))
-            (reset! selected-ref ref)
-            (some-> ref .-current .focus)))
-        #js [selected? (.-current ref)])
+            (when-let [el (.-current ref)]
+              (.scrollIntoView el #js {:block "nearest" :behavior "smooth"}))))
+        #js [selected (.-current ref)])
        [s/div
         (merge
          (when-not (:readonly? context)
-           {:tab-index 0
-            :on-focus
-            (fn [e]
-              (when-not selected?
-                (state/dispatch! state assoc :selected context))
-              (.stopPropagation e))
-            :on-mouse-down
+           {:on-mouse-down
             (fn [e]
               (when (= (.-button e) 1)
                 (state/dispatch! state state/toggle-expand location)
                 (.stopPropagation e)))
             :on-click
             (fn [e]
+              (if selected
+                (state/dispatch! state state/deselect-context context (.-metaKey e))
+                (state/dispatch! state state/select-context context (.-metaKey e)))
               (.stopPropagation e))
             :on-double-click
             (fn [e]
@@ -710,10 +705,12 @@
           :style
           {:width "100%"
            :border-radius (:border-radius theme)
-           :border (if selected?
-                     [1 :solid "#D8DEE999"]
+           :border (if selected
+                     [1 :solid (get theme (nth theme/order selected))]
                      [1 :solid "rgba(0,0,0,0)"])
-           :background (when selected? "rgba(0,0,0,0.15)")}})
+           :box-shadow (when selected [0 0 3 (get theme (nth theme/order selected))])
+           :background (let [bg (get-background (inc depth))]
+                         (when selected bg))}})
         [:> error-boundary [component value]]])]))
 
 (def viewer

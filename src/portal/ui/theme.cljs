@@ -31,8 +31,8 @@
 
 (defn use-theme [] (react/useContext theme))
 
-(defonce ^:private order
-  (cycle [::c/exception ::c/keyword ::c/string ::c/tag ::c/number ::c/uri]))
+(defonce order
+  (cycle [::c/diff-remove ::c/diff-add ::c/keyword ::c/tag ::c/number ::c/uri]))
 
 (defonce ^:private rainbow
   (react/createContext order))
