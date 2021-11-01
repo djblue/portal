@@ -515,7 +515,7 @@
 
       (or (< (count value) limit)
           (= (:depth context) 1)
-          (contains? expanded? (state/get-location context)))
+          (get expanded? (state/get-location context)))
       [s/span {:style {:color (::c/string theme)}}
        (pr-str value)]
 
@@ -589,7 +589,7 @@
                {:color (::c/text theme)}}
        (if (or (< (count string) limit)
                (= (:depth context) 1)
-               (contains? expanded? (state/get-location context)))
+               (get expanded? (state/get-location context)))
          string
          (trim-string string limit))])))
 
