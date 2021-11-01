@@ -646,7 +646,7 @@
   (let [{:keys [search-text expanded?]} @state
         location (state/get-location context)]
     {:selected  (state/selected @state context)
-     :expanded? (contains? expanded? location)
+     :expanded? (get expanded? location)
      :viewer    (get-viewer state context)
      :value     (f/filter-value (:value context)
                                 (get search-text location ""))}))
@@ -666,8 +666,9 @@
      context
      (let [theme (theme/use-theme)
            depth (use-depth)
-           preview? (and (not expanded?)
-                         (> depth (:max-depth theme)))
+           default-expand (<= depth (:max-depth theme))
+           expanded? (if-not (nil? expanded?) expanded? default-expand)
+           preview?  (not expanded?)
            type (get-value-type value)
            component (or
                       (when-not (= (:name viewer) :portal.viewer/inspector)
@@ -675,6 +676,12 @@
                       (if preview?
                         (get-preview-component type)
                         (get-inspect-component type)))]
+       (react/useEffect
+        (fn []
+          (when selected
+            (state/dispatch! state assoc-in [:default-expand location] default-expand)
+            #(state/dispatch! state update :default-expand dissoc location)))
+        #js [selected])
        (react/useEffect
         (fn []
           (when (and selected

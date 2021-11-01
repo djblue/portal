@@ -111,12 +111,11 @@
       (dissoc :portal/next-state :selected)))
 
 (defn toggle-expand [state context]
-  (let [expanded? (get state :expanded? #{})
-        location  (get-location context)]
-    (assoc state :expanded?
-           (if (contains? expanded? location)
-             (disj expanded? location)
-             (conj expanded? location)))))
+  (let [location (get-location context)
+        default  (get-in state [:default-expand location])]
+    (update-in state [:expanded? location]
+               (fn [value]
+                 (not (if (nil? value) default value))))))
 
 (defn focus-selected [state context]
   (history-push state {:portal/value (:value context)}))
