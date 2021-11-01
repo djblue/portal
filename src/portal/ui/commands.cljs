@@ -747,7 +747,8 @@
    #'clojure.core/str         {}
    #'clojure.core/concat      {:predicate (fn [& args] (every? coll? args))}
    #'clojure.core/contains?   {:predicate (fn [coll & args]
-                                            (and (coll? coll) (= (count args) 1)))}})
+                                            (and (coll? coll) (= (count args) 1)))}
+   #'clojure.core/merge       {:predicate (fn [& args] (every? map? args))}})
 
 (def portal-data-commands
   {#'transpose-map  {:predicate map-of-maps
