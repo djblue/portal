@@ -48,6 +48,12 @@
   diff/Mismatch
   (-to-json [this] (-tag "diff/Mismatch" ((juxt :- :+) this))))
 
+(when (exists? js/BigInt)
+  (extend-type js/BigInt
+    IHash
+    (-hash [this]
+      (hash (.toString this)))))
+
 (defn diff-> [value]
   (case (first value)
     "diff/Deletion"  (diff/Deletion.  (cson/json-> (second value)))
