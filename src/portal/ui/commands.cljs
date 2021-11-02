@@ -733,16 +733,21 @@
 
 (defn- then-first [value] (.then value first))
 
+(defn- when-one [f]
+  (fn [& args]
+    (when (= (count args) 1)
+      (f (first args)))))
+
 (def clojure-commands
   {#'clojure.core/vals        {:predicate map?}
    #'clojure.core/keys        {:predicate map?}
    #'clojure.core/count       {:predicate #(or (coll? %) (string? %))}
    #'clojure.core/first       {:predicate coll?}
    #'clojure.core/rest        {:predicate coll?}
-   #'clojure.core/get         {:predicate map? :args (comp pick-one keys)}
-   #'clojure.core/get-in      {:predicate map? :args pick-in}
-   #'clojure.core/select-keys {:predicate map? :args (comp pick-many keys)}
-   #'clojure.core/dissoc      {:predicate map? :args (comp then-first pick-many keys)}
+   #'clojure.core/get         {:predicate map? :args (when-one (comp pick-one keys))}
+   #'clojure.core/get-in      {:predicate map? :args (when-one pick-in)}
+   #'clojure.core/select-keys {:predicate map? :args (when-one (comp pick-many keys))}
+   #'clojure.core/dissoc      {:predicate map? :args (when-one (comp then-first pick-many keys))}
    #'clojure.core/vector      {}
    #'clojure.core/str         {}
    #'clojure.core/concat      {:predicate (fn [& args] (every? coll? args))}
