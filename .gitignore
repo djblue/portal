@@ -6,6 +6,7 @@ node_modules/
 cljs-runtime/
 resources/portal/
 .clj-kondo/.cache/
+.clj-kondo/rewrite-clj/
 .DS_Store
 .nrepl-port
 
@@ -13,7 +14,6 @@ resources/portal/
 *.calva/
 .lsp/
 .portal/
-*.vsix
 
 # intellij files
 .idea/

@@ -13,9 +13,11 @@
 
 (def version "0.16.3")
 
+(def ^:dynamic *cwd* nil)
+
 (defn- sh [& args]
   (println "=>" (str/join " " (map name args)))
-  (let [opts {:inherit true}
+  (let [opts {:inherit true :dir *cwd*}
         ps (if-not (= (first args) :clojure)
              (p/process (map name args) opts)
              (deps/clojure (map name (rest args)) opts))]
@@ -94,20 +96,11 @@
   "Build vs-code extension."
   []
   (build)
-  (when (seq
-         (fs/modified-since
-          "target/vs-code.js"
-          (concat
-           ["deps.edn"
-            "package.json"
-            "package-lock.json"
-            "shadow-cljs.edn"]
-           (fs/glob "src/portal/" "**.cljs"))))
-    (shadow :release :vs-code))
-  (when (seq
-         (fs/modified-since
-          (str "portal-" version ".vsix")
-          ["target/vs-code.js"]))
+  (shadow :release :vs-code)
+  (binding [*cwd* "extension-vscode"]
+    (npm :ci)
+    (fs/copy "README.md" "extension-vscode/" {:replace-existing true})
+    (fs/copy "LICENSE" "extension-vscode/LICENSE" {:replace-existing true})
     (npx :vsce :package)))
 
 (defn dev

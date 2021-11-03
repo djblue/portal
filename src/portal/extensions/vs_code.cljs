@@ -32,7 +32,7 @@
                                   :retainContextWhenHidden true})
         ^js web-view        (.-webview panel)]
     (set! (.-iconPath panel)
-          (.file vscode/Uri (.asAbsolutePath ^js @context "resources/icon.png")))
+          (.file vscode/Uri (.asAbsolutePath ^js @context "icon.png")))
     (set! (.-html web-view)
           (index/html :code-url   (str "http://" host ":" port "/main.js?" session-id)
                       :host       (str host ":" port)

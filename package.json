@@ -1,36 +1,7 @@
 {
   "name": "portal",
   "version": "0.16.3",
-  "icon": "resources/icon.png",
-  "main": "./target/vs-code.js",
-  "publisher": "djblue",
   "repository": "github:djblue/portal",
-  "engines": {
-    "vscode": "^1.25.0"
-  },
-  "activationEvents": [
-    "onLanguage:clojure",
-    "onCommand:extension.portalOpen",
-    "onCommand:extension.portalOpenDev",
-    "workspaceContains:**/project.clj",
-    "workspaceContains:**/shadow-cljs.edn",
-    "workspaceContains:**/deps.edn",
-    "workspaceContains:**/bb.edn"
-  ],
-  "contributes": {
-    "commands": [
-      {
-        "command": "extension.portalOpen",
-        "title": "Open Portal",
-        "enablement": "portal:is-dev"
-      },
-      {
-        "command": "extension.portalOpenDev",
-        "title": "Open Portal (DEV)",
-        "enablement": "portal:is-dev"
-      }
-    ]
-  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
@@ -45,7 +16,6 @@
   "devDependencies": {
     "browserify": "^16.5.2",
     "source-map-support": "^0.5.20",
-    "vsce": "^1.100.1",
     "ws": "^8.2.3"
   }
 }

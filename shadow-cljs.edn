@@ -35,7 +35,7 @@
    {:infer-externs true
     :source-map    true
     :warnings-as-errors true}
-   :output-to "target/vs-code.js"
+   :output-to "extension-vscode/vs-code.js"
    :devtools {:after-load portal.extensions.vs-code/reload}}
 
   :node
