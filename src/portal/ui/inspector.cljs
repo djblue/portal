@@ -479,6 +479,11 @@
 (defn hex-color? [string]
   (re-matches #"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}gi" string))
 
+(defn rgb-color? [string]
+  (re-matches #"rgb\(\d+,\d+,\d+\)" string))
+
+(def color? (some-fn hex-color? rgb-color?))
+
 (defn- url-string? [string]
   (re-matches #"https?://.*" string))
 
@@ -499,7 +504,7 @@
         (trim-string value limit)]
        "\""]
 
-      (hex-color? value)
+      (color? value)
       [s/div
        {:style
         {:padding (* 0.65 (:padding theme))
