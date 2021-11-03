@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>djblue.portal-extension-intellij</id>
+    <name>portal</name>
+    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+
+    <description>A clojure tool to navigate through your data.</description>
+    <idea-version since-build="192.5118"/>
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Portal"
+                    anchor="right"
+                    icon="PortalIcons.ToolWindow"
+                    factoryClass="portal.extensions.intellij.Factory" />
+    </extensions>
+
+    <projectListeners>
+        <listener
+            class="portal.extensions.intellij.Factory"
+            topic="com.intellij.ide.ui.UISettingsListener"/>
+    </projectListeners>
+</idea-plugin>

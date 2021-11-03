@@ -1,6 +1,13 @@
 (ns portal.ui.theme
   (:require ["react" :as react]
-            [portal.colors :as c]))
+            [clojure.edn :as edn]
+            [portal.colors :as c]
+            [reagent.core :as r]))
+
+(defonce ^:private override (r/atom nil))
+
+(defn ^:export patch [edn-string]
+  (reset! override (edn/read-string edn-string)))
 
 (defn is-vs-code? []
   (-> js/document
@@ -17,7 +24,8 @@
     :max-depth 1
     :padding 8
     :border-radius 2}
-   (get c/themes theme-name)))
+   (get c/themes theme-name)
+   @override))
 
 (defn- default-theme []
   (if (is-vs-code?) ::c/vs-code-embedded ::c/nord))

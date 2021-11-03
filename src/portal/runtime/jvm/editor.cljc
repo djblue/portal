@@ -2,8 +2,10 @@
   (:refer-clojure :exclude [resolve])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [org.httpkit.client :as http]
             [portal.runtime :as rt]
             [portal.runtime.fs :as fs]
+            [portal.runtime.jvm.launcher :as launcher]
             [portal.runtime.shell :refer [sh]])
   (:import (java.io File)
            (java.net URL URI)))
@@ -65,6 +67,13 @@
 
 (defmethod -open-editor :vs-code [{:keys [line column file]}]
   (sh (get-vs-code) "--goto" (str file ":" line ":" column)))
+
+(defmethod -open-editor :intellij [info]
+  (when-let [{:keys [host port]} (launcher/get-config "intellij.edn")]
+    (http/post
+     (str "http://" host ":" port "/open-file")
+     {:headers {"content-type" "application/edn"}
+      :body (pr-str info)})))
 
 (defn can-goto [input]
   (and (satisfies? IResolve input) (resolve input)))

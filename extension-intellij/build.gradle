@@ -1,0 +1,57 @@
+plugins {
+    id 'org.jetbrains.intellij' version '1.2.1'
+    id 'dev.clojurephant.clojure' version '0.6.0'
+    id 'java'
+}
+
+group 'djblue'
+version '0.16.3'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'Clojars'
+        url = 'https://repo.clojars.org/'
+    }
+}
+
+dependencies {
+    implementation 'org.clojure:clojure:1.10.3'
+    implementation 'djblue:portal:0.16.3'
+    implementation 'nrepl:nrepl:0.8.3'
+}
+
+clojure {
+    builds {
+        main {
+            aotNamespaces = ['portal.extensions.intellij.factory']
+        }
+    }
+}
+
+jar {
+    into '/', {
+        from 'src/main/clojure'
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+sourceSets {
+    main.clojure.srcDirs = ['src/main/clojure']
+    main.java.srcDirs = ['src/main/java']
+}
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version = '2021.2.3'
+}
+patchPluginXml {
+    changeNotes = """
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>"""
+}
+test {
+    useJUnitPlatform()
+}

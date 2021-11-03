@@ -11,20 +11,27 @@
 
 (defn- get-parent [s] (.getParent (io/file s)))
 
-(defn- vs-code-config []
+(defn get-config [file]
   (->> (System/getProperty "user.dir")
        (iterate get-parent)
        (take-while some?)
        (some
         (fn [parent]
           (some-> parent
-                  (fs/join ".portal/vs-code.edn")
+                  (fs/join ".portal" file)
                   fs/exists
                   slurp
                   edn/read-string)))))
 
+(defmethod browser/-open :intellij [{:keys [portal options server]}]
+  (when-let [{:keys [host port]} (get-config "intellij.edn")]
+    (client/post (str "http://" host ":" port "/open")
+                 {:body (pr-str {:portal  portal
+                                 :options options
+                                 :server  (select-keys server [:host :port])})})))
+
 (defmethod browser/-open :vs-code [{:keys [portal options server]}]
-  (when-let [{:keys [host port]} (vs-code-config)]
+  (when-let [{:keys [host port]} (get-config "vs-code.edn")]
     (client/post (str "http://" host ":" port "/open")
                  {:body (pr-str {:portal  portal
                                  :options options
