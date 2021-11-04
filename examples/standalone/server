@@ -1,0 +1,40 @@
+#!/usr/bin/env bb
+
+(require '[babashka.deps :as deps])
+(require '[cheshire.core :as json])
+(require '[clojure.edn :as edn])
+(require '[clojure.java.io :as io])
+(require '[clojure.main :as main])
+(require '[cognitect.transit :as transit])
+(require '[org.httpkit.server :as http])
+(import '(java.io PushbackReader))
+
+(defn handler [request]
+  (let [body (:body request)]
+    (tap>
+     (case (get-in request [:headers "content-type"])
+       "application/transit+json" (transit/read (transit/reader body :json))
+       "application/json"         (json/parse-stream (io/reader body) true)
+       "application/edn"          (edn/read (PushbackReader. (io/reader body)))))
+    {:status 200}))
+
+(def server (http/run-server
+             #'handler
+             {:port                 1664
+              :legacy-return-value? false}))
+
+(println "Server running on port:" (http/server-port server))
+
+(deps/add-deps '{:deps {djblue/portal {:mvn/version "0.16.3"}}})
+
+(require '[portal.api :as p])
+
+(p/open)
+
+(.addShutdownHook
+ (Runtime/getRuntime)
+ (Thread. (fn [] (p/close))))
+
+(add-tap #'p/submit)
+
+(main/repl)
