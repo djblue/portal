@@ -19,6 +19,11 @@
 #?(:bb (def clojure.lang.Namespace (type *ns*)))
 
 (extend-protocol IResolve
+  clojure.lang.PersistentHashMap
+  (resolve [m]
+    (when-let [file (:file m)]
+      (when-let [resolved (resolve file)]
+        (merge m resolved))))
   clojure.lang.PersistentArrayMap
   (resolve [m]
     (when-let [file (:file m)]
