@@ -37,8 +37,8 @@ jar {
     }
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 sourceSets {
     main.clojure.srcDirs = ['src/main/clojure']
