@@ -10,6 +10,9 @@
     (catch #?(:clj Exception :cljs :default) ex#
       [:throw ex#])))
 
+(defn runtime []
+  #?(:bb :bb :clj :clj :cljs :cljs))
+
 (defn capture [level form expr]
   (let [{:keys [line column]} (meta form)]
     `(let [[flow# result#] (run (fn [] ~expr))]
@@ -21,7 +24,8 @@
          :file     ~#?(:clj *file* :cljs nil)
          :line     ~line
          :column   ~column
-         :time     (now)})
+         :time     (now)
+         :runtime  (runtime)})
        (if (= flow# :throw) (throw result#) result#))))
 
 (defmacro log   [expr] (capture :info &form expr))
