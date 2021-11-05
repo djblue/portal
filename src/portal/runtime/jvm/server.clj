@@ -1,12 +1,15 @@
 (ns portal.runtime.jvm.server
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
+            [cognitect.transit :as transit]
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.remote.socket :as socket])
-  (:import [java.util UUID]))
+  (:import [java.io PushbackReader]
+           [java.util UUID]))
 
 (defn- not-found [_request done]
   (done {:status :not-found}))
@@ -65,7 +68,7 @@
    :headers {"Content-Type" content-type}
    :body    resource})
 
-(defn- wait []
+(defn- wait [_]
   (try (Thread/sleep 60000)
        (catch Exception _e {:status 200})))
 
@@ -98,14 +101,26 @@
     (assoc request :session (rt/get-session session-id))
     request))
 
+(defn- submit [request]
+  (let [body (:body request)]
+    (rt/update-value
+     (case (get-in request [:headers "content-type"])
+       "application/transit+json" (transit/read (transit/reader body :json))
+       ;; "application/json"         (json/parse-stream (io/reader body) true)
+       "application/edn"          (edn/read (PushbackReader. (io/reader body)))))
+    {:status 200}))
+
+(defn- index [_]
+  (send-resource "text/html" (index/html)))
+
+(def ^:private routes
+  {[:get "/"]        index
+   [:get "/wait.js"] wait
+   [:get "/main.js"] main-js
+   [:get "/rpc"]     rpc-handler
+   [:post "/submit"] submit})
+
 (defn handler [request]
-  (let [request (with-session request)
-        paths
-        {"/"        #(send-resource "text/html" (index/html))
-         "/wait.js" wait
-         "/main.js" #(main-js request)
-         "/rpc"     #(rpc-handler request)}
-        f (get paths (:uri request))]
-    (cond
-      (fn? f) (f)
-      :else   (resource request))))
+  (let [match   ((juxt :request-method :uri) request)
+        handler (get routes match resource)]
+    (handler (with-session request))))

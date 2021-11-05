@@ -18,10 +18,10 @@
   ([{:keys [encoding port host]
      :or   {encoding :transit
             host     "localhost"
-            port     1664}}
+            port     53755}}
     value]
    @(http/post
-     (str "http://" host ":" port)
+     (str "http://" host ":" port "/submit")
      {:headers
       {"content-type"
        (case encoding
