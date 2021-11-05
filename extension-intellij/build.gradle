@@ -25,6 +25,8 @@ clojure {
     builds {
         main {
             aotNamespaces = ['portal.extensions.intellij.factory']
+            checkAll()
+            reflection = 'fail'
         }
     }
 }

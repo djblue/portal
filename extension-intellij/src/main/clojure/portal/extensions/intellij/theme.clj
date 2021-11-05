@@ -1,7 +1,8 @@
 (ns portal.extensions.intellij.theme
   (:import
    (com.intellij.openapi.editor DefaultLanguageHighlighterColors)
-   (com.intellij.openapi.editor.colors TextAttributesKey EditorColorsManager ColorKey)
+   (com.intellij.openapi.editor.colors ColorKey EditorColorsManager EditorColorsScheme TextAttributesKey)
+   (com.intellij.openapi.editor.colors.impl AbstractColorsScheme)
    (java.awt Color)))
 
 (def ^:private language-colors
@@ -64,7 +65,7 @@
 (defn- get-color
   ([key]
    (get-color (.getGlobalScheme (EditorColorsManager/getInstance)) key))
-  ([^EditorColorsManager theme key]
+  ([^EditorColorsScheme theme key]
    (some->
     (if-let [attrs (language-colors key)]
       (cond
@@ -105,10 +106,10 @@
 (defn- get-keys
   ([]
    (get-keys (.getGlobalScheme (EditorColorsManager/getInstance))))
-  ([^EditorColorsManager theme]
+  ([^AbstractColorsScheme theme]
    (concat
     (keys language-colors)
-    (for [key (.getColorKeys theme)]
+    (for [^ColorKey key (.getColorKeys theme)]
       (keyword (.getExternalName key))))))
 
 (comment

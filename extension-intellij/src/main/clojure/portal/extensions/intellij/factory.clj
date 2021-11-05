@@ -43,7 +43,7 @@
   (let [body (edn/read (PushbackReader. (io/reader (:body request))))]
     (case (:uri request)
       "/open"
-      (do (.loadURL @browser (format-url body))
+      (do (.loadURL ^JBCefBrowser @browser (format-url body))
           (Thread/sleep 1000)
           (patch-theme)
           {:status 200})
@@ -74,7 +74,7 @@
 
 (defn -init [_this ^ToolWindow _window]
   (WithLoader/bind)
-  (apply (requiring-resolve 'portal.extensions.intellij.nrepl/run) nil))
+  #_(apply (requiring-resolve 'portal.extensions.intellij.nrepl/run) nil))
 
 (defn -isApplicable [_this ^Project _project] true)
 

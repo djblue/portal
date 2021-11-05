@@ -21,4 +21,6 @@
    (fn []
      (.runReadAction
       (ApplicationManager/getApplication)
-      #(.navigate (->descriptor project info) true)))))
+      ^Runnable
+      (fn []
+        (.navigate (->descriptor project info) true))))))
