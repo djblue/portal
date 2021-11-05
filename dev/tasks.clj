@@ -27,6 +27,7 @@
 (def bb     (partial sh :bb))
 (def clj    (partial sh :clojure))
 (def git    (partial sh :git))
+(def gradle (partial sh "./gradlew" "--warning-mode" "all"))
 (def mvn    (partial sh :mvn))
 (def node   (partial sh :node))
 (def npm    (partial sh :npm))
@@ -43,14 +44,22 @@
 (defn check
   "Run all static analysis checks."
   []
+  (clj "-M:cljfmt" :check
+       :dev :src :test
+       "extension-intellij/src/main/clojure")
+  (clj "-M:kondo"
+       "--lint" :dev :src :test
+       "extension-intellij/src/main/clojure")
   (clj "-M:cider:check")
-  (clj "-M:kondo" "--lint" :dev :src :test)
-  (clj "-M:cljfmt" :check :dev :src :test))
+  (binding [*cwd* "extension-intellij"]
+    (gradle "checkClojure")))
 
 (defn format
   "Run cljfmt formatter."
   []
-  (clj "-M:cljfmt" :fix :dev :src :test))
+  (clj "-M:cljfmt" :fix
+       :dev :src :test
+       "extension-intellij/src/main/clojure"))
 
 (defn check-deps []
   (npm :outdated)
@@ -92,6 +101,13 @@
 
 (defn build [] (main-js) (ws-js))
 
+(defn intellij-extension
+  "Build intellij extension."
+  []
+  (binding [*cwd* "extension-intellij"]
+    (gradle "buildPlugin")
+    (println (str "extension-intellij/build/distributions/portal-extension-intellij-" version ".zip"))))
+
 (defn vs-code-extension
   "Build vs-code extension."
   []
@@ -102,6 +118,12 @@
     (fs/copy "README.md" "extension-vscode/" {:replace-existing true})
     (fs/copy "LICENSE" "extension-vscode/LICENSE" {:replace-existing true})
     (npx :vsce :package)))
+
+(defn build-extensions
+  "Build editor extensions."
+  []
+  (vs-code-extension)
+  (intellij-extension))
 
 (defn dev
   "Start dev server."

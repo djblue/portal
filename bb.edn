@@ -11,5 +11,5 @@
          jar    tasks/jar
          test   tasks/test
          tag    tasks/tag
-         ext    tasks/vs-code-extension
+         ext    tasks/build-extensions
          deploy tasks/deploy}}
