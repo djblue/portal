@@ -1,11 +1,11 @@
 (ns examples.data
   (:require #?(:clj [clojure.java.io :as io])
+            [examples.hacker-news :as hn]
             [examples.macros :refer [read-file]]
-            [portal.colors :as c]
-            [examples.hacker-news :as hn])
+            [portal.colors :as c])
   #?(:clj (:import [java.io File ByteArrayOutputStream]
-                   [java.util Date]
                    [java.net URI]
+                   [java.util Date]
                    [java.util UUID])))
 
 #?(:clj

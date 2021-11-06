@@ -1,9 +1,9 @@
 (ns examples.hacker-news
-  (:require [clojure.core.protocols :refer [nav]]
-            [portal.runtime.json :as json]
-            #?(:clj  [portal.sync  :as a]
+  (:require #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a])
-            #?(:cljs [examples.fetch :refer [fetch]])))
+            #?(:cljs [examples.fetch :refer [fetch]])
+            [clojure.core.protocols :refer [nav]]
+            [portal.runtime.json :as json]))
 
 (def root "https://hacker-news.firebaseio.com/v0")
 

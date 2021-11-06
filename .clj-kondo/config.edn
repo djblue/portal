@@ -1,4 +1,5 @@
-{:lint-as
+{:linters {:unsorted-required-namespaces {:level :fail}}
+ :lint-as
  {portal.async/let clojure.core/let
   portal.sync/let  clojure.core/let
   reagent.core/with-let              clojure.core/let

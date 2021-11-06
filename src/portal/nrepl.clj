@@ -1,8 +1,8 @@
 (ns ^:no-doc portal.nrepl
-  (:require [portal.api :as p]
-            [portal.runtime :as rt]
-            [nrepl.middleware :refer [set-descriptor!]]
-            [nrepl.transport :as transport])
+  (:require [nrepl.middleware :refer [set-descriptor!]]
+            [nrepl.transport :as transport]
+            [portal.api :as p]
+            [portal.runtime :as rt])
   (:import [nrepl.transport Transport]))
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
