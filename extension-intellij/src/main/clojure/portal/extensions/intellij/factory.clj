@@ -73,9 +73,14 @@
     (Disposer/register project b)
     (.getComponent b)))
 
+(defn get-nrepl []
+  (try
+    (requiring-resolve 'nrepl.server/start-server)
+    (catch Exception _e)))
+
 (defn -init [_this ^ToolWindow _window]
   (WithLoader/bind)
-  #_(apply (requiring-resolve 'portal.extensions.intellij.nrepl/run) nil))
+  (when-let [start-server (get-nrepl)] (start-server :port 7888)))
 
 (defn -isApplicable [_this ^Project _project] true)
 

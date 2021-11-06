@@ -17,8 +17,11 @@ repositories {
 
 dependencies {
     implementation 'org.clojure:clojure:1.10.3'
-    implementation 'djblue:portal:0.16.3'
-    implementation 'nrepl:nrepl:0.8.3'
+    implementation 'http-kit:http-kit:2.5.3'
+    // Include depdencies for dev
+    //   - devImplementation doesn't work for plugin development
+    // implementation 'djblue:portal:0.16.3'
+    // implementation 'nrepl:nrepl:0.8.3'
 }
 
 clojure {
