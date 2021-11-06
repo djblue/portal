@@ -18,5 +18,8 @@
         <listener
             class="portal.extensions.intellij.Factory"
             topic="com.intellij.ide.ui.UISettingsListener"/>
+        <listener
+            class="portal.extensions.intellij.Factory"
+            topic="com.intellij.openapi.editor.colors.EditorColorsListener"/>
     </projectListeners>
 </idea-plugin>

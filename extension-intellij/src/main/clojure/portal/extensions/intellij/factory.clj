@@ -15,11 +15,10 @@
   (:gen-class
    :main false
    :extends portal.extensions.intellij.WithLoader
-   :implements [com.intellij.openapi.wm.ToolWindowFactory
-                com.intellij.ide.ui.UISettingsListener]
+   :implements [com.intellij.ide.ui.UISettingsListener
+                com.intellij.openapi.editor.colors.EditorColorsListener
+                com.intellij.openapi.wm.ToolWindowFactory]
    :name portal.extensions.intellij.Factory))
-
-(set! *warn-on-reflection* true)
 
 (defonce ^:private browser (atom nil))
 (defonce ^:private proj    (atom nil))
@@ -32,12 +31,14 @@
   (.executeJavaScript (.getCefBrowser browser) js "" 0))
 
 (defn patch-theme []
-  (run-js
-   @browser
-   (str "portal.ui.theme.patch("
-        (pr-str (pr-str (theme/get-theme))) ")")))
+  (when-let [browser @browser]
+    (run-js
+     browser
+     (str "portal.ui.theme.patch("
+          (pr-str (pr-str (theme/get-theme))) ")"))))
 
-(defn -uiSettingsChanged [_this _] (patch-theme))
+(defn -uiSettingsChanged  [_this _] (patch-theme))
+(defn -globalSchemeChange [_this _] (patch-theme))
 
 (defn handler [request]
   (let [body (edn/read (PushbackReader. (io/reader (:body request))))]
