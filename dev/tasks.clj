@@ -292,3 +292,10 @@
   "Deploy to clojars."
   []
   (release) (mvn :deploy))
+
+(defn- get-task [task]
+  (find-var
+   (get-in (read-string (slurp "bb.edn")) [:tasks task])))
+
+(defn -main [task & args]
+  (apply (get-task (symbol task)) args))

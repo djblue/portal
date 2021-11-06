@@ -8,7 +8,8 @@
  {:dev
   {:extra-paths ["dev" "test"]
    :extra-deps
-   {hiccup/hiccup         {:mvn/version "2.0.0-alpha2"}
+   {babashka/babashka     {:mvn/version "0.6.4"}
+    hiccup/hiccup         {:mvn/version "2.0.0-alpha2"}
     ns-tracker/ns-tracker {:mvn/version "0.4.0"}}}
   :cljs
   {:extra-deps

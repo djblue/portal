@@ -1,5 +1,5 @@
 {:paths ["src" "resources" "dev" "test"]
- :min-bb-version "0.5.0"
+ :min-bb-version "0.6.4"
  :tasks {app    tasks/app
          deps   tasks/fix-deps
          ci     tasks/ci
