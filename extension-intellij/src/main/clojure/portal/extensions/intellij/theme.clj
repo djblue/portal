@@ -76,6 +76,14 @@
       (.getColor theme (ColorKey/createColorKey (name key))))
     format-color)))
 
+(defn- get-font
+  ([]
+   (get-font
+    (.getGlobalScheme (EditorColorsManager/getInstance))))
+  ([^EditorColorsScheme theme]
+   {:font-size   (.getEditorFontSize theme)
+    :font-family (str (pr-str (.getEditorFontName theme)) ", monospace")}))
+
 (defn resolve-theme [m]
   (reduce-kv
    (fn [out k v]
@@ -86,22 +94,22 @@
 (def theme-mapping
   {:portal.colors/background  :CONSOLE_BACKGROUND_KEY
    :portal.colors/background2 :CARET_ROW_COLOR
-   :portal.colors/boolean     :LABEL
+   :portal.colors/boolean     :CONSTANT
    :portal.colors/border      :VISUAL_INDENT_GUIDE
-   :portal.colors/diff-add    :ADDED_LINES_COLOR
-   :portal.colors/diff-remove :DELETED_LINES_COLOR
+   :portal.colors/diff-add    :FILESTATUS_addedOutside
+   :portal.colors/diff-remove :FILESTATUS_UNKNOWN
    :portal.colors/exception   :FILESTATUS_UNKNOWN
-   :portal.colors/keyword     :LABEL
-   :portal.colors/namespace   :INTERFACE_NAME
+   :portal.colors/keyword     :CONSTANT
+   :portal.colors/namespace   :KEYWORD
    :portal.colors/number      :NUMBER
    :portal.colors/package     :INSTANCE_METHOD
    :portal.colors/string      :STRING
    :portal.colors/symbol      :IDENTIFIER
-   :portal.colors/tag         :VALID_STRING_ESCAPE
-   :portal.colors/text        :CONSTANT
-   :portal.colors/uri         :METADATA})
+   :portal.colors/tag         :STATIC_METHOD
+   :portal.colors/text        :IDENTIFIER
+   :portal.colors/uri         :DOC_COMMENT_LINK})
 
-(defn get-theme [] (resolve-theme theme-mapping))
+(defn get-theme [] (merge (get-font) (resolve-theme theme-mapping)))
 
 (defn- get-keys
   ([]
