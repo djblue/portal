@@ -1,6 +1,19 @@
 (ns portal.ui.options
   (:require ["react" :as react]
-            [portal.ui.state :as state]))
+            [clojure.edn :as edn]
+            [portal.ui.state :as state]
+            [reagent.core :as r]))
+
+(defn- get-extension-options []
+  (when (exists? js/PORTAL_EXTENSION_OPTIONS)
+    (edn/read-string js/PORTAL_EXTENSION_OPTIONS)))
+
+(defonce ^:private extension-options (r/atom (get-extension-options)))
+
+(defn ^:export patch
+  "Function for extensions to patch options after init."
+  [edn-string]
+  (reset! extension-options (edn/read-string edn-string)))
 
 (defonce ^:private options-context (react/createContext nil))
 
@@ -12,7 +25,9 @@
            (.then set-options!)))
      #js [])
     (into [:r> (.-Provider options-context)
-           #js {:value options}]
+           #js {:value (if (= options ::loading)
+                         options
+                         (merge options @extension-options))}]
           children)))
 
 (defn use-options [] (react/useContext options-context))

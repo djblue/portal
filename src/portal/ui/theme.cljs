@@ -1,13 +1,7 @@
 (ns portal.ui.theme
   (:require ["react" :as react]
-            [clojure.edn :as edn]
             [portal.colors :as c]
-            [reagent.core :as r]))
-
-(defonce ^:private override (r/atom nil))
-
-(defn ^:export patch [edn-string]
-  (reset! override (edn/read-string edn-string)))
+            [portal.ui.options :as opts]))
 
 (defn is-vs-code? []
   (-> js/document
@@ -17,15 +11,16 @@
       (not= "")))
 
 (defn- get-theme [theme-name]
-  (merge
-   {:font-family "Monaco, monospace"
-    :font-size "12pt"
-    :string-length 100
-    :max-depth 1
-    :padding 8
-    :border-radius 2}
-   (get c/themes theme-name)
-   @override))
+  (let [opts (opts/use-options)]
+    (merge
+     {:font-family "Monaco, monospace"
+      :font-size "12pt"
+      :string-length 100
+      :max-depth 1
+      :padding 8
+      :border-radius 2}
+     (or (get c/themes theme-name)
+         (get (:themes opts) theme-name)))))
 
 (defn- default-theme []
   (if (is-vs-code?) ::c/vs-code-embedded ::c/nord))

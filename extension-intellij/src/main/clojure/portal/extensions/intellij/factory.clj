@@ -27,26 +27,34 @@
 (defn- format-url [{:keys [portal server]}]
   (str "http://" (:host server) ":" (:port server) "?" (:session-id portal)))
 
-(defn- run-js [^JBCefBrowser browser ^String js]
-  (.executeJavaScript (.getCefBrowser browser) js "" 0))
+(defn- run-js [^String js]
+  (when-let [^JBCefBrowser browser @browser]
+    (.executeJavaScript (.getCefBrowser browser) js "" 0)))
 
-(defn patch-theme []
-  (when-let [browser @browser]
-    (run-js
-     browser
-     (str "portal.ui.theme.patch("
-          (pr-str (pr-str (theme/get-theme))) ")"))))
+(defn- get-options []
+  (pr-str
+   (pr-str
+    {:portal.colors/theme ::theme
+     :themes
+     {::theme (theme/get-theme)}})))
 
-(defn -uiSettingsChanged  [_this _] (patch-theme))
-(defn -globalSchemeChange [_this _] (patch-theme))
+(defn patch-options []
+  (run-js
+   (str "portal.ui.options.patch(" (get-options) ")")))
+
+(defn init-options []
+  (run-js
+   (str "window.PORTAL_EXTENSION_OPTIONS = " (get-options))))
+
+(defn -uiSettingsChanged  [_this _] (patch-options))
+(defn -globalSchemeChange [_this _] (patch-options))
 
 (defn handler [request]
   (let [body (edn/read (PushbackReader. (io/reader (:body request))))]
     (case (:uri request)
       "/open"
       (do (.loadURL ^JBCefBrowser @browser (format-url body))
-          (Thread/sleep 1000)
-          (patch-theme)
+          (init-options)
           {:status 200})
       "/open-file" (do (file/open @proj body) {:status 200})
       {:status 404})))
