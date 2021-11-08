@@ -1,3 +1,40 @@
+## 0.17.0 - 2021-11-07
+
+### Highlights
+
+- First cut of intellij extension 58ff20a
+- First cut of multi-select ea9568b
+
+Selecting multiple values allows for invoking n-arity functions.
+
+The semantics will be:
+
+```clojure
+(apply f [first-selected second-selcted ...])
+```
+
+### Improvements
+
+- Tree viewer improvements f8e1195
+  - Improve selection
+    - Enable relative selection
+    - Enable collection selection
+  - Enable `portal.viewer/default`
+- Add `TaggedLiteral` type support 0de75a5
+- Allow relative selecting tagged literal values 2ac964f
+- Add `copy-str` command fcbb1c9
+- Add `merge` command 10e9625
+- Add runtime type to `portal.console` b7cf00b
+- Add rgb color support to string inspector b9af7ce
+- Allow collapsing a value that is default expanded 3773a2f
+
+### Bug Fixes
+
+- Fix stale use-invoke 39ba128
+- Focus filter command should respect history 929a18e
+- Fix relative selection for `js/BigInt` 062c776
+- Implement `IResolve` for hash maps 97a6840
+
 ## 0.16.3 - 2021-10-18
 
 ### Bug Fixes

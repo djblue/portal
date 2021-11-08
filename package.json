@@ -1,6 +1,6 @@
 {
   "name": "portal",
-  "version": "0.16.3",
+  "version": "0.17.0",
   "repository": "github:djblue/portal",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
