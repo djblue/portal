@@ -18,10 +18,12 @@
 
 (def files
   ["README.md"
+   "extension-intellij/build.gradle"
+   "extension-vscode/package.json"
    "package.json"
+   "src/portal/extensions/vs_code.cljs"
    "src/portal/runtime.cljc"
-   "src/portal/runtime/index.cljc"
-   "src/portal/extensions/vs_code.cljs"])
+   "src/portal/runtime/index.cljc"])
 
 (defn- version-updates [next-version]
   (let [current-version (find-version "src/portal/runtime/index.cljc")]
