@@ -65,10 +65,6 @@
     (.mkdirs (.getParentFile file))
     (spit file (pr-str config))))
 
-(defn- has-file? [^Project project relative-path]
-  (when-let [dir (some-> project .getBaseDir .getCanonicalPath)]
-    (.exists (io/file dir relative-path))))
-
 (defn start [^Project project]
   (when-not @server
     (reset! server (http/run-server #'handler {:legacy-return-value? false})))
@@ -94,16 +90,7 @@
   (WithLoader/bind)
   (when-let [start-server (get-nrepl)] (start-server :port 7888)))
 
-(defn -isApplicable [_this ^Project project]
-  (some?
-   (some
-    (fn [file]
-      (has-file? project file))
-    ["bb.edn"
-     "deps.edn"
-     "project.clj"
-     "shadow-cljs.edn"])))
-
+(defn -isApplicable [_this ^Project _project] true)
 (defn -shouldBeAvailable [_this ^Project _project] true)
 
 (defn -createToolWindowContent [_this ^Project project ^ToolWindow window]
