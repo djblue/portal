@@ -9,14 +9,24 @@
 (require '[org.httpkit.server :as http])
 (import '(java.io PushbackReader))
 
+(def cors-answer
+  {:status 204
+   :headers
+   {"Access-Control-Allow-Origin" "*"
+    "Access-Control-Allow-Headers" "origin, content-type"
+    "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
+    "Access-Control-Max-Age" 86400}})
+
 (defn handler [request]
   (let [body (:body request)]
-    (tap>
-     (case (get-in request [:headers "content-type"])
-       "application/transit+json" (transit/read (transit/reader body :json))
-       "application/json"         (json/parse-stream (io/reader body) true)
-       "application/edn"          (edn/read (PushbackReader. (io/reader body)))))
-    {:status 200}))
+    (if-let [content-type (get-in request [:headers "content-type"])]
+      (do (tap>
+           (case content-type
+             "application/transit+json" (transit/read (transit/reader body :json))
+             "application/json"         (json/parse-stream (io/reader body) true)
+             "application/edn"          (edn/read (PushbackReader. (io/reader body)))))
+          {:status 200})
+      cors-answer)))
 
 (def server (http/run-server
              #'handler
