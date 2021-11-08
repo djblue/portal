@@ -1,38 +1,10 @@
 (ns portal.client.web
   (:require
-   [cognitect.transit :as transit]))
+   [portal.client.common :refer (->send!)]))
 
-(defn- transit-write
-  [value]
-  (transit/write
-   (transit/writer :json {:transform transit/write-meta})
-   value))
-
-(defn send!
-  ([value] (send! nil value))
-  ([{:keys [encoding port host]
-     :or   {encoding :transit
-            host     "localhost"
-            port     53755}}
-    value]
-   (-> (js/fetch
-        (str "http://" host ":" port "/submit")
-        (clj->js
-         {:method "POST"
-          :headers
-          {"content-type"
-           (case encoding
-             :json    "application/json"
-             :transit "application/transit+json"
-             :edn     "application/edn")}
-          :body
-          (case encoding
-            :json    (js/JSON.stringify value)
-            :transit (transit-write value)
-            :edn     (pr-str value))})))))
+(def send! (->send! js/fetch))
 
 (comment
-
   (send! nil "Hello World")
   (add-tap send!)
   (tap> #?(:cljs {:runtime 'cljs :value "hello web"}))
