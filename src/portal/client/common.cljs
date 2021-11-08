@@ -1,5 +1,6 @@
 (ns portal.client.common
   (:require
+   [portal.runtime.json :as json]
    [cognitect.transit :as transit]))
 
 (defn- transit-write
@@ -28,6 +29,6 @@
                :edn     "application/edn")}
             :body
             (case encoding
-              :json    (js/JSON.stringify value)
+              :json    (json/write value)
               :transit (transit-write value)
               :edn     (pr-str value))}))))))

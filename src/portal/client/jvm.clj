@@ -1,14 +1,9 @@
 (ns portal.client.jvm
   (:require
-   #?(:bb [cheshire.core :as json]
-      :clj [clojure.data.json :as json])
    [cognitect.transit :as transit]
-   [org.httpkit.client :as http])
+   [org.httpkit.client :as http]
+   [portal.runtime.json :as json])
   (:import [java.io ByteArrayOutputStream]))
-
-(defn- ->json-str [v]
-  (#?(:bb json/generate-string
-      :clj json/write-str) v))
 
 (defn- transit-write [value]
   (let [out (ByteArrayOutputStream. 1024)]
@@ -34,17 +29,16 @@
          :edn     "application/edn")}
       :body
       (case encoding
-        :json    (->json-str value)
+        :json    (json/write value)
         :transit (transit-write value)
         :edn     (pr-str value))})))
 
 (comment
-  (send! nil #?(:bb {:runtime 'bb :value "hello bb"}
-                :clj {:runtime 'jvm :value "hello jvm"}))
+  (send! nil {:runtime 'jvm :value "hello jvm"})
+  (send! {:port 1664} {:runtime 'jvm :value "hello jvm"})
 
   (add-tap send!)
-  (tap> #?(:bb {:runtime 'bb :value "hello bb"}
-           :clj {:runtime 'jvm :value "hello jvm"}))
+  (tap> {:runtime 'jvm :value "hello jvm"})
 
   (add-tap (partial send! {:encoding :json}))
   (add-tap (partial send! {:encoding :edn})))
