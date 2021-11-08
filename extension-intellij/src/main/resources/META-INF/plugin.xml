@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>djblue.portal-extension-intellij</id>
     <name>portal</name>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <vendor url="https://github.com/djblue/portal">djblue</vendor>
 
     <description>A clojure tool to navigate through your data.</description>
     <idea-version since-build="192.5118"/>

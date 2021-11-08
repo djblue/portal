@@ -66,7 +66,7 @@
     (spit file (pr-str config))))
 
 (defn- has-file? [^Project project relative-path]
-  (let [dir (.getCanonicalPath (.getBaseDir project))]
+  (when-let [dir (some-> project .getBaseDir .getCanonicalPath)]
     (.exists (io/file dir relative-path))))
 
 (defn start [^Project project]
@@ -95,13 +95,14 @@
   (when-let [start-server (get-nrepl)] (start-server :port 7888)))
 
 (defn -isApplicable [_this ^Project project]
-  (some
-   (fn [file]
-     (has-file? project file))
-   ["bb.edn"
-    "deps.edn"
-    "project.clj"
-    "shadow-cljs.edn"]))
+  (some?
+   (some
+    (fn [file]
+      (has-file? project file))
+    ["bb.edn"
+     "deps.edn"
+     "project.clj"
+     "shadow-cljs.edn"])))
 
 (defn -shouldBeAvailable [_this ^Project _project] true)
 

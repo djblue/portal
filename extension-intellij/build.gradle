@@ -7,6 +7,10 @@ plugins {
 group 'djblue'
 version '0.16.3'
 
+intellij {
+    version = '2021.2.3'
+}
+
 repositories {
     mavenCentral()
     maven {
@@ -46,17 +50,4 @@ targetCompatibility = 11
 sourceSets {
     main.clojure.srcDirs = ['src/main/clojure']
     main.java.srcDirs = ['src/main/java']
-}
-
-// See https://github.com/JetBrains/gradle-intellij-plugin/
-intellij {
-    version = '2021.2.3'
-}
-patchPluginXml {
-    changeNotes = """
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>"""
-}
-test {
-    useJUnitPlatform()
 }
