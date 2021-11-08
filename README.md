@@ -1,9 +1,3 @@
-
-
-<p align="center">
-  <img width="200" style="margin: 0 auto" src="https://raw.githubusercontent.com/djblue/portal/master/resources/icon.png"/>
-</p>
-
 # portal
 
 A clojure tool to navigate through your data.
@@ -76,9 +70,9 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 
 (def p (p/open)) ; Open a new inspector
 
-;; or with the vs-code extension installed, do:
-(def p (p/open {:launcher :vs-code})) ; JVM only for now
-
+;; or with an extension installed, do:
+(def p (p/open {:launcher :vs-code}))  ; JVM only for now
+(def p (p/open {:launcher :intellij})) ; JVM only for now
 
 (add-tap #'p/submit) ; Add portal as a tap> target
 
@@ -268,8 +262,6 @@ Add a portal alias in `~/.clojure/deps.edn`
 {:main-opts ["-m" "portal.main"]
  :extra-deps
  {djblue/portal {:mvn/version "0.17.0"}
-  ;; optional json support
-  cheshire/cheshire {:mvn/version "5.10.0"}
   ;; optional yaml support
   clj-commons/clj-yaml {:mvn/version "0.7.0"}}}
 ```
@@ -453,9 +445,9 @@ bb e2e
 verification and synchronization but it beats having to type everything out
 manually into a repl.
 
-## VS Code Extension
+### Extensions
 
-To build the vs-code extension, do:
+To build the [vs-code](./extension-vscode) and [intellij](./extension-intellij) extensions, do:
 
 ```bash
 bb ext
