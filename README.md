@@ -1,5 +1,3 @@
-
-
 <p align="center">
   <img width="200" style="margin: 0 auto" src="https://raw.githubusercontent.com/djblue/portal/master/resources/icon.png"/>
 </p>
@@ -299,6 +297,13 @@ the following:
 curl ... | transit
 ```
 
+There is also the ability to invoke a standalone http server to listen and
+display data from remote client
+
+```bash
+   bb -cp `clojure -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "LATEST"}}}'` -m portal.standalone
+```
+
 ## Editor Integration
 
 ### Emacs
@@ -367,7 +372,7 @@ runtime in which `(portal.api/open {:launcher :vs-code})` is run.
 - [punk](https://github.com/Lokeh/punk)
 - [shadow-cljs inspect](https://clojureverse.org/t/introducing-shadow-cljs-inspect/5012)
 
-## Ideas for the Future 
+## Ideas for the Future
 
 - ~Diff Viewer~
   - Any vector pair can be diffed in portal via [lambdaisland/deep-diff2](https://github.com/lambdaisland/deep-diff2#diffing)
@@ -469,3 +474,4 @@ To deploy to a release to [clojars](https://clojars.org/djblue/portal), do:
 bb tag
 bb deploy
 ```
+<
