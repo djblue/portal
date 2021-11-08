@@ -20,7 +20,7 @@
 
 (def server (http/run-server
              #'handler
-             {:port                 1664
+             {:port                 53755
               :legacy-return-value? false}))
 
 (println "Server running on port:" (http/server-port server))
