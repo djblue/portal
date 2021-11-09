@@ -67,7 +67,7 @@
 
 (defn start [^Project project]
   (when-not @server
-    (reset! server (http/run-server #'handler {:legacy-return-value? false})))
+    (reset! server (http/run-server #'handler {:port 0 :legacy-return-value? false})))
   (write-config
    project
    {:host "localhost"
