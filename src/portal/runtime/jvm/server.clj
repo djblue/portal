@@ -6,6 +6,7 @@
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]
+            [portal.runtime.json :as json]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.remote.socket :as socket])
   (:import [java.io PushbackReader]
@@ -90,11 +91,14 @@
      (slurp (io/resource "portal/main.js")))})
 
 (defn- get-session-id [request]
-  (some->
-   (or (:query-string request)
-       (when-let [referer (get-in request [:headers "referer"])]
-         (last (str/split referer #"\?"))))
-   UUID/fromString))
+  ;; There might be a referrer which is not a UUID in standalone mode.
+  (try
+    (some->
+     (or (:query-string request)
+         (when-let [referer (get-in request [:headers "referer"])]
+           (last (str/split referer #"\?"))))
+     UUID/fromString)
+    (catch Exception _ nil)))
 
 (defn- with-session [request]
   (if-let [session-id (get-session-id request)]
@@ -106,9 +110,17 @@
     (rt/update-value
      (case (get-in request [:headers "content-type"])
        "application/transit+json" (transit/read (transit/reader body :json))
-       ;; "application/json"         (json/parse-stream (io/reader body) true)
+       "application/json"         (json/parse-stream (io/reader body))
        "application/edn"          (edn/read (PushbackReader. (io/reader body)))))
     {:status 200}))
+
+(defn- cors-handler [_]
+  {:status 204
+   :headers
+   {"Access-Control-Allow-Origin" "*"
+    "Access-Control-Allow-Headers" "origin, content-type"
+    "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
+    "Access-Control-Max-Age" 86400}})
 
 (defn- index [_]
   (send-resource "text/html" (index/html)))
@@ -118,7 +130,8 @@
    [:get "/wait.js"] wait
    [:get "/main.js"] main-js
    [:get "/rpc"]     rpc-handler
-   [:post "/submit"] submit})
+   [:post "/submit"] submit
+   [:options "/submit"] cors-handler})
 
 (defn handler [request]
   (let [match   ((juxt :request-method :uri) request)
