@@ -38,13 +38,15 @@
      :themes
      {::theme (theme/get-theme)}})))
 
-(defn patch-options []
-  (run-js
-   (str "portal.ui.options.patch(" (get-options) ")")))
-
 (defn init-options []
   (run-js
-   (str "window.PORTAL_EXTENSION_OPTIONS = " (get-options))))
+   (str
+    "sessionStorage.setItem(\"PORTAL_EXTENSION_OPTIONS\", " (get-options) ")")))
+
+(defn patch-options []
+  (init-options)
+  (run-js
+   (str "portal.ui.options.patch(" (get-options) ")")))
 
 (defn -uiSettingsChanged  [_this _] (patch-options))
 (defn -globalSchemeChange [_this _] (patch-options))
@@ -53,8 +55,8 @@
   (let [body (edn/read (PushbackReader. (io/reader (:body request))))]
     (case (:uri request)
       "/open"
-      (do (.loadURL ^JBCefBrowser @browser (format-url body))
-          (init-options)
+      (do (init-options)
+          (.loadURL ^JBCefBrowser @browser (format-url body))
           {:status 200})
       "/open-file" (do (file/open @proj body) {:status 200})
       {:status 404})))

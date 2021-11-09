@@ -5,8 +5,8 @@
             [reagent.core :as r]))
 
 (defn- get-extension-options []
-  (when (exists? js/PORTAL_EXTENSION_OPTIONS)
-    (edn/read-string js/PORTAL_EXTENSION_OPTIONS)))
+  (when-let [options (.getItem js/sessionStorage "PORTAL_EXTENSION_OPTIONS")]
+    (edn/read-string options)))
 
 (defonce ^:private extension-options (r/atom (get-extension-options)))
 
