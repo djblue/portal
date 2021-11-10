@@ -1,0 +1,21 @@
+#!/usr/bin/env bb
+
+(require '[babashka.deps :as deps])
+(require '[clojure.main :as main])
+
+(deps/add-deps '{:deps {djblue/portal {:mvn/version "0.18.0"}}})
+
+(require '[portal.api :as p])
+
+(def port 5678)
+
+(println "Server running on port:" port)
+(p/open {:portal.launcher/port port})
+
+(.addShutdownHook
+ (Runtime/getRuntime)
+ (Thread. (fn [] (p/close))))
+
+(add-tap #'p/submit)
+
+(main/repl)

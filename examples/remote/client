@@ -1,0 +1,20 @@
+#!/usr/bin/env bb
+
+(require '[babashka.deps :as deps])
+(require '[clojure.main :as main])
+
+(deps/add-deps '{:deps {djblue/portal {:mvn/version "0.18.0"}}})
+
+(require '[portal.client.jvm :as p])
+
+(def port 5678)
+
+(def submit (partial p/submit {:port port}))
+
+(add-tap #'submit)
+
+(comment
+  (add-tap (partial p/submit {:port port :encoding :json}))
+  (add-tap (partial p/submit {:port port :encoding :transit})))
+
+(main/repl)
