@@ -11,7 +11,7 @@
      :clj  ((requiring-resolve 'clojure.data.json/read-str) string)
      :cljs (.parse js/JSON string)))
 
-(defn parse-stream [stream]
-  #?(:bb (cheshire.core/parse-stream stream keyword)
-     :clj ((requiring-resolve 'clojure.data.json/read) stream
-           :key-fn keyword)))
+(defn read-stream [stream]
+  #?(:bb   (cheshire.core/parse-stream stream keyword)
+     :clj  ((requiring-resolve 'clojure.data.json/read) stream :key-fn keyword)
+     :cljs (throw (ex-info "Unsupported in cljs" {:stream stream}))))

@@ -12,10 +12,10 @@
      value)
     (.toString out)))
 
-(defn send!
-  ([value] (send! nil value))
+(defn submit
+  ([value] (submit nil value))
   ([{:keys [encoding port host]
-     :or   {encoding :transit
+     :or   {encoding :edn
             host     "localhost"
             port     53755}}
     value]
@@ -31,14 +31,15 @@
       (case encoding
         :json    (json/write value)
         :transit (transit-write value)
-        :edn     (pr-str value))})))
+        :edn     (binding [*print-meta* true]
+                   (pr-str value)))})))
 
 (comment
-  (send! nil {:runtime 'jvm :value "hello jvm"})
-  (send! {:port 1664} {:runtime 'jvm :value "hello jvm"})
+  (submit {:runtime :jvm :value "hello jvm"})
+  (submit {:port 1664} {:runtime :jvm :value "hello jvm"})
 
-  (add-tap send!)
-  (tap> {:runtime 'jvm :value "hello jvm"})
+  (add-tap submit)
+  (tap> {:runtime :jvm :value "hello jvm"})
 
-  (add-tap (partial send! {:encoding :json}))
-  (add-tap (partial send! {:encoding :edn})))
+  (add-tap (partial submit {:encoding :json}))
+  (add-tap (partial submit {:encoding :transit})))

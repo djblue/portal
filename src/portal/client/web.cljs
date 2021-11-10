@@ -1,14 +1,14 @@
 (ns portal.client.web
   (:require
-   [portal.client.common :refer (->send!)]))
+   [portal.client.common :refer (->submit)]))
 
-(def send! (->send! js/fetch))
+(def submit (->submit js/fetch))
 
 (comment
-  (send! nil "Hello World")
-  (add-tap send!)
-  (tap> #?(:cljs {:runtime 'cljs :value "hello web"}))
-  (add-tap send!)
+  (submit "Hello World")
+  (add-tap submit)
+  (tap> {:runtime :cljs :value "hello web"})
+  (add-tap submit)
 
-  (add-tap (partial send! {:encoding :json}))
-  (add-tap (partial send! {:encoding :edn})))
+  (add-tap (partial submit {:encoding :json}))
+  (add-tap (partial submit {:encoding :transit})))

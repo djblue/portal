@@ -110,27 +110,29 @@
     (rt/update-value
      (case (get-in request [:headers "content-type"])
        "application/transit+json" (transit/read (transit/reader body :json))
-       "application/json"         (json/parse-stream (io/reader body))
-       "application/edn"          (edn/read (PushbackReader. (io/reader body)))))
+       "application/json"         (json/read-stream (io/reader body))
+       "application/edn"          (edn/read
+                                   {:default tagged-literal}
+                                   (PushbackReader. (io/reader body)))))
     {:status 200}))
 
 (defn- cors-handler [_]
   {:status 204
    :headers
-   {"Access-Control-Allow-Origin" "*"
+   {"Access-Control-Allow-Origin"  "*"
     "Access-Control-Allow-Headers" "origin, content-type"
     "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
-    "Access-Control-Max-Age" 86400}})
+    "Access-Control-Max-Age"       86400}})
 
 (defn- index [_]
   (send-resource "text/html" (index/html)))
 
 (def ^:private routes
-  {[:get "/"]        index
-   [:get "/wait.js"] wait
-   [:get "/main.js"] main-js
-   [:get "/rpc"]     rpc-handler
-   [:post "/submit"] submit
+  {[:get "/"]           index
+   [:get "/wait.js"]    wait
+   [:get "/main.js"]    main-js
+   [:get "/rpc"]        rpc-handler
+   [:post "/submit"]    submit
    [:options "/submit"] cors-handler})
 
 (defn handler [request]

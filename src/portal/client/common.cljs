@@ -9,26 +9,27 @@
    (transit/writer :json {:transform transit/write-meta})
    value))
 
-(defn ->send! [fetch-fn]
-  (fn send!
-    ([value] (send! nil value))
+(defn ->submit [fetch]
+  (fn submit
+    ([value] (submit nil value))
     ([{:keys [encoding port host]
-       :or   {encoding :transit
+       :or   {encoding :edn
               host     "localhost"
               port     53755}}
       value]
-     (-> (fetch-fn
-          (str "http://" host ":" port "/submit")
-          (clj->js
-           {:method "POST"
-            :headers
-            {"content-type"
-             (case encoding
-               :json    "application/json"
-               :transit "application/transit+json"
-               :edn     "application/edn")}
-            :body
-            (case encoding
-              :json    (json/write value)
-              :transit (transit-write value)
-              :edn     (pr-str value))}))))))
+     (fetch
+      (str "http://" host ":" port "/submit")
+      (clj->js
+       {:method "POST"
+        :headers
+        {"content-type"
+         (case encoding
+           :json    "application/json"
+           :transit "application/transit+json"
+           :edn     "application/edn")}
+        :body
+        (case encoding
+          :json    (json/write value)
+          :transit (transit-write value)
+          :edn     (binding [*print-meta* true]
+                     (pr-str value)))})))))
