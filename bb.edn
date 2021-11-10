@@ -12,4 +12,5 @@
          test   tasks/test
          tag    tasks/tag
          ext    tasks/build-extensions
+         pkg    tasks/package-artifacts
          deploy tasks/deploy}}

@@ -175,16 +175,24 @@
     (fs/delete-tree path))
   nil)
 
+(def ^:private clean-files
+  ["extension-intellij/build/"
+   "extension-vscode/vs-code.js"
+   "extension-vscode/vs-code.js.map"
+   "pom.xml"
+   "resources/portal/"
+   "target/"
+   (str "extension-vscode/portal-" version ".vsix")])
+
 (defn clean
   "Remove target and resources/portal"
   []
-  (rm "resources/portal/")
-  (rm "target/"))
+  (doseq [file clean-files] (rm file)))
 
 (defn ci
   "Run all CI Checks."
   []
-  (rm "resources/portal/") (check) (test))
+  (check) (test))
 
 (def e2e-envs
   {:jvm  [:clojure "-M" "-e" "(set! *warn-on-reflection* true)" "-r"]
@@ -288,12 +296,26 @@
            (fs/glob "resources" "**"))))
     (mvn :package)))
 
-(defn release [] (clean) (ci) (jar))
+(defn package-artifacts
+  "Package all release artifacts."
+  []
+  (jar)
+  (build-extensions))
+
+(defn- deploy-vscode []
+  (binding [*cwd* "extension-vscode"]
+    (npx :vsce :publish)))
+
+(defn- deploy-clojars []
+  (mvn :deploy))
 
 (defn deploy
   "Deploy to clojars."
   []
-  (release) (mvn :deploy))
+  (ci)
+  (package-artifacts)
+  (deploy-clojars)
+  (deploy-vscode))
 
 (defn- get-task [task]
   (find-var
