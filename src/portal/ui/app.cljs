@@ -164,7 +164,7 @@
     (react/useEffect
      (fn []
        (state/dispatch! state assoc :filter-input (.-current ref)))
-     #js [(.-current ref)])
+     #js [(hash context) (.-current ref)])
     [s/input
      {:ref ref
       :disabled  (nil? context)
