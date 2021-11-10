@@ -657,73 +657,86 @@
                                 (get search-text location ""))}))
 
 (defn inspector [value]
-  (let [ref   (react/useRef nil)
-        state (state/use-state)
-        context
-        (-> (use-context)
-            (assoc :value value)
-            (update :depth inc))
-        location (state/get-location context)
+  (let [ref            (react/useRef nil)
+        focus-ref      (react/useRef)
+        state          (state/use-state)
+        context        (-> (use-context)
+                           (assoc :value value)
+                           (update :depth inc))
+        location       (state/get-location context)
         {:keys [value viewer selected expanded?]}
-        @(r/track get-info state context)]
+        @(r/track get-info state context)
+        theme          (theme/use-theme)
+        depth          (use-depth)
+        default-expand (<= depth (:max-depth theme))
+        expanded?      (if-not (nil? expanded?) expanded? default-expand)
+        preview?       (not expanded?)
+        type           (get-value-type value)
+        component      (or
+                        (when-not (= (:name viewer) :portal.viewer/inspector)
+                          (:component viewer))
+                        (if preview?
+                          (get-preview-component type)
+                          (get-inspect-component type)))]
     (select/use-register-context context viewer)
+    (react/useEffect
+     (fn []
+       (when selected
+         (some-> focus-ref .-current .focus)
+         (state/dispatch! state assoc-in [:default-expand location] default-expand)
+         #(state/dispatch! state update :default-expand dissoc location)))
+     #js [selected])
+    (react/useEffect
+     (fn []
+       (when (and selected
+                  (not= (.. js/document -activeElement -tagName) "INPUT"))
+         (when-let [el (.-current ref)]
+           (.scrollIntoView el #js {:block "nearest" :behavior "smooth"}))))
+     #js [selected (.-current ref)])
     [with-context
      context
-     (let [theme (theme/use-theme)
-           depth (use-depth)
-           default-expand (<= depth (:max-depth theme))
-           expanded? (if-not (nil? expanded?) expanded? default-expand)
-           preview?  (not expanded?)
-           type (get-value-type value)
-           component (or
-                      (when-not (= (:name viewer) :portal.viewer/inspector)
-                        (:component viewer))
-                      (if preview?
-                        (get-preview-component type)
-                        (get-inspect-component type)))]
-       (react/useEffect
-        (fn []
-          (when selected
-            (state/dispatch! state assoc-in [:default-expand location] default-expand)
-            #(state/dispatch! state update :default-expand dissoc location)))
-        #js [selected])
-       (react/useEffect
-        (fn []
-          (when (and selected
-                     (not= (.. js/document -activeElement -tagName) "INPUT"))
-            (when-let [el (.-current ref)]
-              (.scrollIntoView el #js {:block "nearest" :behavior "smooth"}))))
-        #js [selected (.-current ref)])
+     (when-not (:readonly? context)
        [s/div
-        (merge
-         (when-not (:readonly? context)
-           {:on-mouse-down
-            (fn [e]
-              (when (= (.-button e) 1)
-                (state/dispatch! state state/toggle-expand location)
-                (.stopPropagation e)))
-            :on-click
-            (fn [e]
-              (if selected
-                (state/dispatch! state state/deselect-context context (.-metaKey e))
-                (state/dispatch! state state/select-context context (.-metaKey e)))
-              (.stopPropagation e))
-            :on-double-click
-            (fn [e]
-              (state/dispatch! state state/nav context)
-              (.stopPropagation e))})
-         {:ref ref
-          :title (-> value meta :doc)
-          :style
-          {:width "100%"
-           :border-radius (:border-radius theme)
-           :border (if selected
-                     [1 :solid (get theme (nth theme/order selected))]
-                     [1 :solid "rgba(0,0,0,0)"])
-           :box-shadow (when selected [0 0 3 (get theme (nth theme/order selected))])
-           :background (let [bg (get-background (inc depth))]
-                         (when selected bg))}})
-        [:> error-boundary [component value]]])]))
+        {:ref         focus-ref
+         :tab-index   0
+         :style/focus {:outline :none}
+         :style       {:position :absolute}
+         :on-focus
+         (fn [e]
+           (when-not selected
+             (state/dispatch! state state/select-context context false)
+             (.stopPropagation e)))}])
+     [s/div
+      (merge
+       (when-not (:readonly? context)
+         {:on-mouse-down
+          (fn [e]
+            (.stopPropagation e)
+            (when (= (.-button e) 1)
+              (state/dispatch! state state/toggle-expand location)
+              (.stopPropagation e)))
+          :on-click
+          (fn [e]
+            (if selected
+              (state/dispatch! state state/deselect-context context (.-metaKey e))
+              (state/dispatch! state state/select-context context (.-metaKey e)))
+            (.stopPropagation e))
+          :on-double-click
+          (fn [e]
+            (state/dispatch! state state/nav context)
+            (.stopPropagation e))})
+       {:ref   ref
+        :title (-> value meta :doc)
+        :style
+        {:width         "100%"
+         :border-radius (:border-radius theme)
+         :border        (if selected
+                          [1 :solid (get theme (nth theme/order selected))]
+                          [1 :solid "rgba(0,0,0,0)"])
+         :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
+         :background    (let [bg (get-background (inc depth))]
+                          (when selected bg))}})
+      [:> error-boundary [component value]]]]))
 
 (def viewer
   {:predicate (constantly true)

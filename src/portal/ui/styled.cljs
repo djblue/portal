@@ -19,6 +19,7 @@
 (def selectors
   {:style             #(str "." %)
    :style/hover       #(str "." % ":hover")
+   :style/focus       #(str "." % ":focus")
    :style/placeholder #(str "." % "::placeholder")})
 
 (defonce cache (atom {}))
