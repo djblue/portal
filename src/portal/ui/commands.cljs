@@ -6,6 +6,7 @@
             [portal.async :as a]
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
+            [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
@@ -276,11 +277,11 @@
       keymap))))
 
 (def shortcut->symbol
-  {"arrowright" "⭢"
-   "arrowleft" "⭠"
-   "arrowup" "⭡"
-   "arrowdown" "⭣"
-   "meta" "⌘"})
+  {"arrowright" [icons/arrow-right {:size "xs"}]
+   "arrowleft"  [icons/arrow-left {:size "xs"}]
+   "arrowup"    [icons/arrow-up {:size "xs"}]
+   "arrowdown"  [icons/arrow-down {:size "xs"}]
+   "meta"       "⌘"})
 
 (defn combo-order [k]
   (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
