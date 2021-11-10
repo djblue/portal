@@ -69,7 +69,9 @@
   "Update npm and clj dependencies."
   []
   (npm :update)
-  (clj "-M:antq" "-m" :antq.core "--upgrade"))
+  (clj "-M:antq" "-m" :antq.core "--upgrade")
+  (binding [*cwd* "extension-vscode"]
+    (npm :update)))
 
 (defn main-js []
   (install)
