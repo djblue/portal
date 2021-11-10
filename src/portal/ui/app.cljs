@@ -163,8 +163,8 @@
         location (state/get-location context)]
     (react/useEffect
      (fn []
-       (state/dispatch! state assoc :filter-input (.-current ref)))
-     #js [(hash context) (.-current ref)])
+       (swap! commands/search-refs conj ref)
+       #(swap! commands/search-refs disj ref)))
     [s/input
      {:ref ref
       :disabled  (nil? context)

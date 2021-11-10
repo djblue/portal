@@ -644,9 +644,11 @@
   (when-let [path (state/get-path @state)]
     (copy-edn! path)))
 
-(defn ^:command focus-filter [state]
-  (when-let [input (:filter-input @state)]
-    (.focus input)))
+(defonce search-refs (atom #{}))
+
+(defn ^:command focus-filter [_]
+  (doseq [ref @search-refs]
+    (when-let [input (.-current ref)] (.focus input))))
 
 (defn ^:command scroll-top [state]
   (when-let [el (:scroll-element @state)]
