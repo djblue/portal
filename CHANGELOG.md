@@ -1,3 +1,30 @@
+## 0.18.0 - 2021-11-09
+
+### Bug Fixes
+
+- Fix search input focus ddda7c5
+- Fix tab-to-value 41bb66d
+
+Thanks [@seancorfield](https://github.com/seancorfield) for the bug reports!
+
+### Intellij Extension
+
+- Use random port for intellij extension b0c407f
+- Put options in session storage to avoid data race 427f5a1
+  - Thanks [@wilkerlucio](https://github.com/wilkerlucio) for the bug report!
+- Always enable tool window in intellij extension 3a4e835
+  - Thanks [@markaddleman](https://github.com/markaddleman) for the suggestion!
+
+### Experimental
+
+- First cut of remote api 188eb04
+ - feat: addition of node client d7476b1
+ - feat: addition of web client for standalone mode 396506a
+ - feat: allow CORS on the standalone server 1e279cc
+ - feat: addition of jvm+bb client 1348297
+
+Thanks [@davidpham87](https://github.com/davidpham87) for this new feature!
+
 ## 0.17.0 - 2021-11-07
 
 ### Highlights
