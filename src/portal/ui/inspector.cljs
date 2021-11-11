@@ -717,9 +717,13 @@
               (.stopPropagation e)))
           :on-click
           (fn [e]
-            (if selected
-              (state/dispatch! state state/deselect-context context (.-metaKey e))
-              (state/dispatch! state state/select-context context (.-metaKey e)))
+            (state/dispatch!
+             state
+             (if selected
+               state/deselect-context
+               state/select-context)
+             context
+             (or (.-metaKey e) (.-altKey e)))
             (.stopPropagation e))
           :on-double-click
           (fn [e]

@@ -153,6 +153,13 @@ A single click will select a value. The arrow keys, (`⭠` `⭣` `⭡` `⭢`) or
 `j` `k` `l`) will change the selection relative to the currently selected value.
 Relative selection is based on the viewer.
 
+#### Multi-Select
+
+To select multiple values, hold down either `⌘` or `alt` and single click a
+value. To un-select a value, simply click it again while holding down the
+multi-select key. The order of selection is important to the application of
+commands.
+
 ### Viewers
 
 A viewer takes a raw value and renders it to the screen. A single value can have
@@ -181,16 +188,23 @@ be considered a match.
 To register your own command, use the `portal.api/register!` function. For example:
 
 ``` clojure
-;; Currently, only single arity vars can be registerd as commands.
 (portal.api/register! #'identity)
+```
+
+When multiple values are selected, commands will be applied as follows:
+
+``` clojure
+(apply f [first-selected second-selcted ...])
 ```
 
 **NOTES:**
 
+- A very useful command is `portal.ui.commands/copy` which will copy the
+  currently selected value as an edn string to the clipboard.
+- [`lambdaisland.deep-diff2/diff`](https://github.com/lambdaisland/deep-diff2#use)
+  is a useful command for diffing two selected values.
 - Commands manipulating the UI itself will live under the `portal.ui.commands`
   namespace.
-- A very useful command is `portal.ui.commands/copy` which will copy the
-  currently selected value as an edn string to the clipbaord.
 - The `cljs.core` namespace will be aliased as `clojure.core` when using a
   clojurescript runtime.
 
