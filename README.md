@@ -49,10 +49,13 @@ or for a **babashka >=0.2.4** repl, do:
 bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.0"}}}'`
 ```
 
-or for examples on how to integrate portal into an existing project, look through the [examples](./examples) directory.
+or for examples on how to integrate portal into an existing project, look
+through the [examples](./examples) directory.
 
-**NOTE** Portal can also be used without a runtime via the [standalone
-version](https://djblue.github.io/portal/).
+**NOTE:** Portal can also be used without a runtime via the [standalone
+version](https://djblue.github.io/portal/). The standalone version can be
+installed as a [chrome pwa](https://support.google.com/chrome/answer/9658361)
+which will provide a dock launcher for easy access.
 
 ### API
 
@@ -368,12 +371,14 @@ runtime in which `(portal.api/open {:launcher :vs-code})` is run.
 ## Principles
 
 - Support as much of clojure's data as possible
-- First class support for async extensibility
+- Independent of any particular editor but embeddable
 - Simple standalone usage without a clojure environment
 - Easy theming
 
-## Prior Art
+## Inspiration
 
+- [Reveal](https://github.com/vlaaad/reveal)
+  - [Talk](https://www.youtube.com/watch?v=jq-7aiXPRKs)
 - [Clouseau](https://common-lisp.net/project/mcclim/static/manual/mcclim.html)
   - [Demo Video](https://youtu.be/-1LzFxTbU9E)
 - [clojure.inspector](https://clojuredocs.org/clojure.inspector/inspect)
@@ -399,6 +404,8 @@ runtime in which `(portal.api/open {:launcher :vs-code})` is run.
 To start the development server, make sure you have the following dependencies
 installed on your system:
 
+- [java](https://openjdk.java.net/) - for clojure runtime
+  - for osx, do `brew install openjdk`
 - [babashka](https://babashka.org/) - for build scripting
   - for osx, do: `brew install borkdude/brew/babashka`
   - to list all build tasks, do: `bb tasks`
