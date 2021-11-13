@@ -34,6 +34,16 @@
 (def npx    (partial sh :npx))
 (def shadow (partial clj "-M:cljs:shadow"))
 
+(defn assert-clean []
+  (git :diff "--exit-code"))
+
+(defn git-hash []
+  (-> ["git" "rev-parse" "HEAD"]
+      (p/process {:out :string})
+      p/check
+      :out
+      str/trim))
+
 (defn install []
   (when (seq
          (fs/modified-since
@@ -68,10 +78,13 @@
 (defn fix-deps
   "Update npm and clj dependencies."
   []
+  (assert-clean)
   (npm :update)
   (clj "-M:antq" "-m" :antq.core "--upgrade")
   (binding [*cwd* "extension-vscode"]
-    (npm :update)))
+    (npm :update))
+  (git :add "-u")
+  (git :commit "-m" "Bump deps"))
 
 (defn main-js []
   (install)
@@ -246,13 +259,6 @@
   (git :tag version))
 
 (def deps (read-string (slurp "deps.edn")))
-
-(defn git-hash []
-  (-> ["git" "rev-parse" "HEAD"]
-      (p/process {:out :string})
-      p/check
-      :out
-      str/trim))
 
 (def options
   {:lib 'djblue/portal
