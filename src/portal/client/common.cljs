@@ -1,7 +1,7 @@
 (ns portal.client.common
   (:require
-   [portal.runtime.json :as json]
-   [cognitect.transit :as transit]))
+   [cognitect.transit :as transit]
+   [portal.runtime.json :as json]))
 
 (defn- transit-write
   [value]
