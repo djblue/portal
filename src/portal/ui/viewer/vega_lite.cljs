@@ -10,10 +10,10 @@
 
 (sp/def ::x
   (sp/keys :req-un [::field]
-           :opt-un [::type ::title ::axis]))
+           :opt-un [:vega/type ::title ::axis]))
 
 (sp/def ::y
-  (sp/keys :opt-un [::field ::type ::title ::axis]))
+  (sp/keys :opt-un [::field :vega/type ::title ::axis]))
 
 (sp/def ::encoding
   (sp/keys :opt-un [::x ::y ::theta]))
@@ -33,8 +33,10 @@
 (sp/def ::mark-string
   #{"bar" "circle" "square" "rect" "tick" "line" "area" "point" "geoshape" "rule" "text" "boxplot" "errorband" "errorbar"})
 
+(sp/def ::type ::mark-string)
+
 (sp/def ::mark-object
-  (sp/keys :req-un [::mark-string]
+  (sp/keys :req-un [::type]
            :opt-un [::aria ::description ::style ::tooltip ::clip ::invalid ::order]))
 
 (sp/def ::mark
