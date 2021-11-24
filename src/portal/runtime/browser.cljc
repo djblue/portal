@@ -1,4 +1,5 @@
 (ns portal.runtime.browser
+  #?(:clj  (:refer-clojure :exclude [random-uuid]))
   #?(:clj  (:require [clojure.java.browse :refer [browse-url]]
                      [portal.runtime :as rt]
                      [portal.runtime.fs :as fs]
