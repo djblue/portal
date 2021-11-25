@@ -18,7 +18,7 @@
    (defn get-file [env file]
      (if (:ns env) ;; cljs target
        (if-let [classpath-file (io/resource file)]
-         (.toString classpath-file)
+         (.getPath (io/file classpath-file))
          file)
        *file*)))
 

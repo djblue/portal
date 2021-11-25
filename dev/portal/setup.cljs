@@ -2,9 +2,13 @@
   (:require [clojure.core.protocols :refer [Datafiable]]
             [clojure.datafy :refer [datafy]]
             [examples.data :refer [data]]
-            [portal.console :as c]
+            [portal.client.web :as client]
+            [portal.console :as log]
             [portal.web :as p]))
 
+(def submit (partial client/submit {:port js/window.location.port}))
+
+(add-tap #'submit)
 (add-tap #'p/submit)
 
 (extend-protocol Datafiable
@@ -39,6 +43,8 @@
   (tap> (with-meta (range) {:hello :world}))
   (tap> data)
 
-  ;; console
-  (c/log "log")
-  (c/error "error"))
+  (do (log/trace ::trace)
+      (log/debug ::debug)
+      (log/info  ::info)
+      (log/warn  ::warn)
+      (log/error ::error)))
