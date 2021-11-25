@@ -1,6 +1,5 @@
 (ns user
-  (:require [c]
-            [clojure.core.protocols :refer [Datafiable]]
+  (:require [clojure.core.protocols :refer [Datafiable]]
             [clojure.datafy :refer [datafy]]
             [clojure.java.io :as io]
             [examples.data :refer [data]]

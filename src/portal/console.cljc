@@ -22,6 +22,7 @@
          file)
        *file*)))
 
+#_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-binding])}
 (defn capture [level form expr env]
   (let [{:keys [line column file]} (meta form)]
     `(let [[flow# result#] (run (fn [] ~expr))]
