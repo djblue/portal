@@ -20,15 +20,15 @@
                 com.intellij.openapi.wm.ToolWindowFactory]
    :name portal.extensions.intellij.Factory))
 
-(defonce ^:private browser (atom nil))
-(defonce ^:private proj    (atom nil))
-(defonce ^:private server  (atom nil))
+; instances are indexed per project, each instance will contain the keys
+; :browser and :server
+(defonce ^:private instances (atom {}))
 
 (defn- format-url [{:keys [portal server]}]
   (str "http://" (:host server) ":" (:port server) "?" (:session-id portal)))
 
-(defn- run-js [^String js]
-  (when-let [^JBCefBrowser browser @browser]
+(defn- run-js [^JBCefBrowser browser ^String js]
+  (when browser
     (.executeJavaScript (.getCefBrowser browser) js "" 0)))
 
 (defn- get-options []
@@ -38,27 +38,32 @@
      :themes
      {::theme (theme/get-theme)}})))
 
-(defn init-options []
-  (run-js
-   (str
-    "sessionStorage.setItem(\"PORTAL_EXTENSION_OPTIONS\", " (get-options) ")")))
+(defn init-options [browser]
+  (run-js browser
+          (str
+           "sessionStorage.setItem(\"PORTAL_EXTENSION_OPTIONS\", " (get-options) ")")))
 
-(defn patch-options []
-  (init-options)
-  (run-js
-   (str "portal.ui.options.patch(" (get-options) ")")))
+(defn patch-options
+  ([]
+   (doseq [browser (into [] (map :browser) (vals @instances))]
+     (patch-options browser)))
+  ([browser]
+   (init-options browser)
+   (run-js browser
+           (str "portal.ui.options.patch(" (get-options) ")"))))
 
 (defn -uiSettingsChanged  [_this _] (patch-options))
 (defn -globalSchemeChange [_this _] (patch-options))
 
-(defn handler [request]
-  (let [body (edn/read (PushbackReader. (io/reader (:body request))))]
+(defn handler [request project]
+  (let [body (edn/read (PushbackReader. (io/reader (:body request))))
+        browser (get-in @instances [project :browser])]
     (case (:uri request)
       "/open"
-      (do (init-options)
-          (.loadURL ^JBCefBrowser @browser (format-url body))
+      (do (init-options browser)
+          (.loadURL ^JBCefBrowser browser (format-url body))
           {:status 200})
-      "/open-file" (do (file/open @proj body) {:status 200})
+      "/open-file" (do (file/open project body) {:status 200})
       {:status 404})))
 
 (defn- write-config [^Project project config]
@@ -68,18 +73,20 @@
     (spit file (pr-str config))))
 
 (defn start [^Project project]
-  (when-not @server
-    (reset! server (http/run-server #'handler {:port 0 :legacy-return-value? false})))
+  (swap! instances update project
+         (fn [m]
+           (cond-> m
+             (not (:server m))
+             (assoc :server (http/run-server #(handler % project) {:port 0 :legacy-return-value? false})))))
   (write-config
    project
    {:host "localhost"
-    :port (http/server-port @server)}))
+    :port (http/server-port (get-in @instances [project :server]))}))
 
 (defn- get-window ^JComponent [^Project project]
   (start project)
-  (reset! proj project)
   (let [b (JBCefBrowser.)]
-    (reset! browser b)
+    (swap! instances assoc-in [project :browser] b)
     (Disposer/register project b)
     (.getComponent b)))
 
