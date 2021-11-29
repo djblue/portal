@@ -40,8 +40,8 @@
 
 (defn init-options [browser]
   (run-js browser
-   (str
-    "sessionStorage.setItem(\"PORTAL_EXTENSION_OPTIONS\", " (get-options) ")")))
+          (str
+           "sessionStorage.setItem(\"PORTAL_EXTENSION_OPTIONS\", " (get-options) ")")))
 
 (defn patch-options
   ([]
@@ -50,7 +50,7 @@
   ([browser]
    (init-options browser)
    (run-js browser
-     (str "portal.ui.options.patch(" (get-options) ")"))))
+           (str "portal.ui.options.patch(" (get-options) ")"))))
 
 (defn -uiSettingsChanged  [_this _] (patch-options))
 (defn -globalSchemeChange [_this _] (patch-options))
@@ -74,10 +74,10 @@
 
 (defn start [^Project project]
   (swap! instances update project
-    (fn [m]
-      (cond-> m
-        (not (:server m))
-        (assoc :server (http/run-server #(handler % project) {:port 0 :legacy-return-value? false})))))
+         (fn [m]
+           (cond-> m
+             (not (:server m))
+             (assoc :server (http/run-server #(handler % project) {:port 0 :legacy-return-value? false})))))
   (write-config
    project
    {:host "localhost"
