@@ -211,7 +211,8 @@ A default viewer can be set via metadata. For example:
 The bottom-right yellow button will open the command palette. Commands can have
 a `:predicate` function like viewers, so only relevant commands will be visible
 which is based on the currently selected value. They will be sorted
-alphabetically by name and can quickly be filtered.
+alphabetically by name and can quickly be filtered. The `(ctrl | ⌘) + shift +
+p` or `ctrl + j` shortcuts can also be used to open the command palette.
 
 The filter string is split by white space and all words must appear in a name to
 be considered a match.
