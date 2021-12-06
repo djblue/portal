@@ -10,7 +10,8 @@
    :extra-deps
    {babashka/babashka     {:mvn/version "0.6.4"}
     hiccup/hiccup         {:mvn/version "2.0.0-alpha2"}
-    ns-tracker/ns-tracker {:mvn/version "0.4.0"}}}
+    ns-tracker/ns-tracker {:mvn/version "0.4.0"}
+    vlaaad/reveal         {:mvn/version "1.3.250"}}}
   :cljs
   {:extra-deps
    {borkdude/sci              {:mvn/version "0.2.7"}

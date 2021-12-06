@@ -25,7 +25,7 @@
       {:style
        {:padding       (:padding theme)
         :border-bottom [1 :solid (::c/exception theme)]}}
-      "Rendering error: "]
+      "Rendering error: " (.-message error)]
      [s/div
       {:style
        {:padding (:padding theme)}}
