@@ -4,6 +4,7 @@
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.runtime.cson :as cson]
             [portal.ui.state :as state]
+            [portal.ui.sci :as sci]
             [reagent.core :as r]))
 
 (deftype RuntimeObject [object]
@@ -146,6 +147,16 @@
            [resolve] (get @pending-requests id)]
        (swap! pending-requests dissoc id)
        (when (fn? resolve) (resolve message))))
+   :portal.rpc/eval-str
+   (fn [message send!]
+     (send!
+      (merge
+       {:op            :portal.rpc/response
+        :portal.rpc/id (:portal.rpc/id message)}
+       (try
+         {:result (sci/eval-string (:code message))}
+         (catch :default e
+           {:result (pr-str e)})))))
    :portal.rpc/update-versions
    (fn [message send!]
      (reset! versions (:body message))

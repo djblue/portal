@@ -6,6 +6,7 @@
             [portal.ui.options :as opts]
             [portal.ui.rpc :as rpc]
             [portal.ui.sci :as sci]
+            [portal.ui.sci.libs :as libs]
             [portal.ui.state :as state]
             [reagent.core :as r]
             [reagent.dom :as dom]))
@@ -52,7 +53,16 @@
               (.getElementById js/document "root")
               functional-compiler))
 
+(defn- load-fn [{:keys [namespace]}]
+  (let [file (ns->url namespace)
+        xhr  (js/XMLHttpRequest.)]
+    (.open xhr "GET" file false)
+    (.send xhr nil)
+    {:file   file
+     :source (.-responseText xhr)}))
+
 (defn main! []
+  (reset! sci/ctx (libs/init {:load-fn load-fn}))
   (reset! state/sender rpc/request)
   (render-app))
 

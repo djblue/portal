@@ -71,4 +71,9 @@
   (reset! server nil)
   (reset! rt/sessions {}))
 
+(defn eval-str [code]
+  (:result
+   (c/request {:op   :portal.rpc/eval-str
+               :code code})))
+
 (reset! rt/request c/request)
