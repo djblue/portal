@@ -36,8 +36,9 @@
 
 (defn request
   ([message]
-   (doseq [session-id (keys @connections)]
-     (request session-id message)))
+   (last
+    (for [session-id (keys @connections)]
+      (request session-id message))))
   ([session-id message]
    (if-let [send! (get-connection session-id)]
      (let [id       (next-id)

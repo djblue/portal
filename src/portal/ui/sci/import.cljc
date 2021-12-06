@@ -1,6 +1,6 @@
-(ns portal.ui.sci-import
+(ns portal.ui.sci.import
   (:refer-clojure :exclude [import])
-  #?(:cljs (:require-macros portal.ui.sci-import)))
+  #?(:cljs (:require-macros portal.ui.sci.import)))
 
 (defn- sci-import [symbols]
   (let [ns (gensym)]
