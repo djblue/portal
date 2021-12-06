@@ -2,6 +2,7 @@
   (:require ["react" :as react]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.connecton-status :as status]
             [portal.ui.icons :as icons]
@@ -386,7 +387,7 @@
    date-time/viewer
    relative-time/viewer])
 
-(reset! ins/viewers viewers)
+(reset! api/viewers viewers)
 
 (defn root [& children]
   (let [opts  (opts/use-options)

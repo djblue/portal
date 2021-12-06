@@ -4,6 +4,7 @@
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
+            [portal.ui.api :as api]
             [portal.ui.filter :as f]
             [portal.ui.lazy :as l]
             [portal.ui.rpc :as rpc]
@@ -50,7 +51,7 @@
         (r/as-element [inspect-error* error])
         (.. this -props -children)))}))
 
-(defonce viewers (atom []))
+(defonce viewers api/viewers)
 
 (defn viewers-by-name [viewers]
   (into {} (map (juxt :name identity) viewers)))
@@ -66,8 +67,8 @@
 (defn get-viewer [state context]
   (if-let [selected-viewer
            (get-in @state [:selected-viewers (state/get-location context)])]
-    (some #(when (= (:name %) selected-viewer) %) @viewers)
-    (first (get-compatible-viewers @viewers context))))
+    (some #(when (= (:name %) selected-viewer) %) @api/viewers)
+    (first (get-compatible-viewers @api/viewers context))))
 
 (defn set-viewer! [state context viewer-name]
   (state/dispatch! state
