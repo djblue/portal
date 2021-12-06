@@ -14,11 +14,11 @@
 
 (def start!       (lazy-fn 'shadow.cljs.devtools.server/start!))
 (def watch        (lazy-fn 'shadow.cljs.devtools.api/watch))
-(def nrepl-select (lazy-fn 'shadow.cljs.devtools.api/nrepl-select))
+(def repl         (lazy-fn 'shadow.cljs.devtools.api/repl))
 
 (defn cljs
   ([] (cljs :client))
-  ([build-id] (start!) (watch build-id) (nrepl-select build-id)))
+  ([build-id] (start!) (watch build-id) (repl build-id)))
 
 (defn node [] (cljs :node))
 
