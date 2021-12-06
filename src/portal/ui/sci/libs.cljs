@@ -2,6 +2,7 @@
   (:require [cljs.reader]
             [portal.ui.commands]
             [portal.ui.sci.import :as sci-import]
+            [portal.ui.state]
             [reagent.core]
             [reagent.dom]
             [sci.core :as sci]))
@@ -41,6 +42,8 @@
    portal.ui.styled/iframe
    portal.ui.styled/select
    portal.ui.styled/option
+
+   portal.ui.state/invoke
 
    reagent.core/as-element
    reagent.core/atom
