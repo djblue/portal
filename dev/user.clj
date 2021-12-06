@@ -87,4 +87,37 @@
   (tap> (with-meta (range) {:hello :world}))
   (tap> (json/read (slurp "package-lock.json")))
   (tap> (io/file "deps.edn"))
-  (dotimes [_i 25] (tap> data)))
+  (dotimes [_i 25] (tap> data))
+
+  (require '[portal.runtime.jvm.launcher :as launcher])
+
+    (tap> data)
+  (launcher/eval-str (str '(ns mine
+                             (:require ["vega-embed" :as vegaEmbed]))
+                          '(portal.ui.api/register-viewer! {:predicate string?
+                                                            :component (fn [val]
+                                                                         [:portal.ui.styled/div
+                                                                          {:title "Time"
+                                                                           :style
+                                                                           {:display :flex
+                                                                            :align-items :center}}
+                                                                          val])
+                                                            :name :portal.viewer/testing5})))
+
+  (launcher/eval-str (str '(ns mine
+                             )
+                          '(portal.ui.api/register-viewer!
+                            {:predicate map?
+                             :component (fn [val]
+                                          (reagent.core/create-class
+                                           {:display-name "vega-test"
+                                            :component-did-mount (fn [this]
+                                                                   (portal.ui.sci.libs/vega-embed (reagent.dom/dom-node this) val {:renderer :canvas
+                                                                                                               :mode "vega-lite"}))
+                                            :component-will-update (fn [this [_ new-doc new-opts]]
+                                                                     (portal.ui.sci.libs/vega-embed (reagent.dom/dom-node this) new-doc {:renderer :canvas
+                                                                                                                     :mode "vega-lite"}))
+                                            :reagent-render (fn [val]
+                                                              [:div.viz])}))
+                             :name :portal.viewer/vega-test2})))
+  )

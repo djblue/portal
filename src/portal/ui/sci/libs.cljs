@@ -5,8 +5,11 @@
             [portal.ui.state]
             [reagent.core]
             [reagent.dom]
+            ["vega-embed" :as vegaEmbed]
             [sci.core :as sci]))
 
+(defn vega-embed [el schema opts]
+  (vegaEmbed el (clj->js schema) (clj->js opts)))
 (def namespaces
   #_:clj-kondo/ignore
   (sci-import/import
@@ -14,6 +17,10 @@
    cljs.core/tap>
 
    cljs.reader/read-string
+
+   portal.ui.api/register-viewer!
+   portal.ui.sci.libs/vega-embed
+
 
    portal.colors/themes
    portal.ui.inspector/inspector
@@ -47,6 +54,8 @@
 
    reagent.core/as-element
    reagent.core/atom
+   reagent.core/create-class
+   reagent.dom/dom-node
 
    reagent.dom/render))
 

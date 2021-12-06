@@ -149,14 +149,22 @@
        (when (fn? resolve) (resolve message))))
    :portal.rpc/eval-str
    (fn [message send!]
-     (send!
-      (merge
-       {:op            :portal.rpc/response
-        :portal.rpc/id (:portal.rpc/id message)}
-       (try
-         {:result (sci/eval-string (:code message))}
-         (catch :default e
-           {:result (pr-str e)})))))
+     (.catch
+       (send!
+        (merge
+         {:op            :portal.rpc/response
+          :portal.rpc/id (:portal.rpc/id message)}
+         (try
+           {:result (sci/eval-string (:code message))}
+           (catch :default e
+             {:result (pr-str e)}))))
+       (fn [e]
+         (.log js/console e)
+         (send!
+          (merge
+           {:op            :portal.rpc/response
+            :portal.rpc/id (:portal.rpc/id message)}
+           {:result "could not return send result"})))))
    :portal.rpc/update-versions
    (fn [message send!]
      (reset! versions (:body message))
