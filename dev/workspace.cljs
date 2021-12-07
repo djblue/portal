@@ -1,5 +1,7 @@
 (ns workspace
-  (:require [portal.colors :as c]
+  (:require ["react" :as react]
+            ["vega-embed" :as vega-embed]
+            [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -25,7 +27,9 @@
      children)))
 
 (defn hello-world []
-  (let [theme (theme/use-theme)]
+  (let [theme              (theme/use-theme)
+        [state set-state!] (react/useState 0)]
+    (js/console.log vega-embed/default)
     [s/div
      {:style
       {:border-top [1 :solid (::c/border theme)]
@@ -33,9 +37,12 @@
      [s/h1 {:style
             {:display :flex
              :color (::c/boolean theme)}}
-      "Counter: " [ins/inspector @counter]]
+      "Counter: "
+      [ins/inspector @counter]
+      [ins/inspector state]]
      [button {:on-click
               (fn []
+                (set-state! (inc state))
                 (tap> {:action  :inc
                        :current @counter
                        :next    (swap! counter inc)}))}
