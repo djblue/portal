@@ -399,7 +399,7 @@ runtime in which `(portal.api/open {:launcher :vs-code})` is run.
 
 ### IntelliJ
 
-Download the IntelliJ plugin from [Releases](releases) and [install it from the disk](https://www.jetbrains.com/help/idea/managing-plugins.html).
+Download the IntelliJ plugin from [Releases](https://github.com/djblue/portal/releases) and [install it from the disk](https://www.jetbrains.com/help/idea/managing-plugins.html).
 A "Portal" button will appear on the right-hand bar.
 
 Add a dependency on Portal to your project, start a Clojure REPL and inside that evaluate:
