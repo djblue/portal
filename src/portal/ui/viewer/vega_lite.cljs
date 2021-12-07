@@ -30,15 +30,15 @@
 (sp/def ::data
   (sp/or :remote-data ::remote-data :inline ::inline-data))
 
-(sp/def ::mark-string
+(sp/def :portal.ui.viewer.vega-lite.mark/type
   #{"bar" "circle" "square" "rect" "tick" "line" "area" "point" "geoshape" "rule" "text" "boxplot" "errorband" "errorbar"})
 
 (sp/def ::mark-object
-  (sp/keys :req-un [::mark-string]
+  (sp/keys :req-un [:portal.ui.viewer.vega-lite.mark/type]
            :opt-un [::aria ::description ::style ::tooltip ::clip ::invalid ::order]))
 
 (sp/def ::mark
-  (sp/or :mark ::mark-string :mark-object ::mark-object))
+  (sp/or :mark :portal.ui.viewer.vega-lite.mark/type :mark-object ::mark-object))
 
 (sp/def ::layer coll?)
 
