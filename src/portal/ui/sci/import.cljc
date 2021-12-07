@@ -1,6 +1,7 @@
 (ns portal.ui.sci.import
   (:refer-clojure :exclude [import])
-  #?(:cljs (:require-macros portal.ui.sci.import)))
+  #?(:cljs (:require-macros portal.ui.sci.import))
+  #?(:cljs (:require [sci.core :as sci])))
 
 (defn- sci-import [symbols]
   (let [ns (gensym)]
@@ -22,3 +23,22 @@
      (group-by (comp symbol namespace) symbols))))
 
 (defmacro import [& symbols] (sci-import symbols))
+
+#?(:cljs
+   (defn import-ns* [namespace publics]
+     {namespace
+      (let [ns (sci/create-ns namespace nil)]
+        (reduce
+         (fn [ns-map [var-name var]]
+           (let [m (meta var)]
+             (if (:private m)
+               ns-map
+               (assoc ns-map var-name
+                      (sci/new-var (symbol var-name) @var (assoc m :ns ns))))))
+         {:obj ns}
+         publics))}))
+
+(defmacro import-ns [& namespaces]
+  `(merge
+    ~@(for [ns namespaces]
+        `(import-ns* '~ns (ns-publics '~ns)))))
