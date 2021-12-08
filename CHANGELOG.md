@@ -1,3 +1,17 @@
+## 0.18.1 - 2021-12-08
+
+- Enable alt for multi-select a1dc433
+- Update vega lite spec to be more open (#82) 37a1e18 @BrianChevalier
+- Improve file detection for cljs in `portal.console` 59110dc @Cyrik
+- Fixes warning about `random-uuid` in Clojure 1.11 Alpha 3 (#81) 62b74cb @seancorfield
+- Optionally use `IntersectionObserver` in Portal UI b667c71
+
+### Intellij Extension
+
+- Manage multiple project instances on IntelliJ extension (#85) f8205fa @wilkerlucio
+- Add IntelliJ instructions (#89) fd24ed4 @holyjak a710e9e @Lambeaux
+- Bump Intellij extension version 7f43062
+
 ## 0.18.0 - 2021-11-09
 
 ### Bug Fixes
