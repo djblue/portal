@@ -406,7 +406,7 @@ Add a dependency on Portal to your project, start a Clojure REPL and inside that
 
 ```clojure
 (do
-    ((requiring-resolve 'portal.api/open) {:launcher :intellij})
+    (def user/portal ((requiring-resolve 'portal.api/open) {:launcher :intellij}))
     (add-tap (requiring-resolve 'portal.api/submit)))
 ```
 
