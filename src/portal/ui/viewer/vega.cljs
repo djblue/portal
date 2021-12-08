@@ -1,4 +1,6 @@
 (ns portal.ui.viewer.vega
+  "Viewer for the Vega-Lite specification
+  https://vega.github.io/vega/docs/specification/"
   (:require ["react" :as react]
             ["vega-embed" :as vegaEmbed]
             [clojure.spec.alpha :as sp]

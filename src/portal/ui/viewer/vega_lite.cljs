@@ -1,59 +1,17 @@
 (ns portal.ui.viewer.vega-lite
+  "Viewer for the Vega-Lite specification
+  https://vega.github.io/vega-lite/docs/spec.html"
   (:require [clojure.spec.alpha :as sp]
             [portal.ui.viewer.vega :as vega]))
 
-;; Vega-lite spec
-;; https://vega.github.io/vega-lite/docs/spec.html
-
-(sp/def ::field
-  (sp/or :key keyword? :string string?))
-
-(sp/def ::x
-  (sp/keys :req-un [::field]
-           :opt-un [::type ::title ::axis]))
-
-(sp/def ::y
-  (sp/keys :opt-un [::field ::type ::title ::axis]))
-
-(sp/def ::encoding
-  (sp/keys :opt-un [::x ::y ::theta]))
-
-(sp/def ::values
-  (sp/coll-of map?))
-
-(sp/def ::inline-data
-  (sp/keys :req-un [::values]))
-
-(sp/def ::remote-data
-  (sp/keys :req-un [::url]))
-
-(sp/def ::data
-  (sp/or :remote-data ::remote-data :inline ::inline-data))
-
-(sp/def ::mark-string
-  #{"bar" "circle" "square" "rect" "tick" "line" "area" "point" "geoshape" "rule" "text" "boxplot" "errorband" "errorbar"})
-
-(sp/def ::mark-object
-  (sp/keys :req-un [::mark-string]
-           :opt-un [::aria ::description ::style ::tooltip ::clip ::invalid ::order]))
-
-(sp/def ::mark
-  (sp/or :mark ::mark-string :mark-object ::mark-object))
-
-(sp/def ::layer coll?)
-
-;; https://vega.github.io/vega-lite/docs/spec.html#single
-(sp/def ::single-view
-  (sp/keys :req-un [::data ::encoding ::mark]
-           :opt-un [::title ::name ::description ::transform ::width ::height]))
-
-;; https://vega.github.io/vega-lite/docs/spec.html#layered-and-multi-view-specifications
-(sp/def ::layered-view
-  (sp/keys :req-un [::data ::encoding ::layer]
-           :opt-un [::title ::name ::description ::transform ::width ::height]))
+(sp/def ::name string?)
+(sp/def ::description string?)
+(sp/def ::$schema
+  (sp/and string? #(re-matches #"https://vega\.github\.io/schema/vega-lite/v\d\.json" %)))
 
 (sp/def ::vega-lite
-  (sp/or :single-view ::single-view :layered-view ::layered-view))
+  (sp/keys :req-un [::data]
+           :opt-un [::name ::description ::$schema]))
 
 (defn vega-lite-viewer [value]
   ^{:key (hash value)}
