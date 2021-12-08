@@ -13,6 +13,23 @@
     (.toString out)))
 
 (defn submit
+  "Tap target function.
+
+  Will submit values to a remote portal. Tapped value must be serialiable with
+  the encoding method provided.
+
+  Usage:
+
+  ```clojure
+  (def submit (partial p/submit {:port 5678})) ;; :encoding :edn is the default
+  ;; (def submit (partial p/submit {:port 5678 :encoding :json}))
+  ;; (def submit (partial p/submit {:port 5678 :encoding :transit}))
+
+  (add-tap #'submit)
+  (remove-tap #'submit)
+  ```
+  "
+  {:added "0.18.0" :see-also ["portal.api/submit"]}
   ([value] (submit nil value))
   ([{:keys [encoding port host]
      :or   {encoding :edn
