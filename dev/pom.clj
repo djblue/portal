@@ -12,14 +12,15 @@
 
 (defn- options->dependencies [options]
   [:dependencies
-   (for [[dep {:mvn/keys [version]}]
+   (for [[dep {:mvn/keys [version] :keys [scope]}]
          (merge {'org.clojure/clojure
                  {:mvn/version "1.10.3"}}
                 (:deps options))]
      [:dependency
       [:groupId (namespace dep)]
       [:artifactId (name dep)]
-      [:version version]])])
+      [:version version]
+      (when scope [:scope scope])])])
 
 (defn- options->resources [options]
   [:resources

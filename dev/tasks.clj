@@ -277,7 +277,7 @@
    :license
    {:name "MIT License"
     :url  "https://opensource.org/licenses/MIT"}
-   :deps (:deps deps)})
+   :deps (assoc (:deps deps) 'nrepl/nrepl {:mvn/version "0.4.0" :scope "provided"})})
 
 (defn pom []
   (let [target "pom.xml"]
