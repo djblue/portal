@@ -15,8 +15,8 @@
 (defn- exists [path]
   (when (.exists (io/file path)) {:file path}))
 
-#?(:bb (def clojure.lang.Var (type #'exists)))
-#?(:bb (def clojure.lang.Namespace (type *ns*)))
+(def clojure.lang.Var (type #'exists))
+(def clojure.lang.Namespace (type *ns*))
 
 (extend-protocol IResolve
   clojure.lang.PersistentHashMap
@@ -42,7 +42,7 @@
            (resolve url)))
        [".cljc" ".clj"])))
   clojure.lang.Symbol
-  (resolve [^Symbol s]
+  (resolve [^clojure.lang.Symbol s]
     (resolve (find-ns s)))
   URL
   (resolve [^URL url]
