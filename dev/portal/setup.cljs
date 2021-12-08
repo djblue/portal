@@ -1,6 +1,5 @@
 (ns portal.setup
   (:require [clojure.core.protocols :refer [Datafiable]]
-            [clojure.datafy :refer [datafy]]
             [examples.data :refer [data]]
             [portal.client.web :as client]
             [portal.console :as log]
