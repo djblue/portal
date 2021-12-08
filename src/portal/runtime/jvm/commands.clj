@@ -1,4 +1,4 @@
-(ns portal.runtime.jvm.commands
+(ns ^:no-doc portal.runtime.jvm.commands
   (:require [portal.runtime :as rt]
             [portal.runtime.jvm.editor :as editor])
   (:import [java.io File]

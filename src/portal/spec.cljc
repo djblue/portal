@@ -1,4 +1,4 @@
-(ns portal.spec
+(ns ^:no-doc portal.spec
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]))
 

@@ -1,4 +1,4 @@
-(ns portal.runtime.web.launcher
+(ns ^:no-doc portal.runtime.web.launcher
   (:require [portal.resources :as io]
             [portal.runtime :as rt]
             [portal.runtime.index :as index]

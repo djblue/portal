@@ -4,7 +4,7 @@
             [portal.api :as p])
   (:import [java.io PushbackReader]))
 
-(defn lazy-fn [symbol]
+(defn- lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
 
 (def ^:private read-json      (lazy-fn 'portal.runtime.json/read))

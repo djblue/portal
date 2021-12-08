@@ -1,4 +1,4 @@
-(ns portal.resources
+(ns ^:no-doc portal.resources
   #?(:cljs (:require-macros portal.resources))
   #?(:clj (:require [clojure.java.io :as io])))
 

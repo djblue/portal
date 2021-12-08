@@ -1,4 +1,4 @@
-(ns portal.runtime.json
+(ns ^:no-doc portal.runtime.json
   (:refer-clojure :exclude [read]))
 
 (defn write [value]

@@ -1,4 +1,4 @@
-(ns portal.runtime.web.client
+(ns ^:no-doc portal.runtime.web.client
   (:require [portal.runtime :as rt]))
 
 (defonce session {:session-id ::id :value-cache (atom {})})

@@ -1,4 +1,4 @@
-(ns portal.runtime.index)
+(ns ^:no-doc portal.runtime.index)
 
 (def testing? (atom false))
 

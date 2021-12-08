@@ -1,4 +1,4 @@
-(ns portal.async
+(ns ^:no-doc portal.async
   (:refer-clojure :exclude [let promise])
   #?(:cljs (:require-macros portal.async)))
 

@@ -2,20 +2,20 @@
   #?(:clj (:require [clojure.java.io :as io]))
   #?(:cljs (:require-macros portal.console)))
 
-(defn now []
+(defn ^:no-doc now []
   #?(:clj (java.util.Date.) :cljs (js/Date.)))
 
-(defn run [f]
+(defn ^:no-doc run [f]
   (try
     [nil (f)]
     (catch #?(:clj Exception :cljs :default) ex#
       [:throw ex#])))
 
-(defn runtime []
+(defn ^:no-doc runtime []
   #?(:bb :bb :clj :clj :cljs :cljs))
 
 #?(:clj
-   (defn get-file [env file]
+   (defn ^:no-doc get-file [env file]
      (if (:ns env) ;; cljs target
        (if-let [classpath-file (io/resource file)]
          (.getPath (io/file classpath-file))
@@ -23,7 +23,7 @@
        *file*)))
 
 #_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-binding])}
-(defn capture [level form expr env]
+(defn ^:no-doc capture [level form expr env]
   (let [{:keys [line column file]} (meta form)]
     `(let [[flow# result#] (run (fn [] ~expr))]
        (tap>

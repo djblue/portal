@@ -1,4 +1,4 @@
-(ns portal.runtime.jvm.launcher
+(ns ^:no-doc portal.runtime.jvm.launcher
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [org.httpkit.client :as client]

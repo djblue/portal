@@ -1,4 +1,4 @@
-(ns portal.client.common
+(ns ^:no-doc portal.client.common
   (:require
    [cognitect.transit :as transit]
    [portal.runtime.json :as json]))

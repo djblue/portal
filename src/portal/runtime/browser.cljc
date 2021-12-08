@@ -1,4 +1,4 @@
-(ns portal.runtime.browser
+(ns ^:no-doc portal.runtime.browser
   #?(:clj  (:refer-clojure :exclude [random-uuid]))
   #?(:clj  (:require [clojure.java.browse :refer [browse-url]]
                      [portal.runtime :as rt]

@@ -1,4 +1,4 @@
-(ns portal.runtime.macros
+(ns ^:no-doc portal.runtime.macros
   #?(:cljs (:require-macros portal.runtime.macros)))
 
 #?(:clj

@@ -1,4 +1,4 @@
-(ns portal.runtime.node.client
+(ns ^:no-doc portal.runtime.node.client
   (:require [portal.runtime :as rt]))
 
 (defonce connections (atom {}))

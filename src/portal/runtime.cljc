@@ -1,4 +1,4 @@
-(ns portal.runtime
+(ns ^:no-doc portal.runtime
   (:refer-clojure :exclude [read])
   (:require [clojure.datafy :refer [datafy nav]]
             [portal.runtime.cson :as cson]

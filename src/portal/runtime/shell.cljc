@@ -1,4 +1,4 @@
-(ns portal.runtime.shell
+(ns ^:no-doc portal.runtime.shell
   #?(:clj  (:require [clojure.java.shell :as shell])
      :cljs (:require ["child_process" :as cp])))
 

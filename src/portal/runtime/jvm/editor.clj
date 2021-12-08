@@ -1,4 +1,4 @@
-(ns portal.runtime.jvm.editor
+(ns ^:no-doc portal.runtime.jvm.editor
   (:refer-clojure :exclude [resolve])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]

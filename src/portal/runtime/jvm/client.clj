@@ -1,4 +1,4 @@
-(ns portal.runtime.jvm.client
+(ns ^:no-doc portal.runtime.jvm.client
   (:require [clojure.pprint :as pprint]
             [portal.runtime :as rt])
   (:import [clojure.lang IAtom IDeref]))

@@ -1,4 +1,4 @@
-(ns portal.sync
+(ns ^:no-doc portal.sync
   (:refer-clojure :exclude [let]))
 
 (defmacro let [bindings & body]

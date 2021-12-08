@@ -1,4 +1,4 @@
-(ns portal.runtime.fs
+(ns ^:no-doc portal.runtime.fs
   (:refer-clojure :exclude [slurp spit list])
   #?(:clj  (:require [clojure.java.io :as io]
                      [clojure.string :as s])

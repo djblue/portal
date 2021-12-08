@@ -1,4 +1,4 @@
-(ns portal.shortcuts
+(ns ^:no-doc portal.shortcuts
   (:require [clojure.string :as str]))
 
 (defn- get-platform []

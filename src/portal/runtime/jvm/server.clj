@@ -1,4 +1,4 @@
-(ns portal.runtime.jvm.server
+(ns ^:no-doc portal.runtime.jvm.server
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clojure.string :as str]

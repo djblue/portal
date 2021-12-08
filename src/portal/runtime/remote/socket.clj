@@ -1,4 +1,4 @@
-(ns portal.runtime.remote.socket
+(ns ^:no-doc portal.runtime.remote.socket
   "Fork of https://github.com/mfikes/tubular"
   (:require [clojure.java.io :as io]
             [clojure.string :as str]

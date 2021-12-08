@@ -1,4 +1,4 @@
-(ns portal.runtime.remote.server
+(ns ^:no-doc portal.runtime.remote.server
   (:require [portal.runtime :as rt]
             #?(:clj  [portal.runtime.jvm.client :as c]
                :cljs [portal.runtime.node.client :as c])))

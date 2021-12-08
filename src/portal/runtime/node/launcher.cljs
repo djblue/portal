@@ -1,4 +1,4 @@
-(ns portal.runtime.node.launcher
+(ns ^:no-doc portal.runtime.node.launcher
   (:require ["http" :as http]
             [portal.async :as a]
             [portal.runtime :as rt]

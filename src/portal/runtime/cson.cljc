@@ -1,4 +1,4 @@
-(ns portal.runtime.cson
+(ns ^:no-doc portal.runtime.cson
   "Clojure/Script Object Notation"
   (:refer-clojure :exclude [read])
   #?(:cljs (:require [goog.crypt.base64 :as Base64]
