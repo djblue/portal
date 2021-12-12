@@ -363,14 +363,14 @@
 
 (def viewers
   [ex/viewer
-   vega-lite/viewer
-   vega/viewer
    charts/line-chart
    charts/scatter-chart
    charts/histogram-chart
    log/viewer
    image/viewer
    ins/viewer
+   vega-lite/viewer
+   vega/viewer
    bin/viewer
    table/viewer
    tree/viewer

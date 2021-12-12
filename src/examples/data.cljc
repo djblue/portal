@@ -96,6 +96,7 @@
     {:portal.viewer/default :portal.viewer/hiccup}))
 
 (def line-chart
+  ^{:portal.viewer/default :portal.viewer/vega-lite}
   {:data {:values (map #(-> {:time % :value (Math/sin %)})
                        (range 0 (* 2 3.14) 0.25))}
    :encoding {:x {:field "time" :type "quantitative"}
@@ -120,6 +121,7 @@
     :y {:field "b", :type "quantitative"}}})
 
 (def pie-chart
+  ^{:portal.viewer/default :portal.viewer/vega-lite}
   {:description
    "A simple pie chart with labels."
    :data
@@ -159,6 +161,7 @@
            (range -3.14 3.14 0.1))})
 
 (def scatter-chart
+  ^{:portal.viewer/default :portal.viewer/vega-lite}
   {:$schema
    "https://vega.github.io/schema/vega-lite/v4.json"
    :description
@@ -173,6 +176,7 @@
      :type "quantitative"}}})
 
 (def geographic-data
+  ^{:portal.viewer/default :portal.viewer/vega-lite}
   {:width "container"
    :height "container"
    :data {:url "https://vega.github.io/vega-lite/data/airports.csv"}
@@ -187,6 +191,7 @@
    :config {:view {:stroke "transparent"}}})
 
 (def histogram-heatmap-2D
+  ^{:portal.viewer/default :portal.viewer/vega-lite}
   {:$schema
    "https://vega.github.io/schema/vega-lite/v4.json"
    :data {:url "https://vega.github.io/vega-lite/data/movies.json"}
@@ -213,6 +218,7 @@
    :config {:view {:stroke "transparent"}}})
 
 (def force-directed
+  ^{:portal.viewer/default :portal.viewer/vega}
   {:title "Force Directed Layout"
    :description
    "A node-link diagram with force-directed layout, depicting character co-occurrence in the novel Les Misérables."
@@ -334,6 +340,7 @@
      :format {:type "json", :property "links"}}]})
 
 (def radial-tree
+  ^{:portal.viewer/default :portal.viewer/vega}
   {:title "Radial Tree"
    :description
    "An example of a radial layout for a node-link diagram of hierarchical data."
@@ -454,6 +461,7 @@
        :targetY "target.radius"}]}]})
 
 (def sunburst
+  ^{:portal.viewer/default :portal.viewer/vega}
   {:title "Sunburst"
    :description
    "An example of a space-fulling radial layout for hierarchical data."
