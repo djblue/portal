@@ -252,11 +252,11 @@
 
    ;; PWA
    {::shortcuts/osx     #{"meta" "o"}
-    ::shortcuts/default #{"control" "o"}}       `portal.ui.pwa/open-file
+    ::shortcuts/default #{"control" "o"}}       `portal.extensions.pwa/open-file
    {::shortcuts/osx     #{"meta" "v"}
-    ::shortcuts/default #{"control" "v"}}       `portal.ui.pwa/load-clipboard
+    ::shortcuts/default #{"control" "v"}}       `portal.extensions.pwa/load-clipboard
    {::shortcuts/osx     #{"meta" "d"}
-    ::shortcuts/default #{"control" "d"}}       `portal.ui.pwa/open-demo})
+    ::shortcuts/default #{"control" "d"}}       `portal.extensions.pwa/open-demo})
 
 (def ^:private aliases {"cljs.core" "clojure.core"})
 

@@ -1,4 +1,4 @@
-(ns portal.ui.pwa
+(ns portal.extensions.pwa
   (:require [clojure.string :as str]
             [examples.data :as demo]
             [portal.async :as a]

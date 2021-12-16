@@ -258,7 +258,19 @@
   (git :commit "-m" (str "Release " version))
   (git :tag version))
 
-(def deps (read-string (slurp "deps.edn")))
+(defn- provided [deps]
+  (reduce-kv
+   (fn [m k v]
+     (assoc m k (assoc v :scope "provided")))
+   {}
+   deps))
+
+(defn- get-deps []
+  (let [deps (read-string (slurp "deps.edn"))]
+    (merge
+     (:deps deps)
+     (provided (get-in deps [:aliases :cider :extra-deps]))
+     (provided (get-in deps [:aliases :cljs :extra-deps])))))
 
 (def options
   {:lib 'djblue/portal
@@ -276,7 +288,7 @@
    :license
    {:name "MIT License"
     :url  "https://opensource.org/licenses/MIT"}
-   :deps (assoc (:deps deps) 'nrepl/nrepl {:mvn/version "0.4.0" :scope "provided"})})
+   :deps (get-deps)})
 
 (defn pom []
   (let [target "pom.xml"]
