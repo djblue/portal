@@ -13,12 +13,12 @@
             [portal.ui.theme :as theme]
             [reagent.core :as r]))
 
-(defonce input (r/atom nil))
+(defonce ^:private input (r/atom nil))
 
-(defn open [f] (reset! input f))
-(defn close [] (reset! input nil))
+(defn- open [f] (reset! input f))
+(defn- close [] (reset! input nil))
 
-(defn container [& children]
+(defn- container [& children]
   (let [theme (theme/use-theme)]
     (into
      [s/div
@@ -59,7 +59,7 @@
          (shortcuts/remove! ::with-shortcuts))))
     (into [:r> (.-Provider shortcut-context) #js {:value (inc i)}] children)))
 
-(defn checkbox [checked?]
+(defn- checkbox [checked?]
   (let [theme (theme/use-theme)]
     [s/div
      {:style
@@ -95,7 +95,7 @@
         :reagent-render
         (fn [] [:div {:ref #(reset! el %)}])}))))
 
-(defn selector-component []
+(defn- selector-component []
   (let [selected (r/atom #{})
         active   (r/atom 0)]
     (fn [input]
@@ -258,7 +258,7 @@
    {::shortcuts/osx     #{"meta" "d"}
     ::shortcuts/default #{"control" "d"}}       `portal.ui.pwa/open-demo})
 
-(def aliases {"cljs.core" "clojure.core"})
+(def ^:private aliases {"cljs.core" "clojure.core"})
 
 (defn- var->name [var]
   (let [{:keys [name ns]} (meta var)
@@ -276,17 +276,17 @@
           (shortcuts/get-shortcut combo)))
       keymap))))
 
-(def shortcut->symbol
+(def ^:private shortcut->symbol
   {"arrowright" [icons/arrow-right {:size "xs"}]
    "arrowleft"  [icons/arrow-left {:size "xs"}]
    "arrowup"    [icons/arrow-up {:size "xs"}]
    "arrowdown"  [icons/arrow-down {:size "xs"}]
    "meta"       "⌘"})
 
-(defn combo-order [k]
+(defn ^:private combo-order [k]
   (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
 
-(defn separate [coll]
+(defn- separate [coll]
   (let [theme (theme/use-theme)]
     [:<>
      (drop-last
@@ -301,7 +301,7 @@
           [s/div {:style {:height "100%"
                           :border-right [1 :solid (::c/border theme)]}}]])))]))
 
-(defn shortcut [command]
+(defn- shortcut [command]
   (let [theme (theme/use-theme)]
     [s/div {:style
             {:display :flex
@@ -370,7 +370,7 @@
             :when   (every? #(str/includes? s %) words)]
         option))))
 
-(defn palette-component []
+(defn- palette-component []
   (let [active (r/atom 0)
         filter-text (r/atom "")]
     (fn [{:keys [on-select component]
@@ -445,7 +445,7 @@
                          :on-click on-click}]]])))
                 doall)]]]))))
 
-(defn make-command [{:keys [name command predicate args f] :as opts}]
+(defn- make-command [{:keys [name command predicate args f] :as opts}]
   (assoc opts
          :predicate (fn [state]
                       (if-not predicate
@@ -485,8 +485,8 @@
             :background "rgba(0,0,0,0.20)"}}
           doc]))]))
 
-(def registry (atom {}))
-(def runtime-registry (atom nil))
+(def ^:private registry (atom {}))
+(def ^:private runtime-registry (atom nil))
 
 (defn- get-commands []
   (concat @runtime-registry (vals @registry)))
@@ -563,21 +563,21 @@
 
 ;; portal data commands
 
-(defn coll-of-maps [value]
+(defn- coll-of-maps [value]
   (and (not (map? value))
        (coll? value)
        (every? map? value)))
 
-(defn map-of-maps [value]
+(defn- map-of-maps [value]
   (and (map? value) (every? map? (vals value))))
 
-(defn coll-keys [value]
+(defn- coll-keys [value]
   (into [] (set (mapcat keys value))))
 
-(defn map-keys [value]
+(defn- map-keys [value]
   (coll-keys (vals value)))
 
-(defn columns [value]
+(defn- columns [value]
   (cond
     (map? value) (map-keys value)
     :else        (coll-keys value)))
@@ -741,7 +741,7 @@
     (when (= (count args) 1)
       (f (first args)))))
 
-(def clojure-commands
+(def ^:private clojure-commands
   {#'clojure.core/vals        {:predicate map?}
    #'clojure.core/keys        {:predicate map?}
    #'clojure.core/count       {:predicate #(or (coll? %) (string? %))}
@@ -758,7 +758,7 @@
                                             (and (coll? coll) (= (count args) 1)))}
    #'clojure.core/merge       {:predicate (fn [& args] (every? map? args))}})
 
-(def portal-data-commands
+(def ^:private portal-data-commands
   {#'transpose-map  {:predicate map-of-maps
                      :name      'portal.data/transpose-map}
    #'select-columns {:predicate (some-fn coll-of-maps map-of-maps)
@@ -811,7 +811,7 @@
       (transient {})
       (str/split style #"\s*;\s*")))))
 
-(defn vs-code-vars
+(defn- vs-code-vars
   "List all available css variable provided by vs-code."
   [state]
   (state/dispatch!
@@ -828,7 +828,7 @@
 
 (register! #'copy-str {:predicate (comp string? state/get-selected-value)})
 
-(defn pop-up [child]
+(defn- pop-up [child]
   [s/div
    {:on-click close
     :style
