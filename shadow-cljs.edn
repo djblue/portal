@@ -24,9 +24,9 @@
    :compiler-options
    {:infer-externs true
     :warnings-as-errors true}
-   :modules {:main {:init-fn portal.ui.pwa/main!}}
+   :modules {:main {:init-fn portal.extensions.pwa/main!}}
    :release {:output-dir "target/pwa-release/"}
-   :devtools {:after-load portal.ui.pwa/reload!}}
+   :devtools {:after-load portal.extensions.pwa/reload!}}
 
   :vs-code
   {:exports-var portal.extensions.vs-code/exports
