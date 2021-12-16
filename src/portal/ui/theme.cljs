@@ -3,7 +3,7 @@
             [portal.colors :as c]
             [portal.ui.options :as opts]))
 
-(defn is-vs-code? []
+(defn ^:no-doc is-vs-code? []
   (-> js/document
       .-documentElement
       js/getComputedStyle
@@ -34,7 +34,7 @@
 
 (defn use-theme [] (react/useContext theme))
 
-(defonce order
+(defonce ^:no-doc order
   (cycle [::c/diff-remove ::c/diff-add ::c/keyword ::c/tag ::c/number ::c/uri]))
 
 (defonce ^:private rainbow

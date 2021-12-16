@@ -301,7 +301,7 @@
           [s/div {:style {:height "100%"
                           :border-right [1 :solid (::c/border theme)]}}]])))]))
 
-(defn- shortcut [command]
+(defn shortcut [command]
   (let [theme (theme/use-theme)]
     [s/div {:style
             {:display :flex
@@ -445,7 +445,7 @@
                          :on-click on-click}]]])))
                 doall)]]]))))
 
-(defn- make-command [{:keys [name command predicate args f] :as opts}]
+(defn make-command [{:keys [name command predicate args f] :as opts}]
   (assoc opts
          :predicate (fn [state]
                       (if-not predicate
@@ -485,7 +485,7 @@
             :background "rgba(0,0,0,0.20)"}}
           doc]))]))
 
-(def ^:private registry (atom {}))
+(def registry (atom {}))
 (def ^:private runtime-registry (atom nil))
 
 (defn- get-commands []

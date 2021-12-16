@@ -3,9 +3,12 @@
   (:require ["react" :as react]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.runtime.cson :as cson]
-            [portal.ui.state :as state]
             [portal.ui.sci :as sci]
+            [portal.ui.state :as state]
             [reagent.core :as r]))
+
+(defn call [f & args]
+  (apply state/invoke f args))
 
 (deftype RuntimeObject [object]
   cson/ToJson
@@ -55,7 +58,7 @@
     (-hash [this]
       (hash (.toString this)))))
 
-(defn diff-> [value]
+(defn- diff-> [value]
   (case (first value)
     "diff/Deletion"  (diff/Deletion.  (cson/json-> (second value)))
     "diff/Insertion" (diff/Insertion. (cson/json-> (second value)))
@@ -70,7 +73,7 @@
       (when (runtime-object? value)
         (:id (.-object value)))))
 
-(defn read [string]
+(defn- read [string]
   (cson/read
    string
    {:transform
@@ -88,7 +91,7 @@
                     (RuntimeObject. object)))
         (diff-> value)))}))
 
-(defn write [value]
+(defn- write [value]
   (cson/write
    value
    {:transform
@@ -128,7 +131,7 @@
 
 (defonce ^:private versions (r/atom {}))
 
-(defn use-invoke [f & args]
+(defn ^:no-doc use-invoke [f & args]
   (let [[value set-value!] (react/useState ::loading)
         versions           (for [arg args]
                              (str (hash arg) (get @versions arg)))]
@@ -188,7 +191,7 @@
   ;; (tap> (assoc message :type :response))
   (when-let [f (get ops (:op message))] (f message send!)))
 
-(defn ^:export handler [request]
+(defn ^:export ^:no-doc handler [request]
   (write (dispatch (read request) identity)))
 
 (defonce ^:private ws-promise (atom nil))
@@ -220,5 +223,5 @@
           (set! (.-onclose chan)   #(reset!  ws-promise nil))
           (set! (.-onopen chan)    #(resolve chan))))))))
 
-(defn send! [message]
+(defn- send! [message]
   (.then (connect) #(.send % (write message))))

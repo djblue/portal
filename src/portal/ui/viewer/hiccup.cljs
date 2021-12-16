@@ -4,13 +4,13 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(defn header-styles [theme]
+(defn- header-styles [theme]
   {:color (::c/namespace theme)
    :padding-top (:padding theme)
    :padding-bottom (:padding theme)
    :margin-bottom (* 2 (:padding theme))})
 
-(defn hiccup-styles [theme]
+(defn- hiccup-styles [theme]
   (let [h (header-styles theme)
         border-bottom
         {:border-bottom
@@ -82,7 +82,7 @@
      [ins/inc-depth
       (process-hiccup {:styles styles :viewers viewers} value)]]))
 
-(defn- hiccup? [value]
+(defn hiccup? [value]
   (and (vector? value)
        (keyword? (first value))))
 

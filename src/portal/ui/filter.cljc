@@ -1,4 +1,4 @@
-(ns portal.ui.filter
+(ns ^:no-doc portal.ui.filter
   (:require [clojure.string :as str]))
 
 (defn match [value text]

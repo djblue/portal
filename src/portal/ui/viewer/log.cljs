@@ -29,7 +29,7 @@
 (defn log? [value]
   (sp/valid? ::log value))
 
-(def level->color
+(def ^:private level->color
   {:trace  ::c/text
    :debug  ::c/string
    :info   ::c/boolean

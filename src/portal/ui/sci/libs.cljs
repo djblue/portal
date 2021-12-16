@@ -1,4 +1,4 @@
-(ns portal.ui.sci.libs
+(ns ^:no-doc portal.ui.sci.libs
   (:require ["react" :as react]
             ["react-dom" :as react-dom]
             ["vega" :as vega]
@@ -8,10 +8,30 @@
             portal.colors
             portal.ui.commands
             portal.ui.inspector
+            portal.ui.rpc
             [portal.ui.sci.import :as sci-import]
-            portal.ui.state
             portal.ui.styled
             portal.ui.theme
+            portal.ui.viewer.bin
+            portal.ui.viewer.charts
+            portal.ui.viewer.csv
+            portal.ui.viewer.date-time
+            portal.ui.viewer.diff
+            portal.ui.viewer.edn
+            portal.ui.viewer.exception
+            portal.ui.viewer.hiccup
+            portal.ui.viewer.html
+            portal.ui.viewer.image
+            portal.ui.viewer.json
+            portal.ui.viewer.log
+            portal.ui.viewer.markdown
+            portal.ui.viewer.relative-time
+            portal.ui.viewer.table
+            portal.ui.viewer.text
+            portal.ui.viewer.transit
+            portal.ui.viewer.tree
+            portal.ui.viewer.vega
+            portal.ui.viewer.vega-lite
             reagent.core
             reagent.dom
             [sci.core :as sci]))
@@ -35,9 +55,29 @@
     portal.colors
     portal.ui.commands
     portal.ui.inspector
-    portal.ui.state
+    portal.ui.rpc
     portal.ui.styled
     portal.ui.theme
+    portal.ui.viewer.bin
+    portal.ui.viewer.charts
+    portal.ui.viewer.csv
+    portal.ui.viewer.date-time
+    portal.ui.viewer.diff
+    portal.ui.viewer.edn
+    portal.ui.viewer.exception
+    portal.ui.viewer.hiccup
+    portal.ui.viewer.html
+    portal.ui.viewer.image
+    portal.ui.viewer.json
+    portal.ui.viewer.log
+    portal.ui.viewer.markdown
+    portal.ui.viewer.relative-time
+    portal.ui.viewer.table
+    portal.ui.viewer.text
+    portal.ui.viewer.transit
+    portal.ui.viewer.tree
+    portal.ui.viewer.vega
+    portal.ui.viewer.vega-lite
     reagent.core
     reagent.dom)
    (sci-import/import

@@ -18,7 +18,7 @@
 
 (defn- hover? [hover selector value] (= (selector @hover) value))
 
-(defn table [& children]
+(defn- table [& children]
   (let [theme (theme/use-theme)]
     (into
      [s/div

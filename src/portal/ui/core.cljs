@@ -1,4 +1,4 @@
-(ns portal.ui.core
+(ns ^:no-doc portal.ui.core
   (:require ["react" :as react]
             [clojure.string :as str]
             [portal.ui.app :as app]

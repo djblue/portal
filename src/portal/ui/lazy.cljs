@@ -1,4 +1,4 @@
-(ns portal.ui.lazy
+(ns ^:no-doc portal.ui.lazy
   (:refer-clojure :exclude [lazy-seq])
   (:require ["react" :as react]
             [portal.ui.state :as state]
