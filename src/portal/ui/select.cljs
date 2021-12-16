@@ -1,4 +1,4 @@
-(ns portal.ui.select
+(ns ^:no-doc portal.ui.select
   (:require ["react" :as react]))
 
 (defonce ^:private selection-index (atom {}))

@@ -10,7 +10,7 @@
 
 (defonce ^:private extension-options (r/atom (get-extension-options)))
 
-(defn ^:export patch
+(defn ^:export ^:no-doc patch
   "Function for extensions to patch options after init."
   [edn-string]
   (reset! extension-options (edn/read-string edn-string)))

@@ -20,7 +20,7 @@
 (sp/def ::numerical-collection
   (sp/keys :req-un [:numerical-coll/x :numerical-coll/y]))
 
-(defn normalize-data
+(defn- normalize-data
   "Normalize data to conform to vega-lite specification"
   [data]
   (cond

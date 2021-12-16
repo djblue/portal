@@ -1,4 +1,4 @@
-(ns portal.ui.sci.import
+(ns ^:no-doc portal.ui.sci.import
   (:refer-clojure :exclude [import])
   #?(:cljs (:require-macros portal.ui.sci.import))
   #?(:cljs (:require [sci.core :as sci])))

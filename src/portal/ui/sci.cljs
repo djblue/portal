@@ -1,4 +1,4 @@
-(ns portal.ui.sci
+(ns ^:no-doc portal.ui.sci
   (:require [sci.core :as sci]))
 
 (def ctx (atom nil))

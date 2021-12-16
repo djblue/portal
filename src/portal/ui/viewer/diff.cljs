@@ -10,7 +10,7 @@
    (instance? diff/Insertion value)
    (instance? diff/Mismatch value)))
 
-(defn can-view? [value]
+(defn- can-view? [value]
   (or (diff? value) (and (vector? value) (= 2 (count value)))))
 
 (defn inspect-diff [value]

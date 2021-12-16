@@ -5,7 +5,7 @@
             [markdown.core :refer [md->html]]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
 
-(defn parse-markdown [value]
+(defn ^:no-doc parse-markdown [value]
   (with-redefs
    [common/escape-code   identity
     common/escaped-chars identity

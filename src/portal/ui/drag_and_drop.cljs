@@ -1,4 +1,4 @@
-(ns portal.ui.drag-and-drop
+(ns ^:no-doc portal.ui.drag-and-drop
   (:require ["react" :as react]
             [cljs.reader :refer [read-string]]
             [clojure.string :as string]

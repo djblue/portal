@@ -13,12 +13,12 @@
     (vector? value) ["[" "]"]
     :else           ["(" ")"]))
 
-(def cursor-pointer {:cursor :pointer})
-(def select-none	{:user-select :none})
-(def flex-wrap      {:flex-wrap :wrap})
-(def flex-row       {:display :flex :flex-direction :row})
-(def flex-col	    {:display :flex :flex-direction :column})
-(def flex-center    {:display :flex :align-items :center})
+(def ^:private cursor-pointer {:cursor :pointer})
+(def ^:private select-none	{:user-select :none})
+(def ^:private flex-wrap      {:flex-wrap :wrap})
+(def ^:private flex-row       {:display :flex :flex-direction :row})
+(def ^:private flex-col	    {:display :flex :flex-direction :column})
+(def ^:private flex-center    {:display :flex :align-items :center})
 
 (defn- use-node-styles []
   (let [theme (theme/use-theme)
@@ -94,7 +94,7 @@
        (= (:portal.viewer/default context)
           :portal.viewer/tree)))
 
-(defn with-tree-item [child]
+(defn- with-tree-item [child]
   (let [context (ins/use-context)]
     (if (parent-tree? context)
       child
@@ -145,7 +145,7 @@
            [ins/inspector item]]])
        value)]]]])
 
-(defn tree [value]
+(defn inspect-tree [value]
   [ins/inc-depth
    (cond
      (map? value)  [inspect-tree-map value]
@@ -153,5 +153,5 @@
 
 (def viewer
   {:predicate ins/coll?
-   :component tree
+   :component inspect-tree
    :name :portal.viewer/tree})

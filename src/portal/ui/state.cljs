@@ -1,4 +1,4 @@
-(ns portal.ui.state
+(ns ^:no-doc portal.ui.state
   (:require ["react" :as react]
             [portal.async :as a]
             [portal.colors :as c]

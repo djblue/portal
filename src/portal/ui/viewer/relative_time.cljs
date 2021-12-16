@@ -4,14 +4,14 @@
             [portal.ui.styled :as s]
             [portal.ui.viewer.date-time :as date-time]))
 
-(def millisecond 1)
-(def second     (* 1000 millisecond))
-(def minute     (* 60 second))
-(def hour       (* 60 minute))
-(def day        (* 24 hour))
-(def week       (* 7 day))
-(def month      (* 30 day))
-(def year       (* 365 day))
+(def ^:private millisecond 1)
+(def ^:private second     (* 1000 millisecond))
+(def ^:private minute     (* 60 second))
+(def ^:private hour       (* 60 minute))
+(def ^:private day        (* 24 hour))
+(def ^:private week       (* 7 day))
+(def ^:private month      (* 30 day))
+(def ^:private year       (* 365 day))
 
 (def ^:private time-scales
   [:year        year
