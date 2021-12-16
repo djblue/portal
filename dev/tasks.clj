@@ -269,7 +269,6 @@
    :resource-dirs [""]
    :resources
    {"src" {:excludes ["portal/extensions/**"
-                      "portal/ui/**"
                       "examples/**"]}
     "resources/portal/" {:target "portal/"}}
    :repos {"clojars" {:url "https://repo.clojars.org/"}}
