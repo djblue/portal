@@ -11,7 +11,7 @@
             [pwa]
             [version]))
 
-(def version "0.18.1")
+(def version "0.18.2")
 
 (def ^:dynamic *cwd* nil)
 

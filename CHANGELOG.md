@@ -1,3 +1,13 @@
+## 0.18.2 - 2021-12-15
+
+Prefer inspector to vega viewers d350374
+
+Since implementing a correct and complete spec for vega/vega-lite is
+difficult, the spec was loosened up. However, now data that is not vega
+is being matched for the vega viewer. By preferring the inspector, the
+vega spec can remain open while providing a more reasonable default for
+most data.
+
 ## 0.18.1 - 2021-12-08
 
 - Enable alt for multi-select a1dc433

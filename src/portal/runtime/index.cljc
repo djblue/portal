@@ -4,7 +4,7 @@
 
 (defn html [& {:keys [name version host session-id code-url platform]
                :or   {name       "portal"
-                      version    "0.18.1"
+                      version    "0.18.2"
                       code-url   "main.js"
                       platform   #?(:bb "bb" :clj "jvm" :cljs "node")}}]
   (str

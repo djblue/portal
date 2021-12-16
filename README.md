@@ -24,13 +24,13 @@ To get an overview of portal, you can watch the following recording of a [live d
 To start a repl with portal, run the **clojure >= 1.10.0** cli with:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.1"}}}'
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.2"}}}'
 ```
 
 or for a **web** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.1"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.2"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main
 ```
@@ -38,7 +38,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.1"}
 or for a **node** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.1"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.2"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main -re node
 ```
@@ -46,7 +46,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.1"}
 or for a **babashka >=0.2.4** repl, do:
 
 ```bash
-bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.1"}}}'`
+bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.18.2"}}}'`
 ```
 
 or for examples on how to integrate portal into an existing project, look
@@ -307,7 +307,7 @@ Add a portal alias in `~/.clojure/deps.edn`
 :portal/cli
 {:main-opts ["-m" "portal.main"]
  :extra-deps
- {djblue/portal {:mvn/version "0.18.1"}
+ {djblue/portal {:mvn/version "0.18.2"}
   ;; optional yaml support
   clj-commons/clj-yaml {:mvn/version "0.7.0"}}}
 ```
