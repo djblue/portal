@@ -6,7 +6,9 @@
             ["vega-lite" :as vega-lite]
             cljs.reader
             portal.colors
+            portal.ui.api
             portal.ui.commands
+            portal.ui.icons
             portal.ui.inspector
             portal.ui.rpc
             [portal.ui.sci.import :as sci-import]
@@ -53,7 +55,9 @@
     "vega-lite"  (import-npm vega-lite)}
    (sci-import/import-ns
     portal.colors
+    portal.ui.api
     portal.ui.commands
+    portal.ui.icons
     portal.ui.inspector
     portal.ui.rpc
     portal.ui.styled
