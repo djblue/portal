@@ -1,3 +1,16 @@
+## 0.19.0 - 2021-12-16
+
+### Portal UI Extensions
+
+- Add `portal.api/eval-str` 3e7770e
+- Include ui for clojure-lsp indexing and docs 7d55927
+- Expose portal.ui.commands to sci plugins 2648ab4
+- Expose npm deps directly to sci portal extensions fa5b8d1
+- Allow users to register their own viewers ae46284
+- Allow runtime to eval code on the client af901fb
+
+Docs /examples coming soon!
+
 ## 0.18.2 - 2021-12-15
 
 Prefer inspector to vega viewers d350374
