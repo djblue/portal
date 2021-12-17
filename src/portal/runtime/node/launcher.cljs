@@ -58,4 +58,10 @@
     (reset! rt/sessions {}))
   true)
 
+(defn eval-str [code]
+  (a/let [responses (c/request
+                     {:op   :portal.rpc/eval-str
+                      :code code})]
+    (-> responses last :result)))
+
 (reset! rt/request c/request)

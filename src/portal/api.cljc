@@ -66,3 +66,10 @@
   [var]
   (rt/register! var)
   nil)
+
+(defn eval-str
+  "Evalute ClojureScript source given as a string in the UI runtime."
+  {:added "0.19.0"}
+  [source]
+  (l/eval-str source)
+  nil)

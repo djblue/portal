@@ -28,4 +28,5 @@
   (step '(p/clear))
   (step '(remove-tap #'p/submit))
   (step '(tap> :hello-world))
+  (step '(p/eval-str "(js/alert 1)"))
   (step '(p/close)))

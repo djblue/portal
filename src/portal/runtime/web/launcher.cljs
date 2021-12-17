@@ -81,3 +81,8 @@
     (reset! rt/request nil)
     (.close child)))
 
+(defn eval-str [code]
+  (c/request
+   child-window
+   {:op   :portal.rpc/eval-str
+    :code code}))
