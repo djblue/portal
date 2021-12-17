@@ -6,6 +6,7 @@
             [babashka.process :as p]
             [clojure.java.io :as io]
             [clojure.string :as str]
+            [io.aviso.ansi :as a]
             [pom]
             [portal.e2e :as e2e]
             [pwa]
@@ -16,7 +17,9 @@
 (def ^:dynamic *cwd* nil)
 
 (defn- sh [& args]
-  (println "=>" (str/join " " (map name args)))
+  (println (a/bold-blue "=>")
+           (a/bold-green (name (first args)))
+           (a/bold (str/join " " (map name (rest args)))))
   (let [opts {:inherit true :dir *cwd*}
         ps (if-not (= (first args) :clojure)
              (p/process (map name args) opts)
