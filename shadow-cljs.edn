@@ -10,7 +10,8 @@
    :target :browser
    :compiler-options
    {:infer-externs true
-    :warnings-as-errors true}
+    :warnings-as-errors true
+    :output-feature-set :es2018}
    :modules {:main {:init-fn portal.ui.core/main!}}
    :release {:output-dir "resources/portal/"}
    :devtools {:after-load portal.ui.core/reload!
@@ -23,7 +24,8 @@
    :target :browser
    :compiler-options
    {:infer-externs true
-    :warnings-as-errors true}
+    :warnings-as-errors true
+    :output-feature-set :es2018}
    :modules {:main {:init-fn portal.extensions.pwa/main!}}
    :release {:output-dir "target/pwa-release/"}
    :devtools {:after-load portal.extensions.pwa/reload!}}

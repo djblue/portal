@@ -6,6 +6,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
+    "highlight.js": "^11.3.1",
     "papaparse": "^5.3.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",

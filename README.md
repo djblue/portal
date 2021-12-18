@@ -333,7 +333,7 @@ alias yaml='portal yaml'
 and often use the `Copy as cURL` feature in the chrome network tab to do
 the following:
 
-```
+```bash
 curl ... | transit
 ```
 
@@ -467,13 +467,18 @@ bb dev
 vim-fireplace should automatically connect upon evaluation, but this will
 only be for clj files, to get a cljs repl, do:
 
-    :CljEval (user/cljs)
+```vim
+:CljEval (user/cljs)
+```
 
 ### emacs + [cider](https://cider.mx/)
 
 The best way to get started via emacs is to have cider start the repl, do:
 
-    M-x cider-jack-in-clj&cljs
+```bash
+M-x cider-jack-in-clj&cljs
+```
+
 
 [.dir-locals.el](./.dir-locals.el) has all the configuration variables for
 cider.

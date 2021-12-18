@@ -2,7 +2,8 @@
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+            [portal.ui.theme :as theme]
+            [portal.ui.viewer.code :as code]))
 
 (defn- header-styles [theme]
   {:color (::c/namespace theme)
@@ -36,7 +37,7 @@
 
      :pre
      {:overflow :auto
-      :padding (* 2 (:padding theme))
+      ;:padding (* 2 (:padding theme))
       :background (::c/background2 theme)
       :border-radius (:border-radius theme)}
 
@@ -52,12 +53,25 @@
      :td {:padding (:padding theme)
           :border [1 :solid (::c/border theme)]}}))
 
+(defn inspect-code [& args]
+  (let [[_ attrs code] (second args)
+        theme          (theme/use-theme)]
+    [s/div
+     {:style
+      {:margin-top    (:padding theme)
+       :margin-bottom (:padding theme)}}
+     [code/inspect-code attrs code]]))
+
+(def tap->viewer
+  {:pre inspect-code})
+
 (defn- process-hiccup [context hiccup]
   (if-not (vector? hiccup)
     hiccup
     (let [[tag & args]  hiccup
           style         (get-in context [:styles tag])
-          component     (get-in context [:viewers tag :component])
+          component     (or (get-in context [:viewers tag :component])
+                            (tap->viewer tag))
           has-attrs?    (map? (first args))]
       (if component
         (into [component] args)
@@ -79,8 +93,7 @@
         viewers (ins/viewers-by-name @ins/viewers)]
     [ins/with-key
      :portal.viewer/hiccup
-     [ins/inc-depth
-      (process-hiccup {:styles styles :viewers viewers} value)]]))
+     (process-hiccup {:styles styles :viewers viewers} value)]))
 
 (defn hiccup? [value]
   (and (vector? value)

@@ -14,6 +14,7 @@
             [portal.ui.theme :as theme]
             [portal.ui.viewer.bin :as bin]
             [portal.ui.viewer.charts :as charts]
+            [portal.ui.viewer.code :as code]
             [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.date-time :as date-time]
             [portal.ui.viewer.diff :as diff]
@@ -376,6 +377,7 @@
    table/viewer
    tree/viewer
    text/viewer
+   code/viewer
    json/viewer
    edn/viewer
    transit/viewer
