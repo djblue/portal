@@ -346,14 +346,15 @@
                 {:box-sizing :border-box
                  :padding (:padding theme)
                  :border-right [1 :solid (::c/border theme)]}}
-         [inspector type]])]
+         [select/with-position {:row 0 :column 0} [inspector type]]])]
      (when show-meta?
        [s/div
         {:style
          {:border-top [1 :solid (::c/border theme)]
           :box-sizing :border-box
           :padding (:padding theme)}}
-        [with-depth [inspector metadata]]])]))
+        [with-depth
+         [select/with-position {:row 0 :column 0} [inspector metadata]]]])]))
 
 (defn- container-map-k [child]
   [s/div {:style

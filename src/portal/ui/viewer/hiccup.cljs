@@ -1,6 +1,7 @@
 (ns portal.ui.viewer.hiccup
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
+            [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.code :as code]))
@@ -73,7 +74,10 @@
                             (tap->viewer tag))
           has-attrs?    (map? (first args))]
       (if component
-        (into [component] args)
+        [ins/inc-depth
+         [select/with-position
+          {:row 0 :column 0}
+          (into [component] args)]]
         (into
          [s/styled
           tag
