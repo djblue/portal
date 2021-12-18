@@ -72,4 +72,4 @@
   #?(:clj  (let [children (list path)]
              (doseq [child children] (rm child))
              (io/delete-file path))
-     :cljs (fs/rmdirSync path #js {:recursive true})))
+     :cljs (fs/rmSync path #js {:recursive true})))
