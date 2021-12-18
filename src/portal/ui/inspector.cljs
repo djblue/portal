@@ -683,7 +683,7 @@
     (react/useEffect
      (fn []
        (when selected
-         (some-> focus-ref .-current .focus)
+         (some-> focus-ref .-current (.focus #js {:preventScroll true}))
          (state/dispatch! state assoc-in [:default-expand location] default-expand)
          #(state/dispatch! state update :default-expand dissoc location)))
      #js [selected])
@@ -692,7 +692,8 @@
        (when (and selected
                   (not= (.. js/document -activeElement -tagName) "INPUT"))
          (when-let [el (.-current ref)]
-           (.scrollIntoView el #js {:block "nearest" :behavior "smooth"}))))
+           (when-not (l/element-visible? el)
+             (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
      #js [selected (.-current ref)])
     [with-context
      context

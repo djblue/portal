@@ -26,28 +26,29 @@
        #js [(.-current ref) f]))
     [:div {:ref ref :style {:height "1em" :width "1em"}}]))
 
-(defn- fallback-legacy-visible? [element]
-  (let [rect (.getBoundingClientRect element)]
-    (and (>= (.-top rect) 0)
-         (>= (.-left rect) 0)
-         (<= (.-bottom rect)
-             (or (.-innerHeight js/window)
-                 (.. js/document -documentElement -clientHeight)))
-         (<= (.-right rect)
-             (or (.-innerWidth js/window)
-                 (.. js/document -documentElement -clientWidth))))))
+(defn element-visible? [element]
+  (let [buffer 100
+        rect   (.getBoundingClientRect element)
+        height (or (.-innerHeight js/window)
+                   (.. js/document -documentElement -clientHeight))
+        width  (or (.-innerWidth js/window)
+                   (.. js/document -documentElement -clientWidth))]
+    (and (> (.-bottom rect) buffer)
+         (<= (.-top rect) (- height buffer))
+         (> (.-left rect) 0)
+         (<= (.-right rect) width))))
 
 (defn- fallback-visible-sensor [f]
   (let [ref       (react/useRef nil)
         container (:scroll-element @(state/use-state))]
     (react/useEffect
      (fn []
-       (when (some-> ref .-current fallback-legacy-visible?)
+       (when (some-> ref .-current element-visible?)
          (f))
        (when container
          (let [on-scroll
                (fn []
-                 (when (some-> ref .-current fallback-legacy-visible?)
+                 (when (some-> ref .-current element-visible?)
                    (f)))]
            (.addEventListener ^js container "scroll" on-scroll)
            #(.removeEventListener ^js container "scroll" on-scroll))))
