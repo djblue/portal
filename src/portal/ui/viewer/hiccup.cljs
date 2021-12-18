@@ -37,7 +37,6 @@
 
      :pre
      {:overflow :auto
-      ;:padding (* 2 (:padding theme))
       :background (::c/background2 theme)
       :border-radius (:border-radius theme)}
 

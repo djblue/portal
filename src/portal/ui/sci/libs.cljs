@@ -16,6 +16,7 @@
             portal.ui.theme
             portal.ui.viewer.bin
             portal.ui.viewer.charts
+            portal.ui.viewer.code
             portal.ui.viewer.csv
             portal.ui.viewer.date-time
             portal.ui.viewer.diff
@@ -64,6 +65,7 @@
     portal.ui.theme
     portal.ui.viewer.bin
     portal.ui.viewer.charts
+    portal.ui.viewer.code
     portal.ui.viewer.csv
     portal.ui.viewer.date-time
     portal.ui.viewer.diff

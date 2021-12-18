@@ -340,7 +340,8 @@
         :height "100vh"
         :width "100vw"}}
       [scrollbars]
-      [text-selection]]
+      [text-selection]
+      [code/stylesheet]]
      children)))
 
 (defn- inspect-1-history [default-value]

@@ -6,7 +6,7 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(defn stylesheet [theme]
+(defn- ->styles [theme]
   (let [{::c/keys [uri keyword text namespace background string package number tag border]} theme]
     {"pre code.hljs"                                 {:display :block :overflow-x :auto :padding "1em"}
      "code.hljs"                                     {:padding "3px 5px"}
@@ -79,12 +79,17 @@
      ".language-vim .hljs-built_in"                  {:color package :font-style :italic}
      ".language-yaml .hljs-meta"                     {:color uri}}))
 
-(defn ->css [styles]
+(defn- ->css [styles]
   (str/join
    (for [[class style] styles]
      (str class "{" (s/style->css style) "}"))))
 
-(def language-map {"emacs-lisp" "lisp"})
+(def ^:private language-map {"emacs-lisp" "lisp"})
+
+(defn ^:no-doc stylesheet []
+  (let [theme    (theme/use-theme)]
+    [:style
+     (->css (->styles theme))]))
 
 (defn inspect-code
   ([code]
@@ -120,8 +125,6 @@
          :border-bottom [1 :solid (::c/border theme)]
          :border-radius (:border-radius theme)}}
        language]
-      [:style
-       (->css (stylesheet theme))]
       [:pre
        {:on-click
         (fn [e]
