@@ -354,7 +354,7 @@
           :box-sizing :border-box
           :padding (:padding theme)}}
         [with-depth
-         [select/with-position {:row 0 :column 0} [inspector metadata]]]])]))
+         [select/with-position {:row -1 :column 0} [inspector metadata]]]])]))
 
 (defn- container-map-k [child]
   [s/div {:style
