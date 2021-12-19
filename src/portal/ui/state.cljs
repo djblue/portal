@@ -125,7 +125,8 @@
                     (-> context
                         select/get-parent
                         select/get-prev
-                        select/get-child)
+                        select/get-child
+                        select/get-last)
                     (select/get-parent context))]
     (select-context state prev)
     state))
@@ -135,7 +136,8 @@
                     (-> context
                         select/get-parent
                         select/get-next
-                        select/get-child)
+                        select/get-child
+                        select/get-first)
                     (select/get-child context))]
     (select-context state next)
     state))
