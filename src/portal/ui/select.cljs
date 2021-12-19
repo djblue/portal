@@ -40,16 +40,18 @@
 (defn- compute-relative-index [selection-index index context]
   (let [position-index  {index context context index}
         selection-index (into selection-index position-index)]
-    (cond-> position-index
-      (nil? (get-prev selection-index context))
-      (assoc (conj (pop index)
-                   (assoc (last index) :row :first))
-             context)
+    (if-not (seq index)
+      position-index
+      (cond-> position-index
+        (nil? (get-prev selection-index context))
+        (assoc (conj (pop index)
+                     (assoc (last index) :row :first))
+               context)
 
-      (nil? (get-next selection-index context))
-      (assoc (conj (pop index)
-                   (assoc (last index) :row :last))
-             context))))
+        (nil? (get-next selection-index context))
+        (assoc (conj (pop index)
+                     (assoc (last index) :row :last))
+               context)))))
 
 (defn use-register-context [context viewer]
   (let [index (react/useContext index-context)]
