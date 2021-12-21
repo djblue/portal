@@ -1,17 +1,20 @@
 (ns ^:no-doc portal.runtime.json
-  (:refer-clojure :exclude [read]))
+  (:refer-clojure :exclude [read])
+  (:require
+   #?(:bb  [cheshire.core :as json]
+      :clj [clojure.data.json :as json])))
 
 (defn write [value]
-  #?(:bb   (cheshire.core/generate-string value)
-     :clj  ((requiring-resolve 'clojure.data.json/write-str) value)
+  #?(:bb   (json/generate-string value)
+     :clj  (json/write-str value)
      :cljs (.stringify js/JSON value)))
 
 (defn read [string]
-  #?(:bb   (cheshire.core/parse-string string)
-     :clj  ((requiring-resolve 'clojure.data.json/read-str) string)
+  #?(:bb   (json/parse-string string)
+     :clj  (json/read-str string)
      :cljs (.parse js/JSON string)))
 
 (defn read-stream [stream]
-  #?(:bb   (cheshire.core/parse-stream stream keyword)
-     :clj  ((requiring-resolve 'clojure.data.json/read) stream :key-fn keyword)
+  #?(:bb   (json/parse-stream stream keyword)
+     :clj  (json/read stream :key-fn keyword)
      :cljs (throw (ex-info "Unsupported in cljs" {:stream stream}))))
