@@ -12,6 +12,8 @@
   (:import [java.io PushbackReader]
            [java.util UUID]))
 
+(defmulti route (juxt :request-method :uri))
+
 (defn- not-found [_request done]
   (done {:status :not-found}))
 
@@ -59,7 +61,7 @@
       (fn [_ch _status]
         (swap! c/connections dissoc (:session-id session)))})))
 
-(defn- rpc-handler [request]
+(defmethod route [:get "/rpc"] [request]
   (if (get-in request [:session :options :runtime])
     (rpc-handler-remote request)
     (rpc-handler-local request)))
@@ -69,7 +71,7 @@
    :headers {"Content-Type" content-type}
    :body    resource})
 
-(defn- wait [_]
+(defmethod route [:get "/wait.js"] [_]
   (try (Thread/sleep 60000)
        (catch Exception _e {:status 200})))
 
@@ -82,7 +84,7 @@
      [(io/file "target/resources/portal/" uri)
       (io/file (io/resource uri))])))
 
-(defn- main-js [request]
+(defmethod route [:get "/main.js"] [request]
   {:status  200
    :headers {"Content-Type" "text/javascript"}
    :body
@@ -105,7 +107,7 @@
     (assoc request :session (rt/get-session session-id))
     request))
 
-(defn- submit [request]
+(defmethod route [:post "/submit"] [request]
   (let [body (:body request)]
     (rt/update-value
      (case (get-in request [:headers "content-type"])
@@ -116,7 +118,7 @@
                                    (PushbackReader. (io/reader body)))))
     {:status 200}))
 
-(defn- cors-handler [_]
+(defmethod route [:options "/submit"] [_]
   {:status 204
    :headers
    {"Access-Control-Allow-Origin"  "*"
@@ -124,18 +126,7 @@
     "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
     "Access-Control-Max-Age"       86400}})
 
-(defn- index [_]
+(defmethod route [:get "/"] [_]
   (send-resource "text/html" (index/html)))
 
-(def ^:private routes
-  {[:get "/"]           index
-   [:get "/wait.js"]    wait
-   [:get "/main.js"]    main-js
-   [:get "/rpc"]        rpc-handler
-   [:post "/submit"]    submit
-   [:options "/submit"] cors-handler})
-
-(defn handler [request]
-  (let [match   ((juxt :request-method :uri) request)
-        handler (get routes match resource)]
-    (handler (with-session request))))
+(defn handler [request] (route (with-session request)))
