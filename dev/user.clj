@@ -6,7 +6,7 @@
             [portal.api :as p]
             [portal.runtime.browser :as browser]
             [portal.runtime.json :as json]
-            [pwa]
+            [tasks.pwa :as pwa]
             [tracker]))
 
 (defn lazy-fn [symbol]

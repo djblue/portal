@@ -1,5 +1,7 @@
-(ns version
-  (:require [clojure.string :as str])
+(ns tasks.version
+  (:require [clojure.string :as str]
+            [tasks.info :refer [version]]
+            [tasks.tools :refer [git]])
   (:import [java.time LocalDateTime]
            [java.time.format DateTimeFormatter]))
 
@@ -37,5 +39,13 @@
 (defn- set-version [version]
   (doseq [[file-name content] (version-updates version)]
     (spit file-name content)))
+
+(defn tag
+  "Commit and tag a version."
+  []
+  (set-version version)
+  (git :add "-u")
+  (git :commit "-m" (str "Release " version))
+  (git :tag version))
 
 (defn -main [version] (set-version version))

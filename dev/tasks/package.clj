@@ -1,5 +1,9 @@
-(ns pom
-  (:require [hiccup.core :refer [html]]))
+(ns tasks.package
+  (:require [babashka.fs :as fs]
+            [hiccup.core :refer [html]]
+            [tasks.build :refer [build extensions]]
+            [tasks.info :refer [options version]]
+            [tasks.tools :refer [mvn]]))
 
 (defn- options->licenses [{:keys [license]}]
   [:licenses
@@ -77,3 +81,34 @@
 
 (defn generate [options]
   (-> options options->hiccup xml-str))
+
+(defn pom []
+  (let [target "pom.xml"]
+    (when (seq
+           (fs/modified-since
+            target
+            ["deps.edn"]))
+      (println "=>" "writing" target)
+      (spit target (generate options)))))
+
+(defn jar
+  "Build a jar."
+  []
+  (build)
+  (pom)
+  (when (seq
+         (fs/modified-since
+          (str "target/portal-" version ".jar")
+          (concat
+           ["pom.xml"]
+           (fs/glob "src" "**")
+           (fs/glob "resources" "**"))))
+    (mvn :package)))
+
+(defn all
+  "Package all release artifacts."
+  []
+  (jar)
+  (extensions))
+
+(defn -main [] (all))
