@@ -1,9 +1,11 @@
-(ns pwa
-  (:require [clojure.java.browse :refer [browse-url]]
+(ns tasks.pwa
+  (:require [babashka.fs :as fs]
+            [clojure.java.browse :refer [browse-url]]
             [clojure.java.io :as io]
             [hiccup.core :refer [html]]
             [portal.colors :as c]
-            [portal.runtime.json :as json]))
+            [portal.runtime.json :as json]
+            [tasks.tools :refer [shadow]]))
 
 (defn- manifest-json [settings]
   (json/write
@@ -57,12 +59,21 @@
           :dir "target/pwa-release/"
           :host "https://djblue.github.io/portal/"}})
 
-(defn -main [env]
+(defn generate-files [env]
   (let [{:keys [dir] :as settings} (get envs (keyword env))]
     (doseq [[file content] (get-files settings)]
       (spit (str dir file) content))))
 
+(defn pwa
+  "Build portal PWA. (djblue.github.io/portal)"
+  []
+  (fs/create-dirs "target/pwa-release/")
+  (generate-files :prod)
+  (shadow :release :pwa))
+
+(defn -main [] (pwa))
+
 (comment
-  (-main :dev)
-  (-main :prod)
+  (generate-files :dev)
+  (generate-files :prod)
   (browse-url "http://localhost:4400"))

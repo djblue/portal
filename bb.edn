@@ -1,17 +1,17 @@
 {:paths ["src" "resources" "dev" "test"]
  :deps {io.aviso/pretty {:mvn/version "1.1.1"}}
  :min-bb-version "0.6.4"
- :tasks {app    tasks/app
-         deps   tasks/fix-deps
-         ci     tasks/ci
-         clean  tasks/clean
-         check  tasks/check
-         dev    tasks/dev
-         e2e    tasks/e2e-all
-         fmt    tasks/format
-         jar    tasks/jar
-         test   tasks/test
-         tag    tasks/tag
-         ext    tasks/build-extensions
-         pkg    tasks/package-artifacts
-         deploy tasks/deploy}}
+ :tasks {app    tasks.pwa/pwa
+         deps   tasks.deps/fix-deps
+         ci     tasks.ci/ci
+         clean  tasks.clean/clean
+         check  tasks.check/check
+         dev    tasks.dev/dev
+         e2e    tasks.e2e/all
+         fmt    tasks.format/fix
+         jar    tasks.package/jar
+         test   tasks.test/test
+         tag    tasks.version/tag
+         ext    tasks.build/extensions
+         pkg    tasks.package/all
+         deploy tasks.deploy/all}}
