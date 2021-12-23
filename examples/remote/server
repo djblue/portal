@@ -3,7 +3,7 @@
 (require '[babashka.deps :as deps])
 (require '[clojure.main :as main])
 
-(deps/add-deps '{:deps {djblue/portal {:mvn/version "0.18.0"}}})
+(deps/add-deps '{:deps {djblue/portal {:mvn/version "0.19.0"}}})
 
 (require '[portal.api :as p])
 
