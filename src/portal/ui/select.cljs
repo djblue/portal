@@ -28,8 +28,10 @@
   ([context] (get-child @selection-index context))
   ([selection-index context]
    (when-let [index (get selection-index context)]
-     (get selection-index
-          (conj index {:row 0 :column 0})))))
+     (or (get selection-index
+              (conj index {:row 0 :column 0}))
+         (get selection-index
+              (conj index {:row :first :column 0}))))))
 
 (defn get-parent
   ([context] (get-parent @selection-index context))
