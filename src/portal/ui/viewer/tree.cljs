@@ -121,14 +121,16 @@
               [select/with-position
                {:row index :column 0}
                [s/div
-                {:style {:padding-right (:padding theme)}}
+                {:style {:white-space :nowrap
+                         :padding-right (:padding theme)}}
                 [ins/inspector k]]]]
              :value v
              :value-child
-             [ins/with-key k
-              [select/with-position
-               {:row index :column 1}
-               [ins/inspector v]]]}])
+             [s/div
+              [ins/with-key k
+               [select/with-position
+                {:row index :column 1}
+                [ins/inspector v]]]]}])
          (ins/try-sort-map value))]]]]))
 
 (defn- inspect-tree-coll [value]
