@@ -679,7 +679,7 @@
   (apply-selected state state/focus-selected))
 
 (defn ^:command toggle-expand [state]
-  (apply-selected state state/toggle-expand))
+  (state/dispatch! state state/toggle-expand))
 
 (defn ^:command redo-previous-command [state]
   (a/let [commands (::state/previous-commands @state)]
