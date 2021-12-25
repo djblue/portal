@@ -75,7 +75,7 @@
   (try (Thread/sleep 60000)
        (catch Exception _e {:status 200})))
 
-(defn- resource [request]
+(defmethod route :default [request]
   (let [uri (subs (:uri request) 1)]
     (some
      (fn [^java.io.File file]
