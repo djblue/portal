@@ -23,10 +23,10 @@
 (defn- use-node-styles []
   (let [theme (theme/use-theme)
         color (theme/use-rainbow)]
-    {:color color
-     :font-weigth :bold
-     :margin-right "8px"
-     :padding-top (* 0.5 (:padding theme))
+    {:color          color
+     :font-weigth    :bold
+     :margin-right   (:padding theme)
+     :padding-top    (* 0.5 (:padding theme))
      :padding-bottom (* 0.5 (:padding theme))}))
 
 (defn- center [& children]
