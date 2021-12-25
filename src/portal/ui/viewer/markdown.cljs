@@ -3,6 +3,7 @@
             [hickory.utils :as utils]
             [markdown.common :as common]
             [markdown.core :refer [md->html]]
+            [portal.ui.inspector :as ins]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
 
 (defn ^:no-doc parse-markdown [value]
@@ -25,7 +26,8 @@
    [common/escape-code   identity
     common/escaped-chars identity
     utils/html-escape    identity]
-    [inspect-hiccup (parse-markdown value)]))
+    [ins/inc-depth
+     [inspect-hiccup (parse-markdown value)]]))
 
 (def viewer
   {:predicate string?
