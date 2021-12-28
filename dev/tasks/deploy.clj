@@ -8,13 +8,12 @@
   (binding [*cwd* "extension-vscode"]
     (npx :vsce :publish)))
 
-(defn deploy-clojars []
+(defn- deploy-clojars []
   (clj "-M:deploy" (str "./target/portal-" version ".jar")))
 
 (defn deploy []
   (pkg/all)
-  ;; revert after release
-  #_(deploy-clojars)
+  (deploy-clojars)
   (deploy-vscode))
 
 (defn all
