@@ -14,19 +14,7 @@ jobs:
         java: [ '11' ]
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
-        restore-keys: |
-          ${{ runner.os }}-deps-
-    - uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: ${{ matrix.java }}
-    - uses: turtlequeue/setup-babashka@v1.3.0
-      with:
-        babashka-version: 0.6.4
+    - uses: ./.github/setup
     - run: bb -m tasks.planck
     - run: bb ci
     - run: bb app

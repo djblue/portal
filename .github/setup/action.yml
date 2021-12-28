@@ -1,0 +1,19 @@
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
+        restore-keys: |
+          ${{ runner.os }}-deps-
+    - uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+        server-id: clojars
+        server-username: CLOJARS_USERNAME
+        server-password: CLOJARS_PASSWORD
+    - uses: turtlequeue/setup-babashka@v1.3.0
+      with:
+        babashka-version: 0.6.4
