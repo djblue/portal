@@ -41,18 +41,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [ test-clj, test-cljs, check ]
-    if: startsWith(github.event.head_commit.message, 'Release ')
-    environment: deploy
+    # if: startsWith(github.event.head_commit.message, 'Release ')
+    # environment: deploy
     steps:
     - uses: actions/checkout@v2
     - uses: ./.github/setup
     - id: info
       run: bb -m tasks.info
-    - run: bb -m tasks.deploy
-      env:
-        CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
-        CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
-        VSCE_PAT: ${{ secrets.VSCE_PAT }}
+    - run: bb -m tasks.package
+    # - run: bb -m tasks.deploy
+    #   env:
+    #     CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+    #     CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+    #     VSCE_PAT: ${{ secrets.VSCE_PAT }}
     - uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.info.outputs.version }}
