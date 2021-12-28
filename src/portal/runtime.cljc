@@ -196,7 +196,7 @@
 (defn- get-options []
   (merge
    {:name "portal"
-    :version "0.19.1"
+    :version "0.19.2"
     :platform
     #?(:bb   "bb"
        :clj  "jvm"

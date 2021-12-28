@@ -1,3 +1,7 @@
+## 0.19.2 - 2021-12-28
+
+- Release to fix cljdoc
+
 ## 0.19.1 - 2021-12-27
 
 ### Additions
