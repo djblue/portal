@@ -20,9 +20,9 @@
      " "
      (a/bold-yellow
       (str
-       (when-not (zero? h)
+       (when (> h 0)
          (str h " hours, "))
-       (when-not (zero? m)
+       (when (> m 0)
          (str h " minutes, "))
        s "." ms " seconds")))))
 
