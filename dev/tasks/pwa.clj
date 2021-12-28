@@ -5,6 +5,7 @@
             [hiccup.core :refer [html]]
             [portal.colors :as c]
             [portal.runtime.json :as json]
+            [tasks.build :refer [install]]
             [tasks.tools :refer [shadow]]))
 
 (defn- manifest-json [settings]
@@ -67,6 +68,7 @@
 (defn pwa
   "Build portal PWA. (djblue.github.io/portal)"
   []
+  (install)
   (fs/create-dirs "target/pwa-release/")
   (generate-files :prod)
   (shadow :release :pwa))
