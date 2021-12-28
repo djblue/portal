@@ -1,19 +1,38 @@
 runs:
   using: "composite"
   steps:
-    - uses: actions/cache@v2
+    - name: Maven Cache
+      uses: actions/cache@v2
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
         restore-keys: |
           ${{ runner.os }}-deps-
-    - uses: actions/setup-java@v2
+    - name: Gradle Cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - name: Node Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Install Java
+      uses: actions/setup-java@v2
       with:
         distribution: 'adopt'
         java-version: '11'
         server-id: clojars
         server-username: CLOJARS_USERNAME
         server-password: CLOJARS_PASSWORD
-    - uses: turtlequeue/setup-babashka@v1.3.0
+    - name: Install Babashka
+      uses: turtlequeue/setup-babashka@v1.3.0
       with:
         babashka-version: 0.6.4
