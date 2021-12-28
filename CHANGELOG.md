@@ -1,3 +1,19 @@
+## 0.19.1 - 2021-12-27
+
+### Additions
+
+- Add `portal.ui.commands/select-none` d1b1807
+- Toggle expand all selected values a6c692f
+- Add select-first / select-last 60fcbe5
+- Use highlight.js for syntax highlighting strings b26c6f1
+- Add more libs to sci 1f45777
+
+### UX Fixes
+
+- Only scroll to value if not visible cd00b5e
+- Fix tree viewer white space 719eaab
+- Fix select-child for table viewer 7cdcd72
+
 ## 0.19.0 - 2021-12-16
 
 ### Portal UI Extensions
