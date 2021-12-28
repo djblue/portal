@@ -2,9 +2,9 @@
   (:refer-clojure :exclude [test])
   (:require [babashka.fs :as fs]
             [tasks.build :refer [build]]
-            [tasks.tools :refer [bb clj node sh]]))
+            [tasks.tools :as t]))
 
-(defn test-cljs [version]
+(defn- cljs* [version]
   (let [out (str "target/test." version ".js")]
     (when (seq
            (fs/modified-since
@@ -12,27 +12,30 @@
             (concat
              (fs/glob "src" "**")
              (fs/glob "test" "**"))))
-      (clj "-Sdeps"
-           (pr-str
-            {:deps
-             {'org.clojure/clojurescript
-              {:mvn/version version}}})
-           "-M:test"
-           "-m" :cljs.main
-           "--output-dir" (str "target/cljs-output-" version)
-           "--target" :node
-           "--output-to" out
-           "--compile" :portal.test-runner))
-    (node out)))
+      (t/clj "-Sdeps"
+             (pr-str
+              {:deps
+               {'org.clojure/clojurescript
+                {:mvn/version version}}})
+             "-M:test"
+             "-m" :cljs.main
+             "--output-dir" (str "target/cljs-output-" version)
+             "--target" :node
+             "--output-to" out
+             "--compile" :portal.test-runner))
+    (t/node out)))
 
-(defn test
-  "Run all clj/s tests."
+(defn cljs []
+  (cljs* "1.10.773")
+  (cljs* "1.10.844")
+  (t/sh :planck "-c" "src:test" "-m" :portal.test-planck))
+
+(defn clj
   []
-  (test-cljs "1.10.773")
-  (test-cljs "1.10.844")
-  (sh :planck "-c" "src:test" "-m" :portal.test-planck)
   (build)
-  (clj "-M:test" "-m" :portal.test-runner)
-  (bb "-m" :portal.test-runner))
+  (t/clj "-M:test" "-m" :portal.test-runner)
+  (t/bb "-m" :portal.test-runner))
+
+(defn test "Run all clj/s tests." [] (cljs) (clj))
 
 (defn -main [] (test))
