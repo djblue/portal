@@ -43,4 +43,5 @@
     :url  "https://opensource.org/licenses/MIT"}
    :deps (get-deps)})
 
-(defn -main [] (println options))
+(defn -main []
+  (println (str "::set-output name=version::" version)))

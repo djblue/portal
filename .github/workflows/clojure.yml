@@ -46,6 +46,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: ./.github/setup
+    - id: info
+      run: bb -m tasks.info
     - run: bb -m tasks.deploy
       env:
         CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
@@ -53,6 +55,7 @@ jobs:
         VSCE_PAT: ${{ secrets.VSCE_PAT }}
     - uses: softprops/action-gh-release@v1
       with:
+        tag_name: ${{ steps.info.outputs.version }}
         files: |
           target/*.jar
           extension-vscode/*.vsix
