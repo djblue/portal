@@ -29,9 +29,6 @@ runs:
       with:
         distribution: 'adopt'
         java-version: '11'
-        server-id: clojars
-        server-username: CLOJARS_USERNAME
-        server-password: CLOJARS_PASSWORD
     - name: Install Babashka
       uses: turtlequeue/setup-babashka@v1.3.0
       with:

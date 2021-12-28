@@ -47,6 +47,10 @@ jobs:
     - uses: actions/checkout@v2
     - uses: ./.github/setup
     - run: bb -m tasks.deploy
+      env:
+        CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+        VSCE_PAT: ${{ secrets.VSCE_PAT }}
     - uses: softprops/action-gh-release@v1
       with:
         files: |
