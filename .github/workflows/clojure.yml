@@ -7,20 +7,10 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: [ '11' ]
     steps:
     - uses: actions/checkout@v2
     - uses: ./.github/setup
     - run: bb -m tasks.planck
     - run: bb ci
-    - run: bb app
-      if: ${{ github.event_name == 'push' }}
-    - uses: peaceiris/actions-gh-pages@v3
-      if: ${{ github.event_name == 'push' }}
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./target/pwa-release/
