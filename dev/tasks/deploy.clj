@@ -10,10 +10,16 @@
 (defn- deploy-clojars []
   (mvn :deploy))
 
+(defn deploy []
+  (pkg/all)
+  ;; revert after release
+  #_(deploy-clojars)
+  (deploy-vscode))
+
 (defn all
   "Deploy all artifacts."
   []
   (ci)
-  (pkg/all)
-  (deploy-clojars)
-  (deploy-vscode))
+  (deploy))
+
+(defn -main [] (deploy))
