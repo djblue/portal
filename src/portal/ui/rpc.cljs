@@ -10,6 +10,18 @@
 (defn call [f & args]
   (apply state/invoke f args))
 
+(defonce ^:private current-values (r/atom {}))
+
+(defn- remote-deref [this]
+  (-> (call 'clojure.core/deref this)
+      (.then #(swap! current-values
+                     assoc-in [this 'clojure.core/deref] %))))
+
+(defn- remote-pr-str [this]
+  (-> (call 'clojure.core/pr-str this)
+      (.then #(swap! current-values
+                     assoc-in [this 'clojure.core/pr-str] %))))
+
 (deftype RuntimeObject [object]
   cson/ToJson
   (-to-json [_]
@@ -17,6 +29,12 @@
 
   IMeta
   (-meta [_this] (:meta object))
+
+  IDeref
+  (-deref [this]
+    (when-not (contains? @current-values [this 'clojure.core/deref])
+      (remote-deref this))
+    (get-in @current-values [this 'clojure.core/deref]))
 
   IWithMeta
   (-with-meta [_this m]
@@ -27,8 +45,10 @@
   (-hash [_] (hash object))
 
   IPrintWithWriter
-  (-pr-writer [_o writer _opts]
-    (-write writer (str "#portal/runtime " (pr-str object)))))
+  (-pr-writer [this writer _opts]
+    (when-not (contains? @current-values [this 'clojure.core/pr-str])
+      (remote-pr-str this))
+    (-write writer (get-in @current-values [this 'clojure.core/pr-str] "loading"))))
 
 (defn runtime-object? [value]
   (instance? RuntimeObject value))
@@ -129,12 +149,9 @@
     ;; (tap> (assoc me ssage :type :request))
     ((if js/window.opener web-request ws-request) message)))
 
-(defonce ^:private versions (r/atom {}))
-
 (defn ^:no-doc use-invoke [f & args]
   (let [[value set-value!] (react/useState ::loading)
-        versions           (for [arg args]
-                             (str (hash arg) (get @versions arg)))]
+        versions           (for [arg args] (hash arg))]
     (react/useEffect
      (fn []
        (when (not-any? #{::loading} args)
@@ -160,9 +177,9 @@
          {:result (sci/eval-string (:code message))}
          (catch :default e
            {:result (pr-str e)})))))
-   :portal.rpc/update-versions
+   :portal.rpc/invalidate
    (fn [message send!]
-     (reset! versions (:body message))
+     (remote-deref (:atom message))
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/close
@@ -177,7 +194,7 @@
    :portal.rpc/clear
    (fn [message send!]
      (state/dispatch! state/state state/clear)
-     (reset! versions {})
+     (reset! current-values {})
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/push-state

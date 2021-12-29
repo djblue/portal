@@ -17,6 +17,7 @@
             [portal.ui.viewer.code :as code]
             [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.date-time :as date-time]
+            [portal.ui.viewer.deref :as deref]
             [portal.ui.viewer.diff :as diff]
             [portal.ui.viewer.edn :as edn]
             [portal.ui.viewer.exception :as ex]
@@ -371,6 +372,7 @@
    charts/histogram-chart
    log/viewer
    image/viewer
+   deref/viewer
    ins/viewer
    vega-lite/viewer
    vega/viewer
