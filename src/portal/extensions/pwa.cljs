@@ -163,7 +163,7 @@
 
 (defn create-iframe [src]
   (let [frame (js/document.createElement "iframe")]
-    (set! (.-style frame) "border: 0; width: 100vw; height: calc(100vh + 1px)")
+    (set! (.-style frame) "border: none; position: fixed; height: 100vh; width: 100vw")
     (set! (.-src frame) src)
     frame))
 

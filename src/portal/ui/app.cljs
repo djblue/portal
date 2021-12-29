@@ -354,7 +354,7 @@
          ^{:key index}
          [s/div
           {:style
-           {:flex 1
+           {:flex "1"
             :display
             (if (= state current-state)
               :block
