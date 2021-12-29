@@ -104,6 +104,7 @@
    :mark "line"})
 
 (def bar-chart
+  ^{:portal.viewer/default :portal.viewer/vega-lite}
   {:data
    {:values
     [{:a "A", :b 28}
