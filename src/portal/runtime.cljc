@@ -27,20 +27,19 @@
   #?(:clj  (future (Thread/sleep timeout) (f))
      :cljs (js/setTimeout f timeout)))
 
-(defn broadcast-change [_watch-key a old new]
-  (when-not (= old new)
-    (set-timeout
-     #(when (= @a new)
-        (when-let [request @request]
-          (request {:op :portal.rpc/update-versions :body new})))
-     100)))
-
 (defn- atom? [o]
   #?(:clj  (instance? clojure.lang.Atom o)
      :cljs (satisfies? cljs.core/IAtom o)))
 
-(defonce ^:private watch-registry (atom {}))
-(add-watch watch-registry ::watch-key #'broadcast-change)
+(defonce ^:private watch-registry (atom #{}))
+
+(defn- invalidate [_watch-key a old new]
+  (when-not (= old new)
+    (set-timeout
+     #(when (= @a new)
+        (when-let [request @request]
+          (request {:op :portal.rpc/invalidate :atom a})))
+     100)))
 
 (defn- watch-atom [a]
   (when-not (contains? @watch-registry a)
@@ -50,12 +49,8 @@
        (if (contains? atoms a)
          atoms
          (do
-           (add-watch
-            a
-            ::watch-key
-            (fn [_watch-key a _old _new]
-              (swap! watch-registry update a inc)))
-           (assoc atoms a 0)))))))
+           (add-watch a ::watch-key #'invalidate)
+           (conj atoms a)))))))
 
 (defn- value->id [value]
   (let [k [:value value]]
@@ -102,6 +97,12 @@
   cson/ToJson
   (-to-json [value]
     (to-object value :var (var->symbol value))))
+
+(extend-type #?(:clj  clojure.lang.Atom
+                :cljs cljs.core/Atom)
+  cson/ToJson
+  (-to-json [value]
+    (to-object value :atom nil)))
 
 (defn- can-meta? [value]
   #?(:clj  (or (instance? clojure.lang.IObj value)
@@ -164,9 +165,9 @@
      (reset! id 0)
      (reset! tap-list (list))
      (reset! (:value-cache *session*) {})
-     (doseq [[a] @watch-registry]
+     (doseq [a @watch-registry]
        (remove-watch a ::watch-key))
-     (reset! watch-registry {}))
+     (reset! watch-registry #{}))
    (done nil)))
 
 (defn update-selected

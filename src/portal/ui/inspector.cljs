@@ -90,6 +90,12 @@
            #js {:value (update context :depth inc)}]
           children)))
 
+(defn dec-depth [& children]
+  (let [context (use-context)]
+    (into [:r> (.-Provider inspector-context)
+           #js {:value (update context :depth dec)}]
+          children)))
+
 (defn- use-depth [] (:depth (use-context)))
 
 (defn with-context [value & children]
@@ -216,7 +222,9 @@
       {:style
        {:box-sizing :border-box
         :padding (:padding theme)}}
-      [with-key option [inspector (get value option)]]]]))
+      [select/with-position
+       {:row 0 :column 0}
+       [with-key option [inspector (get value option)]]]]]))
 
 (defn- diff-added [value]
   (let [theme (theme/use-theme)
@@ -587,7 +595,7 @@
 
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
-        string (rpc/use-invoke 'clojure.core/pr-str value)
+        string (pr-str value)
         limit  (:string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]

@@ -14,8 +14,7 @@
 (def functional-compiler (r/create-compiler {:function-components true}))
 
 (defn use-tap-list []
-  (let [a (rpc/use-invoke 'portal.runtime/get-tap-atom)]
-    (rpc/use-invoke 'clojure.core/deref a)))
+  (rpc/use-invoke 'portal.runtime/get-tap-atom))
 
 (defn- default-app [] [app/app (use-tap-list)])
 
