@@ -155,6 +155,9 @@
 
 (defonce tap-list (atom (list)))
 
+(defn- get-tap-atom []
+  (get-in *session* [:options :atom] tap-list))
+
 (defn update-value [new-value]
   (swap! tap-list conj new-value))
 
@@ -163,7 +166,7 @@
   ([_request done]
    (when *session*
      (reset! id 0)
-     (reset! tap-list (list))
+     (swap! (get-tap-atom) empty)
      (reset! (:value-cache *session*) {})
      (doseq [a @watch-registry]
        (remove-watch a ::watch-key))
@@ -191,9 +194,6 @@
              (catch #?(:clj Exception :cljs :default) _ex))
            result))))
    @registry))
-
-(defn- get-tap-atom []
-  (get-in *session* [:options :atom] tap-list))
 
 (defn- get-options []
   (merge
