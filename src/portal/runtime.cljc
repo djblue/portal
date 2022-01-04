@@ -192,7 +192,8 @@
            result))))
    @registry))
 
-(defn- get-tap-atom [] tap-list)
+(defn- get-tap-atom []
+  (get-in *session* [:options :atom] tap-list))
 
 (defn- get-options []
   (merge
@@ -205,7 +206,7 @@
                (exists? js/process)        "node"
                (exists? js/PLANCK_VERSION) "planck"
                :else                        "web"))}
-   (:options *session*)))
+   (dissoc (:options *session*) :atom)))
 
 (defn- ping [] ::pong)
 

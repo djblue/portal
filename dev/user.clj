@@ -59,6 +59,9 @@
   (def remote (p/open {:runtime {:type :socket :port 5555}}))
   (def remote (p/open {:runtime {:type :socket :port 6666}}))
 
+  (def a (atom {}))
+  (def root (p/open {:mode :dev :atom a}))
+
   (with-redefs [browser/pwa (:dev pwa/envs)]
     (def portal (p/open {:mode :dev})))
   (add-tap #'p/submit)
