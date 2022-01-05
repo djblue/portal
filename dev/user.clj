@@ -51,16 +51,15 @@
   (tracker/start)
   (tracker/stop)
 
+  (def value (atom data))
   (def portal (p/open))
   (def dev    (p/open {:mode :dev}))
+  (def dev    (p/open {:mode :dev :value value}))
   (def code   (p/open {:mode :dev :launcher :vs-code}))
   (def idea   (p/open {:mode :dev :launcher :intellij}))
   (def work   (p/open {:mode :dev :main 'workspace}))
   (def remote (p/open {:runtime {:type :socket :port 5555}}))
   (def remote (p/open {:runtime {:type :socket :port 6666}}))
-
-  (def a (atom {}))
-  (def root (p/open {:mode :dev :atom a}))
 
   (with-redefs [browser/pwa (:dev pwa/envs)]
     (def portal (p/open {:mode :dev})))

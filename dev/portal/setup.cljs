@@ -3,6 +3,7 @@
             [examples.data :refer [data]]
             [portal.client.web :as client]
             [portal.console :as log]
+            [portal.ui.state :as state]
             [portal.web :as p]))
 
 (def submit (partial client/submit {:port js/window.location.port}))
@@ -22,7 +23,7 @@
 
 (comment
   (def portal (p/open))
-  (def portal (p/open {:mode :dev}))
+  (def portal (p/open {:mode :dev :value state/state}))
 
   (add-tap #'p/submit)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])

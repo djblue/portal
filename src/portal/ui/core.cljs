@@ -13,11 +13,6 @@
 
 (def functional-compiler (r/create-compiler {:function-components true}))
 
-(defn use-tap-list []
-  (rpc/use-invoke 'portal.runtime/get-tap-atom))
-
-(defn- default-app [] [app/app (use-tap-list)])
-
 (defn- ns->url [ns]
   (str "/"
        (str/replace (name ns) #"\." "/")
@@ -40,7 +35,7 @@
      (cond
        (= opts ::opts/loading) nil
        (contains? opts :main) [custom-app opts]
-       :else [default-app])]))
+       :else [app/app (:value opts)])]))
 
 (defn with-cache [& children]
   (into [:<> (meta @state/value-cache)] children))

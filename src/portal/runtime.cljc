@@ -153,20 +153,33 @@
            "ref"    (ref-> value)
            (cson/tagged-value (first value) (cson/json-> (second value)))))}))))
 
-(defonce tap-list (atom (list)))
-
-(defn- get-tap-atom []
-  (get-in *session* [:options :atom] tap-list))
+(defonce ^:private tap-list (atom (list)))
 
 (defn update-value [new-value]
   (swap! tap-list conj new-value))
+
+(defn- get-options []
+  (merge
+   {:name "portal"
+    :version "0.19.2"
+    :platform
+    #?(:bb   "bb"
+       :clj  "jvm"
+       :cljs (cond
+               (exists? js/process)        "node"
+               (exists? js/PLANCK_VERSION) "planck"
+               :else                        "web"))
+    :value tap-list}
+   (:options *session*)))
 
 (defn clear-values
   ([] (clear-values nil identity))
   ([_request done]
    (when *session*
      (reset! id 0)
-     (swap! (get-tap-atom) empty)
+     (let [value (:value (get-options))]
+       (when (atom? value)
+         (swap! value empty)))
      (reset! (:value-cache *session*) {})
      (doseq [a @watch-registry]
        (remove-watch a ::watch-key))
@@ -194,19 +207,6 @@
              (catch #?(:clj Exception :cljs :default) _ex))
            result))))
    @registry))
-
-(defn- get-options []
-  (merge
-   {:name "portal"
-    :version "0.19.2"
-    :platform
-    #?(:bb   "bb"
-       :clj  "jvm"
-       :cljs (cond
-               (exists? js/process)        "node"
-               (exists? js/PLANCK_VERSION) "planck"
-               :else                        "web"))}
-   (dissoc (:options *session*) :atom)))
 
 (defn- ping [] ::pong)
 
@@ -249,7 +249,6 @@
      :cljs (satisfies? cljs.core/IDeref value)))
 
 (doseq [var [#'ping
-             #'get-tap-atom
              #'get-options
              #'get-functions
              #'type
