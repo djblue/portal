@@ -8,7 +8,8 @@
 
 (defn atom? [value]
   (and (rpc/runtime-object? value)
-       (= (rpc/tag value) :atom)))
+       (not= (rpc/tag value) :var)
+       (rpc/-satisfies? value :IDeref)))
 
 (defn inspect-deref [value]
   (let [theme (theme/use-theme)

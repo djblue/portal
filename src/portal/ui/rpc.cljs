@@ -53,6 +53,9 @@
 (defn runtime-object? [value]
   (instance? RuntimeObject value))
 
+(defn -satisfies? [value protocol]
+  (contains? (:protocols (.-object value)) protocol))
+
 (defn type [value] (:type (.-object value)))
 
 (defn tag [value] (:tag (.-object value)))

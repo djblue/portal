@@ -69,15 +69,21 @@
 (defn- id->value [id]
   (get @(:value-cache *session*) [:id id]))
 
+(defn- deref? [value]
+  #?(:clj  (instance? clojure.lang.IRef value)
+     :cljs (satisfies? cljs.core/IDeref value)))
+
 (defn- to-object [value tag rep]
   (when (atom? value) (watch-atom value))
   (let [m (meta value)]
     (cson/tag
      "object"
      (cson/to-json
-      (cond-> {:id     (value->id value)
-               :type   (pr-str (type value))
-               :tag    tag}
+      (cond-> {:tag       tag
+               :id        (value->id value)
+               :type      (pr-str (type value))
+               :protocols (cond-> #{}
+                            (deref? value) (conj :IDeref))}
         m   (assoc :meta m)
         rep (assoc :rep rep))))))
 
@@ -97,12 +103,6 @@
   cson/ToJson
   (-to-json [value]
     (to-object value :var (var->symbol value))))
-
-(extend-type #?(:clj  clojure.lang.Atom
-                :cljs cljs.core/Atom)
-  cson/ToJson
-  (-to-json [value]
-    (to-object value :atom nil)))
 
 (defn- can-meta? [value]
   #?(:clj  (or (instance? clojure.lang.IObj value)
@@ -243,10 +243,6 @@
           assoc
           (or (:name opts) (var->name var))
           (merge {:var var} opts))))
-
-(defn- deref? [value]
-  #?(:clj  (instance? clojure.lang.IRef value)
-     :cljs (satisfies? cljs.core/IDeref value)))
 
 (doseq [var [#'ping
              #'get-options
