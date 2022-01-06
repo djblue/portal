@@ -25,14 +25,18 @@
 (defn- default-theme []
   (if (is-vs-code?) ::c/vs-code-embedded ::c/nord))
 
-(defonce ^:private theme (react/createContext nil))
+(defonce ^:private theme-context (react/createContext nil))
 
 (defn with-theme [theme-name & children]
-  (into [:r> (.-Provider theme)
-         #js {:value (get-theme (or theme-name (default-theme)))}]
-        children))
+  (let [theme      (get-theme (or theme-name (default-theme)))
+        background (::c/background theme)]
+    (react/useEffect
+     #(set! (.. js/document -body -style -backgroundColor)
+            background)
+     #js [background])
+    (into [:r> (.-Provider theme-context) #js {:value theme}] children)))
 
-(defn use-theme [] (react/useContext theme))
+(defn use-theme [] (react/useContext theme-context))
 
 (defonce ^:no-doc order
   (cycle [::c/diff-remove ::c/diff-add ::c/keyword ::c/tag ::c/number ::c/uri]))
