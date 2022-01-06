@@ -32,7 +32,7 @@
 
   IDeref
   (-deref [this]
-    (when-not (contains? @current-values [this 'clojure.core/deref])
+    (when (= ::not-found (get-in @current-values [this 'clojure.core/deref] ::not-found))
       (remote-deref this))
     (get-in @current-values [this 'clojure.core/deref]))
 
@@ -46,7 +46,7 @@
 
   IPrintWithWriter
   (-pr-writer [this writer _opts]
-    (when-not (contains? @current-values [this 'clojure.core/pr-str])
+    (when (= ::not-found (get-in @current-values [this 'clojure.core/pr-str] ::not-found))
       (remote-pr-str this))
     (-write writer (get-in @current-values [this 'clojure.core/pr-str] "loading"))))
 
