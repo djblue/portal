@@ -21,7 +21,10 @@
             "package-lock.json"
             "shadow-cljs.edn"]
            (fs/glob "src/portal/ui" "**.cljs"))))
-    (shadow :release :client)))
+    (shadow :release :client))
+  (fs/copy "resources/icon.svg"
+           "resources/portal/icon.svg"
+           {:replace-existing true}))
 
 (defn ws-js []
   (install)

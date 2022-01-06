@@ -9,7 +9,7 @@
             [portal.runtime.json :as json]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.remote.socket :as socket])
-  (:import [java.io PushbackReader]
+  (:import [java.io File PushbackReader]
            [java.util UUID]))
 
 (defmulti route (juxt :request-method :uri))
@@ -75,12 +75,19 @@
   (try (Thread/sleep 60000)
        (catch Exception _e {:status 200})))
 
+(defn- ext [^File file]
+  (first (re-find #"\.([^.]+)$" (.getName file))))
+
+(def ^:private ext->mime
+  {".map" "application/json"
+   ".svg" "image/svg+xml"})
+
 (defmethod route :default [request]
   (let [uri (subs (:uri request) 1)]
     (some
-     (fn [^java.io.File file]
+     (fn [^File file]
        (when (and file (.exists file))
-         (send-resource "application/json" (slurp file))))
+         (send-resource (-> file ext ext->mime) (slurp file))))
      [(io/file "target/resources/portal/" uri)
       (io/file (io/resource uri))])))
 
