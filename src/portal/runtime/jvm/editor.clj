@@ -88,7 +88,10 @@
   {:predicate can-goto :command true}
   [input]
   (when-let [location (can-goto input)]
-    (-open-editor
-     (assoc location
-            :editor
-            (get-in rt/*session* [:options :launcher] :emacs)))))
+    (let [{:keys [options]} rt/*session*]
+      (-open-editor
+       (assoc location
+              :editor
+              (or (:editor options)
+                  (:launcher options)
+                  :emacs))))))
