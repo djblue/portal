@@ -74,7 +74,7 @@
                             (tap->viewer tag))
           has-attrs?    (map? (first args))]
       (if component
-        [ins/inc-depth
+        [ins/dec-depth
          [select/with-position
           {:row 0 :column 0}
           (into [component] args)]]
