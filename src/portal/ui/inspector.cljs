@@ -7,7 +7,7 @@
             [portal.ui.api :as api]
             [portal.ui.filter :as f]
             [portal.ui.lazy :as l]
-            [portal.ui.rpc :as rpc]
+            [portal.ui.rpc.runtime :as rt]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
@@ -165,8 +165,8 @@
     (url? value)      :uri
     (date? value)     :date
 
-    (rpc/runtime? value)
-    (rpc/tag value)))
+    (rt/runtime? value)
+    (rt/tag value)))
 
 (declare inspector)
 (declare preview)
@@ -570,8 +570,8 @@
   [tagged-value 'uuid (str value)])
 
 (defn- get-var-symbol [value]
-  (if (rpc/runtime? value)
-    (rpc/rep value)
+  (if (rt/runtime? value)
+    (rt/rep value)
     (let [m (meta value)]
       (symbol (name (:ns m)) (name (:name m))))))
 
@@ -599,14 +599,13 @@
         limit  (:string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]
-    (when-not (= string ::rpc/loading)
-      [s/span {:style
-               {:color (::c/text theme)}}
-       (if (or (< (count string) limit)
-               (= (:depth context) 1)
-               (get expanded? (state/get-location context)))
-         string
-         (trim-string string limit))])))
+    [s/span {:style
+             {:color (::c/text theme)}}
+     (if (or (< (count string) limit)
+             (= (:depth context) 1)
+             (get expanded? (state/get-location context)))
+       string
+       (trim-string string limit))]))
 
 (defn inspect-long [value]
   [inspect-number (:rep value)])

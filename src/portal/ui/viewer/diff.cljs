@@ -1,8 +1,29 @@
 (ns portal.ui.viewer.diff
   (:require [lambdaisland.deep-diff2 :refer [diff]]
             [lambdaisland.deep-diff2.diff-impl :as diff]
+            [portal.runtime.cson :as cson]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]))
+
+(defn- to-json [tag value]
+  (cson/tag tag (cson/to-json value)))
+
+(extend-protocol cson/ToJson
+  diff/Deletion
+  (-to-json [this] (to-json "diff/Deletion" (:- this)))
+
+  diff/Insertion
+  (-to-json [this] (to-json "diff/Insertion" (:+ this)))
+
+  diff/Mismatch
+  (-to-json [this] (to-json "diff/Mismatch" ((juxt :- :+) this))))
+
+(defn ^:no-doc diff-> [value]
+  (case (first value)
+    "diff/Deletion"  (diff/Deletion.  (cson/json-> (second value)))
+    "diff/Insertion" (diff/Insertion. (cson/json-> (second value)))
+    "diff/Mismatch"  (let [[a b] (cson/json-> (second value))]
+                       (diff/Mismatch. a b))))
 
 (defn diff? [value]
   (or

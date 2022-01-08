@@ -1,15 +1,12 @@
 (ns portal.ui.viewer.deref
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
-            [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
 (defn atom? [value]
-  (and (rpc/runtime? value)
-       (not= (rpc/tag value) :var)
-       (satisfies? cljs.core/IDeref value)))
+  (satisfies? cljs.core/IDeref value))
 
 (defn inspect-deref [value]
   (let [theme (theme/use-theme)

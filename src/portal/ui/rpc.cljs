@@ -1,101 +1,14 @@
 (ns portal.ui.rpc
   (:refer-clojure :exclude [read type])
-  (:require ["react" :as react]
-            [lambdaisland.deep-diff2.diff-impl :as diff]
-            [portal.async :as a]
+  (:require [portal.async :as a]
             [portal.runtime.cson :as cson]
+            [portal.ui.rpc.runtime :as rt]
             [portal.ui.sci :as sci]
             [portal.ui.state :as state]
-            [reagent.core :as r]))
+            [portal.ui.viewer.diff :as diff]))
 
 (defn call [f & args]
   (apply state/invoke f args))
-
-(defonce ^:private current-values (r/atom {}))
-
-(defn- remote-deref [this]
-  (-> (call 'clojure.core/deref this)
-      (.then #(swap! current-values
-                     assoc-in [this 'clojure.core/deref] %))))
-
-(defn- remote-pr-str [this]
-  (-> (call 'clojure.core/pr-str this)
-      (.then #(swap! current-values
-                     assoc-in [this 'clojure.core/pr-str] %))))
-
-(defn- runtime-deref [this]
-  (when (= ::not-found (get-in @current-values [this 'clojure.core/deref] ::not-found))
-    (remote-deref this))
-  (get-in @current-values [this 'clojure.core/deref]))
-
-(defn- runtime-print [this writer _opts]
-  (when (= ::not-found (get-in @current-values [this 'clojure.core/pr-str] ::not-found))
-    (remote-pr-str this))
-  (-write writer (get-in @current-values [this 'clojure.core/pr-str] "loading")))
-
-(defn- runtime-to-json [this]
-  (let [object (.-object this)]
-    (if-let [to-object (:to-object cson/*options*)]
-      (to-object this :runtime-object nil)
-      (cson/tag "ref" (:id object)))))
-
-(defn- runtime-meta [this] (:meta (.-object this)))
-
-(defprotocol Runtime)
-
-(declare ->runtime)
-
-(deftype RuntimeObject [object]
-  Runtime
-  cson/ToJson (-to-json [this] (runtime-to-json this))
-  IMeta       (-meta    [this] (runtime-meta this))
-  IHash       (-hash    [_]    (hash object))
-  IWithMeta
-  (-with-meta [_this m]
-    (RuntimeObject.
-     (assoc object :meta m)))
-  IPrintWithWriter
-  (-pr-writer [this writer _opts]
-    (runtime-print this writer _opts)))
-
-(deftype RuntimeAtom [object]
-  Runtime
-  cson/ToJson (-to-json [this] (runtime-to-json this))
-  IMeta       (-meta    [this] (runtime-meta this))
-  IDeref      (-deref   [this] (runtime-deref this))
-  IHash       (-hash    [_]    (hash object))
-  IWithMeta
-  (-with-meta [_this m]
-    (RuntimeAtom.
-     (assoc object :meta m)))
-  IPrintWithWriter
-  (-pr-writer [this writer _opts]
-    (runtime-print this writer _opts)))
-
-(defn runtime? [value]
-  (satisfies? Runtime value))
-
-(defn- ->runtime [object]
-  (if (contains? (:protocols object) :IDeref)
-    (->RuntimeAtom object)
-    (->RuntimeObject object)))
-
-(defn tag [value] (:tag (.-object value)))
-
-(defn rep [value] (:rep (.-object value)))
-
-(defn- to-json [tag value]
-  (cson/tag tag (cson/to-json value)))
-
-(extend-protocol cson/ToJson
-  diff/Deletion
-  (-to-json [this] (to-json "diff/Deletion" (:- this)))
-
-  diff/Insertion
-  (-to-json [this] (to-json "diff/Insertion" (:+ this)))
-
-  diff/Mismatch
-  (-to-json [this] (to-json "diff/Mismatch" ((juxt :- :+) this))))
 
 (when (exists? js/BigInt)
   (extend-type js/BigInt
@@ -103,19 +16,12 @@
     (-hash [this]
       (hash (.toString this)))))
 
-(defn- diff-> [value]
-  (case (first value)
-    "diff/Deletion"  (diff/Deletion.  (cson/json-> (second value)))
-    "diff/Insertion" (diff/Insertion. (cson/json-> (second value)))
-    "diff/Mismatch"  (let [[a b] (cson/json-> (second value))]
-                       (diff/Mismatch. a b))))
-
 (defn- ref-> [value]
   (get @state/value-cache (second value)))
 
 (defn- runtime-id [value]
   (or (-> value meta :portal.runtime/id)
-      (when (runtime? value)
+      (when (rt/runtime? value)
         (:id (.-object value)))))
 
 (defn- read [string]
@@ -133,8 +39,8 @@
         "object" (let [object (cson/json-> (second value))]
                    (or
                     (get @state/value-cache (:id object))
-                    (->runtime object)))
-        (diff-> value)))}))
+                    (rt/->runtime call object)))
+        (diff/diff-> value)))}))
 
 (defn- write [value]
   (cson/write
@@ -142,7 +48,7 @@
    {:transform
     (fn [value]
       (if-let [id (-> value meta :portal.runtime/id)]
-        (->runtime {:id id})
+        (rt/->runtime call {:id id})
         value))}))
 
 (defonce ^:private id (atom 0))
@@ -193,17 +99,6 @@
                  (meta log)))))
     response))
 
-(defn ^:no-doc use-invoke [f & args]
-  (let [[value set-value!] (react/useState ::loading)
-        versions           (for [arg args] (hash arg))]
-    (react/useEffect
-     (fn []
-       (when (not-any? #{::loading} args)
-         (-> (apply state/invoke f args)
-             (.then #(set-value! %)))))
-     (.from js/Array versions))
-    value))
-
 (def ^:private ops
   {:portal.rpc/response
    (fn [message _send!]
@@ -223,7 +118,7 @@
            {:result (pr-str e)})))))
    :portal.rpc/invalidate
    (fn [message send!]
-     (remote-deref (:atom message))
+     (rt/deref (:atom message))
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/close
@@ -238,7 +133,7 @@
    :portal.rpc/clear
    (fn [message send!]
      (state/dispatch! state/state state/clear)
-     (reset! current-values {})
+     (reset! rt/current-values {})
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/push-state
