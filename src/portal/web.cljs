@@ -39,6 +39,17 @@
   (l/clear)
   nil)
 
+(defn register!
+  "Register a var with portal. For now, the var should be a 1 arity fn.
+
+  Example: `(register! #'identity)`
+
+  The function name and doc string will show up in the command palette."
+  {:added "0.20.0"}
+  [var]
+  (rt/register! var)
+  nil)
+
 (defn eval-str
   "Evalute ClojureScript source given as a string in the UI runtime."
   {:added "0.19.0"}
