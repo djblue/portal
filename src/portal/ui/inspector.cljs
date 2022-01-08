@@ -165,7 +165,7 @@
     (url? value)      :uri
     (date? value)     :date
 
-    (rpc/runtime-object? value)
+    (rpc/runtime? value)
     (rpc/tag value)))
 
 (declare inspector)
@@ -570,7 +570,7 @@
   [tagged-value 'uuid (str value)])
 
 (defn- get-var-symbol [value]
-  (if (rpc/runtime-object? value)
+  (if (rpc/runtime? value)
     (rpc/rep value)
     (let [m (meta value)]
       (symbol (name (:ns m)) (name (:name m))))))

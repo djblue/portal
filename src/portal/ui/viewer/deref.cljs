@@ -7,9 +7,9 @@
             [portal.ui.theme :as theme]))
 
 (defn atom? [value]
-  (and (rpc/runtime-object? value)
+  (and (rpc/runtime? value)
        (not= (rpc/tag value) :var)
-       (rpc/-satisfies? value :IDeref)))
+       (satisfies? cljs.core/IDeref value)))
 
 (defn inspect-deref [value]
   (let [theme (theme/use-theme)

@@ -137,7 +137,8 @@
      value
      (merge
       session
-      {:transform id-coll}))))
+      {:transform id-coll
+       :to-object to-object}))))
 
 (defn- ref-> [value]
   (id->value (second value)))

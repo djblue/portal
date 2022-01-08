@@ -23,58 +23,79 @@
       (.then #(swap! current-values
                      assoc-in [this 'clojure.core/pr-str] %))))
 
+(defn- runtime-deref [this]
+  (when (= ::not-found (get-in @current-values [this 'clojure.core/deref] ::not-found))
+    (remote-deref this))
+  (get-in @current-values [this 'clojure.core/deref]))
+
+(defn- runtime-print [this writer _opts]
+  (when (= ::not-found (get-in @current-values [this 'clojure.core/pr-str] ::not-found))
+    (remote-pr-str this))
+  (-write writer (get-in @current-values [this 'clojure.core/pr-str] "loading")))
+
+(defn- runtime-to-json [this]
+  (let [object (.-object this)]
+    (if-let [to-object (:to-object cson/*options*)]
+      (to-object this :runtime-object nil)
+      (cson/tag "ref" (:id object)))))
+
+(defn- runtime-meta [this] (:meta (.-object this)))
+
+(defprotocol Runtime)
+
+(declare ->runtime)
+
 (deftype RuntimeObject [object]
-  cson/ToJson
-  (-to-json [_]
-    (cson/tag "ref" (:id object)))
-
-  IMeta
-  (-meta [_this] (:meta object))
-
-  IDeref
-  (-deref [this]
-    (when (= ::not-found (get-in @current-values [this 'clojure.core/deref] ::not-found))
-      (remote-deref this))
-    (get-in @current-values [this 'clojure.core/deref]))
-
+  Runtime
+  cson/ToJson (-to-json [this] (runtime-to-json this))
+  IMeta       (-meta    [this] (runtime-meta this))
+  IHash       (-hash    [_]    (hash object))
   IWithMeta
   (-with-meta [_this m]
     (RuntimeObject.
      (assoc object :meta m)))
-
-  IHash
-  (-hash [_] (hash object))
-
   IPrintWithWriter
   (-pr-writer [this writer _opts]
-    (when (= ::not-found (get-in @current-values [this 'clojure.core/pr-str] ::not-found))
-      (remote-pr-str this))
-    (-write writer (get-in @current-values [this 'clojure.core/pr-str] "loading"))))
+    (runtime-print this writer _opts)))
 
-(defn runtime-object? [value]
-  (instance? RuntimeObject value))
+(deftype RuntimeAtom [object]
+  Runtime
+  cson/ToJson (-to-json [this] (runtime-to-json this))
+  IMeta       (-meta    [this] (runtime-meta this))
+  IDeref      (-deref   [this] (runtime-deref this))
+  IHash       (-hash    [_]    (hash object))
+  IWithMeta
+  (-with-meta [_this m]
+    (RuntimeAtom.
+     (assoc object :meta m)))
+  IPrintWithWriter
+  (-pr-writer [this writer _opts]
+    (runtime-print this writer _opts)))
 
-(defn -satisfies? [value protocol]
-  (contains? (:protocols (.-object value)) protocol))
+(defn runtime? [value]
+  (satisfies? Runtime value))
 
-(defn type [value] (:type (.-object value)))
+(defn- ->runtime [object]
+  (if (contains? (:protocols object) :IDeref)
+    (->RuntimeAtom object)
+    (->RuntimeObject object)))
 
 (defn tag [value] (:tag (.-object value)))
 
 (defn rep [value] (:rep (.-object value)))
 
-(defn- -tag [tag value]
+(defn- to-json [tag value]
   (cson/tag tag (cson/to-json value)))
 
 (extend-protocol cson/ToJson
   diff/Deletion
-  (-to-json [this] (-tag "diff/Deletion" (:- this)))
+  (-to-json [this] (to-json "diff/Deletion" (:- this)))
 
   diff/Insertion
-  (-to-json [this] (-tag "diff/Insertion" (:+ this)))
+  (-to-json [this] (to-json "diff/Insertion" (:+ this)))
 
   diff/Mismatch
-  (-to-json [this] (-tag "diff/Mismatch" ((juxt :- :+) this))))
+  (-to-json [this] (to-json "diff/Mismatch" ((juxt :- :+) this))))
 
 (when (exists? js/BigInt)
   (extend-type js/BigInt
@@ -94,7 +115,7 @@
 
 (defn- runtime-id [value]
   (or (-> value meta :portal.runtime/id)
-      (when (runtime-object? value)
+      (when (runtime? value)
         (:id (.-object value)))))
 
 (defn- read [string]
@@ -112,7 +133,7 @@
         "object" (let [object (cson/json-> (second value))]
                    (or
                     (get @state/value-cache (:id object))
-                    (RuntimeObject. object)))
+                    (->runtime object)))
         (diff-> value)))}))
 
 (defn- write [value]
@@ -121,7 +142,7 @@
    {:transform
     (fn [value]
       (if-let [id (-> value meta :portal.runtime/id)]
-        (RuntimeObject. {:id id})
+        (->runtime {:id id})
         value))}))
 
 (defonce ^:private id (atom 0))
