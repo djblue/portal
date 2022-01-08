@@ -190,7 +190,8 @@
   ([value]
    (update-selected (:session-id *session*) value))
   ([session-id value]
-   (swap! sessions assoc-in [session-id :selected] value)))
+   (swap! sessions assoc-in [session-id :selected] value)
+   nil))
 
 (def ^:private registry (atom {}))
 
