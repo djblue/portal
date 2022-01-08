@@ -200,9 +200,8 @@
          :portal/next-state nil))))
 
 (defn- send-selected-value [_ _ state state']
-  (when (or (not (:selected state))
-            (not= (get-selected-value state)
-                  (get-selected-value state')))
+  (when (not= (get-selected-value state)
+              (get-selected-value state'))
     (invoke 'portal.runtime/update-selected (get-selected-value state'))))
 
 (add-watch state :selected #'send-selected-value)
