@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [read type])
   (:require ["react" :as react]
             [lambdaisland.deep-diff2.diff-impl :as diff]
+            [portal.async :as a]
             [portal.runtime.cson :as cson]
             [portal.ui.sci :as sci]
             [portal.ui.state :as state]
@@ -126,6 +127,12 @@
 (defonce ^:private id (atom 0))
 (defonce ^:private pending-requests (atom {}))
 
+(defonce log
+  (atom
+   (with-meta
+     (list)
+     {:portal.viewer/default :portal.viewer/table})))
+
 (defn- next-id [] (swap! id inc))
 
 (declare send!)
@@ -148,9 +155,22 @@
        (catch :default e (reject e))))))
 
 (defn request [message]
-  (let [message (assoc message :portal.rpc/id (next-id))]
-    ;; (tap> (assoc me ssage :type :request))
-    ((if js/window.opener web-request ws-request) message)))
+  (a/let [message  (assoc message :portal.rpc/id (next-id))
+          start    (.now js/Date)
+          response ((if js/window.opener web-request ws-request) message)]
+    (when (and js/goog.DEBUG
+               (not= 'portal.runtime/ping (:f message)))
+      (swap! log
+             (fn [log]
+               (with-meta
+                 (take 10
+                       (conj log
+                             (-> message
+                                 (dissoc :op :portal.rpc/id)
+                                 (assoc :return  (:return response)
+                                        :time-ms (- (.now js/Date) start)))))
+                 (meta log)))))
+    response))
 
 (defn ^:no-doc use-invoke [f & args]
   (let [[value set-value!] (react/useState ::loading)
