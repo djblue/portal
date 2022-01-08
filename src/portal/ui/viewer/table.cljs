@@ -27,7 +27,8 @@
         :grid-gap 1
         :background (::c/border theme)
         :border [1 :solid (::c/border theme)]
-        :border-radius (:border-radius theme)}}]
+        :border-radius (:border-radius theme)
+        :grid-template-columns :min-content}}]
      children)))
 
 (defn- cell [row column child]
