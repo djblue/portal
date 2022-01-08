@@ -21,6 +21,7 @@
       {:style
        {:top        0
         :right      0
+        :z-index    100
         :position   :absolute
         :cursor     :pointer
         :color      (::c/tag theme)
