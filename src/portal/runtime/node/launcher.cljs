@@ -23,7 +23,7 @@
        (.listen server #js {:port port :host host}
                 #(resolve {:http-server server
                            :port (.-port (.address server))
-                           :host (.-address (.address server))}))))))
+                           :host host}))))))
 
 (defn start [options]
   (or @server
