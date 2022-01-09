@@ -4,9 +4,7 @@
             [clojure.java.io :as io]
             [examples.data :refer [data]]
             [portal.api :as p]
-            [portal.runtime.browser :as browser]
             [portal.runtime.json :as json]
-            [tasks.pwa :as pwa]
             [tracker]))
 
 (defn lazy-fn [symbol]
@@ -65,8 +63,6 @@
   (def remote (p/open {:runtime {:type :socket :port 5555}}))
   (def remote (p/open {:runtime {:type :socket :port 6666}}))
 
-  (with-redefs [browser/pwa (:dev pwa/envs)]
-    (def portal (p/open {:mode :dev})))
   (add-tap #'p/submit)
   (remove-tap #'p/submit)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])

@@ -78,4 +78,9 @@
 (comment
   (generate-files :dev)
   (generate-files :prod)
-  (browse-url "http://localhost:4400"))
+  (browse-url "http://localhost:4400")
+
+  (require '[portal.api :as p])
+  (require '[portal.runtime.browser :as browser])
+  (with-redefs [browser/pwa (:dev envs)]
+    (def portal (p/open {:mode :dev}))))
