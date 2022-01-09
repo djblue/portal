@@ -30,6 +30,7 @@
 (defn ^:command clear-rpc [] (swap! rpc/log empty))
 
 (add-tap #'tap-value)
+(add-tap #'prn)
 
 (p/register! #'clear-taps)
 (p/register! #'clear-rpc)

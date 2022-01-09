@@ -52,6 +52,10 @@
   (tracker/stop)
 
   (def value (atom data))
+  (reset! value data)
+  (reset! value {})
+  (reset! value {:hello :world})
+  (reset! value (map #(-> [::index %]) (range 100)))
   (def portal (p/open))
   (def dev    (p/open {:mode :dev}))
   (def dev    (p/open {:mode :dev :value value}))

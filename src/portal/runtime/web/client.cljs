@@ -1,7 +1,9 @@
 (ns ^:no-doc portal.runtime.web.client
   (:require [portal.runtime :as rt]))
 
-(defonce session {:session-id ::id :value-cache (atom {})})
+(defonce session {:id (atom 0)
+                  :session-id ::id
+                  :value-cache (atom {})})
 
 (defn request [session-handle message]
   (if-let [child-window @session-handle]

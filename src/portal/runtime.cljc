@@ -6,8 +6,7 @@
                :cljs [portal.async :as a])))
 
 (defonce ^:dynamic *session* nil)
-(defonce ^:private id (atom 0))
-(defn- next-id [] (swap! id inc))
+(defn- next-id [] (swap! (:id *session*) inc))
 (defonce sessions (atom {}))
 
 (defn get-session [session-id]
@@ -18,7 +17,7 @@
 (defn open-session [{:keys [session-id] :as session}]
   (merge
    (get-session session-id)
-   {:value-cache (atom {})}
+   {:value-cache (atom {}) :id (atom 0)}
    session))
 
 (defonce request (atom nil))
@@ -178,7 +177,6 @@
   ([] (clear-values nil identity))
   ([_request done]
    (when *session*
-     (reset! id 0)
      (let [value (:value (get-options))]
        (when (atom? value)
          (swap! value empty)))
@@ -187,6 +185,12 @@
        (remove-watch a ::watch-key))
      (reset! watch-registry #{}))
    (done nil)))
+
+(defn- cache-evict [id]
+  (let [value-cache (:value-cache *session*)
+        value       (id->value id)]
+    (swap! value-cache dissoc [:id id] [:value value])
+    nil))
 
 (defn update-selected
   ([value]
@@ -248,6 +252,7 @@
           (merge {:var var} opts))))
 
 (doseq [var [#'ping
+             #'cache-evict
              #'get-options
              #'get-functions
              #'type

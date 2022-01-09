@@ -16,30 +16,15 @@
     (-hash [this]
       (hash (.toString this)))))
 
-(defn- ref-> [value]
-  (get @state/value-cache (second value)))
-
-(defn- runtime-id [value]
-  (or (-> value meta :portal.runtime/id)
-      (when (rt/runtime? value)
-        (:id (.-object value)))))
-
 (defn- read [string]
   (cson/read
    string
-   {:transform
-    (fn [value]
-      (when-let [id (runtime-id value)]
-        (swap! state/value-cache assoc id value))
-      value)
+   {:transform rt/transform
     :default-handler
     (fn [value]
       (case (first value)
-        "ref"    (ref-> value)
-        "object" (let [object (cson/json-> (second value))]
-                   (or
-                    (get @state/value-cache (:id object))
-                    (rt/->runtime call object)))
+        "ref"    (rt/ref-> value)
+        "object" (rt/object-> call value)
         (diff/diff-> value)))}))
 
 (defn- write [value]
