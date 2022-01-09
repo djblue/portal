@@ -631,6 +631,19 @@
     (copy-to-clipboard! selection)
     (copy-edn! (state/get-selected-value @state))))
 
+(defn- pprint-json [v]
+  (.stringify js/JSON v nil 2))
+
+(defn ^:command copy-json
+  "Copy selected value as a json string to the clipboard."
+  [state]
+  (-> @state
+      state/get-selected-value
+      clj->js
+      pprint-json
+      str/trim
+      copy-to-clipboard!))
+
 (defn ^:command select-none
   "Deselect all values."
   [state]
