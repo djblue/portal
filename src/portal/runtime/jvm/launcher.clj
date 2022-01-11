@@ -41,7 +41,7 @@
 
 (defn start [options]
   (or @server
-      (let [{:portal.launcher/keys [port host]
+      (let [{:keys [port host]
              :or {port 0 host "localhost"}} options
             http-server (http/run-server #'server/handler
                                          {:port port

@@ -10,11 +10,9 @@
 (def pane-titles '("Alice" "Mad Hatter" "The Cake is a Lie"))
 
 (defn options []
-  {:portal.launcher/app (rand-nth [true false])
-   :portal.colors/theme
-   (rand-nth (keys (dissoc c/themes ::c/vs-code-embedded)))
-   :portal.launcher/window-title
-   (rand-nth pane-titles)})
+  {:app          (rand-nth [true false])
+   :theme        (rand-nth (keys (dissoc c/themes ::c/vs-code-embedded)))
+   :window-title (rand-nth pane-titles)})
 
 (defn -main [& args]
   (if (= (first args) "web")

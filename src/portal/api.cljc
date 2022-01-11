@@ -1,9 +1,10 @@
 (ns portal.api
-  (:require [portal.runtime :as rt]
+  (:require #?(:clj
+               [portal.runtime.jvm.commands])
             #?(:clj  [portal.runtime.jvm.launcher :as l]
                :cljs [portal.runtime.node.launcher :as l])
-            #?(:clj
-               [portal.runtime.jvm.commands])))
+            [clojure.set :as set]
+            [portal.runtime :as rt]))
 
 (defn submit
   "Tap target function.
@@ -25,12 +26,22 @@
   (add-tap #'submit)
   nil)
 
+(def ^:private long->short
+  {:portal.colors/theme          :theme
+   :portal.launcher/app          :app
+   :portal.launcher/host         :host
+   :portal.launcher/port         :port
+   :portal.launcher/window-title :window-title})
+
+(defn- rename [options]
+  (set/rename-keys options long->short))
+
 (defn start
   "Start the HTTP server with non-default options. Only use if you need
   control over the HTTP server."
   {:added "0.6.2"}
   [options]
-  (l/start options))
+  (l/start (rename options)))
 
 (defn open
   "Open a new inspector window. A previous instance can be passed as
@@ -40,7 +51,7 @@
   ([portal-or-options]
    (if (:session-id portal-or-options)
      (l/open portal-or-options nil)
-     (l/open nil portal-or-options))))
+     (l/open nil (rename portal-or-options)))))
 
 (defn close
   "Close all current inspector windows."

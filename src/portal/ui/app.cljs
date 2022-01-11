@@ -92,7 +92,7 @@
          (state/set-title!
           (str/join
            " - "
-           [(:portal.launcher/window-title opts name) platform version]))))
+           [(:window-title opts name) platform version]))))
      #js [opts])
     (when-not connected?
       [s/div
@@ -397,8 +397,8 @@
 (defn root [& children]
   (let [opts  (opts/use-options)
         state state/state
-        theme (or (::c/theme @state)
-                  (::c/theme opts))]
+        theme (or (:theme @state)
+                  (:theme opts))]
     [state/with-state
      state
      [theme/with-theme

@@ -10,7 +10,7 @@
 (def port 5678)
 
 (println "Server running on port:" port)
-(p/open {:portal.launcher/port port})
+(p/open {:port port})
 
 (.addShutdownHook
  (Runtime/getRuntime)

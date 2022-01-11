@@ -52,7 +52,7 @@
         child (js/window.open
                url
                "portal"
-               (when (:portal.launcher/app options true)
+               (when (:app options true)
                  "resizable,scrollbars,status"))]
     (set! (.-onunload child)
           (fn []

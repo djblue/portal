@@ -96,7 +96,7 @@
   (let [url (str "http://" (:host server) ":" (:port server) "?" (:session-id portal))
         chrome-bin (get-chrome-bin)]
     (if (and (some? chrome-bin)
-             (:portal.launcher/app options true))
+             (:app options true))
       (apply shell/sh chrome-bin (flags url))
       (browse url))))
 

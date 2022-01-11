@@ -27,7 +27,7 @@
 
 (defn start [options]
   (or @server
-      (a/let [{:portal.launcher/keys [port host]
+      (a/let [{:keys [port host]
                :or {port 0 host "localhost"}} options
               instance (create-server #'server/handler port host)]
         (reset! server instance))))

@@ -123,7 +123,7 @@ In the process hosting the remote api, do:
 
 ``` clojure
 (require '[portal.api :as p])
-(p/open {:portal.launcher/port 5678})
+(p/open {:port 5678})
 ```
 
 In the client process, do:
@@ -157,7 +157,7 @@ Which can be passed as an option to `p/open`:
 
 ```clojure
 (p/open
-  {:portal.colors/theme :portal.colors/nord})
+  {:theme :portal.colors/nord})
 ```
 
 #### Launcher
@@ -167,12 +167,12 @@ chosen port. It is also given a default window title of the form `portal - <plat
 To control this server's port, host, and window title, call the `p/start`
 function with the following options:
 
-| Option                          | Description                | If not specified     |
-|---------------------------------|----------------------------|----------------------|
-| `:portal.launcher/port`         | Port used to access UI     | random port selected |
-| `:portal.launcher/host`         | Hostname used to access UI | "localhost"          |
-| `:portal.launcher/app`          | Launch as separate window  | true                 |
-| `:portal.launcher/window-title` | Custom title for UI window | "portal"             |
+| Option          | Description                | If not specified     |
+|-----------------|----------------------------|----------------------|
+| `:port`         | Port used to access UI     | random port selected |
+| `:host`         | Hostname used to access UI | "localhost"          |
+| `:app`          | Launch as separate window  | true                 |
+| `:window-title` | Custom title for UI window | "portal"             |
 
 ## UX Concepts
 
@@ -342,7 +342,7 @@ display data from remote client
 
 ```bash
    bb -cp `clojure -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "LATEST"}}}'` \
-      -e '(require (quote [portal.api])) (portal.api/open {:portal.launcher/port 53755}) @(promise)'
+      -e '(require (quote [portal.api])) (portal.api/open {:port 53755}) @(promise)'
 ```
 
 ## Editor Integration

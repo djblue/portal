@@ -1,5 +1,6 @@
 (ns portal.web
-  (:require [portal.runtime :as rt]
+  (:require [clojure.set :as set]
+            [portal.runtime :as rt]
             [portal.runtime.web.client :as c]
             [portal.runtime.web.launcher :as l]
             [portal.shortcuts :as shortcuts]
@@ -19,12 +20,22 @@
   (add-tap #'submit)
   nil)
 
+(def ^:private long->short
+  {:portal.colors/theme          :theme
+   :portal.launcher/app          :app
+   :portal.launcher/host         :host
+   :portal.launcher/port         :port
+   :portal.launcher/window-title :window-title})
+
+(defn- rename [options]
+  (set/rename-keys options long->short))
+
 (defn ^:export open
   "Open a new inspector window."
   ([] (open nil))
   ([options]
    (s/assert-options options)
-   (l/open options)
+   (l/open (rename options))
    (c/make-atom l/child-window)))
 
 (defn ^:export close
