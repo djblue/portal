@@ -98,7 +98,8 @@
 
 (defn- inspect-map-table [values]
   (let [rows (seq (ins/try-sort (keys values)))
-        cols (seq (ins/try-sort (into #{} (mapcat keys (vals values)))))]
+        cols (or (:portal.viewer.table/columns (meta values))
+                 (seq (ins/try-sort (into #{} (mapcat keys (vals values))))))]
     [table
      [columns cols]
      [l/lazy-seq
@@ -125,7 +126,8 @@
 
 (defn- inspect-coll-table [values]
   (let [rows (seq values)
-        cols (seq (ins/try-sort (into #{} (mapcat keys values))))]
+        cols (or (:portal.viewer.table/columns (meta values))
+                 (seq (ins/try-sort (into #{} (mapcat keys values)))))]
     [table
      [columns cols]
      [l/lazy-seq
