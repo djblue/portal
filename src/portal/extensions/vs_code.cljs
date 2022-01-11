@@ -69,16 +69,8 @@
          :resource     {"main.js" path}
          :launcher     :vs-code})))})
 
-(defn- get-body [^js req]
-  (js/Promise.
-   (fn [resolve reject]
-     (let [body (atom "")]
-       (.on req "data" #(swap! body str %))
-       (.on req "end"  #(resolve @body))
-       (.on req "error" reject)))))
-
-(defmethod server/handler "/open" [req res]
-  (a/let [body (get-body req)]
+(defmethod server/route [:post "/open"] [req res]
+  (a/let [body (server/get-body req)]
     (-open (edn/read-string body))
     (.end res)))
 

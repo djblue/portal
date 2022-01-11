@@ -1,11 +1,18 @@
 (ns ^:no-doc portal.runtime.node.server
-  (:require [clojure.string :as str]
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]
+            [cognitect.transit :as transit]
+            [goog.object :as g]
             [portal.async :as a]
             [portal.resources :as io]
             [portal.runtime :as rt]
             [portal.runtime.fs :as fs]
             [portal.runtime.index :as index]
+            [portal.runtime.json :as json]
             [portal.runtime.node.client :as c]))
+
+(defn- get-header [^js req k]
+  (-> req .-headers (g/get k)))
 
 (defn- not-found [_request done]
   (done {:status :not-found}))
@@ -25,14 +32,20 @@
 (defn- get-session-id [^js req]
   (some->
    (or (last (str/split (.-url req) #"\?"))
-       (when-let [referer (.getHeader req "referer")]
+       (when-let [referer (get-header req "referer")]
          (last (str/split referer #"\?"))))
    uuid))
 
 (defn- get-session [req]
   (rt/get-session (get-session-id req)))
 
-(defn- rpc-handler [^js req _res]
+(defn- get-path [^js req _res]
+  [(-> req .-method str/lower-case keyword)
+   (-> req .-url (str/split #"\?") first)])
+
+(defmulti route #'get-path)
+
+(defmethod route [:get "/rpc"] [^js req _res]
   (let [session (get-session req)]
     (.handleUpgrade
      (Server. #js {:noServer true})
@@ -64,23 +77,45 @@
       (.writeHead 200 #js {"Content-Type" content-type})
       (.end body)))
 
-(defn- main-js [req]
-  (let [options (-> req get-session :options)]
-    (case (:mode options)
-      :dev (fs/slurp (get-in options [:resource "main.js"]))
-      (io/resource "portal/main.js"))))
-
-(defn- get-path [^js req _res]
-  (-> req .-url (str/split #"\?") first))
-
-(defmulti handler #'get-path)
-
-(defmethod handler "/" [_req res]
+(defmethod route [:get "/"] [_req res]
   (send-resource res "text/html" (index/html)))
 
-(defmethod handler "/main.js" [req res]
-  (send-resource res "text/javascript" (main-js req)))
+(defmethod route [:get "/main.js"] [req res]
+  (let [options (-> req get-session :options)]
+    (send-resource
+     res
+     "text/javascript"
+     (case (:mode options)
+       :dev (fs/slurp (get-in options [:resource "main.js"]))
+       (io/resource "portal/main.js")))))
 
-(defmethod handler "/rpc" [req res] (rpc-handler req res))
+(defn get-body [^js req]
+  (js/Promise.
+   (fn [resolve reject]
+     (let [body (atom "")]
+       (.on req "data" #(swap! body str %))
+       (.on req "end"  #(resolve @body))
+       (.on req "error" reject)))))
 
-(defmethod handler :default [_req ^js res] (-> res (.writeHead 404) .end))
+(defmethod route [:post "/submit"] [^js req ^js res]
+  (a/let [body (get-body req)]
+    (rt/update-value
+     (case (get-header req "content-type")
+       "application/transit+json" (transit/read (transit/reader :json) body)
+       "application/json"         (js->clj (json/read body))
+       "application/edn"          (edn/read-string {:default tagged-literal} body)))
+    (.end res)))
+
+(defmethod route [:options "/submit"] [_req ^js res]
+  (doto res
+    (.writeHead
+     204
+     #js {"Access-Control-Allow-Origin"  "*"
+          "Access-Control-Allow-Headers" "origin, content-type"
+          "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
+          "Access-Control-Max-Age"       86400})
+    (.end)))
+
+(defmethod route :default [_req ^js res] (-> res (.writeHead 404) .end))
+
+(defn handler [req res] (route req res))
