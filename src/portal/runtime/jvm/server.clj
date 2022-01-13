@@ -56,7 +56,9 @@
                                :op :portal.rpc/response)))))))
       :on-open
       (fn [ch]
-        (swap! c/connections assoc (:session-id session) (partial send! ch)))
+        (swap! c/connections assoc (:session-id session) (partial send! ch))
+        (when-let [f (get-in session [:options :on-load])]
+          (f)))
       :on-close
       (fn [_ch _status]
         (swap! c/connections dissoc (:session-id session)))})))
