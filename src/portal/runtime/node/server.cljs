@@ -58,6 +58,8 @@
              (fn send! [message]
                (.send ws (rt/write message session)))]
          (swap! c/connections assoc (:session-id session) send!)
+         (when-let [f (get-in session [:options :on-load])]
+           (f))
          (.on ws "message"
               (fn [message]
                 (a/let [req  (rt/read message session)

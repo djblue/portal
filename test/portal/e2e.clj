@@ -12,6 +12,7 @@
 (defn options []
   {:app          (rand-nth [true false])
    :theme        (rand-nth (keys (dissoc c/themes ::c/vs-code-embedded)))
+   :on-load      '(fn [] (tap> :loaded!))
    :window-title (rand-nth pane-titles)})
 
 (defn -main [& args]
@@ -20,7 +21,6 @@
     (step '(require '[portal.api :as p])))
   (step `(do (add-tap #'p/submit)
              (p/open ~(options))))
-  (step '(tap> :hello-world))
   (step '(p/clear))
   (step '(require '[examples.data :refer [data]]))
   (step '(tap> data))

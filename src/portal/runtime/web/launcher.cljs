@@ -44,6 +44,12 @@
     :dev (str js/window.location.origin "/main.js?" (get-session))
     code-url))
 
+(defn eval-str [code]
+  (c/request
+   child-window
+   {:op   :portal.rpc/eval-str
+    :code code}))
+
 (defn open [options]
   (swap! rt/sessions assoc-in [(:session-id c/session) :options] options)
   (let [url   (str->src (index/html :code-url (main-js options)
@@ -63,6 +69,9 @@
             (when-not (.-closed child)
               (set-item ":portal/open" (js/Date.now)))))
     (reset! child-window child)
+    (when-let [f (:on-load options)]
+      (set! (.-onload child)
+            (fn [] (f))))
     (reset! rt/request (partial c/request child-window)))
   true)
 
@@ -80,9 +89,3 @@
     (reset! child-window nil)
     (reset! rt/request nil)
     (.close child)))
-
-(defn eval-str [code]
-  (c/request
-   child-window
-   {:op   :portal.rpc/eval-str
-    :code code}))
