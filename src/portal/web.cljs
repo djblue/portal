@@ -8,6 +8,16 @@
 
 (def ^:export send! l/send!)
 
+(defonce ^:private default-options (atom nil))
+
+(defn set-defaults!
+  "Set default options for `open`.
+  Parameters passed directly to either will override defaults."
+  {:added    "0.20.0"
+   :see-also ["open"]}
+  [options]
+  (swap! default-options merge options))
+
 (defn ^:export submit
   "Tap target function."
   [value]
@@ -35,7 +45,7 @@
   ([] (open nil))
   ([options]
    (s/assert-options options)
-   (l/open (rename options))
+   (l/open (rename (merge @default-options options)))
    (c/make-atom l/child-window)))
 
 (defn ^:export close
