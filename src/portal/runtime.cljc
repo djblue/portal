@@ -189,6 +189,9 @@
 (defn- cache-evict [id]
   (let [value-cache (:value-cache *session*)
         value       (id->value id)]
+    (when (atom? value)
+      (swap! watch-registry dissoc value)
+      (remove-watch value ::watch-key))
     (swap! value-cache dissoc [:id id] [:value value])
     nil))
 
