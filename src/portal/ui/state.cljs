@@ -165,7 +165,7 @@
   (when-let [el (js/document.querySelector "meta[name=theme-color]")]
     (.setAttribute el "content" color)))
 
-(defn set-theme! [state theme] (assoc state ::c/theme theme))
+(defn set-theme! [state theme] (assoc state :theme theme))
 
 (defn set-title [title]
   (set! (.-title js/document) title))
