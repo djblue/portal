@@ -398,7 +398,8 @@
   (let [opts  (opts/use-options)
         state state/state
         theme (or (:theme @state)
-                  (:theme opts))]
+                  (:theme opts)
+                  (::c/theme opts))]
     [state/with-state
      state
      [theme/with-theme

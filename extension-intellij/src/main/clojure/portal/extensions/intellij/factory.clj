@@ -34,7 +34,7 @@
 (defn- get-options []
   (pr-str
    (pr-str
-    {:portal.colors/theme ::theme
+    {:theme ::theme
      :themes
      {::theme (theme/get-theme)}})))
 
