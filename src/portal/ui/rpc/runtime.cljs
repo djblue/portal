@@ -89,7 +89,6 @@
     (->RuntimeObject call object)))
 
 (defn- cleanup [id]
-  (tap> [:cleanup id])
   (swap! state/value-cache dissoc id)
   (swap! current-values dissoc id)
   (call 'portal.runtime/cache-evict id))

@@ -56,6 +56,8 @@
       [:portal.viewer/inspector rpc/log]]]
     {:portal.viewer/default :portal.viewer/hiccup}))
 
+(p/set-defaults! {:mode :dev :value (dashboard)})
+
 (comment
   (def portal (p/open))
   (def portal (p/open {:mode :dev :value (dashboard)}))
