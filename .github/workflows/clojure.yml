@@ -54,6 +54,7 @@ jobs:
         CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
         CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
         VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
     - uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.info.outputs.version }}

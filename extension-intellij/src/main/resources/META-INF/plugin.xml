@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>djblue.portal-extension-intellij</id>
+    <id>djblue.portal</id>
     <name>portal</name>
     <vendor url="https://github.com/djblue/portal">djblue</vendor>
 

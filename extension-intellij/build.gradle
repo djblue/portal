@@ -11,6 +11,10 @@ intellij {
     version = '2021.3'
 }
 
+publishPlugin {
+  token = System.getenv("JETBRAINS_TOKEN")
+}
+
 repositories {
     mavenCentral()
     maven {
