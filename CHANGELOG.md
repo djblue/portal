@@ -1,3 +1,43 @@
+## 0.20.0 - 2022-01-23
+
+With this next release, you can now specify a `:value` for portal to open. In
+the case of static data, portal behaves as it did previously. With atoms, it
+will automatically deref and update the UI when the atom changes. This new
+feature with the hiccup viewer make it very easy to throw together live
+development dashboards.
+
+Also, special thanks to @BrianChevalier for all the awesome contributions in
+this release! 2e077da 58e2eb3 378ee89 1acb6f8
+
+### New API Options
+
+- Prefer unqualified keys for options 0ca85bb
+- Allow users to specify :editor option 65baf7c
+- Add :on-load option for p/open (#104) 378ee89
+- Allow setting portal defaults (#105) 1acb6f8
+
+### Sync Runtimes
+
+- Port Remote API to node runtime 0141c6a
+- Fix node 17 host issue 5cdba58
+  - Thanks @helins for the bug report!
+- Add `portal.web/register!` 42c0ae9
+
+### New Features
+
+- Allow users to customize root value 6f719cc 75e07a5
+  - Empty atom on clear bcbee50
+  - Enable deref viewer for other atoms 28a8985
+- Add experimental deref viewer 0cad30d
+  - Move deref viewer icon above children viewers ac1e45c
+  - Add initial GC hooks e480cbc
+- Use metadata to specify custom table columns (#103) 2e077da
+- Add copy to json command (#102) 58e2eb3
+
+### Intellij Extension
+
+- Publish intellij plugin to Jetbrains Marketplace 0cba51b
+
 ## 0.19.2 - 2021-12-28
 
 - Release to fix cljdoc
