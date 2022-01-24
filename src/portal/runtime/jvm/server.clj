@@ -77,21 +77,21 @@
   (try (Thread/sleep 60000)
        (catch Exception _e {:status 200})))
 
-(defn- ext [^File file]
-  (first (re-find #"\.([^.]+)$" (.getName file))))
-
-(def ^:private ext->mime
-  {".map" "application/json"
-   ".svg" "image/svg+xml"})
-
 (defmethod route :default [request]
-  (let [uri (subs (:uri request) 1)]
-    (some
-     (fn [^File file]
-       (when (and file (.exists file))
-         (send-resource (-> file ext ext->mime) (slurp file))))
-     [(io/file "target/resources/portal/" uri)
-      (io/file (io/resource uri))])))
+  (if-not (= (-> request :session :options :mode) :dev)
+    {:status 404}
+    (let [uri (subs (:uri request) 1)]
+      (some
+       (fn [^File file]
+         (when (and file (.exists file))
+           (send-resource "application/json" (slurp file))))
+       [(io/file "target/resources/portal/" uri)
+        (io/file (io/resource uri))]))))
+
+(defmethod route [:get "/icon.svg"] [_]
+  {:status  200
+   :headers {"Content-Type" "image/svg+xml"}
+   :body (slurp (io/resource "portal/icon.svg"))})
 
 (defmethod route [:get "/main.js"] [request]
   {:status  200

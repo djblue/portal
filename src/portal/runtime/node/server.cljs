@@ -82,6 +82,12 @@
 (defmethod route [:get "/"] [_req res]
   (send-resource res "text/html" (index/html)))
 
+(defmethod route [:get "/icon.svg"] [_req res]
+  (send-resource
+   res
+   "image/svg+xml"
+   (io/resource "portal/icon.svg")))
+
 (defmethod route [:get "/main.js"] [req res]
   (let [options (-> req get-session :options)]
     (send-resource

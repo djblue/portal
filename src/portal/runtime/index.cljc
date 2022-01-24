@@ -14,7 +14,7 @@
    "<title>" (str name " - " platform " - " version) "</title>"
    "<meta charset='UTF-8' />"
    "<meta name='viewport' content='width=device-width, initial-scale=1' />"
-   "<link rel=\"icon\" href=\"portal/icon.svg\">"
+   "<link rel=\"icon\" href=\"/icon.svg\">"
    "</head>"
    "<body style=\"margin: 0; padding: 0; overflow: hidden\">"
    "<div id=\"root\"></div>"
