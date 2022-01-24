@@ -1,3 +1,7 @@
+## 0.20.1 - 2022-01-23
+
+Fix /icon.svg issue 842c1c7 - Thanks @heypragyan!
+
 ## 0.20.0 - 2022-01-23
 
 With this next release, you can now specify a `:value` for portal to open. In
