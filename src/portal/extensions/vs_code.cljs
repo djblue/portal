@@ -54,7 +54,8 @@
   (-> vscode/workspace
       .-workspaceFolders
       (aget 0)
-      (.. -uri -path)))
+      .-uri
+      .-fsPath))
 
 (defn- get-commands []
   {:extension.portalOpen
@@ -62,7 +63,7 @@
      (p/open {:launcher :vs-code}))
    :extension.portalOpenDev
    (fn []
-     (let [path (fs/exists (str (get-workspace-folder) "/target/resources/portal/main.js"))]
+     (let [path (fs/exists (fs/join (get-workspace-folder) "target/resources/portal/main.js"))]
        (p/open
         {:mode         :dev
          :window-title "vs-code-dev"
@@ -75,18 +76,18 @@
     (.end res)))
 
 (defn- set-status [workspace]
-  (when (fs/exists (str workspace "/target/resources/portal/main.js"))
+  (when (fs/exists (fs/join workspace "target/resources/portal/main.js"))
     (.executeCommand vscode/commands "setContext" "portal:is-dev" true)))
 
 (defn activate
   [^js ctx]
   (reset! context ctx)
   (a/let [workspace (get-workspace-folder)
-          folder    (str workspace "/.portal")
+          folder    (fs/join workspace ".portal")
           info      (p/start {})]
     (set-status workspace)
     (fs/mkdir folder)
-    (fs/spit (str folder "/vs-code.edn")
+    (fs/spit (fs/join folder "vs-code.edn")
              (pr-str (select-keys info [:host :port]))))
   (add-tap #'p/submit)
   (doseq [[command f] (get-commands)]
