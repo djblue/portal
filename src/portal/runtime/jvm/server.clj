@@ -78,7 +78,7 @@
        (catch Exception _e {:status 200})))
 
 (defmethod route :default [request]
-  (if-not (= (-> request :session :options :mode) :dev)
+  (if-not (str/ends-with? (:uri request) ".map")
     {:status 404}
     (let [uri (subs (:uri request) 1)]
       (some
