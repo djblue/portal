@@ -73,7 +73,7 @@
 
 (defn- send! [message] (@sender message))
 
-(def no-history [::previous-commands ::c/theme])
+(def no-history [::previous-commands ::c/theme :theme])
 
 (defn history-back [state]
   (when-let [previous-state (:portal/previous-state state)]
