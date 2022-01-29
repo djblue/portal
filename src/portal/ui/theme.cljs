@@ -17,7 +17,7 @@
       :font-size "12pt"
       :string-length 100
       :max-depth 1
-      :padding 8
+      :padding 6
       :border-radius 2}
      (or (get c/themes theme-name)
          (get (:themes opts) theme-name)))))
