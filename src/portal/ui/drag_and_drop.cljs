@@ -108,7 +108,8 @@
            :padding 40
            :box-sizing :border-box
            :color "white"
-           :background "rgba(0,0,0,0.5)"}}
+           :background "rgba(0,0,0,0.5)"
+           :z-index 100}}
          [s/div
           {:style
            {:user-select :none

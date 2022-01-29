@@ -14,42 +14,6 @@
             [reagent.core :as r]
             [reagent.dom :as dom]))
 
-(defn clipboard []
-  (js/navigator.clipboard.readText))
-
-(defn- prompt-file []
-  (js/Promise.
-   (fn [resolve _reject]
-     (let [id      "open-file-dialog"
-           input   (or
-                    (js/document.getElementById id)
-                    (js/document.createElement "input"))]
-       (set! (.-id input) id)
-       (set! (.-type input) "file")
-       (set! (.-multiple input) "true")
-       (set! (.-style input) "visibility:hidden")
-       (.addEventListener
-        input
-        "change"
-        (fn [event]
-          (a/let [value (dnd/handle-files (-> event .-target .-files))]
-            (resolve value)))
-        false)
-       (js/document.body.appendChild input)
-       (.click input)))))
-
-(defn open-file
-  "Open a File"
-  [state]
-  (a/let [value (prompt-file)]
-    (state/dispatch! state state/history-push {:portal/value value})))
-
-(defn load-clipboard
-  "Load from clipboard"
-  [state]
-  (a/let [value (clipboard)]
-    (state/dispatch! state state/history-push {:portal/value value})))
-
 (defn open-demo
   "Load demo data"
   [state]
@@ -57,8 +21,8 @@
 
 (def commands
   [#'commands/open-command-palette
-   #'open-file
-   #'load-clipboard
+   #'commands/open-file
+   #'commands/load-clipboard
    #'open-demo])
 
 (doseq [var commands] (commands/register! var))
@@ -146,7 +110,7 @@
   (if (contains? @state/state :portal/value)
     [app/app]
     [app/root
-     [dnd/area [splash]]]))
+     [splash]]))
 
 (def functional-compiler (r/create-compiler {:function-components true}))
 

@@ -5,6 +5,7 @@
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.connecton-status :as status]
+            [portal.ui.drag-and-drop :as dnd]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
@@ -404,7 +405,8 @@
      state
      [theme/with-theme
       theme
-      [container children]]]))
+      [dnd/area
+       [container children]]]]))
 
 (defn app [value]
   [root

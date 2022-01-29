@@ -6,6 +6,7 @@
             [portal.async :as a]
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
+            [portal.ui.drag-and-drop :as dnd]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.state :as state]
@@ -253,9 +254,9 @@
 
    ;; PWA
    {::shortcuts/osx     #{"meta" "o"}
-    ::shortcuts/default #{"control" "o"}}       `portal.extensions.pwa/open-file
+    ::shortcuts/default #{"control" "o"}}       `open-file
    {::shortcuts/osx     #{"meta" "v"}
-    ::shortcuts/default #{"control" "v"}}       `portal.extensions.pwa/load-clipboard
+    ::shortcuts/default #{"control" "v"}}       `load-clipboard
    {::shortcuts/osx     #{"meta" "d"}
     ::shortcuts/default #{"control" "d"}}       `portal.extensions.pwa/open-demo})
 
@@ -846,6 +847,46 @@
   (copy-to-clipboard! (state/get-selected-value @state)))
 
 (register! #'copy-str {:predicate (comp string? state/get-selected-value)})
+
+(defn- prompt-file []
+  (js/Promise.
+   (fn [resolve _reject]
+     (let [id      "open-file-dialog"
+           input   (or
+                    (js/document.getElementById id)
+                    (js/document.createElement "input"))]
+       (set! (.-id input) id)
+       (set! (.-type input) "file")
+       (set! (.-multiple input) "true")
+       (set! (.-style input) "visibility:hidden")
+       (.addEventListener
+        input
+        "change"
+        (fn [event]
+          (a/let [value (dnd/handle-files (-> event .-target .-files))]
+            (resolve value)))
+        false)
+       (js/document.body.appendChild input)
+       (.click input)))))
+
+(defn open-file
+  "Open a File"
+  [state]
+  (a/let [value (prompt-file)]
+    (state/dispatch! state state/history-push {:portal/value value})))
+
+(register! #'open-file)
+
+(defn- clipboard []
+  (js/navigator.clipboard.readText))
+
+(defn load-clipboard
+  "Load from clipboard"
+  [state]
+  (a/let [value (clipboard)]
+    (state/dispatch! state state/history-push {:portal/value value})))
+
+(register! #'load-clipboard)
 
 (defn- pop-up [child]
   [s/div
