@@ -608,6 +608,11 @@
      value)
     :else (map #(select-keys % ks) value)))
 
+(defn pprint
+  "Pretty print selected value to a string"
+  [value]
+  (with-out-str (pp/pprint value)))
+
 (defn- copy-to-clipboard! [s]
   (let [el (js/document.createElement "textarea")]
     (set! (.-value el) s)
@@ -779,7 +784,9 @@
    #'clojure.core/merge       {:predicate (fn [& args] (every? map? args))}})
 
 (def ^:private portal-data-commands
-  {#'transpose-map  {:predicate map-of-maps
+  {#'pprint         {:name      'portal.data/pprint
+                     :predicate any?}
+   #'transpose-map  {:predicate map-of-maps
                      :name      'portal.data/transpose-map}
    #'select-columns {:predicate (some-fn coll-of-maps map-of-maps)
                      :args      (comp pick-many columns)

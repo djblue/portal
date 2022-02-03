@@ -28,6 +28,7 @@
             [portal.ui.viewer.json :as json]
             [portal.ui.viewer.log :as log]
             [portal.ui.viewer.markdown :as md]
+            [portal.ui.viewer.pprint :as pprint]
             [portal.ui.viewer.relative-time :as relative-time]
             [portal.ui.viewer.table :as table]
             [portal.ui.viewer.text :as text]
@@ -375,6 +376,7 @@
    image/viewer
    deref/viewer
    ins/viewer
+   pprint/viewer
    vega-lite/viewer
    vega/viewer
    bin/viewer
