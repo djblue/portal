@@ -129,6 +129,7 @@
   (let [frame (js/document.createElement "iframe")]
     (set! (.-style frame) "border: none; position: fixed; height: 100vh; width: 100vw")
     (set! (.-src frame) src)
+    (set! (.-allow frame) "clipboard-read; clipboard-write")
     frame))
 
 (defn host-mode [src]
