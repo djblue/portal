@@ -1,8 +1,10 @@
 (ns portal.ui.commands
   (:require ["react" :as react]
+            [clojure.edn :as edn]
             [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
+            [cognitect.transit :as t]
             [portal.async :as a]
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
@@ -256,7 +258,7 @@
    {::shortcuts/osx     #{"meta" "o"}
     ::shortcuts/default #{"control" "o"}}       `open-file
    {::shortcuts/osx     #{"meta" "v"}
-    ::shortcuts/default #{"control" "v"}}       `load-clipboard
+    ::shortcuts/default #{"control" "v"}}       `paste
    {::shortcuts/osx     #{"meta" "d"}
     ::shortcuts/default #{"control" "d"}}       `portal.extensions.pwa/open-demo})
 
@@ -887,13 +889,31 @@
 (defn- clipboard []
   (js/navigator.clipboard.readText))
 
-(defn load-clipboard
-  "Load from clipboard"
+(defn- parse-json [string]
+  (js->clj (.parse js/JSON string)))
+
+(defn- parse-transit [string]
+  (t/read (t/reader :json) string))
+
+(defn- parse [string]
+  (reduce
+   (fn [_ f]
+     (try
+       (reduced (f string))
+       (catch :default _)))
+   string
+   [edn/read-string
+    parse-transit
+    parse-json
+    identity]))
+
+(defn paste
+  "Paste value from clipboard"
   [state]
   (a/let [value (clipboard)]
-    (state/dispatch! state state/history-push {:portal/value value})))
+    (state/dispatch! state state/history-push {:portal/value (parse value)})))
 
-(register! #'load-clipboard)
+(register! #'paste)
 
 (defn- pop-up [child]
   [s/div

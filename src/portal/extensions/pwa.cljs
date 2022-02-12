@@ -22,7 +22,7 @@
 (def commands
   [#'commands/open-command-palette
    #'commands/open-file
-   #'commands/load-clipboard
+   #'commands/paste
    #'open-demo])
 
 (doseq [var commands] (commands/register! var))
