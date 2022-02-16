@@ -7,7 +7,7 @@
 (defn- lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
 
-(def ^:private read-json      (lazy-fn 'portal.runtime.json/read))
+(def ^:private read-json      (lazy-fn 'portal.runtime.json/read-stream))
 (def ^:private read-yaml      (lazy-fn 'clj-yaml.core/parse-string))
 (def ^:private transit-read   (lazy-fn 'cognitect.transit/read))
 (def ^:private transit-reader (lazy-fn 'cognitect.transit/reader))
@@ -21,7 +21,7 @@
 (defn -main [& args]
   (let [[input-format] args
         in (case input-format
-             "json"     (-> System/in io/reader (read-json true))
+             "json"     (-> System/in io/reader read-json)
              "yaml"     (-> System/in io/reader slurp read-yaml)
              "edn"      (-> System/in io/reader read-edn)
              "transit"  (-> System/in read-transit))]
