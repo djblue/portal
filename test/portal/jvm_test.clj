@@ -18,6 +18,7 @@
       (reset! portal 0)
       (is (= @portal 0))
       (swap! portal inc)
-      (is (= @portal 1))))
+      (is (= @portal 1))
+      (is (= 6 (p/eval-str "(+ 1 2 3)")))
+      (is (= :world (:hello (p/eval-str "{:hello :world}"))))))
   (p/close))
-
