@@ -1,3 +1,27 @@
+## 0.21.0 - 2022-02-15
+
+### Additions
+
+- Expose portal.ui.state to sci 5b08197
+  - Allows users to script Portal UI interactions
+- Improve `p/eval-str` behavior 0377ef8
+  - Return eval result or at least something printable instead of always
+    returning nil.
+- Add pprint viewer & command (#109) 5b753a1
+  - Thanks @BrianChevalier!
+- Port portal commands 6aff87d
+  - Rename `load-clipboard` to `paste` f07b4e4
+    - Try to parse the string from the clipboard before pushing a value into
+      portal.
+  - Allow paste and open-file to be used in other portal environments aside
+    from standalone.
+
+### Bug Fixes
+
+- Fix theme and history 2fd1af4
+- Fix vs-code extension for windows (#108) bd56c71
+  - Thanks for the bug report @kjothen!
+
 ## 0.20.1 - 2022-01-23
 
 Fix /icon.svg issue 842c1c7 - Thanks @heypragyan!
