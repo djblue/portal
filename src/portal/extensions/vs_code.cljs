@@ -51,11 +51,9 @@
 (defmethod browser/-open :vs-code [args] (-open args))
 
 (defn- get-workspace-folder []
-  (-> vscode/workspace
-      .-workspaceFolders
-      (aget 0)
-      .-uri
-      .-fsPath))
+  (let [^js uri (-> vscode/workspace .-workspaceFolders (aget 0) .-uri)
+        fs-path (.-fsPath uri)]
+    (if-not (undefined? fs-path) fs-path (.-path uri))))
 
 (defn- get-commands []
   {:extension.portalOpen
@@ -107,4 +105,3 @@
   (tap> examples.data/data)
   (tap> 123)
   (p/close))
-
