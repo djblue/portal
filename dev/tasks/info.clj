@@ -2,7 +2,7 @@
   (:require [babashka.process :as p]
             [clojure.string :as str]))
 
-(def version "0.21.0")
+(def version "0.21.1")
 
 (defn git-hash []
   (-> ["git" "rev-parse" "HEAD"]

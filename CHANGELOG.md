@@ -1,3 +1,15 @@
+## 0.21.1 - 2022-02-16
+
+### Bug Fixes
+
+- Fix `portal.web/eval-str` return value fb7ad35
+- Fix vs-code workspace folder resolution f8b7ef6
+- Fix json option in main.clj 435dfe1
+- Prompt user for format when pasting a value e821ddb
+  - Trying to guess the data format from the clipboard is error prone and the
+    previous UX of selecting a viewer on a string is not obvious.
+  - This solution feels like a happy medium between both approaches.
+
 ## 0.21.0 - 2022-02-15
 
 ### Additions
