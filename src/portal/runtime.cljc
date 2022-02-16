@@ -73,18 +73,20 @@
      :cljs (satisfies? cljs.core/IDeref value)))
 
 (defn- to-object [value tag rep]
-  (when (atom? value) (watch-atom value))
-  (let [m (meta value)]
-    (cson/tag
-     "object"
-     (cson/to-json
-      (cond-> {:tag       tag
-               :id        (value->id value)
-               :type      (pr-str (type value))
-               :protocols (cond-> #{}
-                            (deref? value) (conj :IDeref))}
-        m   (assoc :meta m)
-        rep (assoc :rep rep))))))
+  (if-not *session*
+    (cson/tag "remote" (pr-str value))
+    (let [m (meta value)]
+      (when (atom? value) (watch-atom value))
+      (cson/tag
+       "object"
+       (cson/to-json
+        (cond-> {:tag       tag
+                 :id        (value->id value)
+                 :type      (pr-str (type value))
+                 :protocols (cond-> #{}
+                              (deref? value) (conj :IDeref))}
+          m   (assoc :meta m)
+          rep (assoc :rep rep)))))))
 
 (extend-type #?(:clj Object :cljs default)
   cson/ToJson
@@ -142,6 +144,17 @@
 (defn- ref-> [value]
   (id->value (second value)))
 
+(defrecord RemoteValue [string])
+
+#?(:clj
+   (defmethod print-method RemoteValue [v ^java.io.Writer w]
+     (.write w ^String (:string v)))
+   :cljs
+   (extend-type RemoteValue
+     IPrintWithWriter
+     (-pr-writer [this writer _opts]
+       (-write writer (:string this)))))
+
 (defn read [string session]
   (binding [*session* session]
     (cson/read
@@ -152,6 +165,7 @@
        (fn [value]
          (case (first value)
            "ref"    (ref-> value)
+           "remote" (->RemoteValue (second value))
            (cson/tagged-value (first value) (cson/json-> (second value)))))}))))
 
 (defonce ^:private tap-list (atom (list)))

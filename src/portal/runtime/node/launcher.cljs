@@ -61,7 +61,11 @@
 (defn eval-str [code]
   (a/let [responses (c/request
                      {:op   :portal.rpc/eval-str
-                      :code code})]
-    (-> responses last :result)))
+                      :code code})
+          response (last responses)]
+    (if-not (:error response)
+      (:result response)
+      (throw (ex-info (:message response)
+                      {:code code :cause (:result response)})))))
 
 (reset! rt/request c/request)

@@ -63,6 +63,10 @@
   (def remote (p/open {:runtime {:type :socket :port 5555}}))
   (def remote (p/open {:runtime {:type :socket :port 6666}}))
 
+  (type (p/eval-str "#js {}"))
+  (type (p/eval-str "{}"))
+  (type (p/eval-str "(+ 1 2 3)"))
+
   (add-tap #'p/submit)
   (remove-tap #'p/submit)
   (tap> [{:hello :world :old-key 123} {:hello :youtube :new-key 123}])

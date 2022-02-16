@@ -92,5 +92,4 @@
   "Evalute ClojureScript source given as a string in the UI runtime."
   {:added "0.19.0"}
   [source]
-  (l/eval-str source)
-  nil)
+  (l/eval-str source))

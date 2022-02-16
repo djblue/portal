@@ -72,8 +72,10 @@
   (reset! rt/sessions {}))
 
 (defn eval-str [code]
-  (:result
-   (c/request {:op   :portal.rpc/eval-str
-               :code code})))
+  (let [response (c/request {:op :portal.rpc/eval-str :code code})]
+    (if-not (:error response)
+      (:result response)
+      (throw (ex-info (:message response)
+                      {:code code :cause (:result response)})))))
 
 (reset! rt/request c/request)

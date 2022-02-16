@@ -93,14 +93,19 @@
        (when (fn? resolve) (resolve message))))
    :portal.rpc/eval-str
    (fn [message send!]
-     (send!
-      (merge
-       {:op            :portal.rpc/response
-        :portal.rpc/id (:portal.rpc/id message)}
-       (try
-         {:result (sci/eval-string (:code message))}
-         (catch :default e
-           {:result (pr-str e)})))))
+     (try
+       (send!
+        {:op            :portal.rpc/response
+         :result        (sci/eval-string (:code message))
+         :portal.rpc/id (:portal.rpc/id message)})
+       (catch :default e
+         (.error js/console e)
+         (send!
+          {:op            :portal.rpc/response
+           :error         true
+           :message       (.-message e)
+           :result        e
+           :portal.rpc/id (:portal.rpc/id message)}))))
    :portal.rpc/invalidate
    (fn [message send!]
      (rt/deref (:atom message))

@@ -45,10 +45,14 @@
     code-url))
 
 (defn eval-str [code]
-  (c/request
-   child-window
-   {:op   :portal.rpc/eval-str
-    :code code}))
+  (let [response (c/request
+                  child-window
+                  {:op   :portal.rpc/eval-str
+                   :code code})]
+    (if-not (:error response)
+      (:result response)
+      (throw (ex-info (:message response)
+                      {:code code :cause (:result response)})))))
 
 (defn open [options]
   (swap! rt/sessions assoc-in [(:session-id c/session) :options] options)
