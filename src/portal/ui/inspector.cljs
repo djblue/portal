@@ -125,6 +125,7 @@
 (defn url? [value] (instance? js/URL value))
 (defn bin? [value] (instance? js/Uint8Array value))
 (defn bigint? [value] (= (type value) js/BigInt))
+(defn error? [value] (instance? js/Error value))
 
 (defn coll? [value]
   (and (clojure.core/coll? value)
@@ -160,6 +161,7 @@
     (string? value)   :string
     (keyword? value)  :keyword
     (var? value)      :var
+    (error? value)    :error
 
     (uuid? value)     :uuid
     (url? value)      :uri
@@ -629,6 +631,7 @@
     :var        inspect-var
     :uri        inspect-uri
     :tagged     inspect-tagged
+    :error      inspect-error
     "long"      inspect-long
     inspect-object))
 
@@ -653,6 +656,7 @@
     :var        inspect-var
     :uri        inspect-uri
     :tagged     inspect-tagged
+    :error      inspect-error
     "long"      inspect-long
     inspect-object))
 

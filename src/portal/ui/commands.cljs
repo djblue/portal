@@ -895,23 +895,21 @@
 (defn- parse-transit [string]
   (t/read (t/reader :json) string))
 
-(defn- parse [string]
-  (reduce
-   (fn [_ f]
-     (try
-       (reduced (f string))
-       (catch :default _)))
-   string
-   [edn/read-string
-    parse-transit
-    parse-json
-    identity]))
+(def parsers
+  {:format/json    parse-json
+   :format/edn     edn/read-string
+   :format/transit parse-transit
+   :format/text    identity})
 
 (defn paste
   "Paste value from clipboard"
   [state]
-  (a/let [value (clipboard)]
-    (state/dispatch! state state/history-push {:portal/value (parse value)})))
+  (a/let [value    (clipboard)
+          [choice] (pick-one (keys parsers))
+          parse    (get parsers choice identity)]
+    (state/dispatch! state
+                     state/history-push
+                     {:portal/value (try (parse value) (catch :default e e))})))
 
 (register! #'paste)
 
