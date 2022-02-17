@@ -13,11 +13,13 @@ will probably evolve over time and user feedback is welcome!
 
 For an in-depth explanation of the UX, jump to [UX Concepts](#ux-concepts).
 
-## Apropos Demo
+## Demo
 
-To get an overview of portal, you can watch the following recording of a [live demo](https://www.youtube.com/watch?v=gByyg-m0XOg) I gave on [Apropos](https://www.youtube.com/channel/UC1UxEQuBvfLJgWR5tk_XIXA/featured).
+To get an overview of the Portal UI and workflow, checkout the following recording of a [live demo](https://www.youtube.com/watch?v=Tj-iyDo3bq0) I gave for [London Clojurians](https://www.youtube.com/channel/UC-pYfofTyvVDMwM4ttfFGqw).
 
-[![Apropos](https://img.youtube.com/vi/gByyg-m0XOg/hqdefault.jpg)](https://www.youtube.com/watch?v=gByyg-m0XOg "Apropos")
+<a href="https://www.youtube.com/watch?v=Tj-iyDo3bq0">
+<img src="https://img.youtube.com/vi/Tj-iyDo3bq0/hqdefault.jpg" alt="London Clojurians Demo" />
+</a>
 
 ## Usage
 
