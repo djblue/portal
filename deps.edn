@@ -1,6 +1,6 @@
 {:paths ["src" "resources"]
  :deps
- {com.cognitect/transit-clj  {:mvn/version "1.0.324"}
+ {com.cognitect/transit-clj  {:mvn/version "1.0.329"}
   com.cognitect/transit-cljs {:mvn/version "0.8.269"}
   org.clojure/data.json      {:mvn/version "2.4.0"}
   http-kit/http-kit          {:mvn/version "2.5.3"}}
@@ -8,7 +8,7 @@
  {:dev
   {:extra-paths ["dev" "test"]
    :extra-deps
-   {babashka/babashka     {:mvn/version "0.7.4"}
+   {babashka/babashka     {:mvn/version "0.7.5"}
     hiccup/hiccup         {:mvn/version "2.0.0-alpha2"}
     io.aviso/pretty       {:mvn/version "1.1.1"}
     ns-tracker/ns-tracker {:mvn/version "0.4.0"}
@@ -18,11 +18,11 @@
    {hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.0.108"}
     markdown-clj/markdown-clj {:mvn/version "1.10.8"}
-    org.babashka/sci          {:mvn/version "0.2.8"}
+    org.babashka/sci          {:mvn/version "0.3.0"}
     reagent/reagent           {:mvn/version "1.1.0"}}}
   :shadow
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.16.12"}}
+   {thheller/shadow-cljs {:mvn/version "2.17.2"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
@@ -31,14 +31,14 @@
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts  ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.01.15"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.02.09"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}}
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "0.9.0"}
-    cider/cider-nrepl {:mvn/version "0.28.1"}}}
+    cider/cider-nrepl {:mvn/version "0.28.2"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
@@ -53,7 +53,7 @@
      :sha     "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "1.4.0"}
-    org.slf4j/slf4j-nop     {:mvn/version "1.7.35"}}}
+   {com.github.liquidz/antq {:mvn/version "1.5.0"}
+    org.slf4j/slf4j-nop     {:mvn/version "1.7.36"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.107"}}}}}
