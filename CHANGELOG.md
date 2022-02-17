@@ -1,3 +1,9 @@
+## 0.21.2 - 2022-02-16
+
+### Bug Fixes
+
+- Fix `p/eval-str` for production builds 01b881f
+
 ## 0.21.1 - 2022-02-16
 
 ### Bug Fixes
