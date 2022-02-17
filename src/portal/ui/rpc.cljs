@@ -16,6 +16,11 @@
     (-hash [this]
       (hash (.toString this)))))
 
+(extend-type default
+  cson/ToJson
+  (-to-json [value]
+    (cson/tag "remote" (pr-str value))))
+
 (defn- read [string]
   (cson/read
    string

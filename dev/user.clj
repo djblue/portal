@@ -63,6 +63,8 @@
   (def remote (p/open {:runtime {:type :socket :port 5555}}))
   (def remote (p/open {:runtime {:type :socket :port 6666}}))
 
+  (p/eval-str "(portal.ui.commands/select-parent portal.ui.state/state)")
+
   (type (p/eval-str "#js {}"))
   (type (p/eval-str "{}"))
   (type (p/eval-str "(+ 1 2 3)"))
