@@ -4,6 +4,7 @@ A clojure tool to navigate through your data.
 
 [![Clojars Project](https://img.shields.io/clojars/v/djblue/portal?color=380036&style=flat-square)](https://clojars.org/djblue/portal)
 [![VS Code Extension](https://vsmarketplacebadge.apphb.com/version-short/djblue.portal.svg?color=007ACC&label=vs-code&logo=vs&style=flat-square)](https://marketplace.visualstudio.com/items?itemName=djblue.portal)
+[![Version](https://img.shields.io/jetbrains/plugin/v/18467?style=flat-square&label=intellij)](https://plugins.jetbrains.com/plugin/18467-portal)
 [![Get help on Slack](https://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?color=63B132&style=flat-square)](https://clojurians.slack.com/channels/portal)
 
 [![screenshot](https://user-images.githubusercontent.com/1986211/129153169-4018d586-d747-48f9-8193-d267ea5e288a.png)](https://djblue.github.io/portal/)
