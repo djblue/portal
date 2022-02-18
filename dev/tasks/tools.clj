@@ -43,7 +43,6 @@
 (def clj    (partial sh :clojure))
 (def git    (partial sh :git))
 (def gradle (partial sh "./gradlew" "--warning-mode" "all"))
-(def mvn    (partial sh :mvn))
 (def node   (partial sh :node))
 (def npm    (partial sh :npm))
 (def npx    (partial sh :npx))

@@ -26,22 +26,21 @@
      (provided (get-in deps [:aliases :cljs :extra-deps])))))
 
 (def options
-  {:lib 'djblue/portal
-   :description "A clojure tool to navigate through your data."
-   :version version
-   :url "https://github.com/djblue/portal"
-   :src-dirs ["src"]
-   :resource-dirs [""]
-   :resources
-   {"src" {:excludes ["portal/extensions/**"
-                      "examples/**"]}
-    "resources/portal/" {:target "portal/"}}
-   :repos {"clojars" {:url "https://repo.clojars.org/"}}
-   :scm {:tag (git-hash)}
+  {:lib           'djblue/portal
+   :description   "A clojure tool to navigate through your data."
+   :version       version
+   :url           "https://github.com/djblue/portal"
+   :src-dirs      ["src"]
+   :resource-dirs ["resources"]
+   :jar-file      (str "./target/portal-" version ".jar")
+   :class-dir     "target/classes"
+   :repos         {"clojars" {:url "https://repo.clojars.org/"}}
+   :scm           {:tag (git-hash)
+                   :url "https://github.com/djblue/portal"}
    :license
    {:name "MIT License"
     :url  "https://opensource.org/licenses/MIT"}
-   :deps (get-deps)})
+   :deps          (get-deps)})
 
 (defn -main []
   (println (str "::set-output name=version::" version)))

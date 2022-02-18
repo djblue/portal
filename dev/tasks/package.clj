@@ -3,7 +3,7 @@
             [hiccup.core :refer [html]]
             [tasks.build :refer [build extensions]]
             [tasks.info :refer [options version]]
-            [tasks.tools :refer [mvn]]))
+            [tasks.tools :refer [clj]]))
 
 (defn- options->licenses [{:keys [license]}]
   [:licenses
@@ -83,13 +83,16 @@
   (-> options options->hiccup xml-str))
 
 (defn pom []
-  (let [target "pom.xml"]
+  (let [lib     (:lib options)
+        classes (:class-dir options)
+        target  (fs/path classes "META-INF/maven" (namespace lib) (name lib) "pom.xml")]
     (when (seq
            (fs/modified-since
             target
             ["deps.edn"]))
-      (println "=>" "writing" target)
-      (spit target (generate options)))))
+      (println "=>" "writing" (str target))
+      (fs/create-dirs (fs/parent target))
+      (spit (str target) (generate options)))))
 
 (defn jar
   "Build a jar."
@@ -103,7 +106,7 @@
            ["pom.xml"]
            (fs/glob "src" "**")
            (fs/glob "resources" "**"))))
-    (mvn :package)))
+    (clj "-M:dev" "-m" :tasks.jar)))
 
 (defn all
   "Package all release artifacts."
