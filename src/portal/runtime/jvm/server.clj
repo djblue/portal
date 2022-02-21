@@ -125,7 +125,8 @@
        "application/edn"          (edn/read
                                    {:default tagged-literal}
                                    (PushbackReader. (io/reader body)))))
-    {:status 200}))
+    {:status  204
+     :headers {"Access-Control-Allow-Origin" "*"}}))
 
 (defmethod route [:options "/submit"] [_]
   {:status 204
