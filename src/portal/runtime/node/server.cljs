@@ -112,7 +112,11 @@
        "application/transit+json" (transit/read (transit/reader :json) body)
        "application/json"         (js->clj (json/read body))
        "application/edn"          (edn/read-string {:default tagged-literal} body)))
-    (.end res)))
+    (doto res
+      (.writeHead
+       204
+       #js {"Access-Control-Allow-Origin" "*"})
+      (.end))))
 
 (defmethod route [:options "/submit"] [_req ^js res]
   (doto res
