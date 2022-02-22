@@ -82,7 +82,7 @@
 (defn- init []
   (when-not @init?
     (reset! init? true)
-    (l/init)
+    (l/init @default-options)
     (shortcuts/add!
      ::init
      (fn [log]
@@ -92,4 +92,4 @@
               log)
          (open))))))
 
-(init)
+(js/setTimeout init 0)

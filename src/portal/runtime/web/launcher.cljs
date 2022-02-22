@@ -79,10 +79,10 @@
     (reset! rt/request (partial c/request child-window)))
   true)
 
-(defn init []
+(defn init [options]
   (when-let [string (get-item ":portal/open")]
     (if (< (- (js/Date.now) (js/parseInt string)) 5000)
-      (open nil)
+      (open options)
       (remove-item ":portal/open"))))
 
 (defn clear []
