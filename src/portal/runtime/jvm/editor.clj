@@ -21,12 +21,12 @@
 (extend-protocol IResolve
   clojure.lang.PersistentHashMap
   (resolve [m]
-    (when-let [file (:file m)]
+    (when-let [file (or (:file m) (:ns m))]
       (when-let [resolved (resolve file)]
         (merge m resolved))))
   clojure.lang.PersistentArrayMap
   (resolve [m]
-    (when-let [file (:file m)]
+    (when-let [file (or (:file m) (:ns m))]
       (when-let [resolved (resolve file)]
         (merge m resolved))))
   clojure.lang.Var
@@ -40,7 +40,7 @@
        (fn [ext]
          (when-let [url (io/resource (str base ext))]
            (resolve url)))
-       [".cljc" ".clj"])))
+       [".cljc" ".clj" ".cljs"])))
   clojure.lang.Symbol
   (resolve [^clojure.lang.Symbol s]
     (resolve (find-ns s)))
