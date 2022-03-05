@@ -177,18 +177,21 @@
   (swap! tap-list conj new-value))
 
 (defn- get-options []
-  (merge
-   {:name "portal"
-    :version "0.21.2"
-    :platform
-    #?(:bb   "bb"
-       :clj  "jvm"
-       :cljs (cond
-               (exists? js/process)        "node"
-               (exists? js/PLANCK_VERSION) "planck"
-               :else                        "web"))
-    :value tap-list}
-   (:options *session*)))
+  (let [options (:options *session*)]
+    (merge
+     {:name (if (= :dev (:mode options))
+              "portal-dev"
+              "portal")
+      :version "0.21.2"
+      :platform
+      #?(:bb   "bb"
+         :clj  "jvm"
+         :cljs (cond
+                 (exists? js/process)        "node"
+                 (exists? js/PLANCK_VERSION) "planck"
+                 :else                        "web"))
+      :value tap-list}
+     options)))
 
 (defn clear-values
   ([] (clear-values nil identity))
