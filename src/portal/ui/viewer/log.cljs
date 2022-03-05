@@ -5,7 +5,37 @@
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
-            [portal.ui.viewer.date-time :as date-time]))
+            [portal.ui.viewer.date-time :as date-time]
+            [shadow.resource :refer [inline]]))
+
+(defn- parse [xml-string]
+  (let [parser (js/DOMParser.)
+        dom    (.parseFromString parser xml-string "text/xml")]
+    (aget (.getElementsByTagName dom "svg") 0)))
+
+(defn- stringify [dom]
+  (.serializeToString (js/XMLSerializer.) dom))
+
+(defn- theme-svg [svg theme]
+  (doseq [el (.querySelectorAll svg "[fill]")]
+    (.setAttribute el "fill" (::c/package theme)))
+  (doseq [el (.querySelectorAll svg "[stroke]")]
+    (.setAttribute el "stroke" (::c/package theme)))
+  svg)
+
+(def runtime->logo
+  {:clj  (inline "runtime/clojure.svg")
+   :cljs (inline "runtime/cljs.svg")
+   :bb   (inline "runtime/babashka.svg")})
+
+(defn- icon [value]
+  (let [theme (theme/use-theme)]
+    [s/img
+     {:style
+      {:height 22 :width 22}
+      :src (str
+            "data:image/svg+xml;base64,"
+            (-> value runtime->logo parse (theme-svg theme) stringify js/btoa))}]))
 
 (def ^:private levels
   [:trace :debug :info :warn :error :fatal :report])
@@ -41,12 +71,18 @@
 (defn inspect-log [log]
   (let [theme      (theme/use-theme)
         background (ins/get-background)
-        color      (-> log :level level->color theme)]
+        color      (-> log :level level->color theme)
+        runtime    (:runtime log)
+        runtime?   (contains? runtime->logo runtime)]
     [s/div
      {:style
       {:display :grid
-       :grid-template-columns "auto 1fr auto"
-       :border-left [5 :solid color]}}
+       :grid-template-columns (if-not runtime?
+                                "auto 1fr auto"
+                                "auto 1fr 1fr auto")
+       :border-left [5 :solid color]
+       :border-top-left-radius (:border-radius theme)
+       :border-bottom-left-radius (:border-radius theme)}}
      [s/div
       {:style
        {:box-sizing :border-box
@@ -66,17 +102,35 @@
        [ins/inspector (:result log)]]]
      [s/div
       {:style
-       {:background background
-        :padding (:padding theme)
-        :color (::c/uri theme)
-        :border-top [1 :solid (::c/border theme)]
-        :border-bottom [1 :solid (::c/border theme)]
-        :border-right [1 :solid (::c/border theme)]
-        :text-align :right}}
+       (merge
+        {:background background
+         :padding (:padding theme)
+         :color (::c/uri theme)
+         :border-top [1 :solid (::c/border theme)]
+         :border-bottom [1 :solid (::c/border theme)]
+         :text-align :right}
+        (when-not runtime?
+          {:border-right [1 :solid (::c/border theme)]
+           :border-top-right-radius (:border-radius theme)
+           :border-bottom-right-radius (:border-radius theme)}))}
       (:ns log)
       ":"
-      (:line log)]]))
-
+      (:line log)]
+     (when runtime?
+       [s/div
+        {:style
+         {:background (::c/background theme)
+          :padding (:padding theme)
+          :display :flex
+          :align-items :center
+          :color (::c/uri theme)
+          :border-top [1 :solid (::c/border theme)]
+          :border-bottom [1 :solid (::c/border theme)]
+          :border-left [1 :solid (::c/border theme)]
+          :border-right [1 :solid (::c/border theme)]
+          :border-top-right-radius (:border-radius theme)
+          :border-bottom-right-radius (:border-radius theme)}}
+        [icon runtime]])]))
 (def viewer
   {:predicate log?
    :component inspect-log
