@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.runtime
   (:refer-clojure :exclude [read])
   (:require [clojure.datafy :refer [datafy nav]]
+            [clojure.pprint :as pprint]
             [portal.runtime.cson :as cson]
             #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a])))
@@ -154,6 +155,8 @@
      IPrintWithWriter
      (-pr-writer [this writer _opts]
        (-write writer (:string this)))))
+
+(defmethod pprint/simple-dispatch RemoteValue [portal] (pr portal))
 
 (defn read [string session]
   (binding [*session* session]
