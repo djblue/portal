@@ -121,6 +121,13 @@
 (defn with-readonly [& children]
   (into [with-context {:readonly? true}] children))
 
+(defonce ^:private options-context (react/createContext nil))
+
+(defn use-options [] (react/useContext options-context))
+
+(defn- with-options [options & children]
+  (into [:r> (.-Provider options-context) #js {:value options}] children))
+
 (defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))
 (defn bin? [value] (instance? js/Uint8Array value))
@@ -416,7 +423,7 @@
        :border [1 :solid (::c/border theme)]}}
      child]))
 
-(defn- inspect-map-k-v [values]
+(defn inspect-map-k-v [values]
   [container-map
    [l/lazy-seq
     (map-indexed
@@ -677,11 +684,12 @@
                            (assoc :value value)
                            (update :depth inc))
         location       (state/get-location context)
-        {:keys [value viewer selected expanded?]}
+        {:keys [value viewer selected expanded?] :as options}
         @(r/track get-info state context)
         theme          (theme/use-theme)
         depth          (use-depth)
-        default-expand (<= depth (:max-depth theme))
+        default-expand (and (= (:name viewer) :portal.viewer/inspector)
+                            (<= depth (:max-depth theme)))
         expanded?      (if-not (nil? expanded?) expanded? default-expand)
         preview?       (not expanded?)
         type           (get-value-type value)
@@ -754,7 +762,8 @@
          :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
          :background    (let [bg (get-background (inc depth))]
                           (when selected bg))}})
-      [:> error-boundary [component value]]]]))
+      [:> error-boundary
+       [with-options options [component value]]]]]))
 
 (def viewer
   {:predicate (constantly true)
