@@ -16,11 +16,20 @@
 (defn- stringify [dom]
   (.serializeToString (js/XMLSerializer.) dom))
 
+(defn- resolve-color [color]
+  (if-let [[_ var] (re-matches #"var\((.*)\)" color)]
+    (-> js/document
+        .-documentElement
+        js/getComputedStyle
+        (.getPropertyValue var))
+    color))
+
 (defn- theme-svg [svg theme]
-  (doseq [el (.querySelectorAll svg "[fill]")]
-    (.setAttribute el "fill" (::c/package theme)))
-  (doseq [el (.querySelectorAll svg "[stroke]")]
-    (.setAttribute el "stroke" (::c/package theme)))
+  (let [package (resolve-color (::c/package theme))]
+    (doseq [el (.querySelectorAll svg "[fill]")]
+      (.setAttribute el "fill" package))
+    (doseq [el (.querySelectorAll svg "[stroke]")]
+      (.setAttribute el "stroke" package)))
   svg)
 
 (def runtime->logo
@@ -78,45 +87,41 @@
         options    (ins/use-options)
         expanded?  (:expanded? options)
         border     (when-not expanded?
-                     {:border-bottom [1 :solid (::c/border theme)]})]
+                     {:border-bottom [1 :solid (::c/border theme)]})
+        flex       {:box-sizing  :border-box
+                    :padding     (:padding theme)
+                    :display     :flex
+                    :align-items :center}]
 
     [s/div
+     {:style
+      {:background background}}
      [s/div
       {:style
        {:display                   :grid
         :grid-template-columns     (if-not runtime?
                                      "auto 1fr auto"
-                                     "auto 1fr 1fr auto")
+                                     "auto 1fr auto auto")
         :border-left               [5 :solid color]
         :border-top-left-radius    (:border-radius theme)
         :border-bottom-left-radius (when-not expanded? (:border-radius theme))}}
       [s/div
        {:style
-        (merge
-         {:box-sizing :border-box
-          :padding    (:padding theme)
-          :background background
-          :border-top [1 :solid (::c/border theme)]}
-         border)}
+        (merge {:border-top [1 :solid (::c/border theme)]} flex border)}
        [date-time/inspect-time (:time log)]]
       [s/div
        {:style
-        (merge
-         {:background background
-          :padding    (:padding theme)
-          :border-top [1 :solid (::c/border theme)]}
-         border)}
+        (merge flex {:border-top [1 :solid (::c/border theme)] :flex "1"} border)}
        [select/with-position
         {:row -1 :column 0}
         [ins/inspector (:result log)]]]
       [s/div
        {:style
         (merge
-         {:background background
-          :padding    (:padding theme)
-          :color      (::c/uri theme)
-          :border-top [1 :solid (::c/border theme)]
-          :text-align :right}
+         flex
+         {:color           (::c/uri theme)
+          :border-top      [1 :solid (::c/border theme)]
+          :justify-content :flex-end}
          border
          (when-not runtime?
            {:border-right               [1 :solid (::c/border theme)]
@@ -129,8 +134,7 @@
         [s/div
          {:style
           (merge
-           {:background                 background
-            :padding                    (:padding theme)
+           {:padding                    (:padding theme)
             :display                    :flex
             :align-items                :center
             :color                      (::c/uri theme)
