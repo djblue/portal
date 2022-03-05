@@ -517,29 +517,56 @@
         "depth"
         "children"]}]}]})
 
+(def log-data
+  [{:ns      'user
+    :time    #inst "2006-03-24T14:49:31+00:00"
+    :level   :info
+    :column  1
+    :line    1
+    :result  :hello/clj
+    :runtime :clj
+    :form    :hello/clj}
+   {:ns      'cljs.user
+    :time    #inst "2011-06-02T19:45:57-04:00"
+    :level   :debug
+    :column  1
+    :line    2
+    :result  :hello/cljs
+    :runtime :cljs
+    :form    :hello/cljs}
+   {:ns      'tasks
+    :time    #inst "2019-08-09T14:51:42+02:00"
+    :level   :error
+    :column  1
+    :line    42
+    :result  :hello/bb
+    :runtime :bb
+    :form    :hello/cljs}])
+
 (def data-visualization
   {::vega
    {::force-directed force-directed
-    ::radial-tree radial-tree
-    ::sunburst sunburst}
+    ::radial-tree    radial-tree
+    ::sunburst       sunburst}
    ::vega-lite
-   {::line-chart line-chart
-    ::pie-chart pie-chart
-    ::bar-chart bar-chart
-    ::scatter-chart scatter-chart
+   {::line-chart           line-chart
+    ::pie-chart            pie-chart
+    ::bar-chart            bar-chart
+    ::scatter-chart        scatter-chart
     ::histogram-heatmap-2D histogram-heatmap-2D
-    ::geographic-data geographic-data}
+    ::geographic-data      geographic-data}
    ::portal-charts
-   {::tabular-data tabular-data
+   {::tabular-data         tabular-data
     ::numerical-collection numerical-collection}})
 
 (def data
-  {::platform-data platform-data
-   ::hacker-news hn/stories
-   ::diff diff-data
-   ::basic-data basic-data
-   ::themes c/themes
-   ::clojure-data clojure-data
-   ::hiccup hiccup
+  {::platform-data      platform-data
+   ::hacker-news        hn/stories
+   ::diff               diff-data
+   ::basic-data         basic-data
+   ::themes             c/themes
+   ::clojure-data       clojure-data
+   ::hiccup             hiccup
    ::data-visualization data-visualization
-   ::string-data string-data})
+   ::string-data        string-data
+   ::log-data           log-data})
