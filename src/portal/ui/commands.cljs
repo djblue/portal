@@ -690,6 +690,9 @@
   (when-let [selected (state/get-selected-context @state)]
     (state/dispatch! state f selected)))
 
+(defn ^:command select-root [state]
+  (state/dispatch! state state/select-root))
+
 (defn ^:command select-prev [state]
   (apply-selected state state/select-prev))
 

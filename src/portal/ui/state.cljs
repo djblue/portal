@@ -123,6 +123,11 @@
 (defn focus-selected [state context]
   (history-push state {:portal/value (:value context)}))
 
+(defn select-root [state]
+  (if-let [root (select/get-root)]
+    (select-context state root)
+    state))
+
 (defn select-prev [state context]
   (if-let [prev (or (select/get-prev context)
                     (-> context

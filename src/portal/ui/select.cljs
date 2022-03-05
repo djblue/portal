@@ -8,6 +8,9 @@
   (let [index (conj (react/useContext index-context) position)]
     (into [:r> (.-Provider index-context) #js {:value index}] children)))
 
+(defn get-root []
+  (doto (::root @selection-index) tap>))
+
 (defn adjacent [f & args]
   (fn select
     ([context] (select @selection-index context))
@@ -45,6 +48,10 @@
     (if-not (seq index)
       position-index
       (cond-> position-index
+
+        (= (:depth context) 1)
+        (assoc ::root context)
+
         (nil? (get-prev selection-index context))
         (assoc (conj (pop index)
                      (assoc (last index) :row :first))
