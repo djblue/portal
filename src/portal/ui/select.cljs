@@ -8,8 +8,7 @@
   (let [index (conj (react/useContext index-context) position)]
     (into [:r> (.-Provider index-context) #js {:value index}] children)))
 
-(defn get-root []
-  (doto (::root @selection-index) tap>))
+(defn get-root [] (::root @selection-index))
 
 (defn adjacent [f & args]
   (fn select
