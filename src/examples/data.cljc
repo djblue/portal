@@ -541,7 +541,15 @@
     :line    42
     :result  :hello/bb
     :runtime :bb
-    :form    :hello/cljs}])
+    :form    :hello/bb}
+   {:ns      'portal.api
+    :time    #inst "2020-06-02T18:43:08-07:00"
+    :level   :warn
+    :column  1
+    :line    7
+    :result  :hello/portal
+    :runtime :portal
+    :form    :hello/portal}])
 
 (def data-visualization
   {::vega

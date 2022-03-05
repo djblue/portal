@@ -24,9 +24,10 @@
   svg)
 
 (def runtime->logo
-  {:clj  (inline "runtime/clojure.svg")
-   :cljs (inline "runtime/cljs.svg")
-   :bb   (inline "runtime/babashka.svg")})
+  {:clj    (inline "runtime/clojure.svg")
+   :cljs   (inline "runtime/cljs.svg")
+   :bb     (inline "runtime/babashka.svg")
+   :portal (inline "runtime/portal.svg")})
 
 (defn- icon [value]
   (let [theme (theme/use-theme)]
