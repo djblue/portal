@@ -86,7 +86,11 @@
     (react/useEffect
      (fn []
        (state/notify-parent
-        {:type :set-theme :color background}))
+        {:type  :set-theme
+         :color
+         (if-not (= :dev (:mode opts))
+           background
+           (::c/diff-add theme))}))
      #js [background])
     (react/useEffect
      (fn []
