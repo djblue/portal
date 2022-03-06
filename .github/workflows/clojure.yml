@@ -10,19 +10,19 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: bb check
   test-clj:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: bb -m tasks.test/clj
   test-cljs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: bb -m tasks.planck
     - run: bb -m tasks.test/cljs
@@ -31,7 +31,7 @@ jobs:
     needs: [ test-clj, test-cljs, check ]
     if: github.event_name == 'push'
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: bb app
     - uses: peaceiris/actions-gh-pages@v3
@@ -45,7 +45,7 @@ jobs:
     if: startsWith(github.event.head_commit.message, 'Release ')
     environment: deploy
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ./.github/setup
     - id: info
       run: bb -m tasks.info
