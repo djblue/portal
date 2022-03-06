@@ -687,8 +687,9 @@
     (.scroll el #js {:top (+ (.-scrollHeight el) 1000)})))
 
 (defn- apply-selected [state f]
-  (when-let [selected (state/get-selected-context @state)]
-    (state/dispatch! state f selected)))
+  (if-let [selected (state/get-selected-context @state)]
+    (state/dispatch! state f selected)
+    (state/dispatch! state state/select-root)))
 
 (defn ^:command select-root [state]
   (state/dispatch! state state/select-root))
