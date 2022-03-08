@@ -60,8 +60,10 @@
   ([] (open nil))
   ([portal-or-options]
    (if (:session-id portal-or-options)
-     (l/open portal-or-options nil)
-     (l/open nil (rename (merge @default-options portal-or-options))))))
+     (open portal-or-options nil)
+     (open nil portal-or-options)))
+  ([portal options]
+   (l/open portal (rename (merge @default-options options)))))
 
 (defn close
   "Close all current inspector windows."
