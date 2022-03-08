@@ -6,6 +6,7 @@
   "Start dev server."
   []
   (build)
-  (clj "-M:dev:cider:cljs:shadow" :watch :pwa :client :vs-code))
+  (clj "-M:dev:cider:cljs:shadow"
+       :watch :pwa :client :vs-code :electron))
 
 (defn -main [] (dev))

@@ -12,7 +12,7 @@
 (defn- get-parent [s] (.getParent (io/file s)))
 
 (defn get-config [file]
-  (->> (System/getProperty "user.dir")
+  (->> (fs/cwd)
        (iterate get-parent)
        (take-while some?)
        (some
@@ -23,19 +23,16 @@
                   slurp
                   edn/read-string)))))
 
-(defmethod browser/-open :intellij [{:keys [portal options server]}]
-  (when-let [{:keys [host port]} (get-config "intellij.edn")]
+(defn- remote-open [{:keys [portal options server]} config-file]
+  (when-let [{:keys [host port]} (get-config config-file)]
     (client/post (str "http://" host ":" port "/open")
                  {:body (pr-str {:portal  portal
                                  :options options
                                  :server  (select-keys server [:host :port])})})))
 
-(defmethod browser/-open :vs-code [{:keys [portal options server]}]
-  (when-let [{:keys [host port]} (get-config "vs-code.edn")]
-    (client/post (str "http://" host ":" port "/open")
-                 {:body (pr-str {:portal  portal
-                                 :options options
-                                 :server  (select-keys server [:host :port])})})))
+(defmethod browser/-open :intellij [args] (remote-open args "intellij.edn"))
+(defmethod browser/-open :vs-code  [args] (remote-open args "vs-code.edn"))
+(defmethod browser/-open :electron [args] (remote-open args "electron.edn"))
 
 (defonce ^:private server (atom nil))
 

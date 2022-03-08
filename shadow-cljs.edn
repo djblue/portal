@@ -40,6 +40,16 @@
    :output-to "extension-vscode/vs-code.js"
    :devtools {:after-load portal.extensions.vs-code/reload}}
 
+  :electron
+  {:exports {:main portal.extensions.electron/-main}
+   :target :node-library
+   :compiler-options
+   {:infer-externs true
+    :source-map    true
+    :warnings-as-errors true}
+   :output-to "extension-electron/electron.js"
+   :devtools {:after-load portal.extensions.electron/reload}}
+
   :node
   {:target :node-script
    :main portal.main/-main

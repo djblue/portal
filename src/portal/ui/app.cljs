@@ -338,7 +338,8 @@
     (into
      [s/div
       {:style
-       {:display :flex
+       {:-webkit-app-region :drag
+        :display :flex
         :flex-direction :column
         :background (::c/background theme)
         :color (::c/text theme)

@@ -103,7 +103,8 @@
 (defn open [{:keys [portal options] :as args}]
   (let [portal     (or portal (c/make-atom (random-uuid)))
         session-id (:session-id portal)]
-    (swap! rt/sessions assoc-in [session-id :options] options)
-    (when-not (c/open? session-id)
-      (-open (assoc args :portal portal)))
+    (swap! rt/sessions update-in [session-id :options] merge options)
+    (let [options (get-in @rt/sessions [session-id :options])]
+      (when (or (not (c/open? session-id)) (:always-open options))
+        (-open (assoc args :portal portal :options options))))
     portal))
