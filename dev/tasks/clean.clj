@@ -14,6 +14,7 @@
    "extension-vscode/vs-code.js.map"
    "pom.xml"
    "resources/portal/"
+   "resources/portal-dev/"
    "target/"
    (str "extension-vscode/portal-" version ".vsix")])
 

@@ -85,7 +85,7 @@
        (fn [^File file]
          (when (and file (.exists file))
            (send-resource "application/json" (slurp file))))
-       [(io/file "target/resources/portal/" uri)
+       [(io/file (io/resource (str "portal-dev/" uri)))
         (io/file (io/resource uri))]))))
 
 (defmethod route [:get "/icon.svg"] [_]
@@ -97,9 +97,11 @@
   {:status  200
    :headers {"Content-Type" "text/javascript"}
    :body
-   (case (-> request :session :options :mode)
-     :dev (io/file "target/resources/portal/main.js")
-     (slurp (io/resource "portal/main.js")))})
+   (slurp
+    (io/resource
+     (case (-> request :session :options :mode)
+       :dev "portal-dev/main.js"
+       "portal/main.js")))})
 
 (defn- get-session-id [request]
   ;; There might be a referrer which is not a UUID in standalone mode.

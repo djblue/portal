@@ -61,7 +61,7 @@
      (p/open {:launcher :vs-code}))
    :extension.portalOpenDev
    (fn []
-     (let [path (fs/exists (fs/join (get-workspace-folder) "target/resources/portal/main.js"))]
+     (let [path (fs/exists (fs/join (get-workspace-folder) "resources/portal-dev/main.js"))]
        (p/open
         {:mode         :dev
          :window-title "vs-code-dev"
@@ -74,7 +74,7 @@
     (.end res)))
 
 (defn- set-status [workspace]
-  (when (fs/exists (fs/join workspace "target/resources/portal/main.js"))
+  (when (fs/exists (fs/join workspace "resources/portal-dev/main.js"))
     (.executeCommand vscode/commands "setContext" "portal:is-dev" true)))
 
 (defn activate

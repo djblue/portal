@@ -5,7 +5,7 @@
          :repl-pprint true}
  :builds
  {:client
-  {:output-dir "target/resources/portal/"
+  {:output-dir "resources/portal-dev/"
    :asset-path "."
    :target :browser
    :compiler-options

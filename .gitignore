@@ -5,6 +5,7 @@ target/
 node_modules/
 cljs-runtime/
 resources/portal/
+resources/portal-dev/
 .clj-kondo/.cache/
 .clj-kondo/rewrite-clj/
 .clj-kondo/babashka/
