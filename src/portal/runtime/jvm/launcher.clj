@@ -27,7 +27,7 @@
   (when-let [{:keys [host port]} (get-config config-file)]
     (client/post (str "http://" host ":" port "/open")
                  {:body (pr-str {:portal  portal
-                                 :options options
+                                 :options (select-keys options [:window-title])
                                  :server  (select-keys server [:host :port])})})))
 
 (defmethod browser/-open :intellij [args] (remote-open args "intellij.edn"))
