@@ -61,7 +61,9 @@
     (when-not (= (get-url @window) url)
       (prn [(get-url @window) url])
       (.loadURL @window url))
-    (.showInactive @window)))
+    (.setVisibleOnAllWorkspaces @window true)
+    (.showInactive @window)
+    (.setVisibleOnAllWorkspaces @window false)))
 
 (defmethod server/route [:post "/open"] [req res]
   (a/let [body (server/get-body req)]
