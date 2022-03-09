@@ -24,10 +24,12 @@
 
 (spec/def ::via
   (spec/coll-of
-   (spec/keys :req-un [::type ::message ::at])))
+   (spec/keys :req-un [::type]
+              :opt-un [::message ::at])))
 
 (spec/def ::exception
-  (spec/keys :req-un [::cause ::trace ::via]))
+  (spec/keys :req-un [::trace ::via]
+             :opt-un [::cause]))
 
 (defn exception? [value]
   (spec/valid? ::exception value))
@@ -92,7 +94,10 @@
   (let [theme (theme/use-theme)]
     [s/div
      {:style
-      {:display :grid
+      {:background (ins/get-background)
+       :box-sizing :border-box
+       :padding (:padding theme)
+       :display :grid
        :grid-template-columns "auto 1fr auto"
        :align-items :center
        :grid-gap [0 (:padding theme)]}}
@@ -106,37 +111,50 @@
              [inspect-sub-trace trace])))]))
 
 (defn- inspect-via [via]
-  (let [theme (theme/use-theme)
+  (let [theme                  (theme/use-theme)
         {:keys [type message]} (first via)]
-    [:<>
-     [s/div
-      {:style {:text-align :center}}
-      [s/span
-       {:style
-        {:font-weight :bold
-         :margin-right (:padding theme)
-         :color (::c/exception theme)}}
-       type]
-      message]]))
-
-(defn inspect-exception [value]
-  (let [theme (theme/use-theme)]
     [s/div
      {:style
-      {:background (::c/background2 theme)
-       :margin "0 auto"
-       :padding (:padding theme)
-       :box-sizing :border-box
-       :color (::c/text theme)
-       :font-size  (:font-size theme)
-       :border-radius (:border-radius theme)
-       :border [1 :solid (::c/border theme)]}}
+      {:display         :flex
+       :justify-content :space-between
+       :box-sizing      :border-box
+       :padding         (:padding theme)}}
+     (when message
+       [s/div
+        {:style
+         {:font-weight :bold
+          :color (::c/exception theme)}}
+        message])
+     type]))
+
+(defn inspect-exception [value]
+  (let [theme     (theme/use-theme)
+        options   (ins/use-options)
+        expanded? (:expanded? options)]
+    [s/div
+     {:style
+      {:color (::c/text theme)
+       :font-size  (:font-size theme)}}
      [s/div
-      {:style
-       {:margin [0 :auto]
-        :width  :fit-content}}
-      [inspect-via (:via value)]
-      [inspect-stack-trace (:trace value)]]]))
+      [s/div
+       {:style
+        {:color      (::c/exception theme)
+         :border     [1 :solid (::c/exception theme)]
+         :background (str (::c/exception theme) "22")
+         :border-top-right-radius    (:border-radius theme)
+         :border-top-left-radius     (:border-radius theme)
+         :border-bottom-right-radius (when-not expanded? (:border-radius theme))
+         :border-bottom-left-radius  (when-not expanded? (:border-radius theme))}}
+       [inspect-via (:via value)]]
+      (when expanded?
+        [s/div
+         {:style
+          {:border-left   [1 :solid (::c/border theme)]
+           :border-right  [1 :solid (::c/border theme)]
+           :border-bottom [1 :solid (::c/border theme)]
+           :border-bottom-left-radius  (:border-radius theme)
+           :border-bottom-right-radius (:border-radius theme)}}
+         [inspect-stack-trace (:trace value)]])]]))
 
 (def viewer
   {:predicate exception?
