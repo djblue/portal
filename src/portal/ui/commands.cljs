@@ -206,6 +206,9 @@
    {::shortcuts/default #{"control" "j"}}
    `open-command-palette
 
+   {::shortcuts/default #{"shift" ":"}}
+   `open-command-palette
+
    {::shortcuts/osx     #{"meta" "c"}
     ::shortcuts/default #{"control" "c"}}
    `copy
