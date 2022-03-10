@@ -123,8 +123,10 @@
            (when
             (condp shortcuts/match? log
               "arrowup"        (swap! active #(mod (dec %) n))
+              "k"              (swap! active #(mod (dec %) n))
               #{"shift" "tab"} (swap! active #(mod (dec %) n))
               "arrowdown"      (swap! active #(mod (inc %) n))
+              "j"              (swap! active #(mod (inc %) n))
               "tab"            (swap! active #(mod (inc %) n))
               "a"       (on-toggle)
               "i"       (on-invert)
