@@ -8,6 +8,11 @@
 (defn parse [date]
   (cond
     (date? date) date
+
+    ;; unix timestamps
+    (number? date)
+    (js/Date. (* date 1000))
+
     (string? date)
     (let [date (.parse js/Date date)]
       (when-not (js/isNaN date) (js/Date. date)))))
