@@ -128,6 +128,11 @@
     (select-context state root)
     state))
 
+(defn select-pop [state]
+  (if (empty? (:selected state))
+    state
+    (update state :selected pop)))
+
 (defn select-prev [state context]
   (if-let [prev (or (select/get-prev context)
                     (-> context

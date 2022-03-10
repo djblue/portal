@@ -234,7 +234,8 @@
 
    {::shortcuts/default ["/"]}                  `focus-filter
 
-   {::shortcuts/default #{"escape"}}            `select-none
+   {::shortcuts/default #{"shift" "escape"}}    `select-none
+   {::shortcuts/default #{"escape"}}            `select-pop
    {::shortcuts/default #{"v"}}                 `select-viewer
    {::shortcuts/default #{"arrowup"}}           `select-prev
    {::shortcuts/default #{"k"}}                 `select-prev
@@ -661,6 +662,10 @@
   "Deselect all values."
   [state]
   (state/dispatch! state dissoc :selected))
+
+(defn ^:command select-pop
+  [state]
+  (state/dispatch! state state/select-pop))
 
 (defn ^:command select-viewer
   "Set the viewer for the currently selected value."
