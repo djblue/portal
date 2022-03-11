@@ -47,7 +47,7 @@
     ::symbol      "#93a1a1"
     ::number      "#d33682"
     ::uri         "#cb4b16"
-    ::border      "#839496"
+    ::border      "#d2cdbb"
     ::package     "#2aa198"
     ::exception   "#dc322f"
     ::diff-add    "#859900"
