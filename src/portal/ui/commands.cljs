@@ -696,6 +696,11 @@
   (when-let [el (:scroll-element @state)]
     (.scroll el #js {:top (+ (.-scrollHeight el) 1000)})))
 
+(defn ^:command toggle-shell
+  "Toggle visibility of top / bottom helper UX. Allows for a value focused session."
+  [state]
+  (state/dispatch! state update :disable-shell? not))
+
 (defn- apply-selected [state f]
   (if-let [selected (state/get-selected-context @state)]
     (state/dispatch! state f selected)

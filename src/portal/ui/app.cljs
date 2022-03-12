@@ -285,7 +285,7 @@
       {:height "100vh"
        :display :flex
        :flex-direction :column}}
-     [toolbar]
+     (when-not (:disable-shell? @state) [toolbar])
      [s/div
       {:style
        {:flex "1"
@@ -314,8 +314,10 @@
           [select/with-position
            {:row 0 :column 0}
            [ins/inspector value]]]]]]]
-     [inspect-footer]
-     [selected-context-view]]))
+     (when-not (:disable-shell? @state)
+       [:<>
+        [inspect-footer]
+        [selected-context-view]])]))
 
 (defn scrollbars []
   (let [thumb "rgba(0,0,0,0.3)"]
