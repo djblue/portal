@@ -1,6 +1,5 @@
 (ns portal.ui.commands
   (:require ["react" :as react]
-            [clojure.edn :as edn]
             [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -14,6 +13,7 @@
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
+            [portal.ui.viewer.edn :as edn]
             [reagent.core :as r]))
 
 (defonce ^:private input (r/atom nil))

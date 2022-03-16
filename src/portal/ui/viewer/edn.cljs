@@ -2,7 +2,7 @@
   (:require [clojure.edn :as edn]
             [portal.ui.inspector :as ins]))
 
-(defn- parse-edn [edn-string]
+(defn read-string [edn-string]
   (try (edn/read-string {:default tagged-literal} edn-string)
        (catch :default _e ::invalid)))
 
@@ -10,7 +10,7 @@
 
 (defn inspect-edn [edn-string]
   [ins/tabs
-   {:portal.viewer/edn (parse-edn edn-string)
+   {:portal.viewer/edn (read-string edn-string)
     "..."              edn-string}])
 
 (def viewer
