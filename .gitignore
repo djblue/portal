@@ -11,6 +11,7 @@ resources/portal-dev/
 .clj-kondo/babashka/
 .DS_Store
 .nrepl-port
+.bb-repl
 
 # vscode
 *.calva/

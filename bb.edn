@@ -6,7 +6,7 @@
          ci     tasks.ci/ci
          clean  tasks.clean/clean
          check  tasks.check/check
-         dev    tasks.dev/dev
+         dev    tasks.dev/-main
          e2e    tasks.e2e/all
          fmt    tasks.format/fix
          jar    tasks.package/jar
