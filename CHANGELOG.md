@@ -1,3 +1,8 @@
+## 0.22.1 - 2022-03-16
+
+- Support tagged literals with edn paste eec9e2b
+- Fix cljdoc build fb31246
+
 ## 0.22.0 - 2022-03-15
 
 ### Additions

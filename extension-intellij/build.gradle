@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'djblue'
-version '0.22.0'
+version '0.22.1'
 
 intellij {
     version = '2021.3'
@@ -28,7 +28,7 @@ dependencies {
     implementation 'http-kit:http-kit:2.5.3'
     // Include depdencies for dev
     //   - devImplementation doesn't work for plugin development
-    // implementation 'djblue:portal:0.22.0'
+    // implementation 'djblue:portal:0.22.1'
     // implementation 'nrepl:nrepl:0.8.3'
 }
 
