@@ -23,7 +23,8 @@
     (merge
      (:deps deps)
      (provided (get-in deps [:aliases :cider :extra-deps]))
-     (provided (get-in deps [:aliases :cljs :extra-deps])))))
+     (provided (get-in deps [:aliases :cljs :extra-deps]))
+     (provided (get-in deps [:aliases :shadow :extra-deps])))))
 
 (def options
   {:lib           'djblue/portal
