@@ -1,3 +1,50 @@
+## 0.22.0 - 2022-03-15
+
+### Additions
+
+#### Table Viewer
+
+- Implement table viewer for group-by maps 4086382
+
+#### Log Viewer
+
+- Expand / collapse log viewer 97da44a
+  - Add portal as a runtime b5f77ba
+- Use runtime logo in log viewer a425920
+
+#### Commands
+
+- Add `toggle-shell` command 8e2e4d8
+- Add `select-pop` to account for multi-select 14ed32d
+- Add `select-root` command 740ff1d
+- Improve goto-definition to use :ns from log maps 499a0ef
+- Select root when no value is currently selected 83365c8
+
+#### Other
+
+- Lighten up solarized-light border f104b5a
+- Add vim style `:` shortcut for command prompt d787582
+- Support unix timestamps 946cf34
+- Add `j` and `k` to the selector-component 6716a1b
+- Align exception viewer with error viewer fc879da
+- Allow portal/open to take both session and options d3a7010
+- Include ChunkedCons for clj and not bb 140e97d
+
+### Extensions
+
+- First cut of electron extension 4b44698
+  - Move electron window to current workspace on open 3538260
+
+- Update Intellij plugin description d7e4d2e
+  - Now published on [Intellij Marketplace](https://plugins.jetbrains.com/plugin/18467-portal-inspector)!
+
+### Bug Fixes
+
+- Fix :options for portal extensions 9865217
+- Fix default options and browser reload 951e73d
+- Fix CORS error around `portal.client.web` a6fa446
+- Port CORS fix a6fa446 to node runtime server 706f451
+
 ## 0.21.2 - 2022-02-16
 
 ### Bug Fixes
