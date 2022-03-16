@@ -11,13 +11,13 @@
         port-file (io/file ".bb-repl")]
     (.deleteOnExit port-file)
     (spit port-file (pr-str {:host host :port port :runtime :bb}))
-    (printf "=> Babashka socket repl listening on %s:%s\n" host port)))
+    (printf "=> Babashka prepl listening on %s:%s\n" host port)))
 
-(defn socket-repl []
+(defn prepl []
   (start-server
    {:name          "bb"
     :port          0
-    :accept        clojure.core.server/repl
+    :accept        clojure.core.server/io-prepl
     :server-daemon false}))
 
 (defn dev
@@ -27,4 +27,4 @@
   (clj "-M:dev:cider:cljs:shadow"
        :watch :pwa :client :vs-code :electron))
 
-(defn -main [] (socket-repl) (dev))
+(defn -main [] (prepl) (dev))
