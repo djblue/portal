@@ -1,5 +1,6 @@
 (ns portal.ui.viewer.table
   (:require ["react" :as react]
+            [clojure.spec.alpha :as sp]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
@@ -40,16 +41,19 @@
       (fn []
         (reset! hover [row column]))
       :style
-      {:background background
-       :grid-row (str (inc row))
+      {:background  background
+       :grid-row    (str (inc row))
        :grid-column (str (inc column))}}
      [s/div
-      {:style {:height "100%" :width "100%"}
+      {:style {:height     "100%"
+               :width      "100%"
+               :box-sizing :border-box
+               :padding    (:padding theme)}
        :style/hover
        {:background (str (::c/border theme) "55")}}
       [select/with-position {:row row :column column} child]]]))
 
-(defn- special [row column child]
+(defn- special [row column child span]
   (let [background (ins/get-background)
         theme      (theme/use-theme)
         hover      (use-hover)]
@@ -82,7 +86,8 @@
         :background background
         :box-sizing :border-box
         :padding (:padding theme)
-        :grid-row (str (inc row))
+        :grid-row (str (if (number? row) (inc row) (name row))
+                       (when span (str " / span " span)))
         :grid-column (str (inc column))})}
      [select/with-position {:row row :column column} child]]))
 
@@ -174,6 +179,45 @@
            row)]]])
      values)]])
 
+(sp/def ::row (sp/coll-of map?))
+(sp/def ::multi-map (sp/map-of any? ::row))
+
+(defn inspect-multi-map-table [values]
+  (let [rows (seq (ins/try-sort (keys values)))
+        cols (or (get-in (meta values) [:portal.viewer/table :columns])
+                 (seq (ins/try-sort (into #{} (comp (mapcat second) (mapcat keys)) values))))]
+    [table
+     [columns cols]
+     [l/lazy-seq
+      (map-indexed
+       (fn [row-index {:keys [row value index]}]
+         [:<>
+          {:key row-index}
+          (when (zero? index)
+            [ins/with-key row
+             [special :auto 0 [ins/inspector row] (count (get values row))]])
+          [ins/inc-depth
+           [ins/with-key row
+            (map-indexed
+             (fn [col-index column]
+               ^{:key col-index}
+               [ins/with-collection value
+                [ins/with-key index
+                 [ins/with-key column
+                  [cell
+                   (inc row-index)
+                   (inc col-index)
+                   (when (contains? value column)
+                     [ins/inspector (get value column)])]]]])
+             cols)]]])
+       (mapcat
+        (fn [row]
+          (map-indexed
+           (fn [index value]
+             {:row row :value value :index index})
+           (get values row)))
+        rows))]]))
+
 (defn- get-component [value]
   (cond
     (and (or (vector? value) (list? value))
@@ -184,7 +228,10 @@
     inspect-map-table
 
     (and (ins/coll? value) (every? ins/map? value))
-    inspect-coll-table))
+    inspect-coll-table
+
+    (sp/valid? ::multi-map value)
+    inspect-multi-map-table))
 
 (defn table-view? [value] (some? (get-component value)))
 
