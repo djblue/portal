@@ -1,6 +1,7 @@
 (ns portal.ui.inspector
   (:refer-clojure :exclude [coll? map?])
-  (:require ["react" :as react]
+  (:require ["anser" :as anser]
+            ["react" :as react]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
@@ -602,6 +603,15 @@
 (defn- inspect-tagged [value]
   [tagged-value (:tag value) (:form value)])
 
+(defn- inspect-ansi [string]
+  (try
+    [:div
+     {:dangerouslySetInnerHTML
+      {:__html (anser/ansiToHtml string)}}]
+    (catch :default e
+      (.error js/console e)
+      string)))
+
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
         string (pr-str value)
@@ -610,11 +620,12 @@
         context             (use-context)]
     [s/span {:style
              {:color (::c/text theme)}}
-     (if (or (< (count string) limit)
-             (= (:depth context) 1)
-             (get expanded? (state/get-location context)))
-       string
-       (trim-string string limit))]))
+     [inspect-ansi
+      (if (or (< (count string) limit)
+              (= (:depth context) 1)
+              (get expanded? (state/get-location context)))
+        string
+        (trim-string string limit))]]))
 
 (defn inspect-long [value]
   [inspect-number (:rep value)])
