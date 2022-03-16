@@ -264,7 +264,12 @@
      ToJson
      (-to-json [value] (tagged-list "list" value))))
 
-#?(:cljs
+#?(:bb nil
+   :clj
+   (extend-type clojure.lang.ChunkedCons
+     ToJson
+     (-to-json [value] (tagged-list "list" value)))
+   :cljs
    (extend-type cljs.core/ChunkedCons
      ToJson
      (-to-json [value] (tagged-list "list" value))))
