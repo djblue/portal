@@ -82,10 +82,13 @@
 (defn generate [options]
   (-> options options->hiccup xml-str))
 
-(defn pom []
+(defn pom-file [options]
   (let [lib     (:lib options)
-        classes (:class-dir options)
-        target  (fs/path classes "META-INF/maven" (namespace lib) (name lib) "pom.xml")]
+        classes (:class-dir options)]
+    (fs/path classes "META-INF/maven" (namespace lib) (name lib) "pom.xml")))
+
+(defn pom []
+  (let [target (pom-file options)]
     (when (seq
            (fs/modified-since
             target

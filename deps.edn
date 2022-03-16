@@ -28,7 +28,7 @@
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
-   :main-opts    ["-m" "deps-deploy.deps-deploy" "deploy"]}
+   :exec-fn      deps-deploy.deps-deploy/deploy}
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
