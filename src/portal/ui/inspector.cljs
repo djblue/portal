@@ -605,8 +605,9 @@
 
 (defn- inspect-ansi [string]
   (try
-    [:div
-     {:dangerouslySetInnerHTML
+    [:pre
+     {:style {:margin 0}
+      :dangerouslySetInnerHTML
       {:__html (anser/ansiToHtml string)}}]
     (catch :default e
       (.error js/console e)
