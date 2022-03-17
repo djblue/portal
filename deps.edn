@@ -11,18 +11,18 @@
    {hiccup/hiccup                 {:mvn/version "2.0.0-alpha2"}
     io.aviso/pretty               {:mvn/version "1.1.1"}
     ns-tracker/ns-tracker         {:mvn/version "0.4.0"}
-    vlaaad/reveal                 {:mvn/version "1.3.270"}
-    io.github.clojure/tools.build {:git/tag "v0.8.0" :git/sha "e3e3532"}}}
+    vlaaad/reveal                 {:mvn/version "1.3.272"}
+    io.github.clojure/tools.build {:git/tag "v0.8.1" :git/sha "7d40500"}}}
   :cljs
   {:extra-deps
    {hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.0.108"}
-    markdown-clj/markdown-clj {:mvn/version "1.10.8"}
-    org.babashka/sci          {:mvn/version "0.3.1"}
-    reagent/reagent           {:mvn/version "1.1.0"}}}
+    markdown-clj/markdown-clj {:mvn/version "1.10.9"}
+    org.babashka/sci          {:mvn/version "0.3.2"}
+    reagent/reagent           {:mvn/version "1.1.1"}}}
   :shadow
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.17.6"}}
+   {thheller/shadow-cljs {:mvn/version "2.17.8"}}
    :main-opts ["-m" "shadow.cljs.devtools.cli"]}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
@@ -31,7 +31,7 @@
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts  ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.03.04"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.03.09"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}}
