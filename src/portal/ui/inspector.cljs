@@ -604,14 +604,18 @@
   [tagged-value (:tag value) (:form value)])
 
 (defn- inspect-ansi [string]
-  (try
-    [:pre
-     {:style {:margin 0}
-      :dangerouslySetInnerHTML
-      {:__html (anser/ansiToHtml string)}}]
-    (catch :default e
-      (.error js/console e)
-      string)))
+  (let [theme (theme/use-theme)]
+    (try
+      [:pre
+       {:style
+        {:margin      0
+         :font-size   (:font-size theme)
+         :font-family (:font-family theme)}
+        :dangerouslySetInnerHTML
+        {:__html (anser/ansiToHtml string)}}]
+      (catch :default e
+        (.error js/console e)
+        string))))
 
 (defn- inspect-object [value]
   (let [theme  (theme/use-theme)
