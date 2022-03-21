@@ -52,8 +52,13 @@
            (add-watch a ::watch-key #'invalidate)
            (conj atoms a)))))))
 
+(defn- value->key
+  "Include metadata when capturing values in cache."
+  [value]
+  [:value value (meta value)])
+
 (defn- value->id [value]
-  (let [k [:value value]]
+  (let [k (value->key value)]
     (-> (:value-cache *session*)
         (swap!
          (fn [cache]
@@ -64,7 +69,7 @@
         (get k))))
 
 (defn- value->id? [value]
-  (get @(:value-cache *session*) [:value value]))
+  (get @(:value-cache *session*) (value->key value)))
 
 (defn- id->value [id]
   (get @(:value-cache *session*) [:id id]))
@@ -212,7 +217,7 @@
     (when (atom? value)
       (swap! watch-registry dissoc value)
       (remove-watch value ::watch-key))
-    (swap! value-cache dissoc [:id id] [:value value])
+    (swap! value-cache dissoc [:id id] (value->key value))
     nil))
 
 (defn update-selected
