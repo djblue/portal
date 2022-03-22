@@ -78,7 +78,8 @@
 (defn- analyze-trace-item [index trace]
   (let [[class method file line] trace
         clj-name (demunge class)
-        clj? (or (str/ends-with? file ".clj")
+        clj? (or (and (string? file)
+                      (str/ends-with? file ".clj"))
                  (not= clj-name class))]
     (merge
      {:class  class
