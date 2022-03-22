@@ -190,6 +190,9 @@
        (::c/background theme)
        (::c/background2 theme)))))
 
+(defn ->id [value]
+  (str (hash value) (type value)))
+
 (defn tabs [value]
   (let [theme   (theme/use-theme)
         options (keys value)
@@ -207,7 +210,7 @@
          :align-items :stretch
          :border-bottom [1 :solid (::c/border theme)]}}
        (for [value options]
-         ^{:key (hash value)}
+         ^{:key (->id value)}
          [s/div
           {:style
            {:flex "1"
@@ -429,7 +432,7 @@
    [l/lazy-seq
     (map-indexed
      (fn [index [k v]]
-       ^{:key (hash k)}
+       ^{:key (str (->id k) (->id v))}
        [:<>
         [select/with-position
          {:row index :column 0}
@@ -477,7 +480,7 @@
    [l/lazy-seq
     (map-indexed
      (fn [index value]
-       ^{:key index}
+       ^{:key (str index (->id value))}
        [select/with-position
         {:row index :column 0}
         [with-key index [inspector value]]])

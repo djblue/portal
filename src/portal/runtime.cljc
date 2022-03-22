@@ -55,7 +55,7 @@
 (defn- value->key
   "Include metadata when capturing values in cache."
   [value]
-  [:value value (meta value)])
+  [:value value (meta value) (type value)])
 
 (defn- value->id [value]
   (let [k (value->key value)]
