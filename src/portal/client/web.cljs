@@ -2,7 +2,10 @@
   (:require
    [portal.client.common :refer (->submit)]))
 
-(def submit (->submit js/fetch))
+(defn- fetch [url options]
+  (js/fetch url (clj->js options)))
+
+(def submit (->submit fetch))
 
 (comment
   (submit "Hello World")

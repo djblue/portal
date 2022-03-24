@@ -1,16 +1,8 @@
 (ns portal.client.jvm
   (:require
-   [cognitect.transit :as transit]
    [org.httpkit.client :as http]
-   [portal.runtime.json :as json])
-  (:import [java.io ByteArrayOutputStream]))
-
-(defn- transit-write [value]
-  (let [out (ByteArrayOutputStream. 1024)]
-    (transit/write
-     (transit/writer out :json {:transform transit/write-meta})
-     value)
-    (.toString out)))
+   [portal.runtime.json :as json]
+   [portal.runtime.transit :as transit]))
 
 (defn submit
   "Tap target function.
@@ -47,7 +39,7 @@
       :body
       (case encoding
         :json    (json/write value)
-        :transit (transit-write value)
+        :transit (transit/write value)
         :edn     (binding [*print-meta* true]
                    (pr-str value)))})))
 

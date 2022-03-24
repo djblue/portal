@@ -1,13 +1,7 @@
 (ns ^:no-doc portal.client.common
   (:require
-   [cognitect.transit :as transit]
-   [portal.runtime.json :as json]))
-
-(defn- transit-write
-  [value]
-  (transit/write
-   (transit/writer :json {:transform transit/write-meta})
-   value))
+   [portal.runtime.json :as json]
+   [portal.runtime.transit :as transit]))
 
 (defn ->submit [fetch]
   (fn submit
@@ -19,17 +13,16 @@
       value]
      (fetch
       (str "http://" host ":" port "/submit")
-      (clj->js
-       {:method "POST"
-        :headers
-        {"content-type"
-         (case encoding
-           :json    "application/json"
-           :transit "application/transit+json"
-           :edn     "application/edn")}
-        :body
+      {:method "POST"
+       :headers
+       {"content-type"
         (case encoding
-          :json    (json/write value)
-          :transit (transit-write value)
-          :edn     (binding [*print-meta* true]
-                     (pr-str value)))})))))
+          :json    "application/json"
+          :transit "application/transit+json"
+          :edn     "application/edn")}
+       :body
+       (case encoding
+         :json    (json/write value)
+         :transit (transit/write value)
+         :edn     (binding [*print-meta* true]
+                    (pr-str value)))}))))

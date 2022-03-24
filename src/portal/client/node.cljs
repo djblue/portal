@@ -11,13 +11,13 @@
        (let [req (.request
                   http
                   url
-                  options
+                  (clj->js options)
                   (fn [res]
                     (let [body (atom "")]
                       (.on res "data" #(swap! body str %))
                       (.on res "error" reject)
                       (.on res "end" #(resolve @body)))))]
-         (.write req (.-body options))
+         (.write req (:body options))
          (.end req))))))
 
 (def submit (->submit fetch))

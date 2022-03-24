@@ -1,31 +1,12 @@
 (ns portal.runtime.cson-test
-  (:require [clojure.test :refer [deftest are is]]
-            #?(:clj  [clojure.edn :as edn]
+  (:require #?(:clj  [clojure.edn :as edn]
                :cljs [cljs.reader :as edn])
-            [cognitect.transit :as transit]
+            [clojure.test :refer [deftest are is]]
             [portal.bench :as b]
-            [portal.runtime.cson :as cson])
-  #?(:clj (:import [java.io ByteArrayOutputStream ByteArrayInputStream]
-                   [java.util Date]
+            [portal.runtime.cson :as cson]
+            [portal.runtime.transit :as transit])
+  #?(:clj (:import [java.util Date]
                    [java.util UUID])))
-
-(defn- transit-read [^String string]
-  #?(:clj  (-> string
-               .getBytes
-               ByteArrayInputStream.
-               (transit/reader :json)
-               transit/read)
-     :cljs (transit/read (transit/reader :json) string)))
-
-(defn- transit-write [value]
-  #?(:clj (let [out (ByteArrayOutputStream. 1024)]
-            (transit/write
-             (transit/writer out :json {:transform transit/write-meta})
-             value)
-            (.toString out))
-     :cljs (transit/write
-            (transit/writer :json {:transform transit/write-meta})
-            value)))
 
 (defn pass [v]
   (cson/read (cson/write v)))
@@ -150,14 +131,14 @@
 
 (comment
   (deftest rich-benchmark
-    (b/simple-benchmark [] (transit-write v) n)
+    (b/simple-benchmark [] (transit/write v) n)
     (b/simple-benchmark [] (cson/write v edn) n)
     (b/simple-benchmark [] (cson/write v) n)
 
     (prn)
 
     (b/simple-benchmark
-     [v (transit-write v)] (transit-read v) n)
+     [v (transit/write v)] (transit/read v) n)
     (b/simple-benchmark
      [v (cson/write v edn)] (cson/read v edn) n)
     (b/simple-benchmark
