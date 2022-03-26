@@ -111,3 +111,5 @@ function with the following options:
 | `:host`         | Hostname used to access UI | "localhost"          |
 | `:app`          | Launch as separate window  | true                 |
 | `:window-title` | Custom title for UI window | "portal"             |
+
+For more documentation, take a look through the [docs](./doc).

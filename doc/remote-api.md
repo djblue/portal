@@ -1,7 +1,22 @@
-# [Remote API](./examples/remote/)
+# Remote API
 
-In addition to running portal in process, values can be sent over the wire to a
-remote instance.
+If running the Portal runtime in process is not supported or not desired, values
+can be sent over the wire to a remote instance.
+
+The following clients are currently implemented:
+
+- `portal.client.jvm`
+  - clj on jvm
+  - clj on [babashka](https://babashka.org/)
+- `portal.client.node`
+  - cljs on [nbb](https://github.com/babashka/nbb)
+  - cljs on [lumo](https://github.com/anmonteiro/lumo)
+- `portal.client.web`
+  - cljs running in the browser
+- `portal.client.planck`
+  - cljs running in [planck](https://planck-repl.org/)
+
+## Usage
 
 In the process hosting the remote api, do:
 
@@ -25,3 +40,49 @@ In the client process, do:
 ```
 
 **NOTE:** `tap>`'d values must be serializable as edn, transit or json.
+
+## Tips
+
+Platform specific tips.
+
+### Planck
+
+Since Planck can load libraries from a jar, you can use the `clj` tool to
+generate the class path and pass it in via the `--classpath` cli argument.
+
+To start a Planck with Portal REPL, do:
+
+```bash
+clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "LATEST"}}}' > .classpath
+planck -c `cat .classpath`
+```
+
+Then at the REPL, do:
+
+```clojure
+(require '[portal.client.planck :as p])
+(def submit (partial p/submit {:port 5678}))
+(add-tap #'submit)
+(tap> :hello-from-planck)
+```
+
+### nbb
+
+For nbb, currently it can only consume file system based libraries so Portal
+needs to be fetched from source via git.
+
+To start a nbb with Portal REPL, do:
+
+```bash
+clj -Sdeps '{:deps {djblue/portal {:git/url "https://github.com/djblue/portal" :git/sha "1009dd87a8975eca0d3724cd8bf957ac94712b6a"}}}' -Spath > .classpath
+nbb --classpath `cat .classpath`
+```
+
+Then at the REPL, do:
+
+```clojure
+(require '[portal.client.node :as p])
+(def submit (partial p/submit {:port 5678}))
+(add-tap #'submit)
+(tap> :hello-from-nbb)
+```

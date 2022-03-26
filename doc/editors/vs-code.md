@@ -1,5 +1,7 @@
 # VS Code
 
+[![Screenshot](https://user-images.githubusercontent.com/1986211/140680881-497efd3b-da75-4220-9630-bf1af9d8bf37.png)](https://marketplace.visualstudio.com/items?itemName=djblue.portal)
+
 If you are using vs-code, try out the
 [vs-code-extension](https://marketplace.visualstudio.com/items?itemName=djblue.portal).
 It allows launching portal in an embedded
