@@ -19,7 +19,7 @@
   (js/localStorage.removeItem k))
 
 (defonce child-window (atom nil))
-(defonce code (io/resource "portal/main.js"))
+(defonce code (io/inline "portal/main.js"))
 (defonce code-url (str->src code "text/javascript"))
 
 (defn- not-found [_request done]

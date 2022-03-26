@@ -1,12 +1,13 @@
 (ns portal.ui.viewer.log
   (:require [clojure.spec.alpha :as sp]
             [portal.colors :as c]
+            [portal.resources :refer [inline]]
+            #_[shadow.resource :refer [inline]] ;; for hot reloading
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
-            [portal.ui.viewer.date-time :as date-time]
-            [shadow.resource :refer [inline]]))
+            [portal.ui.viewer.date-time :as date-time]))
 
 (defn- parse [xml-string]
   (let [parser (js/DOMParser.)

@@ -56,7 +56,7 @@
                    (assoc mapping v (get theme k)))
                  {}
                  (::c/nord c/themes))
-        svg (str/replace (io/resource "splash.svg") hex-color mapping)]
+        svg (str/replace (io/inline "splash.svg") hex-color mapping)]
     [:<>
      [commands/palette]
      [div

@@ -24,7 +24,7 @@
     (._compile m src file-name)
     (.-exports m)))
 
-(def Server (-> (io/resource "portal/ws.js")
+(def Server (-> (io/inline "portal/ws.js")
                 (require-string "portal/ws.js") .-Server))
 
 (def ops (merge c/ops rt/ops))
@@ -86,7 +86,7 @@
   (send-resource
    res
    "image/svg+xml"
-   (io/resource "portal/icon.svg")))
+   (io/inline "portal/icon.svg")))
 
 (defmethod route [:get "/main.js"] [req res]
   (let [options (-> req get-session :options)]
@@ -95,7 +95,7 @@
      "text/javascript"
      (case (:mode options)
        :dev (fs/slurp (get-in options [:resource "main.js"]))
-       (io/resource "portal/main.js")))))
+       (io/inline "portal/main.js")))))
 
 (defn get-body [^js req]
   (js/Promise.
