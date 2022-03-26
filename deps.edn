@@ -13,6 +13,8 @@
     ns-tracker/ns-tracker         {:mvn/version "0.4.0"}
     vlaaad/reveal                 {:mvn/version "1.3.272"}
     io.github.clojure/tools.build {:git/tag "v0.8.1" :git/sha "7d40500"}}}
+  :plk
+  {:extra-deps {planck/planck {:mvn/version "2.26.0"}}}
   :cljs
   {:extra-deps
    {hickory/hickory           {:mvn/version "0.7.1"}
