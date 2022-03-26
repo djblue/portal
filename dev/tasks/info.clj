@@ -1,15 +1,11 @@
 (ns tasks.info
-  (:require [babashka.process :as p]
+  (:require [clojure.java.shell :refer [sh]]
             [clojure.string :as str]))
 
 (def version "0.22.1")
 
 (defn git-hash []
-  (-> ["git" "rev-parse" "HEAD"]
-      (p/process {:out :string})
-      p/check
-      :out
-      str/trim))
+  (str/trim (:out (sh "git" "rev-parse" "HEAD"))))
 
 (defn- provided [deps]
   (reduce-kv
