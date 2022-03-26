@@ -1,0 +1,21 @@
+{:cljdoc.doc/tree
+ [["Readme" {:file "README.md"}]
+  ["Changes" {:file "CHANGELOG.md"}]
+  ["UI Concepts"
+   ["Selection" {:file "doc/ui/selection.md"}]
+   ["Viewers" {:file "doc/ui/viewers.md"}]
+   ["Commands" {:file "doc/ui/commands.md"}]
+   ["History" {:file "doc/ui/history.md"}]
+   ["Shortcuts" {:file "doc/ui/shortcuts.md"}]
+   ["Filtering" {:file "doc/ui/filtering.md"}]
+   ["Themes" {:file "doc/ui/themes.md"}]]
+  ["Remote API" {:file "doc/remote-api.md"}]
+  ["Editors"
+   ["Emacs"    {:file "doc/editors/emacs.md"}]
+   ["VS Code"  {:file "doc/editors/vs-code.md"}]
+   ["Intellij" {:file "doc/editors/intellij.md"}]]
+  ["CLI Usage" {:file "doc/cli.md"}]
+  ["Datafy / Nav" {:file "doc/datafy.md"}]
+  ["Dev Guide"
+   ["Basic" {:file "doc/dev.md"}]]
+  ["Inspiration" {:file "doc/inspiration.md"}]]}
