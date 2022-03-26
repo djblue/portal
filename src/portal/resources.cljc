@@ -4,4 +4,7 @@
 
 #?(:clj
    (defmacro inline [resource-name]
-     (slurp (io/resource resource-name))))
+     (try
+       (slurp (io/resource resource-name))
+       (catch Exception e
+         (println e)))))
