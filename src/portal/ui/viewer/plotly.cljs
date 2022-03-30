@@ -4,8 +4,8 @@
   https://github.com/plotly/plotly.js
   https://github.com/plotly/react-plotly.js"
   (:require
-   [clojure.spec.alpha :as sp]
-   ["react-plotly.js$default" :as plotly]))
+   ["react-plotly.js$default" :as plotly]
+   [clojure.spec.alpha :as sp]))
 
 (sp/def ::name string?)
 (sp/def ::plotly
@@ -22,10 +22,9 @@
    :component plotly-viewer
    :name :portal.viewer/plotly})
 
-(comment
-  (tap> {:data [{:x [0 2] :y [0 3]}]
-         :style {:width 960 :height 560}})
-  (tap> {:data [{:values [0 2 3 4 5]
-                 :type :pie}]
-         :style {:width "100%" :height "100%"}})
-  )
+;; (comment
+;;   (tap> {:data [{:x [0 2] :y [0 3]}]
+;;          :style {:width 960 :height 560}})
+;;   (tap> {:data [{:values [0 2 3 4 5]
+;;                  :type :pie}]
+;;          :style {:width "100%" :height "100%"}}))
