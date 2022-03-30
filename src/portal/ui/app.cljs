@@ -28,6 +28,7 @@
             [portal.ui.viewer.json :as json]
             [portal.ui.viewer.log :as log]
             [portal.ui.viewer.markdown :as md]
+            [portal.ui.viewer.plotly :as plotly]
             [portal.ui.viewer.pprint :as pprint]
             [portal.ui.viewer.relative-time :as relative-time]
             [portal.ui.viewer.table :as table]
@@ -400,7 +401,8 @@
    md/viewer
    hiccup/viewer
    date-time/viewer
-   relative-time/viewer])
+   relative-time/viewer
+   plotly/viewer])
 
 (reset! api/viewers viewers)
 
