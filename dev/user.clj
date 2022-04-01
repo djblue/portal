@@ -1,11 +1,7 @@
 (ns user
   (:require [clojure.core.protocols :refer [Datafiable]]
             [clojure.datafy :refer [datafy]]
-            [clojure.java.io :as io]
-            [examples.data :refer [data]]
-            [portal.api :as p]
-            [portal.runtime.json :as json]
-            [tracker]))
+            [clojure.java.io :as io]))
 
 (defn lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
@@ -19,8 +15,6 @@
   ([build-id] (start!) (watch build-id) (repl build-id)))
 
 (defn node [] (cljs :node))
-
-(add-tap #'p/submit)
 
 (extend-protocol Datafiable
   java.io.File
@@ -43,13 +37,12 @@
      :parent        (.getParentFile this)}))
 
 (comment
+  (require '[portal.api :as p])
+  (add-tap #'p/submit)
+
   (watch :pwa)
 
-  (tracker/start)
-  (tracker/stop)
-
-  (def value (atom data))
-  (reset! value data)
+  (def value (atom nil))
   (reset! value {})
   (reset! value {:hello :world})
   (reset! value (map #(-> [::index %]) (range 100)))
@@ -92,6 +85,7 @@
 
   (tap> 4611681620380904123)
   (tap> (with-meta (range) {:hello :world}))
-  (tap> (json/read (slurp "package-lock.json")))
   (tap> (io/file "deps.edn"))
+
+  (require '[examples.data :refer [data]])
   (dotimes [_i 25] (tap> data)))

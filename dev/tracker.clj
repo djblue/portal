@@ -24,3 +24,7 @@
 
 (defn stop []
   (reset! running? false))
+
+(comment
+  (start)
+  (stop))

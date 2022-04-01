@@ -1,13 +1,12 @@
 (ns tasks.tools
-  (:require [babashka.deps :as deps]
-            [babashka.process :as p]
+  (:require [babashka.process :as p]
             [clojure.string :as str]
             [io.aviso.ansi :as a])
   (:import [java.time Duration]))
 
 (def ^:dynamic *cwd* nil)
 
-(defn- now [] (System/currentTimeMillis))
+(defn- now [] #?(:clj (System/currentTimeMillis)))
 
 (defn- format-millis [ms]
   (let [duration (Duration/ofMillis ms)
@@ -26,15 +25,18 @@
          (str h " minutes, "))
        s "." ms " seconds")))))
 
+(def ^:private fns
+  #?(:bb {:clojure (requiring-resolve 'babashka.deps/clojure)}))
+
 (defn sh [& args]
   (println (a/bold-blue "=>")
            (a/bold-green (name (first args)))
            (a/bold (str/join " " (map name (rest args)))))
   (let [opts {:inherit true :dir *cwd*}
         start (now)
-        ps (if-not (= (first args) :clojure)
-             (p/process (map name args) opts)
-             (deps/clojure (map name (rest args)) opts))]
+        ps (if-let [f (get fns (first args))]
+             (f (map name (rest args)) opts)
+             (p/process (map name args) opts))]
     (p/check ps)
     (println (format-millis (- (now) start)) "\n"))
   nil)
