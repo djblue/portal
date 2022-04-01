@@ -46,4 +46,4 @@
 (def node   (partial sh :node))
 (def npm    (partial sh :npm))
 (def npx    (partial sh :npx))
-(def shadow (partial clj "-M:cljs:shadow"))
+(def shadow (partial clj "-M:cljs:shadow" "-m" "shadow.cljs.devtools.cli"))
