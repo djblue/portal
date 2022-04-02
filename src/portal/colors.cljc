@@ -106,4 +106,21 @@
     ::package     "#88c0d0"
     ::exception   "#ff6c6b"
     ::diff-add    "#a3be8c"
-    ::diff-remove "#ff6c6b"}})
+    ::diff-remove "#ff6c6b"}
+   ::gruvbox
+   {::text        "#ebdbb2"
+    ::background  "#282828"
+    ::background2 "#1e1e1e"
+    ::boolean     "#d3869b"
+    ::string      "#b8bb26"
+    ::keyword     "#d3869b"
+    ::namespace   "#fabd2f"
+    ::tag         "#ebdbb2"
+    ::symbol      "#ebdbb2"
+    ::number      "#d3869b"
+    ::uri         "#da8548"
+    ::border      "#504945"
+    ::package     "#ffffff"
+    ::exception   "#a3be8c"
+    ::diff-add    "#b8bb26"
+    ::diff-remove "#fb4934"}})
