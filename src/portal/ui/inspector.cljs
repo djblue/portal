@@ -114,10 +114,23 @@
           :collection (:portal.ui.filter/value (meta coll) coll)}]
         children))
 
+(defn- get-stable-path
+  "Since seqs grow at the front, reverse indexing them will yeild a more stable
+  path."
+  [context k]
+  (let [{:keys [collection stable-path] :or {stable-path []}} context]
+    (if-not (and collection (seq? collection) (number? k))
+      (conj stable-path k)
+      (conj stable-path (- (count collection) k 1)))))
+
 (defn with-key [k & children]
   (let [context (use-context)
         path    (get context :path [])]
-    (into [with-context {:key k :path (conj path k)}] children)))
+    (into [with-context
+           {:key         k
+            :path        (conj path k)
+            :stable-path (get-stable-path context k)}]
+          children)))
 
 (defn with-readonly [& children]
   (into [with-context {:readonly? true}] children))
