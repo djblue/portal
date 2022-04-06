@@ -1,3 +1,25 @@
+## 0.23.0 - 2022-04-05
+
+### Additions
+
+- Add gruvbox color theme (#118) eae54ec
+  - Thanks @meditans!
+- Add `:deps/prep-lib` to deps.edn d02528a
+
+### Improvements
+
+- Preserve lazy-take in state to reduce re-rendering 0c2c1bf
+- Preserve location info across taps f2c7010
+- Preserve white space for object printing aa92c90
+- Parse ansi color codes with anser 3a1a7f0
+
+### Bug Fixes
+
+- Fix default-expand edge case 334d10c
+- Distinguish between collection types in cache fb1368f
+- Fix exception viewer edge case 7e9ff87
+- Include metadata when capturing values in cache 42c1ce9
+
 ## 0.22.1 - 2022-03-16
 
 - Support tagged literals with edn paste eec9e2b

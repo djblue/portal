@@ -27,13 +27,13 @@ To get an overview of the Portal UI and workflow, checkout the following recordi
 To start a repl with portal, run the **clojure >= 1.10.0** cli with:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.22.1"}}}'
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.23.0"}}}'
 ```
 
 or for a **web** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.22.1"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.23.0"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main
 ```
@@ -41,7 +41,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.22.1"}
 or for a **node** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.22.1"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.23.0"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main -re node
 ```
@@ -49,7 +49,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.22.1"}
 or for a **babashka >=0.2.4** repl, do:
 
 ```bash
-bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.22.1"}}}'`
+bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.23.0"}}}'`
 ```
 
 or for examples on how to integrate portal into an existing project, look
