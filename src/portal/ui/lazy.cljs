@@ -63,11 +63,16 @@
 (defn lazy-seq [_coll opts]
   (let [{:keys [default-take step]
          :or   {default-take 0 step 10}} opts
-        n (r/atom default-take)]
+
+        state (state/use-state)
+        path  (-> opts :context :stable-path)
+        n     (if-not path
+                (r/atom default-take)
+                (r/cursor state [:lazy-take path]))]
     (fn [coll _opts]
-      (let [[head tail] (split-at @n coll)]
+      (let [[head tail] (split-at (or @n default-take) coll)]
         [:<>
          head
          (when (seq tail)
            [visible-sensor
-            (fn [] (swap! n + step))])]))))
+            (fn [] (swap! n (fnil + default-take) step))])]))))

@@ -76,7 +76,8 @@
                    assoc-in [:selected-viewers (state/get-location context)]
                    viewer-name))
 
-(def ^:private inspector-context (react/createContext {:depth 0 :path []}))
+(def ^:private inspector-context
+  (react/createContext {:depth 0 :path [] :stable-path []}))
 
 (defn use-context [] (react/useContext inspector-context))
 
@@ -456,7 +457,8 @@
          {:row index :column 1}
          [with-key k
           [container-map-v [inspector v]]]]])
-     (try-sort-map values))]])
+     (try-sort-map values))
+    {:context (use-context)}]])
 
 (defn- inspect-map [values]
   [with-collection
@@ -497,7 +499,8 @@
        [select/with-position
         {:row index :column 0}
         [with-key index [inspector value]]])
-     values)]])
+     values)
+    {:context (use-context)}]])
 
 (defn- trim-string [string limit]
   (if-not (> (count string) limit)

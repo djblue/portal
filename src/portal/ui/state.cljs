@@ -204,7 +204,8 @@
         (dissoc :portal/value
                 :search-text
                 :selected
-                :selected-viewers)
+                :selected-viewers
+                :lazy-take)
         (assoc
          :portal/previous-state nil
          :portal/next-state nil))))
