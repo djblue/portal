@@ -18,5 +18,8 @@
   ["CLI Usage" {:file "doc/cli.md"}]
   ["Datafy / Nav" {:file "doc/datafy.md"}]
   ["Dev Guide"
-   ["Basic" {:file "doc/dev.md"}]]
+   {:file "doc/dev/index.md"}
+   ["System Deps" {:file "doc/dev/deps.md"}]
+   ["Editor Setup" {:file "doc/dev/editors.md"}]
+   ["Dev Tasks" {:file "doc/dev/tasks.md"}]]
   ["Inspiration" {:file "doc/inspiration.md"}]]}
