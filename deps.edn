@@ -15,7 +15,7 @@
    {hiccup/hiccup                 {:mvn/version "2.0.0-alpha2"}
     io.aviso/pretty               {:mvn/version "1.1.1"}
     ns-tracker/ns-tracker         {:mvn/version "0.4.0"}
-    vlaaad/reveal                 {:mvn/version "1.3.272"}
+    vlaaad/reveal                 {:mvn/version "1.3.273"}
     io.github.clojure/tools.build {:git/tag "v0.8.1" :git/sha "7d40500"}}}
   :plk
   {:extra-deps {planck/planck {:mvn/version "2.26.0"}}}
@@ -23,17 +23,17 @@
   {:extra-deps
    {hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.0.108"}
-    markdown-clj/markdown-clj {:mvn/version "1.10.9"}
-    org.babashka/sci          {:mvn/version "0.3.2"}
+    markdown-clj/markdown-clj {:mvn/version "1.11.0"}
+    org.babashka/sci          {:mvn/version "0.3.4"}
     reagent/reagent           {:mvn/version "1.1.1"}}}
   :shadow
   {:extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.17.8"}}}
+   {thheller/shadow-cljs {:mvn/version "2.18.0"}}}
   :build
   {:extra-paths ["dev"]
    :ns-default  tasks.build
-   :deps        {babashka/babashka {:mvn/version "0.7.7"}
-                 babashka/fs       {:mvn/version "0.1.3"}}}
+   :deps        {babashka/babashka {:mvn/version "0.8.0"}
+                 babashka/fs       {:mvn/version "0.1.4"}}}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
    :exec-fn      deps-deploy.deps-deploy/deploy}
