@@ -2,6 +2,7 @@
  [["Readme" {:file "README.md"}]
   ["Changes" {:file "CHANGELOG.md"}]
   ["UI Concepts"
+   {:file "doc/ui/index.md"}
    ["Selection" {:file "doc/ui/selection.md"}]
    ["Viewers" {:file "doc/ui/viewers.md"}]
    ["Commands" {:file "doc/ui/commands.md"}]

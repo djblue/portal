@@ -12,7 +12,7 @@ A clojure tool to navigate through your data.
 The portal UI can be used to inspect values of various shapes and sizes. The UX
 will probably evolve over time and user feedback is welcome!
 
-For an in-depth explanation of the UI, you can jump to the [UI](./doc/ui/selection.md) docs.
+For an in-depth explanation of the UI, you can jump to the [UI](./doc/ui/index.md) docs.
 
 ## Demo
 
