@@ -6,7 +6,7 @@ Add a portal alias in `~/.clojure/deps.edn`
 :portal/cli
 {:main-opts ["-m" "portal.main"]
  :extra-deps
- {djblue/portal {:mvn/version "0.22.1"}
+ {djblue/portal {:mvn/version "LATEST"}
   ;; optional yaml support
   clj-commons/clj-yaml {:mvn/version "0.7.0"}}}
 ```
