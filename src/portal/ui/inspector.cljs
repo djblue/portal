@@ -628,6 +628,7 @@
       [:pre
        {:style
         {:margin      0
+         :white-space :pre-wrap
          :font-size   (:font-size theme)
          :font-family (:font-family theme)}
         :dangerouslySetInnerHTML
