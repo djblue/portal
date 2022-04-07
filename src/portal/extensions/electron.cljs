@@ -29,7 +29,8 @@
            (fn []
              (js/console.log "app quit")
              (reset! force? true)
-             (.close window)))
+             (when-not (.isDestroyed window)
+               (.close window))))
     (.on window "close"
          (fn [e]
            (when-not @force?
