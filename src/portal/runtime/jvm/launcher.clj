@@ -11,28 +11,45 @@
 
 (defn- get-parent [s] (.getParent (io/file s)))
 
-(defn get-config [file]
-  (->> (fs/cwd)
-       (iterate get-parent)
-       (take-while some?)
-       (some
-        (fn [parent]
-          (some-> parent
-                  (fs/join ".portal" file)
-                  fs/exists
-                  slurp
-                  edn/read-string)))))
+(defn- get-search-paths []
+  (->> (fs/cwd) (iterate get-parent) (take-while some?)))
 
-(defn- remote-open [{:keys [portal options server]} config-file]
-  (when-let [{:keys [host port]} (get-config config-file)]
-    (client/post (str "http://" host ":" port "/open")
-                 {:body (pr-str {:portal  portal
-                                 :options (select-keys options [:window-title])
-                                 :server  (select-keys server [:host :port])})})))
+(defn get-config [{:keys [options config-file]}]
+  (let [search-paths (get-search-paths)]
+    (or (some
+         (fn [parent]
+           (some-> parent
+                   (fs/join ".portal" config-file)
+                   fs/exists
+                   slurp
+                   edn/read-string))
+         search-paths)
+        (throw
+         (ex-info
+          (str "No config file found: " config-file)
+          {:options      options
+           :config-file  config-file
+           :search-paths search-paths})))))
 
-(defmethod browser/-open :intellij [args] (remote-open args "intellij.edn"))
-(defmethod browser/-open :vs-code  [args] (remote-open args "vs-code.edn"))
-(defmethod browser/-open :electron [args] (remote-open args "electron.edn"))
+(defn- remote-open [{:keys [portal options server] :as args}]
+  (let [config (get-config args)
+        {:keys [status error] :as response}
+        @(client/request
+          {:url    (str "http://" (:host config) ":" (:port config) "/open")
+           :method :post
+           :body   (pr-str {:portal  portal
+                            :options (select-keys options [:window-title])
+                            :server  (select-keys server [:host :port])})})]
+    (when (or error (not= status 200))
+      (throw (ex-info "Unable to open extension"
+                      {:options  options
+                       :config   config
+                       :response (select-keys response [:body :headers :status])}
+                      error)))))
+
+(defmethod browser/-open :intellij [args] (remote-open (assoc args :config-file "intellij.edn")))
+(defmethod browser/-open :vs-code  [args] (remote-open (assoc args :config-file "vs-code.edn")))
+(defmethod browser/-open :electron [args] (remote-open (assoc args :config-file "electron.edn")))
 
 (defonce ^:private server (atom nil))
 

@@ -74,11 +74,21 @@
   (sh (get-vs-code) "--goto" (str file ":" line ":" column)))
 
 (defmethod -open-editor :intellij [info]
-  (when-let [{:keys [host port]} (launcher/get-config "intellij.edn")]
-    (http/post
-     (str "http://" host ":" port "/open-file")
-     {:headers {"content-type" "application/edn"}
-      :body (pr-str info)})))
+  (let [file-info (select-keys info [:file :line :column])
+        config    (launcher/get-config {:config-file "intellij.edn"})
+        {:keys [error status] :as response}
+        @(http/request
+          {:url     (str "http://" (:host config) ":" (:port config) "/open-file")
+           :method  :post
+           :headers {"content-type" "application/edn"}
+           :body    (pr-str file-info)})]
+    (when (or error (not= status 200))
+      (throw
+       (ex-info "Unable to open file in intellij editor"
+                {:file-info file-info
+                 :config    config
+                 :response  (select-keys response [:body :headers :status])}
+                error)))))
 
 (defn can-goto [input]
   (and (satisfies? IResolve input) (resolve input)))
