@@ -12,8 +12,20 @@
 
 (defprotocol IResolve (resolve [this]))
 
+(defn- find-file [file-name]
+  (some
+   (fn [^File file]
+     (when (and (.isFile file)
+                (= (.getName file) file-name))
+       file))
+   (concat
+    (file-seq (io/file "src"))
+    (file-seq (io/file "test")))))
+
 (defn- exists [path]
-  (when (.exists (io/file path)) {:file path}))
+  (when-let [^File file (or (fs/exists (io/file path))
+                            (find-file path))]
+    {:file (.getAbsolutePath file)}))
 
 (def clojure.lang.Var (type #'exists))
 (def clojure.lang.Namespace (type *ns*))
