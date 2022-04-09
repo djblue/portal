@@ -49,24 +49,24 @@
        {:display       :flex
         :gap           (:padding theme)
         :box-sizing    :border-box
-        :padding       (:padding theme)
+        :padding       (* 1.6 (:padding theme))
         :border-bottom [1 :solid (::c/border theme)]}}
       [icons/circle {:size :xs :style {:color (::c/exception theme)}}]
       [icons/circle {:size :xs :style {:color (::c/tag theme)}}]
       [icons/circle {:size :xs :style {:color (::c/string theme)}}]]
-     [s/div
+     [:pre
       {:style
-       {:max-height "24rem"
-        :width      "100%"
-        :overflow   :auto}}
-      [:pre
-       {:style
-        {:margin      0
-         :white-space :pre-wrap
-         :box-sizing  :border-box
-         :padding     (:padding theme)
-         :font-size   (:font-size theme)
-         :font-family (:font-family theme)}}
+       {:margin         0
+        :display        :flex
+        :max-height     "24rem"
+        :overflow       :auto
+        :flex-direction :column-reverse
+        :white-space    :pre-wrap
+        :box-sizing     :border-box
+        :padding        (:padding theme)
+        :font-size      (:font-size theme)
+        :font-family    (:font-family theme)}}
+      (reverse
        (map-indexed
         (fn [index value]
           ^{:key index}
@@ -78,7 +78,7 @@
                (::c/text theme))}
             :dangerouslySetInnerHTML
             {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
-        value)]]]))
+        value))]]))
 
 (defn io? [value]
   (sp/valid? ::io value))
