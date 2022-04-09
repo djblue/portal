@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.runtime.jvm.editor
   (:refer-clojure :exclude [resolve])
   (:require [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.string :as str]
             [org.httpkit.client :as http]
             [portal.runtime :as rt]
@@ -105,11 +106,16 @@
 (defn can-goto [input]
   (and (satisfies? IResolve input) (resolve input)))
 
+(def ^:private mapping
+  {:clojure.error/column :column
+   :clojure.error/line   :line
+   :clojure.error/source :file})
+
 (defn goto-definition
   "Goto the definition of a value in an editor."
   {:predicate can-goto :command true}
   [input]
-  (when-let [location (can-goto input)]
+  (when-let [location (can-goto (set/rename-keys input mapping))]
     (let [{:keys [options]} rt/*session*]
       (-open-editor
        (assoc location
