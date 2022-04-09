@@ -29,6 +29,7 @@
             [portal.ui.viewer.log :as log]
             [portal.ui.viewer.markdown :as md]
             [portal.ui.viewer.pprint :as pprint]
+            [portal.ui.viewer.prepl :as prepl]
             [portal.ui.viewer.relative-time :as relative-time]
             [portal.ui.viewer.table :as table]
             [portal.ui.viewer.test-report :as test-report]
@@ -351,6 +352,7 @@
         :height "100vh"
         :width "100vw"}}
       [vega/styles]
+      [prepl/styles]
       [scrollbars]
       [text-selection]
       [code/stylesheet]]
@@ -385,6 +387,7 @@
    image/viewer
    deref/viewer
    test-report/viewer
+   prepl/viewer
    ins/viewer
    pprint/viewer
    vega-lite/viewer

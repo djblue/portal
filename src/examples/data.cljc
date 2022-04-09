@@ -571,6 +571,52 @@
    {:type :end-test-ns
     :ns   (or *ns* 'examples.data)}])
 
+(def prepl-data
+  [{:val
+    "[1;34m=>[m [1;32mclojure[m [1m-M:cljfmt check dev src test extension-intellij/src/main/clojure[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m6.872 seconds[m \n\n", :tag :out}
+   {:val
+    "[1;34m=>[m [1;32mclojure[m [1m-M:kondo --lint dev src test extension-intellij/src/main/clojure[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m8.537 seconds[m \n\n", :tag :out}
+   {:val "[1;34m=>[m [1;32mclojure[m [1m-M:cider:check[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m3.77 seconds[m \n\n", :tag :out}
+   {:val
+    "[1;34m=>[m [1;32m./gradlew[m [1m--warning-mode all checkClojure[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m1.477 seconds[m \n\n", :tag :out}
+   {:val
+    "[1;34m=>[m [1;32mclojure[m [1m-Sdeps {:deps #:org.clojure{clojurescript #:mvn{:version \"1.10.773\"}}} -M:test -m cljs.main --output-dir target/cljs-output-1.10.773 --target node --output-to target/test.1.10.773.js --compile portal.test-runner[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m5.470 seconds[m \n\n", :tag :out}
+   {:val "[1;34m=>[m [1;32mnode[m [1mtarget/test.1.10.773.js[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m0.540 seconds[m \n\n", :tag :out}
+   {:val
+    "[1;34m=>[m [1;32mclojure[m [1m-Sdeps {:deps #:org.clojure{clojurescript #:mvn{:version \"1.10.844\"}}} -M:test -m cljs.main --output-dir target/cljs-output-1.10.844 --target node --output-to target/test.1.10.844.js --compile portal.test-runner[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m6.328 seconds[m \n\n", :tag :out}
+   {:val "[1;34m=>[m [1;32mnode[m [1mtarget/test.1.10.844.js[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m0.307 seconds[m \n\n", :tag :out}
+   {:val
+    "[1;34m=>[m [1;32mplanck[m [1m-c src:test -m portal.test-planck[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m2.39 seconds[m \n\n", :tag :out}
+   {:val
+    "[1;34m=>[m [1;32mclojure[m [1m-M:cljs:shadow -m shadow.cljs.devtools.cli release client[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m38.140 seconds[m \n\n", :tag :out}
+   {:val
+    "[1;34m=>[m [1;32mclojure[m [1m-M:test -m portal.test-runner[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m4.777 seconds[m \n\n", :tag :out}
+   {:val "[1;34m=>[m [1;32mbb[m [1m-m portal.test-runner[m\n",
+    :tag :out}
+   {:val "[1;34m->[m [1;33m1.408 seconds[m \n\n", :tag :out}])
+
 (def data-visualization
   {::vega
    {::force-directed force-directed
@@ -598,4 +644,5 @@
    ::data-visualization data-visualization
    ::string-data        string-data
    ::log-data           log-data
-   ::test-data          test-report})
+   ::test-data          test-report
+   ::prepl-data         prepl-data})
