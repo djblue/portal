@@ -31,6 +31,7 @@
             [portal.ui.viewer.pprint :as pprint]
             [portal.ui.viewer.relative-time :as relative-time]
             [portal.ui.viewer.table :as table]
+            [portal.ui.viewer.test-report :as test-report]
             [portal.ui.viewer.text :as text]
             [portal.ui.viewer.transit :as transit]
             [portal.ui.viewer.tree :as tree]
@@ -382,6 +383,7 @@
    log/viewer
    image/viewer
    deref/viewer
+   test-report/viewer
    ins/viewer
    pprint/viewer
    vega-lite/viewer
@@ -391,6 +393,7 @@
    tree/viewer
    text/viewer
    code/viewer
+   code/pr-str-viewer
    json/viewer
    edn/viewer
    transit/viewer

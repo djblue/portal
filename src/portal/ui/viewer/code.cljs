@@ -91,6 +91,20 @@
     [:style
      (->css (->styles theme))]))
 
+(defn inspect-pr-str [code]
+  (let [theme (theme/use-theme)]
+    [:pre
+     {:style {:margin      0
+              :background  :none
+              :width       "100%"
+              :font-size   (:font-size theme)
+              :font-family (:font-family theme)}
+      :dangerouslySetInnerHTML
+      {:__html (-> code
+                   pr-str
+                   (hljs/highlight  #js {:language "clojure"})
+                   .-value)}}]))
+
 (defn inspect-code
   ([code]
    (inspect-code nil code))
@@ -140,3 +154,8 @@
   {:predicate string?
    :component inspect-code
    :name      :portal.viewer/code})
+
+(def pr-str-viewer
+  {:predicate (constantly true)
+   :component inspect-pr-str
+   :name      :portal.viewer/pr-str})
