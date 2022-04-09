@@ -6,7 +6,8 @@
             [portal.ui.theme :as theme]))
 
 (defn atom? [value]
-  (satisfies? cljs.core/IDeref value))
+  (and (satisfies? cljs.core/IDeref value)
+       (not (instance? cljs.core/Var value))))
 
 (defn inspect-deref [value]
   (let [theme (theme/use-theme)

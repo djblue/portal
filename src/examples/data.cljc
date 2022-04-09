@@ -551,6 +551,26 @@
     :runtime :portal
     :form    :hello/portal}])
 
+(def test-report
+  [{:type :begin-test-ns
+    :ns   (or *ns* 'examples.data)}
+   {:type :begin-test-var
+    :var  #'test-report}
+   {:type     :pass,
+    :expected '(= 0 0),
+    :actual   '(= 0 0),
+    :message  nil}
+   {:file     "NO_SOURCE_FILE",
+    :type     :fail,
+    :line     8,
+    :expected '(= 0 (inc 0)),
+    :actual   '(not (= 0 1)),
+    :message  nil}
+   {:type :end-test-var
+    :var  #'test-report}
+   {:type :end-test-ns
+    :ns   (or *ns* 'examples.data)}])
+
 (def data-visualization
   {::vega
    {::force-directed force-directed
@@ -577,4 +597,5 @@
    ::hiccup             hiccup
    ::data-visualization data-visualization
    ::string-data        string-data
-   ::log-data           log-data})
+   ::log-data           log-data
+   ::test-data          test-report})
