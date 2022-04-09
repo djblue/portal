@@ -41,7 +41,7 @@
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts  ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.03.09"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.04.08"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}}
@@ -63,7 +63,7 @@
      :sha     "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "1.6.0"}
+   {com.github.liquidz/antq {:mvn/version "1.6.1"}
     org.slf4j/slf4j-nop     {:mvn/version "1.7.36"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.108"}}}}}
