@@ -91,7 +91,8 @@
           :end-test-ns    icons/stop-circle
           :begin-test-var icons/play-circle
           :end-test-var   icons/stop-circle
-          :summary        icons/info-circle)
+          :summary        icons/info-circle
+          :<>)
         {:style {:color background}}]]
       [s/div
        {:style
@@ -161,22 +162,21 @@
     value)))
 
 (defn- group-assertions [value]
-  (if-not (begin? (:type (first value)))
-    value
-    (let [results (get-results value)]
-      (if (= 1 (count results))
-        (first results)
-        (merge
-         (pass-fail results)
-         {:message :test-report
-          :results results})))))
+  (let [results (get-results value)]
+    (if (= 1 (count results))
+      (first results)
+      (merge
+       (pass-fail results)
+       {:message :test-report
+        :results results}))))
 
 (defn- inspect-test-report [value]
   [inspect-assertion (group-assertions value)])
 
 (defn get-component [value]
   (cond
-    (sp/valid? ::report value)
+    (and (sp/valid? ::report value)
+         (begin? (:type (first value))))
     inspect-test-report
 
     (and (sp/valid? ::output value)
