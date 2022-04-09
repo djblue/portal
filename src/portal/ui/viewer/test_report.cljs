@@ -17,7 +17,7 @@
 (sp/def ::test-var
   (sp/keys :req-un [:test-var/type ::var]))
 
-(sp/def :assert/type #{:pass :fail})
+(sp/def :assert/type #{:pass :fail :error})
 
 (sp/def ::assert
   (sp/keys :req-un [:assert/type]
@@ -64,7 +64,7 @@
         background (ins/get-background)
         color      (case (:type value)
                      :pass (::c/diff-add theme)
-                     :fail (::c/diff-remove theme)
+                     (:error :fail) (::c/diff-remove theme)
                      (::c/border theme))]
     [s/div
      [s/div
@@ -87,6 +87,7 @@
        [(case (:type value)
           :pass           icons/check-circle
           :fail           icons/times-circle
+          :error          icons/times-circle
           :begin-test-ns  icons/play-circle
           :end-test-ns    icons/stop-circle
           :begin-test-var icons/play-circle
@@ -120,9 +121,11 @@
 
 (def ^:private begin? #{:begin-test-ns :begin-test-var})
 
-(defn- pass-fail [rows]
+(defn- summary [rows]
   (let [counts (frequencies (map :type rows))]
-    (assoc counts :type (if (:fail counts) :fail :pass))))
+    (assoc counts :type (if (or (:error counts) (:fail counts))
+                          :fail
+                          :pass))))
 
 (def ^:private empty-vec ^{:portal.viewer/default :portal.viewer/inspector} [])
 
@@ -138,7 +141,7 @@
                             (update :results
                                     (fnil conj empty-vec)
                                     (merge
-                                     (pass-fail (:vars state))
+                                     (summary (:vars state))
                                      {:ns   test-ns
                                       :vars (:vars state)})))
         :begin-test-var (assoc  state :test-var (:var row))
@@ -147,7 +150,7 @@
                             (update :vars
                                     (fnil conj empty-vec)
                                     (merge
-                                     (pass-fail (:asserts state))
+                                     (summary (:asserts state))
                                      {:ns      test-ns
                                       :var     test-var
                                       :asserts (:asserts state)})))
@@ -166,7 +169,7 @@
     (if (= 1 (count results))
       (first results)
       (merge
-       (pass-fail results)
+       (summary results)
        {:message :test-report
         :results results}))))
 
