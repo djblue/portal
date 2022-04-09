@@ -14,7 +14,10 @@
   (extend-type js/BigInt
     IHash
     (-hash [this]
-      (hash (.toString this)))))
+      (hash (.toString this)))
+    IPrintWithWriter
+    (-pr-writer [this writer _opts]
+      (-write writer (str this "N")))))
 
 (extend-type default
   cson/ToJson
