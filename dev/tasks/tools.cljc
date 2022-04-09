@@ -32,7 +32,7 @@
   (println (a/bold-blue "=>")
            (a/bold-green (name (first args)))
            (a/bold (str/join " " (map name (rest args)))))
-  (let [opts {:inherit true :dir *cwd*}
+  (let [opts {:out *out* :dir *cwd*}
         start (now)
         ps (if-let [f (get fns (first args))]
              (f (map name (rest args)) opts)
