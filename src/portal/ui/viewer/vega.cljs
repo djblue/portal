@@ -4,7 +4,6 @@
   (:require ["react" :as react]
             ["vega-embed" :as vegaEmbed]
             [clojure.spec.alpha :as sp]
-            [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
@@ -16,21 +15,12 @@
 (sp/def ::vega
   (sp/keys :req-un [::$schema]))
 
-(defn- map->css [m]
-  (reduce-kv
-   (fn [css k v]
-     (str css
-          (str/join " " (map name k))
-          "{" (s/style->css v) "}\n"))
-   ""
-   m))
-
-(defn- vega-styles
+(defn styles
   "CSS styles applied to the vega embed elements. Allow filling most of the container."
   []
   (let [theme (theme/use-theme)]
     [:style
-     (map->css
+     (s/map->css
       {[:.vega-embed :.chart-wrapper]
        {:width "fit-content"
         :height "fit-content"}
@@ -132,7 +122,6 @@
      #js [init (.-current view) width])
 
     [s/div
-     [vega-styles]
      (when-let [title (:title value)]
        [:h1 title])
      (when-let [description (:description value)]

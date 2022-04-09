@@ -101,3 +101,12 @@
 (def th     (partial styled :th))
 (def thead  (partial styled :thead))
 (def tr     (partial styled :tr))
+
+(defn map->css [m]
+  (reduce-kv
+   (fn [css k v]
+     (str css
+          (str/join " " (map name k))
+          "{" (style->css v) "}\n"))
+   ""
+   m))

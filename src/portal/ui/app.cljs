@@ -350,6 +350,7 @@
         :font-size (:font-size theme)
         :height "100vh"
         :width "100vw"}}
+      [vega/styles]
       [scrollbars]
       [text-selection]
       [code/stylesheet]]
