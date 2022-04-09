@@ -265,6 +265,7 @@
     ::shortcuts/default #{"control" "o"}}       `open-file
    {::shortcuts/osx     #{"meta" "v"}
     ::shortcuts/default #{"control" "v"}}       `paste
+   {::shortcuts/default ["p" "s"]}              `parse-selected
    {::shortcuts/osx     #{"meta" "d"}
     ::shortcuts/default #{"control" "d"}}       `portal.extensions.pwa/open-demo})
 
@@ -920,17 +921,28 @@
    :format/transit parse-transit
    :format/text    identity})
 
-(defn paste
+(defn- parse-as
   "Paste value from clipboard"
-  [state]
-  (a/let [value    (clipboard)
-          [choice] (pick-one (keys parsers))
+  [state value]
+  (a/let [[choice] (pick-one (keys parsers))
           parse    (get parsers choice identity)]
     (state/dispatch! state
                      state/history-push
                      {:portal/value (try (parse value) (catch :default e e))})))
 
+(defn paste
+  "Paste value from clipboard"
+  [state]
+  (a/let [value (clipboard)] (parse-as state value)))
+
 (register! #'paste)
+
+(defn parse-selected
+  "Parse currently select text"
+  [state]
+  (parse-as state (.toString (.getSelection js/window))))
+
+(register! #'parse-selected)
 
 (defn- pop-up [child]
   [s/div
