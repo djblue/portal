@@ -13,7 +13,7 @@
   []
   (assert-clean)
   (npm :update)
-  (clj "-M:antq" "-m" :antq.core "--upgrade")
+  (clj "-M:antq" "-m" :antq.core "--upgrade" "--force")
   (binding [*cwd* "extension-vscode"]
     (npm :update))
   (binding [*cwd* "extension-electron"]
