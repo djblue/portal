@@ -16,7 +16,7 @@
             :file (spec/or :str string? :nil nil?)
             :line number?))
 
-(spec/def ::trace (spec/coll-of ::trace-line))
+(spec/def ::trace (spec/coll-of ::trace-line :min-count 1))
 
 (spec/def ::type symbol?)
 (spec/def ::message string?)
@@ -30,6 +30,9 @@
 (spec/def ::exception
   (spec/keys :req-un [::trace ::via]
              :opt-un [::cause]))
+
+(defn trace? [value]
+  (spec/valid? ::trace value))
 
 (defn exception? [value]
   (spec/valid? ::exception value))
@@ -48,7 +51,9 @@
           :width       (* 3 (:padding theme))
           :color       (::c/border theme)}}]
        [s/div
-        {:on-click #(swap! expanded? not)
+        {:on-click (fn [e]
+                     (swap! expanded? not)
+                     (.stopPropagation e))
          :style
          {:grid-column "2"
           :cursor      :pointer}}
@@ -92,28 +97,35 @@
         :sym  clj-name}))))
 
 (defn- inspect-stack-trace [trace]
-  (let [theme (theme/use-theme)]
+  (let [theme   (theme/use-theme)
+        options (ins/use-options)]
     [s/div
      {:style
-      {:background (ins/get-background)
-       :box-sizing :border-box
-       :padding (:padding theme)
-       :display :grid
+      {:background            (ins/get-background)
+       :box-sizing            :border-box
+       :padding               (:padding theme)
+       :display               :grid
        :grid-template-columns "auto 1fr auto"
-       :align-items :center
-       :grid-gap [0 (:padding theme)]}}
+       :align-items           :center
+       :grid-gap              [0 (:padding theme)]
+       :border-radius         (:border-radius theme)
+       :border                [1 :solid (::c/border theme)]}}
      (->> trace
           (map-indexed
            analyze-trace-item)
+          (filter
+           (fn [{:keys [clj?]}]
+             (if (:expanded? options) true clj?)))
           (partition-by :file)
           (map
            (fn [trace]
              ^{:key (hash trace)}
              [inspect-sub-trace trace])))]))
 
-(defn- inspect-via [via]
+(defn- inspect-via [value]
   (let [theme                  (theme/use-theme)
-        {:keys [type message]} (first via)]
+        {:keys [type message]} (last (:via value))
+        message                (or (:cause value) message)]
     [s/div
      {:style
       {:display         :flex
@@ -126,7 +138,7 @@
          {:font-weight :bold
           :color (::c/exception theme)}}
         message])
-     type]))
+     (pr-str (:phase value type))]))
 
 (defn inspect-exception [value]
   (let [theme     (theme/use-theme)
@@ -139,25 +151,31 @@
      [s/div
       [s/div
        {:style
-        {:color      (::c/exception theme)
+        {:display :flex
+         :color      (::c/exception theme)
          :border     [1 :solid (::c/exception theme)]
          :background (str (::c/exception theme) "22")
          :border-top-right-radius    (:border-radius theme)
          :border-top-left-radius     (:border-radius theme)
          :border-bottom-right-radius (when-not expanded? (:border-radius theme))
          :border-bottom-left-radius  (when-not expanded? (:border-radius theme))}}
-       [inspect-via (:via value)]]
+       [s/div
+        {:style
+         {:padding    (:padding theme)
+          :border-right     [1 :solid (::c/exception theme)]}}
+        [icon/terminal {:size "sm"}]]
+       [s/div
+        {:style {:flex "1"}}
+        [inspect-via value]]]
       (when expanded?
-        [s/div
-         {:style
-          {:border-left   [1 :solid (::c/border theme)]
-           :border-right  [1 :solid (::c/border theme)]
-           :border-bottom [1 :solid (::c/border theme)]
-           :border-bottom-left-radius  (:border-radius theme)
-           :border-bottom-right-radius (:border-radius theme)}}
-         [inspect-stack-trace (:trace value)]])]]))
+        [ins/inspect-map-k-v (dissoc value :cause :phase)])]]))
 
 (def viewer
   {:predicate exception?
    :component inspect-exception
-   :name :portal.viewer/ex})
+   :name      :portal.viewer/ex})
+
+(def trace-viewer
+  {:predicate trace?
+   :component inspect-stack-trace
+   :name      :portal.viewer/stack-trace})

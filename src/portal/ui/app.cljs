@@ -380,6 +380,7 @@
 
 (def viewers
   [ex/viewer
+   ex/trace-viewer
    charts/line-chart
    charts/scatter-chart
    charts/histogram-chart
