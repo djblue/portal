@@ -47,7 +47,9 @@
    {:infer-externs true
     :source-map    true
     :warnings-as-errors true}
-   :output-to "extension-electron/electron.js"
+   :output-to "extension-electron/electron-dev.js"
+   :release {:output-to "extension-electron/electron.js"
+             :compiler-options {:optimizations :simple}}
    :devtools {:after-load portal.extensions.electron/reload}}
 
   :node

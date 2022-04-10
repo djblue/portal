@@ -1,6 +1,6 @@
 {
   "name": "portal",
-  "version": "0.21.2",
+  "version": "0.23.0",
   "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.63",
@@ -13,8 +13,8 @@
   },
   "main": "./electron.js",
   "scripts": {
+    "start": "electron-forge start --app-path ./electron-dev.js",
     "prepackage": "electron-icon-builder --input=icon.png --output=./out",
-    "start": "electron-forge start",
     "make": "electron-forge make",
     "package": "electron-forge package"
   },
@@ -24,7 +24,8 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "./out/icons/mac/icon.icns"
+        "icon": "./out/icons/mac/icon.icns",
+        "ignore": ["electron-dev.js", "icon.png"]
       },
       "makers": [
         {

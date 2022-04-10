@@ -71,17 +71,6 @@
     (open (edn/read-string body))
     (.end res)))
 
-(comment
-  (reset! window (lazy-close (create-window)))
-
-  (do
-    (.loadURL @window "http://localhost:50287?afe9873b-2b99-4552-9f83-e6b95d9967b5")
-    (.showInactive @window))
-
-  (.hide @window)
-  (.showInactive @window)
-  (.close @window))
-
 (.on app "browser-window-focus"
      (fn [e]
        (.setOpacity (.-sender e) 1.0)))
