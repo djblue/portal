@@ -617,6 +617,110 @@
     :tag :out}
    {:val "[1;34m->[m [1;33m1.408 seconds[m \n\n", :tag :out}])
 
+(def exception-data
+  '{:cause "My message",
+    :via
+    [{:type clojure.lang.ExceptionInfo,
+      :at [clojure.lang.AFn applyToHelper "AFn.java" 156],
+      :message "My message",
+      :data {:my :data}}],
+    :trace
+    [[clojure.lang.AFn applyToHelper "AFn.java" 156]
+     [clojure.lang.AFn applyTo "AFn.java" 144]
+     [clojure.lang.Compiler$InvokeExpr eval "Compiler.java" 3706]
+     [clojure.lang.Compiler$MapExpr eval "Compiler.java" 3058]
+     [clojure.lang.Compiler$DefExpr eval "Compiler.java" 457]
+     [clojure.lang.Compiler eval "Compiler.java" 7186]
+     [clojure.lang.Compiler load "Compiler.java" 7640]
+     [clojure.lang.RT loadResourceScript "RT.java" 381]
+     [clojure.lang.RT loadResourceScript "RT.java" 372]
+     [clojure.lang.RT load "RT.java" 459]
+     [clojure.lang.RT load "RT.java" 424]
+     [clojure.core$load$fn__6856 invoke "core.clj" 6115]
+     [clojure.core$load invokeStatic "core.clj" 6114]
+     [clojure.core$load doInvoke "core.clj" 6098]
+     [clojure.lang.RestFn invoke "RestFn.java" 408]
+     [clojure.core$load_one invokeStatic "core.clj" 5897]
+     [clojure.core$load_one invoke "core.clj" 5892]
+     [clojure.core$load_lib$fn__6796 invoke "core.clj" 5937]
+     [clojure.core$load_lib invokeStatic "core.clj" 5936]
+     [clojure.core$load_lib doInvoke "core.clj" 5917]
+     [clojure.lang.RestFn applyTo "RestFn.java" 142]
+     [clojure.core$apply invokeStatic "core.clj" 669]
+     [clojure.core$load_libs invokeStatic "core.clj" 5974]
+     [clojure.core$load_libs doInvoke "core.clj" 5958]
+     [clojure.lang.RestFn applyTo "RestFn.java" 137]
+     [clojure.core$apply invokeStatic "core.clj" 669]
+     [clojure.core$require invokeStatic "core.clj" 5996]
+     [clojure.core$require doInvoke "core.clj" 5996]
+     [clojure.lang.RestFn invoke "RestFn.java" 408]
+     [user$eval42500 invokeStatic "NO_SOURCE_FILE" 90]
+     [user$eval42500 invoke "NO_SOURCE_FILE" 90]
+     [clojure.lang.Compiler eval "Compiler.java" 7181]
+     [clojure.lang.Compiler eval "Compiler.java" 7136]
+     [clojure.core$eval invokeStatic "core.clj" 3202]
+     [clojure.core$eval invoke "core.clj" 3198]
+     [clojure.main$repl$read_eval_print__9110$fn__9113
+      invoke
+      "main.clj"
+      437]
+     [clojure.main$repl$read_eval_print__9110 invoke "main.clj" 437]
+     [clojure.main$repl$fn__9119 invoke "main.clj" 458]
+     [clojure.main$repl invokeStatic "main.clj" 458]
+     [clojure.main$repl doInvoke "main.clj" 368]
+     [clojure.lang.RestFn invoke "RestFn.java" 805]
+     [companion.jvm$evaluate_clj$fn__40139 invoke "NO_SOURCE_FILE" 115]
+     [clojure.core$with_redefs_fn invokeStatic "core.clj" 7516]
+     [clojure.core$with_redefs_fn invoke "core.clj" 7500]
+     [companion.jvm$evaluate_clj invokeStatic "NO_SOURCE_FILE" 112]
+     [companion.jvm$evaluate_clj invoke "NO_SOURCE_FILE" 102]
+     [companion.jvm$eval37720$fn__37721 invoke "jvm.clj" 248]
+     [clojure.lang.MultiFn invoke "MultiFn.java" 229]
+     [companion.jvm$evaluate invokeStatic "jvm.clj" 424]
+     [companion.jvm$evaluate invoke "jvm.clj" 422]
+     [user$eval42498 invokeStatic "NO_SOURCE_FILE" 1308]
+     [user$eval42498 invoke "NO_SOURCE_FILE" 1308]
+     [clojure.lang.Compiler eval "Compiler.java" 7181]
+     [clojure.lang.Compiler eval "Compiler.java" 7136]
+     [clojure.core$eval invokeStatic "core.clj" 3202]
+     [clojure.core$eval invoke "core.clj" 3198]
+     [shadow.cljs.devtools.server.socket_repl$repl$fn__17976
+      invoke
+      "socket_repl.clj"
+      61]
+     [clojure.main$repl$read_eval_print__9110$fn__9113
+      invoke
+      "main.clj"
+      437]
+     [clojure.main$repl$read_eval_print__9110 invoke "main.clj" 437]
+     [clojure.main$repl$fn__9119 invoke "main.clj" 458]
+     [clojure.main$repl invokeStatic "main.clj" 458]
+     [clojure.main$repl doInvoke "main.clj" 368]
+     [clojure.lang.RestFn invoke "RestFn.java" 805]
+     [shadow.cljs.devtools.server.socket_repl$repl
+      invokeStatic
+      "socket_repl.clj"
+      28]
+     [shadow.cljs.devtools.server.socket_repl$repl
+      invoke
+      "socket_repl.clj"
+      26]
+     [shadow.cljs.devtools.server.socket_repl$connection_loop
+      invokeStatic
+      "socket_repl.clj"
+      102]
+     [shadow.cljs.devtools.server.socket_repl$connection_loop
+      invoke
+      "socket_repl.clj"
+      72]
+     [shadow.cljs.devtools.server.socket_repl$start$fn__17995$fn__17996$fn__17998
+      invoke
+      "socket_repl.clj"
+      142]
+     [clojure.lang.AFn run "AFn.java" 22]
+     [java.lang.Thread run "Thread.java" 829]],
+    :data {:my :data}})
+
 (def data-visualization
   {::vega
    {::force-directed force-directed
@@ -645,4 +749,5 @@
    ::string-data        string-data
    ::log-data           log-data
    ::test-data          test-report
-   ::prepl-data         prepl-data})
+   ::prepl-data         prepl-data
+   ::exception-data     exception-data})
