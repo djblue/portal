@@ -260,7 +260,7 @@
    ;; TODO Move to metadata of var when possible
    {::shortcuts/default ["g" "d"]}              `portal.runtime.jvm.editor/goto-definition
 
-   {::shortcuts/default ["p"]}                  `paste
+   {::shortcuts/default ["p" "p"]}              `paste
    {::shortcuts/default ["y"]}                  `copy
 
    ;; PWA
