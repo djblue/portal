@@ -39,7 +39,7 @@
              (p/process (map name args) opts))]
     (p/check ps)
     (println (format-millis (- (now) start)) "\n"))
-  nil)
+  true)
 
 (def bb     (partial sh :bb))
 (def clj    (partial sh :clojure))
