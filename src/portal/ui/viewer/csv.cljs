@@ -3,7 +3,11 @@
             [portal.ui.inspector :as ins]))
 
 (defn parse-csv [csv-string]
-  (try (js->clj (.-data (parse csv-string))) (catch :default _e ::invalid)))
+  (try
+    (with-meta
+      (js->clj (.-data (parse csv-string)))
+      {:portal.viewer/default :portal.viewer/table})
+    (catch :default _e ::invalid)))
 
 (defn csv? [value] (string? value))
 
