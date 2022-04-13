@@ -101,6 +101,11 @@
              ::previous-commands
              (take 100 (conj (remove #{entry} (::previous-commands state)) entry))))))
 
+(defn- push-viewer [state {:keys [context] :portal/keys [value]}]
+  (if-let [viewer (get-in state [:selected-viewers (get-location context)])]
+    (assoc-in state [:selected-viewers {:stable-path [] :value value}] viewer)
+    state))
+
 (defn history-push [state {:portal/keys [key value f] :as entry}]
   (-> (push-command state entry)
       (assoc
@@ -108,7 +113,8 @@
        :portal/key   key
        :portal/f     f
        :portal/value value)
-      (dissoc :portal/next-state :selected)))
+      (dissoc :portal/next-state :selected)
+      (push-viewer entry)))
 
 (defn toggle-expand-1 [state context]
   (let [location (get-location context)
@@ -121,7 +127,7 @@
   (reduce toggle-expand-1 state (:selected state)))
 
 (defn focus-selected [state context]
-  (history-push state {:portal/value (:value context)}))
+  (history-push state {:portal/value (:value context) :context context}))
 
 (defn select-root [state]
   (if-let [root (select/get-root)]
@@ -222,7 +228,7 @@
         key (when (or (map? collection) (vector? collection)) key)]
     (when collection
       (a/let [value (invoke 'clojure.datafy/nav collection key value)]
-        (history-push state {:portal/value value})))))
+        (history-push state {:portal/value value :context context})))))
 
 (defn get-value [state default]
   (:portal/value state default))
