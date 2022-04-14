@@ -17,7 +17,8 @@
    :extends portal.extensions.intellij.WithLoader
    :implements [com.intellij.ide.ui.UISettingsListener
                 com.intellij.openapi.editor.colors.EditorColorsListener
-                com.intellij.openapi.wm.ToolWindowFactory]
+                com.intellij.openapi.wm.ToolWindowFactory
+                com.intellij.openapi.project.DumbAware]
    :name portal.extensions.intellij.Factory))
 
 ; instances are indexed per project, each instance will contain the keys
