@@ -11,6 +11,11 @@ intellij {
     version = '2021.3'
 }
 
+patchPluginXml {
+    sinceBuild = '191.*'
+    untilBuild = '221.*'
+}
+
 publishPlugin {
   token = System.getenv("JETBRAINS_TOKEN")
 }
