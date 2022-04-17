@@ -31,17 +31,24 @@
 (def clojure.lang.Var (type #'exists))
 (def clojure.lang.Namespace (type *ns*))
 
+(def ^:private mapping
+  {:clojure.error/column :column
+   :clojure.error/line   :line
+   :clojure.error/source :file})
+
 (extend-protocol IResolve
   clojure.lang.PersistentHashMap
   (resolve [m]
-    (when-let [file (or (:file m) (:ns m))]
-      (when-let [resolved (resolve file)]
-        (merge m resolved))))
+    (let [m (set/rename-keys m mapping)]
+      (when-let [file (or (:file m) (:ns m))]
+        (when-let [resolved (resolve file)]
+          (merge m resolved)))))
   clojure.lang.PersistentArrayMap
   (resolve [m]
-    (when-let [file (or (:file m) (:ns m))]
-      (when-let [resolved (resolve file)]
-        (merge m resolved))))
+    (let [m (set/rename-keys m mapping)]
+      (when-let [file (or (:file m) (:ns m))]
+        (when-let [resolved (resolve file)]
+          (merge m resolved)))))
   clojure.lang.Var
   (resolve [v]
     (let [m (meta v)]
@@ -106,16 +113,11 @@
 (defn can-goto [input]
   (and (satisfies? IResolve input) (resolve input)))
 
-(def ^:private mapping
-  {:clojure.error/column :column
-   :clojure.error/line   :line
-   :clojure.error/source :file})
-
 (defn goto-definition
   "Goto the definition of a value in an editor."
   {:predicate can-goto :command true}
   [input]
-  (when-let [location (can-goto (set/rename-keys input mapping))]
+  (when-let [location (can-goto input)]
     (let [{:keys [options]} rt/*session*]
       (-open-editor
        (assoc location
