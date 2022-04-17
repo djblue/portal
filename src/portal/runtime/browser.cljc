@@ -18,6 +18,7 @@
   (fs/find-bin
    (concat
     ["/Applications/Google Chrome.app/Contents/MacOS"
+     "/Program Files (x86)/Google/Chrome/Application"
      "/mnt/c/Program Files (x86)/Google/Chrome/Application"]
     (fs/paths))
    ["chrome" "chrome.exe" "google-chrome-stable" "chromium" "Google Chrome"]))
