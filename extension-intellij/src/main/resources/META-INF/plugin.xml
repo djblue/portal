@@ -42,7 +42,6 @@
     </p>
 
     ]]></description>
-    <idea-version since-build="192.5118"/>
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
