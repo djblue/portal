@@ -71,7 +71,8 @@
   (let [dir  (.getCanonicalPath (.getBaseDir project))
         file (io/file dir ".portal" "intellij.edn")]
     (.mkdirs (.getParentFile file))
-    (spit file (pr-str config))))
+    (spit file (pr-str config))
+    (.deleteOnExit file)))
 
 (defn start [^Project project]
   (swap! instances update project
