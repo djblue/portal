@@ -88,10 +88,11 @@
   (when-not @init?
     (a/let [_      (.whenReady app)
             info   (p/start {})
-            folder (fs/join (fs/home) ".portal")]
+            folder (fs/join (fs/home) ".portal")
+            config (fs/join folder "electron.edn")]
       (fs/mkdir folder)
-      (fs/spit (fs/join folder "electron.edn")
-               (pr-str (select-keys info [:host :port]))))))
+      (fs/spit config (pr-str (select-keys info [:host :port])))
+      (fs/rm-exit config))))
 
 (-main)
 
