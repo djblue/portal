@@ -82,11 +82,12 @@
   (reset! context ctx)
   (a/let [workspace (get-workspace-folder)
           folder    (fs/join workspace ".portal")
-          info      (p/start {})]
+          info      (p/start {})
+          config    (fs/join folder "vs-code.edn")]
     (set-status workspace)
     (fs/mkdir folder)
-    (fs/spit (fs/join folder "vs-code.edn")
-             (pr-str (select-keys info [:host :port]))))
+    (fs/spit config (pr-str (select-keys info [:host :port])))
+    (fs/rm-exit config))
   (add-tap #'p/submit)
   (doseq [[command f] (get-commands)]
     (.push (.-subscriptions ctx)

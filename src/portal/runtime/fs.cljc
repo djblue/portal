@@ -73,3 +73,10 @@
              (doseq [child children] (rm child))
              (io/delete-file path))
      :cljs (fs/rmSync path #js {:recursive true})))
+
+(defn rm-exit [path]
+  #?(:clj  (.deleteOnExit (io/file path))
+     :cljs (let [delete #(rm path)]
+             (.on js/process "exit"    delete)
+             (.on js/process "SIGINT"  delete)
+             (.on js/process "SIGTERM" delete))))
