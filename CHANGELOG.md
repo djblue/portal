@@ -1,3 +1,35 @@
+## 0.24.0 - 2022-04-22
+
+### Extensions
+
+- Remove `~/.portal/electron.edn` on process exit 05c6824
+- Remove `.portal/intellij.edn` on process exit e23adfe
+- Remove `.portal/vs-code.edn` on process exit 09db810
+- IJ Plugin - Bumps until version to run through 2022 (#121) 0458d1c - Thanks @coyotesqrl!
+- IJ Plugin - Implements the `DumbAware` marker interface so plugin window works
+  during indexing (#120) fb5c767  - Thanks @coyotesqrl!
+- Fix electron destroy edge case 8fe5b76
+
+### Viewers
+
+- Initial `test-report` viewer e59838a
+- Initial cut of prepl viewer 50a31e3
+  - Reverse scroll priority for prepl term view 9835f18
+- Exception viewer improvements 25ae988
+- Improve map grid layout, prioritize vals over keys 4fe4da0
+
+### Improvements
+
+- Support app mode in windows 026a8ea
+- Capture selected-viewer on nav / focus e8cc2ff
+- Select table viewer by default for csv viewer a460e75
+- Support :clojure.error keys for goto-definition 75b4369
+- Add `parse-selected` command e88f360
+- Only load vega styles once at root 7841c45
+- Add print writer for `js/BigInt` fea5327
+- Search in src / test for files b4909f2
+- Improve error reporting for extensions e822df3
+
 ## 0.23.0 - 2022-04-05
 
 ### Additions
