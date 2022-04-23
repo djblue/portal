@@ -12,7 +12,7 @@ A clojure tool to navigate through your data.
 The portal UI can be used to inspect values of various shapes and sizes. The UX
 will probably evolve over time and user feedback is welcome!
 
-For an in-depth explanation of the UI, you can jump to the [UI](./doc/ui/index.md) docs.
+For an in-depth explanation of the UI, you can jump to the [UI](https://cljdoc.org/d/djblue/portal/0.24.0/doc/ui-concepts) docs.
 
 ## Demo
 
@@ -112,4 +112,4 @@ function with the following options:
 | `:app`          | Launch as separate window  | true                 |
 | `:window-title` | Custom title for UI window | "portal"             |
 
-For more documentation, take a look through the [docs](./doc).
+For more documentation, take a look through the [docs](https://cljdoc.org/d/djblue/portal/0.24.0/doc/ui-concepts).
