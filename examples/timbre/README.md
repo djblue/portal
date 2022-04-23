@@ -3,6 +3,8 @@
 If you are a [com.taoensso/timbre](https://github.com/ptaoussanis/timbre) user,
 this guide will help you setup a portal instance dedicated to your timbre logs.
 
+<img width="1209" alt="Timbre Log Viewer" src="https://user-images.githubusercontent.com/1986211/164835347-8cc69359-83cd-42e4-9e19-938155767118.png">
+
 ## Setup
 
 To get started, you need the following namespaces:
@@ -83,3 +85,4 @@ to differentiate clj from cljs logs:
   (log/info "my cljs log"))
 ```
 
+<img width="1209" alt="Timbre CLJS Log Viewer" src="https://user-images.githubusercontent.com/1986211/164836119-11695d5f-672f-444c-a908-c0f157056f66.png">
