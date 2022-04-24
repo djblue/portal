@@ -1,36 +1,49 @@
 (ns portal.setup
-  (:require [clojure.core.protocols :refer [Datafiable]]
-            [examples.data :refer [data]]
+  (:require [examples.data :refer [data]]
             [portal.client.web :as client]
             [portal.console :as log]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [portal.web :as p]))
 
-(def submit (partial client/submit {:port js/window.location.port}))
-
-;; (add-tap #'submit)
-;; (add-tap #'p/submit)
-
-(extend-protocol Datafiable
-  js/Promise
-  (datafy [this] (.then this identity))
-
-  js/Error
-  (datafy [this]
-    {:name     (.-name this)
-     :message  (.-message this)
-     :stack    (.-stack this)}))
+(def remote-submit (partial client/submit {:port js/window.location.port}))
 
 (defonce tap-list (atom (list)))
 
-(defn tap-value [value]
+(defn dashboard-submit [value]
   (swap! tap-list (fn [taps] (take 10 (conj taps value)))))
 (defn ^:command clear-taps [] (swap! tap-list empty))
 (defn ^:command clear-rpc [] (swap! rpc/log empty))
 
-(add-tap #'tap-value)
-(add-tap #'prn)
+(defn submit [value]
+  (remote-submit value)
+  (dashboard-submit value))
+
+(defn error->data [ex]
+  (merge
+   (when-let [data (.-data ex)]
+     {:data data})
+   {:cause (.-message ex)
+    :via   [{:type    (symbol (.-name (type ex)))
+             :message (.-message ex)}]
+    :stack (.-stack ex)}))
+
+(defn async-submit [value]
+  (cond
+    (instance? js/Promise value)
+    (-> value
+        (.then async-submit)
+        (.catch (fn [error]
+                  (async-submit error)
+                  (throw error))))
+
+    (instance? js/Error value)
+    (submit (error->data value))
+
+    :else
+    (submit value)))
+
+(add-tap #'async-submit)
 
 (p/register! #'clear-taps)
 (p/register! #'clear-rpc)
@@ -57,6 +70,8 @@
     {:portal.viewer/default :portal.viewer/hiccup}))
 
 (p/set-defaults! {:mode :dev :value (dashboard)})
+
+(.addEventListener js/window "error" #(tap> (.-error %)))
 
 (comment
   (def portal (p/open))

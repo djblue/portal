@@ -38,7 +38,9 @@ tap target, like the following:
 (defn async-submit [value]
   (if-not (instance? js/Promise value)
     (p/submit value)
-    (.then value p/submit)))
+    (-> value
+        (.then p/submit)
+        (.catch p/submit))))
 
 (add-tap #'async-submit)
 
