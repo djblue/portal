@@ -704,14 +704,23 @@
     "long"      inspect-long
     inspect-object))
 
-(defn get-info [state context]
+(defn- get-info [state theme context]
   (let [{:keys [search-text expanded?]} @state
-        location (state/get-location context)]
-    {:selected  (state/selected @state context)
-     :expanded? (get expanded? location)
-     :viewer    (get-viewer state context)
-     :value     (f/filter-value (:value context)
-                                (get search-text location ""))}))
+        location       (state/get-location context)
+        viewer         (get-viewer state context)
+        depth          (:depth context)
+        value          (:value context)
+        default-expand (or (= depth 1)
+                           (and (coll? value)
+                                (= (:name viewer) :portal.viewer/inspector)
+                                (<= depth (:max-depth theme))))
+        expanded?      (if-some [expanded? (get expanded? location)] expanded? default-expand)]
+    {:selected       (state/selected @state context)
+     :expanded?      expanded?
+     :viewer         viewer
+     :value          (f/filter-value (:value context)
+                                     (get search-text location ""))
+     :default-expand default-expand}))
 
 (defn inspector [value]
   (let [ref            (react/useRef nil)
@@ -721,22 +730,16 @@
                            (assoc :value value)
                            (update :depth inc))
         location       (state/get-location context)
-        {:keys [value viewer selected expanded?] :as options}
-        @(r/track get-info state context)
         theme          (theme/use-theme)
-        depth          (use-depth)
-        default-expand (and (coll? value)
-                            (= (:name viewer) :portal.viewer/inspector)
-                            (<= depth (:max-depth theme)))
-        expanded?      (if-not (nil? expanded?) expanded? default-expand)
-        preview?       (not expanded?)
+        {:keys [value viewer selected default-expand expanded?] :as options}
+        @(r/track get-info state theme context)
         type           (get-value-type value)
         component      (or
                         (when-not (= (:name viewer) :portal.viewer/inspector)
                           (:component viewer))
-                        (if preview?
-                          (get-preview-component type)
-                          (get-inspect-component type)))]
+                        (if expanded?
+                          (get-inspect-component type)
+                          (get-preview-component type)))]
     (select/use-register-context context viewer)
     (react/useEffect
      (fn []
@@ -798,7 +801,7 @@
                           [1 :solid (get theme (nth theme/order selected))]
                           [1 :solid "rgba(0,0,0,0)"])
          :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
-         :background    (let [bg (get-background (inc depth))]
+         :background    (let [bg (get-background (:depth context))]
                           (when selected bg))}})
       [:> error-boundary
        [with-options options [component value]]]]]))
