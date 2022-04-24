@@ -27,7 +27,7 @@ perfect development environment!
 
 If you would like to automatically datafy all tapped values, try the following:
 
-```
+```clojure
 (require '[clojure.datafy :as d])
 (require '[portal.api :as p])
 
