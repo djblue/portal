@@ -11,8 +11,9 @@
    ["Filtering" {:file "doc/ui/filtering.md"}]
    ["Themes" {:file "doc/ui/themes.md"}]]
   ["Remote API" {:file "doc/remote-api.md"}]
-  ["Setup Guides"
-   ["Timbre" {:file "examples/timbre/README.md"}]]
+  ["Guides"
+   ["Timbre" {:file "examples/timbre/README.md"}]
+   ["JavaScript Promises" {:file "doc/promises.md"}]]
   ["Editors"
    ["Emacs"    {:file "doc/editors/emacs.md"}]
    ["VS Code"  {:file "doc/editors/vs-code.md"}]
