@@ -21,3 +21,18 @@ An interesting use case for nav is allowing users to nav into keywords to
 produce documentation for that keyword. This really highlights the power
 behind datafy and nav. It becomes very easy to tailor a browser into the
 perfect development environment!
+
+
+## Tips
+
+If you would like to automatically datafy all tapped values, try the following:
+
+```
+(require '[clojure.datafy :as d])
+(require '[portal.api :as p])
+
+(def submit (comp p/submit d/datafy))
+(add-tap #'submit)
+
+(tap> *ns*)
+```
