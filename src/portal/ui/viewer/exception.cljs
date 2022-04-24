@@ -28,8 +28,8 @@
               :opt-un [::message ::at])))
 
 (spec/def ::exception
-  (spec/keys :req-un [::trace ::via]
-             :opt-un [::cause]))
+  (spec/keys :req-un [::via]
+             :opt-un [::trace ::cause]))
 
 (defn trace? [value]
   (spec/valid? ::trace value))
