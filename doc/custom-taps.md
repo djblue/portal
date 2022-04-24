@@ -55,3 +55,5 @@ Finally, you can wire all this up into Portal with the following:
 ```
 
 Which looks something like:
+
+![Table Tap List](https://user-images.githubusercontent.com/1986211/164960811-b7ebfa17-05ab-4b6b-be5f-f3b9b0f742d7.png)
