@@ -1,5 +1,7 @@
 # Commands
 
+![portal command palette](https://user-images.githubusercontent.com/1986211/165007466-005c39ee-d4d2-4599-a58e-ad03445b22ec.png)
+
 The bottom-right yellow button will open the command palette. Commands can have
 a `:predicate` function like viewers, so only relevant commands will be visible
 which is based on the currently selected value. They will be sorted
