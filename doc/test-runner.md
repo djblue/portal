@@ -42,7 +42,7 @@ With the code above, you should get something like:
 ![portal test runner](https://user-images.githubusercontent.com/1986211/165010389-96c610a4-7963-4343-863c-4a68fafdf40f.png)
 
 Although this example is trivial, the main advantage to getting test result out
-as data is particularly handing we dealing with large values in a test
+as data is particularly useful when dealing with large values in a test
 assertion.
 
 ### Tip
