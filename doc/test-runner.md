@@ -39,7 +39,7 @@ and send them directly to Portal.
 
 With the code above, you should get something like:
 
-
+![portal test runner](https://user-images.githubusercontent.com/1986211/165010389-96c610a4-7963-4343-863c-4a68fafdf40f.png)
 
 Although this example is trivial, the main advantage to getting test result out
 as data is particularly handing we dealing with large values in a test
@@ -47,5 +47,7 @@ assertion.
 
 ### Tip
 
-You can select test output values and diff them via the
+You can [select](./ui/selection.md) two test output values and diff them via the
 [`lambdaisland.deep-diff2/diff` command](./ui/commands.md)
+
+![portal test runner diff](https://user-images.githubusercontent.com/1986211/165010558-d5a86019-9a8b-4259-b808-dc0746853586.png)
