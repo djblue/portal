@@ -14,7 +14,8 @@
   ["Guides"
    ["Timbre" {:file "examples/timbre/README.md"}]
    ["JavaScript Promises" {:file "doc/promises.md"}]
-   ["Custom Tap List" {:file "doc/custom-taps.md"}]]
+   ["Custom Tap List" {:file "doc/custom-taps.md"}]
+   ["Test Runner" {:file "doc/test-runner.md"}]]
   ["Editors"
    ["Emacs"    {:file "doc/editors/emacs.md"}]
    ["VS Code"  {:file "doc/editors/vs-code.md"}]
