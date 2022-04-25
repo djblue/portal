@@ -38,7 +38,8 @@
        [:.ansi-bold]       {:font-weight :bold}})]))
 
 (defn inspect-prepl [value]
-  (let [theme (theme/use-theme)]
+  (let [theme (theme/use-theme)
+        opts  (ins/use-options)]
     [s/div
      {:style
       {:background    (ins/get-background)
@@ -58,7 +59,7 @@
       {:style
        {:margin         0
         :display        :flex
-        :max-height     "24rem"
+        :max-height     (when-not (:expanded? opts) "24rem")
         :overflow       :auto
         :flex-direction :column-reverse
         :white-space    :pre-wrap
