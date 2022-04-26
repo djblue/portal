@@ -36,7 +36,7 @@ provide your own mapping between errors and data.
 
 Here is one such mapping and submit function:
 
-```
+```clojure
 (defn error->data [ex]
   (merge
    (when-let [data (.-data ex)]
