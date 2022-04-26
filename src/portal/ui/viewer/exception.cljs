@@ -6,6 +6,7 @@
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
+            [portal.ui.viewer.log :as log]
             [reagent.core :as r]))
 
 (spec/def ::cause string?)
@@ -130,15 +131,30 @@
      {:style
       {:display         :flex
        :justify-content :space-between
-       :box-sizing      :border-box
-       :padding         (:padding theme)}}
+       :align-items     :center
+       :box-sizing      :border-box}}
      (when message
        [s/div
         {:style
          {:font-weight :bold
-          :color (::c/exception theme)}}
+          :color (::c/exception theme)
+          :padding [(:padding theme) (* 2 (:padding theme))]}}
         message])
-     (pr-str (:phase value type))]))
+     [s/div
+      {:style {:display     :flex
+               :align-items :center}}
+      [s/div
+       {:style {:padding [0 (* 2 (:padding theme))]}}
+       (pr-str (:phase value type))]
+      (when-let [value (:runtime value)]
+        [s/div
+         {:style {:padding     (:padding theme)
+                  :display     :flex
+                  :align-items :center
+                  :box-sizing  :border-box
+                  :color       (::c/exception theme)
+                  :border-left [1 :solid (::c/exception theme)]}}
+         [log/icon value (::c/exception theme)]])]]))
 
 (defn inspect-exception [value]
   (let [theme     (theme/use-theme)
@@ -161,14 +177,16 @@
          :border-bottom-left-radius  (when-not expanded? (:border-radius theme))}}
        [s/div
         {:style
-         {:padding    (:padding theme)
-          :border-right     [1 :solid (::c/exception theme)]}}
+         {:display      :flex
+          :align-items  :center
+          :padding      [0 (:padding theme)]
+          :border-right [1 :solid (::c/exception theme)]}}
         [icon/terminal {:size "sm"}]]
        [s/div
         {:style {:flex "1"}}
         [inspect-via value]]]
       (when expanded?
-        [ins/inspect-map-k-v (dissoc value :cause :phase)])]]))
+        [ins/inspect-map-k-v (dissoc value :cause :phase :runtime)])]]))
 
 (def viewer
   {:predicate exception?

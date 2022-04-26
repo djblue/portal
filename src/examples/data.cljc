@@ -618,7 +618,8 @@
    {:val "[1;34m->[m [1;33m1.408 seconds[m \n\n", :tag :out}])
 
 (def exception-data
-  '{:cause "My message",
+  '{:runtime :clj
+    :cause "My message",
     :via
     [{:type clojure.lang.ExceptionInfo,
       :at [clojure.lang.AFn applyToHelper "AFn.java" 156],

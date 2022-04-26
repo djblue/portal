@@ -25,12 +25,12 @@
         (.getPropertyValue var))
     color))
 
-(defn- theme-svg [svg theme]
-  (let [package (resolve-color (::c/package theme))]
+(defn- theme-svg [svg color]
+  (let [color (resolve-color color)]
     (doseq [el (.querySelectorAll svg "[fill]")]
-      (.setAttribute el "fill" package))
+      (.setAttribute el "fill" color))
     (doseq [el (.querySelectorAll svg "[stroke]")]
-      (.setAttribute el "stroke" package)))
+      (.setAttribute el "stroke" color)))
   svg)
 
 (def runtime->logo
@@ -39,14 +39,13 @@
    :bb     (inline "runtime/babashka.svg")
    :portal (inline "runtime/portal.svg")})
 
-(defn- icon [value]
-  (let [theme (theme/use-theme)]
-    [s/img
-     {:style
-      {:height 22 :width 22}
-      :src (str
-            "data:image/svg+xml;base64,"
-            (-> value runtime->logo parse (theme-svg theme) stringify js/btoa))}]))
+(defn icon [value color]
+  [s/img
+   {:style
+    {:height 22 :width 22}
+    :src (str
+          "data:image/svg+xml;base64,"
+          (-> value runtime->logo parse (theme-svg color) stringify js/btoa))}])
 
 (def ^:private levels
   [:trace :debug :info :warn :error :fatal :report])
@@ -145,7 +144,7 @@
             :border-top-right-radius    (:border-radius theme)
             :border-bottom-right-radius (when-not expanded? (:border-radius theme))}
            border)}
-         [icon runtime]])]
+         [icon runtime (::c/package theme)]])]
 
      (when (:expanded? options)
        [ins/inspect-map-k-v (dissoc log :level :result)])]))
