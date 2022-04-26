@@ -1,5 +1,7 @@
 # Exceptions
 
+![portal clojure exception viewer](https://user-images.githubusercontent.com/1986211/165203608-628715bc-7ed4-4e48-9002-08048137abb6.png)
+
 Raw exception objects show up like any other object in Portal, like it would be
 printed at the REPL.
 
@@ -57,3 +59,7 @@ Here is one such mapping and submit function:
 
 (tap> (ex-info "My Error!!!" {:my :data}))
 ```
+
+And with that you get the following:
+
+![portal clojurescript exception viewer](https://user-images.githubusercontent.com/1986211/165203690-317d148b-962f-4579-a627-c187b7ae3a3e.png)
