@@ -12,6 +12,7 @@
    ["Themes" {:file "doc/ui/themes.md"}]]
   ["Remote API" {:file "doc/remote-api.md"}]
   ["Guides"
+   ["Exceptions" {:file "doc/exceptions.md"}]
    ["Timbre" {:file "examples/timbre/README.md"}]
    ["JavaScript Promises" {:file "doc/promises.md"}]
    ["Custom Tap List" {:file "doc/custom-taps.md"}]
