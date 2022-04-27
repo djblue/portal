@@ -12,7 +12,7 @@ A clojure tool to navigate through your data.
 The portal UI can be used to inspect values of various shapes and sizes. The UX
 will probably evolve over time and user feedback is welcome!
 
-For an in-depth explanation of the UI, you can jump to the [UI](https://cljdoc.org/d/djblue/portal/0.24.0/doc/ui-concepts) docs.
+For an in-depth explanation of the UI, you can jump to the [UI](https://cljdoc.org/d/djblue/portal/0.25.0/doc/ui-concepts) docs.
 
 ## Demo
 
@@ -27,13 +27,13 @@ To get an overview of the Portal UI and workflow, checkout the following recordi
 To start a repl with portal, run the **clojure >= 1.10.0** cli with:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.24.0"}}}'
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.25.0"}}}'
 ```
 
 or for a **web** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.24.0"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.25.0"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main
 ```
@@ -41,7 +41,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.24.0"}
 or for a **node** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.24.0"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.25.0"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main -re node
 ```
@@ -49,7 +49,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.24.0"}
 or for a **babashka >=0.2.4** repl, do:
 
 ```bash
-bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.24.0"}}}'`
+bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.25.0"}}}'`
 ```
 
 or for examples on how to integrate portal into an existing project, look
@@ -112,4 +112,4 @@ function with the following options:
 | `:app`          | Launch as separate window  | true                 |
 | `:window-title` | Custom title for UI window | "portal"             |
 
-For more documentation, take a look through the [docs](https://cljdoc.org/d/djblue/portal/0.24.0/doc/ui-concepts).
+For more documentation, take a look through the [docs](https://cljdoc.org/d/djblue/portal/0.25.0/doc/ui-concepts).

@@ -1,3 +1,27 @@
+## 0.25.0 - 2022-04-27
+
+- Allow `:runtime` to be specified for exceptions c3fdb55
+- No `:max-height` on prepl viewer when root value 35b7cd4
+- Default expand root values a2b300a
+- Loosen up exception spec 9def199
+- Improve test-report `:message` rendering 8bc77bd
+
+### IntelliJ Extension Fixes
+
+- Fix hidden portal window in IntelliJ on Linux. (#122) a316959
+  - Thanks @Xceno!
+- Update IntelliJ version compatibility range a432554
+
+### Documentation
+
+- Add exception guide 0958e90
+- Test runner docs 311e47e
+- Update theme docs ec37c6d
+- Auto datafy values doc tip 2daf1fb
+- Custom tap list doc 84f9b98
+- JavaScript promise docs 92f36b2
+- Add timbre docs 0afc062
+
 ## 0.24.0 - 2022-04-22
 
 ### Extensions

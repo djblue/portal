@@ -1,6 +1,6 @@
 {
   "name": "portal",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "description": "A clojure tool to navigate through your data.",
   "icon": "icon.png",
   "main": "vs-code.js",
