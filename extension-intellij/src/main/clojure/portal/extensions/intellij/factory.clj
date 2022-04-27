@@ -106,4 +106,4 @@
 
 (defn -createToolWindowContent [_this ^Project project ^ToolWindow window]
   (let [component (.getComponent window)]
-    (.add (.getParent component) (get-window project))))
+    (.add component (get-window project))))
