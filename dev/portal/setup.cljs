@@ -72,12 +72,20 @@
 
 (p/set-defaults! {:mode :dev :value (dashboard)})
 
-(.addEventListener js/window "error" #(tap> (.-error %)))
+(defn- error-handler [event]
+  (tap> (or (.-error event) (.-reason event))))
+
+(.addEventListener js/window "error" error-handler)
+(.addEventListener js/window "unhandledrejection" error-handler)
 
 (comment
   (def portal (p/open))
   (def portal (p/open {:mode :dev :value (dashboard)}))
   (def portal (p/open {:mode :dev :value state/state}))
+
+  (def ex (ex-info "error" {}))
+  (js/Promise.reject ex)
+  (js/setTimeout #(throw ex) 0)
 
   (-> @portal)
   (tap> :hi)
