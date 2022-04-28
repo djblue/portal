@@ -130,10 +130,11 @@
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/clear
    (fn [message send!]
-     (state/dispatch! state/state state/clear)
-     (reset! rt/current-values {})
-     (send! {:op :portal.rpc/response
-             :portal.rpc/id (:portal.rpc/id message)}))
+     (a/do
+       (state/dispatch! state/state state/clear)
+       (reset! rt/current-values {})
+       (send! {:op :portal.rpc/response
+               :portal.rpc/id (:portal.rpc/id message)})))
    :portal.rpc/push-state
    (fn [message send!]
      (state/dispatch! state/state state/history-push {:portal/value (:state message)})
