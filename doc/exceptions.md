@@ -83,3 +83,15 @@ Similarly for node, the following should work:
 (.on js/process "unhandledRejection" tap>)
 (.on js/process "uncaughtException" tap>)
 ```
+
+Similarly for the JVM, the following should work:
+
+```clojure
+(Thread/setDefaultUncaughtExceptionHandler
+ (reify Thread$UncaughtExceptionHandler
+   (uncaughtException [_this t e]
+     (tap> e))))
+```
+
+However, there is an issues with futures which is explained in this
+[article](https://stuartsierra.com/2015/05/27/clojure-uncaught-exceptions).
