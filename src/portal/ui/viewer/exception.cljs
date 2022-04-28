@@ -133,19 +133,21 @@
        :justify-content :space-between
        :align-items     :center
        :box-sizing      :border-box}}
-     (when message
-       [s/div
-        {:style
-         {:font-weight :bold
-          :color (::c/exception theme)
-          :padding [(:padding theme) (* 2 (:padding theme))]}}
-        message])
      [s/div
-      {:style {:display     :flex
-               :align-items :center}}
+      {:style
+       {:font-weight :bold
+        :color (::c/exception theme)
+        :padding [(:padding theme) (* 2 (:padding theme))]}}
+      (if message
+        message
+        (pr-str (:phase value type)))]
+     [s/div
+      {:style {:display         :flex
+               :align-items     :center
+               :justify-content :space-between}}
       [s/div
-       {:style {:padding [0 (* 2 (:padding theme))]}}
-       (pr-str (:phase value type))]
+       {:style {:padding [(:padding theme) (* 2 (:padding theme))]}}
+       (when message (pr-str (:phase value type)))]
       (when-let [value (:runtime value)]
         [s/div
          {:style {:padding     (:padding theme)
