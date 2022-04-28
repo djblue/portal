@@ -198,7 +198,7 @@
                  (reset! errors (take 5 (conj @errors error))))
                (if-not error
                  return
-                 (throw (ex-info "invoke exception" (clj->js error))))))))
+                 (throw (ex-info "invoke exception" error)))))))
 
 (defonce value-cache (r/atom {}))
 
