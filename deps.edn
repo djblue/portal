@@ -23,8 +23,8 @@
   {:extra-deps
    {hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.0.108"}
-    markdown-clj/markdown-clj {:mvn/version "1.11.0"}
-    org.babashka/sci          {:mvn/version "0.3.4"}
+    markdown-clj/markdown-clj {:mvn/version "1.11.1"}
+    org.babashka/sci          {:mvn/version "0.3.5"}
     reagent/reagent           {:mvn/version "1.1.1"}}}
   :shadow
   {:extra-deps
@@ -32,8 +32,8 @@
   :build
   {:extra-paths ["dev"]
    :ns-default  tasks.build
-   :deps        {babashka/babashka {:mvn/version "0.8.0"}
-                 babashka/fs       {:mvn/version "0.1.4"}}}
+   :deps        {babashka/babashka {:mvn/version "0.8.1"}
+                 babashka/fs       {:mvn/version "0.1.6"}}}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
    :exec-fn      deps-deploy.deps-deploy/deploy}
@@ -41,7 +41,7 @@
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts  ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.04.08"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.04.25"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.8.0"}}}
