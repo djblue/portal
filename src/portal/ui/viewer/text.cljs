@@ -11,16 +11,18 @@
   (let [theme    (theme/use-theme)
         state    (state/use-state)
         context  (ins/use-context)
-        location (state/get-location context)]
+        location (state/get-location context)
+        opts     (ins/use-options)]
     [s/div
      {:style
       {:overflow :auto
-       :background (::c/background2 theme)
+       :background (ins/get-background)
        :padding (:padding theme)
        :box-sizing :border-box
        :cursor :text
        :border-radius (:border-radius theme)
-       :border [1 :solid (::c/border theme)]}}
+       :border [1 :solid (::c/border theme)]
+       :max-height (when-not (:expanded? opts) "24rem")}}
      [s/table
       [s/tbody
        [l/lazy-seq
@@ -50,7 +52,7 @@
               {:style
                {:color (::c/text theme)
                 :font-size (:font-size theme)}}
-              [:pre {:style {:margin 0}} line-content]]])))
+              [:pre {:style {:margin 0 :white-space :pre-wrap}} line-content]]])))
         {:default-take 100 :step 100}]]]]))
 
 (def viewer
