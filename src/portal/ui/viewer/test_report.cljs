@@ -33,16 +33,28 @@
 (sp/def ::summary
   (sp/keys :req-un [:summary/type ::pass ::fail ::error ::test]))
 
+(sp/def :other/type keyword?)
+
+(sp/def ::other
+  (sp/keys :req-un [:other/type]))
+
+(sp/def ::type
+  (sp/or :ns      :test-ns/type
+         :var     :test-var/type
+         :assert  :assert/type
+         :summary :summary/type))
+
 (sp/def ::output
   (sp/or :ns      ::test-ns
          :var     ::test-var
          :assert  ::assert
-         :summary ::summary))
+         :summary ::summary
+         :other   ::other))
 
 (sp/def ::report
   (sp/coll-of ::output :min-count 1))
 
-(defn- label [{:keys [message] :as value}]
+(defn- label [{:keys [type message] :as value}]
   [s/div
    {:style {:flex "1"}}
    [ins/with-key
@@ -50,7 +62,9 @@
     [select/with-position
      {:row -1 :column 0}
      [ins/inspector
-      (or (if-not (coll? message)
+      (or (when-not (sp/valid? ::type type)
+            type)
+          (if-not (coll? message)
             message
             (with-meta
               message
@@ -100,7 +114,7 @@
           :begin-test-var icons/play-circle
           :end-test-var   icons/stop-circle
           :summary        icons/info-circle
-          :<>)
+          icons/info-circle)
         {:style {:color background}}]]
       [s/div
        {:style
@@ -161,13 +175,20 @@
                                      {:ns      test-ns
                                       :var     test-var
                                       :asserts (:asserts state)})))
+        (:pass :fail :error)
         (update
          state
          :asserts
          (fnil conj empty-vec)
          (cond-> row
            test-ns  (assoc :ns test-ns)
-           test-var (assoc :var test-var)))))
+           test-var (assoc :var test-var)))
+
+        (update-in
+         state
+         [:asserts (dec (count (:asserts state)))]
+         merge
+         (dissoc row :type))))
     {:results empty-vec}
     value)))
 
