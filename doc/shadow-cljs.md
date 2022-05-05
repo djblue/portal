@@ -12,14 +12,14 @@ browser, but shadow-cljs supports other JavaScript environments.
 
 This first question you need to answer is, do you want Portal hosted by the web
 page itself or do you want to send values to a remote instance using the
-[remote-api](doc/remote-api.md)?
+[remote-api](/doc/remote-api.md)?
 
 The pros and cons of `portal.web` are:
 
 - ✅ Access to native browser JavaScript objects
-- ✅ Register [commands](doc/ui/commands.md) in the browser JavaScript context
+- ✅ Register [commands](/doc/ui/commands.md) in the browser JavaScript context
 - ❌ State is linked to the browser page, so everything is cleared on page reload
-- ❌ Can't be used within an [editor extension](doc/editors/)
+- ❌ Can't be used within an [editor extension](/doc/editors/)
 
 The pros and cons of `portal.client.web` are:
 
