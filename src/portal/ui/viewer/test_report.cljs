@@ -43,24 +43,26 @@
   (sp/coll-of ::output :min-count 1))
 
 (defn- label [{:keys [message] :as value}]
-  [ins/with-key
-   :label
-   [select/with-position
-    {:row -1 :column 0}
-    [ins/inspector
-     (or (if-not (coll? message)
-           message
-           (with-meta
-             message
-             {:portal.viewer/default
-              :portal.viewer/pr-str}))
-         (when-let [expected (:expected value)]
-           (with-meta
-             expected
-             {:portal.viewer/default
-              :portal.viewer/pr-str}))
-         (:var value)
-         (:ns value))]]])
+  [s/div
+   {:style {:flex "1"}}
+   [ins/with-key
+    :label
+    [select/with-position
+     {:row -1 :column 0}
+     [ins/inspector
+      (or (if-not (coll? message)
+            message
+            (with-meta
+              message
+              {:portal.viewer/default
+               :portal.viewer/pr-str}))
+          (when-let [expected (:expected value)]
+            (with-meta
+              expected
+              {:portal.viewer/default
+               :portal.viewer/pr-str}))
+          (:var value)
+          (:ns value))]]]])
 
 (defn- inspect-assertion [value]
   (let [theme      (theme/use-theme)
