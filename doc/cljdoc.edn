@@ -17,7 +17,8 @@
    ["JavaScript Promises" {:file "doc/promises.md"}]
    ["Custom Tap List" {:file "doc/custom-taps.md"}]
    ["Test Runner" {:file "doc/test-runner.md"}]
-   ["Git Dep" {:file "doc/git-deps.md"}]]
+   ["Git Dep" {:file "doc/git-deps.md"}]
+   ["Shadow CLJS" {:file "doc/shadow-cljs.md"}]]
   ["Editors"
    ["Emacs"    {:file "doc/editors/emacs.md"}]
    ["VS Code"  {:file "doc/editors/vs-code.md"}]
