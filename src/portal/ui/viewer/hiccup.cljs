@@ -34,7 +34,9 @@
 
      :code
      {:background (::c/background2 theme)
-      :border-radius (:border-radius theme)}
+      :border-radius (:border-radius theme)
+      :box-sizing :border-box
+      :padding [0 (* 1.5 (:padding theme))]}
 
      :pre
      {:overflow :auto
