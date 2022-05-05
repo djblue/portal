@@ -2,7 +2,8 @@
   (:refer-clojure :exclude [lazy-seq])
   (:require ["react" :as react]
             [portal.ui.state :as state]
-            [reagent.core :as r]))
+            [reagent.core :as r])
+  (:require-macros portal.ui.lazy))
 
 (defn- observer-visible? [entries]
   (= 1 (reduce
@@ -76,3 +77,5 @@
          (when (seq tail)
            [visible-sensor
             (fn [] (swap! n (fnil + default-take) step))])]))))
+
+(defn use-lazy* [k f] (react/useMemo (fn [] [lazy-seq (f)]) #js [k]))

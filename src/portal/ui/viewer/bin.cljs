@@ -41,15 +41,19 @@
 (defn inspect-bin [value]
   (let [theme (theme/use-theme)
         hex   (inspect-hex value)
-        ascii (inspect-ascii value)]
+        ascii (inspect-ascii value)
+        opts  (ins/use-options)]
     [s/div
-     {:style {:display :flex}}
+     {:style {:display :flex
+              :overflow :auto
+              :max-height (when-not (:expanded? opts) "24rem")}}
      [s/div
       {:style {:display :grid
                :grid-gap (:padding theme)
                :grid-template-columns
                (str "repeat(" (+ 1 1 8 1 16) ", auto)")}}
-      [l/lazy-seq
+      (l/use-lazy
+       value
        (for [[idx [hex ascii]] (indexed (map vector hex ascii))]
          [:<> {:key idx}
           [s/div
@@ -58,7 +62,7 @@
           [s/div]
           [:<> hex]
           [s/div]
-          [:<> ascii]])]]]))
+          [:<> ascii]]))]]))
 
 (def viewer
   {:predicate ins/bin?
