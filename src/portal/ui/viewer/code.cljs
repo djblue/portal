@@ -110,6 +110,7 @@
    (inspect-code nil code))
   ([attrs code]
    (let [theme    (theme/use-theme)
+         opts     (ins/use-options)
          out      (if-let [language (:class attrs)]
                     (hljs/highlight
                      code
@@ -119,12 +120,14 @@
          language (or (:class attrs) (.-language out))]
      [s/div
       {:style
-       {:position      :relative
+       {:overflow      :auto
+        :position      :relative
         :box-sizing    :border-box
         :padding       (:padding theme)
         :border        [1 :solid (::c/border theme)]
         :background    (ins/get-background)
-        :border-radius (:border-radius theme)}}
+        :border-radius (:border-radius theme)
+        :max-height    (when-not (:expanded? opts) "24rem")}}
       [s/div
        {:style
         {:position      :absolute
@@ -142,12 +145,15 @@
       [:pre
        {:on-click
         (fn [e]
-          (.stopPropagation e))
-        :style                   {:padding    0
-                                  :margin     0
-                                  :background :none
-                                  :width      "100%"
-                                  :overflow   :auto}
+          (when-not (=  "" (.toString (.getSelection js/window)))
+            (.stopPropagation e)))
+        :style                   {:padding     0
+                                  :margin      0
+                                  :background  :none
+                                  :width       "100%"
+                                  :overflow    :auto
+                                  :font-family (:font-family theme)
+                                  :font-size   (:font-size theme)}
         :dangerouslySetInnerHTML {:__html html}}]])))
 
 (def viewer
