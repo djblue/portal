@@ -1,46 +1,56 @@
 (ns ^:no-doc portal.nrepl
-  (:require [nrepl.middleware :refer [set-descriptor!]]
+  (:require [clojure.datafy :as d]
+            [nrepl.middleware :refer [set-descriptor!]]
+            [nrepl.middleware.caught :as caught]
+            [nrepl.middleware.print :as print]
             [nrepl.transport :as transport]
-            [portal.api :as p]
-            [portal.runtime :as rt])
-  (:import [nrepl.transport Transport]))
+            [portal.api :as p])
+  (:import [java.util Date]
+           [nrepl.transport Transport]))
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
 
-(defn form-from-cursive? [form]
-  (and (sequential? form)
-       (symbol? (first form))
-       (= "cursive.repl.runtime" (namespace (first form)))))
+(defn- get-result [response]
+  (cond
+    (contains? response :nrepl.middleware.caught/throwable)
+    {:level  :error
+     :file   "*repl*"
+     :line   1
+     :column 1
+     :result (d/datafy (:nrepl.middleware.caught/throwable response))}
 
-(defn read-string* [s]
-  (when s
-    (try
-      (read-string s)
-      (catch Exception _e nil))))
+    (contains? response :value)
+    {:level  :info
+     :file   "*repl*"
+     :line   1
+     :column 1
+     :result (:value response)}))
 
 (defrecord PortalTransport [transport handler-msg]
   Transport
   (recv [_this timeout]
     (transport/recv transport timeout))
-  (send [_this {:keys [value] :as msg}]
+  (send [_this  msg]
     (transport/send transport msg)
-    (when-let [code-form (read-string* (:code handler-msg))]
-      (when (and (some? value)
-                 (not (form-from-cursive? code-form)))
-        (rt/update-value
-         {:code-form code-form :value value})))
+    (when-let [result (get-result msg)]
+      (-> result
+          (merge
+           (select-keys handler-msg [:ns :file :column :line :code]))
+          (update :ns (fnil symbol 'user))
+          (assoc :time     (Date.)
+                 :runtime :clj)
+          p/submit))
     transport))
 
 (defn wrap-portal [handler]
-  (p/open)
   (fn [msg]
-    (-> msg
-        (update :transport ->PortalTransport msg)
-        handler)))
+    (handler
+     (cond-> msg
+       (= (:op msg) "eval")
+       (update :transport ->PortalTransport msg)))))
 
 (set-descriptor! #'wrap-portal
-                 {:requires #{}
+                 {:requires #{#'print/wrap-print
+                              #'caught/wrap-caught}
                   :expects #{"eval"}
                   :handles {}})
-
-

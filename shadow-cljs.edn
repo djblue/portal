@@ -1,8 +1,8 @@
 {:deps {:aliases [:cljs]}
  :dev-http {4400 ["resources/" "target/pwa/"]}
- ;:nrepl {:middleware [portal.nrepl/wrap-portal]}
  :nrepl {:init-ns user
-         :repl-pprint true}
+         :repl-pprint true
+         :middleware [portal.nrepl/wrap-portal]}
  :builds
  {:client
   {:output-dir "resources/portal-dev/"
