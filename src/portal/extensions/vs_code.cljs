@@ -77,12 +77,15 @@
   (when (fs/exists (fs/join workspace "resources/portal-dev/main.js"))
     (.executeCommand vscode/commands "setContext" "portal:is-dev" true)))
 
+(defn- get-port []
+  (.. vscode/workspace getConfiguration (get "portal.serverPort")))
+
 (defn activate
   [^js ctx]
   (reset! context ctx)
   (a/let [workspace (get-workspace-folder)
           folder    (fs/join workspace ".portal")
-          info      (p/start {})
+          info      (p/start {:port (get-port)})
           config    (fs/join folder "vs-code.edn")]
     (set-status workspace)
     (fs/mkdir folder)

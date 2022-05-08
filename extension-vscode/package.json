@@ -30,6 +30,21 @@
         "title": "Open Portal (DEV)",
         "enablement": "portal:is-dev"
       }
+    ],
+    "configuration": [
+      {
+        "type": "object",
+        "title": "Portal",
+        "properties": {
+          "portal.serverPort": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 65535,
+            "default": 0,
+            "description": "Port number to use for embedded portal server."
+          }
+        }
+      }
     ]
   },
   "devDependencies": {
