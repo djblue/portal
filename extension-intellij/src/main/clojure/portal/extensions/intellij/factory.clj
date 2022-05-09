@@ -56,12 +56,17 @@
 (defn -uiSettingsChanged  [_this _] (patch-options))
 (defn -globalSchemeChange [_this _] (patch-options))
 
+(defn- loading? [^JBCefBrowser browser] (.. browser getCefBrowser isLoading))
+
 (defn handler [request project]
   (let [body (edn/read (PushbackReader. (io/reader (:body request))))
         browser (get-in @instances [project :browser])]
     (case (:uri request)
       "/open"
-      (do (init-options browser)
+      (do (future
+            (while (not (loading? browser)))
+            (while (loading? browser))
+            (patch-options browser))
           (.loadURL ^JBCefBrowser browser (format-url body))
           {:status 200})
       "/open-file" (do (file/open project body) {:status 200})
