@@ -342,7 +342,7 @@
     (into
      [s/div
       {:style
-       {:-webkit-app-region :drag
+       {:-webkit-app-region (when-not (theme/is-vs-code?) :drag)
         :display :flex
         :flex-direction :column
         :background (::c/background theme)
