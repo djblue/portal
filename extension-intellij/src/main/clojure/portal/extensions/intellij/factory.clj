@@ -11,6 +11,8 @@
    (com.intellij.ui.jcef JBCefBrowser)
    (java.io PushbackReader)
    (javax.swing JComponent)
+   (org.cef.browser CefBrowser)
+   (org.cef.handler CefLoadHandler)
    (portal.extensions.intellij WithLoader))
   (:gen-class
    :main false
@@ -28,10 +30,6 @@
 (defn- format-url [{:keys [portal server]}]
   (str "http://" (:host server) ":" (:port server) "?" (:session-id portal)))
 
-(defn- run-js [^JBCefBrowser browser ^String js]
-  (when browser
-    (.executeJavaScript (.getCefBrowser browser) js "" 0)))
-
 (defn- get-options []
   (pr-str
    (pr-str
@@ -39,35 +37,22 @@
      :themes
      {::theme (theme/get-theme)}})))
 
-(defn init-options [browser]
-  (run-js browser
-          (str
-           "sessionStorage.setItem(\"PORTAL_EXTENSION_OPTIONS\", " (get-options) ")")))
-
-(defn patch-options
+(defn- patch-options
   ([]
-   (doseq [browser (into [] (map :browser) (vals @instances))]
-     (patch-options browser)))
-  ([browser]
-   (init-options browser)
-   (run-js browser
-           (str "portal.ui.options.patch(" (get-options) ")"))))
+   (doseq [instance (vals @instances)]
+     (patch-options (.getCefBrowser ^JBCefBrowser (:browser instance)))))
+  ([^CefBrowser browser]
+   (.executeJavaScript browser (str "portal.ui.options.patch(" (get-options) ")") "" 0)))
 
 (defn -uiSettingsChanged  [_this _] (patch-options))
 (defn -globalSchemeChange [_this _] (patch-options))
-
-(defn- loading? [^JBCefBrowser browser] (.. browser getCefBrowser isLoading))
 
 (defn handler [request project]
   (let [body (edn/read (PushbackReader. (io/reader (:body request))))
         browser (get-in @instances [project :browser])]
     (case (:uri request)
       "/open"
-      (do (future
-            (while (not (loading? browser)))
-            (while (loading? browser))
-            (patch-options browser))
-          (.loadURL ^JBCefBrowser browser (format-url body))
+      (do (.loadURL ^JBCefBrowser browser (format-url body))
           {:status 200})
       "/open-file" (do (file/open project body) {:status 200})
       {:status 404})))
@@ -90,12 +75,24 @@
    {:host "localhost"
     :port (http/server-port (get-in @instances [project :server]))}))
 
+(defn- init-browser [^JBCefBrowser browser]
+  (.addLoadHandler
+   (.getJBCefClient browser)
+   (reify CefLoadHandler
+     (onLoadingStateChange [_this _browser _isLoading _canGoBack _canGoForward])
+     (onLoadStart [_this _browser _frame _transitionType])
+     (onLoadEnd [_this browser _frame _httpStatusCode]
+       (patch-options browser))
+     (onLoadError [_this _browser _frame _errorCode _errorText _failedUrl]))
+   (.getCefBrowser browser)))
+
 (defn- get-window ^JComponent [^Project project]
   (start project)
-  (let [b (JBCefBrowser.)]
-    (swap! instances assoc-in [project :browser] b)
-    (Disposer/register project b)
-    (.getComponent b)))
+  (let [browser (JBCefBrowser.)]
+    (init-browser browser)
+    (swap! instances assoc-in [project :browser] browser)
+    (Disposer/register project browser)
+    (.getComponent browser)))
 
 (defn get-nrepl []
   (try
