@@ -46,6 +46,7 @@
                 :font-size (:font-size theme)
                 :user-select :none
                 :text-align :right
+                :vertical-align :top
                 :padding-right (* 2 (:padding theme))}}
               [s/span line]]
              [s/td
