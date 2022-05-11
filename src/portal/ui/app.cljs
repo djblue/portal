@@ -24,6 +24,7 @@
             [portal.ui.viewer.exception :as ex]
             [portal.ui.viewer.hiccup :as hiccup]
             [portal.ui.viewer.html :as html]
+            [portal.ui.viewer.http :as http]
             [portal.ui.viewer.image :as image]
             [portal.ui.viewer.json :as json]
             [portal.ui.viewer.log :as log]
@@ -385,6 +386,7 @@
    charts/scatter-chart
    charts/histogram-chart
    log/viewer
+   http/viewer
    image/viewer
    deref/viewer
    test-report/viewer
