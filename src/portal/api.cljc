@@ -68,16 +68,22 @@
 (defn close
   "Close all current inspector windows."
   {:added "0.1.0"}
-  []
-  (l/close)
-  nil)
+  ([]
+   (l/close :all)
+   nil)
+  ([portal]
+   (l/close portal)
+   nil))
 
 (defn clear
   "Clear all values."
   {:added "0.1.0"}
-  []
-  (l/clear)
-  nil)
+  ([]
+   (l/clear :all)
+   nil)
+  ([portal]
+   (l/clear portal)
+   nil))
 
 (defn register!
   "Register a var with portal. For now, the var should be a 1 arity fn.
@@ -93,5 +99,7 @@
 (defn eval-str
   "Evalute ClojureScript source given as a string in the UI runtime."
   {:added "0.19.0"}
-  [source]
-  (l/eval-str source))
+  ([source]
+   (l/eval-str :all source))
+  ([portal source]
+   (l/eval-str portal source)))

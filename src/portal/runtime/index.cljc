@@ -1,8 +1,6 @@
 (ns ^:no-doc portal.runtime.index)
 
-(def testing? (atom false))
-
-(defn html [& {:keys [name version host session-id code-url platform]
+(defn html [& {:keys [name version host session-id code-url platform mode]
                :or   {name       "portal"
                       version    "0.25.0"
                       code-url   "main.js"
@@ -26,6 +24,6 @@
    "</script>"
    "<script src=\"" code-url "\"></script>"
    ;; wait.js will ensure headless chrome doesn't exit early
-   (when @testing? "<script src=\"wait.js\"></script>")
+   (when (= mode :test) "<script src=\"wait.js\"></script>")
    "</body>"
    "</html>"))

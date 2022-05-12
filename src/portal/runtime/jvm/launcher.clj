@@ -74,19 +74,27 @@
    (let [server (start options)]
      (browser/open {:portal portal :options options :server server}))))
 
-(defn clear []
-  (c/request {:op :portal.rpc/clear})
+(defn clear [portal]
+  (if (= portal :all)
+    (c/request {:op :portal.rpc/clear})
+    (c/request (:session-id portal) {:op :portal.rpc/clear}))
   (swap! rt/sessions select-keys (keys @c/connections)))
 
-(defn close []
-  (c/request {:op :portal.rpc/close})
-  (future
-    (some-> server deref :http-server http/server-stop!))
-  (reset! server nil)
-  (reset! rt/sessions {}))
+(defn close [portal]
+  (if (= portal :all)
+    (c/request {:op :portal.rpc/close})
+    (c/request (:session-id portal) {:op :portal.rpc/close}))
+  (when (or (= portal :all) (empty? @c/connections))
+    (future
+      (some-> server deref :http-server http/server-stop!))
+    (reset! server nil))
+  (swap! rt/sessions select-keys (keys @c/connections)))
 
-(defn eval-str [code]
-  (let [response (c/request {:op :portal.rpc/eval-str :code code})]
+(defn eval-str [portal code]
+  (let [response (if (= portal :all)
+                   (c/request {:op :portal.rpc/eval-str :code code})
+                   (c/request (:session-id portal)
+                              {:op :portal.rpc/eval-str :code code}))]
     (if-not (:error response)
       (:result response)
       (throw (ex-info (:message response)

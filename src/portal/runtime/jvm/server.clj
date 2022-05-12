@@ -138,7 +138,7 @@
     "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
     "Access-Control-Max-Age"       86400}})
 
-(defmethod route [:get "/"] [_]
-  (send-resource "text/html" (index/html)))
+(defmethod route [:get "/"] [request]
+  (send-resource "text/html" (index/html (-> request :session :options))))
 
 (defn handler [request] (route (with-session request)))

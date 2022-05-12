@@ -44,24 +44,34 @@
        (browser/open {:portal portal :options options :server server}))
      portal)))
 
-(defn clear []
-  (c/request {:op :portal.rpc/clear})
+(defn clear [portal]
+  (if (= portal :all)
+    (c/request {:op :portal.rpc/clear})
+    (c/request (:session-id portal) {:op :portal.rpc/clear}))
   (swap! rt/sessions select-keys (keys @c/connections)))
 
-(defn close []
+(defn close [portal]
   (a/do
-    (c/request {:op :portal.rpc/close})
-    (doseq [socket @sockets] (.destroy socket))
-    (reset! sockets #{})
-    (stop @server)
-    (reset! server nil)
-    (reset! rt/sessions {}))
+    (if (= portal :all)
+      (c/request {:op :portal.rpc/close})
+      (c/request (:session-id portal) {:op :portal.rpc/close}))
+    (when (or (= portal :all) (empty? @c/connections))
+      (doseq [socket @sockets] (.destroy socket))
+      (reset! sockets #{})
+      (stop @server)
+      (reset! server nil))
+    (swap! rt/sessions select-keys (keys @c/connections)))
   true)
 
-(defn eval-str [code]
-  (a/let [responses (c/request
-                     {:op   :portal.rpc/eval-str
-                      :code code})
+(defn eval-str [portal code]
+  (a/let [responses (if (= portal :all)
+                      (c/request
+                       {:op   :portal.rpc/eval-str
+                        :code code})
+                      (c/request
+                       (:session-id portal)
+                       {:op   :portal.rpc/eval-str
+                        :code code}))
           response (last responses)]
     (if-not (:error response)
       (:result response)
