@@ -34,9 +34,9 @@
     (set! (.-iconPath panel)
           (.file vscode/Uri (.asAbsolutePath ^js @context "icon.png")))
     (set! (.-html web-view)
-          (index/html :code-url   (str "http://" host ":" port "/main.js?" session-id)
-                      :host       (str host ":" port)
-                      :session-id (str session-id)))
+          (index/html {:code-url   (str "http://" host ":" port "/main.js?" session-id)
+                       :host       (str host ":" port)
+                       :session-id (str session-id)}))
     (.onDidReceiveMessage
      web-view
      (fn handle-message [^js message]

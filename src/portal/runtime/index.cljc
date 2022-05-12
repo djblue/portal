@@ -1,10 +1,10 @@
 (ns ^:no-doc portal.runtime.index)
 
-(defn html [& {:keys [name version host session-id code-url platform mode]
-               :or   {name       "portal"
-                      version    "0.25.0"
-                      code-url   "main.js"
-                      platform   #?(:bb "bb" :clj "jvm" :cljs "node")}}]
+(defn html [{:keys [name version host session-id code-url platform mode]
+             :or   {name       "portal"
+                    version    "0.25.0"
+                    code-url   "main.js"
+                    platform   #?(:bb "bb" :clj "jvm" :cljs "node")}}]
   (str
    "<!DOCTYPE html>"
    "<html lang=\"en\">"

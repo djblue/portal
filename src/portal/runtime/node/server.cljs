@@ -79,8 +79,8 @@
       (.writeHead 200 #js {"Content-Type" content-type})
       (.end body)))
 
-(defmethod route [:get "/"] [_req res]
-  (send-resource res "text/html" (index/html)))
+(defmethod route [:get "/"] [req res]
+  (send-resource res "text/html" (index/html (-> req get-session :options))))
 
 (defmethod route [:get "/icon.svg"] [_req res]
   (send-resource

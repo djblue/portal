@@ -56,8 +56,8 @@
 
 (defn open [options]
   (swap! rt/sessions assoc-in [(:session-id c/session) :options] options)
-  (let [url   (str->src (index/html :code-url (main-js options)
-                                    :platform "web")
+  (let [url   (str->src (index/html {:code-url (main-js options)
+                                     :platform "web"})
                         "text/html")
         child (js/window.open
                url
