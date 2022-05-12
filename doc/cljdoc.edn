@@ -16,6 +16,7 @@
    ["Timbre" {:file "examples/timbre/README.md"}]
    ["JavaScript Promises" {:file "doc/promises.md"}]
    ["Custom Tap List" {:file "doc/custom-taps.md"}]
+   ["Default Viewer" {:file "doc/guides/default-viewer.md"}]
    ["Test Runner" {:file "doc/test-runner.md"}]
    ["Git Dep" {:file "doc/git-deps.md"}]
    ["Shadow CLJS" {:file "doc/shadow-cljs.md"}]]
