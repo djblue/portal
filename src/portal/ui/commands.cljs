@@ -220,8 +220,14 @@
     ::shortcuts/default #{"control" "arrowleft"}}
    `history-back
 
+   {::shortcuts/default #{"shift" "h"}}
+   `history-back
+
    {::shortcuts/osx     #{"meta" "arrowright"}
     ::shortcuts/default #{"control" "arrowright"}}
+   `history-forward
+
+   {::shortcuts/default #{"shift" "l"}}
    `history-forward
 
    {::shortcuts/osx     #{"meta" "shift" "arrowleft"}
