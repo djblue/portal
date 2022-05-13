@@ -237,6 +237,12 @@
    {::shortcuts/default #{"shift" "escape"}}    `select-none
    {::shortcuts/default #{"escape"}}            `select-pop
    {::shortcuts/default #{"v"}}                 `select-viewer
+
+   {::shortcuts/default #{"shift" "k"}}         `select-prev-viewer
+   {::shortcuts/default #{"shift" "arrowup"}}   `select-prev-viewer
+   {::shortcuts/default #{"shift" "j"}}         `select-next-viewer
+   {::shortcuts/default #{"shift" "arrowdown"}} `select-next-viewer
+
    {::shortcuts/default #{"arrowup"}}           `select-prev
    {::shortcuts/default #{"k"}}                 `select-prev
    {::shortcuts/default #{"arrowdown"}}         `select-next
@@ -679,6 +685,27 @@
       (when (> (count viewers) 1)
         (a/let [[selected-viewer] (pick-one (map :name viewers))]
           (ins/set-viewer! state selected-context selected-viewer))))))
+
+(defn- get-viewer [state context direction]
+  (let [viewers (map :name (ins/get-compatible-viewers @ins/viewers context))
+        current (:name (ins/get-viewer state context))]
+    (when (> (count viewers) 1)
+      (some
+       (fn [[prev next]]
+         (case direction
+           :prev (when (= next current) prev)
+           :next (when (= prev current) next)))
+       (partition 2 1 (conj viewers (last viewers)))))))
+
+(defn ^:command select-prev-viewer [state]
+  (when-let [selected-context (state/get-selected-context @state)]
+    (when-let [prev-viewer (get-viewer state selected-context :prev)]
+      (ins/set-viewer! state selected-context prev-viewer))))
+
+(defn ^:command select-next-viewer [state]
+  (when-let [selected-context (state/get-selected-context @state)]
+    (when-let [next-viewer (get-viewer state selected-context :next)]
+      (ins/set-viewer! state selected-context next-viewer))))
 
 (defn ^:command copy-path
   "Copy the path from the root value to the currently selected item."
