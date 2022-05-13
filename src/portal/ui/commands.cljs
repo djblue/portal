@@ -254,6 +254,7 @@
 
    {::shortcuts/default #{"control" "enter"}}   `focus-selected
    {::shortcuts/default #{"e"}}                 `toggle-expand
+   {::shortcuts/default #{" "}}                 `toggle-expand
 
    {::shortcuts/default #{"enter"}}             'clojure.datafy/nav
 
