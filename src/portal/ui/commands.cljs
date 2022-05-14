@@ -308,7 +308,8 @@
    "arrowleft"  [icons/arrow-left {:size "xs"}]
    "arrowup"    [icons/arrow-up {:size "xs"}]
    "arrowdown"  [icons/arrow-down {:size "xs"}]
-   "meta"       "⌘"})
+   "meta"       "⌘"
+   " "          "SPACE"})
 
 (defn ^:private combo-order [k]
   (get {"control" 0 "meta" 1 "shift" 2 "alt" 3} k 4))
