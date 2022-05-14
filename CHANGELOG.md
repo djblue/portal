@@ -1,3 +1,24 @@
+## 0.26.0 - 2022-05-14
+
+- Add shift h / shift l for history commands 1ae20b0
+- Add space as shortcut for toggle-expand cbc7b7f
+- Add relative viewer selection 6086262
+  - Add `portal.ui.commands/select-prev-viewer`
+  - Add `portal.ui.commands/select-next-viewer`
+- Support instance api functions ad7062e
+- Initial http viewer 238cf06
+- Update nrepl middleware 2df0fdf
+- Expand / collapse code viewer 3954914
+- Expand / collapse for bin viewer f8f1e56
+- Expand / collapse text viewer ef03645
+
+### Bug Fixes
+
+- Select root value on history push 350f8ce
+- intellij: Improve initial options loading 471207f
+- vs-code: Prevent app drag region e625065
+- Fix clear race condition client error c7432e0
+
 ## 0.25.0 - 2022-04-27
 
 - Allow `:runtime` to be specified for exceptions c3fdb55
