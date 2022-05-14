@@ -32,13 +32,7 @@
 (defn with-state [state & children]
   (into [:r> (.-Provider state-context) #js {:value state}] children))
 
-(defn get-selected-context [state]
-  (if-let [selected (:selected state)]
-    (first selected)
-    (when (contains? state :portal/value)
-      {:depth 1
-       :path []
-       :value (:portal/value state)})))
+(defn get-selected-context [state] (first (:selected state)))
 
 (defn get-selected-value [state] (:value (get-selected-context state)))
 
@@ -112,8 +106,12 @@
        :portal/previous-state state
        :portal/key   key
        :portal/f     f
-       :portal/value value)
-      (dissoc :portal/next-state :selected)
+       :portal/value value
+       :selected     [{:depth       1
+                       :path        []
+                       :stable-path []
+                       :value       value}])
+      (dissoc :portal/next-state)
       (push-viewer entry)))
 
 (defn toggle-expand-1 [state context]
