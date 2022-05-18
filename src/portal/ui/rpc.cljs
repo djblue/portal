@@ -159,6 +159,9 @@
 (defn- get-host []
   (if (exists? js/PORTAL_HOST) js/PORTAL_HOST js/location.host))
 
+(defn- get-proto []
+  (if (= (.-protocol js/location) "https:") "wss:" "ws:"))
+
 (defn- connect []
   (if-let [ws @ws-promise]
     ws
@@ -167,7 +170,7 @@
      (js/Promise.
       (fn [resolve reject]
         (when-let [chan (js/WebSocket.
-                         (str "ws://" (get-host) "/rpc?" (get-session)))]
+                         (str (get-proto) "//" (get-host) "/rpc?" (get-session)))]
           (set! (.-onmessage chan) #(dispatch (read (.-data %))
                                               (fn [message]
                                                 (send! message))))
