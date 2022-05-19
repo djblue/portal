@@ -82,7 +82,8 @@
   (let [state                 (state/use-state)
         [active? set-active!] (react/useState false)]
     [s/div
-     {:on-drag-over
+     {:on-click #(set-active! false)
+      :on-drag-over
       (fn [e]
         (.preventDefault e)
         (set-active! true))
