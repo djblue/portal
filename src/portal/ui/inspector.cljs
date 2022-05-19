@@ -15,6 +15,16 @@
             [portal.ui.theme :as theme]
             [reagent.core :as r]))
 
+(defn error->data [ex]
+  (merge
+   (when-let [data (.-data ex)]
+     {:data data})
+   {:runtime :portal
+    :cause   (.-message ex)
+    :via     [{:type    (symbol (.-name (type ex)))
+               :message (.-message ex)}]
+    :stack   (.-stack ex)}))
+
 (defn- inspect-error [error]
   (let [theme (theme/use-theme)]
     [s/div
@@ -28,11 +38,12 @@
        {:padding       (:padding theme)
         :border-bottom [1 :solid (::c/exception theme)]}}
       "Rendering error: " (.-message error)]
-     [s/div
-      {:style
-       {:padding (:padding theme)}}
-      [:pre
-       [:code (.-stack error)]]]]))
+     [:pre
+      {:style {:margin      0
+               :box-sizing  :border-box
+               :padding     (:padding theme)
+               :white-space :pre-wrap}}
+      [:code (.-stack error)]]]))
 
 (defn- inspect-error* [error] [:f> inspect-error error])
 

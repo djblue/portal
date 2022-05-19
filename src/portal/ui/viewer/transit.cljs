@@ -4,7 +4,7 @@
 
 (defn- parse-transit [transit-string]
   (try (t/read (t/reader :json) transit-string)
-       (catch :default _e ::invalid)))
+       (catch :default e (ins/error->data e))))
 
 (defn transit? [value] (string? value))
 

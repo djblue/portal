@@ -4,7 +4,7 @@
 
 (defn read-string [edn-string]
   (try (edn/read-string {:default tagged-literal} edn-string)
-       (catch :default _e ::invalid)))
+       (catch :default e (ins/error->data e))))
 
 (defn edn? [value] (string? value))
 

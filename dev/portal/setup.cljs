@@ -2,6 +2,7 @@
   (:require [examples.data :refer [data]]
             [portal.client.web :as client]
             [portal.console :as log]
+            [portal.ui.inspector :as ins]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [portal.web :as p]))
@@ -19,16 +20,6 @@
   (remote-submit value)
   (dashboard-submit value))
 
-(defn error->data [ex]
-  (merge
-   (when-let [data (.-data ex)]
-     {:data data})
-   {:runtime :portal
-    :cause   (.-message ex)
-    :via     [{:type    (symbol (.-name (type ex)))
-               :message (.-message ex)}]
-    :stack   (.-stack ex)}))
-
 (defn async-submit [value]
   (cond
     (instance? js/Promise value)
@@ -39,7 +30,7 @@
                   (throw error))))
 
     (instance? js/Error value)
-    (submit (error->data value))
+    (submit (ins/error->data value))
 
     :else
     (submit value)))
