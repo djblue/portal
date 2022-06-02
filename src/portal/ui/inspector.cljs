@@ -3,6 +3,7 @@
   (:require ["anser" :as anser]
             ["react" :as react]
             [lambdaisland.deep-diff2.diff-impl :as diff]
+            [portal.async :as a]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
             [portal.ui.api :as api]
@@ -801,7 +802,9 @@
             (.stopPropagation e))
           :on-double-click
           (fn [e]
-            (state/dispatch! state state/nav context)
+            (a/do
+              (state/dispatch! state state/select-context context)
+              (state/dispatch! state state/nav context))
             (.stopPropagation e))})
        {:ref   ref
         :title (-> value meta :doc)
