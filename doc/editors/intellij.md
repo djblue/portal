@@ -28,7 +28,7 @@ The main benefits of using this plugin are:
 - No window management.
 - Editor specific commands. See: goto-definition in the command palette.
 
-## Debugging
+## Debugging / Troubleshooting
 
 If after running `portal.api/open` at the REPL, the Portal UI does not open, it
 is most likely due to having a multi-module project. When the plugin is started,
@@ -38,3 +38,11 @@ able to use the Intellij plugin.
 
 A quick hack to get around this problem is to symlink the `.portal` directory to
 the directory where the REPL process is started.
+
+Similarly, if you get the following error message, simply remove the `.portal` directory, and try calling `(p/open {:launcher :intellij}` again.
+(This might be caused by the portal intellij extension not being initialized after upgrading, but you have an existing .portal/intellij.edn -- the clj runtime is trying to connect to a server that is no longer running.)
+
+```
+Execution error (ConnectException) at sun.nio.ch.Net/pollConnect (Net.java:-2).
+Connection refused
+```
