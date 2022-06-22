@@ -783,7 +783,8 @@
      #js [selected (.-current ref)])
     [with-context
      context
-     (when-not (:readonly? context)
+     (when-not (or (:readonly? context)
+                   (= (use-context) context))
        [s/div
         {:ref         focus-ref
          :tab-index   0
