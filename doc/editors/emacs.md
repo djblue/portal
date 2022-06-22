@@ -7,10 +7,11 @@ the following section may be of interest to you.
 ;; Leverage an existing cider nrepl connection to evaluate portal.api functions
 ;; and map them to convenient key bindings.
 
+;; def portal to the dev namespace to allow dereferencing via @dev/portal
 (defun portal.api/open ()
   (interactive)
   (cider-nrepl-sync-request:eval
-   "(require 'portal.api) (portal.api/tap) (portal.api/open)"))
+    "(do (ns dev) (def portal ((requiring-resolve 'portal.api/open))) (add-tap (requiring-resolve 'portal.api/submit)))"))
 
 (defun portal.api/clear ()
   (interactive)
