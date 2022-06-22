@@ -27,7 +27,8 @@
     org.babashka/sci          {:mvn/version "0.3.31"}
     reagent/reagent           {:mvn/version "1.1.1"}}}
   :shadow
-  {:extra-deps
+  {:jvm-opts ["-Xss16m"]
+   :extra-deps
    {thheller/shadow-cljs {:mvn/version "2.19.4"}}}
   :build
   {:extra-paths ["dev"]
