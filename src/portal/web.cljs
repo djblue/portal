@@ -77,6 +77,12 @@
   [source]
   (l/eval-str source))
 
+(defn sessions
+  "Get all current portal sessions."
+  {:added "0.27.0"}
+  []
+  (list (c/make-atom l/child-window)))
+
 (defonce ^:private init? (atom false))
 
 (defn- init []

@@ -12,6 +12,7 @@
 
 (deftest e2e-jvm
   (when-let [portal (open headless-chrome-flags)]
+    (is (some? (some #{portal} (p/sessions))))
     (with-redefs [client/timeout 60000]
       (reset! portal 0)
       (is (= @portal 0))
@@ -19,4 +20,5 @@
       (is (= @portal 1))
       (is (= 6 (p/eval-str portal "(+ 1 2 3)")))
       (is (= :world (:hello (p/eval-str portal "{:hello :world}")))))
-    (p/close portal)))
+    (p/close portal)
+    (is (nil? (some #{portal} (p/sessions))))))

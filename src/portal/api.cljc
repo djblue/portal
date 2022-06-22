@@ -103,3 +103,9 @@
    (l/eval-str :all source))
   ([portal source]
    (l/eval-str portal source)))
+
+(defn sessions
+  "Get all current portal sessions."
+  {:added "0.27.0"}
+  []
+  (l/sessions))

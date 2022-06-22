@@ -88,6 +88,7 @@
     (future
       (some-> server deref :http-server http/server-stop!))
     (reset! server nil))
+  (swap! rt/sessions dissoc (:session-id portal))
   (swap! rt/sessions select-keys (keys @c/connections)))
 
 (defn eval-str [portal code]
@@ -99,5 +100,8 @@
       (:result response)
       (throw (ex-info (:message response)
                       {:code code :cause (:result response)})))))
+
+(defn sessions []
+  (for [session-id (keys @rt/sessions)] (c/make-atom session-id)))
 
 (reset! rt/request c/request)

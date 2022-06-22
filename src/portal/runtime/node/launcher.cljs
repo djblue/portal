@@ -60,6 +60,7 @@
       (reset! sockets #{})
       (stop @server)
       (reset! server nil))
+    (swap! rt/sessions dissoc (:session-id portal))
     (swap! rt/sessions select-keys (keys @c/connections)))
   true)
 
@@ -77,5 +78,8 @@
       (:result response)
       (throw (ex-info (:message response)
                       {:code code :cause (:result response)})))))
+
+(defn sessions []
+  (for [session-id (key @rt/sessions)] (c/make-atom session-id)))
 
 (reset! rt/request c/request)
