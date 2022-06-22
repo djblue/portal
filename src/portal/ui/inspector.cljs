@@ -426,12 +426,16 @@
     child]])
 
 (defn try-sort [values]
-  (try (sort values)
-       (catch :default _e values)))
+  (if (sorted? values)
+    values
+    (try (sort values)
+         (catch :default _e values))))
 
 (defn try-sort-map [values]
-  (try (sort-by first values)
-       (catch :default _e values)))
+  (if (sorted? values)
+    values
+    (try (sort-by first values)
+         (catch :default _e values))))
 
 (defn- container-map [child]
   (let [theme (theme/use-theme)]

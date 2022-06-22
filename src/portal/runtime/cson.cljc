@@ -328,17 +328,27 @@
   ToJson
   (-to-json [value] (tagged-list "set" value)))
 
+(defn- set-> [value] (into #{} (map json->) (rest value)))
+
 (extend-type #?(:clj  clojure.lang.PersistentTreeSet
                 :cljs cljs.core/PersistentTreeSet)
   ToJson
-  (-to-json [value] (tagged-list "set" value)))
+  (-to-json [value] (tagged-list "sset" value)))
 
-(defn- set-> [value] (into #{} (map json->) (rest value)))
+(defn- sset-> [value]
+  (let [args  (map json-> (rest value))
+        order (zipmap args (range))]
+    (apply sorted-set-by
+           (fn [a b]
+             (compare (get order a) (get order b)))
+           args)))
 
-(defn- tagged-map [value]
-  (tagged-meta
-   value
-   (tagged-list "map" (mapcat identity value))))
+(defn- tagged-map
+  ([value] (tagged-map "map" value))
+  ([tag value]
+   (tagged-meta
+    value
+    (tagged-list tag (mapcat identity value)))))
 
 (extend-type #?(:clj  clojure.lang.PersistentHashMap
                 :cljs cljs.core/PersistentHashMap)
@@ -348,7 +358,7 @@
 (extend-type #?(:clj  clojure.lang.PersistentTreeMap
                 :cljs cljs.core/PersistentTreeMap)
   ToJson
-  (-to-json [value] (tagged-map value)))
+  (-to-json [value] (tagged-map "smap" value)))
 
 #?(:clj
    (extend-type clojure.lang.APersistentMap
@@ -367,6 +377,14 @@
 
 (defn- map-> [value]
   (apply hash-map (map json-> (rest value))))
+
+(defn- sorted-map-> [value]
+  (let [args  (map json-> (rest value))
+        order (zipmap (->> args (partition-all 2) (map first)) (range))]
+    (apply sorted-map-by
+           (fn [a b]
+             (compare (get order a) (get order b)))
+           args)))
 
 (defn long-> [value]
   #?(:clj  (Long/parseLong (second value))
@@ -393,8 +411,10 @@
     "kw"      (kw-> value)
     "list"    (list-> value)
     "map"     (map-> value)
+    "smap"    (sorted-map-> value)
     "meta"    (meta-> value)
     "set"     (set-> value)
+    "sset"    (sset-> value)
     "sym"     (sym-> value)
     "url"     (url-> value)
     "uuid"    (uuid-> value)

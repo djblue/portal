@@ -52,6 +52,8 @@
 
 (def clojure-data
   {::regex #"hello-world"
+   ::sorted-map (sorted-map-by > 3 "c" 2 "b" 1 "a")
+   ::sorted-set (sorted-set-by > 3 2 1)
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
    ::tagged (tagged-literal 'my/tag ["hello, world"])
