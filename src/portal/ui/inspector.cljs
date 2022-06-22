@@ -313,7 +313,7 @@
     [s/div
      {:style {:position :relative :display :flex :gap (:padding theme)}}
      [s/div
-      {:style {:position :sticky :top 0 :height :fit-content}}
+      {:style {:position :sticky :top (:padding theme) :height :fit-content}}
       [s/div
        {:style {:display :flex
                 :align-items :center}}
@@ -416,7 +416,7 @@
            :align-items :flex-start}}
    [s/div {:style
            {:width "100%"
-            :top 0
+            :top (:padding (theme/use-theme))
             :position :sticky}}
     child]])
 
@@ -427,7 +427,7 @@
            :align-items :flex-start}}
    [s/div {:style
            {:width "100%"
-            :top 0
+            :top (:padding (theme/use-theme))
             :position :sticky}}
     child]])
 
@@ -823,7 +823,7 @@
        {:ref   ref
         :title (-> value meta :doc)
         :style
-        {:width         "100%"
+        {:flex          "1"
          :border-radius (:border-radius theme)
          :border        (if selected
                           [1 :solid (get theme (nth theme/order selected))]
