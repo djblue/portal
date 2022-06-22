@@ -311,15 +311,16 @@
   (let [theme (theme/use-theme)
         depth (dec (use-depth))]
     [s/div
-     {:style {:display :flex :align-items :center}}
+     {:style {:position :relative :display :flex :gap (:padding theme)}}
      [s/div
-      {:style {:display :flex
-               :align-items :center}}
-      [s/span {:style {:color (::c/tag theme)}} "#"]
-      [with-readonly [inspector tag]]]
+      {:style {:position :sticky :top 0 :height :fit-content}}
+      [s/div
+       {:style {:display :flex
+                :align-items :center}}
+       [s/span {:style {:color (::c/tag theme)}} "#"]
+       [with-readonly [inspector tag]]]]
      [s/div {:style
-             {:flex "1"
-              :margin-left (:padding theme)}}
+             {:flex "1"}}
       [with-key
        tag
        [select/with-position {:row 0 :column 0}
