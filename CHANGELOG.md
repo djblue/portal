@@ -1,3 +1,20 @@
+## 0.27.0 - 2022-06-21
+
+- Add portal.api/sessions to get current sessions bb390bb
+  - Thanks for the feature idea @andyhorng!
+- Adding diagnosis/troubleshooting as per Clojurians Slack discussion (#127) cecd2c9
+  - Thanks for the improvement @realgenekim!
+- Select value on double click nav eadfa84
+- Improve exception rendering for json/transit/edn 580bcbd
+- Allow users to proxy Portal behind a load balancer 37d2a88
+
+### Bug Fixes
+
+- Preserve sort order for sorted-maps / sorted-sets b0b962a
+  - Thanks for the bug report @bortexz!
+- Allow users to close drag and drop ui when stuck b0ecdc3
+  - Thanks for the bug report @wilkerlucio!
+
 ## 0.26.0 - 2022-05-14
 
 - Add shift h / shift l for history commands 1ae20b0
