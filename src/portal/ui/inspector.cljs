@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [coll? map?])
   (:require ["anser" :as anser]
             ["react" :as react]
+            [clojure.edn :as edn]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.async :as a]
             [portal.colors :as c]
@@ -16,6 +17,10 @@
             [portal.ui.theme :as theme]
             [reagent.core :as r]))
 
+(declare inspector*)
+(declare inspector)
+(declare preview)
+
 (defn error->data [ex]
   (merge
    (when-let [data (.-data ex)]
@@ -25,6 +30,9 @@
     :via     [{:type    (symbol (.-name (type ex)))
                :message (.-message ex)}]
     :stack   (.-stack ex)}))
+
+(defn read-string [edn-string]
+  (edn/read-string {:default tagged-literal} edn-string))
 
 (defn- inspect-error [error]
   (let [theme (theme/use-theme)]
@@ -203,9 +211,6 @@
 
     (rt/runtime? value)
     (rt/tag value)))
-
-(declare inspector)
-(declare preview)
 
 (defn get-background
   ([]
@@ -660,14 +665,20 @@
         limit  (:string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]
-    [s/span {:style
-             {:color (::c/text theme)}}
-     [inspect-ansi
-      (if (or (< (count string) limit)
-              (= (:depth context) 1)
-              (get expanded? (state/get-location context)))
-        string
-        (trim-string string limit))]]))
+    (try
+      (let [v (read-string string)]
+        (if (nil? v)
+          "nil"
+          [inspector* context v]))
+      (catch :default _
+        [s/span {:style
+                 {:color (::c/text theme)}}
+         [inspect-ansi
+          (if (or (< (count string) limit)
+                  (= (:depth context) 1)
+                  (get expanded? (state/get-location context)))
+            string
+            (trim-string string limit))]]))))
 
 (defn inspect-long [value]
   [inspect-number (:rep value)])
@@ -738,17 +749,14 @@
                                      (get search-text location ""))
      :default-expand default-expand}))
 
-(defn inspector [value]
+(defn- inspector* [context value]
   (let [ref            (react/useRef nil)
         focus-ref      (react/useRef)
         state          (state/use-state)
-        context        (-> (use-context)
-                           (assoc :value value)
-                           (update :depth inc))
         location       (state/get-location context)
         theme          (theme/use-theme)
         {:keys [value viewer selected default-expand expanded?] :as options}
-        @(r/track get-info state theme context)
+        @(r/track get-info state theme (assoc context :value value))
         type           (get-value-type value)
         component      (or
                         (when-not (= (:name viewer) :portal.viewer/inspector)
@@ -823,6 +831,13 @@
                           (when selected bg))}})
       [:> error-boundary
        [with-options options [component value]]]]]))
+
+(defn inspector [value]
+  [inspector*
+   (-> (use-context)
+       (assoc :value value)
+       (update :depth inc))
+   value])
 
 (def viewer
   {:predicate (constantly true)
