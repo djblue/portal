@@ -103,6 +103,6 @@
                       {:code code :cause (:result response)})))))
 
 (defn sessions []
-  (for [session-id (keys @rt/sessions)] (c/make-atom session-id)))
+  (for [session-id (keys @c/connections)] (c/make-atom session-id)))
 
 (reset! rt/request c/request)
