@@ -26,11 +26,12 @@
                            :host host}))))))
 
 (defn start [options]
-  (or @server
-      (a/let [{:keys [port host]
-               :or {port 0 host "localhost"}} options
-              instance (create-server #'server/handler port host)]
-        (reset! server instance))))
+  (let [options (merge @rt/default-options options)]
+    (or @server
+        (a/let [{:keys [port host]
+                 :or {port 0 host "localhost"}} options
+                instance (create-server #'server/handler port host)]
+          (reset! server instance)))))
 
 (defn- stop [handle]
   (some-> handle :http-server .close))

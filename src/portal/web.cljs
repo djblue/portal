@@ -8,16 +8,6 @@
 
 (def ^:export send! l/send!)
 
-(defonce ^:private default-options (atom nil))
-
-(defn set-defaults!
-  "Set default options for `open`.
-  Parameters passed directly to either will override defaults."
-  {:added    "0.20.0"
-   :see-also ["open"]}
-  [options]
-  (swap! default-options merge options))
-
 (defn ^:export submit
   "Tap target function."
   [value]
@@ -40,12 +30,20 @@
 (defn- rename [options]
   (set/rename-keys options long->short))
 
+(defn set-defaults!
+  "Set default options for `open`.
+  Parameters passed directly to either will override defaults."
+  {:added    "0.20.0"
+   :see-also ["open"]}
+  [options]
+  (swap! rt/default-options merge (rename options)))
+
 (defn ^:export open
   "Open a new inspector window."
   ([] (open nil))
   ([options]
    (s/assert-options options)
-   (l/open (rename (merge @default-options options)))
+   (l/open (rename options))
    (c/make-atom l/child-window)))
 
 (defn ^:export close
@@ -88,7 +86,7 @@
 (defn- init []
   (when-not @init?
     (reset! init? true)
-    (l/init @default-options)
+    (l/init @rt/default-options)
     (shortcuts/add!
      ::init
      (fn [log]

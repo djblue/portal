@@ -54,18 +54,19 @@
 (defonce ^:private server (atom nil))
 
 (defn start [options]
-  (or @server
-      (let [{:keys [port host]
-             :or {port 0 host "localhost"}} options
-            http-server (http/run-server #'server/handler
-                                         {:port port
-                                          :max-ws (* 1024 1024 1024)
-                                          :legacy-return-value? false})]
-        (reset!
-         server
-         {:http-server http-server
-          :port (http/server-port http-server)
-          :host host}))))
+  (let [options (merge @rt/default-options options)]
+    (or @server
+        (let [{:keys [port host]
+               :or {port 0 host "localhost"}} options
+              http-server (http/run-server #'server/handler
+                                           {:port port
+                                            :max-ws (* 1024 1024 1024)
+                                            :legacy-return-value? false})]
+          (reset!
+           server
+           {:http-server http-server
+            :port (http/server-port http-server)
+            :host host})))))
 
 (defn open
   ([options]

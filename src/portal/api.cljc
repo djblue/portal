@@ -6,16 +6,6 @@
             [clojure.set :as set]
             [portal.runtime :as rt]))
 
-(defonce ^:private default-options (atom nil))
-
-(defn set-defaults!
-  "Set default options for `open` and `start`.
-  Parameters passed directly to either will override defaults."
-  {:added    "0.20.0"
-   :see-also ["open" "start"]}
-  [options]
-  (swap! default-options merge options))
-
 (defn submit
   "Tap target function.
 
@@ -46,12 +36,20 @@
 (defn- rename [options]
   (set/rename-keys options long->short))
 
+(defn set-defaults!
+  "Set default options for `open` and `start`.
+  Parameters passed directly to either will override defaults."
+  {:added    "0.20.0"
+   :see-also ["open" "start"]}
+  [options]
+  (swap! rt/default-options merge (rename options)))
+
 (defn start
   "Start the HTTP server with non-default options. Only use if you need
   control over the HTTP server."
   {:added "0.6.2"}
   [options]
-  (l/start (rename (merge @default-options options))))
+  (l/start (rename options)))
 
 (defn open
   "Open a new inspector window. A previous instance can be passed as
@@ -63,7 +61,7 @@
      (open portal-or-options nil)
      (open nil portal-or-options)))
   ([portal options]
-   (l/open portal (rename (merge @default-options options)))))
+   (l/open portal (rename options))))
 
 (defn close
   "Close all current inspector windows."

@@ -6,6 +6,8 @@
             #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a])))
 
+(defonce default-options (atom nil))
+
 (defonce ^:dynamic *session* nil)
 (defn- next-id [] (swap! (:id *session*) inc))
 (defonce sessions (atom {}))
@@ -13,7 +15,8 @@
 (defn get-session [session-id]
   (-> @sessions
       (get session-id)
-      (assoc :session-id session-id)))
+      (assoc :session-id session-id)
+      (update :options #(merge @default-options %))))
 
 (defn open-session [{:keys [session-id] :as session}]
   (merge
