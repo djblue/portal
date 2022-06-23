@@ -37,7 +37,7 @@
    uuid))
 
 (defn- get-session [req]
-  (rt/get-session (get-session-id req)))
+  (some-> req get-session-id rt/get-session))
 
 (defn- get-path [^js req _res]
   [(-> req .-method str/lower-case keyword)
@@ -79,8 +79,16 @@
       (.writeHead 200 #js {"Content-Type" content-type})
       (.end body)))
 
-(defmethod route [:get "/"] [req res]
-  (send-resource res "text/html" (index/html (-> req get-session :options))))
+(defmethod route [:get "/"] [req ^js res]
+  (if-let [session (get-session req)]
+    (send-resource res "text/html" (index/html (:options session)))
+    (let [session-id (random-uuid)]
+      (swap! rt/sessions assoc session-id {})
+      (doto res
+        (.writeHead
+         307
+         #js {"Location" (str "?" session-id)})
+        (.end)))))
 
 (defmethod route [:get "/icon.svg"] [_req res]
   (send-resource

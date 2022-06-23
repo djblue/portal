@@ -139,6 +139,10 @@
     "Access-Control-Max-Age"       86400}})
 
 (defmethod route [:get "/"] [request]
-  (send-resource "text/html" (index/html (-> request :session :options))))
+  (if-let [session (:session request)]
+    (send-resource "text/html" (index/html (:options session)))
+    (let [session-id (UUID/randomUUID)]
+      (swap! rt/sessions assoc session-id {})
+      {:status 307 :headers {"Location" (str "?" session-id)}})))
 
 (defn handler [request] (route (with-session request)))
