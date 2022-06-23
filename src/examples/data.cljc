@@ -50,10 +50,15 @@
 
 (defrecord Point [x y])
 
+(defn- gt [a b]
+  (if-not (and (number? a) (number? b))
+    -1
+    (compare b a)))
+
 (def clojure-data
   {::regex #"hello-world"
-   ::sorted-map (sorted-map-by > 3 "c" 2 "b" 1 "a")
-   ::sorted-set (sorted-set-by > 3 2 1)
+   ::sorted-map (sorted-map-by gt 3 "c" 2 "b" 1 "a")
+   ::sorted-set (sorted-set-by gt 3 2 1)
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
    ::tagged (tagged-literal 'my/tag ["hello, world"])
