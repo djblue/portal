@@ -15,3 +15,7 @@
 (rt/register! #'bean)
 (rt/register! #'slurp {:predicate can-slurp?})
 (rt/register! #'editor/goto-definition)
+
+(try
+  (rt/register! (requiring-resolve `clojure.spec.alpha/exercise))
+  (catch Exception _))
