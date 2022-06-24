@@ -473,6 +473,9 @@
                          :on-click on-click}]]])))
                 doall)]]]))))
 
+(defn- catch* [value]
+  (-> js/Promise (.resolve value) (.catch ex-data)))
+
 (defn make-command [{:keys [name command predicate args f] :as opts}]
   (assoc opts
          :predicate (fn [state]
@@ -482,7 +485,7 @@
          :run (fn [state]
                 (a/let [selected (state/selected-values @state)
                         args     (when args (apply args selected))
-                        result   (apply f (concat selected args))]
+                        result   (catch* (apply f (concat selected args)))]
                   (when-not command
                     (state/dispatch!
                      state
