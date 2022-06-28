@@ -4,7 +4,8 @@
 (defn hook
   {:shadow.build/stage :compile-prepare}
   [build-state]
-  (assoc-in
-   build-state
-   [:compiler-options :closure-defines `port]
-   (:port (p/start nil))))
+  (cond-> build-state
+    (= (:shadow.build/mode build-state) :dev)
+    (assoc-in
+     [:compiler-options :closure-defines `port]
+     (:port (p/start nil)))))

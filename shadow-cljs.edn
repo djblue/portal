@@ -12,12 +12,12 @@
    {:infer-externs true
     :warnings-as-errors true
     :output-feature-set :es2018}
+   :build-hooks [(portal.shadow.remote/hook)]
    :modules {:main {:init-fn portal.ui.core/main!}}
    :release {:output-dir "resources/portal/"}
    :devtools {:after-load portal.ui.core/reload!
               :use-document-host false
-              :preloads   [portal.setup]
-              :build-hooks [(portal.shadow.remote/hook)]}}
+              :preloads   [portal.setup]}}
 
   :pwa
   {:output-dir "target/pwa/"
