@@ -15,8 +15,9 @@
    :modules {:main {:init-fn portal.ui.core/main!}}
    :release {:output-dir "resources/portal/"}
    :devtools {:after-load portal.ui.core/reload!
+              :use-document-host false
               :preloads   [portal.setup]
-              :use-document-host false}}
+              :build-hooks [(portal.shadow.remote/hook)]}}
 
   :pwa
   {:output-dir "target/pwa/"

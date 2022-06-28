@@ -1,13 +1,11 @@
 (ns portal.setup
   (:require [examples.data :refer [data]]
-            [portal.client.web :as client]
             [portal.console :as log]
+            [portal.shadow.remote :as remote]
             [portal.ui.inspector :as ins]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [portal.web :as p]))
-
-(def remote-submit (partial client/submit {:port js/window.location.port}))
 
 (defonce tap-list (atom (list)))
 
@@ -17,7 +15,7 @@
 (defn ^:command clear-rpc [] (swap! rpc/log empty))
 
 (defn submit [value]
-  (remote-submit value)
+  (remote/submit value)
   (dashboard-submit value))
 
 (defn async-submit [value]
