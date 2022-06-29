@@ -8,7 +8,7 @@ allows you to inject a namespace for instrumentation during development.
 **Note** that this guide will focus on ClojureScript in the context of a web
 browser, but shadow-cljs supports other JavaScript environments.
 
-## `portal.web` vs `portal.client.web`
+## `portal.web` vs `portal.shadow.remote`
 
 This first question you need to answer is, do you want Portal hosted by the web
 page itself or do you want to send values to a remote instance using the
@@ -21,11 +21,10 @@ The pros and cons of `portal.web` are:
 - ❌ State is linked to the browser page, so everything is cleared on page reload
 - ❌ Can't be used within an [editor extension](/doc/editors/)
 
-The pros and cons of `portal.client.web` are:
+The pros and cons of `portal.shadow.remote` are:
 
 - ✅ Values are persisted across page refreshes
 - ✅ Can manipulate data in a runtime where you might have more powerful tools
-- ❌ Need to coordinate with an external server, usually a port number
 - ❌ Native objects are serialized via pretty-print so you tend to have less
      leverage
 
@@ -43,6 +42,7 @@ to add the following bit of configuration:
  {:build-id
   {:target :browser
    ...
+   :build-hooks [(portal.shadow.remote/hook)]
    :devtools {:preloads [portal.setup]}}}}
 ```
 
@@ -57,7 +57,7 @@ A basic setup with `portal.web` is as follows:
 ;; Allows options to be propagated across page reloads
 (p/set-defaults! {:theme :portal.colors/gruvbox})
 
-(add-tap #'p/submit)
+(add-tap p/submit)
 ```
 
 **Note** To quickly open the Portal UI, you can use the `ctrl | cmd + shift + o`
@@ -65,13 +65,13 @@ shortcut from the parent page.
 
 ### Remote Setup
 
-A basic setup with `portal.client.web` is as follows:
+A basic setup with `portal.shadow.remote` is as follows:
 
 ```clojure
 (ns portal.setup
-  (:require [portal.client.web :as p]))
+  (:require [portal.shadow.remote :as p]))
 
-(add-tap (partial p/submit {:port 1234}))
+(add-tap p/submit)
 ```
 
 ### Custom Setup
@@ -81,12 +81,12 @@ additional bits from other guides:
 
 ```clojure
 (ns portal.setup
-  (:require [portal.client.web :as c]
+  (:require [portal.shadow.remote :as r]
             [portal.web :as p]))
 
 (defn- submit [value]
   (p/submit value)
-  (c/submit {:port 1234} value))
+  (r/submit {:port 1234} value))
 
 (defn- error->data [ex]
   (merge
@@ -113,7 +113,7 @@ additional bits from other guides:
     :else
     (submit value)))
 
-(add-tap #'async-submit)
+(add-tap async-submit)
 
 (defn- error-handler [event]
   (tap> (or (.-error event) (.-reason event))))
