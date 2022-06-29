@@ -86,7 +86,7 @@ additional bits from other guides:
 
 (defn- submit [value]
   (p/submit value)
-  (r/submit {:port 1234} value))
+  (r/submit value))
 
 (defn- error->data [ex]
   (merge
