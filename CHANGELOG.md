@@ -1,3 +1,18 @@
+## 0.28.0 - 2022-06-28
+
+- Add improved shadow-cljs integration e0af8af
+- Render caught command exceptions 952acc0
+- Add clojure `clojure.spec.alpha/exercise` as a command 3ffbae8
+- Switch to connections for more accurate session listing 9be02dc
+- Try parsing objects as edn before rendering 9e1ab59
+
+### Docs
+
+- Update emacs elisp example to def portal to dev namespace (#129) d6886fc
+  - Thanks @mschmele!
+- Add nREPL guide 3458626
+- Update shadow-cljs guide with new hook example fb8677e
+
 ## 0.27.0 - 2022-06-21
 
 - Add portal.api/sessions to get current sessions bb390bb
