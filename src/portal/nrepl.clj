@@ -10,6 +10,11 @@
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
 
+(deftype Print [string] Object (toString [_] string))
+
+(defmethod print-method Print [v ^java.io.Writer w]
+  (.write w ^String (str v)))
+
 (defn- get-result [response]
   (cond
     (contains? response :nrepl.middleware.caught/throwable)
@@ -24,7 +29,20 @@
      :file   "*repl*"
      :line   1
      :column 1
-     :result (:value response)}))
+     :result (if-not (:printed-value response)
+               (:value response)
+               (->Print (:value response)))}))
+
+(defn- shadow-cljs?
+  "Determine if the current message was handled by shadow-cljs."
+  [msg]
+  (try
+    (some?
+     (get
+      @(:session msg)
+      (requiring-resolve
+       'shadow.cljs.devtools.server.nrepl-impl/*repl-state*)))
+    (catch Exception _ false)))
 
 (defrecord PortalTransport [transport handler-msg]
   Transport
@@ -38,7 +56,7 @@
            (select-keys handler-msg [:ns :file :column :line :code]))
           (update :ns (fnil symbol 'user))
           (assoc :time     (Date.)
-                 :runtime :clj)
+                 :runtime  (if (shadow-cljs? handler-msg) :cljs :clj))
           p/submit))
     transport))
 
@@ -49,8 +67,13 @@
        (= (:op msg) "eval")
        (update :transport ->PortalTransport msg)))))
 
+(defn- get-shadow-middleware []
+  (try
+    [(requiring-resolve 'shadow.cljs.devtools.server.nrepl/middleware)]
+    (catch Exception _)))
+
 (set-descriptor! #'wrap-portal
                  {:requires #{#'print/wrap-print
                               #'caught/wrap-caught}
-                  :expects #{"eval"}
+                  :expects (into #{"eval"} (get-shadow-middleware))
                   :handles {}})

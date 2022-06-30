@@ -8,4 +8,8 @@
          (eval . (progn
                    (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
                    (add-to-list 'cider-jack-in-nrepl-middlewares
+                                "cider.nrepl/cider-middleware")
+                   (add-to-list 'cider-jack-in-nrepl-middlewares
+                                "portal.nrepl/wrap-portal")
+                   (add-to-list 'cider-jack-in-nrepl-middlewares
                                 "shadow.cljs.devtools.server.nrepl/middleware"))))))
