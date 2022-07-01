@@ -50,14 +50,15 @@
     (transport/recv transport timeout))
   (send [_this  msg]
     (transport/send transport msg)
-    (when-let [result (get-result msg)]
-      (-> result
-          (merge
-           (select-keys handler-msg [:ns :file :column :line :code]))
-          (update :ns (fnil symbol 'user))
-          (assoc :time     (Date.)
-                 :runtime  (if (shadow-cljs? handler-msg) :cljs :clj))
-          p/submit))
+    (when (seq (p/sessions))
+      (when-let [result (get-result msg)]
+        (-> result
+            (merge
+             (select-keys handler-msg [:ns :file :column :line :code]))
+            (update :ns (fnil symbol 'user))
+            (assoc :time     (Date.)
+                   :runtime  (if (shadow-cljs? handler-msg) :cljs :clj))
+            p/submit)))
     transport))
 
 (defn wrap-portal [handler]
