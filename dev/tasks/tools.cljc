@@ -5,6 +5,7 @@
   (:import [java.time Duration]))
 
 (def ^:dynamic *cwd* nil)
+(def ^:dynamic *opts* nil)
 
 (defn- now [] #?(:clj (System/currentTimeMillis)))
 
@@ -32,11 +33,13 @@
   (println (a/bold-blue "=>")
            (a/bold-green (name (first args)))
            (a/bold (str/join " " (map name (rest args)))))
-  (let [opts {:out *out* :err *out* :dir *cwd*}
+  (let [opts  (merge {:dir      *cwd*
+                      :shutdown p/destroy-tree}
+                     (or *opts* {:out *out* :err *out*}))
         start (now)
-        ps (if-let [f (get fns (first args))]
-             (f (map name (rest args)) opts)
-             (p/process (map name args) opts))]
+        ps    (if-let [f (get fns (first args))]
+                (f (map name (rest args)) opts)
+                (p/process (map name args) opts))]
     (p/check ps)
     (println (format-millis (- (now) start)) "\n"))
   true)

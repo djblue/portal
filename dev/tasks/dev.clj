@@ -2,7 +2,7 @@
   (:require [clojure.core.server :as server]
             [clojure.java.io :as io]
             [tasks.build :refer [build]]
-            [tasks.tools :refer [clj]]))
+            [tasks.tools :refer [*opts* clj]]))
 
 (defn- start-server [opts]
   (let [server    (server/start-server opts)
@@ -23,9 +23,10 @@
 (defn dev
   "Start dev server."
   []
-  (build)
-  (clj "-M:dev:cider:cljs:shadow"
-       "-m" "shadow.cljs.devtools.cli"
-       :watch :pwa :client :vs-code :electron))
+  (binding [*opts* {:inherit true}]
+    (build)
+    (clj "-M:dev:cider:cljs:shadow"
+         "-m" "shadow.cljs.devtools.cli"
+         :watch :pwa :client :vs-code :electron)))
 
 (defn -main [] (prepl) (dev))
