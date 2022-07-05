@@ -57,6 +57,7 @@
              (select-keys handler-msg [:ns :file :column :line :code]))
             (update :ns (fnil symbol 'user))
             (assoc :time     (Date.)
+                   :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
                    :runtime  (if (shadow-cljs? handler-msg) :cljs :clj))
             p/submit)))
     transport))
@@ -66,7 +67,7 @@
     (handler
      (cond-> msg
        (= (:op msg) "eval")
-       (update :transport ->PortalTransport msg)))))
+       (update :transport ->PortalTransport (assoc msg :start (System/nanoTime)))))))
 
 (defn- get-shadow-middleware []
   (try
