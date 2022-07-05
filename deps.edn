@@ -22,8 +22,8 @@
   :cljs
   {:extra-deps
    {hickory/hickory           {:mvn/version "0.7.1"}
-    lambdaisland/deep-diff2   {:mvn/version "2.2.124"}
-    markdown-clj/markdown-clj {:mvn/version "1.11.1"}
+    lambdaisland/deep-diff2   {:mvn/version "2.3.127"}
+    markdown-clj/markdown-clj {:mvn/version "1.11.2"}
     org.babashka/sci          {:mvn/version "0.3.32"}
     reagent/reagent           {:mvn/version "1.1.1"}}}
   :shadow
@@ -33,7 +33,7 @@
   :build
   {:extra-paths ["dev"]
    :ns-default  tasks.build
-   :deps        {babashka/babashka {:mvn/version "0.8.156"}
+   :deps        {babashka/babashka {:mvn/version "0.8.157"}
                  babashka/fs       {:mvn/version "0.1.6"}}}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
@@ -64,7 +64,7 @@
      :sha     "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "1.7.804"}
+   {com.github.liquidz/antq {:mvn/version "1.8.847"}
     org.slf4j/slf4j-nop     {:mvn/version "1.7.36"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.108"}}}}}
