@@ -147,7 +147,7 @@
          [icon runtime (::c/package theme)]])]
 
      (when (:expanded? options)
-       [ins/inspect-map-k-v (dissoc log :level :result)])]))
+       [ins/inspect-map-k-v (dissoc log :level :result :line :column :ns :runtime)])]))
 
 (def viewer
   {:predicate log?
