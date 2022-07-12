@@ -29,12 +29,12 @@
               "Applications/Chrome Apps.localized/"
               (str app-name ".app")
               "Contents/Info.plist")]
-    (when (fs/exists info)
-      {:app-id
-       (->> info
-            fs/slurp
-            (re-find #"com\.google\.Chrome\.app\.([^<]+)")
-            second)})))
+    (when-let [app-id (some->> info
+                               fs/exists
+                               fs/slurp
+                               (re-find #"com\.google\.Chrome\.app\.([^<]+)")
+                               second)]
+      {:app-id app-id})))
 
 (defn- get-app-id-from-pref-file [path app-name]
   (when (fs/exists path)
