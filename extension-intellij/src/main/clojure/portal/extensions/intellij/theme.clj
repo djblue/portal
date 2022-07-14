@@ -81,8 +81,8 @@
    (get-font
     (.getGlobalScheme (EditorColorsManager/getInstance))))
   ([^EditorColorsScheme theme]
-   {:font-size   (.getEditorFontSize theme)
-    :font-family (str (pr-str (.getEditorFontName theme)) ", monospace")}))
+   {:font-size   (.getConsoleFontSize theme)
+    :font-family (str (pr-str (.getConsoleFontName theme)) ", monospace")}))
 
 (defn resolve-theme [m]
   (reduce-kv
