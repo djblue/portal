@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'djblue'
-version '0.28.0'
+version '0.29.0'
 
 intellij {
     version = '2021.3'
@@ -13,11 +13,11 @@ intellij {
 
 patchPluginXml {
     sinceBuild = '211.*'
-    untilBuild = '221.*'
+    untilBuild = '222.*'
 }
 
 publishPlugin {
-  token = System.getenv("JETBRAINS_TOKEN")
+    token = System.getenv("JETBRAINS_TOKEN")
 }
 
 repositories {
