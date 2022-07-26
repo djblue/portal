@@ -3,45 +3,6 @@
     <name>Portal Inspector</name>
     <vendor url="https://github.com/djblue/portal">djblue</vendor>
 
-    <description><![CDATA[
-
-    <p>A clojure tool to navigate through your data.</p>
-
-    <br/>
-
-    <p>
-    This plugin acts as a companion to the main
-    <a href="https://github.com/djblue/portal">Portal</a>
-    project. It enables you to host the web based Portal UI inside of Intellij.
-    </p>
-
-    <br/>
-
-    <p>
-    The main benefits of using this plugin are:
-    <ul>
-    <li>Automatic font / theme discovery.</li>
-    <li>No window management.</li>
-    <li>Editor specific commands. See: goto-definition in the command palette.</li>
-    </ul>
-    </p>
-
-    <br/>
-
-    <p>
-    Portal itself allows you to pipe data from a clojure repl via
-    <a href="https://clojuredocs.org/clojure.core/tap%3E">tap&gt;</a>
-    into the various data visualization tools within the Portal UI.
-    </p>
-
-    <br/>
-
-    <p>
-    For a more in-depth look into how to use portal, take a look at the project
-    <a href="https://github.com/djblue/portal#api">README</a>.
-    </p>
-
-    ]]></description>
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
