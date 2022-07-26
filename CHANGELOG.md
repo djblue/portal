@@ -1,3 +1,14 @@
+## 0.29.0 - 2022-07-26
+
+- Bumps IJ compatibility to 222.* (#132) ecd9116 - Thanks @coyotesqrl!
+- intellij: Use console font size (#130) b7b6922 - Thanks @rads!
+- Account for Portal PWA and Chrome alt browsers 0be369d
+- Tidy up log viewer 589de9b
+- Include stdio / test-report output in portal.nrepl 272b0fe
+- Include eval time for portal.nrepl middleware 007c216
+- Submit values in portal.nrepl when portal is open d86d8b3
+- Support shadow-cljs evals for nrepl middleware e29bb48
+
 ## 0.28.0 - 2022-06-28
 
 - Add improved shadow-cljs integration e0af8af
