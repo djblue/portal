@@ -100,7 +100,8 @@
     (catch Exception _)))
 
 (set-descriptor! #'wrap-portal
-                 {:requires #{#'print/wrap-print
+                 {:requires #{"clone"
+                              #'print/wrap-print
                               #'caught/wrap-caught}
                   :expects (into #{"eval"} (get-shadow-middleware))
                   :handles {}})
