@@ -1,3 +1,7 @@
+## 0.29.1 - 2022-07-26
+
+- Fix portal.nrepl middleware order issue 3d4cb04
+
 ## 0.29.0 - 2022-07-26
 
 - Bumps IJ compatibility to 222.* (#132) ecd9116 - Thanks @coyotesqrl!
