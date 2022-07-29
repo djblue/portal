@@ -1,0 +1,17 @@
+name: Intellij Plugin Verifier
+
+on:
+  push:
+    branches: [ master ]
+    paths: extension-intellij/**
+  pull_request:
+    branches: [ master ]
+    paths: extension-intellij/**
+
+jobs:
+  ij-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/setup
+      - run: bb -m tasks.ijverify/verify
