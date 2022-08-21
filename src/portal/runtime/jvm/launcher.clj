@@ -1,6 +1,5 @@
 (ns ^:no-doc portal.runtime.jvm.launcher
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [org.httpkit.client :as client]
             [org.httpkit.server :as http]
             [portal.runtime :as rt]
@@ -9,10 +8,8 @@
             [portal.runtime.jvm.client :as c]
             [portal.runtime.jvm.server :as server]))
 
-(defn- get-parent [s] (.getParent (io/file s)))
-
 (defn- get-search-paths []
-  (->> (fs/cwd) (iterate get-parent) (take-while some?)))
+  (->> (fs/cwd) (iterate fs/dirname) (take-while some?)))
 
 (defn get-config [{:keys [options config-file]}]
   (let [search-paths (get-search-paths)]
@@ -21,7 +18,7 @@
            (some-> parent
                    (fs/join ".portal" config-file)
                    fs/exists
-                   slurp
+                   fs/slurp
                    edn/read-string))
          search-paths)
         (throw

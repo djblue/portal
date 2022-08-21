@@ -18,4 +18,7 @@
     (is (= (fs/slurp file) "hello"))
     (fs/rm dir)
     (is (nil? (fs/exists file)))
-    (is (nil? (fs/exists dir)))))
+    (is (nil? (fs/exists dir))))
+  (let [cwd  (fs/cwd)
+        path (fs/join cwd "deps.edn")]
+    (is (= cwd (fs/dirname path)))))

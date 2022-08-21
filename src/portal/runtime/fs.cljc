@@ -80,3 +80,7 @@
              (.on js/process "exit"    delete)
              (.on js/process "SIGINT"  delete)
              (.on js/process "SIGTERM" delete))))
+
+(defn dirname [path]
+  #?(:clj  (.getParent (io/file path))
+     :cljs (path/dirname path)))
