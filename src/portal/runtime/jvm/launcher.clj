@@ -34,7 +34,7 @@
         @(client/request
           {:url    (str "http://" (:host config) ":" (:port config) "/open")
            :method :post
-           :body   (pr-str {:portal  portal
+           :body   (pr-str {:portal  (into {} portal)
                             :options (select-keys options [:window-title])
                             :server  (select-keys server [:host :port])})})]
     (when (or error (not= status 200))

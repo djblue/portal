@@ -1,10 +1,54 @@
 (ns ^:no-doc portal.runtime.node.launcher
   (:require ["http" :as http]
+            [clojure.edn :as edn]
             [portal.async :as a]
+            [portal.client.node :as client]
             [portal.runtime :as rt]
             [portal.runtime.browser :as browser]
+            [portal.runtime.fs :as fs]
             [portal.runtime.node.client :as c]
             [portal.runtime.node.server :as server]))
+
+(defn- get-search-paths []
+  (->> (fs/cwd) (iterate fs/dirname) (take-while some?)))
+
+(defn get-config [{:keys [options config-file]}]
+  (let [search-paths (get-search-paths)]
+    (or (some
+         (fn [parent]
+           (some-> parent
+                   (fs/join ".portal" config-file)
+                   fs/exists
+                   fs/slurp
+                   edn/read-string))
+         search-paths)
+        (throw
+         (ex-info
+          (str "No config file found: " config-file)
+          {:options      options
+           :config-file  config-file
+           :search-paths search-paths})))))
+
+(defn- remote-open [{:keys [portal options server] :as args}]
+  (a/let [config (get-config args)
+          {:keys [status error] :as response}
+          (client/fetch
+           (str "http://" (:host config) ":" (:port config) "/open")
+           {:method  "POST"
+            :headers {"content-type" "application/edn"}
+            :body    (pr-str {:portal  (into {} portal)
+                              :options (select-keys options [:window-title])
+                              :server  (select-keys server [:host :port])})})]
+    (when (or error (not= status 200))
+      (throw (ex-info "Unable to open extension"
+                      {:options  options
+                       :config   config
+                       :response (select-keys response [:body :headers :status])}
+                      error)))))
+
+(defmethod browser/-open :intellij [args] (remote-open (assoc args :config-file "intellij.edn")))
+(defmethod browser/-open :vs-code  [args] (remote-open (assoc args :config-file "vs-code.edn")))
+(defmethod browser/-open :electron [args] (remote-open (assoc args :config-file "electron.edn")))
 
 (defonce ^:private server (atom nil))
 (defonce ^:private sockets (atom #{}))
