@@ -21,7 +21,9 @@
 (defn open-session [{:keys [session-id] :as session}]
   (merge
    (get-session session-id)
-   {:value-cache (atom {}) :id (atom 0)}
+   {:id             (atom 0)
+    :value-cache    (atom {})
+    :watch-registry (atom #{})}
    session))
 
 (defonce request (atom nil))
@@ -34,26 +36,25 @@
   #?(:clj  (instance? clojure.lang.Atom o)
      :cljs (satisfies? cljs.core/IAtom o)))
 
-(defonce ^:private watch-registry (atom #{}))
-
-(defn- invalidate [_watch-key a old new]
+(defn- invalidate [session-id a old new]
   (when-not (= old new)
     (set-timeout
      #(when (= @a new)
         (when-let [request @request]
-          (request {:op :portal.rpc/invalidate :atom a})))
+          (request session-id {:op :portal.rpc/invalidate :atom a})))
      100)))
 
 (defn- watch-atom [a]
-  (when-not (contains? @watch-registry a)
-    (swap!
-     watch-registry
-     (fn [atoms]
-       (if (contains? atoms a)
-         atoms
-         (do
-           (add-watch a ::watch-key #'invalidate)
-           (conj atoms a)))))))
+  (let [{:keys [session-id watch-registry]} *session*]
+    (when-not (contains? @watch-registry a)
+      (swap!
+       watch-registry
+       (fn [atoms]
+         (if (contains? atoms a)
+           atoms
+           (do
+             (add-watch a session-id #'invalidate)
+             (conj atoms a))))))))
 
 (defn- value->key
   "Include metadata when capturing values in cache."
@@ -204,22 +205,22 @@
 (defn clear-values
   ([] (clear-values nil identity))
   ([_request done]
-   (when *session*
+   (when-let [{:keys [session-id value-cache watch-registry]} *session*]
      (let [value (:value (get-options))]
        (when (atom? value)
          (swap! value empty)))
-     (reset! (:value-cache *session*) {})
+     (reset! value-cache {})
      (doseq [a @watch-registry]
-       (remove-watch a ::watch-key))
+       (remove-watch a session-id))
      (reset! watch-registry #{}))
    (done nil)))
 
 (defn- cache-evict [id]
-  (let [value-cache (:value-cache *session*)
-        value       (id->value id)]
+  (let [value (id->value id)
+        {:keys [session-id value-cache watch-registry]} *session*]
     (when (atom? value)
       (swap! watch-registry dissoc value)
-      (remove-watch value ::watch-key))
+      (remove-watch value session-id))
     (swap! value-cache dissoc [:id id] (value->key value))
     nil))
 
