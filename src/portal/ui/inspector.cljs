@@ -824,6 +824,8 @@
         :title (-> value meta :doc)
         :style
         {:flex          "1"
+         :font-size     (:font-size theme)
+         :font-family   (:font-family theme)
          :border-radius (:border-radius theme)
          :border        (if selected
                           [1 :solid (get theme (nth theme/order selected))]
