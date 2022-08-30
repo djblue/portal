@@ -16,19 +16,25 @@
             [portal.ui.viewer.edn :as edn]
             [reagent.core :as r]))
 
+(def ^:dynamic *state* nil)
 (defonce ^:private input (r/atom nil))
 
-(defn- open [f] (reset! input f))
-(defn- close [] (reset! input nil))
+(defn open
+  ([f] (open input f))
+  ([state f] (swap! state assoc ::input f)))
 
-(defn- container [& children]
+(defn close
+  ([] (close input))
+  ([state] (swap! state dissoc ::input)))
+
+(defn- palette-container [& children]
   (let [theme (theme/use-theme)]
     (into
      [s/div
       {:on-click #(.stopPropagation %)
        :style
-       {:width "80%"
-        :max-height "40vh"
+       {:font-family (:font-family theme)
+        :max-height "100%"
         :height :fit-content
         :margin "0 auto"
         :overflow :hidden
@@ -104,7 +110,7 @@
     (fn [input]
       (let [theme     (theme/use-theme)
             selected? @selected
-            on-close  close
+            on-close  (partial close (state/use-state))
             on-done   (:run input)
             options   (:options input)
             n         (count (:options input))
@@ -137,7 +143,7 @@
               nil)
              (shortcuts/matched! log)))
 
-         [container
+         [palette-container
           [s/div
            {:style {:box-sizing :border-box
                     :padding (:padding theme)
@@ -407,7 +413,7 @@
       (let [theme (theme/use-theme)
             options (filter-options options @filter-text)
             n (count options)
-            on-close close
+            on-close (partial close (state/use-state))
             on-select
             (fn []
               (reset! filter-text "")
@@ -427,7 +433,7 @@
               "escape"         (on-close)
               nil)
              (shortcuts/matched! log)))
-         [container
+         [palette-container
           [s/div
            {:style
             {:padding (:padding theme)
@@ -484,7 +490,7 @@
                         (apply predicate (state/selected-values state))))
          :run (fn [state]
                 (a/let [selected (state/selected-values @state)
-                        args     (when args (apply args selected))
+                        args     (when args (binding [*state* state] (apply args selected)))
                         result   (catch* (apply f (concat selected args)))]
                   (when-not command
                     (state/dispatch!
@@ -536,6 +542,7 @@
                           (not (predicate @state)))))
                      (get-commands)))]
     (open
+     state
      (fn [state]
        [palette-component
         {:filter-by :name
@@ -547,50 +554,62 @@
 
 ;; pick args
 
-(defn pick-one [options]
-  (js/Promise.
-   (fn [resolve]
-     (open
-      (fn [_state]
-        [palette-component
-         {:on-select #(resolve [%])
-          :options options}])))))
+(defn pick-one
+  ([options] (pick-one *state* options))
+  ([state options]
+   (js/Promise.
+    (fn [resolve]
+      (open
+       state
+       (fn [_state]
+         [palette-component
+          {:on-select #(resolve [%])
+           :options options}]))))))
 
-(defn pick-many [options]
-  (js/Promise.
-   (fn [resolve]
-     (open
-      (fn []
-        [selector-component
-         {:options options
-          :run
-          (fn [options]
-            (close)
-            (resolve [options]))}])))))
+(defn pick-many
+  ([options]
+   (pick-many *state* options))
+  ([state options]
+   (js/Promise.
+    (fn [resolve]
+      (open
+       state
+       (fn []
+         (let [state (state/use-state)]
+           [selector-component
+            {:options options
+             :run
+             (fn [options]
+               (close state)
+               (resolve [options]))}])))))))
 
-(defn pick-in [v]
-  (js/Promise.
-   (fn [resolve]
-     (let [get-key
-           (fn get-key [path v]
-             (open
-              (fn [_state]
-                [palette-component
-                 {:options (concat [::done] (keys v))
-                  :on-select
-                  (fn [k]
-                    (let [path (conj path k)
-                          next-value (get v k)]
-                      (cond
-                        (= k ::done)
-                        (resolve [(drop-last path)])
+(defn pick-in
+  ([v]
+   (pick-in *state* v))
+  ([state v]
+   (js/Promise.
+    (fn [resolve]
+      (let [get-key
+            (fn get-key [path v]
+              (open
+               state
+               (fn [_state]
+                 [palette-component
+                  {:options (concat [::done] (keys v))
+                   :on-select
+                   (fn [k]
+                     (let [path (conj path k)
+                           next-value (get v k)]
+                       (cond
+                         (= k ::done)
+                         (resolve [(drop-last path)])
 
-                        (not (map? next-value))
-                        (resolve [path])
+                         (not (map? next-value))
+                         (resolve [path])
 
-                        :else
-                        (get-key path next-value))))}])))]
-       (get-key [] v)))))
+                         :else
+                         (get-key path next-value))))}])))]
+        (get-key [] v))))))
 
 ;; portal data commands
 
@@ -694,7 +713,7 @@
   (when-let [selected-context (state/get-selected-context @state)]
     (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
       (when (> (count viewers) 1)
-        (a/let [[selected-viewer] (pick-one (map :name viewers))]
+        (a/let [[selected-viewer] (pick-one state (map :name viewers))]
           (ins/set-viewer! state selected-context selected-viewer))))))
 
 (defn- get-viewer [state context direction]
@@ -805,7 +824,7 @@
                (for [a (:portal/args command)] (pr-str a))]])}])))))
 
 (defn ^:command set-theme [state]
-  (a/let [[theme] (pick-one (keys c/themes))]
+  (a/let [[theme] (pick-one state (keys c/themes))]
     (state/dispatch! state state/set-theme! theme)))
 
 (defn ^:command history-back [state]
@@ -965,7 +984,7 @@
 (defn- parse-as
   "Paste value from clipboard"
   [state value]
-  (a/let [[choice] (pick-one (keys parsers))
+  (a/let [[choice] (pick-one state (keys parsers))
           parse    (get parsers choice identity)]
     (state/dispatch! state
                      state/history-push
@@ -986,23 +1005,23 @@
 (register! #'parse-selected)
 
 (defn- pop-up [child]
-  [s/div
-   {:on-click close
-    :style
-    {:position :fixed
-     :top 0
-     :left 0
-     :right 0
-     :bottom 0
-     :z-index 100
-     :padding-top 200
-     :padding-bottom 200
-     :box-sizing :border-box
-     :height "100%"
-     :overflow :hidden}}
-   child])
+  (let [state (state/use-state)]
+    [s/div
+     {:on-click (fn [_] (close state))
+      :style
+      {:position :fixed
+       :top 0
+       :left 0
+       :right 0
+       :bottom 0
+       :z-index 100
+       :padding [200 "10%"]
+       :box-sizing :border-box
+       :height "100%"
+       :overflow :hidden}}
+     child]))
 
-(defn palette []
+(defn palette [{:keys [container]}]
   (let [state (state/use-state)
         value (state/get-selected-value @state)]
     (react/useEffect
@@ -1025,5 +1044,5 @@
             (do
               (shortcuts/matched! log)
               ((:run command) state))))))
-     (when-let [component @input]
-       [ins/with-readonly [pop-up [component state]]])]))
+     (when-let [component (::input @state)]
+       [ins/with-readonly [(or container pop-up) [component state]]])]))
