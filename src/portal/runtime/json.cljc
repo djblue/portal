@@ -10,8 +10,8 @@
      :cljs (.stringify js/JSON value)))
 
 (defn read [string]
-  #?(:bb   (json/parse-string string)
-     :clj  (json/read-str string)
+  #?(:bb   (json/parse-string string keyword)
+     :clj  (json/read-str string :key-fn keyword)
      :cljs (.parse js/JSON string)))
 
 (defn read-stream [stream]

@@ -44,6 +44,9 @@
 (defn as-date [^long timestamp]
   #?(:clj (java.util.Date. timestamp) :cljs (js/Date. timestamp)))
 
+(declare nav-hn)
+(declare nav-item)
+
 (defn fetch-hn [path]
   (a/let [url   (as-url (str root path))
           res   (fetch-json url)
@@ -61,9 +64,13 @@
         (update :created #(as-date (* % 1000)))
 
         (contains? item :type)
-        (update :type keyword)))))
+        (update :type keyword)
 
-(declare nav-hn)
+        (contains? item :kids)
+        (update :kids vary-meta assoc `nav #'nav-item)
+
+        (contains? item :submitted)
+        (update :submitted vary-meta assoc `nav #'nav-item)))))
 
 (defn fetch-user [user]
   (a/let [res (fetch-hn (str "/user/" user ".json"))]
@@ -85,11 +92,10 @@
 
 (defn nav-hn [coll k v]
   (cond
-    (stories v)             (fetch-stories v)
-    (keyword? v)            (get (if (contains? coll :type)
-                                   item-doc
-                                   user-doc) v v)
-    (= k :by)               (fetch-user v)
-    (= k :parent)           (nav-item coll k v)
-    (#{:kids :submitted} k) (vary-meta v assoc `nav #'nav-item)
-    :else v))
+    (stories v)   (fetch-stories v)
+    (keyword? v)  (get (if (contains? coll :type)
+                         item-doc
+                         user-doc) v v)
+    (= k :by)     (fetch-user v)
+    (= k :parent) (nav-item coll k v)
+    :else         v))
