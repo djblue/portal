@@ -49,7 +49,7 @@
   "Build vs-code extension."
   []
   (build)
-  (shadow :release :vs-code)
+  (shadow :release :vs-code :vs-code-notebook)
   (binding [*cwd* "extension-vscode"]
     (npm :ci)
     (fs/copy "README.md" "extension-vscode/" {:replace-existing true})

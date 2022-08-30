@@ -1,5 +1,7 @@
+.clj-kondo/.cache/
 README.md
 LICENSE
 vs-code.js
 vs-code.js.map
+notebook/
 *.vsix

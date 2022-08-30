@@ -1,5 +1,5 @@
 (ns portal.extensions.vs-code
-  (:require ["vscode" :as vscode]
+  (:require ["vscode" :as vscode :refer [notebooks]]
             [clojure.edn :as edn]
             [clojure.string :as str]
             [portal.api :as p]
@@ -68,6 +68,21 @@
          :resource     {"main.js" path}
          :launcher     :vs-code})))})
 
+(defn- setup-notebook-handler []
+  (let [message-channel (.createRendererMessaging notebooks "portal-edn-renderer")]
+    (.onDidReceiveMessage
+     message-channel
+     (fn handle-message [^js event]
+       (let [message (.-message event)]
+         (case (.-type message)
+           "open-editor"
+           (p/open
+            {:launcher     :vs-code
+             :window-title "notebook"
+             :value        (edn/read-string
+                            {:default tagged-literal}
+                            (.-data message))})))))))
+
 (defmethod server/route [:post "/open"] [req res]
   (a/let [body (server/get-body req)]
     (-open (edn/read-string body))
@@ -88,6 +103,7 @@
     (fs/mkdir folder)
     (fs/spit config (pr-str (select-keys info [:host :port])))
     (fs/rm-exit config))
+  (setup-notebook-handler)
   (add-tap #'p/submit)
   (doseq [[command f] (get-commands)]
     (.push (.-subscriptions ctx)

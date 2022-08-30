@@ -16,7 +16,8 @@
     "workspaceContains:**/project.clj",
     "workspaceContains:**/shadow-cljs.edn",
     "workspaceContains:**/deps.edn",
-    "workspaceContains:**/bb.edn"
+    "workspaceContains:**/bb.edn",
+    "onRenderer:portal-edn-renderer"
   ],
   "contributes": {
     "commands": [
@@ -29,6 +30,61 @@
         "command": "extension.portalOpenDev",
         "title": "Open Portal (DEV)",
         "enablement": "portal:is-dev"
+      }
+    ],
+    "notebookRenderer": [
+      {
+        "id": "portal-edn-renderer",
+        "displayName": "Portal",
+        "entrypoint": "./notebook/main.js",
+        "mimeTypes": [
+          "x-application/edn"
+        ],
+        "requiresMessaging": "optional"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "",
+        "key": "up",
+        "mac": "up",
+        "when": "notebookOutputFocused"
+      },
+      {
+        "command": "",
+        "key": "shift+up",
+        "mac": "shift+up",
+        "when": "notebookOutputFocused"
+      },
+      {
+        "command": "",
+        "key": "down",
+        "mac": "down",
+        "when": "notebookOutputFocused"
+      },
+      {
+        "command": "",
+        "key": "shift+down",
+        "mac": "shift+down",
+        "when": "notebookOutputFocused"
+      },
+      {
+        "command": "",
+        "key": "enter",
+        "mac": "enter",
+        "when": "notebookOutputFocused"
+      },
+      {
+        "command": "",
+        "key": "ctrl+enter",
+        "mac": "ctrl+enter",
+        "when": "notebookOutputFocused"
+      },
+      {
+        "command": "",
+        "key": "m",
+        "mac": "m",
+        "when": "notebookOutputFocused"
       }
     ]
   },

@@ -72,11 +72,12 @@
    ::vs-code-embedded
    {:font-size   "var(--vscode-editor-font-size)"
     :font-family "var(--vscode-editor-font-family)"
+    :border-radius 0
 
     ::text        "var(--vscode-editor-foreground)"
-    ::border      "var(--vscode-editorGroup-border)"
-    ::background  "var(--vscode-tab-inactiveBackground)"
-    ::background2 "var(--vscode-editor-background)"
+    ::border      "var(--vscode-notebook-cellBorderColor)"
+    ::background  "var(--vscode-notebook-editorBackground)"
+    ::background2 "var(--vscode-notebook-cellEditorBackground)"
 
     ::uri         "var(--vscode-textLink-foreground)"
     ::tag         "var(--vscode-textPreformat-foreground)"
