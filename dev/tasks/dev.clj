@@ -27,6 +27,6 @@
     (build)
     (clj "-M:dev:cider:cljs:shadow"
          "-m" "shadow.cljs.devtools.cli"
-         :watch :pwa :client :vs-code :electron)))
+         :watch #_:pwa :client :vs-code :vs-code-notebook #_:electron)))
 
 (defn -main [] (prepl) (dev))

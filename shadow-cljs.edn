@@ -41,6 +41,22 @@
    :output-to "extension-vscode/vs-code.js"
    :devtools {:after-load portal.extensions.vs-code/reload}}
 
+  :vs-code-notebook
+  {:output-dir "extension-vscode/notebook/"
+   :asset-path "."
+   :modules
+   {:main
+    {:exports
+     {activate portal.extensions.vs-code-notebook/activate}}}
+   :target :esm
+   :compiler-options
+   {:infer-externs true
+    :source-map    true
+    :warnings-as-errors true
+    :optimizations :simple}
+   :devtools {:use-document-host false
+              :after-load portal.extensions.vs-code-notebook/reload}}
+
   :electron
   {:exports {:main portal.extensions.electron/-main}
    :target :node-library

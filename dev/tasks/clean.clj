@@ -13,6 +13,7 @@
   ["extension-intellij/build/"
    "extension-vscode/vs-code.js"
    "extension-vscode/vs-code.js.map"
+   "extension-vscode/notebook"
    "pom.xml"
    "resources/portal/"
    "resources/portal-dev/"

@@ -8,6 +8,7 @@
             ["@fortawesome/free-solid-svg-icons/faChevronRight" :as chevron-right]
             ["@fortawesome/free-solid-svg-icons/faCircle" :as circle]
             ["@fortawesome/free-solid-svg-icons/faCopy" :as copy]
+            ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt" :as external-link]
             ["@fortawesome/free-solid-svg-icons/faInfoCircle" :as info-circle]
             ["@fortawesome/free-solid-svg-icons/faPlayCircle" :as play-circle]
             ["@fortawesome/free-solid-svg-icons/faStopCircle" :as stop-circle]
@@ -27,6 +28,7 @@
 (def chevron-right (partial icon chevron-right/faChevronRight))
 (def circle        (partial icon circle/faCircle))
 (def copy          (partial icon copy/faCopy))
+(def external-link (partial icon external-link/faExternalLinkAlt))
 (def info-circle   (partial icon info-circle/faInfoCircle))
 (def play-circle   (partial icon play-circle/faPlayCircle))
 (def stop-circle   (partial icon stop-circle/faStopCircle))

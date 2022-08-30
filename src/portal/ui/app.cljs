@@ -338,6 +338,13 @@
      (str "::selection { " style " }")
      (str "::-moz-selection { " style " }")]))
 
+(defn styles []
+  [:<>
+   [vega/styles]
+   [prepl/styles]
+   [text-selection]
+   [code/stylesheet]])
+
 (defn- container [children]
   (let [theme (theme/use-theme)]
     (into
@@ -352,11 +359,8 @@
         :font-size (:font-size theme)
         :height "100vh"
         :width "100vw"}}
-      [vega/styles]
-      [prepl/styles]
-      [scrollbars]
-      [text-selection]
-      [code/stylesheet]]
+      [styles]
+      [scrollbars]]
      children)))
 
 (defn- inspect-1-history [default-value]
