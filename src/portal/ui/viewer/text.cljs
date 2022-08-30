@@ -8,15 +8,16 @@
             [portal.ui.theme :as theme]))
 
 (defn inspect-text [value]
-  (let [theme    (theme/use-theme)
-        state    (state/use-state)
-        context  (ins/use-context)
-        location (state/get-location context)
-        opts     (ins/use-options)]
+  (let [theme      (theme/use-theme)
+        state      (state/use-state)
+        context    (ins/use-context)
+        location   (state/get-location context)
+        opts       (ins/use-options)
+        background (ins/get-background)]
     [s/div
      {:style
       {:overflow :auto
-       :background (ins/get-background)
+       :background background
        :padding (:padding theme)
        :box-sizing :border-box
        :cursor :text
@@ -43,6 +44,7 @@
              [s/td
               {:style
                {:color (::c/number theme)
+                :background background
                 :font-size (:font-size theme)
                 :user-select :none
                 :text-align :right
@@ -52,6 +54,8 @@
              [s/td
               {:style
                {:color (::c/text theme)
+                :background background
+                :text-align :left
                 :font-size (:font-size theme)}}
               [:pre {:style {:margin 0 :white-space :pre-wrap}} line-content]]])))
         {:default-take 100 :step 100}]]]]))
