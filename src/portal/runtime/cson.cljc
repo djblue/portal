@@ -65,7 +65,16 @@
 (defrecord Tagged [tag rep]
   ToJson
   (-to-json [_]
-    #?(:clj [tag rep] :cljs #js [tag rep])))
+    #?(:clj [tag (to-json rep)] :cljs #js [tag (to-json rep)])))
+
+#?(:clj
+   (defmethod print-method Tagged [v ^java.io.Writer w]
+     (.write w ^String (:rep v)))
+   :cljs
+   (extend-type Tagged
+     IPrintWithWriter
+     (-pr-writer [this writer _opts]
+       (-write writer (:rep this)))))
 
 (defn tagged-value [tag rep] (->Tagged tag rep))
 
