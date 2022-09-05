@@ -39,11 +39,11 @@
                 "loading"
                 (str "#'" (rep this))))))
 
-(defn- runtime-to-json [this]
+(defn- runtime-to-json [buffer this]
   (let [object (.-object this)]
     (if-let [to-object (:to-object cson/*options*)]
       (to-object this :runtime-object nil)
-      (cson/tag "ref" (:id object)))))
+      (cson/tag buffer "ref" (:id object)))))
 
 (defn- runtime-meta [this] (:meta (.-object this)))
 
@@ -51,7 +51,7 @@
 
 (deftype RuntimeObject [runtime object]
   Runtime
-  cson/ToJson (-to-json [this] (runtime-to-json this))
+  cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
   IMeta       (-meta    [this] (runtime-meta this))
   IHash       (-hash    [_]    (hash object))
   IWithMeta
@@ -65,7 +65,7 @@
 
 (deftype RuntimeAtom [runtime object]
   Runtime
-  cson/ToJson (-to-json [this] (runtime-to-json this))
+  cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
   IMeta       (-meta    [this] (runtime-meta this))
   IDeref      (-deref   [this] (runtime-deref this))
   IHash       (-hash    [_]    (hash object))
@@ -123,8 +123,5 @@
       (swap! state/value-cache assoc id (->weak-ref value))))
   value)
 
-(defn ref-> [value] (->value (second value)))
-
-(defn object-> [call value]
-  (let [object (cson/json-> (second value))]
-    (or (->value (:id object)) (->runtime call object))))
+(defn ->object [call object]
+  (or (->value (:id object)) (->runtime call object)))

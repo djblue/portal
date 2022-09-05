@@ -12,7 +12,7 @@
 (defn read [string]
   #?(:bb   (json/parse-string string keyword)
      :clj  (json/read-str string :key-fn keyword)
-     :cljs (.parse js/JSON string)))
+     :cljs (js->clj (.parse js/JSON string))))
 
 (defn read-stream [stream]
   #?(:bb   (json/parse-stream stream keyword)

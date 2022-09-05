@@ -62,7 +62,8 @@
 (p/set-defaults! {:mode :dev :value (dashboard)})
 
 (defn- error-handler [event]
-  (tap> (or (.-error event) (.-reason event))))
+  #_(tap> (or (.-error event) (.-reason event)))
+  (.error js/console event))
 
 (.addEventListener js/window "error" error-handler)
 (.addEventListener js/window "unhandledrejection" error-handler)
