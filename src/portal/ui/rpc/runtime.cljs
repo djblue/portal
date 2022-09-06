@@ -42,7 +42,7 @@
 (defn- runtime-to-json [buffer this]
   (let [object (.-object this)]
     (if-let [to-object (:to-object cson/*options*)]
-      (to-object this :runtime-object nil)
+      (to-object buffer this :runtime-object nil)
       (cson/tag buffer "ref" (:id object)))))
 
 (defn- runtime-meta [this] (:meta (.-object this)))

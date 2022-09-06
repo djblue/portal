@@ -33,6 +33,7 @@
       (case op
         "ref"    (rt/->value value)
         "object" (rt/->object call value)
+        "remote" (cson/tagged-value "remote" value)
         (diff/->diff op value)))}))
 
 (defn- write [value]
