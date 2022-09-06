@@ -188,7 +188,9 @@
         {:style {:flex "1"}}
         [inspect-via value]]]
       (when expanded?
-        [ins/inspect-map-k-v (dissoc value :cause :phase :runtime)])]]))
+        [ins/with-collection
+         value
+         [ins/inspect-map-k-v (dissoc value :cause :phase :runtime)]])]]))
 
 (def viewer
   {:predicate exception?

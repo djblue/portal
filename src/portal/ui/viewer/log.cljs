@@ -114,7 +114,7 @@
         (merge flex {:border-top [1 :solid (::c/border theme)] :flex "1"} border)}
        [select/with-position
         {:row -1 :column 0}
-        [ins/inspector (:result log)]]]
+        [ins/with-collection log [ins/with-key :result [ins/inspector (:result log)]]]]]
       [s/div
        {:style
         (merge
@@ -147,7 +147,9 @@
          [icon runtime (::c/package theme)]])]
 
      (when (:expanded? options)
-       [ins/inspect-map-k-v (dissoc log :level :result :line :column :ns :runtime)])]))
+       [ins/with-collection
+        log
+        [ins/inspect-map-k-v (dissoc log :level :result :line :column :ns :runtime)]])]))
 
 (def viewer
   {:predicate log?
