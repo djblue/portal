@@ -18,7 +18,6 @@
 (defn- remove-item [k]
   (js/localStorage.removeItem k))
 
-(defonce child-window (atom nil))
 (defonce code (io/inline "portal/main.js"))
 (defonce code-url (str->src code "text/javascript"))
 
@@ -28,11 +27,14 @@
 (defn send! [message]
   (js/Promise.
    (fn [resolve _reject]
-     (let [session (rt/open-session c/session)
+     (let [session (merge (rt/get-session (:session-id @c/session)) @c/session)
            body    (rt/read message session)
+           id      (:portal.rpc/id body)
            f       (get rt/ops (:op body) not-found)]
+       (when (== id 1)
+         (swap! c/session rt/reset-session))
        (binding [rt/*session* session]
-         (f body #(resolve (rt/write % session))))))))
+         (f body #(resolve (rt/write (assoc % :portal.rpc/id id) session))))))))
 
 (defn- get-session []
   (if (exists? js/PORTAL_SESSION)
@@ -46,7 +48,6 @@
 
 (defn eval-str [code]
   (let [response (c/request
-                  child-window
                   {:op   :portal.rpc/eval-str
                    :code code})]
     (if-not (:error response)
@@ -55,7 +56,8 @@
                       {:code code :cause (:result response)})))))
 
 (defn open [options]
-  (swap! rt/sessions assoc-in [(:session-id c/session) :options] options)
+  (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
+  (swap! c/session rt/open-session)
   (let [options (merge options @rt/default-options)
         url     (str->src (index/html {:code-url (main-js options)
                                        :platform "web"})
@@ -65,20 +67,18 @@
                  "portal"
                  (when (:app options true)
                    "resizable,scrollbars,status"))]
+    (reset! c/connection child)
     (set! (.-onunload child)
           (fn []
-            (reset! (:value-cache c/session) {})
             (remove-item ":portal/open")))
     (set! (.-onunload js/window)
           (fn []
             (when-not (.-closed child)
               (set-item ":portal/open" (js/Date.now)))))
-    (reset! child-window child)
     (when-let [f (:on-load options)]
       (set! (.-onload child)
-            (fn [] (f))))
-    (reset! rt/request (partial c/request child-window)))
-  true)
+            (fn [] (f)))))
+  (c/make-atom (:session-id @c/session)))
 
 (defn init [options]
   (when-let [string (get-item ":portal/open")]
@@ -87,10 +87,11 @@
       (remove-item ":portal/open"))))
 
 (defn clear []
-  (c/request child-window {:op :portal.rpc/clear}))
+  (c/request {:op :portal.rpc/clear}))
 
 (defn close []
-  (when-let [child @child-window]
-    (reset! child-window nil)
-    (reset! rt/request nil)
+  (when-let [child @c/connection]
+    (reset! c/connection nil)
     (.close child)))
+
+(reset! rt/request c/request)

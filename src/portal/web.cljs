@@ -43,8 +43,7 @@
   ([] (open nil))
   ([options]
    (s/assert-options options)
-   (l/open (rename options))
-   (c/make-atom l/child-window)))
+   (l/open (rename options))))
 
 (defn ^:export close
   "Close all current inspector windows."
@@ -79,7 +78,7 @@
   "Get all current portal sessions."
   {:added "0.27.0"}
   []
-  (list (c/make-atom l/child-window)))
+  (c/sessions))
 
 (defonce ^:private init? (atom false))
 

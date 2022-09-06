@@ -26,6 +26,13 @@
     :watch-registry (atom #{})}
    session))
 
+(defn reset-session [{:keys [session-id value-cache watch-registry] :as session}]
+  (reset! value-cache {})
+  (doseq [a @watch-registry]
+    (remove-watch a session-id))
+  (reset! watch-registry #{})
+  session)
+
 (defonce request (atom nil))
 
 (defn- set-timeout [f timeout]
