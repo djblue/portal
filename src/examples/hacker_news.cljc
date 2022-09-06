@@ -3,7 +3,7 @@
                :cljs [portal.async :as a])
             #?(:cljs [examples.fetch :refer [fetch]])
             [clojure.core.protocols :refer [nav]]
-            [portal.runtime.json :as json]))
+            #?(:clj [portal.runtime.json :as json])))
 
 (def root "https://hacker-news.firebaseio.com/v0")
 
@@ -35,8 +35,7 @@
 (defn fetch-json [url]
   #?(:clj  (-> url slurp json/read)
      :cljs (-> (fetch url)
-               (.then #(json/read %))
-               (.then #(js->clj % :keywordize-keys true)))))
+               (.then #(js->clj (.parse js/JSON %) :keywordize-keys true)))))
 
 (defn as-url [s]
   #?(:clj (java.net.URL. s) :cljs (js/URL. s)))
