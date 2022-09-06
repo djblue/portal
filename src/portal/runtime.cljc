@@ -1,10 +1,10 @@
 (ns ^:no-doc portal.runtime
   (:refer-clojure :exclude [read])
-  (:require [clojure.datafy :refer [datafy nav]]
+  (:require #?(:clj  [portal.sync  :as a]
+               :cljs [portal.async :as a])
+            [clojure.datafy :refer [datafy nav]]
             [clojure.pprint :as pprint]
-            [portal.runtime.cson :as cson]
-            #?(:clj  [portal.sync  :as a]
-               :cljs [portal.async :as a])))
+            [portal.runtime.cson :as cson]))
 
 (defonce default-options (atom nil))
 
@@ -82,26 +82,26 @@
   #?(:clj  (instance? clojure.lang.IRef value)
      :cljs (satisfies? cljs.core/IDeref value)))
 
-(defn- to-object [value tag rep]
+(defn- to-object [buffer value tag rep]
   (if-not *session*
-    (cson/tag "remote" (pr-str value))
+    (cson/tag buffer "remote" (pr-str value))
     (let [m (meta value)]
       (when (atom? value) (watch-atom value))
       (cson/tag
+       buffer
        "object"
-       (cson/to-json
-        (cond-> {:tag       tag
-                 :id        (value->id value)
-                 :type      (pr-str (type value))
-                 :protocols (cond-> #{}
-                              (deref? value) (conj :IDeref))}
-          m   (assoc :meta m)
-          rep (assoc :rep rep)))))))
+       (cond-> {:tag       tag
+                :id        (value->id value)
+                :type      (pr-str (type value))
+                :protocols (cond-> #{}
+                             (deref? value) (conj :IDeref))}
+         m   (assoc :meta m)
+         rep (assoc :rep rep))))))
 
 (extend-type #?(:clj Object :cljs default)
   cson/ToJson
-  (-to-json [value]
-    (to-object value :object nil)))
+  (-to-json [value buffer]
+    (to-object buffer value :object nil)))
 
 (defn- var->symbol [v]
   (let [m (meta v)]
@@ -112,12 +112,16 @@
 (extend-type #?(:clj  clojure.lang.Var
                 :cljs cljs.core/Var)
   cson/ToJson
-  (-to-json [value]
-    (to-object value :var (var->symbol value))))
+  (-to-json [value buffer]
+    (to-object buffer value :var (var->symbol value))))
+
+#?(:bb (def clojure.lang.Range (type (range 1.0))))
 
 (defn- can-meta? [value]
-  #?(:clj  (or (instance? clojure.lang.IObj value)
-               (instance? clojure.lang.Var value))
+  #?(:clj  (and
+            (not (instance? clojure.lang.Range value))
+            (or (instance? clojure.lang.IObj value)
+                (instance? clojure.lang.Var value)))
      :cljs (implements? IMeta value)))
 
 (defn- has? [m k]
@@ -151,9 +155,6 @@
       {:transform id-coll
        :to-object to-object}))))
 
-(defn- ref-> [value]
-  (id->value (second value)))
-
 (defrecord RemoteValue [string])
 
 #?(:clj
@@ -174,11 +175,11 @@
      (merge
       session
       {:default-handler
-       (fn [value]
-         (case (first value)
-           "ref"    (ref-> value)
-           "remote" (->RemoteValue (second value))
-           (cson/tagged-value (first value) (cson/json-> (second value)))))}))))
+       (fn [op value]
+         (case op
+           "ref"    (id->value value)
+           "remote" (->RemoteValue value)
+           (cson/tagged-value op value)))}))))
 
 (defonce ^:private tap-list (atom (list)))
 

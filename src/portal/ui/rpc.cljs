@@ -21,19 +21,19 @@
 
 (extend-type default
   cson/ToJson
-  (-to-json [value]
-    (cson/tag "remote" (pr-str value))))
+  (-to-json [value buffer]
+    (cson/tag buffer "remote" (pr-str value))))
 
 (defn- read [string]
   (cson/read
    string
    {:transform rt/transform
     :default-handler
-    (fn [value]
-      (case (first value)
-        "ref"    (rt/ref-> value)
-        "object" (rt/object-> call value)
-        (diff/diff-> value)))}))
+    (fn [op value]
+      (case op
+        "ref"    (rt/->value value)
+        "object" (rt/->object call value)
+        (diff/->diff op value)))}))
 
 (defn- write [value]
   (cson/write
@@ -41,7 +41,7 @@
    {:transform
     (fn [value]
       (if-let [id (-> value meta :portal.runtime/id)]
-        (rt/->runtime call {:id id})
+        (cson/tagged-value "ref" id)
         value))}))
 
 (defonce ^:private id (atom 0))

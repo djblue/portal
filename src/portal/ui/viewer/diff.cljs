@@ -5,24 +5,21 @@
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]))
 
-(defn- to-json [tag value]
-  (cson/tag tag (cson/to-json value)))
-
 (extend-protocol cson/ToJson
   diff/Deletion
-  (-to-json [this] (to-json "diff/Deletion" (:- this)))
+  (-to-json [this buffer] (cson/tag buffer "diff/Deletion" (:- this)))
 
   diff/Insertion
-  (-to-json [this] (to-json "diff/Insertion" (:+ this)))
+  (-to-json [this buffer] (cson/tag buffer "diff/Insertion" (:+ this)))
 
   diff/Mismatch
-  (-to-json [this] (to-json "diff/Mismatch" ((juxt :- :+) this))))
+  (-to-json [this buffer] (cson/tag buffer "diff/Mismatch" ((juxt :- :+) this))))
 
-(defn ^:no-doc diff-> [value]
-  (case (first value)
-    "diff/Deletion"  (diff/Deletion.  (cson/json-> (second value)))
-    "diff/Insertion" (diff/Insertion. (cson/json-> (second value)))
-    "diff/Mismatch"  (let [[a b] (cson/json-> (second value))]
+(defn ^:no-doc ->diff [op value]
+  (case op
+    "diff/Deletion"  (diff/Deletion.  value)
+    "diff/Insertion" (diff/Insertion. value)
+    "diff/Mismatch"  (let [[a b] value]
                        (diff/Mismatch. a b))))
 
 (defn diff? [value]

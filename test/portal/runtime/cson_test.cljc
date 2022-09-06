@@ -1,10 +1,6 @@
 (ns portal.runtime.cson-test
-  (:require #?(:clj  [clojure.edn :as edn]
-               :cljs [cljs.reader :as edn])
-            [clojure.test :refer [deftest are is]]
-            [portal.bench :as b]
-            [portal.runtime.cson :as cson]
-            [portal.runtime.transit :as transit])
+  (:require [clojure.test :refer [deftest are is]]
+            [portal.runtime.cson :as cson])
   #?(:clj (:import [java.util Date]
                    [java.util UUID])))
 
@@ -84,6 +80,15 @@
        (= value (pass value))
     (range 10)))
 
+(deftest range-with-meta
+  (let [v (with-meta (range 0 5 1.0) {:my :meta})]
+    #?(:clj  (is (= '() (pass v)) "Range with meta doesn't work in clj")
+       :cljs (is (= v (pass v))  "Range with meta doesn't work in cljs")))
+  (let [v (range 0 5 1.0)]
+    (is (= v (pass v)) "Range with no meta works correctly"))
+  (let [v (with-meta (range 0 5 1) {:my :meta})]
+    (is (= v (pass v)) "LongRange with no meta works correctly")))
+
 (deftest seq-collections
   (are [value]
        (= (seq value) (pass (seq value)))
@@ -134,35 +139,6 @@
         value {(with-meta 'k m) 'v}]
     (is (= value (pass value)))
     (is (= m (meta (first (keys (pass value))))))))
-
-(deftest cson-over-edn
-  (is
-   (-> composite-value
-       (cson/write {:stringify pr-str})
-       (cson/read  {:parse edn/read-string})
-       (= composite-value))))
-
-(def n 10000)
-(def v composite-value)
-
-(def edn
-  {:parse     edn/read-string
-   :stringify pr-str})
-
-(comment
-  (deftest rich-benchmark
-    (b/simple-benchmark [] (transit/write v) n)
-    (b/simple-benchmark [] (cson/write v edn) n)
-    (b/simple-benchmark [] (cson/write v) n)
-
-    (prn)
-
-    (b/simple-benchmark
-     [v (transit/write v)] (transit/read v) n)
-    (b/simple-benchmark
-     [v (cson/write v edn)] (cson/read v edn) n)
-    (b/simple-benchmark
-     [v (cson/write v)] (cson/read v) n)))
 
 #?(:clj
    (deftest java-longs
