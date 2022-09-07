@@ -26,7 +26,7 @@
 (defn- open-external [state value]
   (let [theme (theme/use-theme)]
     [icons/external-link
-     {:size "m"
+     {:size "1x"
       :style {:cursor :pointer
               :padding (:padding theme)}
       :on-click
@@ -50,7 +50,7 @@
     [icon
      {:disabled disabled?
       :title  title
-      :size "m"
+      :size "1x"
       :on-click #(state/dispatch! state on-click)
       :style    (merge
                  {:cursor :pointer
@@ -63,7 +63,7 @@
   (let [state (state/use-state)
         theme (theme/use-theme)]
     [icons/terminal
-     {:size     "m"
+     {:size     "1x"
       :title    "Open command palette."
       :style    {:cursor :pointer
                  :padding (:padding theme)}
@@ -72,7 +72,8 @@
 (defn- toolbar [& children]
   (let [theme (theme/use-theme)]
     [s/div
-     {:style
+     {:class "toolbar"
+      :style
       {:z-index 100
        :position :relative
        :min-height (* 2 (:padding theme))}}
@@ -96,8 +97,46 @@
        :overflow :auto}}
      child]))
 
+(defn select-viewer []
+  (let [theme              (theme/use-theme)
+        state              (state/use-state)
+        selected-context   (state/get-selected-context @state)
+        viewer             (ins/get-viewer state selected-context)
+        compatible-viewers (ins/get-compatible-viewers @ins/viewers selected-context)
+        disabled?          (nil? selected-context)]
+    [s/div
+     {:style
+      {:display :inline-block
+       :position :relative
+       :opacity (if disabled? 0.45 1)}}
+     [s/select
+      {:title "Select a different viewer."
+       :disabled disabled?
+       :style {:opacity 0
+               :position :absolute
+               :left 0
+               :top 0
+               :right 0
+               :bottom 0
+               :cursor (if disabled? :default :pointer)}
+       :value (pr-str (:name viewer))
+       :on-change
+       (fn [e]
+         (ins/set-viewer!
+          state
+          selected-context
+          (keyword (subs (.. e -target -value) 1))))}
+      (for [{:keys [name]} compatible-viewers]
+        ^{:key name}
+        [s/option {:value (pr-str name)} (pr-str name)])]
+     [icons/ellipsis-h
+      {:size  "1x"
+       :style {:padding (:padding theme)
+               :z-index 1}
+       :style/hover {:background :pink}}]]))
+
 (defn- app* [id value]
-  (let [state (r/atom {})]
+  (let [state (r/atom {:portal/value value})]
     (fn []
       (let [opts  (opts/use-options)
             theme (or (:theme @state)
@@ -105,7 +144,8 @@
                       (::c/theme opts))]
         [select/with-position {:id id :row 0 :column 0}
          [s/div
-          {:style {:overflow    :auto
+          {:class "app"
+           :style {:overflow    :auto
                    :position    :relative
                    :min-height  :fit-content
                    :font-size   (:font-size theme)
@@ -126,9 +166,13 @@
                :enabled  :portal/next-state
                :icon     icons/arrow-right
                :on-click state/history-forward}]
+             [select-viewer]
              [open-external state value]
              [command-button]]
             [app/styles]
+            [:style
+             ".toolbar {opacity: 0}"
+             ".app:hover .toolbar {opacity: 1}"]
             [commands/palette {:container command-container}]
             (when-not (::commands/input @state)
               [ins/inspector (:portal/value @state value)])]]]]))))

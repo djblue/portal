@@ -1,36 +1,38 @@
 (ns portal.ui.icons
-  (:require ["@fortawesome/free-solid-svg-icons/faArrowDown" :as down]
-            ["@fortawesome/free-solid-svg-icons/faArrowLeft" :as left]
-            ["@fortawesome/free-solid-svg-icons/faArrowRight" :as right]
-            ["@fortawesome/free-solid-svg-icons/faArrowUp" :as up]
-            ["@fortawesome/free-solid-svg-icons/faCheckCircle" :as check-circle]
-            ["@fortawesome/free-solid-svg-icons/faChevronDown" :as chevron-down]
-            ["@fortawesome/free-solid-svg-icons/faChevronRight" :as chevron-right]
-            ["@fortawesome/free-solid-svg-icons/faCircle" :as circle]
-            ["@fortawesome/free-solid-svg-icons/faCopy" :as copy]
-            ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt" :as external-link]
-            ["@fortawesome/free-solid-svg-icons/faInfoCircle" :as info-circle]
-            ["@fortawesome/free-solid-svg-icons/faPlayCircle" :as play-circle]
-            ["@fortawesome/free-solid-svg-icons/faStopCircle" :as stop-circle]
-            ["@fortawesome/free-solid-svg-icons/faTerminal" :as terminal]
-            ["@fortawesome/free-solid-svg-icons/faTimesCircle" :as times-circle]
-            ["@fortawesome/react-fontawesome" :as react-fontawesome]))
+  (:require ["@fortawesome/free-solid-svg-icons/faArrowDown"        :refer [faArrowDown]]
+            ["@fortawesome/free-solid-svg-icons/faArrowLeft"        :refer [faArrowLeft]]
+            ["@fortawesome/free-solid-svg-icons/faArrowRight"       :refer [faArrowRight]]
+            ["@fortawesome/free-solid-svg-icons/faArrowUp"          :refer [faArrowUp]]
+            ["@fortawesome/free-solid-svg-icons/faCheckCircle"      :refer [faCheckCircle]]
+            ["@fortawesome/free-solid-svg-icons/faChevronDown"      :refer [faChevronDown]]
+            ["@fortawesome/free-solid-svg-icons/faChevronRight"     :refer [faChevronRight]]
+            ["@fortawesome/free-solid-svg-icons/faCircle"           :refer [faCircle]]
+            ["@fortawesome/free-solid-svg-icons/faCopy"             :refer [faCopy]]
+            ["@fortawesome/free-solid-svg-icons/faEllipsisH"        :refer [faEllipsisH]]
+            ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt"  :refer [faExternalLinkAlt]]
+            ["@fortawesome/free-solid-svg-icons/faInfoCircle"       :refer [faInfoCircle]]
+            ["@fortawesome/free-solid-svg-icons/faPlayCircle"       :refer [faPlayCircle]]
+            ["@fortawesome/free-solid-svg-icons/faStopCircle"       :refer [faStopCircle]]
+            ["@fortawesome/free-solid-svg-icons/faTerminal"         :refer [faTerminal]]
+            ["@fortawesome/free-solid-svg-icons/faTimesCircle"      :refer [faTimesCircle]]
+            ["@fortawesome/react-fontawesome"                       :refer [FontAwesomeIcon]]))
 
 (defn icon [icon props]
-  [:> react-fontawesome/FontAwesomeIcon (merge {:icon icon :size "lg"} props)])
+  [:> FontAwesomeIcon (merge {:icon icon :size "lg"} props)])
 
-(def arrow-down    (partial icon down/faArrowDown))
-(def arrow-left    (partial icon left/faArrowLeft))
-(def arrow-right   (partial icon right/faArrowRight))
-(def arrow-up      (partial icon up/faArrowUp))
-(def check-circle  (partial icon check-circle/faCheckCircle))
-(def chevron-down  (partial icon chevron-down/faChevronDown))
-(def chevron-right (partial icon chevron-right/faChevronRight))
-(def circle        (partial icon circle/faCircle))
-(def copy          (partial icon copy/faCopy))
-(def external-link (partial icon external-link/faExternalLinkAlt))
-(def info-circle   (partial icon info-circle/faInfoCircle))
-(def play-circle   (partial icon play-circle/faPlayCircle))
-(def stop-circle   (partial icon stop-circle/faStopCircle))
-(def terminal      (partial icon terminal/faTerminal))
-(def times-circle  (partial icon times-circle/faTimesCircle))
+(def arrow-down    (partial icon faArrowDown))
+(def arrow-left    (partial icon faArrowLeft))
+(def arrow-right   (partial icon faArrowRight))
+(def arrow-up      (partial icon faArrowUp))
+(def check-circle  (partial icon faCheckCircle))
+(def chevron-down  (partial icon faChevronDown))
+(def chevron-right (partial icon faChevronRight))
+(def circle        (partial icon faCircle))
+(def copy          (partial icon faCopy))
+(def ellipsis-h    (partial icon faEllipsisH))
+(def external-link (partial icon faExternalLinkAlt))
+(def info-circle   (partial icon faInfoCircle))
+(def play-circle   (partial icon faPlayCircle))
+(def stop-circle   (partial icon faStopCircle))
+(def terminal      (partial icon faTerminal))
+(def times-circle  (partial icon faTimesCircle))
