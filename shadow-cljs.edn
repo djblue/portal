@@ -52,8 +52,7 @@
    :compiler-options
    {:infer-externs true
     :source-map    true
-    :warnings-as-errors true
-    :optimizations :simple}
+    :warnings-as-errors true}
    :devtools {:use-document-host false
               :after-load portal.extensions.vs-code-notebook/reload}}
 
