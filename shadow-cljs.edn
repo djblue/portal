@@ -36,7 +36,6 @@
    :target :node-library
    :compiler-options
    {:infer-externs true
-    :source-map    true
     :warnings-as-errors true}
    :output-to "extension-vscode/vs-code.js"
    :devtools {:after-load portal.extensions.vs-code/reload}}
@@ -51,7 +50,6 @@
    :target :esm
    :compiler-options
    {:infer-externs true
-    :source-map    true
     :warnings-as-errors true}
    :devtools {:use-document-host false
               :after-load portal.extensions.vs-code-notebook/reload}}
