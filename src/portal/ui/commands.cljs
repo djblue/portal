@@ -482,6 +482,13 @@
 (defn- catch* [value]
   (-> js/Promise (.resolve value) (.catch ex-data)))
 
+(defn- can-meta? [value] (implements? IMeta value))
+
+(defn- with-meta* [obj m]
+  (if-not (can-meta? obj)
+    obj
+    (vary-meta obj #(merge m %))))
+
 (defn make-command [{:keys [name command predicate args f] :as opts}]
   (assoc opts
          :predicate (fn [state]
@@ -489,7 +496,10 @@
                         true
                         (apply predicate (state/selected-values state))))
          :run (fn [state]
-                (a/let [selected (state/selected-values @state)
+                (a/let [selected (for [context (:selected @state)]
+                                   (with-meta*
+                                     (:value context)
+                                     {:portal.viewer/default (:name (ins/get-viewer state context))}))
                         args     (when args (binding [*state* state] (apply args selected)))
                         result   (catch* (apply f (concat selected args)))]
                   (when-not command
@@ -635,26 +645,30 @@
 (defn transpose-map
   "Transpose a map."
   [value]
-  (reduce
-   (fn [m path]
-     (assoc-in m (reverse path) (get-in value path)))
-   {}
-   (for [row (keys value)
-         column (map-keys value)
-         :when (contains? (get value row) column)]
-     [row column])))
+  (with-meta
+    (reduce
+     (fn [m path]
+       (assoc-in m (reverse path) (get-in value path)))
+     {}
+     (for [row (keys value)
+           column (map-keys value)
+           :when (contains? (get value row) column)]
+       [row column]))
+    (meta value)))
 
 (defn select-columns
   "Select column from list-of-maps or map-of-maps."
   [value ks]
-  (cond
-    (map? value)
-    (reduce-kv
-     (fn [v k m]
-       (assoc v k (select-keys m ks)))
-     value
-     value)
-    :else (map #(select-keys % ks) value)))
+  (with-meta
+    (cond
+      (map? value)
+      (reduce-kv
+       (fn [v k m]
+         (assoc v k (select-keys m ks)))
+       value
+       value)
+      :else (map #(select-keys % ks) value))
+    (meta value)))
 
 (defn pprint
   "Pretty print selected value to a string"
