@@ -3,6 +3,7 @@
   (:require ["anser" :as anser]
             ["react" :as react]
             [clojure.edn :as edn]
+            [clojure.string :as str]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.async :as a]
             [portal.colors :as c]
@@ -32,7 +33,10 @@
     :stack   (.-stack ex)}))
 
 (defn read-string [edn-string]
-  (edn/read-string {:default tagged-literal} edn-string))
+  (edn/read-string
+   {:readers {'portal/var rt/->var}
+    :default tagged-literal}
+   (str/replace edn-string #"#'" "#portal/var ")))
 
 (defn- inspect-error [error]
   (let [theme (theme/use-theme)]
