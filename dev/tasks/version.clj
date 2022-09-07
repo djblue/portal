@@ -20,7 +20,7 @@
 
 (def files
   ["README.md"
-   "extension-intellij/build.gradle"
+   "extension-intellij/gradle.properties"
    "extension-vscode/package.json"
    "package.json"
    "src/portal/extensions/vs_code.cljs"
