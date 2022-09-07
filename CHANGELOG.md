@@ -1,3 +1,27 @@
+## 0.30.0 - 2022-09-07
+
+### New Features
+
+- Add notebook renderer for vscode e1485e5
+- Port extenion code to node 3119a24
+- Attach :portal.viewer/default meta to command args 7872e0a
+- Support reading vars from edn strings 311ff43
+
+### Improvements
+
+- CSON perf updates (#137) 8c2f312
+- Improve printing for tagged values 28ee0d8
+- Updates build process for IJ plugin (#133) 82210ad
+  - Thanks @coyotesqrl!
+- Add more chrome search paths for windows a95870e
+
+### Bug Fixes
+
+- Fix log / exception viewer context 7cdebfc
+- Isolate watch-registry per `*session*` 20ebc93
+  - This prevents issues related to multiple instances with different atoms
+    clearing each other's watch-registry.
+
 ## 0.29.1 - 2022-07-26
 
 - Fix portal.nrepl middleware order issue 3d4cb04
