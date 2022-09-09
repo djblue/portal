@@ -1,5 +1,6 @@
 (ns portal.test-planck
   (:require [cljs.test :refer [run-tests]]
+            [clojure.pprint :as pp]
             [planck.core :refer [exit slurp]]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
@@ -12,4 +13,5 @@
 (defn -main []
   (run-tests 'portal.runtime.cson-test)
   (prn)
-  (bench/run (json/read (slurp "package-lock.json")) 50))
+  (pp/print-table (bench/run (json/read (slurp "package-lock.json")) 50))
+  (prn))

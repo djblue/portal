@@ -2,17 +2,47 @@
   #?(:cljs (:refer-clojure :exclude [simple-benchmark]))
   #?(:cljs (:require-macros portal.bench)))
 
-(defn now []
-  #?(:clj  (System/currentTimeMillis)
-     :cljs (.now js/Date)))
+(defn- now
+  ([]
+   #?(:clj  (System/nanoTime)
+      :cljs (if (exists? js/process)
+              (.hrtime js/process)
+              (.now js/Date))))
+  ([a]
+   #?(:clj  (/ (- (System/nanoTime) a) 1000000.0)
+      :cljs (if (exists? js/process)
+              (let [[a b] (.hrtime js/process a)]
+                (+ (* a 1000.0) (/ b  1000000.0)))
+              (- (.now js/Date) a)))))
 
-(defmacro simple-benchmark
-  [bindings expr iterations & {:keys [print-fn] :or {print-fn 'println}}]
-  (let [expr-str (pr-str expr)]
-    `(let ~bindings
-       (dotimes [_# ~iterations] ~expr)
-       (let [start#   (now)
-             ret#     (dotimes [_# ~iterations] ~expr)
-             end#     (now)
-             elapsed# (- end# start#)]
-         (~print-fn (str ~iterations " runs, " elapsed# " msecs, " ~expr-str))))))
+(defn trunc [v]
+  (/ (Math/floor (* 100 v)) 100.0))
+
+(defn- simple-stats [expr results]
+  (let [n       (count results)
+        results (into [] (sort results))
+        median  (nth results (quot n 2))
+        total   (reduce + results)]
+    {:label expr
+     :unit  :ms
+     :iter  n
+     :min   (first results)
+     :max   (last results)
+     :avg   (trunc (/ total n))
+     :med   median
+     :total (trunc total)}))
+
+(defn run* [expr f n]
+  (dotimes [_ n] (f))
+  (simple-stats
+   expr
+   (loop [i 0 results (transient [])]
+     (if (== i n)
+       (persistent! results)
+       (let [start (now)
+             _     (f)
+             end   (now start)]
+         (recur (unchecked-inc i)
+                (conj! results (trunc end))))))))
+
+(defmacro run [label expr n] `(run* ~label #(do ~expr) ~n))

@@ -1,5 +1,6 @@
 (ns portal.test-runner
   (:require [cljs.test :refer [run-tests]]
+            [clojure.pprint :as pp]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
             [portal.runtime.fs :as fs]
@@ -13,7 +14,7 @@
 (defn -main []
   (run-tests 'portal.runtime.cson-test
              'portal.runtime.fs-test)
-  (prn)
-  (bench/run (json/read (fs/slurp "package-lock.json")) 50))
+  (pp/print-table (bench/run (json/read (fs/slurp "package-lock.json")) 100))
+  (prn))
 
 (-main)
