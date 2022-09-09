@@ -77,8 +77,8 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 (def p (p/open)) ; Open a new inspector
 
 ;; or with an extension installed, do:
-(def p (p/open {:launcher :vs-code}))  ; JVM only for now
-(def p (p/open {:launcher :intellij})) ; JVM only for now
+(def p (p/open {:launcher :vs-code}))  ; jvm / node only
+(def p (p/open {:launcher :intellij})) ; jvm / node only
 
 (add-tap #'p/submit) ; Add portal as a tap> target
 
