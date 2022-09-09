@@ -16,26 +16,26 @@
    {hiccup/hiccup                 {:mvn/version "2.0.0-alpha2"}
     io.aviso/pretty               {:mvn/version "1.1.1"}
     ns-tracker/ns-tracker         {:mvn/version "0.4.0"}
-    vlaaad/reveal                 {:mvn/version "1.3.273"}
+    vlaaad/reveal                 {:mvn/version "1.3.275"}
     io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}}
   :plk
   {:extra-deps {planck/planck {:mvn/version "2.26.0"}}}
   :cljs
   {:extra-deps
    {hickory/hickory           {:mvn/version "0.7.1"}
-    lambdaisland/deep-diff2   {:mvn/version "2.3.127"}
-    markdown-clj/markdown-clj {:mvn/version "1.11.2"}
+    lambdaisland/deep-diff2   {:mvn/version "2.4.138"}
+    markdown-clj/markdown-clj {:mvn/version "1.11.3"}
     org.babashka/sci          {:mvn/version "0.3.32"}
     reagent/reagent           {:mvn/version "1.1.1"}}}
   :shadow
   {:jvm-opts ["-Xss16m"]
    :extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.19.8"}}}
+   {thheller/shadow-cljs {:mvn/version "2.20.1"}}}
   :build
   {:extra-paths ["dev"]
    :ns-default  tasks.build
-   :deps        {babashka/babashka {:mvn/version "0.9.159"}
-                 babashka/fs       {:mvn/version "0.1.6"}}}
+   :deps        {babashka/babashka {:mvn/version "0.9.162"}
+                 babashka/fs       {:mvn/version "0.1.11"}}}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
    :exec-fn      deps-deploy.deps-deploy/deploy}
@@ -43,13 +43,13 @@
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts  ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.06.22"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.09.08"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
-   :extra-deps {cljfmt/cljfmt {:mvn/version "0.8.2"}}}
+   :extra-deps {cljfmt/cljfmt {:mvn/version "0.9.0"}}}
   :cider
   {:extra-deps
-   {nrepl/nrepl       {:mvn/version "0.9.0"}
+   {nrepl/nrepl       {:mvn/version "1.0.0"}
     cider/cider-nrepl {:mvn/version "0.28.5"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
@@ -65,7 +65,7 @@
      :sha     "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "1.9.874"}
-    org.slf4j/slf4j-nop     {:mvn/version "1.7.36"}}}
+   {com.github.liquidz/antq {:mvn/version "2.0.895"}
+    org.slf4j/slf4j-nop     {:mvn/version "2.0.0"}}}
   :yaml
-  {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.108"}}}}}
+  {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.109"}}}}}
