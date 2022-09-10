@@ -16,7 +16,8 @@
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
-            [reagent.core :as r]))
+            [reagent.core :as r])
+  (:import [goog.math Long]))
 
 (declare inspector*)
 (declare inspector)
@@ -192,6 +193,8 @@
     (instance? diff/Deletion value)   :diff
     (instance? diff/Insertion value)  :diff
     (instance? diff/Mismatch value)   :diff
+
+    (instance? Long value) :number
 
     (bin? value)      :binary
 
@@ -536,7 +539,7 @@
 
 (defn- inspect-number [value]
   (let [theme (theme/use-theme)]
-    [s/span {:style {:color (::c/number theme)}} value]))
+    [s/span {:style {:color (::c/number theme)}} (str value)]))
 
 (defn- inspect-bigint [value]
   (let [theme (theme/use-theme)]
@@ -708,7 +711,6 @@
     :uri        inspect-uri
     :tagged     inspect-tagged
     :error      inspect-error
-    "long"      inspect-long
     inspect-object))
 
 (defn preview [value]
@@ -733,7 +735,6 @@
     :uri        inspect-uri
     :tagged     inspect-tagged
     :error      inspect-error
-    "long"      inspect-long
     inspect-object))
 
 (defn- get-info [state theme context]

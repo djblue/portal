@@ -6,7 +6,8 @@
                      [portal.runtime.macros :as m])
      :clj  (:require [portal.runtime.json-buffer :as json]))
   #?(:clj  (:import [java.net URL]
-                    [java.util Base64 Date UUID])))
+                    [java.util Base64 Date UUID])
+     :cljs (:import [goog.math Long])))
 
 (defprotocol ToJson (-to-json [value buffer]))
 
@@ -25,20 +26,29 @@
   (assert tag string?)
   (-to-json value (json/push-string buffer tag)))
 
-#?(:clj
-   (defn- box-long [buffer value]
+(defn- box-long [buffer value]
+  #?(:clj
      (let [js-min-int -9007199254740991
            js-max-int  9007199254740991]
        (if (<= js-min-int value js-max-int)
          (json/push-long buffer value)
          (-> buffer
              (json/push-string "long")
-             (json/push-string (Long/toString value)))))))
+             (json/push-string (Long/toString value)))))
+     :cljs
+     (-> buffer
+         (json/push-string "long")
+         (json/push-string (str value)))))
+
+(extend-type Long ToJson (-to-json [value buffer] (box-long buffer value)))
+
+(defn- ->long [buffer]
+  #?(:clj  (Long/parseLong (json/next-string buffer))
+     :cljs (Long/fromString (json/next-string buffer))))
 
 #?(:clj (extend-type Byte    ToJson (-to-json [value buffer] (json/push-long buffer value))))
 #?(:clj (extend-type Short   ToJson (-to-json [value buffer] (json/push-long buffer value))))
 #?(:clj (extend-type Integer ToJson (-to-json [value buffer] (json/push-long buffer value))))
-#?(:clj (extend-type Long    ToJson (-to-json [value buffer] (box-long buffer value))))
 #?(:clj (extend-type Float   ToJson (-to-json [value buffer] (json/push-double buffer value))))
 #?(:clj (extend-type Double  ToJson (-to-json [value buffer] (json/push-double buffer value))))
 
@@ -450,10 +460,6 @@
       (fn [a b]
         (compare (get order a) (get order b))))
      pairs)))
-
-(defn- ->long [buffer]
-  #?(:clj  (Long/parseLong (json/next-string buffer))
-     :cljs (tagged-value "long" (json/next-string buffer))))
 
 #?(:bb (def clojure.lang.TaggedLiteral (type (tagged-literal 'a :a))))
 

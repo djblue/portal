@@ -5,7 +5,8 @@
             [portal.ui.rpc.runtime :as rt]
             [portal.ui.sci :as sci]
             [portal.ui.state :as state]
-            [portal.ui.viewer.diff :as diff]))
+            [portal.ui.viewer.diff :as diff])
+  (:import [goog.math Long]))
 
 (defn call [f & args]
   (apply state/invoke f args))
@@ -18,6 +19,11 @@
     IPrintWithWriter
     (-pr-writer [this writer _opts]
       (-write writer (str this "N")))))
+
+(extend-type Long
+  IPrintWithWriter
+  (-pr-writer [this writer _opts]
+    (-write writer (str this))))
 
 (extend-type default
   cson/ToJson
