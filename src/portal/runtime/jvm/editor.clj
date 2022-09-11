@@ -111,7 +111,8 @@
                 error)))))
 
 (defn can-goto [input]
-  (and (satisfies? IResolve input) (resolve input)))
+  (or (and (satisfies? IResolve input) (resolve input))
+      (when-let [m (meta input)] (recur m))))
 
 (defn goto-definition
   "Goto the definition of a value in an editor."

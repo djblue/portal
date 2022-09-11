@@ -49,21 +49,8 @@
 
 (defprotocol Runtime)
 
-(deftype ^:private EdnVar [_ object]
-  Runtime
-  IHash
-  (-hash    [_]     (hash object))
-  IMeta
-  (-meta    [_this] (:meta object))
-  IWithMeta
-  (-with-meta [_this m]
-    (EdnVar. _ (assoc object :meta m)))
-  IPrintWithWriter
-  (-pr-writer [_this writer _opts]
-    (-write writer (str "#'" (:rep object)))))
-
 (defn ->var [var-symbol]
-  (EdnVar. nil {:tag :var :rep var-symbol}))
+  (cson/tagged-value "var" var-symbol))
 
 (deftype RuntimeObject [runtime object]
   Runtime

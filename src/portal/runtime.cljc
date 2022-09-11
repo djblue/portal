@@ -3,7 +3,6 @@
   (:require #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a])
             [clojure.datafy :refer [datafy nav]]
-            [clojure.pprint :as pprint]
             [portal.runtime.cson :as cson]))
 
 (defonce default-options (atom nil))
@@ -110,25 +109,13 @@
   (-to-json [value buffer]
     (to-object buffer value :object nil)))
 
-(defn- var->symbol [v]
-  (let [m (meta v)]
-    (symbol (str (:ns m)) (str (:name m)))))
-
-#?(:bb (def clojure.lang.Var (type #'type)))
-
-(extend-type #?(:clj  clojure.lang.Var
-                :cljs cljs.core/Var)
-  cson/ToJson
-  (-to-json [value buffer]
-    (to-object buffer value :var (var->symbol value))))
-
 #?(:bb (def clojure.lang.Range (type (range 1.0))))
 
 (defn- can-meta? [value]
   #?(:clj  (and
             (not (instance? clojure.lang.Range value))
             (or (instance? clojure.lang.IObj value)
-                (instance? clojure.lang.Var value)))
+                (var? value)))
      :cljs (implements? IMeta value)))
 
 (defn- has? [m k]
@@ -154,27 +141,25 @@
                    (record? value)
                    (assoc ::type (type value)))))))
 
+(defn- var->symbol [v]
+  (let [m (meta v)]
+    (symbol (str (:ns m)) (str (:name m)))))
+
+(defn- id-var [value]
+  (if-not (var? value)
+    value
+    (with-meta
+      (cson/tagged-value "var" (var->symbol value))
+      (assoc (meta value) ::id (value->id value)))))
+
 (defn write [value session]
   (binding [*session* session]
     (cson/write
      value
      (merge
       session
-      {:transform id-coll
+      {:transform (comp id-var id-coll)
        :to-object to-object}))))
-
-(defrecord RemoteValue [string])
-
-#?(:clj
-   (defmethod print-method RemoteValue [v ^java.io.Writer w]
-     (.write w ^String (:string v)))
-   :cljs
-   (extend-type RemoteValue
-     IPrintWithWriter
-     (-pr-writer [this writer _opts]
-       (-write writer (:string this)))))
-
-(defmethod pprint/simple-dispatch RemoteValue [portal] (pr portal))
 
 (defn read [string session]
   (binding [*session* session]
@@ -185,8 +170,7 @@
       {:default-handler
        (fn [op value]
          (case op
-           "ref"    (id->value value)
-           "remote" (->RemoteValue value)
+           "ref" (id->value value)
            (cson/tagged-value op value)))}))))
 
 (defonce ^:private tap-list (atom (list)))

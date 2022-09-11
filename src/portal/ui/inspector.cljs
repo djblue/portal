@@ -209,7 +209,7 @@
     (number? value)   :number
     (string? value)   :string
     (keyword? value)  :keyword
-    (var? value)      :var
+    (var? value)      "var"
     (error? value)    :error
 
     (uuid? value)     :uuid
@@ -629,8 +629,8 @@
   [tagged-value 'uuid (str value)])
 
 (defn- get-var-symbol [value]
-  (if (rt/runtime? value)
-    (rt/rep value)
+  (if-let [rep (:rep value)]
+    rep
     (let [m (meta value)]
       (symbol (name (:ns m)) (name (:name m))))))
 
@@ -707,7 +707,7 @@
     :keyword    inspect-keyword
     :date       inspect-date
     :uuid       inspect-uuid
-    :var        inspect-var
+    "var"       inspect-var
     :uri        inspect-uri
     :tagged     inspect-tagged
     :error      inspect-error
@@ -731,7 +731,7 @@
     :keyword    inspect-keyword
     :date       inspect-date
     :uuid       inspect-uuid
-    :var        inspect-var
+    "var"       inspect-var
     :uri        inspect-uri
     :tagged     inspect-tagged
     :error      inspect-error
