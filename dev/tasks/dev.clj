@@ -13,12 +13,16 @@
     (spit port-file (pr-str {:host host :port port :runtime :bb}))
     (printf "=> Babashka prepl listening on %s:%s\n" host port)))
 
+(defn pr-str* [v]
+  (binding [*print-meta* true] (pr-str v)))
+
 (defn prepl []
   (start-server
    {:name          "bb"
     :port          0
-    :accept        clojure.core.server/io-prepl
-    :server-daemon false}))
+    :server-daemon false
+    :args          [{:valf pr-str*}]
+    :accept        clojure.core.server/io-prepl}))
 
 (defn dev
   "Start dev server."
