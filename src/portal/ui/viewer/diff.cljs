@@ -20,7 +20,8 @@
     "diff/Deletion"  (diff/Deletion.  value)
     "diff/Insertion" (diff/Insertion. value)
     "diff/Mismatch"  (let [[a b] value]
-                       (diff/Mismatch. a b))))
+                       (diff/Mismatch. a b))
+    nil))
 
 (defn diff? [value]
   (or

@@ -36,11 +36,11 @@
    {:transform rt/transform
     :default-handler
     (fn [op value]
-      (case op
-        "ref"    (rt/->value value)
-        "object" (rt/->object call value)
-        "remote" (cson/tagged-value "remote" value)
-        (diff/->diff op value)))}))
+      (or (case op
+            "ref"    (rt/->value value)
+            "object" (rt/->object call value)
+            (diff/->diff op value))
+          (cson/tagged-value op value)))}))
 
 (defn- write [value]
   (cson/write

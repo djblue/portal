@@ -139,6 +139,7 @@
 (defn- no-cache [value]
   (or (not (coll? value))
       (empty? value)
+      (cson/tagged-value? value)
       (not (can-meta? value))
       (has? value :portal.rpc/id)))
 

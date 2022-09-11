@@ -69,24 +69,6 @@
 
 (extend-type nil ToJson (-to-json [_value buffer] (json/push-null buffer)))
 
-(defrecord Tagged [tag rep]
-  ToJson
-  (-to-json [_ buffer]
-    (-to-json rep (json/push-string buffer tag))))
-
-#?(:clj
-   (defmethod print-method Tagged [v ^java.io.Writer w]
-     (.write w ^String (:rep v)))
-   :cljs
-   (extend-type Tagged
-     IPrintWithWriter
-     (-pr-writer [this writer _opts]
-       (-write writer (:rep this)))))
-
-(defn tagged-value [tag rep] (assert tag string?) (->Tagged tag rep))
-
-(defn tagged-value? [x] (instance? Tagged x))
-
 (defn- ->meta [buffer]
   (let [m (->value buffer)]
     (with-meta (->value buffer) m)))
@@ -95,6 +77,38 @@
   (if-let [m (meta value)]
     (-to-json m (json/push-string buffer "^"))
     buffer))
+
+(defn- bb-fix
+  "Remove bb type tag for records which cause an infinite loop."
+  [tagged]
+  #?(:bb (vary-meta tagged dissoc :type) :clj tagged :cljs tagged))
+
+(defrecord Tagged [tag rep]
+  ToJson
+  (-to-json [this buffer]
+    (-to-json (:rep this)
+              (-> buffer
+                  (tagged-meta (bb-fix this))
+                  (json/push-string (:tag this))))))
+
+#?(:clj
+   (defmethod print-method Tagged [v ^java.io.Writer w]
+     (.write w "#")
+     (.write w ^String (:tag v))
+     (.write w " ")
+     (.write w (pr-str (:rep v))))
+   :cljs
+   (extend-type Tagged
+     IPrintWithWriter
+     (-pr-writer [this writer _opts]
+       (-write writer "#")
+       (-write writer (:tag this))
+       (-write writer " ")
+       (-write writer (:rep this)))))
+
+(defn tagged-value [tag rep] {:pre [(string? tag)]} (->Tagged tag rep))
+
+(defn tagged-value? [x] (instance? Tagged x))
 
 (defn- base64-encode [byte-array]
   #?(:clj  (.encodeToString (Base64/getEncoder) byte-array)
@@ -504,7 +518,8 @@
         "uuid" (->uuid buffer)
         "tag"  (->tagged-literal buffer)
         "long" (->long buffer)
-        ((:default-handler *options*) op (->value buffer)))))))
+        (let [handler (:default-handler *options* tagged-value)]
+          (handler op (->value buffer))))))))
 
 (defn write
   ([value] (write value nil))

@@ -128,6 +128,19 @@
   (doseq [value tagged]
     (is (= value (pass value)))))
 
+(defn meta* [v]
+  #?(:bb (dissoc (meta v) :type) :clj (meta v) :cljs (meta v)))
+
+(deftest tagged-values []
+  (let [v1 (cson/tagged-value "my/tag" {:hello :world})
+        v2 (with-meta v1 {:my :meta})]
+    (are [v] (= v (pass v)) v1 v2)
+    (are [v] (= (meta* v) (meta* (pass v))) v1 v2))
+  (is (thrown?
+       #?(:clj AssertionError :cljs js/Error)
+       (cson/tagged-value :my/tag {:hello :world}))
+      "only allow string tags"))
+
 (deftest metadata
   (doseq [value ['hello {} [] #{}]]
     (let [m     {:my :meta}
