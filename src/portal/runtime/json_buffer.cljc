@@ -1,4 +1,4 @@
-(ns portal.runtime.json-buffer
+(ns ^:no-doc portal.runtime.json-buffer
   #?(:bb  (:require [portal.runtime.json :as json])
      :clj (:import (com.google.gson.stream JsonReader JsonToken JsonWriter)
                    (java.io StringReader StringWriter))))
@@ -7,13 +7,7 @@
 
 (defn ->reader [data]
   #?(:bb
-     (let [source (into [] (json/read data))
-           n      (volatile! 0)]
-       (reify IShift
-         (-shift [this]
-           (let [result (nth source @n)]
-             (vswap! n unchecked-inc)
-             result))))
+     (volatile! (json/read data))
      :clj
      (doto (JsonReader. (StringReader. data))
        (.beginArray))
@@ -60,32 +54,32 @@
     (string? value)  (push-string buffer value)))
 
 (defn next-null [buffer]
-  #?(:bb   (-shift buffer)
+  #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
      :clj  (.nextNull ^JsonReader buffer)
      :cljs (-shift buffer)))
 
 (defn next-bool ^Boolean [buffer]
-  #?(:bb   (-shift buffer)
+  #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
      :clj  (.nextBoolean ^JsonReader buffer)
      :cljs (-shift buffer)))
 
 (defn next-long ^long [buffer]
-  #?(:bb   (-shift buffer)
+  #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
      :clj  (.nextLong ^JsonReader buffer)
      :cljs (-shift buffer)))
 
 (defn next-double ^double [buffer]
-  #?(:bb   (-shift buffer)
+  #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
      :clj  (.nextDouble ^JsonReader buffer)
      :cljs (-shift buffer)))
 
 (defn next-string ^String [buffer]
-  #?(:bb   (-shift buffer)
+  #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
      :clj  (.nextString ^JsonReader buffer)
      :cljs (-shift buffer)))
 
 (defn next-value [buffer]
-  #?(:bb (-shift buffer)
+  #?(:bb (let [v (first @buffer)] (vswap! buffer rest) v)
      :clj
      (condp identical? (.peek ^JsonReader buffer)
        JsonToken/STRING  (next-string ^JsonReader buffer)
