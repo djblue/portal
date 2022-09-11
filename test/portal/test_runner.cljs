@@ -1,6 +1,7 @@
 (ns portal.test-runner
   (:require [cljs.test :refer [run-tests]]
             [clojure.pprint :as pp]
+            [portal.client.node :as p]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
             [portal.runtime.fs :as fs]
@@ -11,10 +12,20 @@
   (when-not (cljs.test/successful? m)
     (.exit js/process 1)))
 
+(def port (.. js/process -env -PORTAL_PORT))
+
+(defn submit [value] (p/submit {:port port} value))
+
+(defn table [value]
+  (if port
+    (submit value)
+    (pp/print-table
+     (get-in (meta value) [:portal.viewer/table :columns])
+     value)))
+
 (defn -main []
   (run-tests 'portal.runtime.cson-test
              'portal.runtime.fs-test)
-  (pp/print-table (bench/run (json/read (fs/slurp "package-lock.json")) 100))
-  (prn))
+  (table (bench/run (json/read (fs/slurp "package-lock.json")) 100)))
 
 (-main)
