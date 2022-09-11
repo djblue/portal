@@ -44,7 +44,7 @@
 
 (defn- ->long [buffer]
   #?(:clj  (Long/parseLong (json/next-string buffer))
-     :cljs (Long/fromString (json/next-string buffer))))
+     :cljs (.fromString Long (json/next-string buffer))))
 
 #?(:clj (extend-type Byte    ToJson (-to-json [value buffer] (json/push-long buffer value))))
 #?(:clj (extend-type Short   ToJson (-to-json [value buffer] (json/push-long buffer value))))

@@ -3,10 +3,11 @@
             [examples.hacker-news :as hn]
             [examples.macros :refer [read-file]]
             [portal.colors :as c])
-  #?(:clj (:import [java.io File ByteArrayOutputStream]
-                   [java.net URI]
-                   [java.util Date]
-                   [java.util UUID])))
+  #?(:clj  (:import [java.io File ByteArrayOutputStream]
+                    [java.net URI]
+                    [java.util Date]
+                    [java.util UUID])
+     :cljs (:import [goog.math Long])))
 
 #?(:clj
    (defn slurp-bytes [x]
@@ -16,6 +17,7 @@
 
 (def platform-data
   #?(:clj {::ratio 22/7
+           ::long 4611681620380904123
            ::class File
            ::file (io/file "deps.edn")
            ::directory  (io/file ".")
@@ -28,7 +30,8 @@
            ::date (Date.)
            ::binary (slurp-bytes (io/resource "screenshot.png"))
            ::bigint 42N}
-     :cljs {::promise (js/Promise.resolve 123)
+     :cljs {::long (.fromString Long "4611681620380904123")
+            ::promise (js/Promise.resolve 123)
             ::url (js/URL. "https://github.com/djblue/portal")
             ::uuid (random-uuid)
             ::date (js/Date.)
