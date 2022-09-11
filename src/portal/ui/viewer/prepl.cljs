@@ -4,10 +4,11 @@
             [portal.colors :as c]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
+            [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(sp/def ::tag #{:out :err})
+(sp/def ::tag #{:out :err :tap})
 
 (sp/def ::out
   (sp/keys :req-un [::tag ::val]))
@@ -70,15 +71,30 @@
       (reverse
        (map-indexed
         (fn [index value]
-          ^{:key index}
-          [s/span
-           {:style
-            {:color
-             (if (= (:tag value) :err)
-               (::c/exception theme)
-               (::c/text theme))}
-            :dangerouslySetInnerHTML
-            {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
+          (with-meta
+            (if (= (:tag value) :tap)
+              [ins/with-collection
+               value
+               [ins/with-key
+                index
+                [select/with-position
+                 {:row index :column 0}
+                 [s/div
+                  {:style {:padding
+                           [(* 2 (:padding theme)) (:padding theme)]}}
+                  [ins/inspector
+                   (try
+                     (ins/read-string (:val value))
+                     (catch :default _ (:val value)))]]]]]
+              [s/span
+               {:style
+                {:color
+                 (if (= (:tag value) :err)
+                   (::c/exception theme)
+                   (::c/text theme))}
+                :dangerouslySetInnerHTML
+                {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
+            {:key index}))
         value))]]))
 
 (defn io? [value]
