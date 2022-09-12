@@ -486,7 +486,14 @@
         [select/with-position
          {:row index :column 1}
          [with-key k
-          [container-map-v [inspector v]]]]])
+          [container-map-v
+           [with-context
+            (let [m (meta values)]
+              (when-let [viewer (get-in m [:portal.viewer/for k])]
+                (merge
+                 (select-keys m [viewer])
+                 {:portal.viewer/default viewer})))
+            [inspector v]]]]]])
      (try-sort-map values))
     {:context (use-context)}]])
 

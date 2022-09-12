@@ -111,7 +111,11 @@
   ([attrs code]
    (let [theme    (theme/use-theme)
          opts     (ins/use-options)
-         out      (if-let [language (:class attrs)]
+         context  (ins/use-context)
+         out      (if-let [language (or (:class attrs)
+                                        (some->
+                                         (get-in context [:portal.viewer/code :language])
+                                         name))]
                     (hljs/highlight
                      code
                      #js {:language (get language-map language language)})

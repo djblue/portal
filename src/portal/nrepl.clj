@@ -68,6 +68,10 @@
             (assoc :time     (Date.)
                    :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
                    :runtime  (if (shadow-cljs? handler-msg) :cljs :clj))
+            (with-meta {:portal.viewer/for
+                        {:code :portal.viewer/code
+                         :time :portal.viewer/relative-time}
+                        :portal.viewer/code {:language :clojure}})
             p/submit)))
     transport))
 
