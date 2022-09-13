@@ -1,5 +1,5 @@
 (ns portal.ui.inspector
-  (:refer-clojure :exclude [coll? map?])
+  (:refer-clojure :exclude [coll? map? char?])
   (:require ["anser" :as anser]
             ["react" :as react]
             [clojure.edn :as edn]
@@ -173,6 +173,7 @@
 (defn bin? [value] (instance? js/Uint8Array value))
 (defn bigint? [value] (= (type value) js/BigInt))
 (defn error? [value] (instance? js/Error value))
+(defn char? [value] (instance? cson/Character value))
 
 (defn coll? [value]
   (and (clojure.core/coll? value)
@@ -211,6 +212,7 @@
     (keyword? value)  :keyword
     (var? value)      "var"
     (error? value)    :error
+    (char? value)     :char
 
     (uuid? value)     :uuid
     (url? value)      :uri
@@ -552,6 +554,11 @@
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/number theme)}} (str value) "N"]))
 
+(defn- inspect-char [value]
+  (let [theme (theme/use-theme)]
+    [s/span {:style {:color (::c/string theme)}}
+     (pr-str value)]))
+
 (defn hex-color? [string]
   (re-matches #"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}gi" string))
 
@@ -715,6 +722,7 @@
     :date       inspect-date
     :uuid       inspect-uuid
     "var"       inspect-var
+    :char       inspect-char
     :uri        inspect-uri
     :tagged     inspect-tagged
     :error      inspect-error
@@ -739,6 +747,7 @@
     :date       inspect-date
     :uuid       inspect-uuid
     "var"       inspect-var
+    :char       inspect-char
     :uri        inspect-uri
     :tagged     inspect-tagged
     :error      inspect-error

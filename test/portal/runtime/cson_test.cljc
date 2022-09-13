@@ -160,3 +160,13 @@
      (is (= 1 (int 1)   (pass (int 1))))
      (is (= 1 (long 1)  (pass (long 1))))
      (is (= 4611681620380904123 (pass 4611681620380904123)))))
+
+#?(:clj
+   (deftest java-chars
+     (is (= \A (pass \A)))
+     (is (= (seq "hi") (pass (seq "hi")))))
+   :cljs
+   (deftest js-chars
+     (let [a (cson/Character. 10) b (cson/Character. 10)]
+       (is (= a b))
+       (is (= a (pass b))))))

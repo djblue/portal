@@ -69,9 +69,13 @@
 
 (extend-type nil ToJson (-to-json [_value buffer] (json/push-null buffer)))
 
+(defn- can-meta? [value]
+  #?(:clj  (instance? clojure.lang.IObj value)
+     :cljs (implements? IMeta value)))
+
 (defn- ->meta [buffer]
-  (let [m (->value buffer)]
-    (with-meta (->value buffer) m)))
+  (let [m (->value buffer) v (->value buffer)]
+    (if-not (can-meta? v) v (with-meta v m))))
 
 (defn- tagged-meta [buffer value]
   (if-let [m (meta value)]
@@ -153,11 +157,34 @@
    (extend-type Character
      ToJson
      (-to-json [value buffer]
-       (-> buffer
-           (json/push-string "C")
-           (json/push-long (int value))))))
+       (tag buffer "C" (int value))))
+   :cljs
+   (deftype Character [code]
+     ToJson
+     (-to-json [_this buffer]
+       (tag buffer "C" code))
+     IHash
+     (-hash [_this] code)
+     IEquiv
+     (-equiv [_this other]
+       (and (instance? Character other)
+            (== code (.-code other))))
+     IPrintWithWriter
+     (-pr-writer [_this writer _opts]
+       (-write writer "\\")
+       (-write writer
+               (case code
+                 10 "newline"
+                 32 "space"
+                 9  "tab"
+                 8  "backspace"
+                 12 "formfeed"
+                 13 "return"
+                 (.fromCharCode js/String code))))))
 
-(defn- ->char [buffer] (char (json/next-long buffer)))
+(defn- ->char [buffer]
+  #?(:clj  (char (->value buffer))
+     :cljs (Character. (->value buffer))))
 
 #?(:bb (defn inst-ms [inst] (.getTime inst)))
 
@@ -264,6 +291,13 @@
 #?(:bb (def clojure.lang.PersistentList$EmptyList (type (list))))
 #?(:bb (def clojure.lang.PersistentVector$ChunkedSeq (type (seq [1]))))
 #?(:bb (def clojure.lang.Range (type (range 1.0))))
+#?(:bb (def clojure.lang.StringSeq (type (seq "hi"))))
+
+#?(:clj
+   (extend-type clojure.lang.StringSeq
+     ToJson
+     (-to-json [value buffer]
+       (tagged-coll buffer "(" value))))
 
 (extend-type #?(:clj  clojure.lang.Cons
                 :cljs cljs.core/Cons)

@@ -41,6 +41,8 @@
   {::booleans #{true false}
    ::nil nil
    ::vector [1 2 4]
+   ::character \A
+   ::char-seq (seq "hi\n")
    "string-key" "string-value"
    ::list (range 3)
    ::set #{1 2 3}
