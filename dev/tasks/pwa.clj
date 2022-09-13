@@ -17,6 +17,7 @@
     [{:type "image/svg+xml"
       :sizes "512x512"
       :src "icon.svg"}]
+    :handle_links "preferred"
     :scope (:host settings)
     :start_url (:host settings)
     :display "standalone"
