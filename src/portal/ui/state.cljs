@@ -176,7 +176,7 @@
     (if-not key? path (conj path value))))
 
 (defn set-theme [color]
-  (when-let [el (js/document.querySelector "meta[name=theme-color]")]
+  (doseq [el (.querySelectorAll js/document "meta[name=theme-color]")]
     (.setAttribute el "content" color)))
 
 (defn set-theme! [state theme] (assoc state :theme theme))

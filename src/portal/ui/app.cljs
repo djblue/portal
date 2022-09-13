@@ -85,16 +85,14 @@
   (let [opts       (opts/use-options)
         theme      (theme/use-theme)
         connected? (status/use-status)
-        background (::c/background2 theme)]
+        header     (if (= :dev (:mode opts))
+                     (::c/diff-add theme)
+                     (::c/background2 theme))]
     (react/useEffect
      (fn []
-       (state/notify-parent
-        {:type  :set-theme
-         :color
-         (if-not (= :dev (:mode opts))
-           background
-           (::c/diff-add theme))}))
-     #js [background])
+       (state/set-theme header)
+       (state/notify-parent {:type :set-theme :color header}))
+     #js [header])
     (react/useEffect
      (fn []
        (when-let [{:keys [name platform version]} opts]
