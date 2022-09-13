@@ -44,7 +44,17 @@
                        :response (select-keys response [:body :headers :status])}
                       error)))))
 
-(defmethod browser/-open :intellij [args] (remote-open (assoc args :config-file "intellij.edn")))
+(defmethod browser/-open :intellij [args]
+  (try
+    (remote-open (assoc args :config-file "intellij.edn"))
+    (catch Exception e
+      (throw
+       (ex-info
+        (str
+         (ex-message e)
+         ": Please ensure extension is installed and Portal tab is open.")
+        (ex-data e))))))
+
 (defmethod browser/-open :vs-code  [args] (remote-open (assoc args :config-file "vs-code.edn")))
 (defmethod browser/-open :electron [args] (remote-open (assoc args :config-file "electron.edn")))
 
