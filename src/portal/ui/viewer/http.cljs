@@ -114,7 +114,8 @@
         opts         (ins/use-options)
         expanded?    (:expanded? opts)
         background   (ins/get-background)
-        content-type (get-in value [:headers "Content-Type"])
+        content-type (or (get-in value [:headers "Content-Type"])
+                         (get-in value [:headers :content-type]))
         color        (-> value :status status->color theme)]
     [s/div
      [s/div

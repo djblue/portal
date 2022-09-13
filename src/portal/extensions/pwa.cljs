@@ -5,9 +5,12 @@
             [portal.colors :as c]
             [portal.resources :as io]
             [portal.runtime :as rt]
+            [portal.runtime.json :as json]
+            [portal.runtime.transit :as transit]
             [portal.ui.app :as app]
             [portal.ui.commands :as commands]
             [portal.ui.drag-and-drop :as dnd]
+            [portal.ui.inspector :as ins]
             [portal.ui.state :as state]
             [portal.ui.styled :refer [div]]
             [portal.ui.theme :as theme]
@@ -119,11 +122,23 @@
               (.getElementById js/document "root")
               functional-compiler))
 
+(defn ->map [entries]
+  (persistent!
+   (reduce
+    (fn [m entry]
+      (assoc! m (keyword (aget entry 0)) (aget entry 1)))
+    (transient {})
+    entries)))
+
+(defn- qs->map [qs] (->map (.entries (js/URLSearchParams. qs))))
+
 (defn get-mode []
-  (let [src (js/location.search.slice 1)]
-    (if (str/blank? src)
-      [:app]
-      [:host src])))
+  (let [search (.. js/window -location -search (slice 1))
+        params (qs->map search)]
+    (cond
+      (empty? params)       [:app]
+      (:content-url params) [:fetch params]
+      :else                 [:host search])))
 
 (defn create-iframe [src]
   (let [frame (js/document.createElement "iframe")]
@@ -136,6 +151,48 @@
   (js/window.addEventListener "message" #(handle-message %))
   (js/document.body.appendChild (create-iframe src)))
 
+(defn- with-meta* [obj m]
+  (if-not (implements? IMeta obj) obj (vary-meta obj merge m)))
+
+(defn- parse-data [params response]
+  (let [{:keys [status body]} response
+        content-type          (some->
+                               (or (:content-type params)
+                                   (get-in response [:headers :content-type]))
+                               (str/split #";")
+                               first)
+        metadata              {:query-params params :http-response response}]
+    (if-not (= status 200)
+      (ins/error->data
+       (ex-info (str "Error fetching data: " status) metadata))
+      (try
+        (with-meta*
+          (case content-type
+            "application/transit+json" (transit/read body)
+            "application/json"         (json/read body)
+            "application/edn"          (ins/read-string body)
+            "text/plain"               body
+            (ins/error->data
+             (ex-info (str "Unsupported :content-type " content-type) metadata)))
+          metadata)
+        (catch :default e
+          (ins/error->data
+           (ex-info (str "Error paring :content-type " content-type) metadata e)))))))
+
+(defn ->response [^js response]
+  (a/let [body (.text response)]
+    {:status  (.-status response)
+     :body    body
+     :headers (->map (.entries (.-headers response)))}))
+
+(defn fetch-mode [params]
+  (a/let [fetched  (js/fetch (:content-url params))
+          response (->response fetched)
+          value    (parse-data params response)]
+    (reset! state/sender send!)
+    (swap! state/state assoc :portal/value value)
+    (render-app)))
+
 (defn app-mode []
   (when js/navigator.serviceWorker
     (js/navigator.serviceWorker.register "sw.js"))
@@ -146,10 +203,11 @@
   (render-app))
 
 (defn main! []
-  (let [[mode args] (get-mode)]
+  (let [[mode params] (get-mode)]
     (case mode
-      :app (app-mode)
-      :host (host-mode args))))
+      :app   (app-mode)
+      :fetch (fetch-mode params)
+      :host  (host-mode params))))
 
 (defn reload! []
   (let [[mode] (get-mode)]
