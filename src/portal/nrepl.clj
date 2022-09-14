@@ -1,15 +1,19 @@
 (ns ^:no-doc portal.nrepl
   (:require [clojure.datafy :as d]
+            [clojure.main :as main]
             [clojure.test :as test]
             [nrepl.middleware :refer [set-descriptor!]]
             [nrepl.middleware.caught :as caught]
             [nrepl.middleware.print :as print]
+            [nrepl.misc :refer (response-for)]
             [nrepl.transport :as transport]
             [portal.api :as p])
   (:import [java.util Date]
            [nrepl.transport Transport]))
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
+
+(def ^:dynamic *portal-session* nil)
 
 (deftype Print [string] Object (toString [_] string))
 
@@ -34,6 +38,9 @@
      :result (if-not (:printed-value response)
                (:value response)
                (->Print (:value response)))}))
+
+(defn- in-portal? [msg]
+  (some? (get @(:session msg) #'*portal-session*)))
 
 (defn- shadow-cljs?
   "Determine if the current message was handled by shadow-cljs."
@@ -68,7 +75,10 @@
             (update :ns (fnil symbol 'user))
             (assoc :time     (Date.)
                    :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
-                   :runtime  (if (shadow-cljs? handler-msg) :cljs :clj))
+                   :runtime  (cond
+                               (shadow-cljs? handler-msg) :cljs
+                               (in-portal? handler-msg)   :portal
+                               :else                      :clj))
             (with-meta {:portal.viewer/for
                         {:code :portal.viewer/code
                          :time :portal.viewer/relative-time}
@@ -109,4 +119,44 @@
                               #'print/wrap-print
                               #'caught/wrap-caught}
                   :expects (into #{"eval"} (get-shadow-middleware))
+                  :handles {}})
+
+(defn- wrap-repl* [handler {:keys [op session transport] :as msg}]
+  (when (and (= "eval" op)
+             (not (contains? @session #'*portal-session*)))
+    (swap! session assoc
+           #'*portal-session* nil
+           #'p/*nrepl-init*   #(set! *portal-session* %)))
+  (if-let [portal (and (= op "eval")
+                       (get @session #'*portal-session*))]
+    (try
+      (let [{:keys [value] :as response}
+            (p/eval-str
+             portal
+             (:code msg)
+             (assoc (select-keys msg [:ns]) :verbose true))]
+        (when (= value :cljs/quit)
+          (swap! session assoc #'*portal-session* nil))
+        (transport/send
+         transport
+         (response-for msg (merge
+                            response
+                            {:status      :done
+                             ::print/keys #{:value}}))))
+      (catch Exception e
+        (swap! session assoc #'*e e)
+        (let [resp {::caught/throwable e
+                    :status            :eval-error
+                    :ex                (str (class e))
+                    :root-ex           (str (class (main/root-cause e)))}]
+          (transport/send transport (response-for msg resp)))))
+    (handler msg)))
+
+(defn wrap-repl [handler] (partial #'wrap-repl* handler))
+
+(set-descriptor! #'wrap-repl
+                 {:requires #{"clone"
+                              #'print/wrap-print
+                              #'caught/wrap-caught}
+                  :expects (into #{"eval"})
                   :handles {}})

@@ -126,16 +126,16 @@
    (fn [message send!]
      (try
        (send!
-        {:op            :portal.rpc/response
-         :result        (sci/eval-string (:code message))
-         :portal.rpc/id (:portal.rpc/id message)})
+        (merge
+         (sci/eval-string message)
+         {:op            :portal.rpc/response
+          :portal.rpc/id (:portal.rpc/id message)}))
        (catch :default e
          (.error js/console e)
          (send!
           {:op            :portal.rpc/response
-           :error         true
+           :error         e
            :message       (.-message e)
-           :result        e
            :portal.rpc/id (:portal.rpc/id message)}))))
    :portal.rpc/invalidate
    (fn [message send!]

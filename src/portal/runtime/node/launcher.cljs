@@ -109,20 +109,15 @@
     (swap! rt/sessions select-keys (keys @c/connections)))
   true)
 
-(defn eval-str [portal code]
+(defn eval-str [portal msg]
   (a/let [responses (if (= portal :all)
-                      (c/request
-                       {:op   :portal.rpc/eval-str
-                        :code code})
-                      (c/request
-                       (:session-id portal)
-                       {:op   :portal.rpc/eval-str
-                        :code code}))
+                      (c/request (assoc msg :op :portal.rpc/eval-str))
+                      (c/request (:session-id portal)
+                                 (assoc msg :op :portal.rpc/eval-str)))
           response (last responses)]
     (if-not (:error response)
-      (:result response)
-      (throw (ex-info (:message response)
-                      {:code code :cause (:result response)})))))
+      response
+      (throw (ex-info (:message response) response)))))
 
 (defn sessions []
   (for [session-id (key @c/connections)] (c/make-atom session-id)))

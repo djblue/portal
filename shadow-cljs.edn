@@ -2,7 +2,8 @@
  :dev-http {4400 ["resources/" "target/pwa/"]}
  :nrepl {:init-ns user
          :repl-pprint true
-         :middleware [portal.nrepl/wrap-portal]}
+         :middleware [portal.nrepl/wrap-portal
+                      portal.nrepl/wrap-repl]}
  :builds
  {:client
   {:output-dir "resources/portal-dev/"

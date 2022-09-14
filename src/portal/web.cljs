@@ -71,8 +71,11 @@
 (defn eval-str
   "Evalute ClojureScript source given as a string in the UI runtime."
   {:added "0.19.0"}
-  [source]
-  (l/eval-str source))
+  ([code]
+   (eval-str :all code nil))
+  ([_portal code opts]
+   (let [result (l/eval-str (assoc opts :code code))]
+     (cond-> result (not (:verbose opts)) :value))))
 
 (defn sessions
   "Get all current portal sessions."

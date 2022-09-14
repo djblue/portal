@@ -3,6 +3,8 @@
                [portal.runtime.jvm.commands])
             #?(:clj  [portal.runtime.jvm.launcher :as l]
                :cljs [portal.runtime.node.launcher :as l])
+            #?(:clj  [portal.sync :as a]
+               :cljs [portal.async :as a])
             [clojure.set :as set]
             [portal.runtime :as rt]))
 
@@ -97,13 +99,25 @@
 (defn eval-str
   "Evalute ClojureScript source given as a string in the UI runtime."
   {:added "0.19.0"}
-  ([source]
-   (l/eval-str :all source))
-  ([portal source]
-   (l/eval-str portal source)))
+  ([code]
+   (eval-str :all code))
+  ([portal code]
+   (eval-str portal code nil))
+  ([portal code opts]
+   (a/let [result (l/eval-str portal (assoc opts :code code))]
+     (cond-> result (not (:verbose opts)) :value))))
 
 (defn sessions
   "Get all current portal sessions."
   {:added "0.27.0"}
   []
   (l/sessions))
+
+(def ^:dynamic *nrepl-init* nil)
+
+(defn repl
+  "Start a repl for the given Portal session."
+  [portal]
+  {:added "0.31.0"}
+  (when *nrepl-init* (*nrepl-init* portal))
+  [:repl portal])

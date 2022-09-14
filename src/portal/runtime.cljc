@@ -3,7 +3,15 @@
   (:require #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a])
             [clojure.datafy :refer [datafy nav]]
+            [clojure.pprint :as pprint]
             [portal.runtime.cson :as cson]))
+
+(def ^:private tagged-type (type (cson/->Tagged "tag" [])))
+
+(defmethod pprint/simple-dispatch tagged-type [value]
+  (if (not= (:tag value) "remote")
+    (pr value)
+    (print (:rep value))))
 
 (defonce default-options (atom nil))
 

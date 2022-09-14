@@ -46,14 +46,11 @@
     :dev (str js/window.location.origin "/main.js?" (get-session))
     code-url))
 
-(defn eval-str [code]
-  (let [response (c/request
-                  {:op   :portal.rpc/eval-str
-                   :code code})]
+(defn eval-str [msg]
+  (let [response (c/request (assoc msg :op :portal.rpc/eval-str))]
     (if-not (:error response)
-      (:result response)
-      (throw (ex-info (:message response)
-                      {:code code :cause (:result response)})))))
+      response
+      (throw (ex-info (:message response) response)))))
 
 (defn open [options]
   (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
