@@ -174,6 +174,7 @@
 (defn bigint? [value] (= (type value) js/BigInt))
 (defn error? [value] (instance? js/Error value))
 (defn char? [value] (instance? cson/Character value))
+(defn ratio? [value] (instance? cson/Ratio value))
 
 (defn coll? [value]
   (and (clojure.core/coll? value)
@@ -213,6 +214,7 @@
     (var? value)      "var"
     (error? value)    :error
     (char? value)     :char
+    (ratio? value)    :ratio
 
     (uuid? value)     :uuid
     (url? value)      :uri
@@ -559,6 +561,24 @@
     [s/span {:style {:color (::c/string theme)}}
      (pr-str value)]))
 
+(defn- inspect-ratio [value]
+  (let [theme (theme/use-theme)]
+    [with-collection
+     value
+     [s/div
+      {:style {:display :flex}}
+      [with-key
+       'numerator
+       [select/with-position
+        {:row 0 :column 0}
+        [s/div [inspector (.-numerator value)]]]]
+      [s/span {:style {:color (::c/number theme)}} "/"]
+      [with-key
+       'denominator
+       [select/with-position
+        {:row 0 :column 1}
+        [s/div [inspector (.-denominator value)]]]]]]))
+
 (defn hex-color? [string]
   (re-matches #"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}gi" string))
 
@@ -723,6 +743,7 @@
     :uuid       inspect-uuid
     "var"       inspect-var
     :char       inspect-char
+    :ratio      inspect-ratio
     :uri        inspect-uri
     :tagged     inspect-tagged
     :error      inspect-error
@@ -748,6 +769,7 @@
     :uuid       inspect-uuid
     "var"       inspect-var
     :char       inspect-char
+    :ratio      inspect-ratio
     :uri        inspect-uri
     :tagged     inspect-tagged
     :error      inspect-error

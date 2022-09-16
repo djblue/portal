@@ -54,6 +54,33 @@
 
 #?(:cljs (extend-type number ToJson (-to-json [value buffer] (json/push-double buffer value))))
 
+#?(:clj
+   (extend-type clojure.lang.Ratio
+     ToJson
+     (-to-json [value buffer]
+       (-> buffer
+           (json/push-string "R")
+           (json/push-long (numerator value))
+           (json/push-long (denominator value)))))
+   :cljs
+   (deftype Ratio [numerator denominator]
+     ToJson
+     (-to-json [_ buffer]
+       (-> buffer
+           (json/push-string "R")
+           (json/push-long numerator)
+           (json/push-long denominator)))
+     IPrintWithWriter
+     (-pr-writer [_this writer _opts]
+       (-write writer (str numerator))
+       (-write writer "/")
+       (-write writer (str denominator)))))
+
+(defn ->ratio [buffer]
+  (let [n (json/next-long buffer)
+        d (json/next-long buffer)]
+    #?(:clj (/ n d) :cljs (Ratio. n d))))
+
 (extend-type #?(:clj  String
                 :cljs string)
   ToJson
@@ -544,6 +571,7 @@
         "^"    (->meta buffer)
         "N"    (->bigint buffer)
         "C"    (->char buffer)
+        "R"    (->ratio buffer)
         "bin"  (->bin buffer)
         "inst" (->inst buffer)
         "smap" (->sorted-map buffer)
