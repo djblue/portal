@@ -20,6 +20,22 @@
     (-pr-writer [this writer _opts]
       (-write writer (str this "N")))))
 
+(extend-type array
+  IHash
+  (-hash [this]
+    (hash (into [] this)))
+  IEquiv
+  (-equiv [^js this ^js o]
+    (let [n (.-length this)]
+      (and (array? o)
+           (= n (.-length o))
+           (loop [i 0]
+             (cond
+               (== i n)             true
+               (not= (aget this i)
+                     (aget this o)) false
+               :else                (recur (inc i))))))))
+
 (extend-type Long
   IPrintWithWriter
   (-pr-writer [this writer _opts]

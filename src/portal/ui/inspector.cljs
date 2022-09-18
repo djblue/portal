@@ -220,6 +220,8 @@
     (url? value)      :uri
     (date? value)     :date
 
+    (array? value)    :js-array
+
     (rt/runtime? value)
     (rt/tag value)))
 
@@ -328,8 +330,7 @@
       [s/div
        {:style {:display :flex
                 :align-items :center}}
-       [s/span {:style {:color (::c/tag theme)}} "#"]
-       [with-readonly [inspector tag]]]]
+       [s/span {:style {:color (::c/tag theme)}} "#"] (name tag)]]
      [s/div {:style
              {:flex "1"}}
       [with-key
@@ -543,6 +544,10 @@
      values)
     {:context (use-context)}]])
 
+(defn- inspect-js-array [value]
+  (let [v (into [] value)]
+    [with-collection v [tagged-value 'js v]]))
+
 (defn- trim-string [string limit]
   (if-not (> (count string) limit)
     string
@@ -701,29 +706,42 @@
         (.error js/console e)
         string))))
 
-(defn- inspect-object [value]
+(declare inspect-object)
+(declare get-inspect-component)
+
+(defn- inspect-unreadable [value]
   (let [theme  (theme/use-theme)
-        string (pr-str value)
         limit  (:string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]
+    [s/span {:style
+             {:color (::c/text theme)}}
+     [inspect-ansi
+      (if (or (< (count value) limit)
+              (= (:depth context) 1)
+              (get expanded? (state/get-location context)))
+        value
+        (trim-string value limit))]]))
+
+(defn- inspect-object* [string]
+  (let [context (use-context)]
     (try
       (let [v (read-string string)]
-        (if (nil? v)
-          "nil"
-          [inspector* context v]))
-      (catch :default _
-        [s/span {:style
-                 {:color (::c/text theme)}}
-         [inspect-ansi
-          (if (or (< (count string) limit)
-                  (= (:depth context) 1)
-                  (get expanded? (state/get-location context)))
-            string
-            (trim-string string limit))]]))))
+        (cond
+          (nil? v) "nil"
 
-(defn inspect-long [value]
-  [inspect-number (:rep value)])
+          (= inspect-object
+             (get-inspect-component
+              (get-value-type v)))
+          [inspect-unreadable string]
+
+          :else [inspector* context v]))
+      (catch :default _
+        [inspect-unreadable string]))))
+
+(defn- inspect-object [value] [inspect-object* (pr-str value)])
+
+(defn- inspect-remote [value] [inspect-object* (:rep value)])
 
 (defn- get-preview-component [type]
   (case type
@@ -731,6 +749,7 @@
     :map        preview-map
     :set        preview-set
     :vector     preview-vector
+    :js-array   inspect-js-array
     :list       preview-list
     :coll       preview-list
     :boolean    inspect-boolean
@@ -742,6 +761,7 @@
     :date       inspect-date
     :uuid       inspect-uuid
     "var"       inspect-var
+    "remote"    inspect-remote
     :char       inspect-char
     :ratio      inspect-ratio
     :uri        inspect-uri
@@ -758,6 +778,7 @@
   (case type
     :diff       inspect-diff
     (:set :vector :list :coll) inspect-coll
+    :js-array   inspect-js-array
     :map        inspect-map
     :boolean    inspect-boolean
     :symbol     inspect-symbol
@@ -768,6 +789,7 @@
     :date       inspect-date
     :uuid       inspect-uuid
     "var"       inspect-var
+    "remote"    inspect-remote
     :char       inspect-char
     :ratio      inspect-ratio
     :uri        inspect-uri
