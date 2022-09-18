@@ -266,8 +266,9 @@
               [1 :solid (::c/border theme)])}
            :on-click
            (fn [e]
-             (set-option! value)
-             (.stopPropagation e))}
+             (when-not (= value option)
+               (set-option! value)
+               (.stopPropagation e)))}
           [s/div
            {:style {:box-sizing :border-box
                     :padding (:padding theme)
