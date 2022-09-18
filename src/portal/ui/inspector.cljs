@@ -221,6 +221,7 @@
     (date? value)     :date
 
     (array? value)    :js-array
+    (object? value)   :js-object
 
     (rt/runtime? value)
     (rt/tag value)))
@@ -548,6 +549,21 @@
   (let [v (into [] value)]
     [with-collection v [tagged-value 'js v]]))
 
+(defn- ->map [entries]
+  (persistent!
+   (reduce
+    (fn [m entry]
+      (let [k (aget entry 0)]
+        (if (str/starts-with? k "closure_uid")
+          m
+          (assoc! m (keyword k) (aget entry 1)))))
+    (transient {})
+    entries)))
+
+(defn- inspect-js-object [value]
+  (let [v (->map (.entries js/Object value))]
+    [with-collection v [tagged-value 'js v]]))
+
 (defn- trim-string [string limit]
   (if-not (> (count string) limit)
     string
@@ -750,6 +766,7 @@
     :set        preview-set
     :vector     preview-vector
     :js-array   inspect-js-array
+    :js-object  inspect-js-object
     :list       preview-list
     :coll       preview-list
     :boolean    inspect-boolean
@@ -779,6 +796,7 @@
     :diff       inspect-diff
     (:set :vector :list :coll) inspect-coll
     :js-array   inspect-js-array
+    :js-object  inspect-js-object
     :map        inspect-map
     :boolean    inspect-boolean
     :symbol     inspect-symbol
