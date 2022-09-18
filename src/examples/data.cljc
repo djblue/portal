@@ -35,7 +35,9 @@
             ::url (js/URL. "https://github.com/djblue/portal")
             ::uuid (random-uuid)
             ::date (js/Date.)
-            ::bigint (js/BigInt "42")}))
+            ::bigint (js/BigInt "42")
+            ::js-array #js [0 1 2 3 4]
+            ::js-object #js {:hello "world"}}))
 
 (def basic-data
   {::booleans #{true false}
