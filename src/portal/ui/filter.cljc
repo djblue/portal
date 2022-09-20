@@ -63,3 +63,30 @@
         (matcher value) value
 
         :else ::not-found))))
+
+(defn split [s search-words]
+  (let [string-length (count s)]
+    (loop [i            0
+           search-words search-words
+           out          (transient [])]
+      (if (or (= i string-length) (empty? search-words))
+        (seq (persistent! out))
+        (let [search-words
+              (keep
+               (fn [{:keys [substring] :as search-word}]
+                 (when-let [start (str/index-of s substring i)]
+                   (let [end (+ start (count substring))]
+                     (assoc search-word :start start :end end))))
+               search-words)]
+          (if-let [{:keys [start end] :as entry}
+                   (first (sort-by :start search-words))]
+            (recur
+             end
+             search-words
+             (cond-> out
+               (not= start i) (conj! {:start i :end start})
+               :always        (conj! entry)))
+            (recur
+             string-length
+             search-words
+             (conj! out {:start i :end string-length}))))))))

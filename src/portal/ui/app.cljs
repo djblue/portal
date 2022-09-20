@@ -170,7 +170,10 @@
         theme    (theme/use-theme)
         state    (state/use-state)
         context  (state/get-selected-context @state)
-        location (state/get-location context)]
+        location (state/get-location context)
+        color    (if-let [depth (:depth context)]
+                   (nth theme/order depth)
+                   ::c/border)]
     (react/useEffect
      (fn []
        (swap! commands/search-refs conj ref)
@@ -201,7 +204,7 @@
        :box-sizing :border-box
        :font-family (:font-family theme)
        :font-size (:font-size theme)
-       :color (::c/boolean theme)
+       :color (get theme color)
        :border [1 :solid (::c/border theme)]
        :border-radius (:border-radius theme)}
       :style/placeholder

@@ -57,7 +57,8 @@
                 :background background
                 :text-align :left
                 :font-size (:font-size theme)}}
-              [:pre {:style {:margin 0 :white-space :pre-wrap}} line-content]]])))
+              [:pre {:style {:margin 0 :white-space :pre-wrap}}
+               [ins/highlight-words line-content]]]])))
         {:default-take 100 :step 100}]]]]))
 
 (def viewer

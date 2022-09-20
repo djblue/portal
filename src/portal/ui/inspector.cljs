@@ -226,6 +226,16 @@
     (rt/runtime? value)
     (rt/tag value)))
 
+(defn highlight-words [string]
+  (let [theme (theme/use-theme)]
+    (if-let [segments (some->> (use-options) :search-words (f/split string))]
+      [l/lazy-seq
+       (for [{:keys [start end color]} segments]
+         ^{:key start}
+         [s/span {:style {:color (get theme (or color ::c/border))}}
+          (subs string start end)])]
+      string)))
+
 (defn get-background
   ([]
    (get-background (use-depth)))
@@ -332,7 +342,8 @@
       [s/div
        {:style {:display :flex
                 :align-items :center}}
-       [s/span {:style {:color (::c/tag theme)}} "#"] (name tag)]]
+       [s/span {:style {:color (::c/tag theme)}} "#"]
+       [highlight-words (name tag)]]]
      [s/div {:style
              {:flex "1"}}
       [with-key
@@ -572,16 +583,18 @@
 
 (defn- inspect-number [value]
   (let [theme (theme/use-theme)]
-    [s/span {:style {:color (::c/number theme)}} (str value)]))
+    [s/span {:style {:color (::c/number theme)}}
+     [highlight-words (str value)]]))
 
 (defn- inspect-bigint [value]
   (let [theme (theme/use-theme)]
-    [s/span {:style {:color (::c/number theme)}} (str value) "N"]))
+    [s/span {:style {:color (::c/number theme)}}
+     [highlight-words (str value "N")]]))
 
 (defn- inspect-char [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/string theme)}}
-     (pr-str value)]))
+     [highlight-words (pr-str value)]]))
 
 (defn- inspect-ratio [value]
   (let [theme (theme/use-theme)]
@@ -626,7 +639,7 @@
         {:href value
          :target "_blank"
          :style {:color (::c/string theme)}}
-        (trim-string value limit)]
+        [highlight-words (trim-string value limit)]]
        "\""]
 
       (color? value)
@@ -647,36 +660,37 @@
           (= (:depth context) 1)
           (get expanded? (state/get-location context)))
       [s/span {:style {:color (::c/string theme)}}
-       (pr-str value)]
+       [highlight-words (pr-str value)]]
 
       :else
       [s/span {:style {:color (::c/string theme)}}
-       (pr-str (trim-string value limit))])))
+       [highlight-words (pr-str (trim-string value limit))]])))
 
 (defn- inspect-namespace [value]
   (let [theme (theme/use-theme)]
     (when-let [ns (namespace value)]
       [s/span
-       [s/span {:style {:color (::c/namespace theme)}} ns]
+       [s/span {:style {:color (::c/namespace theme)}}
+        [highlight-words ns]]
        [s/span {:style {:color (::c/text theme)}} "/"]])))
 
 (defn- inspect-boolean [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/boolean theme)}}
-     (pr-str value)]))
+     [highlight-words (pr-str value)]]))
 
 (defn- inspect-symbol [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/symbol theme) :white-space :nowrap}}
      [inspect-namespace value]
-     (name value)]))
+     [highlight-words (name value)]]))
 
 (defn- inspect-keyword [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/keyword theme) :white-space :nowrap}}
      ":"
      [inspect-namespace value]
-     (name value)]))
+     [highlight-words (name value)]]))
 
 (defn- inspect-date [value]
   [tagged-value 'inst (.toJSON value)])
@@ -734,18 +748,19 @@
     [s/span {:style
              {:color (::c/text theme)}}
      [inspect-ansi
-      (if (or (< (count value) limit)
-              (= (:depth context) 1)
-              (get expanded? (state/get-location context)))
-        value
-        (trim-string value limit))]]))
+      [highlight-words
+       (if (or (< (count value) limit)
+               (= (:depth context) 1)
+               (get expanded? (state/get-location context)))
+         value
+         (trim-string value limit))]]]))
 
 (defn- inspect-object* [string]
   (let [context (use-context)]
     (try
       (let [v (read-string string)]
         (cond
-          (nil? v) "nil"
+          (nil? v) [highlight-words "nil"]
 
           (= inspect-object
              (get-inspect-component
@@ -816,7 +831,7 @@
     :error      inspect-error
     inspect-object))
 
-(defn- get-info [state theme context]
+(defn- get-info [state theme context parent-options]
   (let [{:keys [search-text expanded?]} @state
         location       (state/get-location context)
         viewer         (get-viewer state context)
@@ -826,12 +841,19 @@
                            (and (coll? value)
                                 (= (:name viewer) :portal.viewer/inspector)
                                 (<= depth (:max-depth theme))))
-        expanded?      (if-some [expanded? (get expanded? location)] expanded? default-expand)]
+        expanded?      (if-some [expanded? (get expanded? location)] expanded? default-expand)
+        search-text    (get search-text location)]
     {:selected       (state/selected @state context)
      :expanded?      expanded?
      :viewer         viewer
-     :value          (f/filter-value (:value context)
-                                     (get search-text location ""))
+     :value          (f/filter-value (:value context) search-text)
+     :search-words   (seq
+                      (concat
+                       (keep (fn [substring]
+                               (when-not (str/blank? substring)
+                                 {:substring substring :color (nth theme/order depth)}))
+                             (str/split search-text #"\s+"))
+                       (:search-words parent-options)))
      :default-expand default-expand}))
 
 (defn- inspector* [context value]
@@ -841,7 +863,7 @@
         location       (state/get-location context)
         theme          (theme/use-theme)
         {:keys [value viewer selected default-expand expanded?] :as options}
-        @(r/track get-info state theme (assoc context :value value))
+        @(r/track get-info state theme (assoc context :value value) (use-options))
         type           (get-value-type value)
         component      (or
                         (when-not (= (:name viewer) :portal.viewer/inspector)
