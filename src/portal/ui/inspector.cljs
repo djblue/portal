@@ -233,7 +233,8 @@
        (for [{:keys [start end color]} segments]
          ^{:key start}
          [s/span {:style {:color (get theme (or color ::c/border))}}
-          (subs string start end)])]
+          (subs string start end)])
+       {:default-take 5}]
       string)))
 
 (defn get-background
