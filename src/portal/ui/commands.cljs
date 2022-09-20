@@ -763,6 +763,9 @@
   (doseq [ref @search-refs]
     (when-let [input (.-current ref)] (.focus input))))
 
+(defn ^:command clear-filter [state]
+  (state/dispatch! state dissoc :search-text))
+
 (defn ^:command scroll-top [state]
   (when-let [el (:scroll-element @state)]
     (.scroll el #js {:top 0})))
