@@ -359,9 +359,7 @@
       [s/div
        {:style
         {:color (::c/diff-remove theme)}}
-       open
-       (count value)
-       close])))
+       open close [:sub (count value)]])))
 
 (def ^:private preview-map    (preview-coll "{" "}"))
 (def ^:private preview-vector (preview-coll "[" "]"))
