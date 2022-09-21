@@ -625,8 +625,8 @@
   (re-matches #"https?://.*" string))
 
 (defn- inspect-string [value]
-  (let [theme (theme/use-theme)
-        limit (:string-length theme)
+  (let [theme               (theme/use-theme)
+        limit               (:string-length theme)
         {:keys [expanded?]} @(state/use-state)
         context             (use-context)]
     (cond
@@ -635,25 +635,24 @@
        {:style {:color (::c/string theme)}}
        "\""
        [s/a
-        {:href value
+        {:href   value
          :target "_blank"
-         :style {:color (::c/string theme)}}
+         :style  {:color (::c/string theme)}}
         [highlight-words (trim-string value limit)]]
        "\""]
 
       (color? value)
       [s/div
-       {:style
-        {:padding (* 0.65 (:padding theme))
-         :box-sizing :border-box
-         :background value}}
+       {:style {:display     :flex
+                :gap         (:padding theme)
+                :align-items :center}}
        [s/div
-        {:style
-         {:text-align :center
-          :filter "contrast(500%) saturate(0) invert(1) contrast(500%)"
-          :opacity 0.75
-          :color value}}
-        value]]
+        {:style {:width         (:font-size theme)
+                 :height        (:font-size theme)
+                 :border        [1 :solid (::c/border theme)]
+                 :background    value
+                 :border-radius (:border-radius theme)}}]
+       [s/div value]]
 
       (or (< (count value) limit)
           (= (:depth context) 1)
