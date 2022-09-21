@@ -27,6 +27,15 @@ parse the data.
   <img width="640" src="https://user-images.githubusercontent.com/1986211/191424054-78cbc63c-8cf9-42bc-8fcc-15f824f4319d.png" />
 </p>
 
+## Drag + Drop Files
+
+If the data you want to view in Portal is in a file, it can be easily dragged
+and dropped over the UI.
+
+<p align="center">
+  <img width="640" src="https://user-images.githubusercontent.com/1986211/191425670-bff2b251-851a-4b60-aea3-9e73d472886f.png" />
+</p>
+
 ## Preloading Data
 
 To open the UI with pre-loaded data, you can pass the `content-url` and
