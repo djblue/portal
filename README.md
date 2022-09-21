@@ -56,9 +56,7 @@ or for examples on how to integrate portal into an existing project, look
 through the [examples](./examples) directory.
 
 **NOTE:** Portal can also be used without a runtime via the [standalone
-version](https://djblue.github.io/portal/). The standalone version can be
-installed as a [chrome pwa](https://support.google.com/chrome/answer/9658361)
-which will provide a dock launcher for easy access.
+version](./doc/guides/standalone.md).
 
 ### API
 

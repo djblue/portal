@@ -20,7 +20,8 @@
    ["Test Runner" {:file "doc/guides/test-runner.md"}]
    ["Git Dep" {:file "doc/guides/git-deps.md"}]
    ["Shadow CLJS" {:file "doc/guides/shadow-cljs.md"}]
-   ["nREPL" {:file "doc/guides/nrepl.md"}]]
+   ["nREPL" {:file "doc/guides/nrepl.md"}]
+   ["Portal Standalone" {:file "doc/guides/standalone.md"}]]
   ["Editors"
    ["Emacs"    {:file "doc/editors/emacs.md"}]
    ["VS Code"  {:file "doc/editors/vs-code.md"}]
