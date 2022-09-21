@@ -1,4 +1,4 @@
-(ns portal.runtime.transit
+(ns ^:no-doc portal.runtime.transit
   (:refer-clojure :exclude [read])
   #?(:org.babashka/nbb (:require)
      :clj              (:require [cognitect.transit :as transit])
