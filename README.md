@@ -100,16 +100,17 @@ cleared from the UI.
 
 ### Options
 
-By default, when `p/open` is called, an HTTP server is started on a randomly
-chosen port. It is also given a default window title of the form `portal - <platform> - <version>`.
-To control this server's port, host, and window title, call the `p/start`
-function with the following options:
+Options for `portal.api/open`:
 
-| Option          | Description                | If not specified     |
-|-----------------|----------------------------|----------------------|
-| `:port`         | Port used to access UI     | random port selected |
-| `:host`         | Hostname used to access UI | "localhost"          |
-| `:app`          | Launch as separate window  | true                 |
-| `:window-title` | Custom title for UI window | "portal"             |
+| Option          | Description                                 | If not specified    | Spec                  |
+|-----------------|---------------------------------------------|---------------------|-----------------------|
+| `:window-title` | Custom window title for UI                  | "portal"            | string?               |
+| `:theme`        | Default theme for UI                        | :portal.colors/nord |                       |
+| `:value`        | Root value of UI                            | (atom (list))       |                       |
+| `:app`          | Launch UI in Chrome app window              | true                | boolean?              |
+| `:launcher`     | Launch UI using this editor                 |                     | #{:vs-code :intellij} |
+| `:editor`       | Enable editor commands, but use separate UI |                     | #{:vs-code :intellij} |
+| `:port`         | Http server port for UI                     | 0                   | int?                  |
+| `:host`         | Http server host for UI                     | "localhost"         | string?               |
 
 For more documentation, take a look through the [docs](https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts).
