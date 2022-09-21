@@ -652,7 +652,7 @@
                  :border        [1 :solid (::c/border theme)]
                  :background    value
                  :border-radius (:border-radius theme)}}]
-       [s/div value]]
+       [s/div [highlight-words value]]]
 
       (or (< (count value) limit)
           (= (:depth context) 1)
