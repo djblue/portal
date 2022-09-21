@@ -177,7 +177,7 @@
           metadata)
         (catch :default e
           (ins/error->data
-           (ex-info (str "Error paring :content-type " content-type) metadata e)))))))
+           (ex-info (str "Error parsing :content-type " content-type) metadata e)))))))
 
 (defn ->response [^js response]
   (a/let [body (.text response)]
