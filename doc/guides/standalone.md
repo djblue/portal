@@ -13,7 +13,19 @@ To use Portal without any particular runtime, try the
 installed as a [chrome pwa](https://support.google.com/chrome/answer/9658361)
 which will provide a dock launcher for easy access.
 
-![install](https://user-images.githubusercontent.com/1986211/191423393-28b65580-fa51-439b-bf16-1c4f40953cd8.png)
+<p align="center">
+  <img width="640" src="https://user-images.githubusercontent.com/1986211/191423393-28b65580-fa51-439b-bf16-1c4f40953cd8.png" />
+</p>
+
+## Paste Clipboard Data
+
+To quickly paste some edn, json or transit into Portal, try the `ctrl | cmd + v`
+paste command. Upon pasting portal will prompt for the format type in order to
+parse the data.
+
+<p align="center">
+  <img width="640" src="https://user-images.githubusercontent.com/1986211/191424054-78cbc63c-8cf9-42bc-8fcc-15f824f4319d.png" />
+</p>
 
 ## Preloading Data
 
