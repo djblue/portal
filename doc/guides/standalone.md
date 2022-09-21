@@ -1,9 +1,19 @@
 # Portal Standalone
 
+<p align="center">
+  <a href="https://djblue.github.io/portal/">
+  <img width="640"
+     alt="Portal Standalone"
+     src="https://user-images.githubusercontent.com/1986211/191418745-ce7cf62b-cc19-4c32-a573-02b3f3fc35e7.png" />
+  </a>
+</p>
+
 To use Portal without any particular runtime, try the
 [standalone](https://djblue.github.io/portal/) version of Portal. It can be
 installed as a [chrome pwa](https://support.google.com/chrome/answer/9658361)
 which will provide a dock launcher for easy access.
+
+![install](https://user-images.githubusercontent.com/1986211/191423393-28b65580-fa51-439b-bf16-1c4f40953cd8.png)
 
 ## Preloading Data
 
