@@ -4,7 +4,8 @@ If you would like to send every REPL eval to Portal, you can use the
 `portal.nrepl/wrap-portal` nrepl middleware.
 
 **NOTE:** Portal will keep all evaluated objects from being garbage collected
-until they are cleared from the UI.
+until they are cleared from the UI. However, the nREPL middleware will only
+submit values to Portal when the UI is open.
 
 ## tools.deps
 
