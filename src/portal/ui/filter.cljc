@@ -81,7 +81,7 @@
           (if-let [{:keys [start end] :as entry}
                    (first (sort-by :start search-words))]
             (recur
-             end
+             (long end)
              search-words
              (cond-> out
                (not= start i) (conj! {:start i :end start})
