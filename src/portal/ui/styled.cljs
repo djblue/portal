@@ -92,6 +92,7 @@
 (def iframe (partial styled :iframe))
 (def img    (partial styled :img))
 (def input  (partial styled :input))
+(def nav    (partial styled :nav))
 (def option (partial styled :option))
 (def select (partial styled :select))
 (def span   (partial styled :span))

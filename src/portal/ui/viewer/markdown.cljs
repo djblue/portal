@@ -14,8 +14,7 @@
     (->> (md->html value)
          parse-fragment
          (map as-hiccup)
-         (into [:div {:style {:max-width "1012px"
-                              :margin "0 auto"}}]))))
+         (into [:div {:style {:max-width "1012px"}}]))))
 
 (defn inspect-markdown [value]
   ;; I couldn't figure out a good way to disable html escaping, which

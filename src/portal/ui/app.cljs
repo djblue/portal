@@ -15,6 +15,7 @@
             [portal.ui.theme :as theme]
             [portal.ui.viewer.bin :as bin]
             [portal.ui.viewer.charts :as charts]
+            [portal.ui.viewer.cljdoc :as cljdoc]
             [portal.ui.viewer.code :as code]
             [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.date-time :as date-time]
@@ -396,6 +397,7 @@
    deref/viewer
    test-report/viewer
    prepl/viewer
+   cljdoc/viewer
    ins/viewer
    pprint/viewer
    vega-lite/viewer

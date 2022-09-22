@@ -8,6 +8,7 @@
 
 (defn- header-styles [theme]
   {:color (::c/namespace theme)
+   :margin 0
    :padding-top (:padding theme)
    :padding-bottom (:padding theme)
    :margin-bottom (* 2 (:padding theme))})
