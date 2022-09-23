@@ -1,6 +1,7 @@
 (ns portal.doc
   (:require [clojure.edn :as edn]
-            [clojure.walk :as walk]))
+            [clojure.walk :as walk]
+            [portal.api :as p]))
 
 (defn gen-docs []
   (walk/postwalk
@@ -13,4 +14,8 @@
        v))
    (edn/read-string (slurp "doc/cljdoc.edn"))))
 
-(comment (gen-docs))
+(comment
+  (def docs (atom nil))
+  (reset! docs (gen-docs))
+  (reset! docs nil)
+  (p/open {:mode :dev :value docs}))
