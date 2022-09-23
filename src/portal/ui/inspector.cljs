@@ -246,6 +246,9 @@
        (::c/background theme)
        (::c/background2 theme)))))
 
+(defn get-background2 []
+  (get-background (inc (use-depth))))
+
 (defn ->id [value]
   (str (hash value) (pr-str (type value))))
 

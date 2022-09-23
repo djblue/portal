@@ -22,7 +22,8 @@
 
 (defn styles []
   (let [theme (theme/use-theme)
-        h (header-styles theme)
+        h     (header-styles theme)
+        bg    (ins/get-background2)
         border-bottom
         {:border-bottom
          (str "1px solid " (::c/border theme))}]
@@ -57,15 +58,19 @@
 
         :table {:color (::c/text theme)
                 :font-size (:font-size theme)
-                :max-width "100%"
-                :width :max-content
+                :width "100%"
                 :overflow :auto
-                :border-spacing 0
-                :border-collapse :collapse}
-        :th {:padding (:padding theme)
+                :border-style :hidden
+                :border-collapse :collapse
+                :border-radius (:border-radius theme)
+                :box-shadow [0 0 0 1 (::c/border theme)]}
+        :th {:padding (* 1.5 (:padding theme))
+             :font-weight :bold
              :border [1 :solid (::c/border theme)]}
         :td {:padding (:padding theme)
-             :border [1 :solid (::c/border theme)]}}))]))
+             :border [1 :solid (::c/border theme)]}
+
+        "tr:nth-child(even)" {:background bg}}))]))
 
 (defn inspect-code [& args]
   (let [[_ attrs code] (second args)
