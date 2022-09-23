@@ -344,6 +344,7 @@
   [:<>
    [vega/styles]
    [prepl/styles]
+   [hiccup/styles]
    [text-selection]
    [code/stylesheet]])
 
