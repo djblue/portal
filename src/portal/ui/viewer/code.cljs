@@ -123,29 +123,16 @@
          html     (.-value out)
          language (or (:class attrs) (.-language out))]
      [s/div
-      {:style
+      {:title language
+       :style
        {:overflow      :auto
         :position      :relative
         :box-sizing    :border-box
-        :padding       (:padding theme)
+        :padding       (* 2.5 (:padding theme))
         :border        [1 :solid (::c/border theme)]
         :background    (ins/get-background)
         :border-radius (:border-radius theme)
         :max-height    (when-not (:expanded? opts) "24rem")}}
-      [s/div
-       {:style
-        {:position      :absolute
-         :right         0
-         :top           0
-         :color         (::c/border theme)
-         :padding       (* 0.5 (:padding theme))
-         :box-sizing    :border-box
-         :font-family   (:font-family theme)
-         :font-size     (:font-size theme)
-         :border-left   [1 :solid (::c/border theme)]
-         :border-bottom [1 :solid (::c/border theme)]
-         :border-radius (:border-radius theme)}}
-       language]
       [:pre
        {:on-click
         (fn [e]
