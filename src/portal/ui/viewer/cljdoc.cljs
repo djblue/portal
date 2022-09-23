@@ -35,7 +35,7 @@
              #js {:value observer}]
             children))))
 
-(defn- use-observer [id]
+(defn- use-observer ^js [id]
   (let [ref      (react/useRef nil)
         observer (react/useContext observer-context)
         id       (str id)]
@@ -79,7 +79,7 @@
          (fn [e]
            (.stopPropagation e)
            (when-let [el (get-in visible [label :element])]
-             (.scrollIntoView el)))
+             (.scrollIntoView ^js el)))
          :style
          {:cursor        :pointer
           :font-size     "0.85rem"
@@ -111,28 +111,42 @@
        [s/div {:style {:height "50vh"}}]])))
 
 (defn- render-article [value]
-  (let [theme                      (theme/use-theme)
-        last-label                 (:last (use-index))
-        background                 (ins/get-background)
-        [label {:keys [markdown]}] value]
+  (let [theme         (theme/use-theme)
+        last-label    (:last (use-index))
+        background    (ins/get-background)
+        [label entry] value
+        ref           (use-observer label)]
     [s/div
-     {:ref   (use-observer label)
-      :style {:margin-top    1
-              :padding       40
-              :background    background
-              :border-bottom (when-not (= label last-label)
-                               [1 :solid (::c/border theme)])
-              :min-height    (if (= label last-label) "calc(100vh - 226px)" :auto)}}
-     (if-not markdown
-       [s/h1
-        {:style
-         {:margin 0
-          :color  (::c/namespace theme)}}
-        [s/span {:style {:color (::c/tag theme)}} "# "]
-        label]
-       [lazy-render
-        [ins/inc-depth
-         [markdown/inspect-markdown markdown]]])]))
+     {:style {:background  background
+              :padding-top 1}}
+     [s/section
+      {:id    (:file entry label)
+       :ref   ref
+       :style {:padding       40
+               :border-bottom
+               (when-not (= label last-label)
+                 [1 :solid (::c/border theme)])
+               :min-height
+               (if (= label last-label) "calc(100vh - 226px)" :auto)}}
+      (if-let [markdown (:markdown entry)]
+        [lazy-render
+         [ins/inc-depth
+          [markdown/inspect-markdown markdown]]]
+        [s/h1
+         {:style
+          {:margin 0
+           :font-size "2em"
+           :color  (::c/namespace theme)}}
+         [s/span
+          {:on-click
+           (fn [e]
+             (.stopPropagation e)
+             (when-let [el (.-current ref)]
+               (.scrollIntoView ^js el)))
+           :style
+           {:cursor :pointer
+            :color  (::c/tag theme)}} "# "]
+         label])]]))
 
 (defn render-docs [value]
   (let [has-label?  (string? (first value))
@@ -204,7 +218,8 @@
          :box-sizing  :border-box
          :padding-top padding
          :position    :sticky
-         :height      :fit-content}}
+         :height      :fit-content
+         :min-width   240}}
        [docs-nav tree visible]]
       [ins/inc-depth
        [s/div

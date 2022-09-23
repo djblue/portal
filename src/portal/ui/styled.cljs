@@ -94,6 +94,7 @@
 (def input  (partial styled :input))
 (def nav    (partial styled :nav))
 (def option (partial styled :option))
+(def section (partial styled :section))
 (def select (partial styled :select))
 (def span   (partial styled :span))
 (def table  (partial styled :table))
