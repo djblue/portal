@@ -24,7 +24,6 @@
   {:extra-deps
    {hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.4.138"}
-    markdown-clj/markdown-clj {:mvn/version "1.11.3"}
     org.babashka/sci          {:mvn/version "0.4.33"}
     reagent/reagent           {:mvn/version "1.1.1"}}}
   :shadow

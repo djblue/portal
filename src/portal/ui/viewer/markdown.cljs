@@ -1,32 +1,154 @@
 (ns portal.ui.viewer.markdown
-  (:require [hickory.core :refer [parse-fragment as-hiccup]]
+  (:require ["marked" :refer [marked]]
+            [hickory.core :as h]
             [hickory.utils :as utils]
-            [markdown.common :as common]
-            [markdown.core :refer [md->html]]
             [portal.ui.inspector :as ins]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
 
+(declare ->inline)
+(declare ->hiccup)
+
+(defn- unescape [^string string]
+  (-> string
+      (.replaceAll "&amp;"  "&")
+      (.replaceAll "&lt;"   "<")
+      (.replaceAll "&gt;"   ">")
+      (.replaceAll "&quot;" "\"")
+      (.replaceAll "&#39;"  "'")))
+
+(defn- ->text [^js token]
+  (unescape (.-text token)))
+
+(defn- parse-html [html]
+  (with-redefs [utils/html-escape identity]
+    (h/as-hiccup (first (h/parse-fragment html)))))
+
+(defn- ->link [^js token]
+  (->inline
+   (let [title (.-title token)]
+     [:a (cond-> {:href  (.-href token)}
+           title (assoc :title title))])
+   (.-tokens token)))
+
+(defn- ->image [^js token]
+  (let [title (.-title token) alt (->text token)]
+    [:img (cond-> {:src (.-href token)}
+            title (assoc :title title)
+            alt (assoc :alt alt))]))
+
+(defn- ->header [^js token]
+  [:thead
+   {}
+   (persistent!
+    (reduce
+     (fn [out ^js cell]
+       (conj!
+        out
+        (->inline
+         [:th {:align (.-align token)}]
+         (.-tokens cell))))
+     (transient [:tr {}])
+     (.-header token)))])
+
+(defn ->row [^js token ^js row]
+  (persistent!
+   (reduce
+    (fn [out ^js cell]
+      (conj!
+       out
+       (->inline
+        [:td {:align (.-align token)}]
+        (.-tokens cell))))
+    (transient [:tr {}])
+    row)))
+
+(defn- ->rows [^js token]
+  (persistent!
+   (reduce
+    (fn [out row]
+      (conj! out (->row token row)))
+    (transient [:tbody {}])
+    (.-rows token))))
+
+(defn- ->table [^js token]
+  [:table (->header token) (->rows token)])
+
+(defn- ->list [^js token]
+  (let [ordered (.-ordered token)
+        start   (.-start token)
+        _loose   (.-loose token)
+        tag     (if ordered :ol :ul)]
+    (persistent!
+     (reduce
+      (fn [out ^js item]
+        (let [_checked (.-checked item)
+              _task    (.-task item)]
+          (conj! out [:li {} (->hiccup (.-tokens item))])))
+      (transient [tag {:start start}])
+      (.-items token)))))
+
+(defn- ->code [^js token]
+  (let [lang (.-lang token)]
+    [:pre {}
+     [:code
+      (cond-> {} (seq lang) (assoc :class lang))
+      (->text token)]]))
+
+(defn- ->heading [^js token]
+  (let [tag (keyword (str "h" (.-depth token)))]
+    (->inline [tag {}] (.-tokens token))))
+
+(defn- ->paragraph [^js token]
+  (->inline [:p {}] (.-tokens token)))
+
+(defn- ->blockquote [^js token]
+  (->hiccup [:blockquote {}] (.-tokens token)))
+
+(defn- ->inline [out tokens]
+  (reduce
+   (fn [out ^js token]
+     (case (.-type token)
+       "escape"   (conj out (->text token))
+       "html"     (conj out (parse-html (.-text token)))
+       "link"     (conj out (->link token))
+       "image"    (conj out (->image token))
+       "strong"   (conj out (->inline [:strong {}] (.-tokens token)))
+       "em"       (conj out (->inline [:em {}] (.-tokens token)))
+       "codespan" (conj out [:code {} (->text token)])
+       "br"       (conj out [:br {}])
+       "del"      (conj out (->inline [:del {}] (.-tokens token)))
+       "text"     (conj out (->text token))))
+   out
+   tokens))
+
+(defn ->hiccup
+  ([tokens]
+   (->hiccup [:div {:style {:max-width "1012px"}}] tokens))
+  ([out tokens]
+   (reduce
+    (fn [out ^js token]
+      (case (.-type token)
+        "space"      out
+        "hr"         (conj out [:hr {}])
+        "heading"    (conj out (->heading token))
+        "code"       (conj out (->code token))
+        "table"      (conj out (->table token))
+        "blockquote" (conj out (->blockquote token))
+        "list"       (conj out (->list token))
+        "html"       (conj out (parse-html (->text token)))
+        "paragraph"  (conj out (->paragraph token))
+        "text"       (if-let [tokens (.-tokens token)]
+                       (->inline out tokens)
+                       (conj out (->text token)))))
+    out
+    tokens)))
+
 (defn ^:no-doc parse-markdown [value]
-  (with-redefs
-   [common/escape-code   identity
-    common/escaped-chars identity
-    utils/html-escape    identity]
-    (->> (md->html value)
-         parse-fragment
-         (map as-hiccup)
-         (into [:div {:style {:max-width "1012px"}}]))))
+  (->hiccup (.lexer marked value)))
 
 (defn inspect-markdown [value]
-  ;; I couldn't figure out a good way to disable html escaping, which
-  ;; occurs in both markdown-clj and hickory, so I decided to manually
-  ;; intercepts calls into utility methods and replace their
-  ;; implementations. This is probably brittle, but I have little choice.
-  (with-redefs
-   [common/escape-code   identity
-    common/escaped-chars identity
-    utils/html-escape    identity]
-    [ins/inc-depth
-     [inspect-hiccup (parse-markdown value)]]))
+  [ins/inc-depth
+   [inspect-hiccup (parse-markdown value)]])
 
 (def viewer
   {:predicate string?
