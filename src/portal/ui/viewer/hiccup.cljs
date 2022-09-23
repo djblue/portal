@@ -37,6 +37,10 @@
 
         :a {:color (::c/uri theme)}
 
+        :ul {:margin 0}
+        :ol {:margin 0}
+        :li {:margin-top (* 0.5 (:padding theme))}
+
         :p {:font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
             :font-size (:font-size theme)
             :line-height "1.5em"
@@ -70,7 +74,12 @@
         :td {:padding (:padding theme)
              :border [1 :solid (::c/border theme)]}
 
-        "tr:nth-child(even)" {:background bg}}))]))
+        "tr:nth-child(even)" {:background bg}
+
+        "> div"
+        {:display :flex
+         :flex-direction :column
+         :gap (* 1.5 (:padding theme))}}))]))
 
 (defn inspect-code [& args]
   (let [[_ attrs code] (second args)
