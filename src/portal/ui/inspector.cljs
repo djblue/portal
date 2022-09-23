@@ -247,7 +247,7 @@
        (::c/background2 theme)))))
 
 (defn ->id [value]
-  (str (hash value) (type value)))
+  (str (hash value) (pr-str (type value))))
 
 (defn tabs [value]
   (let [theme   (theme/use-theme)
@@ -746,12 +746,11 @@
     [s/span {:style
              {:color (::c/text theme)}}
      [inspect-ansi
-      [highlight-words
-       (if (or (< (count value) limit)
-               (= (:depth context) 1)
-               (get expanded? (state/get-location context)))
-         value
-         (trim-string value limit))]]]))
+      (if (or (< (count value) limit)
+              (= (:depth context) 1)
+              (get expanded? (state/get-location context)))
+        value
+        (trim-string value limit))]]))
 
 (defn- inspect-object* [string]
   (let [context (use-context)]
