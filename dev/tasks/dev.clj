@@ -25,7 +25,10 @@
 
 (defn- io-prepl [& args]
   (binding [*opts* {:extra-env {"PORTAL_PORT" (-> args first ::port str)}}]
-    (server/io-prepl args)))
+    (apply server/io-prepl args)))
+
+(defn- pr-str* [v]
+  (binding [*print-meta* true] (pr-str v)))
 
 (defn prepl []
   (let [server (http/run-server #'proxy-tap> {:legacy-return-value? false})
@@ -34,7 +37,7 @@
      {:name          "bb"
       :port          0
       :server-daemon false
-      :args          [{::port port}]
+      :args          [{:valf pr-str* ::port port}]
       :accept        `io-prepl})))
 
 (defn dev
