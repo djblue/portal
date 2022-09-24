@@ -34,7 +34,7 @@
   :build
   {:extra-paths ["dev"]
    :ns-default  tasks.build
-   :deps        {babashka/babashka {:mvn/version "0.9.162"}
+   :deps        {babashka/babashka {:mvn/version "0.10.163"}
                  babashka/fs       {:mvn/version "0.1.11"}}}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
@@ -50,7 +50,7 @@
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "1.0.0"}
-    cider/cider-nrepl {:mvn/version "0.28.5"}}}
+    cider/cider-nrepl {:mvn/version "0.28.6"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
@@ -65,7 +65,7 @@
      :sha     "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "2.0.895"}
-    org.slf4j/slf4j-nop     {:mvn/version "2.0.1"}}}
+   {com.github.liquidz/antq {:mvn/version "2.1.927"}
+    org.slf4j/slf4j-nop     {:mvn/version "2.0.2"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "0.7.110"}}}}}
