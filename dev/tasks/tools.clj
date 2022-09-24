@@ -32,9 +32,10 @@
   (when in-bb? {:clojure (requiring-resolve 'babashka.deps/clojure)}))
 
 (defn sh [& args]
-  (println (a/bold-blue "=>")
-           (a/bold-green (name (first args)))
-           (a/bold (str/join " " (map name (rest args)))))
+  (binding [*out* *err*]
+    (println (a/bold-blue "=>")
+             (a/bold-green (name (first args)))
+             (a/bold-white (str/join " " (map name (rest args))))))
   (let [opts   (merge {:dir      *cwd*
                        :shutdown p/destroy-tree}
                       (merge *opts* (when-not (:inherit *opts*)
@@ -47,11 +48,11 @@
     (when-not (:inherit opts)
       (.flush *out*)
       (.flush *err*))
-    (println
-     (str (format-millis (- (now) start))
-          (when-not (zero? exit)
-            (str " " (a/bold-red (str "(exit: " exit ")"))))
-          "\n"))
+    (binding [*out* *err*]
+      (println
+       (str (format-millis (- (now) start))
+            (when-not (zero? exit)
+              (str " " (a/bold-red (str "(exit: " exit ")")))))))
     (when-not (zero? exit)
       (throw (ex-info "Non-zero exit code"
                       (assoc (select-keys result [:cmd :exit]) :opts *opts*)))))
