@@ -84,13 +84,13 @@
          {:cursor        :pointer
           :font-size     "0.85rem"
           :color         (condp = label
-                           parent   (::c/package theme)
+                           parent   (::c/namespace theme)
                            selected (::c/boolean theme)
                            (::c/border theme))
           :box-sizing    :border-box
           :padding-right (* 4 (:padding theme))
           :border-right  [3 :solid (condp = label
-                                     parent   (::c/package theme)
+                                     parent   (::c/namespace theme)
                                      selected (::c/boolean theme)
                                      "rgba(0,0,0,0)")]}}
         label])
