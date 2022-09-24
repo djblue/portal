@@ -18,4 +18,4 @@
   (def docs (atom nil))
   (reset! docs (gen-docs))
   (reset! docs nil)
-  (p/open {:mode :dev :value docs}))
+  (p/open {:mode :dev :window-title "portal-docs" :value docs}))
