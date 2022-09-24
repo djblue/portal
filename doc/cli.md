@@ -40,6 +40,6 @@ There is also the ability to invoke a standalone http server to listen and
 display data from remote client
 
 ```bash
-   bb -cp `clojure -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "LATEST"}}}'` \
-      -e '(require (quote [portal.api])) (portal.api/open {:port 53755}) @(promise)'
+bb -cp `clojure -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "LATEST"}}}'` \
+   -e '(require (quote [portal.api])) (portal.api/open {:port 53755}) @(promise)'
 ```
