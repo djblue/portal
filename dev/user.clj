@@ -49,6 +49,7 @@
   (def portal (p/open))
   (def dev    (p/open {:mode :dev}))
   (def dev    (p/open {:mode :dev :value value}))
+  (def emacs  (p/open {:mode :dev :launcher :emacs}))
   (def code   (p/open {:mode :dev :editor :vs-code}))
   (def idea   (p/open {:mode :dev :launcher :intellij}))
   (def work   (p/open {:mode :dev :main 'workspace}))
