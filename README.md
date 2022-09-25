@@ -2,21 +2,24 @@
 
 A clojure tool to navigate through your data.
 
-[![Clojars Project](https://img.shields.io/clojars/v/djblue/portal?color=380036&style=flat-square)](https://clojars.org/djblue/portal)
-[![VS Code Extension](https://vsmarketplacebadge.apphb.com/version-short/djblue.portal.svg?color=007ACC&label=vs-code&logo=vs&style=flat-square)](https://marketplace.visualstudio.com/items?itemName=djblue.portal)
-[![Version](https://img.shields.io/jetbrains/plugin/v/18467?style=flat-square&label=intellij)](https://plugins.jetbrains.com/plugin/18467-portal)
-[![Get help on Slack](https://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?color=63B132&style=flat-square)](https://clojurians.slack.com/channels/portal)
+[![Clojars Project][clojars-badge]][clojars]
+[![VS Code Extension][vscode-badge]][vscode]
+[![Version][intellij-badge]][intellij]
+[![Get help on Slack][clojurians-badge]][clojurians]
 
-[![screenshot](https://user-images.githubusercontent.com/1986211/129153169-4018d586-d747-48f9-8193-d267ea5e288a.png)](https://djblue.github.io/portal/)
+[![screenshot][standalone-screenshot]][standalone]
 
 The portal UI can be used to inspect values of various shapes and sizes. The UX
 will probably evolve over time and user feedback is welcome!
 
-For an in-depth explanation of the UI, you can jump to the [UI](https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts) docs.
+For an in-depth explanation of the UI, you can jump to the [UI][ui-concepts]
+docs.
 
 ## Demo
 
-To get an overview of the Portal UI and workflow, checkout the following recording of a [live demo](https://www.youtube.com/watch?v=Tj-iyDo3bq0) I gave for [London Clojurians](https://www.youtube.com/channel/UC-pYfofTyvVDMwM4ttfFGqw).
+To get an overview of the Portal UI and workflow, checkout the following
+recording of a [live demo][live-demo] I gave for [London
+Clojurians][london-clojurians].
 
 <a href="https://www.youtube.com/watch?v=Tj-iyDo3bq0">
 <img src="https://img.youtube.com/vi/Tj-iyDo3bq0/hqdefault.jpg" alt="London Clojurians Demo" />
@@ -93,8 +96,9 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 (p/close) ; Close the inspector when done
 ```
 
-**NOTE:** portal will keep objects from being garbage collected until they are
-cleared from the UI.
+> **Warning**
+> Portal will keep objects from being garbage collected until they are cleared
+> from the UI.
 
 ### Options
 
@@ -111,4 +115,22 @@ Options for `portal.api/open`:
 | `:port`         | Http server port for UI                     | 0                   | int?                  |
 | `:host`         | Http server host for UI                     | "localhost"         | string?               |
 
-For more documentation, take a look through the [docs](https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts).
+For more documentation, take a look through the [docs][docs].
+
+[clojars]: https://clojars.org/djblue/portal
+[clojars-badge]: https://img.shields.io/clojars/v/djblue/portal?color=380036&style=flat-square
+[vscode]: https://marketplace.visualstudio.com/items?itemName=djblue.portal
+[vscode-badge]: https://vsmarketplacebadge.apphb.com/version-short/djblue.portal.svg?color=007ACC&label=vs-code&logo=vs&style=flat-square
+[intellij]: https://plugins.jetbrains.com/plugin/18467-portal
+[intellij-badge]: https://img.shields.io/jetbrains/plugin/v/18467?style=flat-square&label=intellij
+
+[clojurians]: https://clojurians.slack.com/channels/portal
+[clojurians-badge]: https://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?color=63B132&style=flat-square
+
+[standalone]: https://djblue.github.io/portal/
+[standalone-screenshot]: https://user-images.githubusercontent.com/1986211/129153169-4018d586-d747-48f9-8193-d267ea5e288a.png
+
+[live-demo]: https://www.youtube.com/watch?v=Tj-iyDo3bq0
+[london-clojurians]: https://www.youtube.com/channel/UC-pYfofTyvVDMwM4ttfFGqw
+[docs]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts
+[ui-concepts]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts
