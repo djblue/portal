@@ -44,8 +44,7 @@
         :p {:font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
             :font-size (:font-size theme)
             :line-height "1.5em"
-            :margin-top 0
-            :margin-bottom (* 2 (:padding theme))}
+            :margin 0}
 
         :img {:max-width "100%"}
 
@@ -59,6 +58,11 @@
         {:overflow :auto
          :background (::c/background2 theme)
          :border-radius (:border-radius theme)}
+
+        :blockquote
+        {:margin 0
+         :padding-left (* 2 (:padding theme))
+         :border-left [(:padding theme) :solid (::c/border theme)]}
 
         :table {:color (::c/text theme)
                 :font-size (:font-size theme)

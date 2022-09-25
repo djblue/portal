@@ -123,7 +123,7 @@
 
 (defn ->hiccup
   ([tokens]
-   (->hiccup [:div {:style {:max-width "1012px"}}] tokens))
+   (->hiccup [:div {:style {:max-width 896}}] tokens))
   ([out tokens]
    (reduce
     (fn [out ^js token]
