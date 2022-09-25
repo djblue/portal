@@ -25,7 +25,8 @@
      :column 1
      :result (d/datafy (:nrepl.middleware.caught/throwable response))}
 
-    (contains? response :value)
+    (and (contains? response :value)
+         (not= (:value response) ::p/ignore))
     {:level  :info
      :file   "*repl*"
      :line   1
