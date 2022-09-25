@@ -36,6 +36,15 @@
   (t/clj "-M:test" "-m" :portal.test-runner)
   (t/bb "-m" :portal.test-runner))
 
+(defn test* []
+  (future (cljs* "1.10.773"))
+  (future (cljs* "1.10.844"))
+  (future (t/sh :planck "-c" "src:test" "-m" :portal.test-planck))
+  (future
+    (build)
+    (future (t/clj "-M:test" "-m" :portal.test-runner))
+    (future (t/bb "-m" :portal.test-runner))))
+
 (defn test "Run all clj/s tests." [] (cljs) (clj))
 
 (defn -main [] (test))

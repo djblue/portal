@@ -31,7 +31,7 @@
 (def ^:private fns
   (when in-bb? {:clojure (requiring-resolve 'babashka.deps/clojure)}))
 
-(defn sh [& args]
+(defn- sh* [& args]
   (binding [*out* *err*]
     (println (a/bold-blue "=>")
              (a/bold-green (name (first args)))
@@ -57,6 +57,11 @@
       (throw (ex-info "Non-zero exit code"
                       (assoc (select-keys result [:cmd :exit]) :opts *opts*)))))
   true)
+
+(defn sh [& args]
+  (if-let [session (:session *opts*)]
+    (apply session sh* args)
+    (apply sh* args)))
 
 (def bb     (partial #'sh :bb))
 (def clj    (partial #'sh :clojure))
