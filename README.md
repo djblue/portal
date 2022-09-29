@@ -104,16 +104,16 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 
 Options for `portal.api/open`:
 
-| Option          | Description                                 | If not specified    | Spec                  |
-|-----------------|---------------------------------------------|---------------------|-----------------------|
-| `:window-title` | Custom window title for UI                  | "portal"            | string?               |
-| `:theme`        | Default theme for UI                        | :portal.colors/nord |                       |
-| `:value`        | Root value of UI                            | (atom (list))       |                       |
-| `:app`          | Launch UI in Chrome app window              | true                | boolean?              |
-| `:launcher`     | Launch UI using this editor                 |                     | #{:vs-code :intellij} |
-| `:editor`       | Enable editor commands, but use separate UI |                     | #{:vs-code :intellij} |
-| `:port`         | Http server port for UI                     | 0                   | int?                  |
-| `:host`         | Http server host for UI                     | "localhost"         | string?               |
+| Option          | Description                                 | If not specified    | Spec                                                   |
+|-----------------|---------------------------------------------|---------------------|--------------------------------------------------------|
+| `:window-title` | Custom window title for UI                  | "portal"            | string?                                                |
+| `:theme`        | Default theme for UI                        | :portal.colors/nord |                                                        |
+| `:value`        | Root value of UI                            | (atom (list))       |                                                        |
+| `:app`          | Launch UI in Chrome app window              | true                | boolean?                                               |
+| `:launcher`     | Launch UI using this editor                 |                     | #{[:vs-code][vs-code-docs] [:intellij][intellij-docs]} |
+| `:editor`       | Enable editor commands, but use separate UI |                     | #{[:vs-code][vs-code-docs] [:intellij][intellij-docs]} |
+| `:port`         | Http server port for UI                     | 0                   | int?                                                   |
+| `:host`         | Http server host for UI                     | "localhost"         | string?                                                |
 
 For more documentation, take a look through the [docs][docs].
 
@@ -134,3 +134,6 @@ For more documentation, take a look through the [docs][docs].
 [london-clojurians]: https://www.youtube.com/channel/UC-pYfofTyvVDMwM4ttfFGqw
 [docs]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts
 [ui-concepts]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts
+
+[vs-code-docs]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/editors/vs-code
+[intellij-docs]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/editors/intellij
