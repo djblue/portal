@@ -104,7 +104,7 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 
 Options for `portal.api/open`:
 
-| Option          | Description                                 | If not specified    | Spec                                                   |
+| Option          | Description                                 | Default             | Spec                                                   |
 |-----------------|---------------------------------------------|---------------------|--------------------------------------------------------|
 | `:window-title` | Custom window title for UI                  | "portal"            | string?                                                |
 | `:theme`        | Default theme for UI                        | :portal.colors/nord |                                                        |
