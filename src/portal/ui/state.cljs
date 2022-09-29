@@ -109,6 +109,7 @@
        :portal/key   key
        :portal/f     f
        :portal/value value
+       :search-text  {}
        :selected     [{:depth       1
                        :path        []
                        :stable-path []
