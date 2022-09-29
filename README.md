@@ -135,5 +135,5 @@ For more documentation, take a look through the [docs][docs].
 [docs]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts
 [ui-concepts]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/ui-concepts
 
-[vs-code-docs]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/editors/vs-code
-[intellij-docs]: https://cljdoc.org/d/djblue/portal/0.30.0/doc/editors/intellij
+[vs-code-docs]: ./doc/editors/vs-code.md
+[intellij-docs]: ./doc/editors/intellij.md
