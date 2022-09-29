@@ -15,7 +15,7 @@
    "<meta name='theme-color' content='' />"
    "<link rel=\"icon\" href=\"/icon.svg\">"
    "</head>"
-   "<body style=\"margin: 0; padding: 0; overflow: hidden\">"
+   "<body style=\"margin: 0; padding: 0; overflow: hidden; height: 100vh\">"
    "<div id=\"root\"></div>"
    "<script>"
    (when host
