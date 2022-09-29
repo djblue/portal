@@ -5,15 +5,17 @@
             [portal.ui.lazy :as l]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+            [portal.ui.theme :as theme]
+            [reagent.core :as r]))
 
 (defn inspect-text [value]
-  (let [theme      (theme/use-theme)
-        state      (state/use-state)
-        context    (ins/use-context)
-        location   (state/get-location context)
-        opts       (ins/use-options)
-        background (ins/get-background)]
+  (let [theme       (theme/use-theme)
+        state       (state/use-state)
+        context     (ins/use-context)
+        location    (state/get-location context)
+        opts        (ins/use-options)
+        background  (ins/get-background)
+        search-text @(r/cursor state [:search-text location])]
     [s/div
      {:style
       {:overflow :auto
@@ -34,8 +36,10 @@
             [(inc line) line-content]))
          (filter
           (fn [[_ line-content]]
-            (if-let [search-text (get-in @state [:search-text location])]
-              (str/includes? line-content search-text)
+            (if search-text
+              (some
+               #(str/includes? line-content %)
+               (str/split search-text #"\s+"))
               true)))
          (map
           (fn [[line line-content]]
