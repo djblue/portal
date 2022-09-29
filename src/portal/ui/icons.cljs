@@ -11,6 +11,7 @@
             ["@fortawesome/free-solid-svg-icons/faEllipsisH"        :refer [faEllipsisH]]
             ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt"  :refer [faExternalLinkAlt]]
             ["@fortawesome/free-solid-svg-icons/faInfoCircle"       :refer [faInfoCircle]]
+            ["@fortawesome/free-solid-svg-icons/faBan"              :refer [faBan]]
             ["@fortawesome/free-solid-svg-icons/faPlayCircle"       :refer [faPlayCircle]]
             ["@fortawesome/free-solid-svg-icons/faStopCircle"       :refer [faStopCircle]]
             ["@fortawesome/free-solid-svg-icons/faTerminal"         :refer [faTerminal]]
@@ -24,6 +25,7 @@
 (def arrow-left    (partial icon faArrowLeft))
 (def arrow-right   (partial icon faArrowRight))
 (def arrow-up      (partial icon faArrowUp))
+(def ban           (partial icon faBan))
 (def check-circle  (partial icon faCheckCircle))
 (def chevron-down  (partial icon faChevronDown))
 (def chevron-right (partial icon faChevronRight))

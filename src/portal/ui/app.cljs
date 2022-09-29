@@ -39,7 +39,8 @@
             [portal.ui.viewer.transit :as transit]
             [portal.ui.viewer.tree :as tree]
             [portal.ui.viewer.vega :as vega]
-            [portal.ui.viewer.vega-lite :as vega-lite]))
+            [portal.ui.viewer.vega-lite :as vega-lite]
+            [reagent.core :as r]))
 
 (defn- selected-context-view []
   (let [theme (theme/use-theme)
@@ -166,7 +167,7 @@
         :cursor :pointer}}
       [icons/terminal]]]))
 
-(defn search-input []
+(defn- search-input []
   (let [ref      (react/useRef nil)
         theme    (theme/use-theme)
         state    (state/use-state)
@@ -211,22 +212,24 @@
       :style/placeholder
       {:color (if-not context (::c/border theme) (::c/text theme))}}]))
 
-(defn button-styles []
+(defn- button-hover [disabled? child]
   (let [theme (theme/use-theme)]
-    {:background (::c/text theme)
-     :color (::c/background theme)
-     :border :none
-     :font-size (:font-size theme)
-     :font-family "Arial"
-     :box-sizing :border-box
-     :padding-left (:padding theme)
-     :padding-right (:padding theme)
-     :padding-top (:padding theme)
-     :padding-bottom (:padding theme)
-     :border-radius (:border-radius theme)
-     :cursor :pointer}))
+    [s/div
+     (merge
+      {:style {:display         :flex
+               :width           "2rem"
+               :height          "2rem"
+               :border-radius   "100%"
+               :align-items     :center
+               :justify-content :center
+               :border          [1 :solid "rgba(0,0,0,0)"]}}
+      (when-not disabled?
+        {:style/hover
+         {:background (::c/background theme)
+          :border     [1 :solid (::c/border theme)]}}))
+     child]))
 
-(defn toolbar []
+(defn- toolbar []
   (let [theme (theme/use-theme)
         state (state/use-state)]
     [s/div
@@ -240,41 +243,51 @@
        :padding-left (* 1.5 (:padding theme))
        :grid-gap (* 1.5 (:padding theme))
        :background (::c/background2 theme)
-       :align-items :stretch
+       :align-items :center
        :justify-content :center
        :border-top [1 :solid (::c/border theme)]
        :border-bottom [1 :solid (::c/border theme)]}}
-     (let [disabled? (nil? (:portal/previous-state @state))]
-       [s/button
-        {:disabled disabled?
-         :title    "Go back in portal history."
-         :on-click #(state/dispatch! state state/history-back)
-         :style    (merge
-                    (button-styles)
-                    (when disabled?
-                      {:opacity 0.45
-                       :cursor  :default}))}
-        [icons/arrow-left]])
-     (let [disabled? (nil? (:portal/next-state @state))]
-       [s/button
-        {:disabled disabled?
-         :title    "Go forward in portal history."
-         :on-click #(state/dispatch! state state/history-forward)
-         :style    (merge
-                    (button-styles)
-                    (when disabled?
-                      {:opacity 0.45
-                       :cursor  :default}))}
-        [icons/arrow-right]])
+     (let [disabled? (nil? @(r/cursor state [:portal/previous-state]))]
+       [button-hover
+        disabled?
+        [icons/arrow-left
+         {:disabled disabled?
+          :title    "Go back in portal history."
+          :size     "2x"
+          :on-click #(state/dispatch! state state/history-back)
+          :style    (merge
+                     {:cursor        :pointer
+                      :transform     "scale(0.75)"
+                      :color         (::c/text theme)}
+                     (when disabled?
+                       {:opacity 0.45
+                        :cursor  :default}))}]])
+     (let [disabled? (nil? @(r/cursor state [:portal/next-state]))]
+       [button-hover
+        disabled?
+        [icons/arrow-right
+         {:disabled disabled?
+          :title    "Go forward in portal history."
+          :size     "2x"
+          :on-click #(state/dispatch! state state/history-forward)
+          :style    (merge
+                     {:cursor        :pointer
+                      :transform     "scale(0.75)"
+                      :color         (::c/text theme)}
+                     (when disabled?
+                       {:opacity 0.45
+                        :cursor  :default}))}]])
      [search-input]
-     [s/button
-      {:title    "Clear all values from portal."
-       :on-click #(state/dispatch! state state/clear)
-       :style    (merge
-                  (button-styles)
-                  {:padding-left (* 2.5 (:padding theme))
-                   :padding-right (* 2.5 (:padding theme))})}
-      "clear"]]))
+     [button-hover
+      false
+      [icons/ban
+       {:title    "Clear all values from portal. - CTRL L"
+        :on-click #(state/dispatch! state state/clear)
+        :size     "2x"
+        :style    (merge
+                   {:cursor        :pointer
+                    :transform     "scale(0.75)"
+                    :color         (::c/text theme)})}]]]))
 
 (defn inspect-1 [value]
   (let [theme (theme/use-theme)
