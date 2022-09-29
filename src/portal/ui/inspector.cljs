@@ -226,13 +226,58 @@
     (rt/runtime? value)
     (rt/tag value)))
 
+(defn- child? [location context]
+  (let [v   (:stable-path location)
+        sub (:stable-path context)
+        a (count v)
+        b (count sub)]
+    (cond
+      (> a b) false
+      :else   (= v (take a sub)))))
+
+(defn- all-locations [state context]
+  (let [search-text (:search-text @state)]
+    (seq
+     (reduce-kv
+      (fn [out location search-text]
+        (if-not (child? location context)
+          out
+          (into
+           out
+           (keep
+            (fn [substring]
+              (when-not (str/blank? substring)
+                {:context (-> location meta :context)
+                 :substring substring
+                 :color (nth theme/order (inc (count (:stable-path location))))}))
+            (str/split search-text #"\s+")))))
+      []
+      search-text))))
+
+(defn- use-search-words []
+  (let [state   (state/use-state)
+        context (use-context)]
+    (when-not (:readonly? context)
+      @(r/track all-locations state context))))
+
 (defn highlight-words [string]
-  (let [theme (theme/use-theme)]
-    (if-let [segments (some->> (use-options) :search-words (f/split string))]
+  (let [theme        (theme/use-theme)
+        state        (state/use-state)
+        search-words (use-search-words)]
+    (if-let [segments (some->> search-words (f/split string))]
       [l/lazy-seq
-       (for [{:keys [start end color]} segments]
+       (for [{:keys [context start end color]} segments]
          ^{:key start}
-         [s/span {:style {:color (get theme (or color ::c/border))}}
+         [s/span
+          {:style
+           {:cursor (when context :pointer)
+            :color (get theme (or color ::c/border))}
+           :style/hover (when context {:text-decoration :underline})
+           :on-click
+           (fn [e]
+             (when context
+               (.stopPropagation e)
+               (state/dispatch! state state/select-context context)))}
           (subs string start end)])
        {:default-take 5}]
       string)))
@@ -767,7 +812,7 @@
               (get-value-type v)))
           [inspect-unreadable string]
 
-          :else [inspector* context v]))
+          :else [inspector* (assoc context :value v)]))
       (catch :default _
         [inspect-unreadable string]))))
 
@@ -831,7 +876,7 @@
     :error      inspect-error
     inspect-object))
 
-(defn- get-info [state theme context parent-options]
+(defn- get-info [state theme context]
   (let [{:keys [search-text expanded?]} @state
         location       (state/get-location context)
         viewer         (get-viewer state context)
@@ -847,23 +892,16 @@
      :expanded?      expanded?
      :viewer         viewer
      :value          (f/filter-value (:value context) search-text)
-     :search-words   (seq
-                      (concat
-                       (keep (fn [substring]
-                               (when-not (str/blank? substring)
-                                 {:substring substring :color (nth theme/order depth)}))
-                             (str/split search-text #"\s+"))
-                       (:search-words parent-options)))
      :default-expand default-expand}))
 
-(defn- inspector* [context value]
+(defn- inspector* [context]
   (let [ref            (react/useRef nil)
         focus-ref      (react/useRef)
         state          (state/use-state)
         location       (state/get-location context)
         theme          (theme/use-theme)
         {:keys [value viewer selected default-expand expanded?] :as options}
-        @(r/track get-info state theme (assoc context :value value) (use-options))
+        @(r/track get-info state theme context)
         type           (get-value-type value)
         component      (or
                         (when-not (= (:name viewer) :portal.viewer/inspector)
@@ -887,8 +925,7 @@
            (when-not (l/element-visible? el)
              (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
      #js [selected (.-current ref)])
-    [with-context
-     context
+    [:<>
      (when-not (or (:readonly? context)
                    (= (use-context) context))
        [s/div
@@ -899,8 +936,8 @@
          :on-focus
          (fn [e]
            (when-not selected
-             (state/dispatch! state state/select-context context false)
-             (.stopPropagation e)))}])
+             (.stopPropagation e)
+             (state/dispatch! state state/select-context context false)))}])
      [s/div
       (merge
        (when-not (:readonly? context)
@@ -908,24 +945,23 @@
           (fn [e]
             (.stopPropagation e)
             (when (= (.-button e) 1)
-              (state/dispatch! state state/toggle-expand location)
-              (.stopPropagation e)))
+              (state/dispatch! state state/toggle-expand location)))
           :on-click
           (fn [e]
+            (.stopPropagation e)
             (state/dispatch!
              state
              (if selected
                state/deselect-context
                state/select-context)
              context
-             (or (.-metaKey e) (.-altKey e)))
-            (.stopPropagation e))
+             (or (.-metaKey e) (.-altKey e))))
           :on-double-click
           (fn [e]
+            (.stopPropagation e)
             (a/do
               (state/dispatch! state state/select-context context)
-              (state/dispatch! state state/nav context))
-            (.stopPropagation e))})
+              (state/dispatch! state state/nav context)))})
        {:ref   ref
         :title (-> value meta :doc)
         :style
@@ -943,11 +979,11 @@
        [with-options options [component value]]]]]))
 
 (defn inspector [value]
-  [inspector*
-   (-> (use-context)
-       (assoc :value value)
-       (update :depth inc))
-   value])
+  (let [context
+        (-> (use-context)
+            (assoc :value value)
+            (update :depth inc))]
+    [with-context context [inspector* context]]))
 
 (def viewer
   {:predicate (constantly true)
