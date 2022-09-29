@@ -69,10 +69,10 @@
       {:style
        {:cursor :pointer
         :overflow :auto
-        :display :grid
+        :display :flex
         :box-sizing :border-box
         :padding (:padding theme)
-        :grid-gap (:padding theme)}}
+        :gap (:padding theme)}}
       [s/div {:style {:grid-row "1"}} "["]
       (map-indexed
        (fn [idx k]
