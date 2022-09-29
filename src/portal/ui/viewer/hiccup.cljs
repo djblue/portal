@@ -23,7 +23,8 @@
 (defn styles []
   (let [theme (theme/use-theme)
         h     (header-styles theme)
-        bg    (ins/get-background2)
+        bg    (ins/get-background)
+        bg2   (ins/get-background2)
         border-bottom
         {:border-bottom
          (str "1px solid " (::c/border theme))}]
@@ -78,7 +79,8 @@
         :td {:padding (:padding theme)
              :border [1 :solid (::c/border theme)]}
 
-        "tr:nth-child(even)" {:background bg}
+        "tr:nth-child(odd)"  {:background bg}
+        "tr:nth-child(even)" {:background bg2}
 
         "> div"
         {:display :flex
