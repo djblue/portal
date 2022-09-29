@@ -73,10 +73,12 @@
                 :border-collapse :collapse
                 :border-radius (:border-radius theme)
                 :box-shadow [0 0 0 1 (::c/border theme)]}
-        :th {:padding (* 1.5 (:padding theme))
-             :font-weight :bold
+        :th {:font-weight :bold
+             :text-align :center
+             :padding (* 1.5 (:padding theme))
              :border [1 :solid (::c/border theme)]}
-        :td {:padding (:padding theme)
+        :td {:text-align :left
+             :padding (:padding theme)
              :border [1 :solid (::c/border theme)]}
 
         "tr:nth-child(odd)"  {:background bg}
