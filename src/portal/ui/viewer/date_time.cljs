@@ -41,36 +41,36 @@
    "December"])
 
 (defn inspect-time [value]
-  (let [value   (parse value)
-        hour    (.getHours value)
-        minute  (.getMinutes value)
-        second  (.getSeconds value)
-        theme   (theme/use-theme)
-        style   {:color (::c/number theme)}
-        border  {:color (::c/border theme)}
-        keyword {:color (::c/keyword theme)}]
-    [s/div
-     {:title "Time"
-      :style
-      {:display :flex
-       :align-items :center}}
-     [s/span
-      {:title "Hour" :style style}
-      (let [hour (mod hour 12)]
-        (if (= hour 0) 12 hour))]
-     [s/span {:style border} ":"]
-     [s/span
-      {:title "Minute" :style style}
-      (when (< minute 10) "0") minute]
-     [s/span {:style border} ":"]
-     [s/span
-      {:title "Second" :style style}
-      (when (< second 10) "0")
-      second]
-     [s/div {:style {:width "0.25em"}}]
-     [s/span
-      {:style keyword}
-      (if (> hour 12) "PM" "AM")]]))
+  (when-let [value (parse value)]
+    (let [hour    (.getHours value)
+          minute  (.getMinutes value)
+          second  (.getSeconds value)
+          theme   (theme/use-theme)
+          style   {:color (::c/number theme)}
+          border  {:color (::c/border theme)}
+          keyword {:color (::c/keyword theme)}]
+      [s/div
+       {:title "Time"
+        :style
+        {:display :flex
+         :align-items :center}}
+       [s/span
+        {:title "Hour" :style style}
+        (let [hour (mod hour 12)]
+          (if (= hour 0) 12 hour))]
+       [s/span {:style border} ":"]
+       [s/span
+        {:title "Minute" :style style}
+        (when (< minute 10) "0") minute]
+       [s/span {:style border} ":"]
+       [s/span
+        {:title "Second" :style style}
+        (when (< second 10) "0")
+        second]
+       [s/div {:style {:width "0.25em"}}]
+       [s/span
+        {:style keyword}
+        (if (> hour 12) "PM" "AM")]])))
 
 (defn inspect-date [value]
   (let [value   (parse value)
