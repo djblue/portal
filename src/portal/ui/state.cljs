@@ -61,7 +61,9 @@
 (defn get-location
   "Get a stable location for a given context."
   [context]
-  (select-keys context [:value :stable-path]))
+  (with-meta
+    (select-keys context [:value :stable-path])
+    {:context context}))
 
 (defn clear-selected [state] (dissoc state :selected))
 
