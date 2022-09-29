@@ -1,8 +1,8 @@
 (ns ^:no-doc portal.ui.drag-and-drop
   (:require ["react" :as react]
-            [cljs.reader :refer [read-string]]
             [clojure.string :as string]
             [portal.async :as a]
+            [portal.ui.inspector :as ins]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.viewer.csv :as csv]
@@ -43,7 +43,7 @@
               (js->clj (js/JSON.parse content))))
    "edn"  (fn [file]
             (a/let [content (read-file file)]
-              (read-string content)))
+              (ins/read-string content)))
    "md"   (fn [file]
             (a/let [content (read-file file)]
               (with-meta
