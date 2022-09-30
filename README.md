@@ -58,8 +58,8 @@ bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.30.0"}}}'`
 or for examples on how to integrate portal into an existing project, look
 through the [examples](./examples) directory.
 
-**NOTE:** Portal can also be used without a runtime via the [standalone
-version](./doc/guides/standalone.md).
+> **Note**
+> Portal can also be used without a runtime via the [standalone version](./doc/guides/standalone.md).
 
 ### API
 
