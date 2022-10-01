@@ -18,19 +18,19 @@
 
 (defn- get-result [response]
   (cond
-    (contains? response :nrepl.middleware.caught/throwable)
+    (contains? response ::caught/throwable)
     {:level  :error
-     :file   "*repl*"
      :line   1
      :column 1
-     :result (d/datafy (:nrepl.middleware.caught/throwable response))}
+     :ns (:ns response)
+     :result (d/datafy (::caught/throwable response))}
 
     (and (contains? response :value)
          (not= (:value response) ::p/ignore))
     {:level  :info
-     :file   "*repl*"
      :line   1
      :column 1
+     :ns (:ns response)
      :result (if-not (:printed-value response)
                (:value response)
                (->Print (:value response)))}))
@@ -52,7 +52,7 @@
     (transport/recv transport timeout))
   (send [_this  msg]
     (transport/send transport msg)
-    (when (seq (p/sessions))
+    (when (and (seq (p/sessions)) (:file handler-msg))
       (when-let [out (:out msg)]
         (swap! (:stdio handler-msg) conj {:tag :out :val out}))
       (when-let [err (:err msg)]
