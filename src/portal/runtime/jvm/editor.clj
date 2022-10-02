@@ -86,9 +86,8 @@
     (sh "emacsclient" "-n" (str "+" line ":" column) file)))
 
 (defn- get-vs-code []
-  (some fs/can-execute
-        ["code"
-         "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"]))
+  (or (fs/can-execute "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code")
+      "code"))
 
 (defmethod -open-editor :vs-code [{:keys [line column file]}]
   (sh (get-vs-code) "--goto" (str file ":" line ":" column)))
