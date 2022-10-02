@@ -169,14 +169,23 @@
      [s/div
       [s/div
        {:style
-        {:display :flex
+        {:display    :flex
+         :position   :relative
          :color      (::c/exception theme)
          :border     [1 :solid (::c/exception theme)]
-         :background (str (::c/exception theme) "22")
          :border-top-right-radius    (:border-radius theme)
          :border-top-left-radius     (:border-radius theme)
          :border-bottom-right-radius (when-not expanded? (:border-radius theme))
          :border-bottom-left-radius  (when-not expanded? (:border-radius theme))}}
+       [s/div
+        {:style
+         {:position :absolute
+          :top 0
+          :bottom 0
+          :right 0
+          :left 0
+          :opacity 0.15
+          :background (::c/exception theme)}}]
        [s/div
         {:style
          {:display      :flex
