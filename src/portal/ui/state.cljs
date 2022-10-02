@@ -52,18 +52,18 @@
     (dissoc state :selected)
     (update state :selected #(into [] (remove #{context}) %))))
 
-(defn selected [state context]
-  (some (fn [[index context']]
-          (when (= context' context)
-            index))
-        (map-indexed vector (:selected state))))
-
 (defn get-location
   "Get a stable location for a given context."
   [context]
   (with-meta
     (select-keys context [:value :stable-path])
     {:context context}))
+
+(defn selected [state context]
+  (some (fn [[index context']]
+          (when (= (get-location context') (get-location context))
+            index))
+        (map-indexed vector (:selected state))))
 
 (defn clear-selected [state] (dissoc state :selected))
 
