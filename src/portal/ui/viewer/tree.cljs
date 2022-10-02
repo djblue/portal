@@ -14,10 +14,10 @@
     :else           ["(" ")"]))
 
 (def ^:private cursor-pointer {:cursor :pointer})
-(def ^:private select-none	{:user-select :none})
+(def ^:private select-none    {:user-select :none})
 (def ^:private flex-wrap      {:flex-wrap :wrap})
 (def ^:private flex-row       {:display :flex :flex-direction :row})
-(def ^:private flex-col	    {:display :flex :flex-direction :column})
+(def ^:private flex-col       {:display :flex :flex-direction :column})
 (def ^:private flex-center    {:display :flex :align-items :center})
 
 (defn- use-node-styles []
@@ -50,12 +50,20 @@
         child [s/div
                {:style
                 (merge
-                 {:border-left [1 :dashed (str (:color style) "55")]
+                 {:position :relative
                   :padding-right (:padding theme)
                   :padding-left (:padding theme)
                   :margin-left "0.3em"}
                  flex-wrap
                  flex-col)}
+               [s/div
+                {:style
+                 {:position :absolute
+                  :top 0
+                  :bottom 0
+                  :left 0
+                  :opacity 0.4
+                  :border-left [1 :dashed (:color style)]}}]
                (:value-child opts)]
         ellipsis  [s/div {:style {:margin-right (:padding theme)}} "..."]]
     (cond
