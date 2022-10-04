@@ -673,10 +673,11 @@
   (re-matches #"https?://.*" string))
 
 (defn- inspect-string [value]
-  (let [theme               (theme/use-theme)
-        limit               (:string-length theme)
-        {:keys [expanded?]} @(state/use-state)
-        context             (use-context)]
+  (let [theme     (theme/use-theme)
+        limit     (:string-length theme)
+        context   (use-context)
+        location  (state/get-location context)
+        expanded? @(r/cursor (state/use-state) [:expanded? location])]
     (cond
       (url-string? value)
       [s/span
@@ -704,12 +705,12 @@
 
       (or (< (count value) limit)
           (= (:depth context) 1)
-          (get expanded? (state/get-location context)))
-      [s/span {:style {:color (::c/string theme)}}
+          expanded?)
+      [s/span {:style {:white-space :pre-wrap :color (::c/string theme)}}
        [highlight-words (pr-str value)]]
 
       :else
-      [s/span {:style {:color (::c/string theme)}}
+      [s/span {:style {:white-space :pre-wrap :color (::c/string theme)}}
        [highlight-words (pr-str (trim-string value limit))]])))
 
 (defn- inspect-namespace [value]
@@ -787,16 +788,17 @@
 (declare get-inspect-component)
 
 (defn- inspect-unreadable [value]
-  (let [theme  (theme/use-theme)
-        limit  (:string-length theme)
-        {:keys [expanded?]} @(state/use-state)
-        context             (use-context)]
+  (let [theme     (theme/use-theme)
+        limit     (:string-length theme)
+        context   (use-context)
+        location  (state/get-location context)
+        expanded? @(r/cursor (state/use-state) [:expanded? location])]
     [s/span {:style
              {:color (::c/text theme)}}
      [inspect-ansi
       (if (or (< (count value) limit)
               (= (:depth context) 1)
-              (get expanded? (state/get-location context)))
+              expanded?)
         value
         (trim-string value limit))]]))
 
