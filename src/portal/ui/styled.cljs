@@ -1,21 +1,6 @@
 (ns portal.ui.styled
   (:require [clojure.string :as str]))
 
-(defn parse-style [style]
-  (cond
-    (map? style) style
-
-    (not (str/blank? style))
-    (reduce
-     (fn [m rule]
-       (if-let [[k v] (str/split rule ":")]
-         (assoc m
-                (keyword (str/trim k))
-                (str/trim v))
-         m))
-     {}
-     (str/split style #";"))))
-
 (def selectors
   {:style             #(str "." %)
    :style/hover       #(str "." % ":hover")
