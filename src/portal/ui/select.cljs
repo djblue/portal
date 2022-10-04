@@ -15,8 +15,12 @@
     ([context] (select @selection-index context))
     ([selection-index context]
      (when-let [index (get selection-index context)]
-       (get selection-index
-            (conj (pop index) (apply f (last index) args)))))))
+       (loop [i 0 tail (last index)]
+         (when-not (== i 25)
+           (let [tail (apply f tail args)]
+             (or (get selection-index
+                      (conj (pop index) tail))
+                 (recur (inc i) tail)))))))))
 
 (def get-prev   (adjacent update :row dec))
 (def get-next   (adjacent update :row inc))
