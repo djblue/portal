@@ -35,9 +35,9 @@
         width  (or (.-innerWidth js/window)
                    (.. js/document -documentElement -clientWidth))]
     (and (> (.-bottom rect) buffer)
-         (<= (.-top rect) (- height buffer))
-         (> (.-left rect) 0)
-         (<= (.-right rect) width))))
+         (< (.-top rect) (- height buffer))
+         (> (.-right rect) buffer)
+         (< (.-left rect) (- width buffer)))))
 
 (defn- fallback-visible-sensor [f]
   (let [ref       (react/useRef nil)
