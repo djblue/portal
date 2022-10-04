@@ -898,7 +898,6 @@
 
 (defn- inspector* [context]
   (let [ref            (react/useRef nil)
-        focus-ref      (react/useRef)
         state          (state/use-state)
         location       (state/get-location context)
         theme          (theme/use-theme)
@@ -915,7 +914,7 @@
     (react/useEffect
      (fn []
        (when selected
-         (some-> focus-ref .-current (.focus #js {:preventScroll true}))
+         (some-> ref .-current (.focus #js {:preventScroll true}))
          (state/dispatch! state assoc-in [:default-expand location] default-expand)
          #(state/dispatch! state update :default-expand dissoc location)))
      #js [selected])
@@ -927,64 +926,78 @@
            (when-not (l/element-visible? el)
              (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
      #js [selected (.-current ref)])
-    [:<>
-     (when-not (:readonly? context)
-       [s/div
-        {:ref         focus-ref
-         :tab-index   0
-         :style/focus {:outline :none}
-         :style       {:position :absolute}
-         :on-focus
+    [s/div
+     (merge
+      (when-not (:readonly? context)
+        {:on-mouse-down
          (fn [e]
-           (when-not selected
-             (.stopPropagation e)
-             (state/dispatch! state state/select-context context false)))}])
-     [s/div
-      (merge
-       (when-not (:readonly? context)
-         {:on-mouse-down
-          (fn [e]
-            (.stopPropagation e)
-            (when (= (.-button e) 1)
-              (state/dispatch! state state/toggle-expand location)))
-          :on-click
-          (fn [e]
-            (.stopPropagation e)
-            (state/dispatch!
-             state
-             (if selected
-               state/deselect-context
-               state/select-context)
-             context
-             (or (.-metaKey e) (.-altKey e))))
-          :on-double-click
-          (fn [e]
-            (.stopPropagation e)
-            (a/do
-              (state/dispatch! state state/select-context context)
-              (state/dispatch! state state/nav context)))})
-       {:ref   ref
-        :title (-> value meta :doc)
-        :style
-        {:flex          "1"
-         :font-size     (:font-size theme)
-         :font-family   (:font-family theme)
-         :border-radius (:border-radius theme)
-         :border        (if selected
-                          [1 :solid (get theme (nth theme/order selected))]
-                          [1 :solid "rgba(0,0,0,0)"])
-         :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
-         :background    (let [bg (get-background (:depth context))]
-                          (when selected bg))}})
-      [:> error-boundary
-       [with-options options [component value]]]]]))
+           (.stopPropagation e)
+           (when (= (.-button e) 1)
+             (state/dispatch! state state/toggle-expand location)))
+         :on-click
+         (fn [e]
+           (.stopPropagation e)
+           (state/dispatch!
+            state
+            (if selected
+              state/deselect-context
+              state/select-context)
+            context
+            (or (.-metaKey e) (.-altKey e))))
+         :on-double-click
+         (fn [e]
+           (.stopPropagation e)
+           (a/do
+             (state/dispatch! state state/select-context context)
+             (state/dispatch! state state/nav context)))})
+      {:ref   ref
+       :title (-> value meta :doc)
+       :style
+       {:flex          "1"
+        :font-size     (:font-size theme)
+        :font-family   (:font-family theme)
+        :border-radius (:border-radius theme)
+        :border        (if selected
+                         [1 :solid (get theme (nth theme/order selected))]
+                         [1 :solid "rgba(0,0,0,0)"])
+        :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
+        :background    (let [bg (get-background (:depth context))]
+                         (when selected bg))}})
+     [:> error-boundary
+      [with-options options [component value]]]]))
+
+(defn is-selected? [state context]
+  (some? (state/selected @state context)))
+
+(defn- tab-index [context]
+  (let [ref      (react/useRef nil)
+        state    (state/use-state)
+        selected @(r/track is-selected? state context)]
+    (react/useEffect
+     (fn []
+       (when selected
+         (some-> ref .-current (.focus #js {:preventScroll true}))))
+     #js [selected (.-current ref)])
+    (when-not (:readonly? context)
+      [s/div
+       {:ref         ref
+        :tab-index   0
+        :style/focus {:outline :none}
+        :style       {:position :absolute}
+        :on-focus
+        (fn [e]
+          (.stopPropagation e)
+          (state/dispatch! state state/select-context context false))}])))
 
 (defn inspector [value]
-  (let [context
-        (-> (use-context)
+  (let [parent (use-context)
+        context
+        (-> parent
             (assoc :value value)
             (update :depth inc))]
-    [with-context context [inspector* context]]))
+    [:<>
+     [tab-index context]
+     [with-context context [inspector* context]]]))
 
 (def viewer
   {:predicate (constantly true)
