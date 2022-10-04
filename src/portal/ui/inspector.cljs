@@ -814,7 +814,7 @@
               (get-value-type v)))
           [inspect-unreadable string]
 
-          :else [inspector* (assoc context :value v)]))
+          :else [inspector* context v]))
       (catch :default _
         [inspect-unreadable string]))))
 
@@ -878,12 +878,11 @@
     :error      inspect-error
     inspect-object))
 
-(defn- get-info [state theme context]
+(defn- get-info [state theme context value]
   (let [{:keys [search-text expanded?]} @state
         location       (state/get-location context)
         viewer         (get-viewer state context)
         depth          (:depth context)
-        value          (:value context)
         default-expand (or (= depth 1)
                            (and (coll? value)
                                 (= (:name viewer) :portal.viewer/inspector)
@@ -893,16 +892,16 @@
     {:selected       (state/selected @state context)
      :expanded?      expanded?
      :viewer         viewer
-     :value          (f/filter-value (:value context) search-text)
+     :value          (f/filter-value value search-text)
      :default-expand default-expand}))
 
-(defn- inspector* [context]
+(defn- inspector* [context value]
   (let [ref            (react/useRef nil)
         state          (state/use-state)
         location       (state/get-location context)
         theme          (theme/use-theme)
         {:keys [value viewer selected default-expand expanded?] :as options}
-        @(r/track get-info state theme context)
+        @(r/track get-info state theme context value)
         type           (get-value-type value)
         component      (or
                         (when-not (= (:name viewer) :portal.viewer/inspector)
@@ -997,7 +996,7 @@
             (update :depth inc))]
     [:<>
      [tab-index context]
-     [with-context context [inspector* context]]]))
+     [with-context context [inspector* context value]]]))
 
 (def viewer
   {:predicate (constantly true)
