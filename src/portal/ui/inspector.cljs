@@ -928,8 +928,7 @@
              (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
      #js [selected (.-current ref)])
     [:<>
-     (when-not (or (:readonly? context)
-                   (= (use-context) context))
+     (when-not (:readonly? context)
        [s/div
         {:ref         focus-ref
          :tab-index   0
