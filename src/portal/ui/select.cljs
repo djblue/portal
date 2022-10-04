@@ -27,10 +27,18 @@
 (def get-last   (adjacent assoc :row :last))
 
 (defn get-child
-  ([context] (get-child @selection-index context))
-  ([selection-index context]
+  ([context]
+   (get-child @selection-index context nil))
+  ([context column-context]
+   (get-child @selection-index context column-context))
+  ([selection-index context column-context]
    (when-let [index (get selection-index context)]
      (or (get selection-index
+              (conj index (-> selection-index
+                              (get column-context)
+                              (last)
+                              (assoc :row 0))))
+         (get selection-index
               (conj index {:row 0 :column 0}))
          (get selection-index
               (conj index {:row :first :column 0}))))))
