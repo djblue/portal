@@ -1,3 +1,54 @@
+## 0.31.0 - 2022-10-04
+
+### UX Tweaks
+
+- Allow relative selection to work with gaps 4e924bd
+- Allow selecting children in the same column 5b418d6
+- Exclude messages without :file in portal.nrepl db85221
+- Improve filtering for text viewer 41cb0e7
+- Switch to icon for clear button d9355cf
+- Improve blockquote styles 3382a85
+- Update nrepl to ignore :portal.api/ignore e54f623
+- Remove language label for code viewer 151c80d
+- Better hiccup table styles 871e5c8
+- Simplify hex/rgb preview 92b8468
+- Try subscript notation for collection preview 7da5855
+- Add `portal.ui.commands/clear-filter` 875c9a5
+- Add filter highlighting based on context f4866a8
+- Propagate click to parent when tab is selected 388ce78
+- Allow users to share data via standalone mode 92973b2
+- Allow maps to provide viewer metadata for vals 832d8a7
+
+### Data Support
+
+- Improve js object support d69921c
+- Improve js array support 7c16a88
+- Improve jvm ratio support 4de7152
+- Improve java char support 8414560
+- Improve cljs long representation c25370a
+
+### Performance
+
+- Improve ui selection performance 6cb33ba
+- Improve markdown parsing performance d522a7c
+- Improve highlight responsiveness e272f87
+
+### Experimental
+
+- Experimental emacs launcher support 83a0b0f
+- First cut of cljdoc viewer de8a6d7
+
+### Bug Fixes
+
+- Fix bug in element-visible? afd0df9
+- Use white-space pre-wrap for inspect-string a34b660
+- Fix exception viewer coloring for vscode 0f451b0
+- Fix tree viewer coloring in vscode f3bc908
+- Improve goto for vs-code remote extension c1ae4ca
+- Use get-location to have a stable selection 9450523
+- Better error handling for date-time viewer 56bb787
+- Fix path padding for Safari cf37214
+
 ## 0.30.0 - 2022-09-07
 
 ### New Features
