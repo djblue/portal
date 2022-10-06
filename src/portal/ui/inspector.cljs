@@ -995,7 +995,7 @@
             (assoc :value value)
             (update :depth inc))]
     [:<>
-     [tab-index context]
+     ^{:key "tab-index"} [tab-index context]
      [with-context context [inspector* context value]]]))
 
 (def viewer
