@@ -86,7 +86,7 @@
         :background background
         :box-sizing :border-box
         :padding (:padding theme)
-        :grid-row (str (if (number? row) (inc row) (name row))
+        :grid-row (str (inc row)
                        (when span (str " / span " span)))
         :grid-column (str (inc column))})}
      [select/with-position {:row row :column column} child]]))
@@ -195,7 +195,7 @@
           {:key row-index}
           (when (zero? index)
             [ins/with-key row
-             [special :auto 0 [ins/inspector row] (count (get values row))]])
+             [special (inc row-index) 0 [ins/inspector row] (count (get values row))]])
           [ins/inc-depth
            [ins/with-key row
             (map-indexed
