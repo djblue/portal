@@ -269,6 +269,7 @@
    {::shortcuts/default #{" "}}                 `toggle-expand
 
    {::shortcuts/default #{"enter"}}             'clojure.datafy/nav
+   {::shortcuts/default #{"shift" "enter"}}     'clojure.datafy/datafy
 
    {::shortcuts/default #{"control" "r"}}       `redo-previous-command
    {::shortcuts/default #{"control" "l"}}       `clear
