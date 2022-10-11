@@ -220,12 +220,12 @@
 
 (defn- get-component [value]
   (cond
-    (and (or (vector? value) (list? value))
-         (every? vector? value))
-    inspect-vector-table
-
     (and (ins/map? value) (every? ins/map? (vals value)))
     inspect-map-table
+
+    (and (or (vector? value) (coll? value))
+         (every? vector? value))
+    inspect-vector-table
 
     (and (ins/coll? value) (every? ins/map? value))
     inspect-coll-table
