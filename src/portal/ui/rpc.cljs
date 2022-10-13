@@ -185,6 +185,11 @@
 (defn- get-proto []
   (if (= (.-protocol js/location) "https:") "wss:" "ws:"))
 
+(defn- get-appendable-port []
+  (if (= (.-port js/location) "")
+    ""
+    (str ":" (.-port js/location))))
+
 (defn- connect []
   (if-let [ws @ws-promise]
     ws
@@ -193,7 +198,7 @@
      (js/Promise.
       (fn [resolve reject]
         (when-let [chan (js/WebSocket.
-                         (str (get-proto) "//" (get-host) "/rpc?" (get-session)))]
+                         (str (get-proto) "//" (get-host) (get-appendable-port) "/rpc?" (get-session)))]
           (set! (.-onmessage chan) #(dispatch (read (.-data %))
                                               (fn [message]
                                                 (send! message))))
