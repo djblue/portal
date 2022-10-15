@@ -124,19 +124,25 @@
        (when (fn? resolve) (resolve message))))
    :portal.rpc/eval-str
    (fn [message send!]
-     (try
-       (send!
-        (merge
-         (sci/eval-string message)
-         {:op            :portal.rpc/response
-          :portal.rpc/id (:portal.rpc/id message)}))
-       (catch :default e
-         (.error js/console e)
-         (send!
-          {:op            :portal.rpc/response
-           :error         e
-           :message       (.-message e)
-           :portal.rpc/id (:portal.rpc/id message)}))))
+     (let [return
+           (fn [msg]
+             (send!
+              (assoc msg
+                     :op            :portal.rpc/response
+                     :portal.rpc/id (:portal.rpc/id message))))
+           error
+           (fn [e]
+             (return {:error e :message (.-message e)}))]
+       (try
+         (let [{:keys [value] :as response} (sci/eval-string message)]
+           (if-not (:await message)
+             (return response)
+             (-> (.resolve js/Promise value)
+                 (.then #(return (assoc response :value %)))
+                 (.catch error))))
+         (catch :default e
+           (.error js/console e)
+           (error e)))))
    :portal.rpc/invalidate
    (fn [message send!]
      (rt/deref (:atom message))
