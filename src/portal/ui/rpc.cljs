@@ -186,7 +186,9 @@
     (subs js/window.location.search 1)))
 
 (defn- get-host []
-  (if (exists? js/PORTAL_HOST) js/PORTAL_HOST js/location.host))
+  (if (exists? js/PORTAL_HOST)
+    js/PORTAL_HOST
+    (.-hostname js/location)))
 
 (defn- get-proto []
   (if (= (.-protocol js/location) "https:") "wss:" "ws:"))
