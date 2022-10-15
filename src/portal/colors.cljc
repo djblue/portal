@@ -18,6 +18,23 @@
     ::exception   "#bf616a"
     ::diff-add    "#a3be8c"
     ::diff-remove "#bf616a"}
+   ::nord-light
+   {::text        "#4c566a"
+    ::background  "#ffffff"
+    ::background2 "#eceff4"
+    ::boolean     "#5e81ac"
+    ::string      "#a3be8c"
+    ::keyword     "#5e81ac"
+    ::namespace   "#8fbcbb"
+    ::tag         "#ebcb8b"
+    ::symbol      "#4c566a"
+    ::number      "#b48ead"
+    ::uri         "#d08770"
+    ::border      "#d8dee9"
+    ::package     "#88c0d0"
+    ::exception   "#bf616a"
+    ::diff-add    "#a3be8c"
+    ::diff-remove "#bf616a"}
    ::solarized-dark
    {::text        "#93a1a1"
     ::background  "#073642"

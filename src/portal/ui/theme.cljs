@@ -22,13 +22,29 @@
      (or (get c/themes theme-name)
          (get (:themes opts) theme-name)))))
 
-(defn- default-theme []
-  (if (is-vs-code?) ::c/vs-code-embedded ::c/nord))
+(defn- use-theme-detector []
+  (let [media-query (.matchMedia js/window "(prefers-color-scheme: dark)")
+        [dark-theme set-dark-theme!] (react/useState (.-matches media-query))]
+    (react/useEffect
+     (fn []
+       (let [listener (fn [e] (set-dark-theme! (.-matches e)))]
+         (.addListener media-query listener)
+         (fn []
+           (.removeListener media-query listener))))
+     #js [])
+    dark-theme))
+
+(defn- default-theme [dark-theme]
+  (cond
+    (is-vs-code?) ::c/vs-code-embedded
+    dark-theme    ::c/nord
+    :else         ::c/nord-light))
 
 (defonce ^:private theme-context (react/createContext nil))
 
 (defn with-theme [theme-name & children]
-  (let [theme      (get-theme (or theme-name (default-theme)))
+  (let [dark-theme (use-theme-detector)
+        theme      (get-theme (or theme-name (default-theme dark-theme)))
         background (::c/background theme)]
     (react/useEffect
      #(set! (.. js/document -body -style -backgroundColor)
