@@ -1,3 +1,20 @@
+## 0.32.0 - 2022-10-15
+
+### New Features
+
+- Allow users to await promises when using eval-str 4d612f4
+- Default to nord-light based on system preferences 938dbfa
+- First cut of nREPL repl middleware e32f38a
+- Extend table viewer to seq of vectors dc9309c
+- Adds `Shift + Enter` shortcut to clojure.datafy/datafy (#140) e98c4dc
+  - Thanks @pfeodrippe!
+
+### Bug Fixes
+
+- Add port to websocket connection url f12beba
+  - Thanks @hiredman!
+- Improve relative selection for multi-table 7c28ce3
+
 ## 0.31.0 - 2022-10-04
 
 ### UX Tweaks
