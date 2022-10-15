@@ -104,16 +104,17 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 
 Options for `portal.api/open`:
 
-| Option          | Description                                 | Default             | Spec                                                   |
-|-----------------|---------------------------------------------|---------------------|--------------------------------------------------------|
-| `:window-title` | Custom window title for UI                  | "portal"            | string?                                                |
-| `:theme`        | Default theme for UI                        | :portal.colors/nord |                                                        |
-| `:value`        | Root value of UI                            | (atom (list))       |                                                        |
-| `:app`          | Launch UI in Chrome app window              | true                | boolean?                                               |
-| `:launcher`     | Launch UI using this editor                 |                     | #{[:vs-code][vs-code-docs] [:intellij][intellij-docs]} |
-| `:editor`       | Enable editor commands, but use separate UI |                     | #{[:vs-code][vs-code-docs] [:intellij][intellij-docs]} |
-| `:port`         | Http server port for UI                     | 0                   | int?                                                   |
-| `:host`         | Http server host for UI                     | "localhost"         | string?                                                |
+| Option          | Description                                 | Default             | Spec                                                                        |
+|-----------------|---------------------------------------------|---------------------|-----------------------------------------------------------------------------|
+| `:window-title` | Custom window title for UI                  | "portal"            | string?                                                                     |
+| `:theme`        | Default theme for UI                        | :portal.colors/nord |                                                                             |
+| `:value`        | Root value of UI                            | (atom (list))       |                                                                             |
+| `:app`          | Launch UI in Chrome app window              | true                | boolean?                                                                    |
+| `:launcher`     | Launch UI using this editor                 |                     | #{[:vs-code][vs-code-docs] [:intellij][intellij-docs] [:emacs][emacs-docs]} |
+| `:editor`       | Enable editor commands, but use separate UI |                     | #{[:vs-code][vs-code-docs] [:intellij][intellij-docs] [:emacs][emacs-docs]} |
+| `:port`         | Http server port for UI                     | 0                   | int?                                                                        |
+| `:host`         | Http server host for UI                     | "localhost"         | string?                                                                     |
+
 
 For more documentation, take a look through the [docs][docs].
 
@@ -137,3 +138,4 @@ For more documentation, take a look through the [docs][docs].
 
 [vs-code-docs]: ./doc/editors/vs-code.md
 [intellij-docs]: ./doc/editors/intellij.md
+[emacs-docs]: ./doc/editors/emacs.md#xwidget-webkit-embed
