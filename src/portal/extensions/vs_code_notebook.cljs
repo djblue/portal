@@ -13,18 +13,9 @@
             [reagent.core :as r]
             [reagent.dom :as dom]))
 
-(defonce context (atom nil))
-
-(defonce functional-compiler (r/create-compiler {:function-components true}))
-
-(defn send! [msg]
-  (when-let [f (get rt/ops (:op msg))]
-    (js/Promise.
-     (fn [resolve]
-       (f msg resolve)))))
-
-(defn- open-external [state value]
-  (let [theme (theme/use-theme)]
+(defn- open-external [{:keys [value on-click]}]
+  (let [theme (theme/use-theme)
+        state (state/use-state)]
     [icons/external-link
      {:size "1x"
       :style {:cursor :pointer
@@ -32,16 +23,12 @@
       :on-click
       (fn open-editor [e]
         (.stopPropagation e)
-        (.postMessage
-         ^js @context
-         #js {:type "open-editor"
-              :data (binding [*print-meta* true]
-                      (pr-str
-                       (let [values (state/selected-values @state)]
-                         (case (count values)
-                           0 value
-                           1 (first values)
-                           values))))}))}]))
+        (on-click
+         (let [values (state/selected-values @state)]
+           (case (count values)
+             0 value
+             1 (first values)
+             values))))}]))
 
 (defn- history-arrow [{:keys [icon title on-click enabled]}]
   (let [state (state/use-state)
@@ -135,7 +122,7 @@
                :z-index 1}
        :style/hover {:background :pink}}]]))
 
-(defn- app* [id value]
+(defn- app* [{:keys [id value on-open]}]
   (let [state (r/atom {:portal/value value})]
     (fn []
       (let [opts  (opts/use-options)
@@ -167,7 +154,8 @@
                :icon     icons/arrow-right
                :on-click state/history-forward}]
              [select-viewer]
-             [open-external state value]
+             [open-external
+              {:value value :on-click on-open}]
              [command-button]]
             [app/styles]
             [:style
@@ -177,9 +165,28 @@
             (when-not (::commands/input @state)
               [ins/inspector (:portal/value @state value)])]]]]))))
 
+(defonce context (atom nil))
 (defonce component (r/atom app*))
 
-(defn app [id value] [@component id value])
+(defn app [id value]
+  [@component
+   {:id id
+    :value value
+    :on-open
+    (fn [value]
+      (.postMessage
+       ^js @context
+       #js {:type "open-editor"
+            :data (binding [*print-meta* true]
+                    (pr-str value))}))}])
+
+(defonce functional-compiler (r/create-compiler {:function-components true}))
+
+(defn send! [msg]
+  (when-let [f (get rt/ops (:op msg))]
+    (js/Promise.
+     (fn [resolve]
+       (f msg resolve)))))
 
 (defn render-output-item [data element]
   (let [value (try
