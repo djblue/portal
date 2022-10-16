@@ -168,7 +168,6 @@
 (defn- with-options [options & children]
   (into [:r> (.-Provider options-context) #js {:value options}] children))
 
-(defn date? [value] (instance? js/Date value))
 (defn url? [value] (instance? js/URL value))
 (defn bin? [value] (instance? js/Uint8Array value))
 (defn bigint? [value] (= (type value) js/BigInt))
@@ -218,7 +217,7 @@
 
     (uuid? value)     :uuid
     (url? value)      :uri
-    (date? value)     :date
+    (inst? value)     :inst
 
     (array? value)    :js-array
     (object? value)   :js-object
@@ -739,7 +738,7 @@
      [inspect-namespace value]
      [highlight-words (name value)]]))
 
-(defn- inspect-date [value]
+(defn- inspect-inst [value]
   [tagged-value 'inst (.toJSON value)])
 
 (defn- inspect-uuid [value]
@@ -838,7 +837,7 @@
     :bigint     inspect-bigint
     :string     inspect-string
     :keyword    inspect-keyword
-    :date       inspect-date
+    :inst       inspect-inst
     :uuid       inspect-uuid
     "var"       inspect-var
     "remote"    inspect-remote
@@ -867,7 +866,7 @@
     :bigint     inspect-bigint
     :string     inspect-string
     :keyword    inspect-keyword
-    :date       inspect-date
+    :inst       inspect-inst
     :uuid       inspect-uuid
     "var"       inspect-var
     "remote"    inspect-remote

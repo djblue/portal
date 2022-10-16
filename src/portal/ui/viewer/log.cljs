@@ -53,7 +53,7 @@
 (sp/def ::level (set levels))
 
 (sp/def ::ns symbol?)
-(sp/def ::time ins/date?)
+(sp/def ::time inst?)
 
 (sp/def ::column int?)
 (sp/def ::line int?)
