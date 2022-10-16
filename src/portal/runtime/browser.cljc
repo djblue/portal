@@ -95,13 +95,15 @@
 
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
 
-(defmethod -open :default [{:keys [portal options server]}]
-  (let [url (str "http://" (:host server) ":" (:port server) "?" (:session-id portal))
-        chrome-bin (get-chrome-bin)]
+(defn url [{:keys [portal server]}]
+  (str "http://" (:host server) ":" (:port server) "?" (:session-id portal)))
+
+(defmethod -open :default [{:keys [options] :as args}]
+  (let [chrome-bin (get-chrome-bin)]
     (if (and (some? chrome-bin)
              (:app options true))
-      (apply shell/sh chrome-bin (flags url))
-      (browse url))))
+      (apply shell/sh chrome-bin (flags (url args)))
+      (browse (url args)))))
 
 (defmethod -open false [_args])
 

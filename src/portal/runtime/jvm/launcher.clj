@@ -118,4 +118,7 @@
 (defn sessions []
   (for [session-id (keys @c/connections)] (c/make-atom session-id)))
 
+(defn url [portal]
+  (browser/url {:portal portal :server @server}))
+
 (reset! rt/request c/request)

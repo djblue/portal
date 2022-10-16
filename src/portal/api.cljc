@@ -113,6 +113,12 @@
   []
   (l/sessions))
 
+(defn url
+  "Get url for portal session."
+  {:added "0.33.0"}
+  [portal]
+  (l/url portal))
+
 (def ^:dynamic *nrepl-init* nil)
 
 (defn repl
