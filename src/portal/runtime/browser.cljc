@@ -103,6 +103,8 @@
       (apply shell/sh chrome-bin (flags url))
       (browse url))))
 
+(defmethod -open false [_args])
+
 (defn open [{:keys [portal options] :as args}]
   (let [portal     (or portal (c/make-atom (random-uuid)))
         session-id (:session-id portal)]
