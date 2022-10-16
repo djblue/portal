@@ -7,7 +7,13 @@ A clojure tool to navigate through your data.
 [![Version][intellij-badge]][intellij]
 [![Get help on Slack][clojurians-badge]][clojurians]
 
-[![screenshot][standalone-screenshot]][standalone]
+<a href="https://djblue.github.io/portal/">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/1986211/196015562-238cf450-6467-451c-a985-04c7a9b49dba.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/1986211/196015567-74ba9153-341a-4fd7-be47-2c26f0c88c2e.png">
+  <img src="https://user-images.githubusercontent.com/1986211/196015562-238cf450-6467-451c-a985-04c7a9b49dba.png">
+</picture>
+</a>
 
 The portal UI can be used to inspect values of various shapes and sizes. The UX
 will probably evolve over time and user feedback is welcome!
@@ -127,9 +133,6 @@ For more documentation, take a look through the [docs][docs].
 
 [clojurians]: https://clojurians.slack.com/channels/portal
 [clojurians-badge]: https://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?color=63B132&style=flat-square
-
-[standalone]: https://djblue.github.io/portal/
-[standalone-screenshot]: https://user-images.githubusercontent.com/1986211/129153169-4018d586-d747-48f9-8193-d267ea5e288a.png
 
 [live-demo]: https://www.youtube.com/watch?v=Tj-iyDo3bq0
 [london-clojurians]: https://www.youtube.com/channel/UC-pYfofTyvVDMwM4ttfFGqw
