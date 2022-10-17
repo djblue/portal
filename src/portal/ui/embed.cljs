@@ -14,19 +14,21 @@
 (defn- open-external [{:keys [value on-click]}]
   (let [theme (theme/use-theme)
         state (state/use-state)]
-    [icons/external-link
-     {:size "1x"
-      :style {:cursor :pointer
-              :padding (:padding theme)}
-      :on-click
-      (fn open-editor [e]
-        (.stopPropagation e)
-        (on-click
-         (let [values (state/selected-values @state)]
-           (case (count values)
-             0 value
-             1 (first values)
-             values))))}]))
+    (when on-click
+      [icons/external-link
+       {:size "1x"
+        :style {:cursor :pointer
+                :padding (:padding theme)
+                :color   (::c/text theme)}
+        :on-click
+        (fn open-editor [e]
+          (.stopPropagation e)
+          (on-click
+           (let [values (state/selected-values @state)]
+             (case (count values)
+               0 value
+               1 (first values)
+               values))))}])))
 
 (defn- history-arrow [{:keys [icon title on-click enabled]}]
   (let [state (state/use-state)
@@ -39,7 +41,8 @@
       :on-click #(state/dispatch! state on-click)
       :style    (merge
                  {:cursor :pointer
-                  :padding (:padding theme)}
+                  :padding (:padding theme)
+                  :color   (::c/text theme)}
                  (when disabled?
                    {:opacity 0.45
                     :cursor  :default}))}]))
@@ -51,7 +54,8 @@
      {:size     "1x"
       :title    "Open command palette."
       :style    {:cursor :pointer
-                 :padding (:padding theme)}
+                 :padding (:padding theme)
+                 :color   (::c/text theme)}
       :on-click #(commands/open-command-palette state)}]))
 
 (defn- toolbar [& children]
@@ -117,7 +121,8 @@
      [icons/ellipsis-h
       {:size  "1x"
        :style {:padding (:padding theme)
-               :z-index 1}
+               :z-index 1
+               :color   (::c/text theme)}
        :style/hover {:background :pink}}]]))
 
 (defn app [{:keys [id value on-open]}]
@@ -134,8 +139,8 @@
                    :position    :relative
                    :min-height  :fit-content
                    :font-size   (:font-size theme)
-                   :font-family (:font-family theme)
-                   :on-click    (partial commands/close state)}}
+                   :font-family (:font-family theme)}
+           :on-click (partial commands/close state)}
           [state/with-state
            state
            [theme/with-theme

@@ -530,7 +530,8 @@
           {:style
            {:box-sizing :border-box
             :padding (:padding theme)
-            :background "rgba(0,0,0,0.20)"}}
+            :background "rgba(0,0,0,0.20)"
+            :color (::c/text theme)}}
           doc]))]))
 
 (def registry (atom {}))
