@@ -22,6 +22,31 @@ produce documentation for that keyword. This really highlights the power
 behind datafy and nav. It becomes very easy to tailor a browser into the
 perfect development environment!
 
+Below is an example of extending the Datafiable protocol to java files:
+
+```clojure
+(require '[clojure.core.protocols :refer [Datafiable]])
+
+(extend-protocol Datafiable
+  java.io.File
+  (datafy [^java.io.File this]
+    {:name          (.getName this)
+     :absolute-path (.getAbsolutePath this)
+     :flags         (cond-> #{}
+                      (.canRead this)     (conj :read)
+                      (.canExecute this)  (conj :execute)
+                      (.canWrite this)    (conj :write)
+                      (.exists this)      (conj :exists)
+                      (.isAbsolute this)  (conj :absolute)
+                      (.isFile this)      (conj :file)
+                      (.isDirectory this) (conj :directory)
+                      (.isHidden this)    (conj :hidden))
+     :size          (.length this)
+     :last-modified (.lastModified this)
+     :uri           (.toURI this)
+     :files         (seq (.listFiles this))
+     :parent        (.getParentFile this)}))
+```
 
 ## Tips
 

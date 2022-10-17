@@ -1,7 +1,4 @@
-(ns user
-  (:require [clojure.core.protocols :refer [Datafiable]]
-            [clojure.datafy :refer [datafy]]
-            [clojure.java.io :as io]))
+(ns user)
 
 (defn lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
@@ -15,26 +12,6 @@
   ([build-id] (start!) (watch build-id) (repl build-id)))
 
 (defn node [] (cljs :node))
-
-(extend-protocol Datafiable
-  java.io.File
-  (datafy [^java.io.File this]
-    {:name          (.getName this)
-     :absolute-path (.getAbsolutePath this)
-     :flags         (cond-> #{}
-                      (.canRead this)     (conj :read)
-                      (.canExecute this)  (conj :execute)
-                      (.canWrite this)    (conj :write)
-                      (.exists this)      (conj :exists)
-                      (.isAbsolute this)  (conj :absolute)
-                      (.isFile this)      (conj :file)
-                      (.isDirectory this) (conj :directory)
-                      (.isHidden this)    (conj :hidden))
-     :size          (.length this)
-     :last-modified (.lastModified this)
-     :uri           (.toURI this)
-     :files         (seq (.listFiles this))
-     :parent        (.getParentFile this)}))
 
 (comment
   (require '[portal.api :as p])
@@ -74,8 +51,6 @@
   (swap! portal * 1000)
   (reset! portal 1)
 
-  (tap> (datafy java.io.File))
-
   (require '[portal.console :as log])
 
   (do (log/trace ::trace)
@@ -85,8 +60,6 @@
       (log/error ::error))
 
   (tap> 4611681620380904123)
-  (tap> (with-meta (range) {:hello :world}))
-  (tap> (io/file "deps.edn"))
 
   (require '[examples.data :refer [data]])
   (dotimes [_i 25] (tap> data)))
