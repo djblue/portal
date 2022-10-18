@@ -79,7 +79,8 @@
                                (shadow-cljs? handler-msg) :cljs
                                (in-portal? handler-msg)   :portal
                                :else                      :clj))
-            (with-meta {:portal.viewer/for
+            (with-meta {::eval true
+                        :portal.viewer/for
                         {:code :portal.viewer/code
                          :time :portal.viewer/relative-time}
                         :portal.viewer/code {:language :clojure}})
