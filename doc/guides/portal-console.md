@@ -13,7 +13,7 @@ to work with the `:portal.viewer/log` viewer.
 
 ## Example
 
-```
+```clojure
 ;; user.clj
 (require '[portal.console :as log])
 
