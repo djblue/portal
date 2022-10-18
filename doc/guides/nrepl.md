@@ -3,6 +3,9 @@
 If you would like to send every REPL eval to Portal, you can use the
 `portal.nrepl/wrap-portal` nrepl middleware.
 
+> **Note** You will also need to invoke `(add-tap portal.api/submit)` for eval
+> results to show up in portal.
+
 The main advantage of using this middleware is that it can capture additional
 information about your REPL interaction, such as:
 
