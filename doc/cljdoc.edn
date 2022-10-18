@@ -13,7 +13,9 @@
   ["Remote API" {:file "doc/remote-api.md"}]
   ["Guides"
    ["Exceptions" {:file "doc/guides/exceptions.md"}]
-   ["Timbre" {:file "examples/timbre/README.md"}]
+   ["Logging"
+    ["Portal Console" {:file "doc/guides/portal-console.md"}]
+    ["Timbre" {:file "examples/timbre/README.md"}]]
    ["JavaScript Promises" {:file "doc/guides/promises.md"}]
    ["Custom Tap List" {:file "doc/guides/custom-taps.md"}]
    ["Default Viewer" {:file "doc/guides/default-viewer.md"}]
