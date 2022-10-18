@@ -21,7 +21,8 @@
    ["Git Dep" {:file "doc/guides/git-deps.md"}]
    ["Shadow CLJS" {:file "doc/guides/shadow-cljs.md"}]
    ["nREPL" {:file "doc/guides/nrepl.md"}]
-   ["Portal Standalone" {:file "doc/guides/standalone.md"}]]
+   ["Portal Standalone" {:file "doc/guides/standalone.md"}]
+   ["Clerk" {:file "doc/guides/clerk.md"}]]
   ["Editors"
    ["Emacs"    {:file "doc/editors/emacs.md"}]
    ["VS Code"  {:file "doc/editors/vs-code.md"}]
