@@ -8,7 +8,7 @@
   (binding [*cwd* "extension-vscode"]
     (npx :vsce :publish)))
 
-(defn- deploy-intellij []
+(defn deploy-intellij []
   (binding [*cwd* "extension-intellij"]
     (gradle :publishPlugin)))
 
@@ -22,7 +22,7 @@
   (pkg/all)
   (deploy-clojars)
   (deploy-vscode)
-  (deploy-intellij))
+  #_(deploy-intellij))
 
 (defn all
   "Deploy all artifacts."
