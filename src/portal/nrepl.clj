@@ -83,7 +83,7 @@
                         {:code :portal.viewer/code
                          :time :portal.viewer/relative-time}
                         :portal.viewer/code {:language :clojure}})
-            p/submit)))
+            tap>)))
     transport))
 
 (defn- wrap-portal* [handler msg]
