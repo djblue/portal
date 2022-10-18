@@ -7,7 +7,9 @@ Before getting started, make sure you have both the [Calva][2] and [Portal][3] V
 
 ## Usage
 
-![notebook](https://user-images.githubusercontent.com/1986211/196565058-dd6a1bfb-f27d-498a-926e-9758d9cc0b4e.gif)
+<p align="center">
+<img src="https://user-images.githubusercontent.com/1986211/196565058-dd6a1bfb-f27d-498a-926e-9758d9cc0b4e.gif" />
+</p>
 
 With the above extensions installed, you should now be able to open any Clojure
 file by right clicking the file in the file explorer and selecting `Open
