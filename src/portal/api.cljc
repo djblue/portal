@@ -97,8 +97,22 @@
   nil)
 
 (defn eval-str
-  "Evalute ClojureScript source given as a string in the UI runtime."
-  {:added "0.19.0"}
+  "Evalute ClojureScript source given as a string in the UI runtime. The parameters:
+
+   portal
+     portal instance returned from portal.api/open or :all
+
+   code (string)
+     the ClojureScript source
+
+   opts (map)
+     evaluation options.
+
+     :verbose - optional, return a map containing more info that just the value.
+                Defaults to false.
+     :await   - optional, await a promise result. Defaults to false."
+  {:added "0.19.0"
+   :see-also ["open"]}
   ([code]
    (eval-str :all code))
   ([portal code]
