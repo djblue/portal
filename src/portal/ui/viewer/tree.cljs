@@ -32,8 +32,10 @@
 (defn- center [& children]
   (into [s/div {:style flex-center}] children))
 
-(defn- inspect-tree-item [opts]
-  (let [[open? set-open] (react/useState true)
+(defn- inspect-tree-item [{:keys [values] :as opts}]
+  (let [[open? set-open] (react/useState (if-some [expand (get-in (meta values) [:portal.viewer/tree :expand])]
+                                           expand
+                                           true))
         theme (theme/use-theme)
         value (:value opts)
         [open close] (delimiter value)
