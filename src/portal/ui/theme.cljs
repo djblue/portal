@@ -13,7 +13,7 @@
 (defn- get-theme [theme-name]
   (let [opts (opts/use-options)]
     (merge
-     {:font-family   "Monaco, monospace"
+     {:font-family   "monospace"
       :font-size     "12pt"
       :string-length 100
       :max-depth     2
