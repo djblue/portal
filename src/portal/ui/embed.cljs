@@ -1,4 +1,4 @@
-(ns portal.ui.embed
+(ns ^:no-doc portal.ui.embed
   (:require [portal.colors :as c]
             [portal.ui.app :as app]
             [portal.ui.commands :as commands]
