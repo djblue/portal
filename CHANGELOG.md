@@ -1,3 +1,25 @@
+## 0.33.0 - 2022-10-18
+
+- Add portal.api/url to get session url (#144) 9a9fad4
+- Allow users to disable :launcher on p/open 0dfe342
+
+### nREPL
+
+- Tag portal.nrepl results e15865c
+  - The tag in metadata is `{:portal.nrepl/eval true}`
+  - This will allow for easier dispatch in tap handlers
+- Update nrepl docs 95e6655
+  - Must explicitly eval `(add-tap portal.api/submit)`
+  - This is a bit of a breaking change but should mostly go unnoticed
+- Allow users to intercept portal.nrepl results b124cd6
+
+### Documentation
+
+- Calva Clojure notebook docs beb4149
+- Add portal.console docs 3830ea0
+- Clerk docs 9be7c9d
+- Update eval-str doc string fa6e557
+
 ## 0.32.0 - 2022-10-15
 
 ### New Features
