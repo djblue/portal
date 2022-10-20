@@ -61,6 +61,29 @@ or for a **babashka >=0.2.4** repl, do:
 bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.33.0"}}}'`
 ```
 
+or for a Leiningen project:
+
+- Add Portal as a dependency, either to `:dev` profile or its own profile:
+
+```clojure
+{:profiles {:dev {:dependencies [[djblue/portal "0.33.0"]]}}}
+```
+
+or
+
+```clojure
+{:profiles {:portal {:dependencies [[djblue/portal "0.33.0"]]}}}
+```
+
+Or as a global profile, add to `~/.lein/profiles.clj`:
+
+```clojure
+{:portal {:dependencies [[djblue/portal "0.33.0"]]}}
+```
+
+If you add Portal to a profile other than `:dev`, when starting a REPL
+start it with `with-profiles +portal`. The `+` is important.
+
 or for examples on how to integrate portal into an existing project, look
 through the [examples](./examples) directory.
 
