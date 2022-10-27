@@ -985,7 +985,8 @@
         :on-focus
         (fn [e]
           (.stopPropagation e)
-          (state/dispatch! state state/select-context context false))}])))
+          (when-not selected
+            (state/dispatch! state state/select-context context false)))}])))
 
 (defn inspector [value]
   (let [parent (use-context)
