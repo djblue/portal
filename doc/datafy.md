@@ -48,6 +48,25 @@ Below is an example of extending the Datafiable protocol to java files:
      :parent        (.getParentFile this)}))
 ```
 
+Here is an example how to leverage [protocol extension via metadata](https://clojure.org/reference/protocols#_extend_via_metadata) to make it possible to navigate to a related entity, namely from a book to its author:
+
+```clojure
+;; in practice you'd use e.g. next.jdbc with a real DB, here we've a db map:
+(let [db {:book [#:book{:id 1, :title "1984" :author 10}]
+            :person [#:person{:id 10 :fname "George" :lname "Orwell"}]}]
+    (tap> (->> (get db :book)
+               (map #(with-meta % {`clojure.core.protocols/nav
+                                   (fn [_coll key value]
+                                     (if (= key :book/author)
+                                       (first (filter (comp #{value} :person/id) (:person db)))
+                                       value))})))))
+```
+
+This is what it looks like. Notice the book author's ID is selected - if we press Enter now, it will trigger the navigation and display the person map:
+
+![portal-nav-example](https://user-images.githubusercontent.com/624958/198690804-269131fe-2c77-4c37-96b2-fd4d6831d452.png)
+
+
 ## Tips
 
 If you would like to automatically datafy all tapped values, try the following:
