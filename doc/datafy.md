@@ -48,12 +48,12 @@ Below is an example of extending the Datafiable protocol to java files:
      :parent        (.getParentFile this)}))
 ```
 
-Here is an example how to leverage [protocol extension via metadata](https://clojure.org/reference/protocols#_extend_via_metadata) to make it possible to navigate to a related entity, namely from a book to its author:
+Here is an example of how to leverage [protocol extension via metadata](https://clojure.org/reference/protocols#_extend_via_metadata) to make it possible to navigate to a related entity, namely from a book to its author:
 
 ```clojure
 ;; in practice you'd use e.g. next.jdbc with a real DB, here we've a db map:
-(let [db {:book [#:book{:id 1, :title "1984" :author 10}]
-            :person [#:person{:id 10 :fname "George" :lname "Orwell"}]}]
+(let [db {:book   [#:book{:id 1,   :title "1984"   :author 10}]
+          :person [#:person{:id 10 :fname "George" :lname "Orwell"}]}]
     (tap> (->> (get db :book)
                (map #(with-meta % {`clojure.core.protocols/nav
                                    (fn [_coll key value]
