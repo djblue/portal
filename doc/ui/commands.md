@@ -15,6 +15,9 @@ To register your own command, use the `portal.api/register!` function. For examp
 
 ``` clojure
 (portal.api/register! #'identity)
+;; or
+(portal.api/register! #'identity 
+                      {:predicate (comp string? portal.ui.state/get-selected-value)})
 ```
 
 When multiple values are selected, commands will be applied as follows:
