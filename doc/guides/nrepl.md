@@ -30,7 +30,9 @@ If you are starting nrepl from tools.deps, you can try the following:
 ;; deps.edn
 {:aliases
  {:nrepl
-  {:extra-deps {cider/cider-nrepl {:mvn/version "0.28.5"}}
+  {:extra-deps
+   {cider/cider-nrepl {:mvn/version "0.28.5"}
+    djblue/portal     {:mvn/version "0.33.0"}}
    :main-opts ["-m" "nrepl.cmdline"
                "--middleware"
                "[cider.nrepl/cider-middleware,portal.nrepl/wrap-portal]"]}}}
@@ -44,4 +46,25 @@ If you are using shadow-cljs, you can add the middleware via the
 ```clojure
 ;; shadow-cljs.edn
 {:nrepl {:middleware [portal.nrepl/wrap-portal]}}
+```
+
+## leiningen
+
+If you are starting nrepl via `lein repl`, you can try the following:
+
+```clojure
+(defproject app "0.1.0-SNAPSHOT"
+  :dependencies [[djblue/portal "0.33.0"]]
+  :repl-options {:nrepl-middleware [portal.nrepl/wrap-portal]})
+```
+
+Or via a dev profile:
+
+```clojure
+(defproject app "0.1.0-SNAPSHOT"
+  :profiles
+  {:dev {:source-paths ["dev"]
+         :dependencies [[djblue/portal "0.33.0"]]
+         :repl-options
+         {:nrepl-middleware [portal.nrepl/wrap-portal]}}})
 ```

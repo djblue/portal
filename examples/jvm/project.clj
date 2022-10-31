@@ -2,4 +2,6 @@
   :dependencies [[ring "1.8.2"]]
   :profiles
   {:dev {:source-paths ["dev"]
-         :dependencies [[djblue/portal "0.19.0"]]}})
+         :dependencies [[djblue/portal "0.33.0"]]
+         :repl-options
+         {:nrepl-middleware [portal.nrepl/wrap-portal]}}})
