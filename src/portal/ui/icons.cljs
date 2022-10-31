@@ -10,6 +10,7 @@
             ["@fortawesome/free-solid-svg-icons/faCircle" :refer [faCircle]]
             ["@fortawesome/free-solid-svg-icons/faCopy" :refer [faCopy]]
             ["@fortawesome/free-solid-svg-icons/faEllipsisH" :refer [faEllipsisH]]
+            ["@fortawesome/free-solid-svg-icons/faExclamationTriangle" :refer [faExclamationTriangle]]
             ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt" :refer [faExternalLinkAlt]]
             ["@fortawesome/free-solid-svg-icons/faInfoCircle" :refer [faInfoCircle]]
             ["@fortawesome/free-solid-svg-icons/faPlayCircle" :refer [faPlayCircle]]
@@ -32,6 +33,7 @@
 (def circle (partial icon faCircle))
 (def copy (partial icon faCopy))
 (def ellipsis-h (partial icon faEllipsisH))
+(def exclamation-triangle (partial icon faExclamationTriangle))
 (def external-link (partial icon faExternalLinkAlt))
 (def info-circle (partial icon faInfoCircle))
 (def play-circle (partial icon faPlayCircle))
