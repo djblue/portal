@@ -62,6 +62,7 @@
 
         :blockquote
         {:margin 0
+         :background bg
          :padding-left (* 2 (:padding theme))
          :border-left [(:padding theme) :solid (::c/border theme)]}
 
