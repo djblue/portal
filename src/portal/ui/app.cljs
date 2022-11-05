@@ -338,14 +338,15 @@
         [selected-context-view]])]))
 
 (defn scrollbars []
-  (let [thumb "rgba(0,0,0,0.3)"]
-    [:style
-     (str "* { scrollbar-color: " thumb " rgba(0,0,0,0); } "
-          "*::-webkit-scrollbar { width: 10px; height: 10px; }"
-          "*::-webkit-scrollbar-corner { opacity: 0 }"
-          "*::-webkit-scrollbar-track  { opacity: 0 }"
-          "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
-          "*::-webkit-scrollbar-thumb  { border-radius: 10px; }")]))
+  (when-not (theme/is-vs-code?)
+    (let [thumb "rgba(0,0,0,0.3)"]
+      [:style
+       (str "* { scrollbar-color: " thumb " rgba(0,0,0,0); } "
+            "*::-webkit-scrollbar { width: 10px; height: 10px; }"
+            "*::-webkit-scrollbar-corner { opacity: 0 }"
+            "*::-webkit-scrollbar-track  { opacity: 0 }"
+            "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
+            "*::-webkit-scrollbar-thumb  { border-radius: 10px; }")])))
 
 (defn text-selection []
   (let [style "background: rgba(0,0,0,0.5)"]
