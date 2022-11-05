@@ -102,7 +102,7 @@
                    viewer-name))
 
 (def ^:private inspector-context
-  (react/createContext {:depth 0 :path [] :stable-path []}))
+  (react/createContext {:depth 0 :path [] :stable-path [] :alt-bg false}))
 
 (defn use-context [] (react/useContext inspector-context))
 
@@ -122,8 +122,6 @@
     (into [:r> (.-Provider inspector-context)
            #js {:value (update context :depth dec)}]
           children)))
-
-(defn- use-depth [] (:depth (use-context)))
 
 (defn with-context [value & children]
   (let [context (use-context)]
@@ -281,17 +279,21 @@
        {:default-take 5}]
       string)))
 
+(defn toggle-bg [& children]
+  (let [context (use-context)]
+    (into [with-context (update context :alt-bg not)] children)))
+
 (defn get-background
   ([]
-   (get-background (use-depth)))
-  ([depth]
+   (get-background (use-context)))
+  ([{:keys [alt-bg]}]
    (let [theme (theme/use-theme)]
-     (if (even? depth)
+     (if-not alt-bg
        (::c/background theme)
        (::c/background2 theme)))))
 
 (defn get-background2 []
-  (get-background (inc (use-depth))))
+  (get-background (update (use-context) :alt-bg not)))
 
 (defn ->id [value]
   (str (hash value) (pr-str (type value))))
@@ -381,8 +383,7 @@
         [diff-added added]])]))
 
 (defn- tagged-value [tag value]
-  (let [theme (theme/use-theme)
-        depth (dec (use-depth))]
+  (let [theme (theme/use-theme)]
     [s/div
      {:style {:position :relative :display :flex :gap (:padding theme)}}
      [s/div
@@ -397,9 +398,7 @@
       [with-key
        tag
        [select/with-position {:row 0 :column 0}
-        [with-context
-         {:depth depth}
-         [inspector value]]]]]]))
+        [toggle-bg [inspector value]]]]]]))
 
 (defn- preview-coll [open close]
   (fn [value]
@@ -959,7 +958,7 @@
                          [1 :solid (get theme (nth theme/order selected))]
                          [1 :solid "rgba(0,0,0,0)"])
         :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
-        :background    (let [bg (get-background (:depth context))]
+        :background    (let [bg (get-background context)]
                          (when selected bg))}})
      [:> error-boundary
       [with-options options [component value]]]]))
@@ -993,6 +992,7 @@
         context
         (-> parent
             (assoc :value value)
+            (update :alt-bg not)
             (update :depth inc))]
     [:<>
      ^{:key "tab-index"} [tab-index context]

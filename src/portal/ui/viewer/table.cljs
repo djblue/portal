@@ -114,7 +114,7 @@
           {:key (hash row)}
           [ins/with-key row
            [special (inc row-index) 0 [ins/inspector row]]]
-          [ins/inc-depth
+          [ins/toggle-bg
            [ins/with-key row
             (map-indexed
              (fn [col-index column]
@@ -142,7 +142,7 @@
          [:<>
           [ins/with-key row-index
            [special (inc row-index) 0 [ins/inspector row-index]]]
-          [ins/inc-depth
+          [ins/toggle-bg
            [ins/with-key row-index
             (map-indexed
              (fn [col-index column]
@@ -165,7 +165,7 @@
        [:<>
         [ins/with-key row-index
          [special (inc row-index) 0 [ins/inspector row-index]]]
-        [ins/inc-depth
+        [ins/toggle-bg
          [ins/with-key row-index
           (map-indexed
            (fn [col-index value]
@@ -196,7 +196,7 @@
           (when (zero? index)
             [ins/with-key row
              [special (inc row-index) 0 [ins/inspector row] (count (get values row))]])
-          [ins/inc-depth
+          [ins/toggle-bg
            [ins/with-key row
             (map-indexed
              (fn [col-index column]

@@ -33,7 +33,8 @@
       "@"]
      [select/with-position
       {:row 0 :column 0}
-      [ins/dec-depth [ins/inspector value]]]]))
+      [ins/toggle-bg
+       [ins/dec-depth [ins/inspector value]]]]]))
 
 (def viewer
   {:predicate atom?

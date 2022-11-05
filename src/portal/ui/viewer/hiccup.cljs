@@ -93,11 +93,12 @@
 (defn inspect-code [& args]
   (let [[_ attrs code] (second args)
         theme          (theme/use-theme)]
-    [s/div
-     {:style
-      {:margin-top    (:padding theme)
-       :margin-bottom (:padding theme)}}
-     [code/inspect-code attrs code]]))
+    [ins/toggle-bg
+     [s/div
+      {:style
+       {:margin-top    (:padding theme)
+        :margin-bottom (:padding theme)}}
+      [code/inspect-code attrs code]]]))
 
 (def tag->viewer
   {:pre inspect-code})
@@ -120,10 +121,11 @@
 
 (defn inspect-hiccup [value]
   (let [viewers (ins/viewers-by-name @ins/viewers)]
-    [ins/with-key
-     :portal.viewer/hiccup
-     [:div {:class "hiccup"}
-      (process-hiccup {:viewers viewers} value)]]))
+    [ins/toggle-bg
+     [ins/with-key
+      :portal.viewer/hiccup
+      [:div {:class "hiccup"}
+       (process-hiccup {:viewers viewers} value)]]]))
 
 (defn hiccup? [value]
   (and (vector? value)

@@ -130,7 +130,7 @@
                (if (= label last-label) "calc(100vh - 226px)" :auto)}}
       (if-let [markdown (:markdown entry)]
         [lazy-render
-         [ins/inc-depth
+         [ins/toggle-bg
           [markdown/inspect-markdown markdown]]]
         [s/h1
          {:style
@@ -153,7 +153,7 @@
         has-article? (map? (second value))]
     [:<>
      (when has-label?
-       [render-article value])
+       [ins/toggle-bg [render-article value]])
      (for [value (cond-> value
                    has-label?   rest
                    has-article? rest)]
@@ -221,12 +221,11 @@
          :height      :fit-content
          :min-width   240}}
        [docs-nav tree visible]]
-      [ins/inc-depth
-       [s/div
-        {:style
-         {:flex        1
-          :border-left [1 :solid (::c/border theme)]}}
-        [render-docs tree]]]]]))
+      [s/div
+       {:style
+        {:flex        1
+         :border-left [1 :solid (::c/border theme)]}}
+       [render-docs tree]]]]))
 
 (defn inspect-cljdoc [value]
   [with-index (index-docs value) [inspect-cljdoc* value]])

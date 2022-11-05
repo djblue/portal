@@ -114,7 +114,10 @@
         (merge flex {:border-top [1 :solid (::c/border theme)] :flex "1"} border)}
        [select/with-position
         {:row -1 :column 0}
-        [ins/with-collection log [ins/with-key :result [ins/inspector (:result log)]]]]]
+        [ins/with-collection log
+         [ins/with-key :result
+          [ins/dec-depth
+           [ins/inspector (:result log)]]]]]]
       [s/div
        {:style
         (merge
