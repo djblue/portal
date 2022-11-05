@@ -40,6 +40,13 @@
            (not (map? value))
            (> (count value) 1))))
 
+(defn- test-actual [value]
+  (or (and (= (first value) 'not)
+           (coll? (second value))
+           (= (first (second value)) '=)
+           (rest (second value)))
+      value))
+
 (defn inspect-diff [value]
   (let [theme (theme/use-theme)
         bg (ins/get-background)]
@@ -88,7 +95,8 @@
           :border-bottom-left-radius (:border-radius theme)
           :border-bottom-right-radius (:border-radius theme)}}
         [ins/dec-depth
-         (->> (partition 2 1 value)
+         (->> (test-actual value)
+              (partition 2 1)
               (map-indexed
                (fn [idx [a b]]
                  ^{:key idx}
