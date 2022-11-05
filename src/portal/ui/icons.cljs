@@ -10,10 +10,13 @@
             ["@fortawesome/free-solid-svg-icons/faCircle" :refer [faCircle]]
             ["@fortawesome/free-solid-svg-icons/faCopy" :refer [faCopy]]
             ["@fortawesome/free-solid-svg-icons/faEllipsisH" :refer [faEllipsisH]]
+            ["@fortawesome/free-solid-svg-icons/faExchangeAlt" :refer [faExchangeAlt]]
             ["@fortawesome/free-solid-svg-icons/faExclamationTriangle" :refer [faExclamationTriangle]]
             ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt" :refer [faExternalLinkAlt]]
             ["@fortawesome/free-solid-svg-icons/faInfoCircle" :refer [faInfoCircle]]
+            ["@fortawesome/free-solid-svg-icons/faMinusCircle" :refer [faMinusCircle]]
             ["@fortawesome/free-solid-svg-icons/faPlayCircle" :refer [faPlayCircle]]
+            ["@fortawesome/free-solid-svg-icons/faPlusCircle" :refer [faPlusCircle]]
             ["@fortawesome/free-solid-svg-icons/faStopCircle" :refer [faStopCircle]]
             ["@fortawesome/free-solid-svg-icons/faTerminal" :refer [faTerminal]]
             ["@fortawesome/free-solid-svg-icons/faTimesCircle" :refer [faTimesCircle]]
@@ -33,10 +36,13 @@
 (def circle (partial icon faCircle))
 (def copy (partial icon faCopy))
 (def ellipsis-h (partial icon faEllipsisH))
+(def exchange-alt (partial icon faExchangeAlt))
 (def exclamation-triangle (partial icon faExclamationTriangle))
 (def external-link (partial icon faExternalLinkAlt))
 (def info-circle (partial icon faInfoCircle))
+(def minus-circle (partial icon faMinusCircle))
 (def play-circle (partial icon faPlayCircle))
+(def plus-circle (partial icon faPlusCircle))
 (def stop-circle (partial icon faStopCircle))
 (def terminal (partial icon faTerminal))
 (def times-circle (partial icon faTimesCircle))
