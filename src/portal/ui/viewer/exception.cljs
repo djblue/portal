@@ -192,7 +192,7 @@
           :align-items  :center
           :padding      [0 (:padding theme)]
           :border-right [1 :solid (::c/exception theme)]}}
-        [icon/exclamation-triangle {:size "sm"}]]
+        [icon/exclamation-triangle {:size "lg"}]]
        [s/div
         {:style {:flex "1"}}
         [inspect-via value]]]
