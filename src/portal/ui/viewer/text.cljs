@@ -68,4 +68,5 @@
 (def viewer
   {:predicate string?
    :component inspect-text
-   :name :portal.viewer/text})
+   :name :portal.viewer/text
+   :doc "View string as a text file."})

@@ -15,4 +15,5 @@
 (def viewer
   {:predicate edn?
    :component inspect-edn
-   :name :portal.viewer/edn})
+   :name :portal.viewer/edn
+   :doc "Parse a string as EDN. Will render error if parsing fails."})

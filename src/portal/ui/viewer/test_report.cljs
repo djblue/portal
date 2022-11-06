@@ -217,4 +217,5 @@
 (def viewer
   {:predicate get-component
    :component inspect-test
-   :name      :portal.viewer/test-report})
+   :name      :portal.viewer/test-report
+   :doc       "View clojure.test report output."})

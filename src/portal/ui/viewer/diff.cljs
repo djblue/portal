@@ -111,7 +111,8 @@
 (def viewer
   {:predicate can-view?
    :component inspect-diff
-   :name :portal.viewer/diff})
+   :name :portal.viewer/diff
+   :doc "Diff a collection of values successively starting with the first two."})
 
 (let [var  #'diff
       name (#'commands/var->name var)]

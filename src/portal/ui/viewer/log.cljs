@@ -159,4 +159,5 @@
 (def viewer
   {:predicate log?
    :component inspect-log
-   :name      :portal.viewer/log})
+   :name      :portal.viewer/log
+   :doc       "Useful for conveying a value in a specific context (what/where/when)."})

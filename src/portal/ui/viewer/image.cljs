@@ -22,4 +22,5 @@
 (def viewer
   {:predicate ins/bin?
    :component inspect-image
-   :name :portal.viewer/image})
+   :name :portal.viewer/image
+   :doc "View a binary value as an image."})

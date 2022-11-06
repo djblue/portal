@@ -151,4 +151,5 @@
 (def viewer
   {:predicate string?
    :component inspect-markdown
-   :name :portal.viewer/markdown})
+   :name :portal.viewer/markdown
+   :doc "Parse string as markdown and view as html."})

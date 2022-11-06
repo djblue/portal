@@ -45,4 +45,5 @@
 (def viewer
   {:predicate (constantly true)
    :component pprint-data
-   :name :portal.viewer/pprint})
+   :name :portal.viewer/pprint
+   :doc "View value printed via clojure.pprint/pprint."})
