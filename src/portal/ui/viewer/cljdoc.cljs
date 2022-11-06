@@ -3,8 +3,10 @@
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
+            [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
+            [portal.ui.viewer.hiccup :as hiccup]
             [portal.ui.viewer.markdown :as markdown]))
 
 (def ^:private observer-context (react/createContext nil))
@@ -99,7 +101,7 @@
          ^{:key (hash child)}
          [s/div
           {:style
-           {:padding-left (* 4 (:padding theme))}}
+           {:padding-left (* 3 (:padding theme))}}
           [docs-nav child visible selected]]))]))
 
 (defn- lazy-render [child]
@@ -122,43 +124,57 @@
      [s/section
       {:id    (:file entry label)
        :ref   ref
-       :style {:padding       40
-               :border-bottom
+       :style {:border-bottom
                (when-not (= label last-label)
                  [1 :solid (::c/border theme)])
                :min-height
                (if (= label last-label) "calc(100vh - 226px)" :auto)}}
-      (if-let [markdown (:markdown entry)]
-        [lazy-render
-         [ins/toggle-bg
-          [markdown/inspect-markdown markdown]]]
-        [s/h1
-         {:style
-          {:margin 0
-           :font-size "2em"
-           :color  (::c/namespace theme)}}
-         [s/span
-          {:on-click
-           (fn [e]
-             (.stopPropagation e)
-             (when-let [el (.-current ref)]
-               (.scrollIntoView ^js el)))
-           :style
-           {:cursor :pointer
-            :color  (::c/tag theme)}} "# "]
-         label])]]))
+      (or
+       (when-let [markdown (:markdown entry)]
+         [lazy-render
+          [ins/toggle-bg
+           [markdown/inspect-markdown markdown]]])
+       (when-let [hiccup (:hiccup entry)]
+         [lazy-render
+          [ins/toggle-bg
+           [ins/with-collection
+            entry
+            [hiccup/inspect-hiccup hiccup]]]])
+       [s/h1
+        {:style
+         {:margin 0
+          :padding 40
+          :font-size "2em"
+          :color  (::c/namespace theme)}}
+        [s/span
+         {:on-click
+          (fn [e]
+            (.stopPropagation e)
+            (when-let [el (.-current ref)]
+              (.scrollIntoView ^js el)))
+          :style
+          {:cursor :pointer
+           :color  (::c/tag theme)}} "# "]
+        label])]]))
 
 (defn render-docs [value]
   (let [has-label?  (string? (first value))
         has-article? (map? (second value))]
-    [:<>
+    [ins/with-collection
+     value
      (when has-label?
        [ins/toggle-bg [render-article value]])
-     (for [value (cond-> value
-                   has-label?   rest
-                   has-article? rest)]
-       ^{:key (hash value)}
-       [render-docs value])]))
+     (map-indexed
+      (fn [index value]
+        ^{:key index}
+        [ins/with-key
+         index
+         [select/with-position
+          {:row index :column 0}
+          [render-docs value]]])
+      (cond-> value
+        has-label?   rest
+        has-article? rest))]))
 
 (defn get-docs-order
   ([value]
@@ -214,12 +230,12 @@
       [s/nav
        {:style
         {:top         0
-         :line-height "1.45rem"
+         :line-height "1.1rem"
          :box-sizing  :border-box
          :padding-top padding
          :position    :sticky
          :height      :fit-content
-         :min-width   240}}
+         :min-width   280}}
        [docs-nav tree visible]]
       [s/div
        {:style
