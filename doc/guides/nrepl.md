@@ -68,3 +68,25 @@ Or via a dev profile:
          :repl-options
          {:nrepl-middleware [portal.nrepl/wrap-portal]}}})
 ```
+
+## Customization
+
+If you would like to process eval results, you can do so with a custom tap
+handler, such as the following:
+
+```clojure
+(require '[portal.api :as p])
+
+(defn submit [value]
+  (if (-> value meta :portal.nrepl/eval)
+    (let [{:keys [stdio report result]} value]
+      (when stdio (p/submit stdio))
+      (when report (p/submit report))
+      (p/submit result))
+    (p/submit value)))
+
+(add-tap submit)
+```
+
+> **Note** An expression that results in `:portal.api/ignore` will not be tapped
+> by the `portal.nrepl` middleware.
