@@ -39,22 +39,22 @@ If you could like the generate data for the log viewer in another context, the
 following specs will be useful:
 
 ```clojure
-(def ^:private levels
+(def levels
   [:trace :debug :info :warn :error :fatal :report])
 
-(sp/def ::level (set levels))
+(s/def ::level (set levels))
 
-(sp/def ::ns symbol?)
-(sp/def ::time inst?)
+(s/def ::ns symbol?)
+(s/def ::time inst?)
 
-(sp/def ::column int?)
-(sp/def ::line int?)
+(s/def ::column int?)
+(s/def ::line int?)
 
-(sp/def ::log
-  (sp/keys :req-un
-           [::level
-            ::ns
-            ::time
-            ::line
-            ::column]))
+(s/def ::log
+  (s/keys :req-un
+          [::level
+           ::ns
+           ::time
+           ::line
+           ::column]))
 ```
