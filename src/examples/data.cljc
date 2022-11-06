@@ -736,6 +736,15 @@
      [java.lang.Thread run "Thread.java" 829]],
     :data {:my :data}})
 
+(def http-data
+  {::http-request
+   {:request-method :get
+    :uri "https://djblue.github.io/portal/"}
+   ::http-response
+   {:status 200
+    :headers {:content-type "text/html; charset=utf-8"}
+    :body "<html><body>hi</body></html>"}})
+
 (def data-visualization
   {::vega
    {::force-directed force-directed
@@ -765,4 +774,5 @@
    ::log-data           log-data
    ::test-data          test-report
    ::prepl-data         prepl-data
-   ::exception-data     exception-data})
+   ::exception-data     exception-data
+   ::http-data          http-data})
