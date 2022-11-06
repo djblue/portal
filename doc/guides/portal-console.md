@@ -28,6 +28,11 @@ Will produce the following:
 
 ![logs](https://user-images.githubusercontent.com/1986211/196558924-d07fa896-2550-427e-b437-9a6f83fba1fb.png)
 
+> **Note** The data produced by `portal.console` is compatible with the
+> `portal.runtime.jvm.editor/goto-definition` command which can automatically
+> open the file location via the `:launcher` / `:editor` option passed to
+> `portal.api/open`.
+
 ## Spec
 
 If you could like the generate data for the log viewer in another context, the
