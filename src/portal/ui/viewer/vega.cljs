@@ -3,24 +3,26 @@
   https://vega.github.io/vega/docs/specification/"
   (:require ["react" :as react]
             ["vega-embed" :as vegaEmbed]
-            [clojure.spec.alpha :as sp]
+            [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
-(sp/def ::$schema
-  (sp/and string? #(re-matches #"https://vega\.github\.io/schema/vega/v\d\.json" %)))
+;;; :spec
+(s/def ::$schema
+  (s/and string? #(re-matches #"https://vega\.github\.io/schema/vega/v\d\.json" %)))
 
-(sp/def ::vega
-  (sp/keys :req-un [::$schema]))
+(s/def ::vega
+  (s/keys :req-un [::$schema]))
+;;;
 
 (defn styles
   "CSS styles applied to the vega embed elements. Allow filling most of the container."
   []
   (let [theme (theme/use-theme)]
     [:style
-     (s/map->css
+     (d/map->css
       {[:.vega-embed :.chart-wrapper]
        {:width "fit-content"
         :height "fit-content"}
@@ -121,12 +123,12 @@
            (.run view))))
      #js [init (.-current view) width])
 
-    [s/div
+    [d/div
      (when-let [title (:title value)]
        [:h1 title])
      (when-let [description (:description value)]
        [:p description])
-     [s/div
+     [d/div
       {:ref relative
        :style
        {:width "100%"
@@ -151,6 +153,6 @@
   [vega-embed {:mode "vega" :renderer :canvas} value])
 
 (def viewer
-  {:predicate (partial sp/valid? ::vega)
+  {:predicate (partial s/valid? ::vega)
    :component vega-viewer
    :name :portal.viewer/vega})

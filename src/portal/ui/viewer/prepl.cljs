@@ -1,25 +1,27 @@
 (ns portal.ui.viewer.prepl
   (:require ["anser" :as anser]
-            [clojure.spec.alpha :as sp]
+            [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
-(sp/def ::tag #{:out :err :tap})
+;;; :spec
+(s/def ::tag #{:out :err :tap})
 
-(sp/def ::out
-  (sp/keys :req-un [::tag ::val]))
+(s/def ::out
+  (s/keys :req-un [::tag ::val]))
 
-(sp/def ::io
-  (sp/coll-of ::out :min-count 1))
+(s/def ::prepl
+  (s/coll-of ::out :min-count 1))
+;;;
 
 (defn styles []
   (let [theme (theme/use-theme)]
     [:style
-     (s/map->css
+     (d/map->css
       {[:.ansi-black-fg]   {:color (::c/border theme)}
        [:.ansi-black-bg]   {:background (::c/border theme)}
        [:.ansi-red-fg]     {:color (::c/exception theme)}
@@ -41,12 +43,12 @@
 (defn inspect-prepl [value]
   (let [theme (theme/use-theme)
         opts  (ins/use-options)]
-    [s/div
+    [d/div
      {:style
       {:background    (ins/get-background)
        :border-radius (:border-radius theme)
        :border        [1 :solid (::c/border theme)]}}
-     [s/div
+     [d/div
       {:style
        {:display       :flex
         :gap           (:padding theme)
@@ -79,14 +81,14 @@
                 index
                 [select/with-position
                  {:row index :column 0}
-                 [s/div
+                 [d/div
                   {:style {:padding
                            [(* 2 (:padding theme)) (:padding theme)]}}
                   [ins/inspector
                    (try
                      (ins/read-string (:val value))
                      (catch :default _ (:val value)))]]]]]
-              [s/span
+              [d/span
                {:style
                 {:color
                  (if (= (:tag value) :err)
@@ -98,7 +100,7 @@
         value))]]))
 
 (defn io? [value]
-  (sp/valid? ::io value))
+  (s/valid? ::prepl value))
 
 (def viewer
   {:predicate io?

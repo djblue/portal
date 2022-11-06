@@ -1,54 +1,55 @@
 (ns portal.ui.viewer.http
-  (:require [clojure.spec.alpha :as sp]
+  (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
-(sp/def ::method #{:get     "GET"
-                   :head    "HEAD"
-                   :post    "POST"
-                   :put     "PUT"
-                   :patch   "PATCH"
-                   :delete  "DELETE"
-                   :options "OPTIONS"})
+;;; :spec
+(s/def ::method #{:get     "GET"
+                  :head    "HEAD"
+                  :post    "POST"
+                  :put     "PUT"
+                  :patch   "PATCH"
+                  :delete  "DELETE"
+                  :options "OPTIONS"})
 
-(sp/def ::uri string?)
-(sp/def ::url string?)
+(s/def ::uri string?)
 
 (defn valid-status? [value] (<= 100 value 599))
-(sp/def ::status (sp/and int? valid-status?))
-(sp/def ::name (sp/or :string string? :keyword keyword?))
-(sp/def ::header (sp/or :string string? :strings (sp/coll-of string?)))
-(sp/def ::headers (sp/map-of ::name ::header))
-(sp/def ::query-params (sp/map-of ::name ::name))
-(sp/def ::doc string?)
+(s/def ::status (s/and int? valid-status?))
+(s/def ::name (s/or :string string? :keyword keyword?))
+(s/def ::header (s/or :string string? :strings (s/coll-of string?)))
+(s/def ::headers (s/map-of ::name ::header))
+(s/def ::query-params (s/map-of ::name ::name))
+(s/def ::doc string?)
 
-(sp/def ::request-method #{:get :head :post :put :patch :delete})
+(s/def ::request-method #{:get :head :post :put :patch :delete})
 
-(sp/def ::request
-  (sp/keys :req-un [::request-method
-                    ::uri]
-           :opt-un [::headers
-                    ::query-params
-                    ::body
-                    ::doc]))
+(s/def ::request
+  (s/keys :req-un [::request-method
+                   ::uri]
+          :opt-un [::headers
+                   ::query-params
+                   ::body
+                   ::doc]))
 
-(sp/def ::request
-  (sp/keys :req-un [::request-method
-                    ::uri]
-           :opt-un [::headers
-                    ::query-params
-                    ::body
-                    ::doc]))
+(s/def ::request
+  (s/keys :req-un [::request-method
+                   ::uri]
+          :opt-un [::headers
+                   ::query-params
+                   ::body
+                   ::doc]))
 
-(sp/def ::response
-  (sp/keys :req-un [::status]
-           :opt-un [::headers
-                    ::body
-                    ::doc]))
+(s/def ::response
+  (s/keys :req-un [::status]
+          :opt-un [::headers
+                   ::body
+                   ::doc]))
+;;;
 
 (def ^:private method->color
   {:get     ::c/boolean
@@ -65,13 +66,13 @@
         background (ins/get-background)
         color      (-> value :request-method method->color theme)
         expanded?  (:expanded? opts)]
-    [s/div
-     [s/div
+    [d/div
+     [d/div
       {:style
        {:display     :flex
         :align-items :stretch
         :background  background}}
-      [s/div
+      [d/div
        {:style
         {:cursor     :pointer
          :color      background
@@ -83,7 +84,7 @@
          :border-bottom-left-radius
          (when-not expanded? (:border-radius theme))}}
        (str/upper-case (name (:request-method value)))]
-      [s/div
+      [d/div
        {:style
         {:flex    "1"
          :padding [(:padding theme) (* 2 (:padding theme))]
@@ -117,12 +118,12 @@
         content-type (or (get-in value [:headers "Content-Type"])
                          (get-in value [:headers :content-type]))
         color        (-> value :status status->color theme)]
-    [s/div
-     [s/div
+    [d/div
+     [d/div
       {:style
        {:display    :flex
         :background background}}
-      [s/div
+      [d/div
        {:style
         {:cursor                 :pointer
          :background             color
@@ -133,7 +134,7 @@
          :border-bottom-left-radius
          (when-not expanded? (:border-radius theme))}}
        (:status value)]
-      [s/div
+      [d/div
        {:style
         {:flex                    "1"
          :padding                 (:padding theme)
@@ -154,10 +155,10 @@
 
 (defn get-component [value]
   (cond
-    (sp/valid? ::request value)
+    (s/valid? ::request value)
     inspect-http-request
 
-    (sp/valid? ::response value)
+    (s/valid? ::response value)
     inspect-http-response))
 
 (defn inspect-http [value]

@@ -1,49 +1,51 @@
 (ns portal.ui.viewer.test-report
-  (:require [clojure.spec.alpha :as sp]
+  (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
-(sp/def :test-ns/type #{:begin-test-ns :end-test-ns})
+;;; :spec
+(s/def :test-ns/type #{:begin-test-ns :end-test-ns})
 
-(sp/def ::test-ns
-  (sp/keys :req-un [:test-ns/type ::ns]))
+(s/def ::test-ns
+  (s/keys :req-un [:test-ns/type ::ns]))
 
-(sp/def :test-var/type #{:begin-test-var :end-test-var})
+(s/def :test-var/type #{:begin-test-var :end-test-var})
 
-(sp/def ::test-var
-  (sp/keys :req-un [:test-var/type ::var]))
+(s/def ::test-var
+  (s/keys :req-un [:test-var/type ::var]))
 
-(sp/def :assert/type #{:pass :fail :error})
+(s/def :assert/type #{:pass :fail :error})
 
-(sp/def ::assert
-  (sp/keys :req-un [:assert/type]
-           :opt-un [::file ::line ::actual ::expected ::message]))
+(s/def ::assert
+  (s/keys :req-un [:assert/type]
+          :opt-un [::file ::line ::actual ::expected ::message]))
 
-(sp/def :summary/type #{:summary})
+(s/def :summary/type #{:summary})
 
-(sp/def ::pass  number?)
-(sp/def ::fail  number?)
-(sp/def ::error number?)
-(sp/def ::test  number?)
+(s/def ::pass  number?)
+(s/def ::fail  number?)
+(s/def ::error number?)
+(s/def ::test  number?)
 
-(sp/def ::summary
-  (sp/keys :req-un [:summary/type ::pass ::fail ::error ::test]))
+(s/def ::summary
+  (s/keys :req-un [:summary/type ::pass ::fail ::error ::test]))
 
-(sp/def ::output
-  (sp/or :ns      ::test-ns
-         :var     ::test-var
-         :assert  ::assert
-         :summary ::summary))
+(s/def ::output
+  (s/or :ns      ::test-ns
+        :var     ::test-var
+        :assert  ::assert
+        :summary ::summary))
 
-(sp/def ::report
-  (sp/coll-of ::output :min-count 1))
+(s/def ::report
+  (s/coll-of ::output :min-count 1))
+;;;
 
 (defn- label [{:keys [message expected var ns] :as value}]
-  [s/div
+  [d/div
    {:style {:flex "1"}}
    [ins/with-collection
     value
@@ -88,14 +90,14 @@
                      :pass (::c/diff-add theme)
                      (:error :fail) (::c/diff-remove theme)
                      (::c/border theme))]
-    [s/div
-     [s/div
+    [d/div
+     [d/div
       {:style
        {:display        :flex
         :flex-direction :row
         :align-items    :stretch
         :background     background}}
-      [s/div
+      [d/div
        {:style
         {:padding    (:padding theme)
          :background color
@@ -117,7 +119,7 @@
           :summary        icons/info-circle
           :<>)
         {:style {:color background}}]]
-      [s/div
+      [d/div
        {:style
         {:flex          "1"
          :display       :flex
@@ -132,7 +134,7 @@
          :border-bottom-right-radius (when-not expanded? (:border-radius theme))}}
        [label value]
        (when-let [file (:file value)]
-         [s/div
+         [d/div
           {:style {:color (::c/uri theme)}}
           file
           (when-let [line (:line value)]
@@ -200,11 +202,11 @@
 
 (defn get-component [value]
   (cond
-    (and (sp/valid? ::report value)
+    (and (s/valid? ::report value)
          (begin? (:type (first value))))
     inspect-test-report
 
-    (and (sp/valid? ::output value)
+    (and (s/valid? ::output value)
          (not= (:type value) :summary))
     inspect-assertion))
 

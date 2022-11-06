@@ -1,11 +1,11 @@
 (ns portal.ui.viewer.log
-  (:require [clojure.spec.alpha :as sp]
+  (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.resources :refer [inline]]
             #_[shadow.resource :refer [inline]] ;; for hot reloading
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.date-time :as date-time]))
 
@@ -40,34 +40,36 @@
    :portal (inline "runtime/portal.svg")})
 
 (defn icon [value color]
-  [s/img
+  [d/img
    {:style
     {:height 22 :width 22}
     :src (str
           "data:image/svg+xml;base64,"
           (-> value runtime->logo parse (theme-svg color) stringify js/btoa))}])
 
+;;; :spec
 (def ^:private levels
   [:trace :debug :info :warn :error :fatal :report])
 
-(sp/def ::level (set levels))
+(s/def ::level (set levels))
 
-(sp/def ::ns symbol?)
-(sp/def ::time inst?)
+(s/def ::ns symbol?)
+(s/def ::time inst?)
 
-(sp/def ::column int?)
-(sp/def ::line int?)
+(s/def ::column int?)
+(s/def ::line int?)
 
-(sp/def ::log
-  (sp/keys :req-un
-           [::level
-            ::ns
-            ::time
-            ::line
-            ::column]))
+(s/def ::log
+  (s/keys :req-un
+          [::level
+           ::ns
+           ::time
+           ::line
+           ::column]))
+;;;
 
 (defn log? [value]
-  (sp/valid? ::log value))
+  (s/valid? ::log value))
 
 (def ^:private level->color
   {:trace  ::c/text
@@ -93,10 +95,10 @@
                     :display     :flex
                     :align-items :center}]
 
-    [s/div
+    [d/div
      {:style
       {:background background}}
-     [s/div
+     [d/div
       {:style
        {:display                   :grid
         :grid-template-columns     (if-not runtime?
@@ -105,11 +107,11 @@
         :border-left               [5 :solid color]
         :border-top-left-radius    (:border-radius theme)
         :border-bottom-left-radius (when-not expanded? (:border-radius theme))}}
-      [s/div
+      [d/div
        {:style
         (merge {:border-top [1 :solid (::c/border theme)]} flex border)}
        [date-time/inspect-time (:time log)]]
-      [s/div
+      [d/div
        {:style
         (merge flex {:border-top [1 :solid (::c/border theme)] :flex "1"} border)}
        [select/with-position
@@ -118,7 +120,7 @@
          [ins/with-key :result
           [ins/dec-depth
            [ins/inspector (:result log)]]]]]]
-      [s/div
+      [d/div
        {:style
         (merge
          flex
@@ -134,7 +136,7 @@
        ":"
        (:line log)]
       (when runtime?
-        [s/div
+        [d/div
          {:style
           (merge
            {:padding                    (:padding theme)

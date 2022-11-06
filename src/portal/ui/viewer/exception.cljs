@@ -1,42 +1,44 @@
 (ns portal.ui.viewer.exception
-  (:require [clojure.spec.alpha :as spec]
+  (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.icons :as icon]
             [portal.ui.inspector :as ins]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.log :as log]
             [reagent.core :as r]))
 
-(spec/def ::cause string?)
+;;; :spec
+(s/def ::cause string?)
 
-(spec/def ::trace-line
-  (spec/cat :class symbol?
-            :method symbol?
-            :file (spec/or :str string? :nil nil?)
-            :line number?))
+(s/def ::trace-line
+  (s/cat :class symbol?
+         :method symbol?
+         :file (s/or :str string? :nil nil?)
+         :line number?))
 
-(spec/def ::trace (spec/coll-of ::trace-line :min-count 1))
+(s/def ::trace (s/coll-of ::trace-line :min-count 1))
 
-(spec/def ::type symbol?)
-(spec/def ::message string?)
-(spec/def ::at ::trace-line)
+(s/def ::type symbol?)
+(s/def ::message string?)
+(s/def ::at ::trace-line)
 
-(spec/def ::via
-  (spec/coll-of
-   (spec/keys :req-un [::type]
-              :opt-un [::message ::at])))
+(s/def ::via
+  (s/coll-of
+   (s/keys :req-un [::type]
+           :opt-un [::message ::at])))
 
-(spec/def ::exception
-  (spec/keys :req-un [::via]
-             :opt-un [::trace ::cause]))
+(s/def ::exception
+  (s/keys :req-un [::via]
+          :opt-un [::trace ::cause]))
+;;;
 
 (defn trace? [value]
-  (spec/valid? ::trace value))
+  (s/valid? ::trace value))
 
 (defn exception? [value]
-  (spec/valid? ::exception value))
+  (s/valid? ::exception value))
 
 (defn- inspect-sub-trace [trace]
   (r/with-let [expanded? (r/atom (zero? (:index (first trace))))]
@@ -51,7 +53,7 @@
          {:grid-column "1"
           :width       (* 3 (:padding theme))
           :color       (::c/border theme)}}]
-       [s/div
+       [d/div
         {:on-click (fn [e]
                      (swap! expanded? not)
                      (.stopPropagation e))
@@ -59,13 +61,13 @@
          {:grid-column "2"
           :cursor      :pointer}}
 
-        [s/span
+        [d/span
          {:title file
           :style {:color (if clj?
                            (::c/namespace theme)
                            (::c/package theme))}}
          (if-not clj? class (namespace sym))]]
-       [s/span
+       [d/span
         {:style
          {:grid-column "3"
           :color       (::c/border theme)}}
@@ -74,11 +76,11 @@
          (for [{:keys [clj? sym method line index]} trace]
            [:<>
             {:key index}
-            [s/div]
-            [s/div
+            [d/div]
+            [d/div
              (if clj?
                (name sym)
-               [s/div method])]
+               [d/div method])]
             [ins/inspector line]]))])))
 
 (defn- analyze-trace-item [index trace]
@@ -100,7 +102,7 @@
 (defn- inspect-stack-trace [trace]
   (let [theme   (theme/use-theme)
         options (ins/use-options)]
-    [s/div
+    [d/div
      {:style
       {:background            (ins/get-background)
        :box-sizing            :border-box
@@ -127,13 +129,13 @@
   (let [theme                  (theme/use-theme)
         {:keys [type message]} (last (:via value))
         message                (or (:cause value) message)]
-    [s/div
+    [d/div
      {:style
       {:display         :flex
        :justify-content :space-between
        :align-items     :center
        :box-sizing      :border-box}}
-     [s/div
+     [d/div
       {:style
        {:font-weight :bold
         :color (::c/exception theme)
@@ -141,15 +143,15 @@
       (if message
         message
         (pr-str (:phase value type)))]
-     [s/div
+     [d/div
       {:style {:display         :flex
                :align-items     :center
                :justify-content :space-between}}
-      [s/div
+      [d/div
        {:style {:padding [(:padding theme) (* 2 (:padding theme))]}}
        (when message (pr-str (:phase value type)))]
       (when-let [value (:runtime value)]
-        [s/div
+        [d/div
          {:style {:padding     (:padding theme)
                   :display     :flex
                   :align-items :center
@@ -162,12 +164,12 @@
   (let [theme     (theme/use-theme)
         options   (ins/use-options)
         expanded? (:expanded? options)]
-    [s/div
+    [d/div
      {:style
       {:color (::c/text theme)
        :font-size  (:font-size theme)}}
-     [s/div
-      [s/div
+     [d/div
+      [d/div
        {:style
         {:display    :flex
          :position   :relative
@@ -177,7 +179,7 @@
          :border-top-left-radius     (:border-radius theme)
          :border-bottom-right-radius (when-not expanded? (:border-radius theme))
          :border-bottom-left-radius  (when-not expanded? (:border-radius theme))}}
-       [s/div
+       [d/div
         {:style
          {:position :absolute
           :top 0
@@ -186,14 +188,14 @@
           :left 0
           :opacity 0.15
           :background (::c/exception theme)}}]
-       [s/div
+       [d/div
         {:style
          {:display      :flex
           :align-items  :center
           :padding      [0 (:padding theme)]
           :border-right [1 :solid (::c/exception theme)]}}
         [icon/exclamation-triangle {:size "lg"}]]
-       [s/div
+       [d/div
         {:style {:flex "1"}}
         [inspect-via value]]]
       (when expanded?
