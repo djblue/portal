@@ -60,9 +60,10 @@
 
        [:table.hiccup]
        {:margin-left 1
+        :margin-right 1
         :color (::c/text theme)
         :font-size (:font-size theme)
-        :width "100%"
+        :width "calc(100% - 2)"
         :overflow :auto
         :border-style :hidden
         :border-collapse :collapse
