@@ -126,14 +126,16 @@
 
 (defn inspect-hiccup [value]
   (let [viewers (ins/viewers-by-name @ins/viewers)
-        opts    (ins/use-options)]
+        opts    (ins/use-options)
+        theme   (theme/use-theme)]
     [ins/toggle-bg
      [ins/with-key
       :portal.viewer/hiccup
       [d/div
        {:class "hiccup-root"
         :style
-        {:overflow   :auto
+        {:padding    (* 6 (:padding theme))
+         :overflow   :auto
          :max-height (when-not (:expanded? opts) "24rem")}}
        (process-hiccup
         {:count (atom -1) :viewers viewers} value)]]]))
