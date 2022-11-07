@@ -736,36 +736,36 @@
      [java.lang.Thread run "Thread.java" 829]],
     :data {:my :data}})
 
-(def http-data
-  {::http-requests
-   [{:request-method :get
-     :uri "https://djblue.github.io/portal/"}
-    {:request-method :post
-     :uri "https://djblue.github.io/portal/"}
-    {:request-method :put
-     :uri "https://djblue.github.io/portal/"}
-    {:request-method :patch
-     :uri "https://djblue.github.io/portal/"}
-    {:request-method :delete
-     :uri "https://djblue.github.io/portal/"}
-    {:request-method :options
-     :uri "https://djblue.github.io/portal/"}]
-   ::http-responses
-   [{:status 100
-     :headers {:content-type "text/html; charset=utf-8"}
-     :body "<html><body>hi</body></html>"}
-    {:status 200
-     :headers {:content-type "text/html; charset=utf-8"}
-     :body "<html><body>hi</body></html>"}
-    {:status 300
-     :headers {:content-type "text/html; charset=utf-8"}
-     :body "<html><body>hi</body></html>"}
-    {:status 400
-     :headers {:content-type "text/html; charset=utf-8"}
-     :body "<html><body>hi</body></html>"}
-    {:status 500
-     :headers {:content-type "text/html; charset=utf-8"}
-     :body "<html><body>hi</body></html>"}]})
+(def http-requests
+  [{:request-method :get
+    :uri "https://djblue.github.io/portal/"}
+   {:request-method :post
+    :uri "https://djblue.github.io/portal/"}
+   {:request-method :put
+    :uri "https://djblue.github.io/portal/"}
+   {:request-method :patch
+    :uri "https://djblue.github.io/portal/"}
+   {:request-method :delete
+    :uri "https://djblue.github.io/portal/"}
+   {:request-method :options
+    :uri "https://djblue.github.io/portal/"}])
+
+(def http-responses
+  [{:status 100
+    :headers {:content-type "text/html; charset=utf-8"}
+    :body "<html><body>hi</body></html>"}
+   {:status 200
+    :headers {:content-type "text/html; charset=utf-8"}
+    :body "<html><body>hi</body></html>"}
+   {:status 300
+    :headers {:content-type "text/html; charset=utf-8"}
+    :body "<html><body>hi</body></html>"}
+   {:status 400
+    :headers {:content-type "text/html; charset=utf-8"}
+    :body "<html><body>hi</body></html>"}
+   {:status 500
+    :headers {:content-type "text/html; charset=utf-8"}
+    :body "<html><body>hi</body></html>"}])
 
 (def data-visualization
   {::vega
@@ -797,4 +797,5 @@
    ::test-data          test-report
    ::prepl-data         prepl-data
    ::exception-data     exception-data
-   ::http-data          http-data})
+   ::http-requests      http-requests
+   ::http-responses     http-responses})
