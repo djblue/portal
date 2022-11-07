@@ -142,7 +142,6 @@
                                   :margin      0
                                   :background  :none
                                   :width       "100%"
-                                  :overflow    :auto
                                   :font-family (:font-family theme)
                                   :font-size   (:font-size theme)}
         :dangerouslySetInnerHTML {:__html html}}]])))
