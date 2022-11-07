@@ -114,7 +114,7 @@
         [ins/with-key
          tag
          [select/with-position
-          {:row 0 :column 0}
+          {:row (swap! (:count context) inc) :column 0}
           [ins/with-default-viewer
            tag
            (into [component] args)]]]
@@ -139,7 +139,8 @@
         :style
         {:overflow   :auto
          :max-height (when-not (:expanded? opts) "24rem")}}
-       (process-hiccup {:viewers viewers} value)]]]))
+       (process-hiccup
+        {:count (atom -1) :viewers viewers} value)]]]))
 
 (defn hiccup? [value]
   (and (vector? value)
