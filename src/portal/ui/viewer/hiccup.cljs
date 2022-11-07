@@ -2,9 +2,8 @@
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [portal.ui.viewer.code :as code]))
+            [portal.ui.styled :as d]
+            [portal.ui.theme :as theme]))
 
 (defn- header-styles [theme]
   {:color (::c/namespace theme)
@@ -12,13 +11,6 @@
    :padding-top (:padding theme)
    :padding-bottom (:padding theme)
    :margin-bottom (* 2 (:padding theme))})
-
-(defn- add-class [m]
-  (reduce-kv
-   (fn [out k v]
-     (assoc out [:.hiccup k] v))
-   {}
-   m))
 
 (defn styles []
   (let [theme (theme/use-theme)
@@ -29,76 +21,84 @@
         {:border-bottom
          (str "1px solid " (::c/border theme))}]
     [:style
-     (s/map->css
-      (add-class
-       {:h1 (merge {:font-size "2em"} h border-bottom)
-        :h2 (merge {:font-size "1.5em"} h border-bottom)
+     (d/map->css
+      {[:h1.hiccup] (merge {:font-size "2em"} h border-bottom)
+       [:h2.hiccup] (merge {:font-size "1.5em"} h border-bottom)
 
-        :h3 h :h4 h :h5 h :h6 h
+       [:h3.hiccup] h [:h4.hiccup] h [:h5.hiccup] h [:h6.hiccup] h
 
-        :a {:color (::c/uri theme)}
+       [:a.hiccup] {:color (::c/uri theme)}
 
-        :ul {:margin 0}
-        :ol {:margin 0}
-        :li {:margin-top (* 0.5 (:padding theme))}
+       [:ul.hiccup] {:margin 0}
+       [:ol.hiccup] {:margin 0}
+       [:li.hiccup] {:margin-top (* 0.5 (:padding theme))}
 
-        :p {:font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
-            :font-size (:font-size theme)
-            :line-height "1.5em"
-            :margin 0}
+       [:p.hiccup]
+       {:font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
+        :font-size (:font-size theme)
+        :line-height "1.5em"
+        :margin 0}
 
-        :img {:max-width "100%"}
+       [:img.hiccup] {:max-width "100%"}
 
-        :code
-        {:background (::c/background2 theme)
-         :border-radius (:border-radius theme)
-         :box-sizing :border-box
-         :padding [0 (* 1.5 (:padding theme))]}
+       [:code.hiccup]
+       {:background (::c/background2 theme)
+        :border-radius (:border-radius theme)
+        :box-sizing :border-box
+        :padding [0 (* 1.5 (:padding theme))]}
 
-        :pre
-        {:overflow :auto
-         :background (::c/background2 theme)
-         :border-radius (:border-radius theme)}
+       [:pre.hiccup]
+       {:overflow :auto
+        :background (::c/background2 theme)
+        :border-radius (:border-radius theme)}
 
-        :blockquote
-        {:margin 0
-         :background bg
-         :padding-left (* 2 (:padding theme))
-         :border-left [(:padding theme) :solid (::c/border theme)]}
+       [:blockquote.hiccup]
+       {:margin 0
+        :background bg
+        :padding-left (* 2 (:padding theme))
+        :border-left [(:padding theme) :solid (::c/border theme)]}
 
-        :table {:color (::c/text theme)
-                :font-size (:font-size theme)
-                :width "100%"
-                :overflow :auto
-                :border-style :hidden
-                :border-collapse :collapse
-                :border-radius (:border-radius theme)
-                :box-shadow [0 0 0 1 (::c/border theme)]}
-        :th {:font-weight :bold
-             :text-align :center
-             :padding (* 1.5 (:padding theme))
-             :border [1 :solid (::c/border theme)]}
-        :td {:text-align :left
-             :padding (:padding theme)
-             :border [1 :solid (::c/border theme)]}
+       [:table.hiccup]
+       {:margin-left 1
+        :color (::c/text theme)
+        :font-size (:font-size theme)
+        :width "100%"
+        :overflow :auto
+        :border-style :hidden
+        :border-collapse :collapse
+        :border-radius (:border-radius theme)
+        :box-shadow [0 0 0 1 (::c/border theme)]}
 
-        "tr:nth-child(odd)"  {:background bg}
-        "tr:nth-child(even)" {:background bg2}
+       [:th.hiccup]
+       {:font-weight :bold
+        :text-align :center
+        :padding (* 1.5 (:padding theme))
+        :border [1 :solid (::c/border theme)]}
+       [:td.hiccup]
+       {:text-align :left
+        :padding (:padding theme)
+        :border [1 :solid (::c/border theme)]}
 
-        "> div"
-        {:display :flex
-         :flex-direction :column
-         :gap (* 1.5 (:padding theme))}}))]))
+       ["tr.hiccup:nth-child(odd)"]  {:background bg}
+       ["tr.hiccup:nth-child(even)"] {:background bg2}
+
+       ["div.hiccup-root > *"]
+       {:display :flex
+        :flex-direction :column
+        :gap (* 1.5 (:padding theme))}})]))
 
 (defn inspect-code [& args]
   (let [[_ attrs code] (second args)
         theme          (theme/use-theme)]
-    [ins/toggle-bg
-     [s/div
-      {:style
-       {:margin-top    (:padding theme)
-        :margin-bottom (:padding theme)}}
-      [code/inspect-code attrs code]]]))
+    [d/div
+     {:style
+      {:margin-top    (:padding theme)
+       :margin-bottom (:padding theme)}}
+     [ins/with-context
+      {:portal.viewer/code {:language (:class attrs)}}
+      [ins/with-default-viewer
+       :portal.viewer/code
+       [ins/inspector code]]]]))
 
 (def tag->viewer
   {:pre inspect-code})
@@ -107,24 +107,38 @@
   (if-not (vector? hiccup)
     hiccup
     (let [[tag & args]  hiccup
-          component     (or (get-in context [:viewers tag :component])
+          component     (or (when (get-in context [:viewers tag :component])
+                              ins/inspector)
                             (tag->viewer tag))]
       (if component
-        [ins/dec-depth
+        [ins/with-key
+         tag
          [select/with-position
           {:row 0 :column 0}
-          (into [component] args)]]
-        (into
-         [tag]
-         (map #(process-hiccup context %))
-         args)))))
+          [ins/with-default-viewer
+           tag
+           (into [component] args)]]]
+        (if (map? (first args))
+          (into
+           [tag (update (first args) :class str " hiccup")]
+           (map #(process-hiccup context %))
+           (rest args))
+          (into
+           [tag {:class "hiccup"}]
+           (map #(process-hiccup context %))
+           args))))))
 
 (defn inspect-hiccup [value]
-  (let [viewers (ins/viewers-by-name @ins/viewers)]
+  (let [viewers (ins/viewers-by-name @ins/viewers)
+        opts    (ins/use-options)]
     [ins/toggle-bg
      [ins/with-key
       :portal.viewer/hiccup
-      [:div {:class "hiccup"}
+      [d/div
+       {:class "hiccup-root"
+        :style
+        {:overflow   :auto
+         :max-height (when-not (:expanded? opts) "24rem")}}
        (process-hiccup {:viewers viewers} value)]]]))
 
 (defn hiccup? [value]
