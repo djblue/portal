@@ -99,7 +99,7 @@
     (<= 100 status 199) ::c/boolean
     (<= 200 status 299) ::c/string
     (<= 300 status 399) ::c/tag
-    (<= 400 status 499) ::c/exception
+    (<= 400 status 499) ::c/uri
     (<= 500 status 599) ::c/exception))
 
 (defn inspect-http-response [value]
