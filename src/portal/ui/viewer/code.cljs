@@ -141,7 +141,7 @@
         :style                   {:padding     0
                                   :margin      0
                                   :background  :none
-                                  :width       "100%"
+                                  :width       :fit-content
                                   :font-family (:font-family theme)
                                   :font-size   (:font-size theme)}
         :dangerouslySetInnerHTML {:__html html}}]])))
