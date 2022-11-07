@@ -8,14 +8,6 @@
             [portal.ui.theme :as theme]))
 
 ;;; :spec
-(s/def ::method #{:get     "GET"
-                  :head    "HEAD"
-                  :post    "POST"
-                  :put     "PUT"
-                  :patch   "PATCH"
-                  :delete  "DELETE"
-                  :options "OPTIONS"})
-
 (s/def ::uri string?)
 
 (defn valid-status? [value] (<= 100 value 599))
@@ -26,7 +18,7 @@
 (s/def ::query-params (s/map-of ::name ::name))
 (s/def ::doc string?)
 
-(s/def ::request-method #{:get :head :post :put :patch :delete})
+(s/def ::request-method #{:get :head :post :put :patch :delete :options})
 
 (s/def ::request
   (s/keys :req-un [::request-method

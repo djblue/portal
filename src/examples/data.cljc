@@ -737,13 +737,35 @@
     :data {:my :data}})
 
 (def http-data
-  {::http-request
-   {:request-method :get
-    :uri "https://djblue.github.io/portal/"}
-   ::http-response
-   {:status 200
-    :headers {:content-type "text/html; charset=utf-8"}
-    :body "<html><body>hi</body></html>"}})
+  {::http-requests
+   [{:request-method :get
+     :uri "https://djblue.github.io/portal/"}
+    {:request-method :post
+     :uri "https://djblue.github.io/portal/"}
+    {:request-method :put
+     :uri "https://djblue.github.io/portal/"}
+    {:request-method :patch
+     :uri "https://djblue.github.io/portal/"}
+    {:request-method :delete
+     :uri "https://djblue.github.io/portal/"}
+    {:request-method :options
+     :uri "https://djblue.github.io/portal/"}]
+   ::http-responses
+   [{:status 100
+     :headers {:content-type "text/html; charset=utf-8"}
+     :body "<html><body>hi</body></html>"}
+    {:status 200
+     :headers {:content-type "text/html; charset=utf-8"}
+     :body "<html><body>hi</body></html>"}
+    {:status 300
+     :headers {:content-type "text/html; charset=utf-8"}
+     :body "<html><body>hi</body></html>"}
+    {:status 400
+     :headers {:content-type "text/html; charset=utf-8"}
+     :body "<html><body>hi</body></html>"}
+    {:status 500
+     :headers {:content-type "text/html; charset=utf-8"}
+     :body "<html><body>hi</body></html>"}]})
 
 (def data-visualization
   {::vega
