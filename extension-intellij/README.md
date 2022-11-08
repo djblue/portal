@@ -14,6 +14,6 @@ The main benefits of using this plugin are:
 
 Portal itself allows you to pipe data from a clojure repl via [tap&gt;](https://clojuredocs.org/clojure.core/tap%3E) into the various data visualization tools within the Portal UI.
 
-For a more in-depth look into how to use portal, take a look at the project [https://github.com/djblue/portal#api](README)
+For a more in-depth look into how to use portal, take a look at the project [README](https://github.com/djblue/portal#api)
 
 <!-- Plugin description end -->
