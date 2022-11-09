@@ -63,6 +63,16 @@
        (sort-by second)
        ffirst))
 
+(defn- selected-path [index selected]
+  (zipmap
+   (->> selected
+        (iterate
+         (fn [label]
+           (get-in index [:parents label])))
+        (take-while some?)
+        reverse)
+   (range)))
+
 (defn- docs-nav [value visible]
   (let [index      (use-index)
         selected   (first-visible visible index)
@@ -70,7 +80,8 @@
         has-label? (string? (first value))
         label      (when has-label? (first value))
         value      (if-not has-label? value (rest value))
-        parent     (get-in index [:parents selected])]
+        depth      (get (selected-path index selected) label)
+        color      (when depth (get theme (nth theme/order depth)))]
     [:<>
      (when (string? label)
        [s/div
@@ -82,16 +93,10 @@
          :style
          {:cursor        :pointer
           :font-size     "0.85rem"
-          :color         (condp = label
-                           parent   (::c/namespace theme)
-                           selected (::c/boolean theme)
-                           (::c/border theme))
+          :color         (or color (::c/border theme))
           :box-sizing    :border-box
           :padding-right (* 4 (:padding theme))
-          :border-right  [3 :solid (condp = label
-                                     parent   (::c/namespace theme)
-                                     selected (::c/boolean theme)
-                                     "rgba(0,0,0,0)")]}}
+          :border-right  [3 :solid (or color "rgba(0,0,0,0)")]}}
         label])
      (when (and (coll? value) (not (map? value)))
        (for [child value]
