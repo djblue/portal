@@ -2,6 +2,7 @@
   (:require ["marked" :refer [marked]]
             [hickory.core :as h]
             [hickory.utils :as utils]
+            [portal.ui.lazy :as l]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
 
 (declare ->inline)
@@ -145,8 +146,11 @@
 (defn ^:no-doc parse-markdown [value]
   (->hiccup (.lexer marked value)))
 
-(defn inspect-markdown [value]
+(defn- inspect-markdown* [value]
   [inspect-hiccup (parse-markdown value)])
+
+(defn inspect-markdown [value]
+  [l/lazy-render [inspect-markdown* value]])
 
 (def viewer
   {:predicate string?

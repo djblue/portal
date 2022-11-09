@@ -2,12 +2,9 @@
   (:require ["react" :as react]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
-            [portal.ui.lazy :as l]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [portal.ui.viewer.hiccup :as hiccup]
-            [portal.ui.viewer.markdown :as markdown]))
+            [portal.ui.theme :as theme]))
 
 (def ^:private observer-context (react/createContext nil))
 
@@ -104,17 +101,10 @@
            {:padding-left (* 3 (:padding theme))}}
           [docs-nav child visible selected]]))]))
 
-(defn- lazy-render [child]
-  (let [[show set-show!] (react/useState false)]
-    (if show
-      child
-      [:<>
-       [l/visible-sensor #(set-show! true)]
-       [s/div {:style {:height "50vh"}}]])))
-
 (defn- render-article [value]
-  (let [theme         (theme/use-theme)
-        last-label    (:last (use-index))
+  (let [index         (use-index)
+        theme         (theme/use-theme)
+        last-label    (:last index)
         background    (ins/get-background)
         [label entry] value
         ref           (use-observer label)]
@@ -129,33 +119,39 @@
                  [1 :solid (::c/border theme)])
                :min-height
                (if (= label last-label) "calc(100vh - 226px)" :auto)}}
-      (or
-       (when-let [markdown (:markdown entry)]
-         [lazy-render
-          [ins/toggle-bg
-           [markdown/inspect-markdown markdown]]])
-       (when-let [hiccup (:hiccup entry)]
-         [lazy-render
-          [ins/toggle-bg
-           [ins/with-collection
-            entry
-            [hiccup/inspect-hiccup hiccup]]]])
-       [s/h1
-        {:style
-         {:margin 0
-          :padding 40
-          :font-size "2em"
-          :color  (::c/namespace theme)}}
-        [s/span
-         {:on-click
-          (fn [e]
-            (.stopPropagation e)
-            (when-let [el (.-current ref)]
-              (.scrollIntoView ^js el)))
-          :style
-          {:cursor :pointer
-           :color  (::c/tag theme)}} "# "]
-        label])]]))
+      [ins/with-key
+       label
+       [select/with-position
+        {:row (get-in index [:order label]) :column 0}
+        (or
+         (when-let [markdown (:markdown entry)]
+           [ins/dec-depth
+            [ins/with-default-viewer
+             :portal.viewer/markdown
+             [ins/inspector markdown]]])
+         (when-let [hiccup (:hiccup entry)]
+           [ins/dec-depth
+            [ins/with-default-viewer
+             :portal.viewer/hiccup
+             [ins/with-collection
+              entry
+              [ins/inspector hiccup]]]])
+         [s/h1
+          {:style
+           {:margin 0
+            :padding 40
+            :font-size "2em"
+            :color  (::c/namespace theme)}}
+          [s/span
+           {:on-click
+            (fn [e]
+              (.stopPropagation e)
+              (when-let [el (.-current ref)]
+                (.scrollIntoView ^js el)))
+            :style
+            {:cursor :pointer
+             :color  (::c/tag theme)}} "# "]
+          label])]]]]))
 
 (defn render-docs [value]
   (let [has-label?  (string? (first value))
@@ -167,11 +163,7 @@
      (map-indexed
       (fn [index value]
         ^{:key index}
-        [ins/with-key
-         index
-         [select/with-position
-          {:row index :column 0}
-          [render-docs value]]])
+        [render-docs value])
       (cond-> value
         has-label?   rest
         has-article? rest))]))
@@ -225,6 +217,7 @@
        {:font-size     (:font-size theme)
         :display       :flex
         :background    background
+        :max-width     (+ 280 896 3)
         :border        [1 :solid (::c/border theme)]
         :border-radius (:border-radius theme)}}
       [s/nav
@@ -235,11 +228,14 @@
          :padding-top padding
          :position    :sticky
          :height      :fit-content
-         :min-width   280}}
+         :min-width   280
+         :max-height  "calc(100vh - 146px)"
+         :overflow    :auto}}
        [docs-nav tree visible]]
       [s/div
        {:style
         {:flex        1
+         :overflow    :auto
          :border-left [1 :solid (::c/border theme)]}}
        [render-docs tree]]]]))
 

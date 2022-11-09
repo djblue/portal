@@ -79,3 +79,11 @@
             (fn [] (swap! n (fnil + default-take) step))])]))))
 
 (defn use-lazy* [k f] (react/useMemo (fn [] [lazy-seq (f)]) #js [k]))
+
+(defn lazy-render [child]
+  (let [[show set-show!] (react/useState false)]
+    (if show
+      child
+      [:<>
+       [visible-sensor #(set-show! true)]
+       [:div {:style {:height "50vh"}}]])))

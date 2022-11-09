@@ -1,6 +1,7 @@
 (ns portal.ui.viewer.hiccup
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
+            [portal.ui.lazy :as l]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
@@ -124,7 +125,7 @@
            (map #(process-hiccup context %))
            args))))))
 
-(defn inspect-hiccup [value]
+(defn- inspect-hiccup* [value]
   (let [viewers (ins/viewers-by-name @ins/viewers)
         opts    (ins/use-options)
         theme   (theme/use-theme)]
@@ -139,6 +140,9 @@
          :max-height (when-not (:expanded? opts) "24rem")}}
        (process-hiccup
         {:count (atom -1) :viewers viewers} value)]]]))
+
+(defn inspect-hiccup [value]
+  [l/lazy-render [inspect-hiccup* value]])
 
 (defn hiccup? [value]
   (and (vector? value)
