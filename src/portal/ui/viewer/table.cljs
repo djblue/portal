@@ -20,16 +20,20 @@
 (defn- hover? [hover selector value] (= (selector @hover) value))
 
 (defn- table [& children]
-  (let [theme (theme/use-theme)]
+  (let [theme   (theme/use-theme)
+        context (ins/use-context)]
     (into
      [s/div
       {:style
-       {:display :grid
-        :grid-gap 1
-        :background (::c/border theme)
-        :border [1 :solid (::c/border theme)]
-        :border-radius (:border-radius theme)
-        :grid-template-columns :min-content}}]
+       (cond->
+        {:display :grid
+         :grid-gap 1
+         :background (::c/border theme)
+         :border [1 :solid (::c/border theme)]
+         :border-radius (:border-radius theme)
+         :grid-template-columns :min-content}
+         (not= (:depth context) 1)
+         (assoc :overflow :auto))}]
      children)))
 
 (defn- cell [row column child]
