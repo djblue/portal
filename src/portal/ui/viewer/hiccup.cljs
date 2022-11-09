@@ -117,11 +117,15 @@
            (into [component] args)]]]
         (if (map? (first args))
           (into
-           [tag (update (first args) :class str " hiccup")]
+           (if (= tag :<>)
+             [tag (first args)]
+             [tag (update (first args) :class str " hiccup")])
            (map #(process-hiccup context %))
            (rest args))
           (into
-           [tag {:class "hiccup"}]
+           (if (= tag :<>)
+             [tag]
+             [tag {:class "hiccup"}])
            (map #(process-hiccup context %))
            args))))))
 
