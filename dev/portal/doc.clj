@@ -63,11 +63,11 @@
    ::v/pprint
    {:examples [d/basic-data]}})
 
-(defn ->render [{:keys [name doc spec examples]}]
-  [(str name)
+(defn ->render [{:keys [doc spec examples] :as entry}]
+  [(name (:name entry))
    {:hiccup
     [:div
-     [:h1 (str name)]
+     [:h1 [:portal.viewer/inspector (:name entry)]]
      (when doc [:p doc])
      (when spec
        [:<>
@@ -78,7 +78,7 @@
         [:<>
          [:h2 "Examples"]]
         (map-indexed
-         (fn [idx itm] ^{:key idx} [name itm])
+         (fn [idx itm] ^{:key idx} [(:name entry) itm])
          examples)))]}])
 
 (defn gen-viewer-docs []
