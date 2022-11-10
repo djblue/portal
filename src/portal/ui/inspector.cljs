@@ -394,6 +394,8 @@
        {:style {:display :flex
                 :align-items :center}}
        [s/span {:style {:color (::c/tag theme)}} "#"]
+       (when-let [ns (namespace tag)]
+         [:<> [highlight-words ns] "/"])
        [highlight-words (name tag)]]]
      [s/div {:style
              {:flex "1"}}
