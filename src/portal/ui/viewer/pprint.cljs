@@ -26,7 +26,7 @@
 
 (defmulti pprint-dispatch type-dispatcher)
 
-(defmethod pprint-dispatch :tagged  [value] (-write *out* (:rep value)))
+(defmethod pprint-dispatch :tagged  [value] (-write *out* (pr-str value)))
 (defmethod pprint-dispatch :list    [value] (#'pp/pprint-list value))
 (defmethod pprint-dispatch :vector  [value] (#'pp/pprint-vector value))
 (defmethod pprint-dispatch :map     [value] (#'pp/pprint-map value))
