@@ -938,17 +938,20 @@
          :on-click
          (fn [e]
            (.stopPropagation e)
-           (state/dispatch!
-            state
-            (if selected
-              state/deselect-context
-              state/select-context)
-            context
-            (or (.-metaKey e) (.-altKey e))))
+           (a/do
+             (set-viewer! state context (:name viewer))
+             (state/dispatch!
+              state
+              (if selected
+                state/deselect-context
+                state/select-context)
+              context
+              (or (.-metaKey e) (.-altKey e)))))
          :on-double-click
          (fn [e]
            (.stopPropagation e)
            (a/do
+             (set-viewer! state context (:name viewer))
              (state/dispatch! state state/select-context context)
              (state/dispatch! state state/nav context)))})
       {:ref   ref
