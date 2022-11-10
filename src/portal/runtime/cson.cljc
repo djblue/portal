@@ -135,7 +135,7 @@
        (-write writer "#")
        (-write writer (:tag this))
        (-write writer " ")
-       (-write writer (:rep this)))))
+       (-write writer (pr-str (:rep this))))))
 
 (defn tagged-value [tag rep] {:pre [(string? tag)]} (->Tagged tag rep))
 

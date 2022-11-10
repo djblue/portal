@@ -157,7 +157,7 @@
   (if-not (var? value)
     value
     (with-meta
-      (cson/tagged-value "var" (var->symbol value))
+      (cson/tagged-value "portal/var" (var->symbol value))
       (assoc (meta value) ::id (value->id value)))))
 
 (defn write [value session]

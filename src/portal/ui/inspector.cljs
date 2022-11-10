@@ -210,7 +210,7 @@
     (number? value)   :number
     (string? value)   :string
     (keyword? value)  :keyword
-    (var? value)      "var"
+    (var? value)      "portal/var"
     (error? value)    :error
     (char? value)     :char
     (ratio? value)    :ratio
@@ -842,7 +842,7 @@
     :keyword    inspect-keyword
     :inst       inspect-inst
     :uuid       inspect-uuid
-    "var"       inspect-var
+    "portal/var" inspect-var
     "remote"    inspect-remote
     :char       inspect-char
     :ratio      inspect-ratio
@@ -871,7 +871,7 @@
     :keyword    inspect-keyword
     :inst       inspect-inst
     :uuid       inspect-uuid
-    "var"       inspect-var
+    "portal/var" inspect-var
     "remote"    inspect-remote
     :char       inspect-char
     :ratio      inspect-ratio

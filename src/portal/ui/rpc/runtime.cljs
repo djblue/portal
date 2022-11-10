@@ -50,7 +50,7 @@
 (defprotocol Runtime)
 
 (defn ->var [var-symbol]
-  (cson/tagged-value "var" var-symbol))
+  (cson/tagged-value "portal/var" var-symbol))
 
 (deftype RuntimeObject [runtime object]
   Runtime
