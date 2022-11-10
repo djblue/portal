@@ -20,6 +20,14 @@
     (-pr-writer [this writer _opts]
       (-write writer (str this "N")))))
 
+(when (exists? js/Uint8Array)
+  (extend-type js/Uint8Array
+    IPrintWithWriter
+    (-pr-writer [this writer _opts]
+      (-write writer "#portal/bin \"")
+      (-write writer (cson/base64-encode this))
+      (-write writer "\""))))
+
 (extend-type array
   IHash
   (-hash [this]

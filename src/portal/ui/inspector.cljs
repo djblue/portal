@@ -35,7 +35,8 @@
 
 (defn read-string [edn-string]
   (edn/read-string
-   {:readers {'portal/var rt/->var}
+   {:readers {'portal/var rt/->var
+              'portal/bin cson/base64-decode}
     :default tagged-literal}
    (str/replace edn-string #"#'" "#portal/var ")))
 

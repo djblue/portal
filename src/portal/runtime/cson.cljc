@@ -141,11 +141,11 @@
 
 (defn tagged-value? [x] (instance? Tagged x))
 
-(defn- base64-encode [byte-array]
+(defn base64-encode [byte-array]
   #?(:clj  (.encodeToString (Base64/getEncoder) byte-array)
      :cljs (Base64/encodeByteArray byte-array)))
 
-(defn- base64-decode [^String string]
+(defn base64-decode [^String string]
   #?(:clj  (.decode (Base64/getDecoder) string)
      :cljs (Base64/decodeStringToUint8Array string)))
 
