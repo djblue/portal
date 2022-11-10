@@ -345,7 +345,8 @@
         :padding (:padding theme)}}
       [select/with-position
        {:row 0 :column 0}
-       [with-key option [inspector (get value option)]]]]]))
+       [dec-depth
+        [with-key option [inspector (get value option)]]]]]]))
 
 (defn- diff-added [value]
   (let [theme (theme/use-theme)
