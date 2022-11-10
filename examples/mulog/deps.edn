@@ -1,0 +1,4 @@
+{:deps
+ {djblue/portal          {:mvn/version "0.33.0"}
+  com.brunobonacci/mulog {:mvn/version "0.9.0"}}}
+
