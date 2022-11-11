@@ -138,6 +138,7 @@
      [d/div
       {:style
        {:font-weight :bold
+        :white-space :pre-bold
         :color (::c/exception theme)
         :padding [(:padding theme) (* 2 (:padding theme))]}}
       (if message
