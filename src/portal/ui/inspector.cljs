@@ -245,9 +245,8 @@
            (keep
             (fn [substring]
               (when-not (str/blank? substring)
-                {:context (-> location meta :context)
-                 :substring substring
-                 :color (nth theme/order (inc (count (:stable-path location))))}))
+                {:substring substring
+                 :context (-> location meta :context)}))
             (str/split search-text #"\s+")))))
       []
       search-text))))
@@ -281,14 +280,14 @@
         background   (get-background2)]
     (if-let [segments (some->> search-words (f/split string))]
       [l/lazy-seq
-       (for [{:keys [context start end color]} segments]
+       (for [{:keys [context start end]} segments]
          ^{:key start}
          [s/span
           {:style
            (when context
              {:cursor :pointer
               :color background
-              :background (get theme color)})
+              :background (get theme (nth theme/order (:depth context)))})
            :style/hover (when context {:text-decoration :underline})
            :on-click
            (fn [e]
