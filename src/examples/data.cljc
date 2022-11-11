@@ -104,7 +104,7 @@
 
 (def hiccup
   (with-meta
-    [:div
+    [:<>
      [:h1 "Hello, I'm hiccup"]
      [:a {:href "https://github.com/djblue/portal"} "djblue/portal"]
      [:portal.viewer/inspector {:hello :world}]]

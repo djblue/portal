@@ -123,7 +123,7 @@
 
 (defn ->hiccup
   ([tokens]
-   (->hiccup [:div {:style {:max-width 896}}] tokens))
+   (->hiccup [:<>] tokens))
   ([out tokens]
    (reduce
     (fn [out ^js token]
@@ -147,7 +147,16 @@
   (->hiccup (.lexer marked value)))
 
 (defn- inspect-markdown* [value]
-  [inspect-hiccup (parse-markdown value)])
+  [inspect-hiccup
+   [:div
+    {:style
+     {:gap 16
+      :padding 40
+      :max-width 896
+      :display :flex
+      :box-sizing :border-box
+      :flex-direction :column}}
+    (parse-markdown value)]])
 
 (defn inspect-markdown [value]
   [l/lazy-render [inspect-markdown* value]])

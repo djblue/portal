@@ -63,10 +63,16 @@
    ::v/pprint
    {:examples [d/basic-data]}})
 
+(def flex
+  {:gap 9
+   :padding 40
+   :display :flex
+   :flex-direction :column})
+
 (defn ->render [{:keys [doc spec examples] :as entry}]
   [(name (:name entry))
    {:hiccup
-    [:div
+    [:div {:style flex}
      [:h1 [:portal.viewer/inspector (:name entry)]]
      (when doc [:p doc])
      (when spec
@@ -75,7 +81,7 @@
         [:pre {} [:code {:class "clojure"} spec]]])
      (when examples
        (into
-        [:<>
+        [:div {:style flex}
          [:h2 "Examples"]]
         (map-indexed
          (fn [idx itm] ^{:key idx} [(:name entry) itm])

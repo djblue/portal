@@ -10,8 +10,7 @@
   {:color (::c/namespace theme)
    :margin 0
    :padding-top (:padding theme)
-   :padding-bottom (:padding theme)
-   :margin-bottom (* 2 (:padding theme))})
+   :padding-bottom (:padding theme)})
 
 (defn styles []
   (let [theme (theme/use-theme)
@@ -28,11 +27,11 @@
 
        [:h3.hiccup] h [:h4.hiccup] h [:h5.hiccup] h [:h6.hiccup] h
 
-       [:a.hiccup] {:color (::c/uri theme)}
+       [:a.hiccup] {:color (::c/uri theme) :width :fit-content}
 
        [:ul.hiccup] {:margin 0}
        [:ol.hiccup] {:margin 0}
-       [:li.hiccup] {:margin-top (* 0.5 (:padding theme))}
+       [:li.hiccup] {:margin-top (:padding theme)}
 
        [:p.hiccup]
        {:font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
@@ -79,7 +78,7 @@
        ["tr.hiccup:nth-child(odd)"]  {:background bg}
        ["tr.hiccup:nth-child(even)"] {:background bg2}
 
-       ["div.hiccup-root > *"]
+       ["div.hiccup-root"]
        {:display :flex
         :flex-direction :column
         :gap (* 1.5 (:padding theme))}})]))
@@ -133,16 +132,14 @@
 
 (defn- inspect-hiccup* [value]
   (let [viewers (ins/viewers-by-name @ins/viewers)
-        opts    (ins/use-options)
-        theme   (theme/use-theme)]
+        opts    (ins/use-options)]
     [ins/toggle-bg
      [ins/with-key
       :portal.viewer/hiccup
       [d/div
        {:class "hiccup-root"
         :style
-        {:padding    (* 6 (:padding theme))
-         :overflow   :auto
+        {:overflow   :auto
          :max-height (when-not (:expanded? opts) "24rem")}}
        (process-hiccup
         {:count (atom -1) :viewers viewers} value)]]]))
