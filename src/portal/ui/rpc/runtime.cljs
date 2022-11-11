@@ -45,8 +45,6 @@
       (to-object buffer this :runtime-object nil)
       (cson/tag buffer "ref" (:id object)))))
 
-(defn- runtime-meta [this] (:meta (.-object this)))
-
 (defprotocol Runtime)
 
 (defn ->var [var-symbol]
@@ -55,23 +53,31 @@
 (deftype RuntimeObject [runtime object]
   Runtime
   cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
-  IMeta       (-meta    [this] (runtime-meta this))
-  IHash       (-hash    [_]    (hash object))
+  IMeta       (-meta    [_] (:meta object))
+  IHash       (-hash    [_] (:id object))
+  IEquiv
+  (-equiv [_this other]
+    (and (instance? RuntimeObject other)
+         (= (:id object) (:id other))))
   IWithMeta
   (-with-meta [_this m]
     (RuntimeObject.
      runtime
      (assoc object :meta m)))
   IPrintWithWriter
-  (-pr-writer [this writer _opts]
-    (runtime-print this writer _opts)))
+  (-pr-writer [_this writer _opts]
+    (-write writer (:pr-str object))))
 
 (deftype RuntimeAtom [runtime object]
   Runtime
   cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
-  IMeta       (-meta    [this] (runtime-meta this))
   IDeref      (-deref   [this] (runtime-deref this))
-  IHash       (-hash    [_]    (hash object))
+  IMeta       (-meta    [_] (:meta object))
+  IHash       (-hash    [_] (:id object))
+  IEquiv
+  (-equiv [_this other]
+    (and (instance? RuntimeAtom other)
+         (= (:id object) (:id other))))
   IWithMeta
   (-with-meta [_this m]
     (RuntimeAtom.

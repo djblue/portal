@@ -110,7 +110,9 @@
                 :protocols (cond-> #{}
                              (deref? value) (conj :IDeref))}
          m   (assoc :meta m)
-         rep (assoc :rep rep))))))
+         rep (assoc :rep rep)
+         (not (atom? value))
+         (assoc :pr-str (pr-str value)))))))
 
 (extend-type #?(:clj Object :cljs default)
   cson/ToJson
