@@ -44,6 +44,13 @@
                      (aget this o)) false
                :else                (recur (inc i))))))))
 
+(extend-type number
+  IEquiv
+  (-equiv [a b]
+    (or (== a b)
+        (and (.isNaN js/Number a)
+             (.isNaN js/Number b)))))
+
 (extend-type Long
   IPrintWithWriter
   (-pr-writer [this writer _opts]

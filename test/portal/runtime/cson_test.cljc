@@ -170,3 +170,8 @@
      (let [a (cson/Character. 10) b (cson/Character. 10)]
        (is (= a b))
        (is (= a (pass b))))))
+
+(deftest special-numbers
+  (doseq [n    [##NaN ##Inf ##-Inf]
+          :let [cson (cson/write n)]]
+    (is (= cson (cson/write (cson/read cson))) n)))

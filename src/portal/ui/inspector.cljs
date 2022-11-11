@@ -634,7 +634,12 @@
 (defn- inspect-number [value]
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/number theme)}}
-     [highlight-words (str value)]]))
+     [highlight-words
+      (cond
+        (cson/is-finite? value) (str value)
+        (cson/nan? value)       "##NaN"
+        (cson/inf? value)       "##Inf"
+        (cson/-inf? value)      "##-Inf")]]))
 
 (defn- inspect-bigint [value]
   (let [theme (theme/use-theme)]

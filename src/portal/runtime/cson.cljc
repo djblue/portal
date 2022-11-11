@@ -46,13 +46,36 @@
   #?(:clj  (Long/parseLong (json/next-string buffer))
      :cljs (.fromString Long (json/next-string buffer))))
 
+(defn is-finite? [^Double value]
+  #?(:clj  (Double/isFinite value)
+     :cljs (.isFinite js/Number value)))
+
+(defn nan? [value]
+  #?(:clj  (.equals ^Double value ##NaN)
+     :cljs (.isNaN js/Number value)))
+
+(defn inf? [value]
+  #?(:clj  (.equals ^Double value ##Inf)
+     :cljs (== ##Inf value)))
+
+(defn -inf? [value]
+  #?(:clj  (.equals ^Double value ##-Inf)
+     :cljs (== ##-Inf value)))
+
+(defn- push-double [buffer value]
+  (cond
+    (is-finite? value) (json/push-double buffer value)
+    (nan? value)       (json/push-string buffer "nan")
+    (inf? value)       (json/push-string buffer "inf")
+    (-inf? value)      (json/push-string buffer "-inf")))
+
 #?(:clj (extend-type Byte    ToJson (-to-json [value buffer] (json/push-long buffer value))))
 #?(:clj (extend-type Short   ToJson (-to-json [value buffer] (json/push-long buffer value))))
 #?(:clj (extend-type Integer ToJson (-to-json [value buffer] (json/push-long buffer value))))
-#?(:clj (extend-type Float   ToJson (-to-json [value buffer] (json/push-double buffer value))))
-#?(:clj (extend-type Double  ToJson (-to-json [value buffer] (json/push-double buffer value))))
+#?(:clj (extend-type Float   ToJson (-to-json [value buffer] (push-double buffer value))))
+#?(:clj (extend-type Double  ToJson (-to-json [value buffer] (push-double buffer value))))
 
-#?(:cljs (extend-type number ToJson (-to-json [value buffer] (json/push-double buffer value))))
+#?(:cljs (extend-type number ToJson (-to-json [value buffer] (push-double buffer value))))
 
 #?(:clj
    (extend-type clojure.lang.Ratio
@@ -580,6 +603,9 @@
         "uuid" (->uuid buffer)
         "tag"  (->tagged-literal buffer)
         "long" (->long buffer)
+        "nan"  ##NaN
+        "inf"  ##Inf
+        "-inf" ##-Inf
         (let [handler (:default-handler *options* tagged-value)]
           (handler op (->value buffer))))))))
 
