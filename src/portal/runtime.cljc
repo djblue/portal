@@ -111,7 +111,7 @@
                              (deref? value) (conj :IDeref))}
          m   (assoc :meta m)
          rep (assoc :rep rep)
-         (not (atom? value))
+         (not (deref? value))
          (assoc :pr-str (pr-str value)))))))
 
 (extend-type #?(:clj Object :cljs default)
