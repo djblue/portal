@@ -113,6 +113,7 @@
        :selected     [{:depth       1
                        :path        []
                        :stable-path []
+                       :alt-bg      true
                        :value       value}])
       (dissoc :portal/next-state)
       (push-viewer entry)))
