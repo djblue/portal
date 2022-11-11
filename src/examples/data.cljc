@@ -53,6 +53,7 @@
    ::ns-keyword ::hello-world
    ::range (range 10)
    ::nested-vector [1 2 3 [4 5 6]]
+   ::special-doubles [##NaN ##Inf ##-Inf]
    ::url-string "https://github.com/djblue/portal"})
 
 (defrecord Point [x y])
