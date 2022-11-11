@@ -1,3 +1,8 @@
+## 0.34.1 - 2022-11-11
+
+- Fix stackoverflow with volatiles b9de7ff
+  - Thanks @wilkerlucio for the bug report!
+
 ## 0.34.0 - 2022-11-11
 
 ### UX Tweaks
