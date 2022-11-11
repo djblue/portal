@@ -112,9 +112,11 @@
          tag
          [select/with-position
           {:row (swap! (:count context) inc) :column 0}
-          [ins/with-default-viewer
-           tag
-           (into [component] args)]]]
+          (if (= tag :portal.viewer/inspector)
+            (into [component] args)
+            [ins/with-default-viewer
+             tag
+             (into [component] args)])]]
         (if (map? (first args))
           (into
            (if (= tag :<>)
