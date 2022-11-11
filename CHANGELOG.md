@@ -1,3 +1,42 @@
+## 0.34.0 - 2022-11-11
+
+### UX Tweaks
+
+- Only highlight background on filtering 97d7930
+  - Thanks @dangercoder for the feedback!
+- Allow copy + paste of binary data via edn 64580da
+- Improve code viewer scroll styles e29340c
+- Enable relative selection for hiccup viewer 08d6ac5
+- Diff support for test output e892a64
+- Remove hard-coded font name (Monaco) from themes. (#146) dcbb185 @finalfantasia
+- Add ability to change initial folding for some data structure in a tree viewer (#143) 19a5977 @pfeodrippe
+
+### Documentation
+
+- Add example for consuming μ/log logs in Portal (#151) 7eea29f @walterl
+- Fix bad hyperlink in README (#150) 6adb5c6 @The-Alchemist
+- Add portal.console docs 04e384e
+- Add nREPL customization docs 7ef5e28
+- Add nREPL lein docs afd4926
+- datafy - example of using nav (#148) e4b0f34 @holyjak
+- Add leiningen examples to README (#147) 8dab116
+
+### Viewer Docs
+
+- Initial viewer docs 556bef2
+- Add relative selection to doc viewer 2e6d742
+- Highlight full tree path in doc viewer ed6e634
+
+### Bug Fixes
+
+- Keep filter highlight color in sync with context 10b4612
+- Fix serialization of ##NaN, ##Inf and ##-Inf 36acbe5
+  - Thanks @rschmukler for the bug report!
+- Support fully qualified symbols in tagged values d036b44
+- Prevent hiccup css from escaping to children 9fff14f
+- Fix pprint for tagged values 4eb1771
+- Fix multi select issue caused by 6b34ed1 fe11541
+
 ## 0.33.0 - 2022-10-18
 
 - Add portal.api/url to get session url (#144) 9a9fad4
