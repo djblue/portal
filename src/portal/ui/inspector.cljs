@@ -259,28 +259,6 @@
     (when-not (:readonly? context)
       @(r/track all-locations state context))))
 
-(defn highlight-words [string]
-  (let [theme        (theme/use-theme)
-        state        (state/use-state)
-        search-words (use-search-words)]
-    (if-let [segments (some->> search-words (f/split string))]
-      [l/lazy-seq
-       (for [{:keys [context start end color]} segments]
-         ^{:key start}
-         [s/span
-          {:style
-           {:cursor (when context :pointer)
-            :color (get theme (or color ::c/border))}
-           :style/hover (when context {:text-decoration :underline})
-           :on-click
-           (fn [e]
-             (when context
-               (.stopPropagation e)
-               (state/dispatch! state state/select-context context)))}
-          (subs string start end)])
-       {:default-take 5}]
-      string)))
-
 (defn toggle-bg [& children]
   (let [context (use-context)]
     (into [with-context (update context :alt-bg not)] children)))
@@ -296,6 +274,31 @@
 
 (defn get-background2 []
   (get-background (update (use-context) :alt-bg not)))
+
+(defn highlight-words [string]
+  (let [theme        (theme/use-theme)
+        state        (state/use-state)
+        search-words (use-search-words)
+        background   (get-background2)]
+    (if-let [segments (some->> search-words (f/split string))]
+      [l/lazy-seq
+       (for [{:keys [context start end color]} segments]
+         ^{:key start}
+         [s/span
+          {:style
+           (when context
+             {:cursor :pointer
+              :color background
+              :background (get theme color)})
+           :style/hover (when context {:text-decoration :underline})
+           :on-click
+           (fn [e]
+             (when context
+               (.stopPropagation e)
+               (state/dispatch! state state/select-context context)))}
+          (subs string start end)])
+       {:default-take 5}]
+      string)))
 
 (defn ->id [value]
   (str (hash value) (pr-str (type value))))
