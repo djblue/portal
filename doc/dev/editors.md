@@ -28,5 +28,5 @@ M-x cider-jack-in-clj&cljs
 [.dir-locals.el](./.dir-locals.el) has all the configuration variables for
 cider.
 
-**Note** when using cider-jack-in, you will need to manually `npm install` when
-the `package.json` or `package-lock.json` changes.
+> **Note** when using cider-jack-in, you will need to manually `npm install`
+> when the `package.json` or `package-lock.json` changes.
