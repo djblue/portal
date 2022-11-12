@@ -4,7 +4,7 @@
   com.cognitect/transit-cljs {:mvn/version "0.8.280"}
   org.clojure/data.json      {:mvn/version "2.4.0"}
   http-kit/http-kit          {:mvn/version "2.6.0"}
-  com.google.code.gson/gson  {:mvn/version "2.9.1"}}
+  com.google.code.gson/gson  {:mvn/version "2.10"}}
  :deps/prep-lib
  {:ensure "resources/portal"
   :alias  :build
@@ -15,9 +15,9 @@
    :extra-deps
    {babashka/process              {:mvn/version "0.3.11"}
     hiccup/hiccup                 {:mvn/version "2.0.0-alpha2"}
-    io.aviso/pretty               {:mvn/version "1.2"}
+    io.aviso/pretty               {:mvn/version "1.3"}
     vlaaad/reveal                 {:mvn/version "1.3.276"}
-    io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}}
+    io.github.clojure/tools.build {:git/tag "v0.8.4" :git/sha "8c3cd69"}}}
   :plk
   {:extra-deps {planck/planck {:mvn/version "2.26.0"}}}
   :cljs
@@ -29,11 +29,11 @@
   :shadow
   {:jvm-opts ["-Xss16m"]
    :extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.20.5"}}}
+   {thheller/shadow-cljs {:mvn/version "2.20.10"}}}
   :build
   {:extra-paths ["dev"]
    :ns-default  tasks.build
-   :deps        {babashka/babashka {:mvn/version "1.0.164"}
+   :deps        {babashka/babashka {:mvn/version "1.0.165"}
                  babashka/fs       {:mvn/version "0.1.11"}}}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.0"}}
@@ -42,14 +42,14 @@
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
   {:main-opts  ["-m" "clj-kondo.main"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.10.14"}}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2022.11.02"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.9.0"}}}
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "1.0.0"}
-    cider/cider-nrepl {:mvn/version "0.28.6"}}}
+    cider/cider-nrepl {:mvn/version "0.28.7"}}}
   :check
   {:main-opts ["-m" "clj-check.check"]
    :extra-deps
@@ -64,7 +64,7 @@
      :sha     "a75db6db60eadcf609104a979b29499f54b3665b"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "2.1.932"}
+   {com.github.liquidz/antq {:mvn/version "2.1.946"}
     org.slf4j/slf4j-nop     {:mvn/version "2.0.3"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "1.0.26"}}}}}
