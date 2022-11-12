@@ -26,7 +26,7 @@
                               " - "
                               ["portal"
                                (get options :window-title "vs-code")
-                               "0.34.1"])
+                               "0.34.2"])
                              (.-One vscode/ViewColumn)
                              #js {:enableScripts           true
                                   :retainContextWhenHidden true})

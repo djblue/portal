@@ -1,3 +1,8 @@
+## 0.34.2 - 2022-11-11
+
+- Fix edge case around commands and default viewers 624f0b8
+  - Thanks @rschmukler for the bug report!
+
 ## 0.34.1 - 2022-11-11
 
 - Fix stackoverflow with volatiles b9de7ff
