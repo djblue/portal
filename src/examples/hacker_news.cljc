@@ -49,7 +49,10 @@
 (defn fetch-hn [path]
   (a/let [url   (as-url (str root path))
           res   (fetch-json url)
-          item  (with-meta res {:hacker-news/api-url url})]
+          item  (with-meta res {:hacker-news/api-url url
+                                :portal.viewer/for
+                                {:text :portal.viewer/text
+                                 :time :portal.viewer/relative-time}})]
     (if-not (map? item)
       item
       (cond-> item
