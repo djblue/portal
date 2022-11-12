@@ -2,11 +2,16 @@
   (:require ["marked" :refer [marked]]
             [hickory.core :as h]
             [hickory.utils :as utils]
+            [portal.colors :as c]
+            [portal.ui.icons :as icons]
             [portal.ui.lazy :as l]
+            [portal.ui.theme :as theme]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
 
 (declare ->inline)
 (declare ->hiccup)
+
+(def ^:dynamic *context* nil)
 
 (defn- unescape [^string string]
   (-> string
@@ -35,6 +40,27 @@
     [:img (cond-> {:src (.-href token)}
             title (assoc :title title)
             alt (assoc :alt alt))]))
+
+(def ^:private callouts
+  {"Note"
+   {:icon icons/info-circle
+    :color ::c/boolean}
+   "Warning"
+   {:icon icons/exclamation-triangle
+    :color ::c/tag}})
+
+(defn- ->strong [^js token]
+  (let [theme  (:theme *context*)
+        tokens (->inline [] (.-tokens token))]
+    (into
+     (if-let [{:keys [icon color]}
+              (and (= :blockquote (:parent *context*))
+                   (get callouts (first tokens)))]
+       [:strong
+        {:style {:color (get theme color)}}
+        [icon {:size "1x"}] " "]
+       [:strong {}])
+     tokens)))
 
 (defn- ->header [^js token]
   [:thead
@@ -102,7 +128,8 @@
   (->inline [:p {}] (.-tokens token)))
 
 (defn- ->blockquote [^js token]
-  (->hiccup [:blockquote {}] (.-tokens token)))
+  (binding [*context* (assoc *context* :parent :blockquote)]
+    (->hiccup [:blockquote {}] (.-tokens token))))
 
 (defn- ->inline [out tokens]
   (reduce
@@ -112,7 +139,7 @@
        "html"     (conj out (parse-html (.-text token)))
        "link"     (conj out (->link token))
        "image"    (conj out (->image token))
-       "strong"   (conj out (->inline [:strong {}] (.-tokens token)))
+       "strong"   (conj out (->strong token))
        "em"       (conj out (->inline [:em {}] (.-tokens token)))
        "codespan" (conj out [:code {} (->text token)])
        "br"       (conj out [:br {}])
@@ -147,16 +174,17 @@
   (->hiccup (.lexer marked value)))
 
 (defn- inspect-markdown* [value]
-  [inspect-hiccup
-   [:div
-    {:style
-     {:gap 16
-      :padding 40
-      :max-width 896
-      :display :flex
-      :box-sizing :border-box
-      :flex-direction :column}}
-    (parse-markdown value)]])
+  (binding [*context* {:theme (theme/use-theme)}]
+    [inspect-hiccup
+     [:div
+      {:style
+       {:gap 16
+        :padding 40
+        :max-width 896
+        :display :flex
+        :box-sizing :border-box
+        :flex-direction :column}}
+      (parse-markdown value)]]))
 
 (defn inspect-markdown [value]
   [l/lazy-render [inspect-markdown* value]])
