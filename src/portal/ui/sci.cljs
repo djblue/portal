@@ -20,7 +20,8 @@
          sci/*2 *2
          sci/*3 *3
          sci/*e *e
-         sci/ns sci-ns}
+         sci/ns sci-ns
+         sci/file (:file msg)}
         {:value (loop [last-val nil]
                   (let [form (sci/parse-next ctx reader)]
                     (if (= ::sci/eof form)

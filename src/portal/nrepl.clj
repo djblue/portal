@@ -135,7 +135,7 @@
             (p/eval-str
              portal
              (:code msg)
-             (assoc (select-keys msg [:ns]) :verbose true))]
+             (assoc (select-keys msg [:ns :file]) :verbose true))]
         (when (= value :cljs/quit)
           (swap! session assoc #'*portal-session* nil))
         (transport/send
