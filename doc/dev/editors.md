@@ -25,7 +25,7 @@ The best way to get started via emacs is to have cider start the repl, do:
 M-x cider-jack-in-clj&cljs
 ```
 
-[.dir-locals.el](./.dir-locals.el) has all the configuration variables for
+[.dir-locals.el](../../.dir-locals.el) has all the configuration variables for
 cider.
 
 > **Note** when using cider-jack-in, you will need to manually `npm install`
