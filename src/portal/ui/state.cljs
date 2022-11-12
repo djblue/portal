@@ -98,7 +98,8 @@
              (take 100 (conj (remove #{entry} (::previous-commands state)) entry))))))
 
 (defn- push-viewer [state {:keys [context] :portal/keys [value]}]
-  (if-let [viewer (get-in state [:selected-viewers (get-location context)])]
+  (if-let [viewer (or (some-> value meta :portal.viewer/default)
+                      (get-in state [:selected-viewers (get-location context)]))]
     (assoc-in state [:selected-viewers {:stable-path [] :value value}] viewer)
     state))
 
