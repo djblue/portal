@@ -40,6 +40,9 @@
         :margin 0}
 
        [:img.hiccup] {:max-width "100%"}
+       [:hr.hiccup] {:width "calc(100% - 2px)"
+                     :border [1 :solid (::c/border theme)]
+                     :border-radius (:border-radius theme)}
 
        [:code.hiccup]
        {:background (::c/background2 theme)
