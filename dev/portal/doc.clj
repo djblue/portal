@@ -6,6 +6,38 @@
             [portal.api :as p]
             [portal.viewer :as-alias v]))
 
+(def flex
+  {:gap 9
+   :padding 40
+   :display :flex
+   :flex-direction :column})
+
+(defn ->docs [namespace]
+  [(name namespace)
+   (->> (ns-publics namespace)
+        (sort-by first)
+        (map
+         (fn [[symbol-name v]]
+           [(name symbol-name)
+            {:hiccup
+             (let [m (meta v)]
+               ^{:portal.viewer/default :portal.viewer/hiccup}
+               [:div
+                {:style flex}
+                [:h2 [:portal.viewer/inspector v]]
+                (into
+                 [:<>]
+                 (map-indexed
+                  (fn [idx itm]
+                    ^{:key idx}
+                    [:portal.viewer/pr-str (concat [symbol-name] itm)])
+                  (:arglists m)))
+                [:p {:style {:white-space :pre-wrap}} (:doc m)]])}]))
+        (into []))])
+
+(comment
+  {:cljdoc.doc/tree (->docs 'portal.api)})
+
 (def info
   {::v/log
    {:file "portal/ui/viewer/log.cljs"
@@ -63,12 +95,6 @@
    ::v/pprint
    {:examples [d/basic-data]}})
 
-(def flex
-  {:gap 9
-   :padding 40
-   :display :flex
-   :flex-direction :column})
-
 (defn ->render [{:keys [doc spec examples] :as entry}]
   [(name (:name entry))
    {:hiccup
@@ -101,14 +127,18 @@
     (->render info)))
 
 (defn gen-docs []
-  (walk/postwalk
-   (fn [v]
-     (let [file (:file v)]
-       (cond-> v
-         file (assoc :markdown (slurp file))
-         (and (vector? v) (= (first v) "Viewers"))
-         (concat (gen-viewer-docs)))))
-   (edn/read-string (slurp "doc/cljdoc.edn"))))
+  (update
+   (walk/postwalk
+    (fn [v]
+      (let [file (:file v)]
+        (cond-> v
+          file (assoc :markdown (slurp file))
+          (and (vector? v) (= (first v) "Viewers"))
+          (concat (gen-viewer-docs)))))
+    (edn/read-string (slurp "doc/cljdoc.edn")))
+   :cljdoc.doc/tree
+   into
+   [(->docs 'portal.api)]))
 
 (comment
   (def docs (atom nil))
