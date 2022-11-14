@@ -72,9 +72,9 @@
    ::v/hiccup
    {:examples [d/hiccup]}
    ::v/date-time
-   {:examples [(java.util.Date.)]}
+   {:examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
    ::v/relative-time
-   {:examples [(java.util.Date.)]}
+   {:examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
    ::v/diff
    {:file "portal/ui/viewer/diff.cljs"
     :examples [(vary-meta d/diff-data dissoc ::v/default)]}
