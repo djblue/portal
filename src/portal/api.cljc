@@ -12,15 +12,18 @@
   "Tap target function.
 
   Usage:
-    (add-tap #'portal.api/submit)
-    (remove-tap #'portal.api/submit)"
+
+  ```clojure
+  (add-tap #'portal.api/submit)
+  (remove-tap #'portal.api/submit)
+  ```"
   {:added "0.9.0"}
   [value]
   (rt/update-value value)
   nil)
 
 (defn tap
-  "Add portal as a tap> target."
+  "Add portal as a `tap>` target."
   {:added         "0.1.0"
    :deprecated    "0.9"
    :superseded-by "submit"}
@@ -88,7 +91,11 @@
 (defn register!
   "Register a var with portal. For now, the var should be a 1 arity fn.
 
-  Example: `(register! #'identity)`
+  Example:
+
+  ```clojure
+  (register! #'identity)
+  ```
 
   The function name and doc string will show up in the command palette."
   {:added "0.16.0"}
@@ -99,18 +106,12 @@
 (defn eval-str
   "Evalute ClojureScript source given as a string in the UI runtime. The parameters:
 
-   portal
-     portal instance returned from portal.api/open or :all
-
-   code (string)
-     the ClojureScript source
-
-   opts (map)
-     evaluation options.
-
-     :verbose - optional, return a map containing more info that just the value.
-                Defaults to false.
-     :await   - optional, await a promise result. Defaults to false."
+   - portal: portal instance returned from `portal.api/open` or `:all`
+   - code (string): the ClojureScript source
+   - opts (map): evaluation options.
+     - `:verbose` optional, return a map containing more info that just the value.
+       - Defaults to false.
+     - `:await`   - optional, await a promise result. Defaults to `false`."
   {:added "0.19.0"
    :see-also ["open"]}
   ([code]
