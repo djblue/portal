@@ -1,13 +1,11 @@
 (ns portal.ui.viewer.date-time
   (:require [portal.colors :as c]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
-
-(defn date? [value] (instance? js/Date value))
 
 (defn parse [date]
   (cond
-    (date? date) date
+    (inst? date) date
 
     ;; unix timestamps
     (number? date)
@@ -49,26 +47,26 @@
           style   {:color (::c/number theme)}
           border  {:color (::c/border theme)}
           keyword {:color (::c/keyword theme)}]
-      [s/div
+      [d/div
        {:title "Time"
         :style
         {:display :flex
          :align-items :center}}
-       [s/span
+       [d/span
         {:title "Hour" :style style}
         (let [hour (mod hour 12)]
           (if (= hour 0) 12 hour))]
-       [s/span {:style border} ":"]
-       [s/span
+       [d/span {:style border} ":"]
+       [d/span
         {:title "Minute" :style style}
         (when (< minute 10) "0") minute]
-       [s/span {:style border} ":"]
-       [s/span
+       [d/span {:style border} ":"]
+       [d/span
         {:title "Second" :style style}
         (when (< second 10) "0")
         second]
-       [s/div {:style {:width "0.25em"}}]
-       [s/span
+       [d/div {:style {:width "0.25em"}}]
+       [d/span
         {:style keyword}
         (if (> hour 12) "PM" "AM")]])))
 
@@ -81,31 +79,31 @@
         theme   (theme/use-theme)
         style   {:color (::c/number theme)}
         border  {:color (::c/border theme)}]
-    [s/div
+    [d/div
      {:title "Date"
       :style
       {:display :flex
        :align-items :center}}
-     [s/span
+     [d/span
       {:title (nth months month) :style style}
       (inc month)]
-     [s/span {:style border} "/"]
-     [s/span
+     [d/span {:style border} "/"]
+     [d/span
       {:title (nth days day) :style style}
       (when (< date 10) "0") date]
-     [s/span {:style border} "/"]
-     [s/span
+     [d/span {:style border} "/"]
+     [d/span
       {:title "Year" :style style}
       year]]))
 
 (defn inspect-date-time [value]
   (let [value (parse value)]
-    [s/div
+    [d/div
      {:style
       {:display :flex
        :align-items :center}}
      [inspect-date value]
-     [s/div {:style {:width "0.75em"}}]
+     [d/div {:style {:width "0.75em"}}]
      [inspect-time value]]))
 
 (def viewer
