@@ -71,6 +71,8 @@
    {:examples [d/hiccup]}
    ::v/date-time
    {:examples [(java.util.Date.)]}
+   ::v/relative-time
+   {:examples [(java.util.Date.)]}
    ::v/diff
    {:file "portal/ui/viewer/diff.cljs"
     :examples [(vary-meta d/diff-data dissoc ::v/default)]}
