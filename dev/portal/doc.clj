@@ -71,8 +71,8 @@
    {:examples [d/hiccup]}
    ::v/date-time
    {:examples [(java.util.Date.)]}
-   #_#_::v/diff
-     {:examples [(vary-meta d/diff-data dissoc ::v/default)]}
+   ::v/diff
+   {:examples [(vary-meta d/diff-data dissoc ::v/default)]}
    ::v/tree
    {:examples [(vary-meta d/hiccup dissoc ::v/default)]}
    ::v/code
@@ -83,8 +83,8 @@
    {:examples [(::d/json d/string-data)]}
    ::v/edn
    {:examples [(::d/edn d/string-data)]}
-   #_#_::v/csv
-     {:examples [(::d/csv d/string-data)]}
+   ::v/csv
+   {:examples [(::d/csv d/string-data)]}
    ::v/markdown
    {:examples [(::d/markdown d/string-data)]}
    ::v/text
