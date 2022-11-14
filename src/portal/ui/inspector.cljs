@@ -86,7 +86,8 @@
 (defn get-compatible-viewers [viewers {:keys [value] :as context}]
   (let [by-name        (viewers-by-name viewers)
         default-viewer (get by-name
-                            (or (:portal.viewer/default (meta value))
+                            (or (get-in context [:props :portal.viewer/default])
+                                (:portal.viewer/default (meta value))
                                 (:portal.viewer/default context)))
         viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
@@ -1000,16 +1001,19 @@
           (when-not selected
             (state/dispatch! state state/select-context context false)))}])))
 
-(defn inspector [value]
-  (let [parent (use-context)
-        context
-        (-> parent
-            (assoc :value value)
-            (update :alt-bg not)
-            (update :depth inc))]
-    [:<>
-     ^{:key "tab-index"} [tab-index context]
-     [with-context context [inspector* context value]]]))
+(defn inspector
+  ([value]
+   (inspector nil value))
+  ([props value]
+   (let [parent (use-context)
+         context
+         (-> parent
+             (assoc :value value :props props)
+             (update :alt-bg not)
+             (update :depth inc))]
+     [:<>
+      ^{:key "tab-index"} [tab-index context]
+      [with-context context [inspector* context value]]])))
 
 (def viewer
   {:predicate (constantly true)

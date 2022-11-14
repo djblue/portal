@@ -476,9 +476,9 @@
                        {:active? active?
                         :on-click on-click}
                        [component
-                        option
                         {:active? active?
-                         :on-click on-click}]]])))
+                         :on-click on-click}
+                        option]]])))
                 doall)]]]))))
 
 (defn- catch* [value]
@@ -513,7 +513,7 @@
                       :portal/args  args
                       :portal/value result}))))))
 
-(defn- command-item [command {:keys [active?]}]
+(defn- command-item [{:keys [active?]} command]
   (let [theme (theme/use-theme)]
     [s/div
      {:style {:width "100%"}}
