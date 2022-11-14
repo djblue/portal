@@ -114,7 +114,7 @@
        :selected     (mapv
                       (fn [context]
                         (-> context
-                            (dissoc :collection :key)
+                            (dissoc :props :collection :key)
                             (assoc :depth       1
                                    :path        []
                                    :stable-path []

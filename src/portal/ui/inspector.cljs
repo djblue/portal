@@ -1007,10 +1007,15 @@
   ([props value]
    (let [parent (use-context)
          context
-         (-> parent
-             (assoc :value value :props props)
-             (update :alt-bg not)
-             (update :depth inc))]
+         (cond->
+          (-> parent
+              (assoc :value value)
+              (update :alt-bg not)
+              (update :depth inc))
+           props
+           (assoc :props props)
+           (nil? props)
+           (dissoc :props))]
      [:<>
       ^{:key "tab-index"} [tab-index context]
       [with-context context [inspector* context value]]])))
