@@ -222,7 +222,6 @@
        {:font-size     (:font-size theme)
         :display       :flex
         :background    background
-        :max-width     (+ 280 896 3)
         :border        [1 :solid (::c/border theme)]
         :border-radius (:border-radius theme)}}
       [s/nav

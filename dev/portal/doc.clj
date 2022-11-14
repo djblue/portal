@@ -8,9 +8,11 @@
 
 (def flex
   {:gap 9
+   :width 896
    :padding 40
    :display :flex
-   :flex-direction :column})
+   :flex-direction :column
+   :box-sizing :border-box})
 
 (defn ->docs [namespace]
   (->> (ns-publics namespace)
@@ -107,7 +109,7 @@
         [:pre {} [:code {:class "clojure"} spec]]])
      (when examples
        (into
-        [:div {:style (dissoc flex :padding)}
+        [:div {:style (dissoc flex :padding :width)}
          [:h2 "Examples"]]
         (map-indexed
          (fn [idx itm] ^{:key idx} [(:name entry) itm])
