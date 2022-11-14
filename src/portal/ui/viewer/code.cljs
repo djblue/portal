@@ -97,6 +97,7 @@
      {:style {:margin      0
               :background  :none
               :width       "100%"
+              :white-space :pre-wrap
               :font-size   (:font-size theme)
               :font-family (:font-family theme)}
       :dangerouslySetInnerHTML
