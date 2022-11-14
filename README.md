@@ -7,7 +7,7 @@ A clojure tool to navigate through your data.
 [![Version][intellij-badge]][intellij]
 [![Get help on Slack][clojurians-badge]][clojurians]
 
-<a href="https://djblue.github.io/portal/">
+<a target="_blank" href="https://djblue.github.io/portal/">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/1986211/196015562-238cf450-6467-451c-a985-04c7a9b49dba.png">
   <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/1986211/196015567-74ba9153-341a-4fd7-be47-2c26f0c88c2e.png">
@@ -27,7 +27,7 @@ To get an overview of the Portal UI and workflow, checkout the following
 recording of a [live demo][live-demo] I gave for [London
 Clojurians][london-clojurians].
 
-<a href="https://www.youtube.com/watch?v=Tj-iyDo3bq0">
+<a target="_blank" href="https://www.youtube.com/watch?v=Tj-iyDo3bq0">
 <img src="https://img.youtube.com/vi/Tj-iyDo3bq0/hqdefault.jpg" alt="London Clojurians Demo" />
 </a>
 

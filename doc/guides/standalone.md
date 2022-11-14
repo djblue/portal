@@ -1,7 +1,7 @@
 # Portal Standalone
 
 <p align="center">
-  <a href="https://djblue.github.io/portal/">
+  <a target="_blank" href="https://djblue.github.io/portal/">
   <img width="640"
      alt="Portal Standalone"
      src="https://user-images.githubusercontent.com/1986211/191418745-ce7cf62b-cc19-4c32-a573-02b3f3fc35e7.png" />

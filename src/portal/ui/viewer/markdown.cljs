@@ -1,5 +1,6 @@
 (ns portal.ui.viewer.markdown
   (:require ["marked" :refer [marked]]
+            [clojure.string :as str]
             [hickory.core :as h]
             [hickory.utils :as utils]
             [portal.colors :as c]
@@ -29,12 +30,22 @@
   (with-redefs [utils/html-escape identity]
     (h/as-hiccup (first (h/parse-fragment html)))))
 
+(defn- absolute-link? [href]
+  (or (str/starts-with? href "http")
+      (str/starts-with? href "https")))
+
 (defn- ->link [^js token]
-  (->inline
-   (let [title (.-title token)]
-     [:a (cond-> {:href  (.-href token)}
-           title (assoc :title title))])
-   (.-tokens token)))
+  (let [href (.-href token)]
+    (->inline
+     (let [title (.-title token)]
+       [:a (cond-> {:href  href
+                    :target "_blank"
+                    :on-click
+                    (fn [e]
+                      (when-not (absolute-link? href)
+                        (.preventDefault e)))}
+             title (assoc :title title))])
+     (.-tokens token))))
 
 (defn- ->image [^js token]
   (let [title (.-title token) alt (->text token)]
