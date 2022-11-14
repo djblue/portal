@@ -85,9 +85,9 @@
    ::v/pr-str
    {:examples ['(+ 1 2 3)]}
    ::v/json
-   {:examples [(::d/json d/string-data)]}
+   {:examples [(::d/json d/string-data) "{]"]}
    ::v/edn
-   {:examples [(::d/edn d/string-data)]}
+   {:examples [(::d/edn d/string-data) "{]"]}
    ::v/csv
    {:examples [(::d/csv d/string-data)]}
    ::v/markdown
