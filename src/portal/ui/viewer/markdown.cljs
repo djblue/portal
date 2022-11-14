@@ -4,6 +4,7 @@
             [hickory.utils :as utils]
             [portal.colors :as c]
             [portal.ui.icons :as icons]
+            [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
@@ -178,12 +179,13 @@
     [inspect-hiccup
      [:div
       {:style
-       {:gap 16
-        :padding 40
-        :max-width 896
-        :display :flex
-        :box-sizing :border-box
-        :flex-direction :column}}
+       (merge
+        {:gap 16
+         :max-width 896
+         :display :flex
+         :box-sizing :border-box
+         :flex-direction :column}
+        (get-in (ins/use-context) [:props :style]))}
       (parse-markdown value)]]))
 
 (defn inspect-markdown [value]

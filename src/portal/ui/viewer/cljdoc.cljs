@@ -124,39 +124,39 @@
                  [1 :solid (::c/border theme)])
                :min-height
                (if (= label last-label) "calc(100vh - 226px)" :auto)}}
-      [ins/with-key
-       label
-       [select/with-position
-        {:row (get-in index [:order label]) :column 0}
-        (or
-         (when-let [markdown (:markdown entry)]
-           [ins/dec-depth
-            [ins/with-default-viewer
-             :portal.viewer/markdown
-             [ins/inspector markdown]]])
-         (when-let [hiccup (:hiccup entry)]
-           [ins/dec-depth
-            [ins/with-default-viewer
-             :portal.viewer/hiccup
-             [ins/with-collection
-              entry
-              [ins/inspector hiccup]]]])
-         [s/h1
-          {:style
-           {:margin 0
-            :padding 40
-            :font-size "2em"
-            :color  (::c/namespace theme)}}
-          [s/span
-           {:on-click
-            (fn [e]
-              (.stopPropagation e)
-              (when-let [el (.-current ref)]
-                (.scrollIntoView ^js el)))
-            :style
-            {:cursor :pointer
-             :color  (::c/tag theme)}} "# "]
-          label])]]]]))
+      [ins/with-collection
+       entry
+       [ins/with-key
+        label
+        [ins/dec-depth
+         [select/with-position
+          {:row (get-in index [:order label]) :column 0}
+          (or
+           (when-let [markdown (:markdown entry)]
+             [ins/inspector
+              {:style {:padding 40}
+               :portal.viewer/default :portal.viewer/markdown}
+              markdown])
+           (when-let [hiccup (:hiccup entry)]
+             [ins/inspector
+              {:portal.viewer/default :portal.viewer/hiccup}
+              hiccup])
+           [s/h1
+            {:style
+             {:margin 0
+              :padding 40
+              :font-size "2em"
+              :color  (::c/namespace theme)}}
+            [s/span
+             {:on-click
+              (fn [e]
+                (.stopPropagation e)
+                (when-let [el (.-current ref)]
+                  (.scrollIntoView ^js el)))
+              :style
+              {:cursor :pointer
+               :color  (::c/tag theme)}} "# "]
+            label])]]]]]]))
 
 (defn render-docs [value]
   (let [has-label?  (string? (first value))

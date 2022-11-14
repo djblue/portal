@@ -95,9 +95,7 @@
        :margin-bottom (:padding theme)}}
      [ins/with-context
       {:portal.viewer/code {:language (:class attrs)}}
-      [ins/with-default-viewer
-       :portal.viewer/code
-       [ins/inspector code]]]]))
+      [ins/inspector {:portal.viewer/default :portal.viewer/code} code]]]))
 
 (def tag->viewer
   {:pre inspect-code})
@@ -110,15 +108,13 @@
                               ins/inspector)
                             (tag->viewer tag))]
       (if component
-        [ins/with-key
-         tag
-         [select/with-position
-          {:row (swap! (:count context) inc) :column 0}
-          (if (= tag :portal.viewer/inspector)
-            (into [component] args)
-            [ins/with-default-viewer
-             tag
-             (into [component] args)])]]
+        [select/with-position
+         {:row (swap! (:count context) inc) :column 0}
+         (if (= tag :portal.viewer/inspector)
+           (into [component] args)
+           (if (= 1 (count args))
+             (into [component {:portal.viewer/default tag}] args)
+             (into [component (merge (first args) {:portal.viewer/default tag})] (rest args))))]
         (if (map? (first args))
           (into
            (if (= tag :<>)
@@ -137,15 +133,13 @@
   (let [viewers (ins/viewers-by-name @ins/viewers)
         opts    (ins/use-options)]
     [ins/toggle-bg
-     [ins/with-key
-      :portal.viewer/hiccup
-      [d/div
-       {:class "hiccup-root"
-        :style
-        {:overflow   :auto
-         :max-height (when-not (:expanded? opts) "24rem")}}
-       (process-hiccup
-        {:count (atom -1) :viewers viewers} value)]]]))
+     [d/div
+      {:class "hiccup-root"
+       :style
+       {:overflow   :auto
+        :max-height (when-not (:expanded? opts) "24rem")}}
+      (process-hiccup
+       {:count (atom -1) :viewers viewers} value)]]))
 
 (defn inspect-hiccup [value]
   [l/lazy-render [inspect-hiccup* value]])
