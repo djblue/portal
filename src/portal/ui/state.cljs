@@ -111,11 +111,15 @@
        :portal/f     f
        :portal/value value
        :search-text  {}
-       :selected     [{:depth       1
-                       :path        []
-                       :stable-path []
-                       :alt-bg      true
-                       :value       value}])
+       :selected     (mapv
+                      (fn [context]
+                        (-> context
+                            (dissoc :collection :key)
+                            (assoc :depth       1
+                                   :path        []
+                                   :stable-path []
+                                   :alt-bg      true)))
+                      (:selected state)))
       (dissoc :portal/next-state)
       (push-viewer entry)))
 
