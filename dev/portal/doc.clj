@@ -72,7 +72,8 @@
    ::v/date-time
    {:examples [(java.util.Date.)]}
    ::v/diff
-   {:examples [(vary-meta d/diff-data dissoc ::v/default)]}
+   {:file "portal/ui/viewer/diff.cljs"
+    :examples [(vary-meta d/diff-data dissoc ::v/default)]}
    ::v/tree
    {:examples [(vary-meta d/hiccup dissoc ::v/default)]}
    ::v/code

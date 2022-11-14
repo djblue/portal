@@ -1,5 +1,6 @@
 (ns portal.ui.viewer.diff
-  (:require [lambdaisland.deep-diff2 :refer [diff]]
+  (:require [clojure.spec.alpha :as s]
+            [lambdaisland.deep-diff2 :refer [diff]]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
@@ -7,7 +8,7 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
 (extend-protocol cson/ToJson
@@ -28,17 +29,19 @@
                        (diff/Mismatch. a b))
     nil))
 
+;;; :spec
 (defn diff? [value]
   (or
    (instance? diff/Deletion value)
    (instance? diff/Insertion value)
    (instance? diff/Mismatch value)))
 
+(s/def ::diff (s/or :diff diff?
+                    :seq  (s/coll-of any? :min-count 2)))
+;;;
+
 (defn- can-view? [value]
-  (or (diff? value)
-      (and (coll? value)
-           (not (map? value))
-           (> (count value) 1))))
+  (s/valid? ::diff value))
 
 (defn- test-actual [value]
   (or (and (= (first value) 'not)
@@ -55,27 +58,27 @@
       (instance? diff/Insertion value) [ins/inspector (:+ value)]
       (instance? diff/Mismatch value)  [ins/inspector value]
       :else
-      [s/div
+      [d/div
        {:style
         {:background (ins/get-background)}}
-       [s/div
+       [d/div
         {:style
          {:display :flex
           :justify-content :space-between}}
-        [s/div
+        [d/div
          {:style
           {:flex "1"
            :padding (:padding theme)
            :background (::c/diff-remove theme)
            :border-top-left-radius (:border-radius theme)}}
          [icons/minus-circle {:style {:color bg}}]]
-        [s/div
+        [d/div
          {:style
           {:padding (:padding theme)
            :color (::c/border theme)
            :border [1 :solid (::c/border theme)]}}
          [icons/exchange-alt]]
-        [s/div
+        [d/div
          {:style
           {:flex "1"
            :padding (:padding theme)
@@ -83,7 +86,7 @@
            :background (::c/diff-add theme)
            :border-top-right-radius (:border-radius theme)}}
          [icons/plus-circle {:style {:color bg}}]]]
-       [s/div
+       [d/div
         {:style
          {:display :flex
           :flex-direction :column
