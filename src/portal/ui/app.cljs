@@ -28,6 +28,7 @@
             [portal.ui.viewer.http :as http]
             [portal.ui.viewer.image :as image]
             [portal.ui.viewer.json :as json]
+            [portal.ui.viewer.jwt :as jwt]
             [portal.ui.viewer.log :as log]
             [portal.ui.viewer.markdown :as md]
             [portal.ui.viewer.pprint :as pprint]
@@ -424,6 +425,7 @@
    code/viewer
    code/pr-str-viewer
    json/viewer
+   jwt/viewer
    edn/viewer
    transit/viewer
    csv/viewer
