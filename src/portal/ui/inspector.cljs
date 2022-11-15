@@ -541,6 +541,13 @@
        :border [1 :solid (::c/border theme)]}}
      child]))
 
+(defn- get-props [value k]
+  (let [m (meta value)]
+    (when-let [viewer (get-in m [:portal.viewer/for k])]
+      (merge
+       (select-keys m [viewer])
+       {:portal.viewer/default viewer}))))
+
 (defn inspect-map-k-v [values]
   [container-map
    [l/lazy-seq
@@ -557,13 +564,7 @@
          {:row index :column 1}
          [with-key k
           [container-map-v
-           [with-context
-            (let [m (meta values)]
-              (when-let [viewer (get-in m [:portal.viewer/for k])]
-                (merge
-                 (select-keys m [viewer])
-                 {:portal.viewer/default viewer})))
-            [inspector v]]]]]])
+           [inspector (get-props values k) v]]]]])
      (try-sort-map values))
     {:context (use-context)}]])
 
