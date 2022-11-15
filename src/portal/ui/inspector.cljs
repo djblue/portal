@@ -183,6 +183,8 @@
   (and (clojure.core/map? value)
        (not (cson/tagged-value? value))))
 
+(defn- long? [value] (instance? Long value))
+
 (defn get-value-type [value]
   (cond
     (tagged-literal? value)
@@ -195,10 +197,8 @@
     (instance? diff/Insertion value)  :diff
     (instance? diff/Mismatch value)   :diff
 
-    (instance? Long value) :number
-
+    (long? value)     :number
     (bin? value)      :binary
-
     (map? value)      :map
     (set? value)      :set
     (vector? value)   :vector
@@ -640,6 +640,7 @@
      [highlight-words
       (cond
         (cson/is-finite? value) (str value)
+        (long? value)           (str value)
         (cson/nan? value)       "##NaN"
         (cson/inf? value)       "##Inf"
         (cson/-inf? value)      "##-Inf")]]))
