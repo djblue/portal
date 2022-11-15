@@ -97,10 +97,17 @@
     {:portal.viewer/default :portal.viewer/diff}))
 
 (def string-data
+  ^{:portal.viewer/for
+    {::json :portal.viewer/json
+     ::edn :portal.viewer/edn
+     ::csv :portal.viewer/csv
+     ::markdown :portal.viewer/markdown
+     ::jwt :portal.viewer/jwt}}
   {::json "{\"hello\": 123}"
    ::edn "^{:portal.viewer/default :portal.viewer/tree} {:hello 123}"
    ::csv "a,b,c\n1,2,3\n4,5,6"
-   ::markdown (read-file "README.md")})
+   ::markdown (read-file "README.md")
+   ::jwt "eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiSm9lIENvZGVyIn0.5dlp7GmziL2QS06sZgK4mtaqv0_xX4oFUuTDh1zHK4U"})
 
 (def hiccup
   (with-meta
