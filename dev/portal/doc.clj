@@ -86,6 +86,8 @@
    {:examples ['(+ 1 2 3)]}
    ::v/json
    {:examples [(::d/json d/string-data) "{]"]}
+   ::v/jwt
+   {:examples [(::d/jwt d/string-data)]}
    ::v/edn
    {:examples [(::d/edn d/string-data) "{]"]}
    ::v/csv

@@ -525,7 +525,6 @@
     [s/div
      {:style
       {:width "100%"
-       :min-width :fit-content
        :display :grid
        :grid-template-columns "auto 1fr"
        :background (get-background)
