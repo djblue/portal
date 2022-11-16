@@ -48,7 +48,7 @@
    :head    ::c/number
    :put     ::c/uri
    :post    ::c/string
-   :patch   ::c/namespace
+   :patch   ::c/tag
    :delete  ::c/exception
    :options ::c/package})
 
