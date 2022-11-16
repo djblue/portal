@@ -19,6 +19,9 @@
     "workspaceContains:**/bb.edn",
     "onRenderer:portal-edn-renderer"
   ],
+  "sponsor": {
+    "url": "https://github.com/sponsors/djblue"
+  },
   "contributes": {
     "commands": [
       {
