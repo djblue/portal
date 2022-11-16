@@ -93,7 +93,8 @@
          :style
          {:cursor        :pointer
           :font-size     "0.85rem"
-          :color         (or color (::c/border theme))
+          :color         (or color (::c/text theme))
+          :opacity       (if color "1" "0.60")
           :box-sizing    :border-box
           :padding-right (* 4 (:padding theme))
           :border-right  [3 :solid (or color "rgba(0,0,0,0)")]}}
