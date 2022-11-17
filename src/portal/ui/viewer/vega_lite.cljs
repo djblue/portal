@@ -16,7 +16,6 @@
 ;;;
 
 (defn vega-lite-viewer [value]
-  ^{:key (hash value)}
   [vega/vega-embed
    {:mode "vega-lite" :renderer :canvas}
    value])

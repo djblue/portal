@@ -149,7 +149,6 @@
          :overflow :hidden}}]]]))
 
 (defn vega-viewer [value]
-  ^{:key (hash value)}
   [vega-embed {:mode "vega" :renderer :canvas} value])
 
 (def viewer

@@ -597,17 +597,22 @@
        child]]]))
 
 (defn- inspect-coll [values]
-  [container-coll
-   values
-   [l/lazy-seq
-    (map-indexed
-     (fn [index value]
-       ^{:key (str index (->id value))}
-       [select/with-position
-        {:row index :column 0}
-        [with-key index [inspector value]]])
-     values)
-    {:context (use-context)}]])
+  (let [n (count values)]
+    [container-coll
+     values
+     [l/lazy-seq
+      (map-indexed
+       (fn [index value]
+         (let [key (str (if (vector? values)
+                          index
+                          (- n index 1))
+                        (->id value))]
+           ^{:key key}
+           [select/with-position
+            {:row index :column 0}
+            [with-key index [inspector value]]]))
+       values)
+      {:context (use-context)}]]))
 
 (defn- inspect-js-array [value]
   (let [v (into [] value)]
