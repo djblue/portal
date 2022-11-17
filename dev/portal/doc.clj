@@ -17,24 +17,25 @@
 (defn ->docs [namespace]
   (->> (ns-publics namespace)
        (sort-by first)
-       (map
+       (keep
         (fn [[symbol-name v]]
-          [(name symbol-name)
-           {:hiccup
-            (let [m (meta v)]
-              ^{:portal.viewer/default :portal.viewer/hiccup}
-              [:div
-               {:style flex}
-               [:h2 [:portal.viewer/inspector v]]
-               (into
-                [:<>]
-                (map-indexed
-                 (fn [idx itm]
-                   ^{:key idx}
-                   [:portal.viewer/pr-str (concat [symbol-name] itm)])
-                 (:arglists m)))
-               (when-let [doc (:doc m)]
-                 [:portal.viewer/markdown doc])])}]))
+          (let [m (meta v)]
+            (when-not (:no-doc m)
+              [(name symbol-name)
+               {:hiccup
+                ^{:portal.viewer/default :portal.viewer/hiccup}
+                [:div
+                 {:style flex}
+                 [:h2 [:portal.viewer/inspector v]]
+                 (into
+                  [:<>]
+                  (map-indexed
+                   (fn [idx itm]
+                     ^{:key idx}
+                     [:portal.viewer/pr-str (concat [symbol-name] itm)])
+                   (:arglists m)))
+                 (when-let [doc (:doc m)]
+                   [:portal.viewer/markdown doc])]}]))))
        (into [(name namespace)])))
 
 (def info
