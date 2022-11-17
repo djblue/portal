@@ -138,7 +138,7 @@
 
 (defn repl
   "Start a repl for the given Portal session."
-  [portal]
   {:added "0.31.0"}
+  [portal]
   (when *nrepl-init* (*nrepl-init* portal))
   [:repl portal])
