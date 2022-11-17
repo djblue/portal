@@ -134,7 +134,7 @@
   [portal]
   (l/url portal))
 
-(def ^:dynamic *nrepl-init* nil)
+(def ^:no-doc ^:dynamic *nrepl-init* nil)
 
 (defn repl
   "Start a repl for the given Portal session."
