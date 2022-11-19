@@ -213,7 +213,7 @@
       :style/placeholder
       {:color (if-not context (::c/border theme) (::c/text theme))}}]))
 
-(defn- button-hover [disabled? child]
+(defn- button-hover [props child]
   (let [theme (theme/use-theme)]
     [s/div
      (merge
@@ -223,8 +223,10 @@
                :border-radius   "100%"
                :align-items     :center
                :justify-content :center
+               :cursor          :pointer
                :border          [1 :solid "rgba(0,0,0,0)"]}}
-      (when-not disabled?
+      props
+      (when-not (:disabled props)
         {:style/hover
          {:background (::c/background theme)
           :border     [1 :solid (::c/border theme)]}}))
@@ -250,44 +252,40 @@
        :border-bottom [1 :solid (::c/border theme)]}}
      (let [disabled? (nil? @(r/cursor state [:portal/previous-state]))]
        [button-hover
-        disabled?
+        {:disabled disabled?
+         :on-click #(state/dispatch! state state/history-back)}
         [icons/arrow-left
          {:disabled disabled?
           :title    "Go back in portal history."
           :size     "2x"
-          :on-click #(state/dispatch! state state/history-back)
           :style    (merge
-                     {:cursor        :pointer
-                      :transform     "scale(0.75)"
+                     {:transform     "scale(0.75)"
                       :color         (::c/text theme)}
                      (when disabled?
                        {:opacity 0.45
                         :cursor  :default}))}]])
      (let [disabled? (nil? @(r/cursor state [:portal/next-state]))]
        [button-hover
-        disabled?
+        {:disabled disabled?
+         :on-click #(state/dispatch! state state/history-forward)}
         [icons/arrow-right
          {:disabled disabled?
           :title    "Go forward in portal history."
           :size     "2x"
-          :on-click #(state/dispatch! state state/history-forward)
           :style    (merge
-                     {:cursor        :pointer
-                      :transform     "scale(0.75)"
+                     {:transform     "scale(0.75)"
                       :color         (::c/text theme)}
                      (when disabled?
                        {:opacity 0.45
                         :cursor  :default}))}]])
      [search-input]
      [button-hover
-      false
+      {:on-click #(state/dispatch! state state/clear)}
       [icons/ban
        {:title    "Clear all values from portal. - CTRL L"
-        :on-click #(state/dispatch! state state/clear)
         :size     "2x"
         :style    (merge
-                   {:cursor        :pointer
-                    :transform     "scale(0.75)"
+                   {:transform     "scale(0.75)"
                     :color         (::c/text theme)})}]]]))
 
 (defn inspect-1 [value]
