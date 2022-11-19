@@ -1,11 +1,11 @@
 (ns portal.ui.viewer.table
   (:require ["react" :as react]
-            [clojure.spec.alpha :as sp]
+            [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
-            [portal.ui.styled :as s]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [reagent.core :as r]))
 
@@ -23,7 +23,7 @@
   (let [theme   (theme/use-theme)
         context (ins/use-context)]
     (into
-     [s/div
+     [d/div
       {:style
        (cond->
         {:display :grid
@@ -40,7 +40,7 @@
   (let [background (ins/get-background)
         theme      (theme/use-theme)
         hover      (use-hover)]
-    [s/div
+    [d/div
      {:on-mouse-over
       (fn []
         (reset! hover [row column]))
@@ -48,7 +48,7 @@
       {:background  background
        :grid-row    (str (inc row))
        :grid-column (str (inc column))}}
-     [s/div
+     [d/div
       {:style {:height     "100%"
                :width      "100%"
                :box-sizing :border-box
@@ -61,7 +61,7 @@
   (let [background (ins/get-background)
         theme      (theme/use-theme)
         hover      (use-hover)]
-    [s/div
+    [d/div
      {:style
       (merge
        (cond
@@ -183,8 +183,8 @@
            row)]]])
      values)]])
 
-(sp/def ::row (sp/coll-of map?))
-(sp/def ::multi-map (sp/map-of any? ::row))
+(s/def ::row (s/coll-of map?))
+(s/def ::multi-map (s/map-of any? ::row))
 
 (defn inspect-multi-map-table [values]
   (let [rows (seq (ins/try-sort (keys values)))
@@ -224,7 +224,7 @@
 
 (defn- get-component [value]
   (cond
-    (sp/valid? ::multi-map value)
+    (s/valid? ::multi-map value)
     inspect-multi-map-table
 
     (and (ins/map? value) (every? ins/map? (vals value)))
