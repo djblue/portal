@@ -220,10 +220,9 @@
         rows))]]))
 
 ;;; :spec
-(s/def ::multi-row      (s/coll-of map?))
-(s/def ::multi-map      (s/map-of any? ::multi-row))
-(s/def ::map-of-maps    (s/map-of any? map?))
 (s/def ::coll-of-maps   (s/coll-of map?))
+(s/def ::multi-map      (s/map-of any? ::coll-of-maps))
+(s/def ::map-of-maps    (s/map-of any? map?))
 (s/def ::coll-of-vector (s/coll-of vector?))
 
 (s/def ::table
