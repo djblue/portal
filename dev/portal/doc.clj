@@ -38,7 +38,7 @@
                    [:portal.viewer/markdown doc])]}]))))
        (into [(name namespace)])))
 
-(def info
+(defn info []
   {::v/log
    {:file "portal/ui/viewer/log.cljs"
     :examples d/log-data}
@@ -69,13 +69,16 @@
    ::v/image
    {:examples [(::d/binary d/platform-data)]}
    ::v/table
-   {:examples [(with-meta d/log-data {::v/default :portal.viewer/table})]}
+   {:file "portal/ui/viewer/table.cljs"
+    :examples (vals d/table-data)}
    ::v/hiccup
    {:examples [d/hiccup]}
    ::v/date-time
-   {:examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
+   {:file "portal/ui/viewer/date_time.cljs"
+    :examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
    ::v/relative-time
-   {:examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
+   {:file "portal/ui/viewer/relative_time.cljs"
+    :examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
    ::v/diff
    {:file "portal/ui/viewer/diff.cljs"
     :examples [(vary-meta d/diff-data dissoc ::v/default)]}
@@ -119,17 +122,18 @@
          examples)))]}])
 
 (defn gen-viewer-docs []
-  (for [viewer (p/eval-str "(map #(select-keys % [:name :doc]) @portal.ui.api/viewers)")
-        :let [{:keys [file] :as info}  (get info (:name viewer))
-              info (cond-> (merge viewer info)
-                     file
-                     (into
-                      (->> (slurp (io/resource file))
-                           (re-seq #"(?s);;;([^\n]+)\n(.*);;;")
-                           (map
-                            (fn [[_ k v]] [(edn/read-string k) v])))))]
-        :when (or (:doc info) (:examples info) (:spec info))]
-    (->render info)))
+  (let [info (info)]
+    (for [viewer (p/eval-str "(map #(select-keys % [:name :doc]) @portal.ui.api/viewers)")
+          :let [{:keys [file] :as info}  (get info (:name viewer))
+                info (cond-> (merge viewer info)
+                       file
+                       (into
+                        (->> (slurp (io/resource file))
+                             (re-seq #"(?s);;;([^\n]+)\n(.*);;;")
+                             (map
+                              (fn [[_ k v]] [(edn/read-string k) v])))))]
+          :when (or (:doc info) (:examples info) (:spec info))]
+      (->render info))))
 
 (defn gen-docs []
   (update

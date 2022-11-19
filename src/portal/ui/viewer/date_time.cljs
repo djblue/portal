@@ -1,7 +1,15 @@
 (ns portal.ui.viewer.date-time
-  (:require [portal.colors :as c]
+  (:require [clojure.spec.alpha :as s]
+            [portal.colors :as c]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
+
+;;; :spec
+(s/def ::date-time
+  (s/or :inst     inst?
+        :unix     number?
+        :iso-8601 string?))
+;;;
 
 (defn parse [date]
   (cond

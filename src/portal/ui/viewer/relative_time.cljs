@@ -1,8 +1,16 @@
 (ns portal.ui.viewer.relative-time
   (:refer-clojure :exclude [second])
   (:require ["react" :as react]
-            [portal.ui.styled :as s]
+            [clojure.spec.alpha :as s]
+            [portal.ui.styled :as d]
             [portal.ui.viewer.date-time :as date-time]))
+
+;;; :spec
+(s/def ::relative-time
+  (s/or :inst     inst?
+        :unix     number?
+        :iso-8601 string?))
+;;;
 
 (def ^:private millisecond 1)
 (def ^:private second     (* 1000 millisecond))
@@ -65,7 +73,7 @@
          (fn []
            (js/clearInterval i))))
      #js [])
-    [s/div (format-relative-time (relative-time now value))]))
+    [d/div (format-relative-time (relative-time now value))]))
 
 (def viewer
   {:predicate date-time/parse
