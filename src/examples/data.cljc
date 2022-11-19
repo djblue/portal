@@ -78,6 +78,139 @@
    ;;::range (range)
    ::record #?(:bb {:x 0 :y 0} :default (->Point 0 0))})
 
+(def map-reflection-data
+  (with-meta
+    '{asTransient
+      [{:name asTransient
+        :return-type
+        clojure.lang.ITransientMap
+        :declaring-class
+        clojure.lang.PersistentArrayMap
+        :parameter-types []
+        :exception-types []
+        :flags #{:public}}
+       {:name asTransient
+        :return-type
+        clojure.lang.ITransientCollection
+        :declaring-class
+        clojure.lang.PersistentArrayMap
+        :parameter-types []
+        :exception-types []
+        :flags #{:public :bridge :synthetic}}]
+      assoc
+      [{:name assoc
+        :return-type
+        clojure.lang.IPersistentMap
+        :declaring-class
+        clojure.lang.PersistentArrayMap
+        :parameter-types [java.lang.Object java.lang.Object]
+        :exception-types []
+        :flags #{:public}}
+       {:name assoc
+        :return-type clojure.lang.Associative
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types [java.lang.Object]
+        :exception-types []
+        :flags #{:public :bridge :synthetic}}]
+      PersistentArrayMap
+      [{:name clojure.lang.PersistentArrayMap
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types [clojure.lang.IPersistentMap java.lang.Object<>]
+        :exception-types []
+        :flags #{:public}}
+       {:name clojure.lang.PersistentArrayMap
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types []
+        :exception-types []
+        :flags #{:protected}}
+       {:name clojure.lang.PersistentArrayMap
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types [java.lang.Object<>]
+        :exception-types []
+        :flags #{:public}}]
+      count
+      [{:name count
+        :return-type int
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types []
+        :exception-types []
+        :flags #{:public}}]
+      create
+      [{:name create
+        :return-type clojure.lang.PersistentArrayMap
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types
+        [java.lang.Object<>]
+        :exception-types []
+        :flags #{:varargs}}
+       {:name create
+        :return-type clojure.lang.IPersistentMap
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types [java.util.Map]
+        :exception-types []
+        :flags #{:public :static}}]
+      empty
+      [{:name empty
+        :return-type clojure.lang.IPersistentMap
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types []
+        :exception-types []
+        :flags #{:public}}
+       {:name empty
+        :return-type clojure.lang.IPersistentCollection
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types []
+        :exception-types []
+        :flags #{:public :bridge :synthetic}}]
+      meta
+      [{:name meta
+        :return-type clojure.lang.IPersistentMap
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types []
+        :exception-types []
+        :flags #{:public}}]
+      withMeta
+      [{:name withMeta
+        :return-type clojure.lang.IObj
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types [clojure.lang.IPersistentMap]
+        :exception-types []
+        :flags #{:public :bridge :synthetic}}
+       {:name withMeta
+        :return-type clojure.lang.PersistentArrayMap
+        :declaring-class clojure.lang.PersistentArrayMap
+        :parameter-types [clojure.lang.IPersistentMap]
+        :exception-types []
+        :flags #{:public}}]}
+    {:portal.viewer/default :portal.viewer/table
+     :portal.viewer/table {:columns [:flags :parameter-types :return-type]}}))
+
+(def table-data
+  {::multi-map map-reflection-data
+   ::nested-maps
+   ^{:portal.viewer/default :portal.viewer/table
+     :portal.viewer/table
+     {:columns [:nFiles :blank :comment :code]}}
+   {:ClojureScript {:nFiles 75 :blank 969 :comment 66 :code 7889}
+    :ClojureC {:nFiles 27 :blank 337 :comment 3 :code 2785}
+    :Clojure {:nFiles 41 :blank 288 :comment 11 :code 1909}
+    :SUM {:blank 1594 :comment 80 :code 12583 :nFiles 143}}
+   ::coll-of-maps
+   ^{:portal.viewer/default :portal.viewer/table
+     :portal.viewer/table
+     {:columns [:lang :nFiles :blank :comment :code]}}
+   [{:lang :ClojureScript  :nFiles 75 :blank 969 :comment 66 :code 7889}
+    {:lang :ClojureC :nFiles 27 :blank 337 :comment 3 :code 2785}
+    {:lang :Clojure :nFiles 41 :blank 288 :comment 11 :code 1909}
+    {:blank 1594 :comment 80 :code 12583 :nFiles 143}]
+   ::coll-of-vectors
+   ^{:portal.viewer/default :portal.viewer/table}
+   [[1 0 0 0 0]
+    [0 1 0 0 0]
+    [0 0 1 0 0]
+    [0 0 0 1 0]
+    [0 0 0 0 1]]})
+
 (def diff-data
   (with-meta
     [{::removed "value"
@@ -794,6 +927,7 @@
 (def data
   {::platform-data      platform-data
    ::hacker-news        hn/stories
+   ::table-data         table-data
    ::diff               diff-data
    ::basic-data         basic-data
    ::themes             c/themes
