@@ -108,13 +108,16 @@
                               ins/inspector)
                             (tag->viewer tag))]
       (if component
-        [select/with-position
-         {:row (swap! (:count context) inc) :column 0}
-         (if (= tag :portal.viewer/inspector)
-           (into [component] args)
-           (if (= 1 (count args))
-             (into [component {:portal.viewer/default tag}] args)
-             (into [component (merge (first args) {:portal.viewer/default tag})] (rest args))))]
+        (let [row (swap! (:count context) inc)]
+          [ins/with-key
+           row
+           [select/with-position
+            {:row row :column 0}
+            (if (= tag :portal.viewer/inspector)
+              (into [component] args)
+              (if (= 1 (count args))
+                (into [component {:portal.viewer/default tag}] args)
+                (into [component (merge (first args) {:portal.viewer/default tag})] (rest args))))]])
         (if (map? (first args))
           (into
            (if (= tag :<>)
