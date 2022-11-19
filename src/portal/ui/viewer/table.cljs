@@ -183,9 +183,6 @@
            row)]]])
      values)]])
 
-(s/def ::row (s/coll-of map?))
-(s/def ::multi-map (s/map-of any? ::row))
-
 (defn inspect-multi-map-table [values]
   (let [rows (seq (ins/try-sort (keys values)))
         cols (or (get-in (meta values) [:portal.viewer/table :columns])
@@ -222,22 +219,30 @@
            (get values row)))
         rows))]]))
 
+;;; :spec
+(s/def ::multi-row      (s/coll-of map?))
+(s/def ::multi-map      (s/map-of any? ::multi-row))
+(s/def ::map-of-maps    (s/map-of any? map?))
+(s/def ::coll-of-maps   (s/coll-of map?))
+(s/def ::coll-of-vector (s/coll-of vector?))
+
+(s/def ::table
+  (s/or :multi-map      ::multi-map
+        :map-of-maps    ::map-of-maps
+        :coll-of-vector ::coll-of-vector
+        :coll-of-maps   ::coll-of-maps))
+;;;
+
 (defn- get-component [value]
-  (cond
-    (s/valid? ::multi-map value)
-    inspect-multi-map-table
+  (let [result (s/conform ::table value)]
+    (when-not (= result ::s/invalid)
+      (case (first result)
+        :multi-map      inspect-multi-map-table
+        :map-of-maps    inspect-map-table
+        :coll-of-vector inspect-vector-table
+        :coll-of-maps   inspect-coll-table))))
 
-    (and (ins/map? value) (every? ins/map? (vals value)))
-    inspect-map-table
-
-    (and (or (vector? value) (coll? value))
-         (every? vector? value))
-    inspect-vector-table
-
-    (and (ins/coll? value) (every? ins/map? value))
-    inspect-coll-table))
-
-(defn table-view? [value] (some? (get-component value)))
+(defn table-view? [value] (s/valid? ::table value))
 
 (defn inspect-table [values]
   (let [component (get-component values)]
