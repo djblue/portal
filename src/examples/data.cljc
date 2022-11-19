@@ -185,32 +185,6 @@
     {:portal.viewer/default :portal.viewer/table
      :portal.viewer/table {:columns [:flags :parameter-types :return-type]}}))
 
-(def table-data
-  {::multi-map map-reflection-data
-   ::nested-maps
-   ^{:portal.viewer/default :portal.viewer/table
-     :portal.viewer/table
-     {:columns [:nFiles :blank :comment :code]}}
-   {:ClojureScript {:nFiles 75 :blank 969 :comment 66 :code 7889}
-    :ClojureC {:nFiles 27 :blank 337 :comment 3 :code 2785}
-    :Clojure {:nFiles 41 :blank 288 :comment 11 :code 1909}
-    :SUM {:blank 1594 :comment 80 :code 12583 :nFiles 143}}
-   ::coll-of-maps
-   ^{:portal.viewer/default :portal.viewer/table
-     :portal.viewer/table
-     {:columns [:lang :nFiles :blank :comment :code]}}
-   [{:lang :ClojureScript  :nFiles 75 :blank 969 :comment 66 :code 7889}
-    {:lang :ClojureC :nFiles 27 :blank 337 :comment 3 :code 2785}
-    {:lang :Clojure :nFiles 41 :blank 288 :comment 11 :code 1909}
-    {:blank 1594 :comment 80 :code 12583 :nFiles 143}]
-   ::coll-of-vectors
-   ^{:portal.viewer/default :portal.viewer/table}
-   [[1 0 0 0 0]
-    [0 1 0 0 0]
-    [0 0 1 0 0]
-    [0 0 0 1 0]
-    [0 0 0 0 1]]})
-
 (def diff-data
   (with-meta
     [{::removed "value"
@@ -705,6 +679,28 @@
     :result  :hello/portal
     :runtime :portal
     :form    :hello/portal}])
+
+(def table-data
+  {::coll-of-maps
+   (with-meta log-data
+     {:portal.viewer/default :portal.viewer/table
+      :portal.viewer/table {:columns [:level :ns :result :runtime]}})
+   ::nested-maps
+   ^{:portal.viewer/default :portal.viewer/table
+     :portal.viewer/table
+     {:columns [:nFiles :blank :comment :code]}}
+   {:ClojureScript {:nFiles 75 :blank 969 :comment 66 :code 7889}
+    :ClojureC {:nFiles 27 :blank 337 :comment 3 :code 2785}
+    :Clojure {:nFiles 41 :blank 288 :comment 11 :code 1909}
+    :SUM {:blank 1594 :comment 80 :code 12583 :nFiles 143}}
+   ::coll-of-vectors
+   ^{:portal.viewer/default :portal.viewer/table}
+   [[1 0 0 0 0]
+    [0 1 0 0 0]
+    [0 0 1 0 0]
+    [0 0 0 1 0]
+    [0 0 0 0 1]]
+   ::multi-map map-reflection-data})
 
 (def test-report
   [{:type :begin-test-ns
