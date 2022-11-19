@@ -224,6 +224,9 @@
 
 (defn- get-component [value]
   (cond
+    (sp/valid? ::multi-map value)
+    inspect-multi-map-table
+
     (and (ins/map? value) (every? ins/map? (vals value)))
     inspect-map-table
 
@@ -232,10 +235,7 @@
     inspect-vector-table
 
     (and (ins/coll? value) (every? ins/map? value))
-    inspect-coll-table
-
-    (sp/valid? ::multi-map value)
-    inspect-multi-map-table))
+    inspect-coll-table))
 
 (defn table-view? [value] (some? (get-component value)))
 
