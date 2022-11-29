@@ -17,7 +17,7 @@
 
 (defn vega-lite-viewer [value]
   [vega/vega-embed
-   {:mode "vega-lite" :renderer :canvas}
+   {:mode "vega-lite" :renderer :svg}
    value])
 
 (def viewer

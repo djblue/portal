@@ -149,7 +149,7 @@
          :overflow :hidden}}]]]))
 
 (defn vega-viewer [value]
-  [vega-embed {:mode "vega" :renderer :canvas} value])
+  [vega-embed {:mode "vega" :renderer :svg} value])
 
 (def viewer
   {:predicate (partial s/valid? ::vega)
