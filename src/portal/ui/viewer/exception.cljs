@@ -207,7 +207,8 @@
 (def viewer
   {:predicate exception?
    :component inspect-exception
-   :name      :portal.viewer/ex})
+   :name      :portal.viewer/ex
+   :doc       "Viewer for datafied exceptions."})
 
 (def trace-viewer
   {:predicate trace?
