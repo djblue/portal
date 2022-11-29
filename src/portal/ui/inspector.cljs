@@ -92,11 +92,15 @@
         viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
 
-(defn get-viewer [state context]
-  (if-let [selected-viewer
-           (get-in @state [:selected-viewers (state/get-location context)])]
-    (some #(when (= (:name %) selected-viewer) %) @api/viewers)
-    (first (get-compatible-viewers @api/viewers context))))
+(defn get-viewer
+  ([state context]
+   (get-viewer state context (:value context)))
+  ([state context value]
+   (if-let [selected-viewer
+            (and (= (:value context) value)
+                 (get-in @state [:selected-viewers (state/get-location context)]))]
+     (some #(when (= (:name %) selected-viewer) %) @api/viewers)
+     (first (get-compatible-viewers @api/viewers (assoc context :value value))))))
 
 (defn set-viewer! [state context viewer-name]
   (state/dispatch! state
@@ -897,18 +901,19 @@
 (defn- get-info [state theme context value]
   (let [{:keys [search-text expanded?]} @state
         location       (state/get-location context)
-        viewer         (get-viewer state context)
+        search-text    (get search-text location)
+        value          (f/filter-value value search-text)
+        viewer         (get-viewer state context value)
         depth          (:depth context)
         default-expand (or (= depth 1)
                            (and (coll? value)
                                 (= (:name viewer) :portal.viewer/inspector)
                                 (<= depth (:max-depth theme))))
-        expanded?      (if-some [expanded? (get expanded? location)] expanded? default-expand)
-        search-text    (get search-text location)]
+        expanded?      (if-some [expanded? (get expanded? location)] expanded? default-expand)]
     {:selected       (state/selected @state context)
      :expanded?      expanded?
      :viewer         viewer
-     :value          (f/filter-value value search-text)
+     :value          value
      :default-expand default-expand}))
 
 (defn- inspector* [context value]
