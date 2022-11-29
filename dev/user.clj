@@ -19,6 +19,8 @@
 
   (watch :pwa)
 
+  (p/docs {:mode :dev})
+
   (def value (atom nil))
   (reset! value {})
   (reset! value {:hello :world})

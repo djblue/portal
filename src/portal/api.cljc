@@ -5,8 +5,11 @@
                :cljs [portal.runtime.node.launcher :as l])
             #?(:clj  [portal.sync :as a]
                :cljs [portal.async :as a])
+            #?(:clj  [clojure.java.io :as io]
+               :cljs [portal.resources :as io])
             [clojure.set :as set]
-            [portal.runtime :as rt]))
+            [portal.runtime :as rt]
+            [portal.runtime.cson :as cson]))
 
 (defn submit
   "Tap target function.
@@ -142,3 +145,17 @@
   [portal]
   (when *nrepl-init* (*nrepl-init* portal))
   [:repl portal])
+
+(defn- get-docs []
+  (cson/read
+   #?(:clj  (slurp (io/resource "portal/docs.json"))
+      :cljs (io/inline "portal/docs.json"))))
+
+(defn docs
+  "Open portal docs."
+  {:added "035.0"
+   :see-also ["open"]}
+  ([]
+   (docs nil))
+  ([options]
+   (open (assoc options :value (get-docs)))))

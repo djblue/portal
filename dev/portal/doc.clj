@@ -4,6 +4,7 @@
             [clojure.walk :as walk]
             [examples.data :as d]
             [portal.api :as p]
+            [portal.runtime.cson :as cson]
             [portal.viewer :as-alias v]))
 
 (def flex
@@ -149,6 +150,9 @@
    into
    [(->docs 'portal.api)
     #_(->docs 'portal.client.jvm)]))
+
+(defn -main []
+  (spit "resources/portal/docs.json" (cson/write (gen-docs))))
 
 (comment
   (def docs (atom nil))
