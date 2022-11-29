@@ -63,7 +63,11 @@
        [".cljc" ".clj" ".cljs"])))
   clojure.lang.Symbol
   (resolve [^clojure.lang.Symbol s]
-    (resolve (find-ns s)))
+    (merge
+     (or
+      (some-> s namespace symbol find-ns resolve)
+      (some-> s find-ns resolve))
+     (meta s)))
   URL
   (resolve [^URL url]
     (exists (.getPath url)))
