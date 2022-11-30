@@ -10,7 +10,7 @@
 
 (defn get-root [] (::root @selection-index))
 
-(defn adjacent [f & args]
+(defn- adjacent [f & args]
   (fn select
     ([context] (select @selection-index context))
     ([selection-index context]

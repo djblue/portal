@@ -303,7 +303,7 @@
        {:default-take 5}]
       string)))
 
-(defn ->id [value]
+(defn- ->id [value]
   (str (hash value) (pr-str (type value))))
 
 (defn tabs [value]
@@ -681,13 +681,13 @@
         {:row 0 :column 1}
         [s/div [inspector (.-denominator value)]]]]]]))
 
-(defn hex-color? [string]
+(defn- hex-color? [string]
   (re-matches #"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}gi" string))
 
-(defn rgb-color? [string]
+(defn- rgb-color? [string]
   (re-matches #"rgb\(\d+,\d+,\d+\)" string))
 
-(def color? (some-fn hex-color? rgb-color?))
+(def ^:private color? (some-fn hex-color? rgb-color?))
 
 (defn- url-string? [string]
   (re-matches #"https?://.*" string))
@@ -988,7 +988,7 @@
      [:> error-boundary
       [with-options options [component value]]]]))
 
-(defn is-selected? [state context]
+(defn- is-selected? [state context]
   (some? (state/selected @state context)))
 
 (defn- tab-index [context]
