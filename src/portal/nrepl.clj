@@ -13,6 +13,7 @@
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
 
+(def ^:dynamic *portal-ns* nil)
 (def ^:dynamic *portal-session* nil)
 
 (deftype Print [string] Object (toString [_] string))
@@ -138,9 +139,14 @@
             (p/eval-str
              portal
              (:code msg)
-             (assoc (select-keys msg [:ns :file]) :verbose true))]
+             (-> {:ns (get @session #'*portal-ns*)}
+                 (merge  msg)
+                 (select-keys  [:ns :file])
+                 (assoc  :verbose true)))]
+        (when-let [namespace (:ns response)]
+          (swap! session assoc #'*portal-ns* namespace))
         (when (= value :cljs/quit)
-          (swap! session assoc #'*portal-session* nil))
+          (swap! session dissoc #'*portal-session* #'*portal-ns*))
         (transport/send
          transport
          (response-for msg (merge
