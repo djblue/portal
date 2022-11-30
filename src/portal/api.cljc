@@ -143,8 +143,13 @@
   "Start a repl for the given Portal session."
   {:added "0.31.0"}
   [portal]
-  (when *nrepl-init* (*nrepl-init* portal))
-  [:repl portal])
+  (if *nrepl-init*
+    (*nrepl-init* portal)
+    (throw
+     (ex-info
+      "Please start nREPL with `portal.nrepl/wrap-repl` middleware to enable the portal subrepl."
+      {:portal-instance    portal
+       :missing-middleware 'portal.nrepl/wrap-repl}))))
 
 (defn- get-docs []
   (cson/read

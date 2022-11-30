@@ -127,7 +127,10 @@
              (not (contains? @session #'*portal-session*)))
     (swap! session assoc
            #'*portal-session* nil
-           #'p/*nrepl-init*   #(set! *portal-session* %)))
+           #'p/*nrepl-init*   (fn [portal]
+                                (set! *portal-session* portal)
+                                (println "To quit, type:" :cljs/quit)
+                                [:repl portal])))
   (if-let [portal (and (= op "eval")
                        (get @session #'*portal-session*))]
     (try
