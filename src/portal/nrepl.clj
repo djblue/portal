@@ -134,32 +134,36 @@
                                 [:repl portal])))
   (if-let [portal (and (= op "eval")
                        (get @session #'*portal-session*))]
-    (try
-      (let [{:keys [value] :as response}
-            (p/eval-str
-             portal
-             (:code msg)
-             (-> {:ns (get @session #'*portal-ns*)}
-                 (merge  msg)
-                 (select-keys  [:ns :file])
-                 (assoc  :verbose true)))]
-        (when-let [namespace (:ns response)]
-          (swap! session assoc #'*portal-ns* namespace))
-        (when (= value :cljs/quit)
-          (swap! session dissoc #'*portal-session* #'*portal-ns*))
-        (transport/send
-         transport
-         (response-for msg (merge
-                            response
-                            {:status      :done
-                             ::print/keys #{:value}}))))
-      (catch Exception e
-        (swap! session assoc #'*e e)
-        (let [resp {::caught/throwable e
-                    :status            :eval-error
-                    :ex                (str (class e))
-                    :root-ex           (str (class (main/root-cause e)))}]
-          (transport/send transport (response-for msg resp)))))
+    (->> (if-not (contains? (into #{} (p/sessions)) portal)
+           (do (swap! session dissoc #'*portal-session* #'*portal-ns*)
+               {:value       :cljs/quit
+                :status      :done
+                ::print/keys #{:value}})
+           (try
+             (let [{:keys [value] :as response}
+                   (p/eval-str
+                    portal
+                    (:code msg)
+                    (-> {:ns (get @session #'*portal-ns*)}
+                        (merge  msg)
+                        (select-keys  [:ns :file])
+                        (assoc  :verbose true)))]
+               (when-let [namespace (:ns response)]
+                 (swap! session assoc #'*portal-ns* namespace))
+               (when (= value :cljs/quit)
+                 (swap! session dissoc #'*portal-session* #'*portal-ns*))
+               (merge
+                response
+                {:status      :done
+                 ::print/keys #{:value}}))
+             (catch Exception e
+               (swap! session assoc #'*e e)
+               {::caught/throwable e
+                :status            :eval-error
+                :ex                (str (class e))
+                :root-ex           (str (class (main/root-cause e)))})))
+         (response-for msg)
+         (transport/send transport))
     (handler msg)))
 
 (defn wrap-repl [handler] (partial #'wrap-repl* handler))
