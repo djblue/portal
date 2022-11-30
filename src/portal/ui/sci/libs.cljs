@@ -12,6 +12,7 @@
             portal.ui.inspector
             portal.ui.rpc
             [portal.ui.sci.import :as sci-import]
+            portal.ui.select
             portal.ui.state
             portal.ui.styled
             portal.ui.theme
@@ -62,6 +63,7 @@
     portal.ui.icons
     portal.ui.inspector
     portal.ui.rpc
+    portal.ui.select
     portal.ui.state
     portal.ui.styled
     portal.ui.theme
