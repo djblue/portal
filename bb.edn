@@ -9,6 +9,7 @@
          dev    tasks.dev/-main
          e2e    tasks.e2e/all
          fmt    tasks.format/fix
+         docs   tasks.docs/-main
          jar    tasks.package/jar
          test   tasks.test/test
          tag    tasks.version/tag
