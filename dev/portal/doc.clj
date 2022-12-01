@@ -1,13 +1,14 @@
 (ns portal.doc
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.pprint :refer [pprint]]
             [clojure.walk :as walk]
             [examples.data :as d]
             [portal.api :as p]
             [portal.runtime.cson :as cson]
             [portal.viewer :as-alias v]))
 
-(def flex
+(def ^:private flex
   {:gap 9
    :width 896
    :padding 40
@@ -15,7 +16,7 @@
    :flex-direction :column
    :box-sizing :border-box})
 
-(defn ->docs [namespace]
+(defn- ->docs [namespace]
   (->> (ns-publics namespace)
        (sort-by first)
        (keep
@@ -39,7 +40,7 @@
                    [:portal.viewer/markdown doc])]}]))))
        (into [(name namespace)])))
 
-(defn info []
+(defn- info []
   {::v/log
    {:file "portal/ui/viewer/log.cljs"
     :examples d/log-data}
@@ -104,7 +105,7 @@
    ::v/pprint
    {:examples [d/basic-data]}})
 
-(defn ->render [{:keys [doc spec examples] :as entry}]
+(defn- ->render [{:keys [doc spec examples] :as entry}]
   [(name (:name entry))
    {:hiccup
     [:div {:style flex}
@@ -122,9 +123,20 @@
          (fn [idx itm] ^{:key idx} [(:name entry) itm])
          examples)))]}])
 
-(defn gen-viewer-docs []
+(defn- save-viewers []
+  (spit "resources/viewers.edn"
+        (-> "(map #(select-keys % [:name :doc]) @portal.ui.api/viewers)"
+            (p/eval-str)
+            (pprint)
+            (with-out-str))))
+
+(comment (save-viewers))
+
+(defn- get-viewers [] (read-string (slurp (io/resource "viewers.edn"))))
+
+(defn- gen-viewer-docs []
   (let [info (info)]
-    (for [viewer (p/eval-str "(map #(select-keys % [:name :doc]) @portal.ui.api/viewers)")
+    (for [viewer (get-viewers)
           :let [{:keys [file] :as info}  (get info (:name viewer))
                 info (cond-> (merge viewer info)
                        file
@@ -136,7 +148,7 @@
           :when (or (:doc info) (:examples info) (:spec info))]
       (->render info))))
 
-(defn gen-docs []
+(defn- gen-docs []
   (update
    (walk/postwalk
     (fn [v]
