@@ -32,4 +32,4 @@ runs:
     - name: Install Babashka
       uses: turtlequeue/setup-babashka@v1.3.0
       with:
-        babashka-version: 0.6.4
+        babashka-version: 1.0.165
