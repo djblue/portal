@@ -22,7 +22,7 @@
   (pkg/all)
   (deploy-clojars)
   (deploy-vscode)
-  #_(deploy-intellij))
+  (deploy-intellij))
 
 (defn all
   "Deploy all artifacts."
