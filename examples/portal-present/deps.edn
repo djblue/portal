@@ -1,0 +1,8 @@
+{:deps {djblue/portal {:mvn/version "0.34.2"}}
+ :aliases
+ {:repl
+  {:extra-deps
+   {cider/cider-nrepl {:mvn/version "0.28.5"}}
+   :main-opts ["-m" "nrepl.cmdline"
+               "--middleware"
+               "[cider.nrepl/cider-middleware,portal.nrepl/wrap-repl]"]}}}
