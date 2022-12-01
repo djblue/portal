@@ -163,8 +163,10 @@
    [(->docs 'portal.api)
     #_(->docs 'portal.client.jvm)]))
 
-(defn -main []
+(defn docs []
   (spit "resources/portal/docs.json" (cson/write (gen-docs))))
+
+(defn -main [] (docs))
 
 (comment
   (def docs (atom nil))
