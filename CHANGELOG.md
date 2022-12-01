@@ -1,3 +1,46 @@
+## 0.35.0 - 2022-11-30
+
+- Updates IJ plugin for 2022.3 (#154) 4c71251
+  - Thanks @coyotesqrl for the updates!
+- Add portal.ui.select to sci libs aa99f9c
+- Improve symbol go-to resolution 01f6942
+- Add jwt viewer to quickly parse jwt strings 981ded5
+
+### UX Tweaks
+
+- Auto close repl when portal session is closed 5a177b5
+- Explicitly fail when nrepl middleware is missing for `portal.api/repl` 6cb4507
+- Increase click area for history buttons c7ebf53
+- Target "_blank" absolute links d7f692f
+- Add github markdown style callouts 0c97f45
+
+### Documentation
+
+- Add custom viewer docs 118cd29
+- Update nrepl docs f54a4b4
+
+### Viewer Docs
+
+- Add `portal.api/docs` to open docs in portal a11c6b3
+- Add jwt viewer to docs fed6916
+- Add more time examples 8e18c15
+- Add error example cases 60b30d9
+- Add relative time example to viewer docs 016c238
+- Add spec for diff viewer 4d2818f
+- Add diff and csv to viewer docs bb2e016
+
+### Bug Fixes
+
+- Preserve `:ns` in portal.nrepl/wrap-repl 3e5a69f
+  - Fixes `portal.api/repl` for vs-code
+- Fix bb spec warning 497dd39
+- Switch vega / vega-lite to svg for vs-code c70a359
+- Account for filtering when selecting viewer 4d560cf
+  - Thanks @seancorfield for the bug report!
+- Fixes different values rendering the same (#119) 4090fa1
+  - Thanks @daslu for the bug report!
+- Fix java long rendering 5944ec8
+
 ## 0.34.2 - 2022-11-11
 
 - Fix edge case around commands and default viewers 624f0b8
