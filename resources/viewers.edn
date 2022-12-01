@@ -1,0 +1,55 @@
+({:name :portal.viewer/ex, :doc "Viewer for datafied exceptions."}
+ {:name :portal.viewer/stack-trace}
+ {:name :portal.viewer/line-chart}
+ {:name :portal.viewer/scatter-chart}
+ {:name :portal.viewer/histogram-chart}
+ {:name :portal.viewer/log,
+  :doc
+  "Useful for conveying a value in a specific context (what/where/when)."}
+ {:name :portal.viewer/http,
+  :doc
+  "Highlight HTTP method and status code for http request and response."}
+ {:name :portal.viewer/image, :doc "View a binary value as an image."}
+ {:name :portal.viewer/deref}
+ {:name :portal.viewer/test-report,
+  :doc "View clojure.test report output."}
+ {:name :portal.viewer/prepl,
+  :doc
+  "View interlacing of stdout, stderr and tap values. Useful for build output."}
+ {:name :portal.viewer/cljdoc}
+ {:name :portal.viewer/inspector}
+ {:name :portal.viewer/pprint,
+  :doc "View value printed via clojure.pprint/pprint."}
+ {:name :portal.viewer/vega-lite}
+ {:name :portal.viewer/vega}
+ {:name :portal.viewer/bin, :doc "View binary data as a hexdump."}
+ {:name :portal.viewer/table,
+  :doc
+  "View value as a table. Supports sticky headers and keyboard navigation."}
+ {:name :portal.viewer/tree,
+  :doc "For viewing highly nested values, such as hiccup."}
+ {:name :portal.viewer/text, :doc "View string as a text file."}
+ {:name :portal.viewer/code}
+ {:name :portal.viewer/pr-str}
+ {:name :portal.viewer/json,
+  :doc "Parse a string as JSON. Will render error if parsing fails."}
+ {:name :portal.viewer/jwt,
+  :doc "Parse a string as a JWT. Will render error if parsing fails."}
+ {:name :portal.viewer/edn,
+  :doc "Parse a string as EDN. Will render error if parsing fails."}
+ {:name :portal.viewer/transit,
+  :doc
+  "Parse a string as transit. Will render error if parsing fails."}
+ {:name :portal.viewer/csv,
+  :doc "Parse a string as a CSV and use the table viewer by default."}
+ {:name :portal.viewer/html}
+ {:name :portal.viewer/diff,
+  :doc
+  "Diff a collection of values successively starting with the first two."}
+ {:name :portal.viewer/markdown,
+  :doc "Parse string as markdown and view as html."}
+ {:name :portal.viewer/hiccup,
+  :doc "Render a hiccup value as html via reagent."}
+ {:name :portal.viewer/date-time}
+ {:name :portal.viewer/relative-time,
+  :doc "View value relative to the current time."})
