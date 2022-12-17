@@ -9,12 +9,31 @@
             [portal.runtime.index :as index]
             [portal.runtime.node.server :as server]))
 
-(defn reload
-  []
-  (.log js/console "Reloading...")
-  (js-delete js/require.cache (js/require.resolve "./vs-code")))
+(defonce ^:private !app-db (atom {:context nil
+                                  :disposables []}))
 
-(defonce ^:private context (atom nil))
+(defn- register-disposable! [^js disposable]
+  (let [context (:context @!app-db)]
+    (swap! !app-db update :disposables conj disposable)
+    (.push (.-subscriptions context) disposable)))
+
+(defn- clear-disposables! []
+  (doseq [disposable (:disposables @!app-db)]
+    (.dispose disposable))
+  (swap! !app-db assoc :disposables []))
+
+(def ^:private view-column-key "portal:viewColumn")
+
+(defn- view-column []
+  (let [^js context (:context @!app-db)
+        column (-> context .-workspaceState (.get view-column-key))]
+    (if-not (= js/undefined column)
+      column
+      (.-Beside vscode/ViewColumn))))
+
+(defn- save-view-column [column]
+  (let [^js context (:context @!app-db)]
+    (-> context .-workspaceState (.update view-column-key column))))
 
 (defn- -open [{:keys [portal options server]}]
   (let [{:keys [host port]} server
@@ -27,12 +46,12 @@
                               ["portal"
                                (get options :window-title "vs-code")
                                "0.35.0"])
-                             (.-One vscode/ViewColumn)
+                             (view-column)
                              #js {:enableScripts           true
                                   :retainContextWhenHidden true})
         ^js web-view        (.-webview panel)]
     (set! (.-iconPath panel)
-          (.file vscode/Uri (.asAbsolutePath ^js @context "icon.png")))
+          (.file vscode/Uri (.asAbsolutePath ^js (:context @!app-db) "icon.png")))
     (set! (.-html web-view)
           (index/html {:code-url   (str "http://" host ":" port "/main.js?" session-id)
                        :host       (str host ":" port)
@@ -46,7 +65,11 @@
            "set-title" (set! (.-title panel) (.-title event))
            "set-theme" :unsupported)))
      js/undefined
-     (.-subscriptions ^js @context))))
+     (.-subscriptions ^js (:context @!app-db)))
+    (.onDidChangeViewState
+     panel
+     (fn [_event]
+       (save-view-column (.-viewColumn panel))))))
 
 (defmethod browser/-open :vs-code [args] (-open args))
 
@@ -94,20 +117,20 @@
 
 (defn activate
   [^js ctx]
-  (reset! context ctx)
-  (a/let [workspace (get-workspace-folder)
-          folder    (fs/join workspace ".portal")
-          info      (p/start {})
-          config    (fs/join folder "vs-code.edn")]
-    (set-status workspace)
-    (fs/mkdir folder)
-    (fs/spit config (pr-str (select-keys info [:host :port])))
-    (fs/rm-exit config))
-  (setup-notebook-handler)
-  (add-tap #'p/submit)
+  (when ctx
+    (swap! !app-db assoc :context ctx)
+    (a/let [workspace (get-workspace-folder)
+            folder    (fs/join workspace ".portal")
+            info      (p/start {})
+            config    (fs/join folder "vs-code.edn")]
+      (set-status workspace)
+      (fs/mkdir folder)
+      (fs/spit config (pr-str (select-keys info [:host :port])))
+      (fs/rm-exit config))
+    (setup-notebook-handler)
+    (add-tap #'p/submit))
   (doseq [[command f] (get-commands)]
-    (.push (.-subscriptions ctx)
-           (.registerCommand vscode/commands (name command) f))))
+    (register-disposable! (vscode/commands.registerCommand (name command) f))))
 
 (defn deactivate
   []
@@ -115,6 +138,19 @@
 
 (def exports #js {:activate activate
                   :deactivate deactivate})
+
+(defn before-load
+  [done-fn]
+  (.log js/console "Reloading...")
+  (clear-disposables!)
+  (js-delete js/require.cache (js/require.resolve "./vs-code"))
+  (when done-fn
+    (done-fn)))
+
+(defn after-load
+  []
+  (.log js/console "Reloaded, reactivating...")
+  (activate nil))
 
 (comment
   (p/open)
