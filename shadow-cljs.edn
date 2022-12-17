@@ -39,7 +39,8 @@
    {:infer-externs true
     :warnings-as-errors true}
    :output-to "extension-vscode/vs-code.js"
-   :devtools {:after-load portal.extensions.vs-code/reload}}
+   :devtools {:before-load portal.extensions.vs-code/before-load
+              :after-load portal.extensions.vs-code/after-load}}
 
   :vs-code-notebook
   {:output-dir "extension-vscode/notebook/"
