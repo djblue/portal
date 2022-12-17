@@ -150,7 +150,7 @@ For more documentation, take a look through the [docs][docs].
 [clojars]: https://clojars.org/djblue/portal
 [clojars-badge]: https://img.shields.io/clojars/v/djblue/portal?color=380036&style=flat-square
 [vscode]: https://marketplace.visualstudio.com/items?itemName=djblue.portal
-[vscode-badge]: https://vsmarketplacebadges.dev/version-short/djblue.portal.svg?color=007ACC&label=vs-code&logo=vs&style=flat-square
+[vscode-badge]: https://vsmarketplacebadges.dev/version-short/djblue.portal.png?color=007ACC&label=vs-code&logo=vs&style=flat-square
 [intellij]: https://plugins.jetbrains.com/plugin/18467-portal
 [intellij-badge]: https://img.shields.io/jetbrains/plugin/v/18467?style=flat-square&label=intellij
 
