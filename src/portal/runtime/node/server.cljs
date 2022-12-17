@@ -18,8 +18,6 @@
   (done {:status :not-found}))
 
 (defn- require-string [src file-name]
-  (println "BOOM! require-string src" src)
-  (println "BOOM! require-string file-name" file-name)
   (let [Module (js/require "module")
         ^js m (Module. file-name js/module.parent)]
     (set! (.-filename m) file-name)
