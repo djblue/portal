@@ -8,6 +8,10 @@
   (binding [*cwd* "extension-vscode"]
     (npx :vsce :publish)))
 
+(defn- deploy-open-vsx []
+  (binding [*cwd* "extension-vscode"]
+    (npx :ovsx :publish)))
+
 (defn deploy-intellij []
   (binding [*cwd* "extension-intellij"]
     (gradle :publishPlugin)))
@@ -22,6 +26,7 @@
   (pkg/all)
   (deploy-clojars)
   (deploy-vscode)
+  (deploy-open-vsx)
   (deploy-intellij))
 
 (defn all
