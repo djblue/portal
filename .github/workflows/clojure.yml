@@ -24,7 +24,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
-    - run: bb -m tasks.planck
     - run: bb -m tasks.test/cljs
   app:
     runs-on: ubuntu-latest
