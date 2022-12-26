@@ -101,7 +101,7 @@ the host runtime.
 For example, the following will alert `1` when invoked at the host repl.
 
 ```clojure
-(require '[potral.api :as p])
+(require '[portal.api :as p])
 (p/eval-str "(js/alert 1)")
 ```
 
@@ -109,7 +109,7 @@ To load the code for an extension, we can provide the string directly or load it
 from a file via slurp. For example:
 
 ```clojure
-(require '[potral.api :as p])
+(require '[portal.api :as p])
 (p/eval-str (slurp (io/resource "portal_present/viewer.cljs")))
 ```
 
@@ -121,7 +121,7 @@ from a file via slurp. For example:
 Now that the viewer has been defined and loaded, you can select it like any viewer or enable it by default via metadata:
 
 ```clojure
-(require '[potral.api :as p]
+(require '[portal.api :as p]
          '[portal.viewer :as-alias v])
 
 (def slides
@@ -140,7 +140,7 @@ browser reloads or `portal.api/open` invocations. To address this issue, we can
 auto load the viewer via the `:on-load` hook. For example:
 
 ```clojure
-(require '[potral.api :as p])
+(require '[portal.api :as p])
 
 (declare portal)
 
