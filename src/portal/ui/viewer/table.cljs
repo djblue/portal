@@ -39,6 +39,8 @@
 (defn- cell [row column child]
   (let [background (ins/get-background)
         theme      (theme/use-theme)
+        width      2
+        border     (ins/get-background2)
         hover      (use-hover)]
     [d/div
      {:on-mouse-over
@@ -49,12 +51,23 @@
        :grid-row    (str (inc row))
        :grid-column (str (inc column))}}
      [d/div
-      {:style {:height     "100%"
-               :width      "100%"
-               :box-sizing :border-box
-               :padding    (:padding theme)}
+      {:style (cond->
+               {:height     "100%"
+                :width      "100%"
+                :box-sizing :border-box
+                :padding    (:padding theme)}
+                (nil? child)
+                (assoc
+                 :background
+                 (list
+                  'repeating-linear-gradient
+                  "45deg"
+                  [border 0]
+                  [border width]
+                  [background width]
+                  [background (* 3 width)])))
        :style/hover
-       {:background (str (::c/border theme) "55")}}
+       {:background (when child (str (::c/border theme) "55"))}}
       [select/with-position {:row row :column column} child]]]))
 
 (defn- special [row column child span]
