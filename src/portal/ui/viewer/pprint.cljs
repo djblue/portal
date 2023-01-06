@@ -40,7 +40,7 @@
 
 (defn pprint-data [value]
   (let [string (str/trim (with-out-str (pp/pprint value)))]
-    [code/inspect-code {:class "clojure"} string]))
+    [code/highlight-clj string]))
 
 (def viewer
   {:predicate (constantly true)

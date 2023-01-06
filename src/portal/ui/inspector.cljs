@@ -23,6 +23,23 @@
 (declare inspector)
 (declare preview)
 
+(defn url? [value] (instance? js/URL value))
+(defn bin? [value] (instance? js/Uint8Array value))
+(defn bigint? [value] (= (type value) js/BigInt))
+(defn error? [value] (instance? js/Error value))
+(defn char? [value] (instance? cson/Character value))
+(defn ratio? [value] (instance? cson/Ratio value))
+
+(defn coll? [value]
+  (and (clojure.core/coll? value)
+       (not (cson/tagged-value? value))))
+
+(defn map? [value]
+  (and (clojure.core/map? value)
+       (not (cson/tagged-value? value))))
+
+(defn- long? [value] (instance? Long value))
+
 (defn error->data [ex]
   (merge
    (when-let [data (.-data ex)]
@@ -83,12 +100,31 @@
 (defn viewers-by-name [viewers]
   (into {} (map (juxt :name identity) viewers)))
 
+(defn- scalar? [value]
+  (or (number? value)
+      (keyword? value)
+      (symbol? value)
+      (string? value)
+      (long? value)
+      (url? value)
+      (bigint? value)
+      (char? value)
+      (ratio? value)
+      (inst? value)
+      (uuid? value)))
+
+(defn- scalar-seq? [value]
+  (and (coll? value)
+       (every? scalar? value)))
+
 (defn get-compatible-viewers [viewers {:keys [value] :as context}]
   (let [by-name        (viewers-by-name viewers)
         default-viewer (get by-name
                             (or (get-in context [:props :portal.viewer/default])
                                 (:portal.viewer/default (meta value))
-                                (:portal.viewer/default context)))
+                                (:portal.viewer/default context)
+                                (when (scalar-seq? value)
+                                  :portal.viewer/pprint)))
         viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
 
@@ -171,23 +207,6 @@
 
 (defn- with-options [options & children]
   (into [:r> (.-Provider options-context) #js {:value options}] children))
-
-(defn url? [value] (instance? js/URL value))
-(defn bin? [value] (instance? js/Uint8Array value))
-(defn bigint? [value] (= (type value) js/BigInt))
-(defn error? [value] (instance? js/Error value))
-(defn char? [value] (instance? cson/Character value))
-(defn ratio? [value] (instance? cson/Ratio value))
-
-(defn coll? [value]
-  (and (clojure.core/coll? value)
-       (not (cson/tagged-value? value))))
-
-(defn map? [value]
-  (and (clojure.core/map? value)
-       (not (cson/tagged-value? value))))
-
-(defn- long? [value] (instance? Long value))
 
 (defn get-value-type [value]
   (cond

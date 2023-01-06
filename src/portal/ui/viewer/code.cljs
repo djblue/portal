@@ -91,7 +91,7 @@
     [:style
      (->css (->styles theme))]))
 
-(defn inspect-pr-str [code]
+(defn highlight-clj [string-value]
   (let [theme (theme/use-theme)]
     [:pre
      {:style {:margin      0
@@ -101,10 +101,11 @@
               :font-size   (:font-size theme)
               :font-family (:font-family theme)}
       :dangerouslySetInnerHTML
-      {:__html (-> code
-                   pr-str
+      {:__html (-> string-value
                    (hljs/highlight  #js {:language "clojure"})
                    .-value)}}]))
+
+(defn inspect-pr-str [value] [highlight-clj (pr-str value)])
 
 (defn inspect-code
   ([code]
