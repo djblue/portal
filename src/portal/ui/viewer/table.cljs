@@ -183,7 +183,28 @@
            row)]]])
      values)]])
 
-(defn inspect-multi-map-table [values]
+(defn- inspect-map [values]
+  (let [rows (seq (ins/try-sort (keys values)))]
+    [table
+     [l/lazy-seq
+      (map-indexed
+       (fn [row-index row]
+         [:<>
+          {:key row-index}
+          [ins/with-key row
+           [special (inc row-index) 0 [ins/inspector row]]]
+          [ins/toggle-bg
+           [ins/with-key row
+            [ins/with-collection values
+             [ins/with-key row-index
+              [ins/with-key row
+               [cell
+                (inc row-index)
+                1
+                [ins/inspector (get values row)]]]]]]]])
+       rows)]]))
+
+(defn- inspect-multi-map-table [values]
   (let [rows (seq (ins/try-sort (keys values)))
         cols (or (get-in (meta values) [:portal.viewer/table :columns])
                  (seq (ins/try-sort (into #{} (comp (mapcat second) (mapcat keys)) values))))]
@@ -220,6 +241,7 @@
         rows))]]))
 
 ;;; :spec
+(s/def ::map            map?)
 (s/def ::coll-of-maps   (s/coll-of map?))
 (s/def ::multi-map      (s/map-of any? ::coll-of-maps))
 (s/def ::map-of-maps    (s/map-of any? map?))
@@ -228,8 +250,9 @@
 (s/def ::table
   (s/or :multi-map      ::multi-map
         :map-of-maps    ::map-of-maps
-        :coll-of-vector ::coll-of-vector
-        :coll-of-maps   ::coll-of-maps))
+        :map            ::map
+        :coll-of-maps   ::coll-of-maps
+        :coll-of-vector ::coll-of-vector))
 ;;;
 
 (defn- get-component [value]
@@ -238,6 +261,7 @@
       (case (first result)
         :multi-map      inspect-multi-map-table
         :map-of-maps    inspect-map-table
+        :map            inspect-map
         :coll-of-vector inspect-vector-table
         :coll-of-maps   inspect-coll-table))))
 
