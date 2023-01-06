@@ -123,6 +123,8 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 (remove-tap #'p/submit) ; Remove portal from tap> targetset
 
 (p/close) ; Close the inspector when done
+
+(p/docs) ; View docs locally via Portal - jvm / node only
 ```
 
 > **Warning**
