@@ -1,3 +1,14 @@
+## 0.35.1 - 2023-01-06
+
+- Use pprint for collection of scalars d706d15
+- Update how empty cells are styled d45ac1f
+- Specialize `:portal.viewer/table` for maps bb43ab4
+- Add :window-title to `portal.api/docs` f659c2e
+- Fix typos. (#163) 64ce611 Thanks @maacl!
+- Add ovsx publish (fixes #158) 509a606
+- Remember ViewColumn between opens (#161) 2bbedc5 Thanks @PEZ!
+- Fix broken badge for VS Marketplace (#159) fa73b69 Thanks @bpringe!
+
 ## 0.35.0 - 2022-11-30
 
 - Updates IJ plugin for 2022.3 (#154) 4c71251

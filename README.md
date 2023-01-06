@@ -36,13 +36,13 @@ Clojurians][london-clojurians].
 To start a repl with portal, run the **clojure >= 1.10.0** cli with:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.0"}}}'
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.1"}}}'
 ```
 
 or for a **web** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.0"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.1"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main
 ```
@@ -50,7 +50,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.0"}
 or for a **node** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.0"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.1"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main -re node
 ```
@@ -58,7 +58,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.0"}
 or for a **babashka >=0.2.4** repl, do:
 
 ```bash
-bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.0"}}}'`
+bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.35.1"}}}'`
 ```
 
 or for a Leiningen project:
@@ -66,19 +66,19 @@ or for a Leiningen project:
 - Add Portal as a dependency, either to `:dev` profile or its own profile:
 
 ```clojure
-{:profiles {:dev {:dependencies [[djblue/portal "0.35.0"]]}}}
+{:profiles {:dev {:dependencies [[djblue/portal "0.35.1"]]}}}
 ```
 
 or
 
 ```clojure
-{:profiles {:portal {:dependencies [[djblue/portal "0.35.0"]]}}}
+{:profiles {:portal {:dependencies [[djblue/portal "0.35.1"]]}}}
 ```
 
 Or as a global profile, add to `~/.lein/profiles.clj`:
 
 ```clojure
-{:portal {:dependencies [[djblue/portal "0.35.0"]]}}
+{:portal {:dependencies [[djblue/portal "0.35.1"]]}}
 ```
 
 If you add Portal to a profile other than `:dev`, when starting a REPL
@@ -159,8 +159,8 @@ For more documentation, take a look through the [docs][docs].
 
 [live-demo]: https://www.youtube.com/watch?v=Tj-iyDo3bq0
 [london-clojurians]: https://www.youtube.com/channel/UC-pYfofTyvVDMwM4ttfFGqw
-[docs]: https://cljdoc.org/d/djblue/portal/0.35.0/doc/ui-concepts
-[ui-concepts]: https://cljdoc.org/d/djblue/portal/0.35.0/doc/ui-concepts
+[docs]: https://cljdoc.org/d/djblue/portal/0.35.1/doc/ui-concepts
+[ui-concepts]: https://cljdoc.org/d/djblue/portal/0.35.1/doc/ui-concepts
 
 [vs-code-docs]: ./doc/editors/vs-code.md
 [intellij-docs]: ./doc/editors/intellij.md
