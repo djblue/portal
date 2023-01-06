@@ -14,6 +14,10 @@
     (number? v)  (str v "px")
     (keyword? v) (name v)
     (vector? v)  (str/join " " (map value->css v))
+    (list? v)    (str (first v)
+                      "("
+                      (str/join ", " (map value->css (rest v)))
+                      ")")
     :else        v))
 
 (def exclude? #{:opacity :z-index})
