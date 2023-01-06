@@ -163,4 +163,4 @@
   ([]
    (docs nil))
   ([options]
-   (open (assoc options :value (get-docs)))))
+   (open (assoc options :window-title "portal-docs" :value (get-docs)))))
