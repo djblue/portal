@@ -5,18 +5,22 @@
 (defn- now
   ([]
    #?(:clj  (System/nanoTime)
+      :cljr (.Ticks (System.DateTime/Now))
       :cljs (if (exists? js/process)
               (.hrtime js/process)
               (.now js/Date))))
   ([a]
-   #?(:clj  (/ (- (System/nanoTime) a) 1000000.0)
+   #?(:clj  (/ (- (now) a) 1000000.0)
+      :cljr (/ (- (now) a) 10000.0)
       :cljs (if (exists? js/process)
               (let [[a b] (.hrtime js/process a)]
                 (+ (* a 1000.0) (/ b  1000000.0)))
               (- (.now js/Date) a)))))
+(defn floor [v]
+  #?(:cljr (Math/Floor v) :default (Math/floor v)))
 
 (defn trunc [v]
-  (/ (Math/floor (* 100 v)) 100.0))
+  (/ (floor (* 100 v)) 100.0))
 
 (defn- simple-stats [expr results]
   (let [n       (count results)
