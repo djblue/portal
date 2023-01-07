@@ -6,7 +6,8 @@
             [portal.runtime.cson-test]
             [portal.runtime.fs :as fs]
             [portal.runtime.fs-test]
-            [portal.runtime.json :as json]))
+            [portal.runtime.json :as json]
+            [portal.runtime.json-buffer-test]))
 
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
   (when-not (cljs.test/successful? m)
@@ -25,7 +26,8 @@
 
 (defn -main []
   (run-tests 'portal.runtime.cson-test
-             'portal.runtime.fs-test)
+             'portal.runtime.fs-test
+             'portal.runtime.json-buffer-test)
   (table (bench/run (json/read (fs/slurp "package-lock.json")) 100)))
 
 (-main)

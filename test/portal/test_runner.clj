@@ -6,7 +6,8 @@
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
             [portal.runtime.fs-test]
-            [portal.runtime.json :as json]))
+            [portal.runtime.json :as json]
+            [portal.runtime.json-buffer-test]))
 
 (def port (System/getenv "PORTAL_PORT"))
 
@@ -33,7 +34,8 @@
   (let [{:keys [fail error]}
         (run-tests 'portal.jvm-test
                    'portal.runtime.cson-test
-                   'portal.runtime.fs-test)]
+                   'portal.runtime.fs-test
+                   'portal.runtime.json-buffer-test)]
     (table (bench/run (json/read (slurp "package-lock.json")) 50))
     (shutdown-agents)
     (System/exit (+ fail error))))
