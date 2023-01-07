@@ -4,4 +4,8 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="clojure.data.json" Version="2.4.0" />
+  </ItemGroup>
+
 </Project>
