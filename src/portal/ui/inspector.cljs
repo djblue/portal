@@ -115,6 +115,7 @@
 
 (defn- scalar-seq? [value]
   (and (coll? value)
+       (seq value)
        (every? scalar? value)))
 
 (defn get-compatible-viewers [viewers {:keys [value] :as context}]
