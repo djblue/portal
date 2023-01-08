@@ -118,10 +118,15 @@
     (assoc request :session (rt/get-session session-id))
     request))
 
+(defn- content-type [request]
+  (some-> (get-in request [:headers "content-type"])
+          (str/split #";")
+          first))
+
 (defmethod route [:post "/submit"] [request]
   (let [body (:body request)]
     (rt/update-value
-     (case (get-in request [:headers "content-type"])
+     (case (content-type request)
        "application/transit+json" (transit/read (transit/reader body :json))
        "application/json"         (json/read-stream (io/reader body))
        "application/edn"          (edn/read
