@@ -65,6 +65,7 @@
 
 (def bb     (partial #'sh :bb))
 (def clj    (partial #'sh :clojure))
+(def cljr   (partial #'sh :Clojure.Main))
 (def git    (partial #'sh :git))
 (def gradle (partial #'sh "./gradlew" "--warning-mode" "all"))
 (def node   (partial #'sh :node))

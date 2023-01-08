@@ -35,6 +35,10 @@
   (t/clj "-M:test" "-m" :portal.test-runner)
   (t/bb "-m" :portal.test-runner))
 
+(defn cljr []
+  (binding [t/*opts* (assoc-in t/*opts* [:extra-env "CLOJURE_LOAD_PATH"] "src:test")]
+    (t/cljr "-m" :portal.test-clr)))
+
 (defn test* []
   (future (cljs* "1.10.773"))
   (future (cljs* "1.10.844"))
