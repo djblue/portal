@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.runtime
   (:refer-clojure :exclude [read])
   (:require #?(:clj  [portal.sync  :as a]
+               :cljr [portal.sync  :as a]
                :cljs [portal.async :as a])
             [clojure.datafy :refer [datafy nav]]
             [clojure.pprint :as pprint]
@@ -94,6 +95,7 @@
 
 (defn- deref? [value]
   #?(:clj  (instance? clojure.lang.IRef value)
+     :cljr (instance? clojure.lang.IRef value)
      :cljs (satisfies? cljs.core/IDeref value)))
 
 (defn- to-object [buffer value tag rep]
@@ -114,7 +116,9 @@
          (not (deref? value))
          (assoc :pr-str (pr-str value)))))))
 
-(extend-type #?(:clj Object :cljs default)
+(extend-type #?(:clj  Object
+                :cljr Object
+                :cljs default)
   cson/ToJson
   (-to-json [value buffer]
     (to-object buffer value :object nil)))
@@ -260,7 +264,7 @@
     (let [f (if (symbol? f) (get-function f) f)]
       (a/let [return (apply f args)]
         (done {:return return})))
-    (catch #?(:clj Exception :cljs js/Error) e
+    (catch #?(:clj Exception :cljr Exception :cljs js/Error) e
       (done {:error
              (-> (ex-info
                   "invoke exception"
