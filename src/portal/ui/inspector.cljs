@@ -101,7 +101,9 @@
   (into {} (map (juxt :name identity) viewers)))
 
 (defn- scalar? [value]
-  (or (number? value)
+  (or (nil? value)
+      (boolean? value)
+      (number? value)
       (keyword? value)
       (symbol? value)
       (string? value)
