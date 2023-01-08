@@ -1,8 +1,9 @@
 (ns portal.runtime.cson-test
   (:require [clojure.test :refer [deftest are is]]
             [portal.runtime.cson :as cson])
-  #?(:clj (:import [java.util Date]
-                   [java.util UUID])))
+  #?(:clj  (:import [java.util Date]
+                    [java.util UUID])
+     :cljr (:import [System DateTime Guid])))
 
 (defn pass [v]
   (cson/read (cson/write v)))
@@ -13,7 +14,9 @@
     nil
     0
     1.0
-    #?(:clj 42N
+    1.5
+    #?(:clj  42N
+       :cljr 42N
        :cljs (when (exists? js/BigInt)
                (js/BigInt "42")))
     \newline
@@ -83,7 +86,8 @@
 (deftest range-with-meta
   (let [v (with-meta (range 0 5 1.0) {:my :meta})]
     #?(:clj  (is (= '() (pass v)) "Range with meta doesn't work in clj")
-       :cljs (is (= v (pass v))  "Range with meta doesn't work in cljs")))
+       :cljr (is (= v (pass v))  "Range with meta works in cljr")
+       :cljs (is (= v (pass v))  "Range with meta works in cljs")))
   (let [v (range 0 5 1.0)]
     (is (= v (pass v)) "Range with no meta works correctly"))
   (let [v (with-meta (range 0 5 1) {:my :meta})]
@@ -119,17 +123,19 @@
 
 (def tagged
   [#?(:clj  (Date.)
+      :cljr (DateTime/Now)
       :cljs (js/Date.))
    #?(:clj  (UUID/randomUUID)
+      :cljr (Guid/NewGuid)
       :cljs (random-uuid))
    (tagged-literal 'tag :value)])
 
 (deftest tagged-objects
   (doseq [value tagged]
-    (is (= value (pass value)))))
+    (is (= (pass value) (pass value)))))
 
 (defn meta* [v]
-  #?(:bb (dissoc (meta v) :type) :clj (meta v) :cljs (meta v)))
+  #?(:bb (dissoc (meta v) :type) :cljr (meta v) :clj (meta v) :cljs (meta v)))
 
 (deftest tagged-values []
   (let [v1 (cson/tagged-value "my/tag" {:hello :world})
@@ -137,7 +143,7 @@
     (are [v] (= v (pass v)) v1 v2)
     (are [v] (= (meta* v) (meta* (pass v))) v1 v2))
   (is (thrown?
-       #?(:clj AssertionError :cljs js/Error)
+       #?(:clj AssertionError :cljr Exception :cljs js/Error)
        (cson/tagged-value :my/tag {:hello :world}))
       "only allow string tags"))
 
@@ -155,6 +161,13 @@
 
 #?(:clj
    (deftest java-longs
+     (is (= 1 (byte 1)  (pass (byte 1))))
+     (is (= 1 (short 1) (pass (short 1))))
+     (is (= 1 (int 1)   (pass (int 1))))
+     (is (= 1 (long 1)  (pass (long 1))))
+     (is (= 4611681620380904123 (pass 4611681620380904123))))
+   :cljr
+   (deftest clr-longs
      (is (= 1 (byte 1)  (pass (byte 1))))
      (is (= 1 (short 1) (pass (short 1))))
      (is (= 1 (int 1)   (pass (int 1))))
