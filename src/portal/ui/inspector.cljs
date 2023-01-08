@@ -50,6 +50,12 @@
                :message (.-message ex)}]
     :stack   (.-stack ex)}))
 
+;; Discard metadata on tagged-literals to improve success rate of  for
+;; read-string. Consider using a different type in the future.
+(extend-type cljs.core/TaggedLiteral
+  IMeta     (-meta [_this] nil)
+  IWithMeta (-with-meta [this _m] this))
+
 (defn read-string [edn-string]
   (edn/read-string
    {:readers {'portal/var rt/->var
