@@ -51,11 +51,8 @@
    {nrepl/nrepl       {:mvn/version "1.0.0"}
     cider/cider-nrepl {:mvn/version "0.28.7"}}}
   :check
-  {:main-opts ["-m" "clj-check.check"]
-   :extra-deps
-   {athos/clj-check
-    {:git/url "https://github.com/athos/clj-check.git"
-     :sha     "518d5a1cbfcd7c952f548e6dbfcb9a4a5faf9062"}}}
+  {:extra-paths ["dev"]
+   :main-opts ["-m" "tasks.load"]}
   :test
   {:extra-paths ["test"]
    :extra-deps
