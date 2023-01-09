@@ -8,6 +8,11 @@
             [portal.ui.theme :as theme]))
 
 ;;; :spec
+(s/def :test-run/type #{:end-run-tests})
+
+(s/def ::test-run
+  (s/keys :req-un [:test-run/type]))
+
 (s/def :test-ns/type #{:begin-test-ns :end-test-ns})
 
 (s/def ::test-ns
@@ -35,7 +40,8 @@
   (s/keys :req-un [:summary/type ::pass ::fail ::error ::test]))
 
 (s/def ::output
-  (s/or :ns      ::test-ns
+  (s/or :run     ::test-run
+        :ns      ::test-ns
         :var     ::test-var
         :assert  ::assert
         :summary ::summary))
@@ -44,7 +50,7 @@
   (s/coll-of ::output :min-count 1))
 ;;;
 
-(defn- label [{:keys [message expected var ns] :as value}]
+(defn- label [{:keys [message expected var ns type] :as value}]
   [d/div
    {:style {:flex "1"}}
    [ins/with-collection
@@ -79,7 +85,12 @@
        ns
        [ins/with-default-viewer
         :portal.viewer/pr-str
-        [ins/with-key :ns [ins/inspector ns]]])]]])
+        [ins/with-key :ns [ins/inspector ns]]]
+
+       type
+       [ins/with-default-viewer
+        :portal.viewer/pr-str
+        [ins/with-key type [ins/inspector type]]])]]])
 
 (defn- inspect-assertion [value]
   (let [theme      (theme/use-theme)
@@ -116,8 +127,7 @@
           :end-test-ns    icons/stop-circle
           :begin-test-var icons/play-circle
           :end-test-var   icons/stop-circle
-          :summary        icons/info-circle
-          :<>)
+          icons/info-circle)
         {:style {:color background}}]]
       [d/div
        {:style
