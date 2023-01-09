@@ -45,10 +45,12 @@
 
 (defn- set-timeout [f timeout]
   #?(:clj  (future (Thread/sleep timeout) (f))
+     :cljr (future (System.Threading.Thread/sleep timeout))
      :cljs (js/setTimeout f timeout)))
 
 (defn- atom? [o]
   #?(:clj  (instance? clojure.lang.Atom o)
+     :cljr (instance? clojure.lang.Atom o)
      :cljs (satisfies? cljs.core/IAtom o)))
 
 (defn- invalidate [session-id a old new]
@@ -130,12 +132,14 @@
             (not (instance? clojure.lang.Range value))
             (or (instance? clojure.lang.IObj value)
                 (var? value)))
+     :cljr (or (instance? clojure.lang.IObj value)
+               (var? value))
      :cljs (implements? IMeta value)))
 
 (defn- has? [m k]
   (try
     (k m)
-    (catch #?(:clj Exception :cljs :default) _e)))
+    (catch #?(:clj Exception :cljr Exception :cljs :default) _e)))
 
 (defn- no-cache [value]
   (or (not (coll? value))
@@ -202,6 +206,7 @@
       :platform
       #?(:bb   "bb"
          :clj  "jvm"
+         :cljr "clr"
          :cljs (cond
                  (exists? js/process)        "node"
                  (exists? js/PLANCK_VERSION) "planck"
@@ -250,7 +255,7 @@
          (if-let [predicate (:predicate m)]
            (try
              (when (predicate v) result)
-             (catch #?(:clj Exception :cljs :default) _ex))
+             (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
            result))))
    @registry))
 
@@ -273,7 +278,7 @@
                    :found?   (boolean (get-function f))}
                   e)
                  datafy
-                 (assoc :runtime #?(:bb :bb :clj :clj :cljs :cljs)))}))))
+                 (assoc :runtime #?(:bb :bb :clj :clj :cljs :cljs :cljr :cljr)))}))))
 
 (def ops {:portal.rpc/invoke #'invoke})
 
