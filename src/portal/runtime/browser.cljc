@@ -10,7 +10,13 @@
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
                      [portal.runtime.node.client :as c]
-                     [portal.runtime.shell :as shell])))
+                     [portal.runtime.shell :as shell])
+     :cljr (:require [portal.runtime :as rt]
+                     [portal.runtime.clr.client :as c]
+                     [portal.runtime.fs :as fs]
+                     [portal.runtime.json :as json]
+                     [portal.runtime.shell :as shell]))
+  #?(:cljr (:import [System.Runtime.InteropServices RuntimeInformation OSPlatform])))
 
 (defmulti -open (comp :launcher :options))
 
@@ -91,6 +97,13 @@
        ("android" "linux") (shell/sh "xdg-open" url)
        "darwin"            (shell/sh "open" url)
        "win32"             (shell/sh "cmd" "/c" "start" url)
+       (println "Goto" url "to view portal ui."))
+     :cljr
+     (condp identical? (.Platform Environment/OSVersion)
+       PlatformID/Win32Windows (shell/sh "cmd" "/c" "start" url)
+       PlatformID/Unix         (if (RuntimeInformation/IsOSPlatform OSPlatform/OSX)
+                                 (shell/sh "open" url)
+                                 (shell/sh "xdg-open" url))
        (println "Goto" url "to view portal ui."))))
 
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))

@@ -26,4 +26,6 @@
 
 #_{:clj-kondo/ignore [:unresolved-symbol]}
 (assembly-load "System.Text.Json")
+#_{:clj-kondo/ignore [:unresolved-symbol]}
+(assembly-load "System.Net.WebSockets")
 (load-deps deps)
