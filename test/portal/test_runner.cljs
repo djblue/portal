@@ -1,5 +1,5 @@
 (ns portal.test-runner
-  (:require [cljs.test :refer [run-tests]]
+  (:require [cljs.test :as t]
             [clojure.pprint :as pp]
             [portal.client.node :as p]
             [portal.runtime.bench-cson :as bench]
@@ -8,6 +8,26 @@
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
             [portal.runtime.json-buffer-test]))
+
+(defn- error->data [ex]
+  (with-meta
+    (merge
+     (when-let [data (.-data ex)]
+       {:data data})
+     {:runtime :cljs
+      :cause   (.-message ex)
+      :via     [{:type    (symbol (.-name (type ex)))
+                 :message (.-message ex)}]
+      :stack   (.-stack ex)})
+    {:portal.viewer/for
+     {:stack :portal.viewer/text}}))
+
+(extend-type js/Error
+  IPrintWithWriter
+  (-pr-writer [this writer _opts]
+    (-write writer "#error ")
+    (binding [*print-meta* true]
+      (-write writer (error->data this)))))
 
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
   (when-not (cljs.test/successful? m)
@@ -24,10 +44,21 @@
      (get-in (meta value) [:portal.viewer/table :columns])
      value)))
 
+(defn run-tests [f]
+  (if-not port
+    (f)
+    (let [report (atom [])
+          counts
+          (with-redefs [t/report #(swap! report conj %)]
+            (f))]
+      (submit @report)
+      counts)))
+
 (defn -main []
-  (run-tests 'portal.runtime.cson-test
-             'portal.runtime.fs-test
-             'portal.runtime.json-buffer-test)
+  (run-tests
+   #(t/run-tests 'portal.runtime.cson-test
+                 'portal.runtime.fs-test
+                 'portal.runtime.json-buffer-test))
   (table (bench/run (json/read (fs/slurp "package-lock.json")) 100)))
 
 (-main)
