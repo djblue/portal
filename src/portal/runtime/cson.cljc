@@ -208,11 +208,13 @@
 
 (defn base64-encode [byte-array]
   #?(:clj  (.encodeToString (Base64/getEncoder) byte-array)
-     :cljs (Base64/encodeByteArray byte-array)))
+     :cljs (Base64/encodeByteArray byte-array)
+     :cljr (Convert/ToBase64String byte-array)))
 
 (defn base64-decode [string]
   #?(:clj  (.decode (Base64/getDecoder) ^String string)
-     :cljs (Base64/decodeStringToUint8Array string)))
+     :cljs (Base64/decodeStringToUint8Array string)
+     :cljr (Convert/FromBase64String string)))
 
 (extend-type #?(:clj  (Class/forName "[B")
                 :cljr (Type/GetType "System.Byte[]")

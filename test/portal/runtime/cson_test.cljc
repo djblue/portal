@@ -3,7 +3,8 @@
             [portal.runtime.cson :as cson])
   #?(:clj  (:import [java.util Date]
                     [java.util UUID])
-     :cljr (:import [System DateTime Guid])))
+     :cljr (:import [System DateTime Guid]
+                    [System.Text Encoding])))
 
 (defn pass [v]
   (cson/read (cson/write v)))
@@ -188,3 +189,9 @@
   (doseq [n    [##NaN ##Inf ##-Inf]
           :let [cson (cson/write n)]]
     (is (= cson (cson/write (cson/read cson))) n)))
+
+(deftest binary
+  (let [bin #?(:clj  (.getBytes "hi")
+               :cljr (.GetBytes Encoding/UTF8 "hi")
+               :cljs (.encode (js/TextEncoder.) "hi"))]
+    (is (= "[\"bin\",\"aGk=\"]" (cson/write bin)))))
