@@ -90,7 +90,7 @@
        type
        [ins/with-default-viewer
         :portal.viewer/pr-str
-        [ins/with-key type [ins/inspector type]]])]]])
+        [ins/with-key :type [ins/inspector type]]])]]])
 
 (defn- inspect-assertion [value]
   (let [theme      (theme/use-theme)
