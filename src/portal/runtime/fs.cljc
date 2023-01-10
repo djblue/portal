@@ -57,7 +57,8 @@
      :cljs (when (not
                   (try (fs/accessSync f fs/constants.X_OK)
                        (catch js/Error _e true)))
-             f)))
+             f)
+     :cljr (exists f)))
 
 (defn paths []
   (s/split (path) (re-pattern (separator))))
