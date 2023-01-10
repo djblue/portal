@@ -45,7 +45,7 @@
 
 (defn- set-timeout [f timeout]
   #?(:clj  (future (Thread/sleep timeout) (f))
-     :cljr (future (System.Threading.Thread/sleep timeout))
+     :cljr (future (System.Threading.Thread/Sleep timeout) (f))
      :cljs (js/setTimeout f timeout)))
 
 (defn- atom? [o]
