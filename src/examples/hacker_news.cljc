@@ -1,9 +1,11 @@
 (ns examples.hacker-news
   (:require #?(:clj  [portal.sync  :as a]
-               :cljs [portal.async :as a])
+               :cljs [portal.async :as a]
+               :cljr [portal.sync :as a])
             #?(:cljs [examples.fetch :refer [fetch]])
             [clojure.core.protocols :refer [nav]]
-            #?(:clj [portal.runtime.json :as json])))
+            #?(:clj  [portal.runtime.json :as json]
+               :cljr [portal.runtime.json :as json])))
 
 (def root "https://hacker-news.firebaseio.com/v0")
 
@@ -35,13 +37,20 @@
 (defn fetch-json [url]
   #?(:clj  (-> url slurp json/read)
      :cljs (-> (fetch url)
-               (.then #(js->clj (.parse js/JSON %) :keywordize-keys true)))))
+               (.then #(js->clj (.parse js/JSON %) :keywordize-keys true)))
+     :cljr (-> url (slurp :enc "utf8") json/read)))
 
 (defn as-url [s]
-  #?(:clj (java.net.URL. s) :cljs (js/URL. s)))
+  #?(:clj  (java.net.URL. s)
+     :cljs (js/URL. s)
+     :cljr (System.Uri. s)))
 
 (defn as-date [^long timestamp]
-  #?(:clj (java.util.Date. timestamp) :cljs (js/Date. timestamp)))
+  #?(:clj  (java.util.Date. timestamp)
+     :cljs (js/Date. timestamp)
+     :cljr (.DateTime
+            (System.DateTimeOffset/FromUnixTimeMilliseconds
+             timestamp))))
 
 (declare nav-hn)
 (declare nav-item)
@@ -51,8 +60,9 @@
           res   (fetch-json url)
           item  (with-meta res {:hacker-news/api-url url
                                 :portal.viewer/for
-                                {:text :portal.viewer/text
-                                 :time :portal.viewer/relative-time}})]
+                                {:text    :portal.viewer/text
+                                 :time    :portal.viewer/relative-time
+                                 :created :portal.viewer/relative-time}})]
     (if-not (map? item)
       item
       (cond-> item
@@ -86,7 +96,8 @@
   (with-meta
     #{:topstories :newstories :beststories
       :askstories :showstories :jobstories}
-    {`nav #'nav-hn}))
+    {`nav #'nav-hn
+     :portal.viewer/default :portal.viewer/inspector}))
 
 (defn fetch-stories [type]
   (a/let [res (fetch-hn (str "/" (name type) ".json"))]

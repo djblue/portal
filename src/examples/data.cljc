@@ -7,7 +7,9 @@
                     [java.net URI]
                     [java.util Date]
                     [java.util UUID])
-     :cljs (:import [goog.math Long])))
+     :cljs (:import [goog.math Long])
+     :cljr (:import [System DateTime Guid Uri]
+                    [System.IO File])))
 
 #?(:clj
    (defn slurp-bytes [x]
@@ -30,6 +32,18 @@
            ::date (Date.)
            ::binary (slurp-bytes (io/resource "screenshot.png"))
            ::bigint 42N}
+     :cljr {::ratio 22/7
+            ::long 4611681620380904123
+            ::class File
+            ::uri (Uri. "https://github.com/djblue/portal")
+            ::exception (try (/ 1 0) (catch Exception e e))
+            ::io-exception (try (slurp "/hello" :enc "utf8") (catch Exception e e))
+            ::user-exception (Exception. "hi")
+            ::ex-info (ex-info "My message" {:my :data})
+            ::uuid (Guid/NewGuid)
+            ::date (DateTime/Now)
+            ;; ::binary (slurp-bytes (io/resource "screenshot.png"))
+            ::bigint 42N}
      :cljs {::long (.fromString Long "4611681620380904123")
             ::promise (js/Promise.resolve 123)
             ::url (js/URL. "https://github.com/djblue/portal")
@@ -224,10 +238,14 @@
      [:portal.viewer/inspector {:hello :world}]]
     {:portal.viewer/default :portal.viewer/hiccup}))
 
+(defn- sin [x]
+  #?(:cljr (Math/Sin x) :default (Math/sin x)))
+
 (def line-chart
   ^{:portal.viewer/default :portal.viewer/vega-lite}
-  {:data {:values (map #(-> {:time % :value (Math/sin %)})
-                       (range 0 (* 2 3.14) 0.25))}
+  {:data {:values
+          (map #(-> {:time % :value (sin %)})
+               (range 0 (* 2 3.14) 0.25))}
    :encoding {:x {:field "time" :type "quantitative"}
               :y {:field "value" :type "quantitative"}}
    :mark "line"})
@@ -280,9 +298,7 @@
    :view {:stroke nil}})
 
 (def tabular-data
-  (map #(-> {:x %
-             :y (#?(:clj Math/sin
-                    :cljs js/Math.sin) %)})
+  (map #(-> {:x % :y (sin %)})
        (range 0 (* 2 3.14) 0.25)))
 
 (def numerical-collection
