@@ -312,7 +312,9 @@
   (-to-json [value buffer]
     (-> buffer
         (json/push-string "inst")
-        (json/push-long (inst-ms value)))))
+        (json/push-long
+         (inst-ms
+          #?(:cljr (.UtcDateTime (System.DateTimeOffset. value)) :default value))))))
 
 (defn- ->inst [buffer]
   #?(:clj  (Date. ^long (json/next-long buffer))
