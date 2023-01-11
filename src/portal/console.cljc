@@ -3,16 +3,16 @@
   #?(:cljs (:require-macros portal.console)))
 
 (defn ^:no-doc now []
-  #?(:clj (java.util.Date.) :cljs (js/Date.)))
+  #?(:clj (java.util.Date.) :cljs (js/Date.) :cljr (DateTime/Now)))
 
 (defn ^:no-doc run [f]
   (try
     [nil (f)]
-    (catch #?(:clj Exception :cljs :default) ex#
+    (catch #?(:clj Exception :cljs :default :cljr Exception) ex#
       [:throw ex#])))
 
 (defn ^:no-doc runtime []
-  #?(:bb :bb :clj :clj :cljs :cljs))
+  #?(:bb :bb :clj :clj :cljs :cljs :cljr :cljr))
 
 #?(:clj
    (defn ^:no-doc get-file [env file]
@@ -31,7 +31,7 @@
          :level    (if (= flow# :throw) :fatal ~level)
          :result   result#
          :ns       (quote ~(symbol (str *ns*)))
-         :file     ~#?(:clj (get-file env file) :cljs nil)
+         :file     ~#?(:clj (get-file env file) :cljs nil :cljr *file*)
          :line     ~line
          :column   ~column
          :time     (now)
