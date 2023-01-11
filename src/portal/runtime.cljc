@@ -191,7 +191,9 @@
            "ref" (id->value value)
            (cson/tagged-value op value)))}))))
 
-(defonce ^:private tap-list (atom (list)))
+(defonce ^:private tap-list
+  (atom (with-meta (list)
+          {:portal.viewer/default :portal.viewer/inspector})))
 
 (defn update-value [new-value]
   (swap! tap-list conj new-value))
