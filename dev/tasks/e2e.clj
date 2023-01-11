@@ -20,7 +20,8 @@
             {'org.clojure/clojurescript
              {:mvn/version "1.10.844"}}})
           "-M" "-m" :cljs.main]
-   :bb   [:bb]})
+   :bb   [:bb]
+   :clr  [:bb "-m" "tasks.cljr/repl"]})
 
 (defn e2e [env]
   (build)
