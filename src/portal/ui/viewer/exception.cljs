@@ -146,10 +146,12 @@
         (pr-str (:phase value type)))]
      [d/div
       {:style {:display         :flex
-               :align-items     :center
+               :align-items     :stretch
                :justify-content :space-between}}
       [d/div
-       {:style {:padding [(:padding theme) (* 2 (:padding theme))]}}
+       {:style {:display     :flex
+                :align-items :center
+                :padding [(:padding theme) (* 2 (:padding theme))]}}
        (when message (pr-str (:phase value type)))]
       (when-let [value (:runtime value)]
         [d/div
