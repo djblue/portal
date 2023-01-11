@@ -77,8 +77,11 @@
    (let [server (start options)]
      (browser/open {:portal portal :options options :server server}))))
 
-(defn clear []
-  (c/request {:op :portal.rpc/clear}))
+(defn clear [portal]
+  (if (= portal :all)
+    (c/request {:op :portal.rpc/clear})
+    (c/request (:session-id portal) {:op :portal.rpc/clear}))
+  (swap! rt/sessions select-keys (keys @c/connections)))
 
 (defn close [portal]
   (if (= portal :all)

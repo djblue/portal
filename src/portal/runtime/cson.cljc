@@ -117,6 +117,14 @@
            (json/push-string "R")
            (json/push-long (numerator value))
            (json/push-long (denominator value)))))
+   :cljr
+   (extend-type clojure.lang.Ratio
+     ToJson
+     (-to-json [value buffer]
+       (-> buffer
+           (json/push-string "R")
+           (json/push-long (long (numerator value)))
+           (json/push-long (long (denominator value))))))
    :cljs
    (deftype Ratio [numerator denominator]
      ToJson
@@ -134,7 +142,7 @@
 (defn ->ratio [buffer]
   (let [n (json/next-long buffer)
         d (json/next-long buffer)]
-    #?(:clj (/ n d) :cljs (Ratio. n d))))
+    #?(:cljs (Ratio. n d) :default (/ n d))))
 
 (extend-type #?(:cljr System.String
                 :clj  String

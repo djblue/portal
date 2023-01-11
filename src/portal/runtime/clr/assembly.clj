@@ -1,4 +1,4 @@
-(ns ^:no-check portal.runtime.clr.assembly
+(ns ^:no-doc ^:no-check portal.runtime.clr.assembly
   (:require [portal.runtime.fs :as fs]))
 
 (defn- find-dll [package version]

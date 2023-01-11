@@ -1,5 +1,6 @@
 (ns ^:no-doc portal.runtime.clr.client
-  (:require [portal.runtime :as rt])
+  (:require [clojure.pprint :as pprint]
+            [portal.runtime :as rt])
   (:import [clojure.lang IAtom IDeref]))
 
 (defonce connections (atom {}))
@@ -72,10 +73,10 @@
   (swap  [this f a b args] (reset! this (apply f @this a b args)))
   (compareAndSet [_this _oldv _newv]))
 
-;; (defmethod print-method Portal [portal w]
-;;   (print-method (into {} portal) w))
+(defmethod print-method Portal [portal w]
+  (print-method (into {} portal) w))
 
-;; (defmethod pprint/simple-dispatch Portal [portal] (pr portal))
+(defmethod pprint/simple-dispatch Portal [portal] (pr portal))
 
 (defn make-atom [session-id] (Portal. session-id))
 
