@@ -42,7 +42,7 @@
             ::ex-info (ex-info "My message" {:my :data})
             ::uuid (Guid/NewGuid)
             ::date (DateTime/Now)
-            ;; ::binary (slurp-bytes (io/resource "screenshot.png"))
+            ::binary (File/ReadAllBytes "resources/screenshot.png")
             ::bigint 42N}
      :cljs {::long (.fromString Long "4611681620380904123")
             ::promise (js/Promise.resolve 123)
