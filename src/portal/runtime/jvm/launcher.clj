@@ -101,8 +101,8 @@
     (c/request (:session-id portal) {:op :portal.rpc/close}))
   (when (or (= portal :all) (empty? @c/connections))
     (future
-      (some-> server deref :http-server http/server-stop!))
-    (reset! server nil))
+      (some-> server deref :http-server http/server-stop!)
+      (reset! server nil)))
   (swap! rt/sessions dissoc (:session-id portal))
   (swap! rt/sessions select-keys (keys @c/connections)))
 
