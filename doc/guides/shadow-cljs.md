@@ -46,6 +46,18 @@ to add the following bit of configuration:
    :devtools {:preloads [portal.setup]}}}}
 ```
 
+Or if you would like to pass options to `portal.api/start`:
+
+```clojure
+;; shadow-cljs.edn
+{:builds
+ {:build-id
+  {:target :browser
+   ...
+   :build-hooks [(portal.shadow.remote/hook {:port 1234})]
+   :devtools {:preloads [portal.setup]}}}}
+```
+
 ### Web Setup
 
 A basic setup with `portal.web` is as follows:
