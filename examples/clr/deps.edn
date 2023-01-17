@@ -1,0 +1,5 @@
+{:paths ["src"]
+ :deps
+ {djblue/portal
+  {:git/url "https://github.com/djblue/portal.git"
+   :sha "366dfd5f87e00863a2d645916048ff935778cca1"}}}

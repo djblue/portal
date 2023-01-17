@@ -1,0 +1,7 @@
+#!/bin/bash
+
+clojure -X:deps prep
+clojure -Spath > .classpath
+
+export CLOJURE_LOAD_PATH=`cat .classpath`
+Clojure.Main
