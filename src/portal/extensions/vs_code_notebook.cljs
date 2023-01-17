@@ -1,5 +1,6 @@
 (ns portal.extensions.vs-code-notebook
   (:require [portal.runtime :as rt]
+            [portal.runtime.edn :as edn]
             [portal.ui.embed :as embed]
             [portal.ui.inspector :as ins]
             [portal.ui.state :as state]
@@ -31,7 +32,7 @@
 
 (defn render-output-item [data element]
   (let [value (try
-                (ins/read-string (.text data))
+                (edn/read-string (.text data))
                 (catch :default e
                   (ins/error->data e)))]
     (dom/render [app (.-id data) value] element functional-compiler)))

@@ -2,6 +2,7 @@
   (:require ["anser" :as anser]
             [clojure.spec.alpha :as s]
             [portal.colors :as c]
+            [portal.runtime.edn :as edn]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
@@ -86,7 +87,7 @@
                            [(* 2 (:padding theme)) (:padding theme)]}}
                   [ins/inspector
                    (try
-                     (ins/read-string (:val value))
+                     (edn/read-string (:val value))
                      (catch :default _ (:val value)))]]]]]
               [d/span
                {:style

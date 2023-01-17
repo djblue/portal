@@ -5,6 +5,7 @@
             [portal.colors :as c]
             [portal.resources :as io]
             [portal.runtime :as rt]
+            [portal.runtime.edn :as edn]
             [portal.runtime.json :as json]
             [portal.runtime.transit :as transit]
             [portal.ui.app :as app]
@@ -170,7 +171,7 @@
           (case content-type
             "application/transit+json" (transit/read body)
             "application/json"         (json/read body)
-            "application/edn"          (ins/read-string body)
+            "application/edn"          (edn/read-string body)
             "text/plain"               body
             (ins/error->data
              (ex-info (str "Unsupported :content-type " content-type) metadata)))
