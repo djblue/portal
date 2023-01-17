@@ -5,5 +5,10 @@ repl: .classpath
 	clojure -X:deps prep
 	clojure -Spath > .classpath
 
+deps/nuget:
+	nuget install clojure.data.json -Version 2.4.0
+
+deps/clj: .classpath
+
 clean:
 	rm .classpath
