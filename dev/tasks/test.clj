@@ -36,7 +36,7 @@
   (t/bb "-m" :portal.test-runner))
 
 (defn cljr []
-  (binding [t/*opts* (assoc-in t/*opts* [:extra-env "CLOJURE_LOAD_PATH"] "src:test")]
+  (binding [t/*opts* (assoc-in t/*opts* [:extra-env "CLOJURE_LOAD_PATH"] "src:resources:test")]
     (t/cljr "-m" :portal.test-clr)))
 
 (defn test* []

@@ -1,8 +1,7 @@
 (ns portal.jvm-test
   (:require [clojure.test :refer [deftest is]]
             [portal.api :as p]
-            [portal.runtime.browser :as browser]
-            [portal.runtime.jvm.client :as client]))
+            [portal.runtime.browser :as browser]))
 
 (defn- headless-chrome-flags [url]
   ["--headless" "--disable-gpu" url])
@@ -12,12 +11,11 @@
 
 (deftest e2e-jvm
   (when-let [portal (open headless-chrome-flags)]
-    (with-redefs [client/timeout 60000]
-      (reset! portal 0)
-      (is (= @portal 0))
-      (swap! portal inc)
-      (is (= @portal 1))
-      (is (= 6 (p/eval-str portal "(+ 1 2 3)")))
-      (is (= :world (:hello (p/eval-str portal "{:hello :world}")))))
+    (reset! portal 0)
+    (is (= @portal 0))
+    (swap! portal inc)
+    (is (= @portal 1))
+    (is (= 6 (p/eval-str portal "(+ 1 2 3)")))
+    (is (= :world (:hello (p/eval-str portal "{:hello :world}"))))
     (is (some? (some #{portal} (p/sessions))))
     (p/close portal)))

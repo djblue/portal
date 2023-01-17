@@ -2,6 +2,7 @@
   (:require [clojure.pprint :as pp]
             [clojure.test :as t]
             [portal.client.clr :as p]
+            [portal.jvm-test]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
             [portal.runtime.fs-test]
@@ -33,6 +34,7 @@
 (defn -main []
   (let [{:keys [fail error]}
         (run-tests
+         'portal.jvm-test
          'portal.runtime.cson-test
          'portal.runtime.fs-test
          'portal.runtime.json-buffer-test)]
