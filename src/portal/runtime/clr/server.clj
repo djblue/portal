@@ -14,7 +14,7 @@
             WebSocketMessageType
             WebSocketState)
            (System.Text Encoding)
-           (System.Threading CancellationToken)))
+           (System.Threading Thread CancellationToken)))
 
 (defmulti route (juxt :request-method :uri))
 
@@ -84,7 +84,7 @@
    :body    resource})
 
 (defmethod route [:get "/wait.js"] [_]
-  (try (System.Threading.Thread/sleep 60000)
+  (try (Thread/Sleep 60000)
        (catch Exception _e {:status 200})))
 
 ;; (defmethod route :default [request]
