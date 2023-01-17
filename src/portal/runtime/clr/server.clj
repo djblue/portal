@@ -7,7 +7,7 @@
             [portal.runtime.index :as index]
             [portal.runtime.json :as json])
   (:import (clojure.lang RT)
-           (System Guid)
+           (System Guid Environment)
            (System.Net HttpListenerContext)
            (System.Net.WebSockets
             WebSocket
@@ -87,19 +87,23 @@
   (try (Thread/Sleep 60000)
        (catch Exception _e {:status 200})))
 
-;; (defmethod route :default [request]
-;;   (if-not (str/ends-with? (:uri request) ".map")
-;;     {:status 404}
-;;     (let [uri (subs (:uri request) 1)]
-;;       (some
-;;        (fn [^File file]
-;;          (when (and file (.exists file))
-;;            (send-resource "application/json" (slurp file))))
-;;        [(io/file (io/resource (str "portal-dev/" uri)))
-;;         (io/file (io/resource uri))]))))
-
 (defn- resource [path]
-  (fs/join (fs/cwd) "resources" path))
+  (some
+   (fn [dir]
+     (fs/exists (fs/join dir path)))
+   (str/split
+    (Environment/GetEnvironmentVariable "CLOJURE_LOAD_PATH") #":")))
+
+(defmethod route :default [request]
+  (if-not (str/ends-with? (:uri request) ".map")
+    {:status 404}
+    (let [uri (subs (:uri request) 1)]
+      (some
+       (fn [file]
+         (when file
+           (send-resource "application/json" (slurp file))))
+       [(resource (str "portal-dev/" uri))
+        (resource uri)]))))
 
 (defmethod route [:get "/icon.svg"] [_]
   {:status  200
