@@ -2,7 +2,7 @@
   (:require [clojure.java.shell :refer [sh]]
             [clojure.string :as str]))
 
-(def version "0.35.1")
+(def version "0.35.1-SNAPSHOT")
 
 (defn git-hash []
   (str/trim (:out (sh "git" "rev-parse" "HEAD"))))
@@ -23,7 +23,7 @@
      (provided (get-in deps [:aliases :plk :extra-deps])))))
 
 (def options
-  {:lib           'djblue/portal
+  {:lib           'nha/portal
    :description   "A clojure tool to navigate through your data."
    :version       version
    :url           "https://github.com/djblue/portal"

@@ -1,4 +1,5 @@
-(ns user)
+(ns user
+  (:require [portal.api :as p]))
 
 (defn lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
@@ -17,7 +18,9 @@
   (require '[portal.api :as p])
   (add-tap #'p/submit)
 
+  (start!)
   (watch :pwa)
+  (node)
 
   (p/docs {:mode :dev})
 
@@ -34,6 +37,10 @@
   (def work   (p/open {:mode :dev :main 'workspace}))
   (def remote (p/open {:runtime {:type :socket :port 5555}}))
   (def remote (p/open {:runtime {:type :socket :port 6666}}))
+
+  (def app (p/open {:mode :dev ;; for live reload
+                    :app  true
+                    :port 4006}))
 
   (p/eval-str "(portal.ui.commands/select-parent portal.ui.state/state)")
 
@@ -64,4 +71,33 @@
   (tap> 4611681620380904123)
 
   (require '[examples.data :refer [data]])
-  (dotimes [_i 25] (tap> data)))
+  (dotimes [_i 25] (tap> data))
+
+
+
+  (do
+    (require '[examples.data :refer [data]])
+    (def app (p/open {:mode :dev ;; for live reload
+                      :app  true
+                      :port 4007}))
+    (add-tap #'p/submit)
+    (tap> "hello")
+
+    (tap> (with-meta ["test3"]
+            {:portal.viewer/default :portal.viewer/proc-par})
+          )
+
+    (tap> (with-meta {:a "test3"
+                      :b "ok"}
+            {:portal.viewer/default :portal.viewer/proc-par})
+          )
+
+
+    (tap> examples.data/proc-par-simple)
+
+    (tap> examples.data/proc-par-abc)
+
+    )
+
+
+  )

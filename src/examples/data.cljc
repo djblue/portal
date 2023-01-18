@@ -953,3 +953,56 @@
    ::exception-data     exception-data
    ::http-requests      http-requests
    ::http-responses     http-responses})
+
+(def proc-par-simple
+  ^{:portal.viewer/default :portal.viewer/proc-par}
+  (list [#:griffin.proc{:message-id   #uuid "e2df7443-4edf-5573-bfb8-f25dbf47ca1b"
+                        :message-type :griffin.proc.proc-seq-test/a
+                        :request-id   #uuid "60bf7658-6921-4230-97aa-53460a5544db"
+                        :request-inst #inst "1900-01-01T00:08:02.320-00:00"}
+         (list [#:griffin.proc{:message-id   #uuid "14c36522-242f-50ce-bf8c-fcfb74a10574"
+                               :message-type :griffin.proc.proc-seq-test/e
+                               :request-id   #uuid "60bf7658-6921-4230-97aa-53460a5544db"
+                               :request-inst #inst "1900-01-01T00:08:02.320-00:00"}])]))
+
+(def proc-par-abc
+  ^{:portal.viewer/default :portal.viewer/proc-par}
+  (list
+   [#:griffin.proc{:message-type :griffin.proc.proc-seq-test/a,
+                   :message-id   #uuid "f65d3bd8-cca9-5f5b-9018-a2a977870eb2",
+                   :request-id   #uuid "c3932895-07f7-4e6c-ab11-ef8dea9c6cc6",
+                   :request-inst #inst "1900-01-01T00:00:02.347-00:00"}
+    (list
+     [#:griffin.proc{:message-type :griffin.proc.proc-seq-test/b,
+                     :message-id   #uuid "9470c386-ffb7-5f20-a141-3a5f09c74d0a",
+                     :request-id   #uuid "c3932895-07f7-4e6c-ab11-ef8dea9c6cc6",
+                     :request-inst #inst "1900-01-01T00:00:02.347-00:00"}
+      (list [#:griffin.proc{:message-type :griffin.proc.proc-seq-test/e,
+                            :message-id
+                            #uuid "4f4d7516-4a4c-579f-b096-8ba731b48e9f",
+                            :request-id
+                            #uuid "c3932895-07f7-4e6c-ab11-ef8dea9c6cc6",
+                            :request-inst #inst
+                                           "1900-01-01T00:00:02.347-00:00"}])]
+     [#:griffin.proc{:message-type :griffin.proc.proc-seq-test/c,
+                     :message-id   #uuid "9ab70517-d188-58b4-a1d3-72728c58e62d",
+                     :request-id   #uuid "c3932895-07f7-4e6c-ab11-ef8dea9c6cc6",
+                     :request-inst #inst "1900-01-01T00:00:02.347-00:00"}
+      (list [#:griffin.proc{:message-type :griffin.proc.proc-seq-test/f,
+                            :message-id
+                            #uuid "987ae4ad-7558-5c36-b4de-5d1583180f59",
+                            :request-id
+                            #uuid "c3932895-07f7-4e6c-ab11-ef8dea9c6cc6",
+                            :request-inst #inst
+                                           "1900-01-01T00:00:02.347-00:00"}])]
+     [#:griffin.proc{:message-type :griffin.proc.proc-seq-test/d,
+                     :message-id   #uuid "b3095623-b4c8-5f1c-92d6-c9079ebcd551",
+                     :request-id   #uuid "c3932895-07f7-4e6c-ab11-ef8dea9c6cc6",
+                     :request-inst #inst "1900-01-01T00:00:02.347-00:00"}
+      (list [#:griffin.proc{:message-type :griffin.proc.proc-seq-test/g,
+                            :message-id
+                            #uuid "e6681c50-06ac-5fed-a241-7b9b104565e8",
+                            :request-id
+                            #uuid "c3932895-07f7-4e6c-ab11-ef8dea9c6cc6",
+                            :request-inst
+                            #inst "1900-01-01T00:00:02.347-00:00"}])])]))

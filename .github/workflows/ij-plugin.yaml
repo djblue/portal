@@ -2,10 +2,10 @@ name: Intellij Plugin Verifier
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main]
     paths: extension-intellij/**
   pull_request:
-    branches: [ master ]
+    branches: [ master, main ]
     paths: extension-intellij/**
 
 jobs:

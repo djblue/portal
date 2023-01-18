@@ -33,6 +33,7 @@
             [portal.ui.viewer.markdown :as md]
             [portal.ui.viewer.pprint :as pprint]
             [portal.ui.viewer.prepl :as prepl]
+            [portal.ui.viewer.proc-par :as proc-par]
             [portal.ui.viewer.relative-time :as relative-time]
             [portal.ui.viewer.table :as table]
             [portal.ui.viewer.test-report :as test-report]
@@ -406,6 +407,8 @@
    charts/scatter-chart
    charts/histogram-chart
    log/viewer
+   proc-par/viewer
+   proc-par/simple-viewer
    http/viewer
    image/viewer
    deref/viewer

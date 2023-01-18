@@ -4,6 +4,9 @@
             ["vega" :as vega]
             ["vega-embed" :as vega-embed]
             ["vega-lite" :as vega-lite]
+            ["reactflow" :as reactflow]
+            ["dagre" :as dagre]
+            ["html-to-image" :as html-to-image]
             cljs.reader
             portal.colors
             portal.ui.api
@@ -37,6 +40,7 @@
             portal.ui.viewer.tree
             portal.ui.viewer.vega
             portal.ui.viewer.vega-lite
+            portal.ui.viewer.proc-par
             reagent.core
             reagent.dom
             [sci.core :as sci]))
@@ -55,7 +59,10 @@
     "react-dom"  (import-npm react-dom)
     "vega"       (import-npm vega)
     "vega-embed" (import-npm vega-embed)
-    "vega-lite"  (import-npm vega-lite)}
+    "vega-lite"  (import-npm vega-lite)
+    "reactflow"  (import-npm reactflow)
+    "dagre"      (import-npm dagre)
+    "html-to-image" (import-npm html-to-image)}
    (sci-import/import-ns
     portal.colors
     portal.ui.api

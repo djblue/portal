@@ -7,4 +7,13 @@
      (try
        (slurp (io/resource resource-name))
        (catch Exception e
+         (println "Could not load " resource-name)
+         (println e)))))
+
+#?(:clj
+   (defmacro inline-slurp [resource-name]
+     (try
+       (slurp resource-name)
+       (catch Exception e
+         (println "Could not load " resource-name)
          (println e)))))
