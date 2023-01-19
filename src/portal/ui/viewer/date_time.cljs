@@ -76,7 +76,7 @@
        [d/div {:style {:width "0.25em"}}]
        [d/span
         {:style keyword}
-        (if (> hour 12) "PM" "AM")]])))
+        (if (> hour 11) "PM" "AM")]])))
 
 (defn inspect-date [value]
   (let [value   (parse value)
