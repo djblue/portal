@@ -102,7 +102,11 @@
 
 (defn- to-object [buffer value tag rep]
   (if-not *session*
-    (cson/tag buffer "remote" (pr-str value))
+    (cson/-to-json
+     (with-meta
+       (cson/tagged-value "remote" (pr-str value))
+       (meta value))
+     buffer)
     (let [m (meta value)]
       (when (atom? value) (watch-atom value))
       (cson/tag

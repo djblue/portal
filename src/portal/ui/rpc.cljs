@@ -59,7 +59,11 @@
 (extend-type default
   cson/ToJson
   (-to-json [value buffer]
-    (cson/tag buffer "remote" (pr-str value))))
+    (cson/-to-json
+     (with-meta
+       (cson/tagged-value "remote" (pr-str value))
+       (meta value))
+     buffer)))
 
 (defn- read [string]
   (cson/read
