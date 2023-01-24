@@ -17,6 +17,8 @@
           reader (sci/reader (:code msg))
           stdio  (atom [])
           out-fn (fn [val] (swap! stdio conj val))]
+      (when-let [n (:line msg)]   (set! (.-line reader) n))
+      (when-let [n (:column msg)] (set! (.-column reader) n))
       (sci/with-bindings
         {sci/*1 *1
          sci/*2 *2

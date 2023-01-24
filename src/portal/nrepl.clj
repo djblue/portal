@@ -146,7 +146,7 @@
                     (:code msg)
                     (-> {:ns (get @session #'*portal-ns*)}
                         (merge  msg)
-                        (select-keys  [:ns :file])
+                        (select-keys  [:ns :file :line :column])
                         (assoc  :verbose true)))]
                (when-let [namespace (:ns response)]
                  (swap! session assoc #'*portal-ns* namespace))
