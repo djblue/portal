@@ -47,9 +47,6 @@
 
 (defprotocol Runtime)
 
-(defn ->var [var-symbol]
-  (cson/tagged-value "portal/var" var-symbol))
-
 (deftype RuntimeObject [runtime object]
   Runtime
   cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
