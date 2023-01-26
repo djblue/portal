@@ -16,6 +16,7 @@
     (swap! portal inc)
     (is (= @portal 1))
     (is (= 6 (p/eval-str portal "(+ 1 2 3)")))
+    (is (= 6 (p/eval-str portal "*1")))
     (is (= :world (:hello (p/eval-str portal "{:hello :world}"))))
     (is (some? (some #{portal} (p/sessions))))
     (p/close portal)))
