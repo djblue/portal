@@ -33,11 +33,12 @@
       (.setAttribute el "stroke" color)))
   svg)
 
-(def runtime->logo
-  {:clj    (inline "runtime/clojure.svg")
-   :cljs   (inline "runtime/cljs.svg")
-   :bb     (inline "runtime/babashka.svg")
-   :portal (inline "runtime/portal.svg")})
+(def ^:private runtime->logo
+  {:clj    {:icon (inline "runtime/clojure.svg")  :color ::c/package}
+   :cljr   {:icon (inline "runtime/clojure.svg")  :color ::c/string}
+   :cljs   {:icon (inline "runtime/cljs.svg")     :color ::c/tag}
+   :bb     {:icon (inline "runtime/babashka.svg") :color ::c/exception}
+   :portal {:icon (inline "runtime/portal.svg")   :color ::c/boolean}})
 
 (defn icon [value color]
   [d/img
@@ -45,7 +46,7 @@
     {:height 22 :width 22}
     :src (str
           "data:image/svg+xml;base64,"
-          (-> value runtime->logo parse (theme-svg color) stringify js/btoa))}])
+          (-> value runtime->logo :icon parse (theme-svg color) stringify js/btoa))}])
 
 ;;; :spec
 (def ^:private levels
@@ -149,7 +150,9 @@
             :border-top-right-radius    (:border-radius theme)
             :border-bottom-right-radius (when-not expanded? (:border-radius theme))}
            border)}
-         [icon runtime (::c/package theme)]])]
+         [icon
+          runtime
+          (get theme (get-in runtime->logo [runtime :color] ::c/text))]])]
 
      (when (:expanded? options)
        [ins/with-collection
