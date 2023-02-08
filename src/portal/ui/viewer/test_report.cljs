@@ -62,10 +62,11 @@
        [ins/with-key
         :message
         [ins/inspector
-         (with-meta
-           message
-           {:portal.viewer/default
-            :portal.viewer/pr-str})]]
+         (cond-> message
+           (coll? message)
+           (with-meta
+             {:portal.viewer/default
+              :portal.viewer/pr-str}))]]
 
        message
        [ins/with-key :message [ins/inspector message]]
@@ -74,10 +75,11 @@
        [ins/with-key
         :expected
         [ins/inspector
-         (with-meta
-           expected
-           {:portal.viewer/default
-            :portal.viewer/pr-str})]]
+         (cond-> expected
+           (coll? expected)
+           (with-meta
+             {:portal.viewer/default
+              :portal.viewer/pr-str}))]]
 
        var
        [ins/with-key :var [ins/inspector var]]
