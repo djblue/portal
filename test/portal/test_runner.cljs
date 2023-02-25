@@ -7,7 +7,8 @@
             [portal.runtime.fs :as fs]
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
-            [portal.runtime.json-buffer-test]))
+            [portal.runtime.json-buffer-test]
+            [portal.runtime.npm-test]))
 
 (defn- error->data [ex]
   (with-meta
@@ -58,7 +59,8 @@
   (run-tests
    #(t/run-tests 'portal.runtime.cson-test
                  'portal.runtime.fs-test
-                 'portal.runtime.json-buffer-test))
+                 'portal.runtime.json-buffer-test
+                 'portal.runtime.npm-test))
   (table (bench/run (json/read (fs/slurp "package-lock.json")) 100)))
 
 (-main)
