@@ -1,7 +1,7 @@
 (ns tasks.test
   (:refer-clojure :exclude [test])
   (:require [babashka.fs :as fs]
-            [tasks.build :refer [build]]
+            [tasks.build :refer [build install]]
             [tasks.tools :as t]))
 
 (defn- cljs* [version]
@@ -26,6 +26,7 @@
     (t/node out)))
 
 (defn cljs []
+  (install)
   (cljs* "1.10.773")
   (cljs* "1.10.844"))
 
@@ -36,6 +37,7 @@
   (t/bb "-m" :portal.test-runner))
 
 (defn cljr []
+  (install)
   (binding [t/*opts* (assoc-in t/*opts* [:extra-env "CLOJURE_LOAD_PATH"] "src:resources:test")]
     (t/cljr "-m" :portal.test-clr)))
 

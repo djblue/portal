@@ -7,7 +7,8 @@
             [portal.runtime.cson-test]
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
-            [portal.runtime.json-buffer-test])
+            [portal.runtime.json-buffer-test]
+            [portal.runtime.npm-test])
   (:import (System Environment)))
 
 (def port (Environment/GetEnvironmentVariable "PORTAL_PORT"))
@@ -37,6 +38,7 @@
          'portal.jvm-test
          'portal.runtime.cson-test
          'portal.runtime.fs-test
-         'portal.runtime.json-buffer-test)]
+         'portal.runtime.json-buffer-test
+         'portal.runtime.npm-test)]
     (table (bench/run (json/read (slurp "package-lock.json" :encoding "utf8")) 50))
     (Environment/Exit (+ fail error))))
