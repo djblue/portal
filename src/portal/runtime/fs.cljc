@@ -46,8 +46,17 @@
      :cljr (Path/Join (into-array String paths))))
 
 (defn exists [f]
-  (when #?(:clj  (.exists (io/file f))
-           :cljs (fs/existsSync f)
+  (when (and (string? f)
+             #?(:clj  (.exists (io/file f))
+                :cljs (fs/existsSync f)
+                :cljr (or (File/Exists f)
+                          (Directory/Exists f))))
+    f))
+
+(defn is-file [f]
+  (when #?(:clj  (.isFile (io/file f))
+           :cljs (and (exists f)
+                      (.isFile (fs/lstatSync f)))
            :cljr (File/Exists f))
     f))
 

@@ -8,6 +8,8 @@
     (is (= (fs/exists deps) deps)))
   (is (some? (fs/home)))
   (is (some? (seq (fs/paths))))
+  (is (some? (fs/is-file "deps.edn")))
+  (is (nil? (fs/is-file "deps.end")))
   (is (contains?
        (into #{} (fs/list (fs/cwd)))
        (fs/join (fs/cwd) "deps.edn")))
