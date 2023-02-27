@@ -1,3 +1,30 @@
+## 0.36.0 - 2023-02-27
+
+- Allow passing options to `portal.shadow.remote` d70730d
+
+### CLR Support
+
+- Add :cljr runtime logo 2d369c7
+- Optionally load `clr.data.json` 52bb1d3
+- Add basic CLR example project 49a9aa2
+- Update `examples.data` for CLR 4aea238
+- Port `portal.console` to CLR 9069afc
+- First cut of ClojureCLR runtime support 8554ea2
+
+### UX Tweaks
+
+- Always use `:portal.viewer/inspector` for tap-list 729c8b7
+- Improve exception viewer styles c806858
+
+### Bug Fixes
+
+- Fix :portal.viewer/test-report edge case 2fc888a
+- Fix AM / PM bug in `:portal.viewer/date-time` 1979e36
+- Fix tasks.build/prep hang 366dfd5
+- Fix portal.api/close race condition on jvm 5addb24
+- Fix test-report key for :type f5a7062
+- Fix read-string for tagged-literals with metadata 4b99c87
+
 ## 0.35.1 - 2023-01-06
 
 - Use pprint for collection of scalars d706d15
