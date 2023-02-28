@@ -43,7 +43,7 @@ to add the following bit of configuration:
   {:target :browser
    ...
    :build-hooks [(portal.shadow.remote/hook)]
-   :devtools {:preloads [portal.setup]}}}}
+   :devtools {:preloads [portal.shadow.preload]}}}}
 ```
 
 Or if you would like to pass options to `portal.api/start`:
@@ -55,15 +55,17 @@ Or if you would like to pass options to `portal.api/start`:
   {:target :browser
    ...
    :build-hooks [(portal.shadow.remote/hook {:port 1234})]
-   :devtools {:preloads [portal.setup]}}}}
+   :devtools {:preloads [portal.shadow.preload]}}}}
 ```
+
+To define a custom preload change the configured preload to your custom namespace.
 
 ### Web Setup
 
 A basic setup with `portal.web` is as follows:
 
 ```clojure
-(ns portal.setup
+(ns my-app.portal.setup
   (:require [portal.web :as p]))
 
 ;; Allows options to be propagated across page reloads
@@ -80,7 +82,7 @@ A basic setup with `portal.web` is as follows:
 A basic setup with `portal.shadow.remote` is as follows:
 
 ```clojure
-(ns portal.setup
+(ns my-app.portal.setup
   (:require [portal.shadow.remote :as p]))
 
 (add-tap p/submit)
@@ -92,7 +94,7 @@ For a more comprehensive setup, try the following which leverages both and some
 additional bits from other guides:
 
 ```clojure
-(ns portal.setup
+(ns my-app.portal.setup
   (:require [portal.shadow.remote :as r]
             [portal.web :as p]))
 
