@@ -1,11 +1,11 @@
 (ns ^:no-doc portal.runtime.cson
   "Clojure/Script Object Notation"
   (:refer-clojure :exclude [read])
-  #?(:cljs (:require [goog.crypt.base64 :as Base64]
-                     [portal.runtime.json-buffer :as json]
-                     [portal.runtime.macros :as m])
+  #?(:clj  (:require [portal.runtime.json-buffer :as json])
      :cljr (:require [portal.runtime.json-buffer :as json])
-     :clj  (:require [portal.runtime.json-buffer :as json]))
+     :cljs (:require [goog.crypt.base64 :as Base64]
+                     [portal.runtime.json-buffer :as json]
+                     [portal.runtime.macros :as m]))
   #?(:clj  (:import [java.net URL]
                     [java.util Base64 Date UUID])
      :cljs (:import [goog.math Long])))
