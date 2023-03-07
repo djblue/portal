@@ -22,9 +22,11 @@
   {:extra-deps {planck/planck {:mvn/version "2.26.0"}}}
   :cljs
   {:extra-deps
-   {hickory/hickory           {:mvn/version "0.7.1"}
+   {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
+                               :git/sha "6dac3165d4bc8f785741ea86aef946b11c9d7d0f"}
+    hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.4.138"}
-    org.babashka/sci          {:mvn/version "0.5.34"}
+    org.babashka/sci          {:mvn/version "0.7.38"}
     reagent/reagent           {:mvn/version "1.1.1"}}}
   :shadow
   {:jvm-opts ["-Xss16m"]
