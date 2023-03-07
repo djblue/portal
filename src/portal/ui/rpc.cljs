@@ -2,8 +2,8 @@
   (:refer-clojure :exclude [read type])
   (:require [portal.async :as a]
             [portal.runtime.cson :as cson]
+            [portal.ui.cljs :as cljs]
             [portal.ui.rpc.runtime :as rt]
-            [portal.ui.sci :as sci]
             [portal.ui.state :as state]
             [portal.ui.viewer.diff :as diff])
   (:import [goog.math Long]))
@@ -153,7 +153,7 @@
            (fn [e]
              (return {:error e :message (.-message e)}))]
        (try
-         (let [{:keys [value] :as response} (sci/eval-string message)]
+         (let [{:keys [value] :as response} (cljs/eval-string message)]
            (if-not (:await message)
              (return response)
              (-> (.resolve js/Promise value)
