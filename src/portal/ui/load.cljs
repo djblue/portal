@@ -9,7 +9,7 @@
    "var module     = {};\n"
    "var require    = window.require_parent(" (pr-str file) ");\n"
    source " ;\n"
-   "return module.exports || exports;\n"
+   "return 'exports' in module ? module.exports : exports;\n"
    "})()"))
 
 (defn load-fn-sync [m]
@@ -45,8 +45,13 @@
                                (if (contains? cache k)
                                  cache
                                  (assoc cache k (load-fn-sync {:npm true :name module :parent parent})))))
-                            k)]
-                 (assoc cache module (js/eval (closure-wrap value)))))))
+                            k)
+                     result (try
+                              (js/eval (closure-wrap value))
+                              (catch :default e
+                                (tap> {:parent parent :module module :value value :error (pr-str e)})
+                                (throw e)))]
+                 (assoc cache module result)))))
     module)))
 
 (defn- node-require-with-parent [parent]
