@@ -41,7 +41,7 @@
       ":"))
 
 (defn join [& paths]
-  #?(:clj  (.getAbsolutePath ^java.io.File (apply io/file paths))
+  #?(:clj  (.getPath ^java.io.File (apply io/file paths))
      :cljs (apply path/join paths)
      :cljr (Path/Join (into-array String paths))))
 
@@ -100,5 +100,5 @@
 
 (defn dirname [path]
   #?(:clj  (.getParent (io/file path))
-     :cljs (path/dirname path)
-     :cljr (str (Directory/GetParent path))))
+     :cljs (when-not (= "/" path) (path/dirname path))
+     :cljr (some-> (Directory/GetParent path) str)))

@@ -21,4 +21,5 @@
     (is (nil? (fs/exists dir))))
   (let [cwd  (fs/cwd)
         path (fs/join cwd "deps.edn")]
-    (is (= cwd (fs/dirname path)))))
+    (is (= cwd (fs/dirname path))))
+  (is (nil? (fs/dirname "/"))))
