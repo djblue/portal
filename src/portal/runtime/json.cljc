@@ -1,10 +1,9 @@
 (ns ^:no-doc portal.runtime.json
   (:refer-clojure :exclude [read])
-  (:require
-   #?(:cljr [portal.runtime.clr.assembly])
-   #?(:bb   [cheshire.core :as json]
-      :clj  [clojure.data.json :as json]
-      :cljr [clojure.data.json :as json])))
+  #?(:bb   (:require [cheshire.core :as json])
+     :clj  (:require [clojure.data.json :as json])
+     :cljr (:require [clojure.data.json :as json]
+                     [portal.runtime.clr.assembly])))
 
 (defn write [value]
   #?(:bb   (json/generate-string value)
