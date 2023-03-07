@@ -5,9 +5,11 @@
             [cognitect.transit :as transit]
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
+            [portal.runtime.fs :as fs]
             [portal.runtime.index :as index]
             [portal.runtime.json :as json]
             [portal.runtime.jvm.client :as c]
+            [portal.runtime.npm :as npm]
             [portal.runtime.remote.socket :as socket])
   (:import [java.io File PushbackReader]
            [java.util UUID]))
@@ -123,17 +125,59 @@
           (str/split #";")
           first))
 
+(defn- body [{:keys [body] :as request}]
+  (case (content-type request)
+    "application/transit+json" (transit/read (transit/reader body :json))
+    "application/json"         (json/read-stream (io/reader body))
+    "application/edn"          (edn/read
+                                {:default tagged-literal}
+                                (PushbackReader. (io/reader body)))))
+
+(defn- ->js [file]
+  (let [source (fs/slurp file)]
+    {:lang :js :npm true :file file :dir (fs/dirname file) :source source}))
+
+(defn- node-resolve [{:keys [name parent]}]
+  (if-not parent
+    (some-> name npm/node-resolve ->js)
+    (some-> name (npm/node-resolve parent) ->js)))
+
+(defmethod route [:put "/cache"] [request]
+  (io/copy (:body request)
+           (io/file ".portal/cache.json")
+           :encoding "utf-8")
+  {:status 204
+   :headers
+   {"content-type" "application/json"}})
+
+(defmethod route [:get "/cache"] [_]
+  {:status 200
+   :headers
+   {"content-type" "application/transit+json"}
+   :body (io/input-stream ".portal/cache.json")})
+
+(defmethod route [:post "/load"] [request]
+  {:headers
+   {"content-type" "application/json"}
+   :body
+   (json/write
+    (let [{:keys [name path macros] :as m} (body request)]
+      (if (or (= name 'react) (string? name) (:npm name))
+        (node-resolve m)
+        (some
+         (fn [ext]
+           (when-let [resource (io/resource (str path ext))]
+             {:lang (if (= ext ".js") :js :clj)
+              :file (str resource)
+              :source (slurp resource)}))
+         (if macros
+           [".clj"  ".cljc"]
+           [".cljs" ".cljc" ".js"])))))})
+
 (defmethod route [:post "/submit"] [request]
-  (let [body (:body request)]
-    (rt/update-value
-     (case (content-type request)
-       "application/transit+json" (transit/read (transit/reader body :json))
-       "application/json"         (json/read-stream (io/reader body))
-       "application/edn"          (edn/read
-                                   {:default tagged-literal}
-                                   (PushbackReader. (io/reader body)))))
-    {:status  204
-     :headers {"Access-Control-Allow-Origin" "*"}}))
+  (rt/update-value (body request))
+  {:status  204
+   :headers {"Access-Control-Allow-Origin" "*"}})
 
 (defmethod route [:options "/submit"] [_]
   {:status 204
