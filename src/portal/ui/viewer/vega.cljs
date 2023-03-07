@@ -10,8 +10,10 @@
             [portal.ui.theme :as theme]))
 
 ;;; :spec
+(def vega-url #"https://vega\.github\.io/schema/vega/v\d\.json")
+
 (s/def ::$schema
-  (s/and string? #(re-matches #"https://vega\.github\.io/schema/vega/v\d\.json" %)))
+  (s/and string? #(re-matches vega-url %)))
 
 (s/def ::vega
   (s/keys :req-un [::$schema]))

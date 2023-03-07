@@ -5,10 +5,12 @@
             [portal.ui.viewer.vega :as vega]))
 
 ;;; :spec
+(def vega-lite-url #"https://vega\.github\.io/schema/vega-lite/v\d\.json")
+
 (s/def ::name string?)
 (s/def ::description string?)
 (s/def ::$schema
-  (s/and string? #(re-matches #"https://vega\.github\.io/schema/vega-lite/v\d\.json" %)))
+  (s/and string? #(re-matches vega-lite-url %)))
 
 (s/def ::vega-lite
   (s/keys :req-un [::data]
