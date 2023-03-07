@@ -31,7 +31,7 @@
   (def emacs  (p/open {:mode :dev :launcher :emacs}))
   (def code   (p/open {:mode :dev :editor :vs-code}))
   (def idea   (p/open {:mode :dev :launcher :intellij}))
-  (def work   (p/open {:mode :dev :main 'workspace}))
+  (def work   (p/open {:mode :dev :main 'workspace/app}))
   (def remote (p/open {:runtime {:type :socket :port 5555}}))
   (def remote (p/open {:runtime {:type :socket :port 6666}}))
 

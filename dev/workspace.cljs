@@ -1,11 +1,15 @@
 (ns workspace
-  (:require ["react" :as react]
-            ["vega-embed" :as vega-embed]
+  (:require ["./hello" :as hello]
+            ["@fortawesome/free-solid-svg-icons/faArrowDown" :refer [faArrowDown]]
+            ["react" :as react]
             [portal.colors :as c]
+            [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
             [reagent.core :as r]))
+
+(.log js/console hello/world)
 
 (def counter (r/atom 0))
 
@@ -26,10 +30,9 @@
        props)]
      children)))
 
-(defn hello-world []
+(defn app []
   (let [theme              (theme/use-theme)
         [state set-state!] (react/useState 0)]
-    (js/console.log vega-embed/default)
     [s/div
      {:style
       {:border-top [1 :solid (::c/border theme)]
@@ -46,4 +49,4 @@
                 (tap> {:action  :inc
                        :current @counter
                        :next    (swap! counter inc)}))}
-      "Click me!"]]))
+      "Click me!" [icons/icon faArrowDown {}]]]))
