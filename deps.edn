@@ -17,7 +17,9 @@
     hiccup/hiccup                 {:mvn/version "2.0.0-alpha2"}
     io.aviso/pretty               {:mvn/version "1.3"}
     vlaaad/reveal                 {:mvn/version "1.3.276"}
-    io.github.clojure/tools.build {:git/tag "v0.8.4" :git/sha "8c3cd69"}}}
+    io.github.clojure/tools.build {:git/tag "v0.8.4" :git/sha "8c3cd69"}
+    io.github.djblue/tetris       {:git/url "https://github.com/djblue/tetris.git"
+                                   :git/sha "6165285b2d4354913f908aeaecdd3596768ccb64"}}}
   :plk
   {:extra-deps {planck/planck {:mvn/version "2.26.0"}}}
   :cljs
