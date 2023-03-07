@@ -46,7 +46,7 @@
                                  cache
                                  (assoc cache k (load-fn-sync {:npm true :name module :parent parent})))))
                             k)]
-                 (assoc cache module (js/eval value))))))
+                 (assoc cache module (js/eval (closure-wrap value)))))))
     module)))
 
 (defn- node-require-with-parent [parent]
