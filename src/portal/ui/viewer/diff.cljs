@@ -1,6 +1,5 @@
 (ns portal.ui.viewer.diff
   (:require [clojure.spec.alpha :as s]
-            [lambdaisland.deep-diff2 :refer [diff]]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
@@ -109,7 +108,7 @@
                    [a b]
                    [select/with-position
                     {:row idx :column 0}
-                    [ins/inspector (diff a b)]]]])))]]])))
+                    [ins/inspector (diff/diff a b)]]]])))]]])))
 
 (def viewer
   {:predicate can-view?
@@ -117,7 +116,7 @@
    :name :portal.viewer/diff
    :doc "Diff a collection of values successively starting with the first two."})
 
-(let [var  #'diff
+(let [var  #'diff/diff
       name (#'commands/var->name var)]
   (swap! commands/registry
          assoc name (commands/make-command
