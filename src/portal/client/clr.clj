@@ -1,4 +1,4 @@
-(ns ^:no-check portal.client.clr
+(ns ^:no-doc ^:no-check portal.client.clr
   (:import (System.Net.Http
             HttpClient
             HttpMethod
