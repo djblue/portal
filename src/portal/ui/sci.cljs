@@ -62,16 +62,12 @@
       (str/replace  #"\-" "_")))
 
 (defn loan-fn [{:keys [namespace]}]
-  (let [result (load/load-fn-sync
-                {:name namespace :path (ns->path namespace)})]
-    (if-not (= (:lang result) :js)
-      result
-      (let [module (js/eval (load/closure-wrap result))]
-        (sci/add-js-lib! @ctx namespace module)
-        module))))
+  (if (string? namespace)
+    (sci/add-js-lib! @ctx namespace (load/node-require namespace))
+    (load/load-fn-sync {:name namespace :path (ns->path namespace)})))
 
 (defn init []
-  (swap! load/require-cache merge libs/js-libs)
+  (load/load-require-cache libs/js-libs)
   (reset! ctx (libs/init {:load-fn loan-fn})))
 
 (reset! cljs/init-fn init)

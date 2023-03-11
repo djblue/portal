@@ -28,9 +28,10 @@
            str)))
 
 (defn- relative-resolve [module root]
-  (let [path (fs/join (fs/dirname root) module)]
+  (let [path (fs/join root module)]
     (or (fs/is-file path)
-        (fs/is-file (str path ".js")))))
+        (fs/is-file (str path ".js"))
+        (fs/is-file (fs/join path "index.js")))))
 
 (defn- relative? [module] (str/starts-with? module "."))
 

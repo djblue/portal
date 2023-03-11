@@ -1,16 +1,9 @@
 (ns portal.ui.load)
 
-(defn closure-wrap [{:keys [source file dir]}]
-  (str
-   "(function () {"
-   "var __filename = " (pr-str file) ";\n"
-   "var __dirname  = " (pr-str dir) ";\n"
-   "var exports    = {};\n"
-   "var module     = {};\n"
-   "var require    = window.require_parent(" (pr-str file) ");\n"
-   source " ;\n"
-   "return 'exports' in module ? module.exports : exports;\n"
-   "})()"))
+(defn- module-wrapper
+  "https://nodejs.org/api/modules.html#the-module-wrapper"
+  [{:keys [source]}]
+  (str "(function (exports, require, module, __filename, __dirname) { " source "\n });"))
 
 (defn load-fn-sync [m]
   (let [_label (str "load-fn-sync: " (pr-str m))
@@ -23,42 +16,47 @@
     (some->
      (.parse js/JSON (.-responseText xhr))
      (js->clj :keywordize-keys true)
-     (update :lang keyword))))
+     (update :lang keyword)
+     (assoc :name (:name m)))))
 
 (def load-cache (atom {}))
-(def require-cache (atom {}))
+(def ^:private require-cache (atom {}))
 
-(defn- node-require
+(deftype Module [exports])
+
+(defn load-require-cache [modules]
+  (swap!
+   require-cache
+   (fn [cache]
+     (reduce-kv
+      (fn [cache module-name export]
+        (assoc cache module-name (Module. export)))
+      cache
+      modules))))
+
+(declare node-require)
+
+(defn node-require
   ([module]
    (node-require nil module))
-  ([parent module]
-   (get
-    (swap! require-cache
-           (fn [cache]
-             (if (contains? cache module)
-               cache
-               (let [k     (str parent "$" module)
-                     value (get
-                            (swap!
-                             load-cache
-                             (fn [cache]
-                               (if (contains? cache k)
-                                 cache
-                                 (assoc cache k (load-fn-sync {:npm true :name module :parent parent})))))
-                            k)
-                     result (try
-                              (js/eval (closure-wrap value))
-                              (catch :default e
-                                (tap> {:parent parent :module module :value value :error (pr-str e)})
-                                (throw e)))]
-                 (assoc cache module result)))))
-    module)))
-
-(defn- node-require-with-parent [parent]
-  (fn [module] (node-require parent module)))
+  ([parent module-name]
+   (or
+    (some-> ^Module (get @require-cache module-name) .-exports)
+    (try
+      (let [{:keys [file] :as value} (load-fn-sync {:npm true :name module-name :parent parent})]
+        (if-let [^Module module (get @require-cache file)]
+          (.-exports module)
+          (let [exports    #js {}
+                module-obj (Module. exports)]
+            (swap! require-cache assoc file module-obj)
+            ((js/eval (module-wrapper value))
+             exports #(node-require (:dir value) %) module-obj (:file value) (:dir value))
+            (.-exports module-obj))))
+      (catch :default e
+        (.error js/console e)
+        (throw e))))))
 
 (set! (.-require js/window) node-require)
-(set! (.-require_parent js/window) node-require-with-parent)
 (set! (.-process js/window)
       #js {:env #js {:NODE_ENV
                      (if js/goog.DEBUG

@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.ui.sci.libs
   (:require ["react" :as react]
             ["react-dom" :as react-dom]
+            ["react/jsx-runtime" :as jsx-runtime]
             ["vega" :as vega]
             ["vega-embed" :as vega-embed]
             ["vega-lite" :as vega-lite]
@@ -46,6 +47,7 @@
 
 (def js-libs
   {"react"      react
+   "react/jsx-runtime" jsx-runtime
    "react-dom"  react-dom
    "vega"       vega
    "vega-embed" vega-embed
