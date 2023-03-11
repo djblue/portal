@@ -41,7 +41,7 @@
       ":"))
 
 (defn join [& paths]
-  #?(:clj  (.getPath ^java.io.File (apply io/file paths))
+  #?(:clj  (.getCanonicalPath ^java.io.File (apply io/file paths))
      :cljs (apply path/join paths)
      :cljr (Path/Join (into-array String paths))))
 
