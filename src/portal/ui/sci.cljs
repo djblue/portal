@@ -5,6 +5,8 @@
             [portal.ui.sci.libs :as libs]
             [sci.core :as sci]))
 
+(sci/alter-var-root sci/print-fn (constantly *print-fn*))
+
 (defn- find-ns* [ctx ns-sym]
   (sci/eval-form ctx (list 'clojure.core/the-ns (list 'quote ns-sym))))
 
