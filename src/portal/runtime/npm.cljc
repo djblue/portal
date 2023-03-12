@@ -35,12 +35,10 @@
 (defn- relative? [module] (str/starts-with? module "."))
 
 (defn- get-parents [root]
-  (cons
-   root
-   (->> root
-        (iterate fs/dirname)
-        (take-while some?)
-        (map #(fs/join % "node_modules")))))
+  (->> root
+       (iterate fs/dirname)
+       (take-while some?)
+       (map #(fs/join % "node_modules"))))
 
 (defn node-resolve
   ([module]
