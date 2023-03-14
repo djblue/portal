@@ -1,0 +1,3 @@
+{:paths ["dev" "src" "resources"]
+ :deps {djblue/portal {#_#_:mvn/version "0.37.0"
+                       :local/root "../../"}}}
