@@ -1,3 +1,22 @@
+## 0.37.0 - 2023-03-13
+
+- Change shadow config to existing preload and change custom preloads away from
+  portal namespace (#167) 7d27db1 Thanks @grahamcarlyle!
+
+### NPM Support
+
+- Add plotly viewer as an example da0439d
+- Simplify node module loading code d0a0588
+- Update sci to use `/load` endpoint 2e5437e
+- Add `/load` endpoint to jvm server 57a0254
+- First cut of `portal.runtime.npm/node-resolve` 70ce1a2
+
+### Bug Fixes
+
+- Enable async print in sci compiled fns 970ba8c
+- Fix cljdoc build 07e6695
+- Fix bug in goto-definition cbf10dd
+
 ## 0.36.0 - 2023-02-27
 
 - Allow passing options to `portal.shadow.remote` d70730d
