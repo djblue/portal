@@ -12,6 +12,13 @@
 
 (defonce ctx (atom nil))
 
+(defn- ex->data
+  [ex phase]
+  (with-meta
+    #_{:clj-kondo/ignore [:unresolved-symbol]}
+    (assoc (Throwable->map ex) :phase phase :runtime :portal)
+    (ex-data ex)))
+
 (defn eval-string [msg]
   (try
     (let [ctx    @ctx
@@ -35,21 +42,49 @@
          sci/print-fn      #(out-fn {:tag :out :val %})
          sci/print-err-fn  #(out-fn {:tag :err :val %})
          sci/file (:file msg)}
-        (cond->
-         {:value (loop [last-val nil]
-                   (let [[form _s] (sci/parse-next+string
-                                    ctx reader
-                                    {:read-cond :allow})]
-                     (if (= ::sci/eof form)
-                       last-val
-                       (let [value (sci/eval-form ctx form)]
-                         (set! *3 *2)
-                         (set! *2 *1)
-                         (set! *1 value)
-                         (recur value)))))
-          :ns    (str @sci/ns)}
-
-          (seq @stdio) (assoc :stdio @stdio))))
+        (loop []
+          (when
+           (try
+             (let [[form s] (sci/parse-next+string ctx reader {:read-cond :allow})]
+               (try
+                 (when-not (= ::sci/eof form)
+                   (let [start (.now (.-performance js/window))
+                         ret (sci/eval-form ctx form)
+                         ms (quot (- (.now (.-performance js/window)) start) 1)]
+                     (set! *3 *2)
+                     (set! *2 *1)
+                     (set! *1 ret)
+                     (out-fn {:tag :ret
+                              :val (if (instance? js/Error ret)
+                                     #_{:clj-kondo/ignore [:unresolved-symbol]}
+                                     (assoc (Throwable->map ret) :runtime :portal)
+                                     ret)
+                              :ns (str @sci/ns)
+                              :ms ms
+                              :form s})
+                     true))
+                 (catch :default ex
+                   (when (:verbose msg) (.error js/console ex))
+                   (set! *e ex)
+                   (out-fn {:tag :ret :val (ex->data ex (or (some-> ex ex-data :phase keyword) :execution))
+                            :ns (str @sci/ns) :form s
+                            :exception true})
+                   true)))
+             (catch :default ex
+               (when (:verbose msg) (.error js/console ex))
+               (set! *e ex)
+               (out-fn {:tag :ret :val (ex->data ex :read-source)
+                        :ns (str @sci/ns)
+                        :exception true})
+               true))
+            (recur)))
+        (if-not (:await msg)
+          @stdio
+          (let [return        @stdio
+                {:keys [val] :as result} (last return)]
+            (-> (.resolve js/Promise val)
+                (.then #(conj (pop return) (assoc result :val %)))
+                (.catch #(conj (pop return) (assoc result :val % :exception true))))))))
     (catch :default e
       (let [sci-error? (isa? (:type (ex-data e)) :sci/error)]
         (throw (if sci-error?

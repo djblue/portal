@@ -20,20 +20,21 @@
        (let [component
              (-> {:code (str "(require '" (namespace (:main opts)) ")" (:main opts))}
                  (cljs/eval-string)
-                 :value)]
+                 last
+                 :val)]
          (set-app! (fn [] component))))
      #js [])
     (when app
-      [app/root [app]])))
+      [app/root
+       [:> ins/error-boundary
+        [app]]])))
 
 (defn connected-app []
   (let [opts (opts/use-options)]
     [conn/with-status
      (cond
        (= opts ::opts/loading) nil
-       (contains? opts :main) [app/root
-                               [:> ins/error-boundary
-                                [custom-app opts]]]
+       (contains? opts :main) [custom-app opts]
        :else [app/app (:value opts)])]))
 
 (defn with-cache [& children]

@@ -143,25 +143,30 @@
        (when (fn? resolve) (resolve message))))
    :portal.rpc/eval-str
    (fn [message send!]
-     (let [return
-           (fn [msg]
-             (send!
-              (assoc msg
-                     :op            :portal.rpc/response
-                     :portal.rpc/id (:portal.rpc/id message))))
-           error
-           (fn [e]
-             (return {:error e :message (.-message e)}))]
-       (try
-         (let [{:keys [value] :as response} (cljs/eval-string message)]
-           (if-not (:await message)
-             (return response)
-             (-> (.resolve js/Promise value)
-                 (.then #(return (assoc response :value %)))
-                 (.catch error))))
-         (catch :default e
-           (.error js/console e)
-           (error e)))))
+     (a/let [value (cljs/eval-string message)]
+       (send!
+        {:value         value
+         :op            :portal.rpc/response
+         :portal.rpc/id (:portal.rpc/id message)}))
+     #_(let [return
+             (fn [msg]
+               (send!
+                (assoc msg
+                       :op            :portal.rpc/response
+                       :portal.rpc/id (:portal.rpc/id message))))
+             error
+             (fn [e]
+               (.error js/console e)
+               (return {:error e :message (.-message e)}))]
+         (try
+           (let [{:keys [value] :as response} (sci/eval-string message)]
+             (if-not (:await message)
+               (return response)
+               (-> (.resolve js/Promise value)
+                   (.then #(return (assoc response :value %)))
+                   (.catch error))))
+           (catch :default e
+             (error e)))))
    :portal.rpc/invalidate
    (fn [message send!]
      (rt/deref (:atom message))

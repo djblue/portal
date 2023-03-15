@@ -137,11 +137,16 @@
   ([portal code opts]
    (a/let [result (l/eval-str portal (assoc opts :code code))]
      (when-not (:verbose opts)
-       (doseq [{:keys [tag val]} (:stdio result)]
+       (doseq [{:keys [tag val]} result]
          (cond
            (= :out tag) (do (print val) (flush))
            (= :err tag) (print-err val))))
-     (cond-> result (not (:verbose opts)) :value))))
+     (if (:verbose opts)
+       result
+       (let [{:keys [val] :as result} (last (:value result))]
+         (if-not (:exception result)
+           val
+           (throw (ex-info (:cause val) (:data val {})))))))))
 
 (defn sessions
   "Get all current portal sessions."
