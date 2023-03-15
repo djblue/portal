@@ -17,6 +17,7 @@
             ["@fortawesome/free-solid-svg-icons/faMinusCircle" :refer [faMinusCircle]]
             ["@fortawesome/free-solid-svg-icons/faPlayCircle" :refer [faPlayCircle]]
             ["@fortawesome/free-solid-svg-icons/faPlusCircle" :refer [faPlusCircle]]
+            ["@fortawesome/free-solid-svg-icons/faSignOutAlt" :refer [faSignOutAlt]]
             ["@fortawesome/free-solid-svg-icons/faStopCircle" :refer [faStopCircle]]
             ["@fortawesome/free-solid-svg-icons/faTerminal" :refer [faTerminal]]
             ["@fortawesome/free-solid-svg-icons/faTimesCircle" :refer [faTimesCircle]]
@@ -43,6 +44,7 @@
 (def minus-circle (partial icon faMinusCircle))
 (def play-circle (partial icon faPlayCircle))
 (def plus-circle (partial icon faPlusCircle))
+(def sign-out-alt (partial icon faSignOutAlt))
 (def stop-circle (partial icon faStopCircle))
 (def terminal (partial icon faTerminal))
 (def times-circle (partial icon faTimesCircle))
