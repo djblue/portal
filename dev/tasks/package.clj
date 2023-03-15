@@ -20,7 +20,8 @@
    (for [[dep {:mvn/keys [version] :keys [scope]}]
          (merge {'org.clojure/clojure
                  {:mvn/version "1.10.3"}}
-                (:deps options))]
+                (:deps options))
+         :when version]
      [:dependency
       [:groupId (namespace dep)]
       [:artifactId (name dep)]
