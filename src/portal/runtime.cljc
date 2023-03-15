@@ -208,7 +208,7 @@
      {:name (if (= :dev (:mode options))
               "portal-dev"
               "portal")
-      :version "0.37.0"
+      :version "0.37.1"
       :platform
       #?(:bb   "bb"
          :clj  "jvm"

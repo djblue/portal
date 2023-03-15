@@ -1,3 +1,9 @@
+## 0.37.1 - 2023-03-15
+
+- Fix pom.xml generation ca290e2
+- Removed unused code 692c86d
+- Update prepl viewer to render return values daa55cd
+
 ## 0.37.0 - 2023-03-13
 
 - Change shadow config to existing preload and change custom preloads away from
