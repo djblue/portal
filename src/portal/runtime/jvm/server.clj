@@ -142,20 +142,6 @@
     (some-> name npm/node-resolve ->js)
     (some-> name (npm/node-resolve parent) ->js)))
 
-(defmethod route [:put "/cache"] [request]
-  (io/copy (:body request)
-           (io/file ".portal/cache.json")
-           :encoding "utf-8")
-  {:status 204
-   :headers
-   {"content-type" "application/json"}})
-
-(defmethod route [:get "/cache"] [_]
-  {:status 200
-   :headers
-   {"content-type" "application/transit+json"}
-   :body (io/input-stream ".portal/cache.json")})
-
 (defmethod route [:post "/load"] [request]
   {:headers
    {"content-type" "application/json"}
