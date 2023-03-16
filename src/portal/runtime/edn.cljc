@@ -1,4 +1,4 @@
-(ns portal.runtime.edn
+(ns ^:no-doc portal.runtime.edn
   (:refer-clojure :exclude [read-string])
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
