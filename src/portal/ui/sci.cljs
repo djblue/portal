@@ -39,7 +39,7 @@
          {:value (loop [last-val nil]
                    (let [[form _s] (sci/parse-next+string
                                     ctx reader
-                                    {:features #{:cljs}})]
+                                    {:read-cond :allow})]
                      (if (= ::sci/eof form)
                        last-val
                        (let [value (sci/eval-form ctx form)]
@@ -68,7 +68,7 @@
 
 (defn init []
   (load/load-require-cache libs/js-libs)
-  (reset! ctx (libs/init {:load-fn loan-fn})))
+  (reset! ctx (libs/init {:load-fn loan-fn :features #{:cljs :portal}})))
 
 (reset! cljs/init-fn init)
 (reset! cljs/eval-fn eval-string)

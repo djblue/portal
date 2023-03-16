@@ -728,7 +728,7 @@
 
 (def test-report
   [{:type :begin-test-ns
-    :ns   (or *ns* 'examples.data)}
+    :ns   (if *ns* *ns* 'examples.data)}
    {:type :begin-test-var
     :var  #'test-report}
    {:type     :pass,
@@ -744,7 +744,7 @@
    {:type :end-test-var
     :var  #'test-report}
    {:type :end-test-ns
-    :ns   (or *ns* 'examples.data)}])
+    :ns   (if *ns* *ns* 'examples.data)}])
 
 (def prepl-data
   [{:val

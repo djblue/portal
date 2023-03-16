@@ -1,6 +1,7 @@
 (ns portal.console
-  #?(:clj (:require [clojure.java.io :as io]))
-  #?(:cljs (:require-macros portal.console)))
+  #?(:clj    (:require [clojure.java.io :as io])
+     :portal (:import)
+     :cljs   (:require-macros portal.console)))
 
 (defn ^:no-doc now []
   #?(:clj (java.util.Date.) :cljs (js/Date.) :cljr (DateTime/Now)))
@@ -12,7 +13,7 @@
       [:throw ex#])))
 
 (defn ^:no-doc runtime []
-  #?(:bb :bb :clj :clj :cljs :cljs :cljr :cljr))
+  #?(:portal :portal :bb :bb :clj :clj :cljs :cljs :cljr :cljr))
 
 #?(:clj
    (defn ^:no-doc get-file [env file]
@@ -31,7 +32,7 @@
          :level    (if (= flow# :throw) :fatal ~level)
          :result   result#
          :ns       (quote ~(symbol (str *ns*)))
-         :file     ~#?(:clj (get-file env file) :cljs nil :cljr *file*)
+         :file     ~#?(:clj (get-file env file) :portal *file* :cljs nil :cljr *file*)
          :line     ~line
          :column   ~column
          :time     (now)
