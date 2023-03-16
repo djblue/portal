@@ -43,7 +43,8 @@
             portal.ui.viewer.vega-lite
             reagent.core
             reagent.dom
-            [sci.core :as sci]))
+            [sci.core :as sci])
+  (:import [goog.math Long]))
 
 (def js-libs
   {"react"      react
@@ -104,6 +105,7 @@
            :js-libs js-libs
            :classes {'js js/window
                      'Math js/Math
+                     'goog.math.Long Long
                      :allow :all}
            :disable-arity-checks true}
           opts)))
