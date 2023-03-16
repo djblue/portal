@@ -103,6 +103,7 @@
    (merge {:namespaces namespaces
            :js-libs js-libs
            :classes {'js js/window
+                     'Math js/Math
                      :allow :all}
            :disable-arity-checks true}
           opts)))
