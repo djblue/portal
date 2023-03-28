@@ -174,3 +174,52 @@
                               #'caught/wrap-caught}
                   :expects (into #{"eval"})
                   :handles {}})
+
+(def ^:private id-gen (atom 0))
+(def ^:private values (atom {}))
+(defn- next-id [] (swap! id-gen inc))
+
+(defn- ->value [id]
+  (let [value (get @values id)]
+    (swap! values dissoc id)
+    value))
+
+(p/register! #'->value)
+
+(defn- ->id [value]
+  (let [id (next-id)]
+    (swap! values assoc id value)
+    id))
+
+(defrecord NotebookTransport [transport]
+  Transport
+  (recv [_this timeout]
+    (transport/recv transport timeout))
+  (send [_this  message]
+    (if-not (contains? message :value)
+      (transport/send transport message)
+      (transport/send
+       transport
+       (update message :value
+               #(with-meta
+                  (list `->value (->id %))
+                  (-> (p/start {})
+                      (select-keys  [:port :host])
+                      (assoc ::eval true :protocol "ws:"))))))
+    transport))
+
+(defn- wrap-notebook* [handler {:keys [op] :as message}]
+  (handler
+   (cond-> message
+     (and (= op "eval")
+          (get-in message [:nrepl.middleware.eval/env :calva-notebook]))
+     (update :transport ->NotebookTransport))))
+
+(defn wrap-notebook [handler] (partial #'wrap-notebook* handler))
+
+(set-descriptor! #'wrap-notebook
+                 {:requires #{"clone"
+                              #'print/wrap-print
+                              #'caught/wrap-caught}
+                  :expects #{"eval"}
+                  :handles {}})

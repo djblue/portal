@@ -1,8 +1,10 @@
 (ns portal.extensions.vs-code-notebook
-  (:require [portal.runtime :as rt]
+  (:require [portal.async :as a]
+            [portal.runtime :as rt]
             [portal.runtime.edn :as edn]
             [portal.ui.embed :as embed]
             [portal.ui.inspector :as ins]
+            [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [reagent.core :as r]
             [reagent.dom :as dom]))
@@ -30,11 +32,25 @@
      (fn [resolve]
        (f msg resolve)))))
 
+(defonce ^:private session (random-uuid))
+
+(defn- ->value [data]
+  (a/let [value (try
+                  (edn/read-string (.text data))
+                  (catch :default e
+                    (ins/error->data e)))
+          conn  (meta value)]
+    (if-not (:portal.nrepl/eval conn)
+      value
+      (a/do
+        (rpc/connect
+         (assoc conn :session session))
+        (reset! state/sender rpc/request)
+        (apply rpc/call value)))))
+
 (defn render-output-item [data element]
-  (let [value (try
-                (edn/read-string (.text data))
-                (catch :default e
-                  (ins/error->data e)))]
+  (a/let [value (->value data)]
+    (dom/unmount-component-at-node element)
     (dom/render [app (.-id data) value] element functional-compiler)))
 
 (defn activate [ctx]

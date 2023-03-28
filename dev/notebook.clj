@@ -7,6 +7,8 @@
   [v default]
   (with-meta v {:portal.viewer/default default}))
 
+(::d/hacker-news d/data)
+
 (-> d/basic-data)
 
 (-> d/platform-data)

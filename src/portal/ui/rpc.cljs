@@ -212,29 +212,36 @@
 (defn- get-proto []
   (if (= (.-protocol js/location) "https:") "wss:" "ws:"))
 
-(defn- get-appendable-port []
-  (if (= (.-port js/location) "")
-    ""
-    (str ":" (.-port js/location))))
+(defn- get-port []
+  (when-not (= (.-port js/location) "")
+    (.-port js/location)))
 
-(defn- connect []
-  (if-let [ws @ws-promise]
-    ws
-    (reset!
-     ws-promise
-     (js/Promise.
-      (fn [resolve reject]
-        (when-let [chan (js/WebSocket.
-                         (str (get-proto) "//" (get-host) (get-appendable-port) "/rpc?" (get-session)))]
-          (set! (.-onmessage chan) #(dispatch (read (.-data %))
-                                              (fn [message]
-                                                (send! message))))
-          (set! (.-onerror chan)   (fn [e]
-                                     (reject e)
-                                     (doseq [[_ [_ reject]] @pending-requests]
-                                       (reject e))))
-          (set! (.-onclose chan)   #(reset!  ws-promise nil))
-          (set! (.-onopen chan)    #(resolve chan))))))))
+(defn connect
+  ([]
+   (connect
+    {:host     (get-host)
+     :port     (get-port)
+     :protocol (get-proto)
+     :session  (get-session)}))
+  ([{:keys [host port protocol session]}]
+   (if-let [ws @ws-promise]
+     ws
+     (reset!
+      ws-promise
+      (js/Promise.
+       (fn [resolve reject]
+         (when-let [chan (js/WebSocket.
+                          (str protocol "//" host (when port (str ":" port)) "/rpc?" session))]
+           (set! (.-onmessage chan) #(dispatch (read (.-data %))
+                                               (fn [message]
+                                                 (send! message))))
+           (set! (.-onerror chan)   (fn [e]
+                                      (reject e)
+                                      (.error js/console (pr-str e))
+                                      (doseq [[_ [_ reject]] @pending-requests]
+                                        (reject e))))
+           (set! (.-onclose chan)   #(reset!  ws-promise nil))
+           (set! (.-onopen chan)    #(resolve chan)))))))))
 
 (defn- send! [message]
   (.then (connect) #(.send % (write message))))
