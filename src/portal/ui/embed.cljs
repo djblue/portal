@@ -140,7 +140,7 @@
                    :min-height  :fit-content
                    :font-size   (:font-size theme)
                    :font-family (:font-family theme)}
-           :on-click (partial commands/close state)}
+           :on-click #(commands/close state)}
           [state/with-state
            state
            [theme/with-theme
