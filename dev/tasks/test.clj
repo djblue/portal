@@ -4,7 +4,7 @@
             [tasks.build :refer [build install]]
             [tasks.tools :as t]))
 
-(defn- cljs* [version]
+(defn cljs* [version]
   (let [out (str "target/test." version ".js")]
     (when (seq
            (fs/modified-since

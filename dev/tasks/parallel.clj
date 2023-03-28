@@ -70,13 +70,13 @@
         (throw e))
       (finally (http/server-stop! server)))))
 
-(defn with-data* [f]
+(defn- with-out-data* [f]
   (let [sessions (create-sessions)]
-    (tap> sessions)
     (binding [*sessions* sessions
               *opts*     (assoc *opts* :session with-session*)]
       (f))
     (deref (-> sessions deref meta :done) 60000 ::timeout)
-    (->> sessions deref meta :results (sort-by first) (map second))))
+    (->> sessions deref meta :results (sort-by first) (map second))
+    @sessions))
 
-(defmacro with-data [& body] `(with-data* (fn [] ~@body)))
+(defmacro with-out-data [& body] `(with-out-data* (fn [] ~@body)))
