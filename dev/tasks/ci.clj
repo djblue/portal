@@ -10,5 +10,5 @@
 (defn -main [] (ci))
 
 (comment
-  (require '[tasks.parallel :refer [with-data]])
-  (with-data (check*) (test*)))
+  (require '[tasks.parallel :refer [with-out-data]])
+  (with-out-data (check*) (test*)))

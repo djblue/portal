@@ -1,4 +1,4 @@
-(ns notebook
+(ns notebook.data
   (:require [examples.data :as d]
             [portal.colors :as c]))
 
