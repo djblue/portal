@@ -176,7 +176,7 @@
                   :handles {}})
 
 (def ^:private id-gen (atom 0))
-(def ^:private values (atom {}))
+(def ^:private values (atom (sorted-map)))
 (defn- next-id [] (swap! id-gen inc))
 
 (defn- ->value [id]
@@ -188,7 +188,11 @@
 
 (defn- ->id [value]
   (let [id (next-id)]
-    (swap! values assoc id value)
+    (swap!
+     values
+     #(cond-> %
+        (> (count %) 32) (dissoc (ffirst %))
+        :always          (assoc id value)))
     id))
 
 (defrecord NotebookTransport [transport]
