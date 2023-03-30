@@ -182,3 +182,15 @@
    (docs nil))
   ([options]
    (open (assoc options :window-title "portal-docs" :value (get-docs)))))
+
+(defn inspect
+  "Open a new portal window to inspect a particular value."
+  {:command true
+   :added "0.38.0"
+   :see-also ["open"]}
+  ([value]
+   (inspect value (:options rt/*session*)))
+  ([value options]
+   (open (assoc options :value value))))
+
+(register! #'inspect)

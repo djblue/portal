@@ -12,17 +12,25 @@
 (defonce context (atom nil))
 (defonce component (r/atom embed/app))
 
+(defn inspect
+  "Open a new portal window to inspect a particular value."
+  {:command true}
+  ([value]
+   (inspect value))
+  ([value _]
+   (.postMessage
+    ^js @context
+    #js {:type "open-editor"
+         :data (binding [*print-meta* true]
+                 (pr-str value))})))
+
+(rt/register! #'inspect {:name `portal.api/inspect})
+
 (defn app [id value]
   [@component
    {:id id
     :value value
-    :on-open
-    (fn [value]
-      (.postMessage
-       ^js @context
-       #js {:type "open-editor"
-            :data (binding [*print-meta* true]
-                    (pr-str value))}))}])
+    :on-open #(rpc/call `portal.api/inspect % {:launcher :vs-code})}])
 
 (defonce functional-compiler (r/create-compiler {:function-components true}))
 
@@ -43,8 +51,7 @@
     (if-not (:portal.nrepl/eval conn)
       value
       (a/do
-        (rpc/connect
-         (assoc conn :session session))
+        (rpc/connect (assoc conn :session session))
         (reset! state/sender rpc/request)
         (apply rpc/call value)))))
 
