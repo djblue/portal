@@ -17,4 +17,4 @@
 (defn- web-fetch [url]
   (.then (js/fetch url) #(.text %)))
 
-(def fetch (if (some? js/window) web-fetch node-fetch))
+(def fetch (if (exists? js/window) web-fetch node-fetch))
