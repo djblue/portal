@@ -1,3 +1,7 @@
+## 0.38.1 - 2023-03-30
+
+- Fix advanced compile issue for calva notebooks
+
 ## 0.38.0 - 2023-03-30
 
 - Add `portal.api/inspect` e1ecae5
