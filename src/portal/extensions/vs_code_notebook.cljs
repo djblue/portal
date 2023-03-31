@@ -42,11 +42,21 @@
 
 (defonce ^:private session (random-uuid))
 
-(defn- ->value [data]
-  (a/let [value (try
-                  (edn/read-string (.text data))
+(defn- ->text [data]
+  (case (.-mime data)
+    "application/vnd.code.notebook.error"
+    (edn/read-string (.-message (.json data)))
+    "x-application/edn"
+    (.text data)))
+
+(defn- ->value [^js data]
+  (a/let [text  (->text data)
+          value (try
+                  (edn/read-string (->text data))
                   (catch :default e
-                    (ins/error->data e)))
+                    (-> e
+                        ins/error->data
+                        (assoc-in [:data ::text] text))))
           conn  (meta value)]
     (if-not (:portal.nrepl/eval conn)
       value

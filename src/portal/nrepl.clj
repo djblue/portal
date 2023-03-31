@@ -195,21 +195,31 @@
         :always          (assoc id value)))
     id))
 
+(defn- link-value [value]
+  (with-meta
+    (list `->value (->id value))
+    (-> (p/start {})
+        (select-keys  [:port :host])
+        (assoc ::eval true :protocol "ws:"))))
+
+(defn- intercept-value [message]
+  (cond-> message
+    (contains? message ::caught/throwable)
+    (assoc :ex
+           (binding [*print-meta* true]
+             (pr-str
+              (link-value
+               (d/datafy (::caught/throwable message))))))
+
+    (contains? message :value)
+    (update :value link-value)))
+
 (defrecord NotebookTransport [transport]
   Transport
   (recv [_this timeout]
     (transport/recv transport timeout))
   (send [_this  message]
-    (if-not (contains? message :value)
-      (transport/send transport message)
-      (transport/send
-       transport
-       (update message :value
-               #(with-meta
-                  (list `->value (->id %))
-                  (-> (p/start {})
-                      (select-keys  [:port :host])
-                      (assoc ::eval true :protocol "ws:"))))))
+    (transport/send transport (intercept-value message))
     transport))
 
 (defn- wrap-notebook* [handler {:keys [op] :as message}]
