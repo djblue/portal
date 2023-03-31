@@ -42,14 +42,14 @@
 
 (defonce ^:private session (random-uuid))
 
-(defn- ->text [data]
+(defn- ->text [^js data]
   (case (.-mime data)
     "application/vnd.code.notebook.error"
     (edn/read-string (.-message (.json data)))
     "x-application/edn"
     (.text data)))
 
-(defn- ->value [^js data]
+(defn- ->value [data]
   (a/let [text  (->text data)
           value (try
                   (edn/read-string (->text data))
@@ -65,7 +65,7 @@
         (reset! state/sender rpc/request)
         (apply rpc/call value)))))
 
-(defn render-output-item [data element]
+(defn render-output-item [^js data element]
   (a/let [value (->value data)]
     (dom/unmount-component-at-node element)
     (dom/render [app (.-id data) value] element functional-compiler)))
