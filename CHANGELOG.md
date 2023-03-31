@@ -1,3 +1,16 @@
+## 0.38.0 - 2023-03-30
+
+- Add `portal.api/inspect` e1ecae5
+- Updates IJ plugin for 2023.1 (#174) fd79e75
+- [docs] update cider variable to include :portal alias (#172) 6ad7824
+- Add `portal.viewer/pprint` limits 1cf2f48
+- Add `js/Math` to sci be73bf4
+
+### Calva Notebooks
+
+- Improve error handling for notebooks 9bb4acd
+- Improve notebook integration with nrepl middleware b24ceb6
+
 ## 0.37.1 - 2023-03-15
 
 - Fix pom.xml generation ca290e2
