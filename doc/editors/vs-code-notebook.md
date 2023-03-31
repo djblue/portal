@@ -23,3 +23,15 @@ menu where you can change the presentation to Portal!
 [1]: https://calva.io/notebooks/
 [2]: https://marketplace.visualstudio.com/items?itemName=betterthantomorrow.calva
 [3]: https://marketplace.visualstudio.com/items?itemName=djblue.portal
+
+## `portal.nrepl/wrap-notebook`
+
+If you would like the same facilities provided by a process connected Portal
+instance directly in your Calva notebooks, simply add the
+`portal.nrepl/wrap-notebook` middleware to your nrepl stack. This will enable:
+
+- [Datafy + Nav](../datafy.md)
+- First class object support
+- Runtime registered commands
+- Larger values which are harder for edn to serialize and parse
+- Better error rendering
