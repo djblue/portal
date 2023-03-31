@@ -70,7 +70,7 @@
         (throw e))
       (finally (http/server-stop! server)))))
 
-(defn- with-out-data* [f]
+(defn with-out-data* [f]
   (let [sessions (create-sessions)]
     (binding [*sessions* sessions
               *opts*     (assoc *opts* :session with-session*)]
