@@ -41,7 +41,8 @@
         "displayName": "Portal",
         "entrypoint": "./notebook/main.js",
         "mimeTypes": [
-          "x-application/edn"
+          "x-application/edn",
+          "application/vnd.code.notebook.error"
         ],
         "requiresMessaging": "optional"
       }
