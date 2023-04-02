@@ -5,6 +5,7 @@
             [cognitect.transit :as transit]
             [org.httpkit.server :as server]
             [portal.runtime :as rt]
+            [portal.runtime.cson :as cson]
             [portal.runtime.fs :as fs]
             [portal.runtime.index :as index]
             [portal.runtime.json :as json]
@@ -129,6 +130,7 @@
   (case (content-type request)
     "application/transit+json" (transit/read (transit/reader body :json))
     "application/json"         (json/read-stream (io/reader body))
+    "application/cson"         (cson/read (slurp body))
     "application/edn"          (edn/read
                                 {:default tagged-literal}
                                 (PushbackReader. (io/reader body)))))

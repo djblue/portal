@@ -1,5 +1,6 @@
 (ns tasks.parallel
   (:require [org.httpkit.server :as http]
+            [portal.runtime.cson :as cson]
             [tasks.tools :refer [*opts*]]))
 
 (def ^:private ^:dynamic *sessions* nil)
@@ -48,7 +49,7 @@
         id       (new-session sessions)
         server   (http/run-server
                   (fn [request]
-                    (append-stdio sessions id {:tag :tap :val (slurp (:body request))})
+                    (append-stdio sessions id {:tag :tap :val (cson/read (slurp (:body request)))})
                     {:status 200})
                   {:port 0 :legacy-return-value? false})
         port     (http/server-port server)
@@ -72,9 +73,11 @@
 
 (defn with-out-data* [f]
   (let [sessions (create-sessions)]
-    (binding [*sessions* sessions
-              *opts*     (assoc *opts* :session with-session*)]
-      (f))
+    (try (binding [*sessions* sessions
+                   *opts*     (assoc *opts* :session with-session*)]
+           (f))
+         (catch Exception e
+           (tap> e)))
     (deref (-> sessions deref meta :done) 60000 ::timeout)
     (->> sessions deref meta :results (sort-by first) (map second))
     @sessions))

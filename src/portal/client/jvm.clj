@@ -1,8 +1,9 @@
 (ns portal.client.jvm
-  (:require
-   [org.httpkit.client :as http]
-   [portal.runtime.json :as json]
-   [portal.runtime.transit :as transit]))
+  (:require [org.httpkit.client :as http]
+            [portal.runtime]
+            [portal.runtime.cson :as cson]
+            [portal.runtime.json :as json]
+            [portal.runtime.transit :as transit]))
 
 (defn submit
   "Tap target function.
@@ -34,12 +35,14 @@
       {"content-type"
        (case encoding
          :json    "application/json"
+         :cson    "application/cson"
          :transit "application/transit+json"
          :edn     "application/edn")}
       :body
       (case encoding
         :json    (json/write value)
         :transit (transit/write value)
+        :cson    (cson/write value)
         :edn     (binding [*print-meta* true]
                    (pr-str value)))})))
 
