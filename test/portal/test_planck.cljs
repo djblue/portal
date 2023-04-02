@@ -14,7 +14,7 @@
 
 (def port (:portal-port env))
 
-(defn submit [value] (p/submit {:port port} value))
+(defn submit [value] (p/submit {:port port :encoding :cson} value))
 
 (defn table [value]
   (if port

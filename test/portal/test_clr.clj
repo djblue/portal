@@ -13,7 +13,7 @@
 
 (def port (Environment/GetEnvironmentVariable "PORTAL_PORT"))
 
-(defn submit [value] (p/submit {:port port} value))
+(defn submit [value] (p/submit {:port port :encoding :cson} value))
 
 (defn table [value]
   (if port

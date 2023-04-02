@@ -1,7 +1,8 @@
 (ns ^:no-doc portal.client.common
-  (:require
-   [portal.runtime.json :as json]
-   [portal.runtime.transit :as transit]))
+  (:require [portal.runtime]
+            [portal.runtime.cson :as cson]
+            [portal.runtime.json :as json]
+            [portal.runtime.transit :as transit]))
 
 (defn ->submit [fetch]
   (fn submit
@@ -18,11 +19,13 @@
        {"content-type"
         (case encoding
           :json    "application/json"
+          :cson    "application/cson"
           :transit "application/transit+json"
           :edn     "application/edn")}
        :body
        (case encoding
          :json    (json/write value)
          :transit (transit/write value)
+         :cson    (cson/write value)
          :edn     (binding [*print-meta* true]
                     (pr-str value)))}))))

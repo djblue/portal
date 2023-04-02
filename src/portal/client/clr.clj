@@ -4,7 +4,9 @@
             HttpMethod
             HttpRequestMessage
             StringContent)
-           (System.Text Encoding)))
+           (System.Text Encoding))
+  (:require [portal.runtime]
+            [portal.runtime.cson :as cson]))
 
 (def client (HttpClient.))
 
@@ -23,8 +25,10 @@
            (StringContent.
             (case encoding
               :edn (binding [*print-meta* true]
-                     (pr-str value)))
+                     (pr-str value))
+              :cson (cson/write value))
             Encoding/UTF8
             (case encoding
-              :edn     "application/edn")))
+              :edn     "application/edn"
+              :cson    "application/cson")))
      (.Send ^HttpClient client request))))
