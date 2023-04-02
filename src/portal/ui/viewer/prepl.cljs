@@ -79,10 +79,11 @@
 
 (defn inspect-prepl [value]
   (let [theme (theme/use-theme)
-        opts  (ins/use-options)]
+        opts  (ins/use-options)
+        bg    (ins/get-background)]
     [d/div
      {:style
-      {:background    (ins/get-background)
+      {:background    bg
        :border-radius (:border-radius theme)
        :border        [1 :solid (::c/border theme)]}}
      [d/div
@@ -99,6 +100,7 @@
       {:style
        {:margin         0
         :display        :flex
+        :background     bg
         :max-height     (when-not (:expanded? opts) "24rem")
         :overflow       :auto
         :flex-direction :column-reverse

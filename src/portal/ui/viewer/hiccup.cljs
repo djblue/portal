@@ -54,6 +54,7 @@
        {:margin 0
         :background bg
         :padding-left (* 2 (:padding theme))
+        :font-style :normal
         :border-left [(:padding theme) :solid (::c/border theme)]}
 
        [:table.hiccup]
@@ -61,7 +62,7 @@
         :margin-right 1
         :color (::c/text theme)
         :font-size (:font-size theme)
-        :width "calc(100% - 2)"
+        :width "calc(100% - 2px)"
         :overflow :auto
         :border-style :hidden
         :border-collapse :collapse
