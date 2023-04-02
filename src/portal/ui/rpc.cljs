@@ -56,6 +56,8 @@
   (-pr-writer [this writer _opts]
     (-write writer (str this))))
 
+(defmethod cson/tagged-str "remote" [{:keys [rep]}] rep)
+
 (extend-type default
   cson/ToJson
   (-to-json [value buffer]

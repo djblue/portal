@@ -100,8 +100,6 @@
      :cljr (instance? clojure.lang.IRef value)
      :cljs (satisfies? cljs.core/IDeref value)))
 
-(defmethod cson/tagged-str "remote" [{:keys [rep]}] rep)
-
 (defn- to-object [buffer value tag rep]
   (if-not *session*
     (cson/-to-json
