@@ -54,7 +54,8 @@
             (when-not (zero? exit)
               (str " " (a/bold-red (str "(exit: " exit ")")))))))
     (when-not (zero? exit)
-      (throw (ex-info "Non-zero exit code"
+      (throw (ex-info (str "Non-zero exit code: "
+                           (str/join " " (map name args)))
                       (assoc (select-keys result [:cmd :exit]) :opts *opts*)))))
   true)
 
