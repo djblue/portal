@@ -19,7 +19,8 @@
        {:size "1x"
         :style {:cursor :pointer
                 :padding (:padding theme)
-                :color   (::c/text theme)}
+                :color   (::c/text theme)
+                :box-sizing :content-box}
         :on-click
         (fn open-editor [e]
           (.stopPropagation e)
@@ -42,7 +43,8 @@
       :style    (merge
                  {:cursor :pointer
                   :padding (:padding theme)
-                  :color   (::c/text theme)}
+                  :color   (::c/text theme)
+                  :box-sizing :content-box}
                  (when disabled?
                    {:opacity 0.45
                     :cursor  :default}))}]))
@@ -55,7 +57,8 @@
       :title    "Open command palette."
       :style    {:cursor :pointer
                  :padding (:padding theme)
-                 :color   (::c/text theme)}
+                 :color   (::c/text theme)
+                 :box-sizing :content-box}
       :on-click #(commands/open-command-palette state)}]))
 
 (defn- toolbar [& children]
@@ -97,6 +100,7 @@
      {:style
       {:display :inline-block
        :position :relative
+       :font-size (:font-size theme)
        :opacity (if disabled? 0.45 1)}}
      [s/select
       {:title "Select a different viewer."
@@ -122,7 +126,8 @@
       {:size  "1x"
        :style {:padding (:padding theme)
                :z-index 1
-               :color   (::c/text theme)}
+               :color   (::c/text theme)
+               :box-sizing :content-box}
        :style/hover {:background :pink}}]]))
 
 (defn app [{:keys [id value on-open]}]
