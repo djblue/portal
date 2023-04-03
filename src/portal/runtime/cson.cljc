@@ -202,7 +202,7 @@
 
 #?(:clj
    (defmethod print-method Tagged [v ^java.io.Writer w]
-     (.write w (tagged-str v)))
+     (.write w ^String (tagged-str v)))
    :cljs
    (extend-type Tagged
      IPrintWithWriter
