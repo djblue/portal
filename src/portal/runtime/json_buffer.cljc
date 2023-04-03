@@ -22,7 +22,7 @@
      :cljr
      (volatile!
       (seq
-       (JsonNode/Parse data
+       (JsonNode/Parse ^String data
                        (JsonNodeOptions.)
                        (JsonDocumentOptions.))))
      :clj
@@ -117,8 +117,9 @@
   #?(:bb (let [v (first @buffer)] (vswap! buffer rest) v)
      :cljr
      (let [result
-           (when-let [value (some-> ^JsonValue (first @buffer)
-                                    (.GetValue (type-args JsonElement)))]
+           (when-let [^JsonElement value
+                      (some-> ^JsonValue (first @buffer)
+                              (.GetValue (type-args JsonElement)))]
              (condp identical? (.ValueKind value)
                JsonValueKind/String (.GetString value)
                JsonValueKind/False  false
