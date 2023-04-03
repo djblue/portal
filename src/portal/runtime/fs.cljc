@@ -83,8 +83,7 @@
 (defn home []
   #?(:clj  (System/getProperty "user.home")
      :cljs (os/homedir)
-     :cljr (or (Environment/GetEnvironmentVariable "HOME")
-               (Environment/GetEnvironmentVariable "userdir"))))
+     :cljr (Environment/GetFolderPath System.Environment+SpecialFolder/UserProfile)))
 
 (defn list [path]
   #?(:clj  (for [^java.io.File f (.listFiles (io/file path))]
