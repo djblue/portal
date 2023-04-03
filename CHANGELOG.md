@@ -1,3 +1,10 @@
+## 0.38.2 - 2023-04-02
+
+- Unmount notebook output item on dispose 0764a59
+- Improve notebook repl error handling fcb741e
+- Special print for remote values in UI 5181411
+- Add cson support for remote api (#175) df7ed37 Thanks @Cyrik!
+
 ## 0.38.1 - 2023-03-30
 
 - Fix advanced compile issue for calva notebooks
