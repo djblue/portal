@@ -109,5 +109,6 @@
 
 (defn dirname [path]
   #?(:clj  (.getParent (io/file path))
-     :cljs (when-not (= "/" path) (path/dirname path))
+     :cljs (let [root (.-root (path/parse path))]
+             (when-not (= path root) (path/dirname path)))
      :cljr (some-> (Directory/GetParent path) str)))
