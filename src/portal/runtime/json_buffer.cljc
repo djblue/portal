@@ -16,6 +16,14 @@
 
 (defprotocol IShift (-shift [this]))
 
+#?(:cljs (deftype Shifter [source ^int n]
+           IShift
+           (-shift [this]
+             (let [n      (.-n this)
+                   result (aget source n)]
+               (set! (.-n this) (unchecked-inc n))
+               result))))
+
 (defn ->reader [data]
   #?(:bb
      (volatile! (json/read data))
@@ -29,13 +37,7 @@
      (doto (JsonReader. (StringReader. data))
        (.beginArray))
      :cljs
-     (let [source (.parse js/JSON data)
-           n      (volatile! 0)]
-       (reify IShift
-         (-shift [_this]
-           (let [result (aget source @n)]
-             (vswap! n unchecked-inc)
-             result))))))
+     (Shifter. (.parse js/JSON data) 0)))
 
 (defn push-null   [buffer]
   #?(:bb   (conj! buffer nil)
