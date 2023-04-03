@@ -100,6 +100,7 @@
        (println "Goto" url "to view portal ui."))
      :cljr
      (condp identical? (.Platform Environment/OSVersion)
+       PlatformID/Win32NT      (shell/sh "cmd" "/c" "start" url)
        PlatformID/Win32Windows (shell/sh "cmd" "/c" "start" url)
        PlatformID/Unix         (if (RuntimeInformation/IsOSPlatform OSPlatform/OSX)
                                  (shell/sh "open" url)
