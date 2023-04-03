@@ -1,5 +1,6 @@
 (ns portal.extensions.vs-code-notebook
-  (:require [portal.async :as a]
+  (:require [clojure.string :as str]
+            [portal.async :as a]
             [portal.runtime :as rt]
             [portal.runtime.edn :as edn]
             [portal.ui.embed :as embed]
@@ -45,18 +46,20 @@
 (defn- ->text [^js data]
   (case (.-mime data)
     "application/vnd.code.notebook.error"
-    (edn/read-string (.-message (.json data)))
+    (let [message (.-message (.json data))]
+      (if (str/starts-with? message "\"^{")
+        (edn/read-string message)
+        (throw (ex-info
+                message
+                (js->clj data :keywordize-keys true)))))
     "x-application/edn"
     (.text data)))
 
 (defn- ->value [data]
-  (a/let [text  (->text data)
-          value (try
+  (a/let [value (try
                   (edn/read-string (->text data))
                   (catch :default e
-                    (-> e
-                        ins/error->data
-                        (assoc-in [:data ::text] text))))
+                    (ins/error->data e)))
           conn  (meta value)]
     (if-not (:portal.nrepl/eval conn)
       value
