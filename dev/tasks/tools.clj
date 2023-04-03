@@ -1,5 +1,6 @@
 (ns tasks.tools
   (:require [babashka.process :as p]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [io.aviso.ansi :as a])
   (:import [java.time Duration]))
@@ -64,11 +65,17 @@
     (apply session sh* args)
     (apply sh* args)))
 
+(def ^:private windows?
+  (str/starts-with? (System/getProperty "os.name") "Win"))
+
+(defn- local-bin [bin]
+  (.getCanonicalPath (io/file (str bin (when windows? ".bat")))))
+
 (def bb     (partial #'sh :bb))
 (def clj    (partial #'sh :clojure))
 (def cljr   (partial #'sh :Clojure.Main))
 (def git    (partial #'sh :git))
-(def gradle (partial #'sh "./gradlew" "--warning-mode" "all"))
+(def gradle (partial #'sh (local-bin "./extension-intellij/gradlew") "--warning-mode" "all"))
 (def node   (partial #'sh :node))
 (def npm    (partial #'sh :npm))
 (def npx    (partial #'sh :npx))
