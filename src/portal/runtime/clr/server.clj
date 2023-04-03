@@ -7,14 +7,12 @@
             [portal.runtime.index :as index]
             [portal.runtime.json :as json])
   (:import (clojure.lang RT)
-           (System Guid Environment)
+           (System Environment Guid)
+           (System.IO Path)
            (System.Net HttpListenerContext)
-           (System.Net.WebSockets
-            WebSocket
-            WebSocketMessageType
-            WebSocketState)
+           (System.Net.WebSockets WebSocket WebSocketMessageType WebSocketState)
            (System.Text Encoding)
-           (System.Threading Thread CancellationToken)))
+           (System.Threading CancellationToken Thread)))
 
 (defmulti route (juxt :request-method :uri))
 
@@ -90,9 +88,10 @@
 (defn- resource [path]
   (some
    (fn [dir]
-     (fs/exists (fs/join dir path)))
+     (fs/exists (fs/join (fs/cwd) dir path)))
    (str/split
-    (Environment/GetEnvironmentVariable "CLOJURE_LOAD_PATH") #":")))
+    (Environment/GetEnvironmentVariable "CLOJURE_LOAD_PATH")
+    (re-pattern (str Path/PathSeparator)))))
 
 (defmethod route :default [request]
   (if-not (str/ends-with? (:uri request) ".map")
