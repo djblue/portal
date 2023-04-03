@@ -76,6 +76,8 @@
 (defn activate [ctx]
   (reset! context ctx)
   (reset! state/sender send!)
-  #js {:renderOutputItem #(render-output-item %1 %2)})
+  #js {:renderOutputItem #(render-output-item %1 %2)
+       :disposeOutputItem
+       #(dom/unmount-component-at-node (.getElementById js/document %))})
 
 (defn reload [] (reset! component embed/app))
