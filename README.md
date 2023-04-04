@@ -58,7 +58,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.38.2"}
 or for a **babashka >=0.2.4** repl, do:
 
 ```bash
-bb -cp `clj -Spath -Sdeps '{:deps {djblue/portal {:mvn/version "0.38.2"}}}'`
+bb -Sdeps '{:deps {djblue/portal {:mvn/version "0.38.2"}}}'
 ```
 
 or for a Leiningen project:
