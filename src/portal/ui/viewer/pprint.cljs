@@ -39,8 +39,12 @@
 (pp/set-pprint-dispatch pprint-dispatch)
 
 (defn pprint-data [value]
-  (let [string (str/trim (with-out-str (pp/pprint value)))]
-    [code/highlight-clj string]))
+  (let [options (:portal.viewer/pprint (meta value))]
+    (binding [*print-meta*   (:print-meta   options (coll? value))
+              *print-length* (:print-length options 25)
+              *print-level*  (:print-level  options 5)]
+      [code/highlight-clj
+       (str/trim (with-out-str (pp/pprint value)))])))
 
 (def viewer
   {:predicate (constantly true)

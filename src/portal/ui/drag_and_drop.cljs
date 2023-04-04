@@ -2,7 +2,7 @@
   (:require ["react" :as react]
             [clojure.string :as string]
             [portal.async :as a]
-            [portal.ui.inspector :as ins]
+            [portal.runtime.edn :as edn]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.viewer.csv :as csv]
@@ -43,7 +43,7 @@
               (js->clj (js/JSON.parse content))))
    "edn"  (fn [file]
             (a/let [content (read-file file)]
-              (ins/read-string content)))
+              (edn/read-string content)))
    "md"   (fn [file]
             (a/let [content (read-file file)]
               (with-meta

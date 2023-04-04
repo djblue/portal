@@ -43,7 +43,7 @@
 
 (defn build [] (main-js) (ws-js))
 
-(defn prep [_] (install) (build))
+(defn prep [_] (install) (build) (shutdown-agents))
 
 (defn vs-code-extension
   "Build vs-code extension."

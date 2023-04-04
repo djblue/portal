@@ -1,12 +1,16 @@
 (ns ^:no-doc portal.ui.sci.libs
   (:require ["react" :as react]
             ["react-dom" :as react-dom]
+            ["react/jsx-runtime" :as jsx-runtime]
             ["vega" :as vega]
             ["vega-embed" :as vega-embed]
             ["vega-lite" :as vega-lite]
             cljs.reader
+            goog.crypt.base64
             portal.colors
+            portal.runtime.cson
             portal.ui.api
+            portal.ui.app
             portal.ui.commands
             portal.ui.icons
             portal.ui.inspector
@@ -39,26 +43,26 @@
             portal.ui.viewer.vega-lite
             reagent.core
             reagent.dom
-            [sci.core :as sci]))
+            [sci.core :as sci])
+  (:import [goog.math Long]))
 
-(defn- import-npm [m]
-  (if (fn? m)
-    {'default m}
-    (reduce-kv
-     (fn [m k v]
-       (assoc m (symbol k) v)) {}
-     (js->clj m))))
+(def js-libs
+  {"react"      react
+   "react/jsx-runtime" jsx-runtime
+   "react-dom"  react-dom
+   "vega"       vega
+   "vega-embed" vega-embed
+   "vega-lite"  vega-lite})
 
 (def namespaces
   (merge
-   {"react"      (import-npm react)
-    "react-dom"  (import-npm react-dom)
-    "vega"       (import-npm vega)
-    "vega-embed" (import-npm vega-embed)
-    "vega-lite"  (import-npm vega-lite)}
    (sci-import/import-ns
+    goog.crypt.base64
+    goog.math
     portal.colors
+    portal.runtime.cson
     portal.ui.api
+    portal.ui.app
     portal.ui.commands
     portal.ui.icons
     portal.ui.inspector
@@ -98,7 +102,10 @@
 (defn init [opts]
   (sci/init
    (merge {:namespaces namespaces
+           :js-libs js-libs
            :classes {'js js/window
+                     'Math js/Math
+                     'goog.math.Long Long
                      :allow :all}
            :disable-arity-checks true}
           opts)))

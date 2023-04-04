@@ -192,7 +192,8 @@
       {:style
        (merge
         {:gap 16
-         :max-width 896
+         :width 896
+         :max-width "100%"
          :display :flex
          :box-sizing :border-box
          :flex-direction :column}

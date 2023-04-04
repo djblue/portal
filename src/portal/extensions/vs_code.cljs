@@ -45,7 +45,7 @@
                               " - "
                               ["portal"
                                (get options :window-title "vs-code")
-                               "0.35.1"])
+                               "0.38.2"])
                              (view-column)
                              #js {:enableScripts           true
                                   :retainContextWhenHidden true})

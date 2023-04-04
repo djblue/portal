@@ -1,13 +1,15 @@
 (ns portal.test-runner
   (:require [cljs.test :as t]
             [clojure.pprint :as pp]
+            [portal.async :as a]
             [portal.client.node :as p]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
             [portal.runtime.fs :as fs]
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
-            [portal.runtime.json-buffer-test]))
+            [portal.runtime.json-buffer-test]
+            [portal.runtime.npm-test]))
 
 (defn- error->data [ex]
   (with-meta
@@ -35,7 +37,7 @@
 
 (def port (.. js/process -env -PORTAL_PORT))
 
-(defn submit [value] (p/submit {:port port} value))
+(defn submit [value] (p/submit {:port port :encoding :cson} value))
 
 (defn table [value]
   (if port
@@ -47,18 +49,20 @@
 (defn run-tests [f]
   (if-not port
     (f)
-    (let [report (atom [])
-          counts
-          (with-redefs [t/report #(swap! report conj %)]
-            (f))]
-      (submit @report)
-      counts)))
+    (let [report (atom [])]
+      (with-redefs [t/report #(swap! report conj %)]
+        (f))
+      (a/do (submit @report) @report))))
 
 (defn -main []
-  (run-tests
-   #(t/run-tests 'portal.runtime.cson-test
-                 'portal.runtime.fs-test
-                 'portal.runtime.json-buffer-test))
-  (table (bench/run (json/read (fs/slurp "package-lock.json")) 100)))
+  (a/let [report
+          (run-tests
+           #(t/run-tests 'portal.runtime.cson-test
+                         'portal.runtime.fs-test
+                         'portal.runtime.json-buffer-test
+                         'portal.runtime.npm-test))
+          errors (count (filter (comp #{:fail} :type) report))]
+    (table (bench/run (json/read (fs/slurp "package-lock.json")) 100))
+    (.exit js/process errors)))
 
 (-main)

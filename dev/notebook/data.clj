@@ -1,4 +1,4 @@
-(ns notebook
+(ns notebook.data
   (:require [examples.data :as d]
             [portal.colors :as c]))
 
@@ -6,6 +6,8 @@
   "Set default portal viewer for a given value."
   [v default]
   (with-meta v {:portal.viewer/default default}))
+
+(::d/hacker-news d/data)
 
 (-> d/basic-data)
 

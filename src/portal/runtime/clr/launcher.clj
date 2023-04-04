@@ -56,17 +56,16 @@
            {:http-server http-server
             :future
             (future
-              (tap> :future-start)
               (while (.IsListening http-server)
                 (let [context (.GetContext http-server)]
-                  (try
-                    (let [request-map  (read-request context)
-                          response-map (server/handler request-map)]
-                      (when-not (:websocket? request-map)
-                        (write-response context response-map)))
-                    (catch Exception e
-                      (write-response context {:status 500 :body (pr-str e)})))))
-              (tap> :future-end))
+                  (future
+                    (try
+                      (let [request-map  (read-request context)
+                            response-map (server/handler request-map)]
+                        (when-not (:websocket? request-map)
+                          (write-response context response-map)))
+                      (catch Exception e
+                        (write-response context {:status 500 :body (pr-str e)})))))))
             :port port
             :host host})))))
 

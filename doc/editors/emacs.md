@@ -30,7 +30,7 @@ the following section may be of interest to you.
 
 ;; NOTE: You do need to have portal on the class path and the easiest way I know
 ;; how is via a clj user or project alias.
-(setq cider-clojure-cli-global-options "-A:portal")
+(setq cider-clojure-cli-aliases ":portal")
 ```
 
 ## xwidget-webkit embed

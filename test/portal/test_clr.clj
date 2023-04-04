@@ -2,16 +2,18 @@
   (:require [clojure.pprint :as pp]
             [clojure.test :as t]
             [portal.client.clr :as p]
+            [portal.jvm-test]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
-            [portal.runtime.json-buffer-test])
+            [portal.runtime.json-buffer-test]
+            [portal.runtime.npm-test])
   (:import (System Environment)))
 
 (def port (Environment/GetEnvironmentVariable "PORTAL_PORT"))
 
-(defn submit [value] (p/submit {:port port} value))
+(defn submit [value] (p/submit {:port port :encoding :cson} value))
 
 (defn table [value]
   (if port
@@ -33,8 +35,10 @@
 (defn -main []
   (let [{:keys [fail error]}
         (run-tests
+         'portal.jvm-test
          'portal.runtime.cson-test
          'portal.runtime.fs-test
-         'portal.runtime.json-buffer-test)]
+         'portal.runtime.json-buffer-test
+         'portal.runtime.npm-test)]
     (table (bench/run (json/read (slurp "package-lock.json" :encoding "utf8")) 50))
     (Environment/Exit (+ fail error))))

@@ -24,9 +24,8 @@
     (file-seq (io/file "test")))))
 
 (defn- exists [path]
-  (when-let [^File file (or (fs/exists (io/file path))
-                            (find-file path))]
-    {:file (.getAbsolutePath file)}))
+  (when-let [file (or (fs/exists path) (find-file path))]
+    {:file (.getAbsolutePath (io/file file))}))
 
 (def clojure.lang.Var (type #'exists))
 (def clojure.lang.Namespace (type *ns*))

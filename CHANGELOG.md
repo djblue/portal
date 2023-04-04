@@ -1,3 +1,79 @@
+## 0.38.2 - 2023-04-02
+
+- Unmount notebook output item on dispose 0764a59
+- Improve notebook repl error handling fcb741e
+- Special print for remote values in UI 5181411
+- Add cson support for remote api (#175) df7ed37 Thanks @Cyrik!
+
+## 0.38.1 - 2023-03-30
+
+- Fix advanced compile issue for calva notebooks
+
+## 0.38.0 - 2023-03-30
+
+- Add `portal.api/inspect` e1ecae5
+- Updates IJ plugin for 2023.1 (#174) fd79e75
+- [docs] update cider variable to include :portal alias (#172) 6ad7824
+- Add `portal.viewer/pprint` limits 1cf2f48
+- Add `js/Math` to sci be73bf4
+
+### Calva Notebooks
+
+- Improve error handling for notebooks 9bb4acd
+- Improve notebook integration with nrepl middleware b24ceb6
+
+## 0.37.1 - 2023-03-15
+
+- Fix pom.xml generation ca290e2
+- Removed unused code 692c86d
+- Update prepl viewer to render return values daa55cd
+
+## 0.37.0 - 2023-03-13
+
+- Change shadow config to existing preload and change custom preloads away from
+  portal namespace (#167) 7d27db1 Thanks @grahamcarlyle!
+
+### NPM Support
+
+- Add plotly viewer as an example da0439d
+- Simplify node module loading code d0a0588
+- Update sci to use `/load` endpoint 2e5437e
+- Add `/load` endpoint to jvm server 57a0254
+- First cut of `portal.runtime.npm/node-resolve` 70ce1a2
+
+### Bug Fixes
+
+- Enable async print in sci compiled fns 970ba8c
+- Fix cljdoc build 07e6695
+- Fix bug in goto-definition cbf10dd
+
+## 0.36.0 - 2023-02-27
+
+- Allow passing options to `portal.shadow.remote` d70730d
+
+### CLR Support
+
+- Add :cljr runtime logo 2d369c7
+- Optionally load `clr.data.json` 52bb1d3
+- Add basic CLR example project 49a9aa2
+- Update `examples.data` for CLR 4aea238
+- Port `portal.console` to CLR 9069afc
+- First cut of ClojureCLR runtime support 8554ea2
+
+### UX Tweaks
+
+- Always use `:portal.viewer/inspector` for tap-list 729c8b7
+- Improve exception viewer styles c806858
+
+### Bug Fixes
+
+- Fix :portal.viewer/test-report edge case 2fc888a
+- Fix AM / PM bug in `:portal.viewer/date-time` 1979e36
+- Fix tasks.build/prep hang 366dfd5
+- Fix portal.api/close race condition on jvm 5addb24
+- Fix test-report key for :type f5a7062
+- Fix read-string for tagged-literals with metadata 4b99c87
+
 ## 0.35.1 - 2023-01-06
 
 - Use pprint for collection of scalars d706d15

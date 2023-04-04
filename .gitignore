@@ -12,6 +12,7 @@ resources/portal-dev/
 .DS_Store
 .nrepl-port
 .bb-repl
+clojure.data.json*
 
 # vscode
 *.calva/

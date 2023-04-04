@@ -108,6 +108,17 @@
   (rt/register! var)
   nil)
 
+(defn- print-err [s]
+  #?(:clj  (binding [*out* *err*]
+             (print s)
+             (flush))
+     :cljs (binding [*print-fn* *print-err-fn*]
+             (print s)
+             (flush))
+     :cljr (binding [*out* *err*]
+             (print s)
+             (flush))))
+
 (defn eval-str
   "Evalute ClojureScript source given as a string in the UI runtime. The parameters:
 
@@ -125,6 +136,11 @@
    (eval-str portal code nil))
   ([portal code opts]
    (a/let [result (l/eval-str portal (assoc opts :code code))]
+     (when-not (:verbose opts)
+       (doseq [{:keys [tag val]} (:stdio result)]
+         (cond
+           (= :out tag) (do (print val) (flush))
+           (= :err tag) (print-err val))))
      (cond-> result (not (:verbose opts)) :value))))
 
 (defn sessions
@@ -166,3 +182,15 @@
    (docs nil))
   ([options]
    (open (assoc options :window-title "portal-docs" :value (get-docs)))))
+
+(defn inspect
+  "Open a new portal window to inspect a particular value."
+  {:command true
+   :added "0.38.0"
+   :see-also ["open"]}
+  ([value]
+   (inspect value (:options rt/*session*)))
+  ([value options]
+   (open (assoc options :value value))))
+
+(register! #'inspect)

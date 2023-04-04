@@ -2,12 +2,12 @@
   (:refer-clojure :exclude [coll? map? char?])
   (:require ["anser" :as anser]
             ["react" :as react]
-            [clojure.edn :as edn]
             [clojure.string :as str]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.async :as a]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
+            [portal.runtime.edn :as edn]
             [portal.ui.api :as api]
             [portal.ui.filter :as f]
             [portal.ui.lazy :as l]
@@ -49,19 +49,6 @@
     :via     [{:type    (symbol (.-name (type ex)))
                :message (.-message ex)}]
     :stack   (.-stack ex)}))
-
-;; Discard metadata on tagged-literals to improve success rate of  for
-;; read-string. Consider using a different type in the future.
-(extend-type cljs.core/TaggedLiteral
-  IMeta     (-meta [_this] nil)
-  IWithMeta (-with-meta [this _m] this))
-
-(defn read-string [edn-string]
-  (edn/read-string
-   {:readers {'portal/var rt/->var
-              'portal/bin cson/base64-decode}
-    :default tagged-literal}
-   (str/replace edn-string #"#'" "#portal/var ")))
 
 (defn- inspect-error [error]
   (let [theme (theme/use-theme)]
@@ -853,7 +840,7 @@
 (defn- inspect-object* [string]
   (let [context (use-context)]
     (try
-      (let [v (read-string string)]
+      (let [v (edn/read-string string)]
         (cond
           (nil? v) [highlight-words "nil"]
 
@@ -1005,6 +992,7 @@
        :title (-> value meta :doc)
        :style
        {:flex          "1"
+        :font-size     (:font-size theme)
         :font-family   (:font-family theme)
         :border-radius (:border-radius theme)
         :border        (if selected

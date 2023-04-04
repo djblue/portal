@@ -84,6 +84,8 @@ Or as a global profile, add to `~/.lein/profiles.clj`:
 If you add Portal to a profile other than `:dev`, when starting a REPL
 start it with `with-profiles +portal`. The `+` is important.
 
+or for [**Clojure CLR**][clojure-clr], checkout this [example project](./examples/clr),
+
 or for examples on how to integrate portal into an existing project, look
 through the [examples](./examples) directory.
 
@@ -167,3 +169,5 @@ For more documentation, take a look through the [docs][docs].
 [vs-code-docs]: ./doc/editors/vs-code.md
 [intellij-docs]: ./doc/editors/intellij.md
 [emacs-docs]: ./doc/editors/emacs.md#xwidget-webkit-embed
+
+[clojure-clr]: https://github.com/clojure/clojure-clr

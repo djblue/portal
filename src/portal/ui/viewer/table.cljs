@@ -28,6 +28,7 @@
        (cond->
         {:display :grid
          :grid-gap 1
+         :font-size (:font-size theme)
          :background (::c/border theme)
          :border [1 :solid (::c/border theme)]
          :border-radius (:border-radius theme)

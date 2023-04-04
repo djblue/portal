@@ -1,10 +1,11 @@
 (ns tasks.test
   (:refer-clojure :exclude [test])
   (:require [babashka.fs :as fs]
-            [tasks.build :refer [build]]
+            [clojure.string :as str]
+            [tasks.build :refer [build install]]
             [tasks.tools :as t]))
 
-(defn- cljs* [version]
+(defn cljs* [version]
   (let [out (str "target/test." version ".js")]
     (when (seq
            (fs/modified-since
@@ -26,6 +27,7 @@
     (t/node out)))
 
 (defn cljs []
+  (install)
   (cljs* "1.10.773")
   (cljs* "1.10.844"))
 
@@ -36,7 +38,10 @@
   (t/bb "-m" :portal.test-runner))
 
 (defn cljr []
-  (binding [t/*opts* (assoc-in t/*opts* [:extra-env "CLOJURE_LOAD_PATH"] "src:test")]
+  (install)
+  (binding [t/*opts* (assoc-in t/*opts* [:extra-env "CLOJURE_LOAD_PATH"]
+                               (str/join (System/getProperty "path.separator")
+                                         ["src" "resources" "test"]))]
     (t/cljr "-m" :portal.test-clr)))
 
 (defn test* []

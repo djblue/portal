@@ -16,26 +16,28 @@
 
 (defprotocol IShift (-shift [this]))
 
+#?(:cljs (deftype Shifter [source ^int n]
+           IShift
+           (-shift [this]
+             (let [n      (.-n this)
+                   result (aget source n)]
+               (set! (.-n this) (unchecked-inc n))
+               result))))
+
 (defn ->reader [data]
   #?(:bb
      (volatile! (json/read data))
      :cljr
      (volatile!
       (seq
-       (JsonNode/Parse data
+       (JsonNode/Parse ^String data
                        (JsonNodeOptions.)
                        (JsonDocumentOptions.))))
      :clj
      (doto (JsonReader. (StringReader. data))
        (.beginArray))
      :cljs
-     (let [source (.parse js/JSON data)
-           n      (volatile! 0)]
-       (reify IShift
-         (-shift [_this]
-           (let [result (aget source @n)]
-             (vswap! n unchecked-inc)
-             result))))))
+     (Shifter. (.parse js/JSON data) 0)))
 
 (defn push-null   [buffer]
   #?(:bb   (conj! buffer nil)
@@ -117,8 +119,9 @@
   #?(:bb (let [v (first @buffer)] (vswap! buffer rest) v)
      :cljr
      (let [result
-           (when-let [value (some-> ^JsonValue (first @buffer)
-                                    (.GetValue (type-args JsonElement)))]
+           (when-let [^JsonElement value
+                      (some-> ^JsonValue (first @buffer)
+                              (.GetValue (type-args JsonElement)))]
              (condp identical? (.ValueKind value)
                JsonValueKind/String (.GetString value)
                JsonValueKind/False  false

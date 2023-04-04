@@ -95,9 +95,12 @@
   (let [theme (theme/use-theme)]
     [:pre
      {:style {:margin      0
+              :padding     0
               :background  :none
               :width       "100%"
               :white-space :pre-wrap
+              :line-height "1rem"
+              :color       (::c/text theme)
               :font-size   (:font-size theme)
               :font-family (:font-family theme)}
       :dangerouslySetInnerHTML
@@ -144,6 +147,7 @@
                                   :margin      0
                                   :background  :none
                                   :width       :fit-content
+                                  :color       (::c/text theme)
                                   :font-family (:font-family theme)
                                   :font-size   (:font-size theme)}
         :dangerouslySetInnerHTML {:__html html}}]])))

@@ -7,11 +7,12 @@
             [portal.runtime.cson-test]
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
-            [portal.runtime.json-buffer-test]))
+            [portal.runtime.json-buffer-test]
+            [portal.runtime.npm-test]))
 
 (def port (System/getenv "PORTAL_PORT"))
 
-(defn submit [value] (p/submit {:port port} value))
+(defn submit [value] (p/submit {:port port :encoding :cson} value))
 
 (defn table [value]
   (if port
@@ -35,7 +36,8 @@
         (run-tests 'portal.jvm-test
                    'portal.runtime.cson-test
                    'portal.runtime.fs-test
-                   'portal.runtime.json-buffer-test)]
+                   'portal.runtime.json-buffer-test
+                   'portal.runtime.npm-test)]
     (table (bench/run (json/read (slurp "package-lock.json")) 50))
     (shutdown-agents)
     (System/exit (+ fail error))))

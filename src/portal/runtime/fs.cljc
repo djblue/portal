@@ -41,13 +41,22 @@
       ":"))
 
 (defn join [& paths]
-  #?(:clj  (.getAbsolutePath ^java.io.File (apply io/file paths))
+  #?(:clj  (.getCanonicalPath ^java.io.File (apply io/file paths))
      :cljs (apply path/join paths)
      :cljr (Path/Join (into-array String paths))))
 
 (defn exists [f]
-  (when #?(:clj  (.exists (io/file f))
-           :cljs (fs/existsSync f)
+  (when (and (string? f)
+             #?(:clj  (.exists (io/file f))
+                :cljs (fs/existsSync f)
+                :cljr (or (File/Exists f)
+                          (Directory/Exists f))))
+    f))
+
+(defn is-file [f]
+  (when #?(:clj  (.isFile (io/file f))
+           :cljs (and (exists f)
+                      (.isFile (fs/lstatSync f)))
            :cljr (File/Exists f))
     f))
 
@@ -74,8 +83,7 @@
 (defn home []
   #?(:clj  (System/getProperty "user.home")
      :cljs (os/homedir)
-     :cljr (or (Environment/GetEnvironmentVariable "HOME")
-               (Environment/GetEnvironmentVariable "userdir"))))
+     :cljr (Environment/GetFolderPath System.Environment+SpecialFolder/UserProfile)))
 
 (defn list [path]
   #?(:clj  (for [^java.io.File f (.listFiles (io/file path))]
@@ -100,5 +108,6 @@
 
 (defn dirname [path]
   #?(:clj  (.getParent (io/file path))
-     :cljs (path/dirname path)
-     :cljr (str (Directory/GetParent path))))
+     :cljs (let [root (.-root (path/parse path))]
+             (when-not (= path root) (path/dirname path)))
+     :cljr (some-> (Directory/GetParent path) str)))

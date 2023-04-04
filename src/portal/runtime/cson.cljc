@@ -1,11 +1,11 @@
 (ns ^:no-doc portal.runtime.cson
   "Clojure/Script Object Notation"
   (:refer-clojure :exclude [read])
-  #?(:cljs (:require [goog.crypt.base64 :as Base64]
-                     [portal.runtime.json-buffer :as json]
-                     [portal.runtime.macros :as m])
+  #?(:clj  (:require [portal.runtime.json-buffer :as json])
      :cljr (:require [portal.runtime.json-buffer :as json])
-     :clj  (:require [portal.runtime.json-buffer :as json]))
+     :cljs (:require [goog.crypt.base64 :as Base64]
+                     [portal.runtime.json-buffer :as json]
+                     [portal.runtime.macros :as m]))
   #?(:clj  (:import [java.net URL]
                     [java.util Base64 Date UUID])
      :cljs (:import [goog.math Long])))
@@ -195,20 +195,19 @@
                   (tagged-meta (bb-fix this))
                   (json/push-string (:tag this))))))
 
+(defmulti tagged-str :tag)
+(defmethod tagged-str :default
+  [{:keys [tag rep]}]
+  (str "#" tag " " (pr-str rep)))
+
 #?(:clj
    (defmethod print-method Tagged [v ^java.io.Writer w]
-     (.write w "#")
-     (.write w ^String (:tag v))
-     (.write w " ")
-     (.write w (pr-str (:rep v))))
+     (.write w ^String (tagged-str v)))
    :cljs
    (extend-type Tagged
      IPrintWithWriter
      (-pr-writer [this writer _opts]
-       (-write writer "#")
-       (-write writer (:tag this))
-       (-write writer " ")
-       (-write writer (pr-str (:rep this))))))
+       (-write writer (tagged-str this)))))
 
 (defn tagged-value [tag rep] {:pre [(string? tag)]} (->Tagged tag rep))
 

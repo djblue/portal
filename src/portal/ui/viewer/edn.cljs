@@ -1,8 +1,9 @@
 (ns portal.ui.viewer.edn
-  (:require [portal.ui.inspector :as ins]))
+  (:require [portal.runtime.edn :as edn]
+            [portal.ui.inspector :as ins]))
 
 (defn read-string [edn-string]
-  (try (ins/read-string edn-string)
+  (try (edn/read-string edn-string)
        (catch :default e (ins/error->data e))))
 
 (defn edn? [value] (string? value))

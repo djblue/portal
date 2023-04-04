@@ -12,7 +12,8 @@
 (defn- resolve-dlls [deps]
   (reduce-kv
    (fn [out package info]
-     (assoc out package (find-dll (name package) (:nuget/version info))))
+     (let [dll (find-dll (name package) (:nuget/version info))]
+       (cond-> out dll (assoc package dll))))
    {}
    deps))
 

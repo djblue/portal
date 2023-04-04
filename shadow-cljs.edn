@@ -3,7 +3,8 @@
  :nrepl {:init-ns user
          :repl-pprint true
          :middleware [portal.nrepl/wrap-portal
-                      portal.nrepl/wrap-repl]}
+                      portal.nrepl/wrap-repl
+                      portal.nrepl/wrap-notebook]}
  :builds
  {:client
   {:output-dir "resources/portal-dev/"

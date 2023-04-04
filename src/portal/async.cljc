@@ -1,6 +1,6 @@
 (ns ^:no-doc portal.async
   (:refer-clojure :exclude [let promise])
-  #?(:cljs (:require-macros portal.async)))
+  #?(:portal (:import) :cljs (:require-macros portal.async)))
 
 (defmacro do [& body]
   (reduce

@@ -671,9 +671,17 @@
     :result  :hello/clj
     :runtime :clj
     :form    :hello/clj}
+   {:ns      'user
+    :time    #inst "2009-02-03T00:25:17-06:00"
+    :level   :warn
+    :column  1
+    :line    1
+    :result  :hello/cljr
+    :runtime :cljr
+    :form    :hello/cljr}
    {:ns      'cljs.user
     :time    #inst "2011-06-02T19:45:57-04:00"
-    :level   :debug
+    :level   :error
     :column  1
     :line    2
     :result  :hello/cljs
@@ -681,7 +689,7 @@
     :form    :hello/cljs}
    {:ns      'tasks
     :time    #inst "2019-08-09T14:51:42+02:00"
-    :level   :error
+    :level   :debug
     :column  1
     :line    42
     :result  :hello/bb
@@ -689,7 +697,7 @@
     :form    :hello/bb}
    {:ns      'portal.api
     :time    #inst "2020-06-02T18:43:08-07:00"
-    :level   :warn
+    :level   :trace
     :column  1
     :line    7
     :result  :hello/portal
@@ -720,7 +728,7 @@
 
 (def test-report
   [{:type :begin-test-ns
-    :ns   (or *ns* 'examples.data)}
+    :ns   (if *ns* *ns* 'examples.data)}
    {:type :begin-test-var
     :var  #'test-report}
    {:type     :pass,
@@ -736,7 +744,7 @@
    {:type :end-test-var
     :var  #'test-report}
    {:type :end-test-ns
-    :ns   (or *ns* 'examples.data)}])
+    :ns   (if *ns* *ns* 'examples.data)}])
 
 (def prepl-data
   [{:val

@@ -27,6 +27,16 @@
   (binding [*opts* {:extra-env {"PORTAL_PORT" (-> args first ::port str)}}]
     (apply server/io-prepl args)))
 
+(defmethod print-method (type #'var?) [v ^java.io.Writer w]
+  (let [m (meta v)]
+    (when *print-meta*
+      (.write w "^")
+      (.write w (pr-str m))
+      (.write w " "))
+    (.write w "#'")
+    (.write w (str (symbol (str (:ns m))
+                           (str (:name m)))))))
+
 (defn- pr-str* [v]
   (binding [*print-meta* true] (pr-str v)))
 

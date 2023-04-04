@@ -146,7 +146,7 @@
                     (:code msg)
                     (-> {:ns (get @session #'*portal-ns*)}
                         (merge  msg)
-                        (select-keys  [:ns :file])
+                        (select-keys  [:ns :file :line :column])
                         (assoc  :verbose true)))]
                (when-let [namespace (:ns response)]
                  (swap! session assoc #'*portal-ns* namespace))
@@ -173,4 +173,67 @@
                               #'print/wrap-print
                               #'caught/wrap-caught}
                   :expects (into #{"eval"})
+                  :handles {}})
+
+(def ^:private id-gen (atom 0))
+(def ^:private values (atom (sorted-map)))
+(defn- next-id [] (swap! id-gen inc))
+
+(defn- ->value [id]
+  (let [value (get @values id)]
+    (swap! values dissoc id)
+    value))
+
+(p/register! #'->value)
+
+(defn- ->id [value]
+  (let [id (next-id)]
+    (swap!
+     values
+     #(cond-> %
+        (> (count %) 32) (dissoc (ffirst %))
+        :always          (assoc id value)))
+    id))
+
+(defn- link-value [value]
+  (with-meta
+    (list `->value (->id value))
+    (-> (p/start {})
+        (select-keys  [:port :host])
+        (assoc ::eval true :protocol "ws:"))))
+
+(defn- intercept-value [message]
+  (cond-> message
+    (contains? message ::caught/throwable)
+    (assoc :ex
+           (binding [*print-meta* true]
+             (pr-str
+              (link-value
+               (d/datafy (::caught/throwable message))))))
+
+    (contains? message :value)
+    (update :value link-value)))
+
+(defrecord NotebookTransport [transport]
+  Transport
+  (recv [_this timeout]
+    (transport/recv transport timeout))
+  (send [_this  message]
+    (transport/send transport (intercept-value message))
+    transport))
+
+(defn- wrap-notebook* [handler {:keys [op] :as message}]
+  (handler
+   (cond-> message
+     (and (= op "eval")
+          (get-in message [:nrepl.middleware.eval/env :calva-notebook]))
+     (update :transport ->NotebookTransport))))
+
+(defn wrap-notebook [handler] (partial #'wrap-notebook* handler))
+
+(set-descriptor! #'wrap-notebook
+                 {:requires #{"clone"
+                              #'print/wrap-print
+                              #'caught/wrap-caught}
+                  :expects #{"eval"}
                   :handles {}})

@@ -2,6 +2,7 @@
   (:require ["anser" :as anser]
             [clojure.spec.alpha :as s]
             [portal.colors :as c]
+            [portal.runtime.edn :as edn]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
@@ -9,7 +10,7 @@
             [portal.ui.theme :as theme]))
 
 ;;; :spec
-(s/def ::tag #{:out :err :tap})
+(s/def ::tag #{:out :err :tap :ret})
 
 (s/def ::out
   (s/keys :req-un [::tag ::val]))
@@ -40,12 +41,49 @@
        [:.ansi-white-bg]   {:background (::c/text theme)}
        [:.ansi-bold]       {:font-weight :bold}})]))
 
+(defn- inspect-prepl-ret [value index]
+  (let [theme (theme/use-theme)]
+    [ins/with-collection
+     value
+     [d/div
+      (when-let [form (:form value)]
+        [ins/with-key
+         :form
+         [select/with-position
+          {:row (* 2 index) :column 0}
+          [ins/with-context
+           {:portal.viewer/code {:language "clojure"}}
+           [ins/inspector {:portal.viewer/default :portal.viewer/code} form]]]])
+      [d/div
+       {:style {:display :flex
+                :align-items :center}}
+       (when (= :ret (:tag value))
+         [icons/sign-out-alt
+          {:style
+           {:padding (:padding theme)
+            :color (if (:exception value)
+                     (::c/exception theme)
+                     (::c/border theme))}}])
+       [ins/with-key
+        :val
+        [select/with-position
+         {:row (inc (* 2 index)) :column 0}
+         [d/div
+          {:style {:width "100%"
+                   :padding
+                   [(:padding theme) 0]}}
+          [ins/inspector
+           (try
+             (edn/read-string (:val value))
+             (catch :default _ (:val value)))]]]]]]]))
+
 (defn inspect-prepl [value]
   (let [theme (theme/use-theme)
-        opts  (ins/use-options)]
+        opts  (ins/use-options)
+        bg    (ins/get-background)]
     [d/div
      {:style
-      {:background    (ins/get-background)
+      {:background    bg
        :border-radius (:border-radius theme)
        :border        [1 :solid (::c/border theme)]}}
      [d/div
@@ -62,6 +100,7 @@
       {:style
        {:margin         0
         :display        :flex
+        :background     bg
         :max-height     (when-not (:expanded? opts) "24rem")
         :overflow       :auto
         :flex-direction :column-reverse
@@ -70,34 +109,26 @@
         :padding        (:padding theme)
         :font-size      (:font-size theme)
         :font-family    (:font-family theme)}}
-      (reverse
-       (map-indexed
-        (fn [index value]
-          (with-meta
-            (if (= (:tag value) :tap)
-              [ins/with-collection
-               value
+      [ins/with-collection
+       value
+       (reverse
+        (map-indexed
+         (fn [index value]
+           (with-meta
+             (if (#{:tap :ret} (:tag value))
                [ins/with-key
                 index
-                [select/with-position
-                 {:row index :column 0}
-                 [d/div
-                  {:style {:padding
-                           [(* 2 (:padding theme)) (:padding theme)]}}
-                  [ins/inspector
-                   (try
-                     (ins/read-string (:val value))
-                     (catch :default _ (:val value)))]]]]]
-              [d/span
-               {:style
-                {:color
-                 (if (= (:tag value) :err)
-                   (::c/exception theme)
-                   (::c/text theme))}
-                :dangerouslySetInnerHTML
-                {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
-            {:key index}))
-        value))]]))
+                [inspect-prepl-ret value index]]
+               [d/span
+                {:style
+                 {:color
+                  (if (= (:tag value) :err)
+                    (::c/exception theme)
+                    (::c/text theme))}
+                 :dangerouslySetInnerHTML
+                 {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
+             {:key index}))
+         value))]]]))
 
 (defn io? [value]
   (s/valid? ::prepl value))
