@@ -198,6 +198,7 @@
           :padding      [0 (:padding theme)]
           :border-right [1 :solid (::c/exception theme)]}}
         [icon/exclamation-triangle {:size "lg"}]]
+       [ins/toggle-expand {:style {:z-index 50 :padding-left (:padding theme)}}]
        [d/div
         {:style {:flex "1"}}
         [inspect-via value]]]

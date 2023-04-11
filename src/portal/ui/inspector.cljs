@@ -10,6 +10,7 @@
             [portal.runtime.edn :as edn]
             [portal.ui.api :as api]
             [portal.ui.filter :as f]
+            [portal.ui.icons :as icons]
             [portal.ui.lazy :as l]
             [portal.ui.rpc.runtime :as rt]
             [portal.ui.select :as select]
@@ -426,13 +427,45 @@
        [select/with-position {:row 0 :column 0}
         [toggle-bg [inspector value]]]]]]))
 
+(defn toggle-expand [{:keys [style context]}]
+  (let [state     (state/use-state)
+        context*  (use-context)
+        context   (or context context*)
+        theme     (theme/use-theme)
+        color     (get theme (nth theme/order (:depth context)))
+        {:keys [expanded?]} (use-options)]
+    (when-not (:readonly? context)
+      [s/div
+       (merge
+        {:title
+         (if expanded?
+           "Click to collapse value. - SPACE | E"
+           "Click to expand value. - SPACE | E")
+         :style
+         (merge
+          {:cursor :pointer
+           :display :flex
+           :align-items :center
+           :color (::c/border theme)}
+          style)
+         :style/hover {:color color}
+         :on-click (fn [e]
+                     (.stopPropagation e)
+                     (state/dispatch! state state/toggle-expand-1 context))})
+       (if expanded?
+         [icons/caret-down]
+         [icons/caret-right])])))
+
 (defn- preview-coll [open close]
   (fn [value]
     (let [theme (theme/use-theme)]
       [s/div
-       {:style
-        {:color (::c/diff-remove theme)}}
-       open close [:sub (count value)]])))
+       {:style {:display :flex}}
+       [toggle-expand {:style {:padding-right (:padding theme)}}]
+       [s/div
+        {:style
+         {:color (::c/diff-remove theme)}}
+        open close [:sub (count value)]]])))
 
 (def ^:private preview-map    (preview-coll "{" "}"))
 (def ^:private preview-vector (preview-coll "[" "]"))

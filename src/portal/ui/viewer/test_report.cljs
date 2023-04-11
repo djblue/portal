@@ -144,6 +144,7 @@
 
          :border-top-right-radius    (:border-radius theme)
          :border-bottom-right-radius (when-not expanded? (:border-radius theme))}}
+       [ins/toggle-expand {:padding-left (:padding theme)}]
        [label value]
        (when-let [file (:file value)]
          [d/div

@@ -4,6 +4,10 @@
             ["@fortawesome/free-solid-svg-icons/faArrowRight" :refer [faArrowRight]]
             ["@fortawesome/free-solid-svg-icons/faArrowUp" :refer [faArrowUp]]
             ["@fortawesome/free-solid-svg-icons/faBan" :refer [faBan]]
+            ["@fortawesome/free-solid-svg-icons/faCaretDown" :refer [faCaretDown]]
+            ["@fortawesome/free-solid-svg-icons/faCaretLeft" :refer [faCaretLeft]]
+            ["@fortawesome/free-solid-svg-icons/faCaretRight" :refer [faCaretRight]]
+            ["@fortawesome/free-solid-svg-icons/faCaretUp" :refer [faCaretUp]]
             ["@fortawesome/free-solid-svg-icons/faCheckCircle" :refer [faCheckCircle]]
             ["@fortawesome/free-solid-svg-icons/faChevronDown" :refer [faChevronDown]]
             ["@fortawesome/free-solid-svg-icons/faChevronRight" :refer [faChevronRight]]
@@ -31,6 +35,10 @@
 (def arrow-right (partial icon faArrowRight))
 (def arrow-up (partial icon faArrowUp))
 (def ban (partial icon faBan))
+(def caret-down (partial icon faCaretDown))
+(def caret-left (partial icon faCaretLeft))
+(def caret-right (partial icon faCaretRight))
+(def caret-up (partial icon faCaretUp))
 (def check-circle (partial icon faCheckCircle))
 (def chevron-down (partial icon faChevronDown))
 (def chevron-right (partial icon faChevronRight))

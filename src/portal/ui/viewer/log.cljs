@@ -89,8 +89,10 @@
         runtime?   (contains? runtime->logo runtime)
         options    (ins/use-options)
         expanded?  (:expanded? options)
-        border     (when-not expanded?
-                     {:border-bottom [1 :solid (::c/border theme)]})
+        border     (cond-> {:border-top [1 :solid (::c/border theme)]}
+                     (not expanded?)
+                     (assoc
+                      :border-bottom [1 :solid (::c/border theme)]))
         flex       {:box-sizing  :border-box
                     :padding     (:padding theme)
                     :display     :flex
@@ -103,14 +105,16 @@
       {:style
        {:display                   :grid
         :grid-template-columns     (if-not runtime?
-                                     "auto 1fr auto"
-                                     "auto 1fr auto auto")
+                                     "auto auto 1fr auto"
+                                     "auto auto 1fr auto auto")
         :border-left               [5 :solid color]
         :border-top-left-radius    (:border-radius theme)
         :border-bottom-left-radius (when-not expanded? (:border-radius theme))}}
-      [d/div
+      [ins/toggle-expand
        {:style
-        (merge {:border-top [1 :solid (::c/border theme)]} flex border)}
+        (merge {:padding-left (:padding theme)} border)}]
+      [d/div
+       {:style (merge flex border)}
        [date-time/inspect-time (:time log)]]
       [d/div
        {:style

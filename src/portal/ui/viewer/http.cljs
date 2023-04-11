@@ -79,6 +79,8 @@
       [d/div
        {:style
         {:flex    "1"
+         :display :flex
+         :gap     (:padding theme)
          :padding [(:padding theme) (* 2 (:padding theme))]
          :border  [1 :solid (::c/border theme)]
 
@@ -86,6 +88,7 @@
          :border-top-right-radius (:border-radius theme)
          :border-bottom-right-radius
          (when-not expanded? (:border-radius theme))}}
+       [ins/toggle-expand]
        [select/with-position
         {:row -1 :column 0}
         [ins/with-key
@@ -129,12 +132,15 @@
       [d/div
        {:style
         {:flex                    "1"
+         :display                 :flex
+         :gap                     (:padding theme)
          :padding                 (:padding theme)
          :border                  [1 :solid (::c/border theme)]
          :border-bottom-style     (when expanded? :none)
          :border-top-right-radius (:border-radius theme)
          :border-bottom-right-radius
          (when-not expanded? (:border-radius theme))}}
+       [ins/toggle-expand]
        [select/with-position
         {:row -1 :column 0}
         [ins/with-key
