@@ -238,7 +238,7 @@
   (let [value (id->value id)
         {:keys [session-id value-cache watch-registry]} *session*]
     (when (atom? value)
-      (swap! watch-registry dissoc value)
+      (swap! watch-registry disj value)
       (remove-watch value session-id))
     (swap! value-cache dissoc [:id id] (value->key value))
     nil))
