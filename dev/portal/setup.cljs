@@ -1,6 +1,7 @@
 (ns portal.setup
   (:require [examples.data :refer [data]]
             [portal.console :as log]
+            [portal.runtime :as rt]
             [portal.shadow.remote :as remote]
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
@@ -26,6 +27,14 @@
   []
   (swap! state/log empty))
 
+(defn ^:command goto
+  [v]
+  (state/invoke 'portal.runtime.jvm.editor/goto-definition v))
+
+(rt/register! #'goto {:name 'portal.runtime.jvm.editor/goto-definition})
+(p/register! #'clear-taps)
+(p/register! #'clear-rpc)
+
 (defn submit [value]
   (comment (remote/submit value))
   (dashboard-submit value))
@@ -46,9 +55,6 @@
     (submit value)))
 
 (add-tap #'async-submit)
-
-(p/register! #'clear-taps)
-(p/register! #'clear-rpc)
 
 (defn section [title value]
   [title

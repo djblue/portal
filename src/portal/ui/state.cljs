@@ -225,15 +225,16 @@
   (let [time  (js/Date.)
         start (.now js/Date)]
     (-> (send! {:op :portal.rpc/invoke :f f :args args})
-        (.then (fn [{:keys [return error]}]
+        (.then (fn [{:keys [return error] :as response}]
                  (log-message
                   {:runtime :portal
                    :level   (if error :error :info)
                    :ns      (-> f namespace symbol)
                    :f       f
                    :args    args
-                   :line    1
-                   :column  1
+                   :line    (:line response 1)
+                   :column  (:column response 1)
+                   :file    (:file response)
                    :result  (or return error)
                    :time    time
                    :ms      (- (.now js/Date) start)})

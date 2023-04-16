@@ -273,21 +273,27 @@
 (defn- get-function [f]
   (get-in @registry [f :var]))
 
+(defn- source-info [f]
+  (when (can-meta? f)
+    (select-keys (meta f) [:file :line :column])))
+
 (defn invoke [{:keys [f args]} done]
-  (try
-    (let [f (if (symbol? f) (get-function f) f)]
+  (let [f (if (symbol? f) (get-function f) f)]
+    (try
       (a/let [return (apply f args)]
-        (done {:return return})))
-    (catch #?(:clj Exception :cljr Exception :cljs js/Error) e
-      (done {:error
-             (-> (ex-info
-                  "invoke exception"
-                  {:function f
-                   :args     args
-                   :found?   (boolean (get-function f))}
-                  e)
-                 datafy
-                 (assoc :runtime #?(:bb :bb :clj :clj :cljs :cljs :cljr :cljr)))}))))
+        (done (assoc (source-info f) :return return)))
+      (catch #?(:clj Exception :cljr Exception :cljs js/Error) e
+        (done (assoc
+               (source-info f)
+               :error
+               (-> (ex-info
+                    "invoke exception"
+                    {:function f
+                     :args     args
+                     :found?   (boolean (get-function f))}
+                    e)
+                   datafy
+                   (assoc :runtime #?(:bb :bb :clj :clj :cljs :cljs :cljr :cljr)))))))))
 
 (def ops {:portal.rpc/invoke #'invoke})
 
