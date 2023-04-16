@@ -5,7 +5,6 @@
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]
-            [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.web :as p]))
@@ -16,8 +15,16 @@
 
 (defn dashboard-submit [value]
   (swap! tap-list (fn [taps] (take 10 (conj taps value)))))
-(defn ^:command clear-taps [] (swap! tap-list empty))
-(defn ^:command clear-rpc [] (swap! rpc/log empty))
+
+(defn ^:command clear-taps
+  "Clear tap list."
+  []
+  (swap! tap-list empty))
+
+(defn ^:command clear-rpc
+  "Clear rpc logs."
+  []
+  (swap! state/log empty))
 
 (defn submit [value]
   (comment (remote/submit value))
@@ -57,8 +64,7 @@
      (section "Taps" tap-list)
      (section "State" state/state)
      ["RPC"
-      (section "Logs" rpc/log)
-      (section "Errors" state/errors)]
+      (section "Logs" state/log)]
      (section "Viewers" api/viewers)
      ["Commands"
       (section "UI" commands/registry)

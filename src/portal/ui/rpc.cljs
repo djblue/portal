@@ -91,13 +91,6 @@
 (defonce ^:private id (atom 0))
 (defonce ^:private pending-requests (atom {}))
 
-(defonce log
-  (atom
-   (with-meta
-     (list)
-     {:portal.viewer/default :portal.viewer/table
-      :portal.viewer/table {:columns [:f :args :return :time-ms]}})))
-
 (defn- next-id [] (swap! id inc))
 
 (declare send!)
@@ -120,22 +113,8 @@
        (catch :default e (reject e))))))
 
 (defn request [message]
-  (a/let [message  (assoc message :portal.rpc/id (next-id))
-          start    (.now js/Date)
-          response ((if js/window.opener web-request ws-request) message)]
-    (when (and js/goog.DEBUG
-               (not= 'portal.runtime/ping (:f message)))
-      (swap! log
-             (fn [log]
-               (with-meta
-                 (take 10
-                       (conj log
-                             (-> message
-                                 (dissoc :op :portal.rpc/id)
-                                 (assoc :return  (:return response)
-                                        :time-ms (- (.now js/Date) start)))))
-                 (meta log)))))
-    response))
+  ((if js/window.opener web-request ws-request)
+   (assoc message :portal.rpc/id (next-id))))
 
 (def ^:private ops
   {:portal.rpc/response

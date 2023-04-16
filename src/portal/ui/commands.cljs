@@ -860,8 +860,10 @@
 (defn ^:command clear [state]
   (state/dispatch! state state/clear))
 
-(defn ^:command show-client-errors [state]
-  (state/dispatch! state state/history-push {:portal/value @state/errors}))
+(defn ^:command show-rpc-log
+  "Show up to the last 10 RPC the Portal UI has made."
+  [state]
+  (state/dispatch! state state/history-push {:portal/value @state/log}))
 
 (defn- then-first [value] (.then value first))
 
