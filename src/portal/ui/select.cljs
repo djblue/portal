@@ -1,7 +1,7 @@
 (ns ^:no-doc portal.ui.select
   (:require ["react" :as react]))
 
-(defonce ^:private selection-index (atom {}))
+(defonce ^:no-doc selection-index (atom {}))
 (defonce ^:private index-context (react/createContext []))
 
 (defn with-position [position & children]

@@ -400,6 +400,8 @@
        (state/get-history current-state)))]))
 
 (def viewers
+  ^{:portal.viewer/default :portal.viewer/table
+    :portal.viewer/table {:columns [:name :doc]}}
   [ex/viewer
    ex/trace-viewer
    charts/line-chart

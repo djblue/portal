@@ -535,8 +535,10 @@
             :color (::c/text theme)}}
           doc]))]))
 
-(def registry (atom {}))
-(def ^:private runtime-registry (atom nil))
+(def ^:no-doc registry
+  (atom ^{:portal.viewer/default :portal.viewer/table
+          :portal.viewer/table {:columns [:doc :command]}} {}))
+(def ^:no-doc runtime-registry (atom nil))
 
 (defn- get-commands []
   (concat @runtime-registry (vals @registry)))
@@ -1049,9 +1051,12 @@
        (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
          (reset!
           runtime-registry
-          (for [{:keys [name] :as opts} fns]
-            (make-command
-             (assoc opts :f #(state/invoke name %)))))))
+          (with-meta
+            (for [{:keys [name] :as opts} fns]
+              (make-command
+               (assoc opts :f #(state/invoke name %))))
+            {:portal.viewer/default :portal.viewer/table
+             :portal.viewer/table {:columns [:name :doc :command]}}))))
      #js [(hash value)])
     [with-shortcuts
      (fn [log]

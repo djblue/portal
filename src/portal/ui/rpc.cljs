@@ -95,7 +95,8 @@
   (atom
    (with-meta
      (list)
-     {:portal.viewer/default :portal.viewer/table})))
+     {:portal.viewer/default :portal.viewer/table
+      :portal.viewer/table {:columns [:f :args :return :time-ms]}})))
 
 (defn- next-id [] (swap! id inc))
 

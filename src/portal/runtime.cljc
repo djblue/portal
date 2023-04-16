@@ -214,6 +214,7 @@
          :clj  "jvm"
          :cljr "clr"
          :cljs (cond
+                 (exists? js/window)         "web"
                  (exists? js/process)        "node"
                  (exists? js/PLANCK_VERSION) "planck"
                  :else                        "web"))
@@ -252,18 +253,20 @@
 (def ^:private registry (atom {}))
 
 (defn- get-functions [v]
-  (keep
-   (fn [[name opts]]
-     (let [m      (merge (meta (:var opts)) opts)
-           result (merge {:name name}
-                         (select-keys m [:doc :command]))]
-       (when-not (:private m)
-         (if-let [predicate (:predicate m)]
-           (try
-             (when (predicate v) result)
-             (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
-           result))))
-   @registry))
+  (with-meta
+    (keep
+     (fn [[name opts]]
+       (let [m      (merge (meta (:var opts)) opts)
+             result (merge {:name name}
+                           (select-keys m [:doc :command]))]
+         (when-not (:private m)
+           (if-let [predicate (:predicate m)]
+             (try
+               (when (predicate v) result)
+               (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
+             result))))
+     @registry)
+    {:portal.viewer/default :portal.viewer/table}))
 
 (defn- ping [] ::pong)
 
