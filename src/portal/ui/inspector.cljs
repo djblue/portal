@@ -981,11 +981,9 @@
     (select/use-register-context context viewer)
     (react/useEffect
      (fn []
-       (when selected
-         (some-> ref .-current (.focus #js {:preventScroll true}))
-         (state/dispatch! state assoc-in [:default-expand location] default-expand)
-         #(state/dispatch! state update :default-expand dissoc location)))
-     #js [selected])
+       (state/dispatch! state assoc-in [:default-expand location] default-expand)
+       #(state/dispatch! state update :default-expand dissoc location))
+     #js [(hash location)])
     (react/useEffect
      (fn []
        (when (and selected

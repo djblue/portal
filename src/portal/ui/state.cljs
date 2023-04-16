@@ -21,9 +21,25 @@
     (when parent
       (.postMessage ^js parent message "*"))))
 
+(defonce ^:private sync-promise (atom (.resolve js/Promise nil)))
+
+(defn- sleep [ms]
+  (js/Promise.
+   (fn [resolve _reject]
+     (js/setTimeout resolve ms))))
+
+(defn- wait-for [p ms]
+  (-> (.race js/Promise #js [p (sleep ms)])
+      (.catch (fn [e] (.error js/console e)))))
+
 (defn dispatch! [state f & args]
-  (a/let [next-state (apply f @state args)]
-    (when next-state (reset! state next-state))))
+  (swap!
+   sync-promise
+   (fn [last-promise]
+     (a/do
+       (wait-for last-promise 10000)
+       (a/let [next-state (apply f @state args)]
+         (when next-state (reset! state next-state)))))))
 
 (def ^:private state-context (react/createContext nil))
 
