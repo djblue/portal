@@ -1,3 +1,26 @@
+## 0.39.0 - 2023-04-16
+
+- Update bb invocation and portal version number (#176) 8cd2422
+  - Thanks @mathisto!
+- Add print-err-fn to sci b026c67
+
+### UX Tweaks
+
+- Add toggle-expand to UI 3e393f6
+
+### Bug Fixes
+
+- Fix bug for evicting atoms from watch registry 3ac9d35
+- Serialize `dispatch!` for async operations 5c34db0
+- Fix reflection warning f3a6656
+- Fix reflection warning e0e366a
+
+### CLR Support
+
+- Fix CLR browse fn on windows a2a3d81
+- Fix CLR resource loading on windows 33a1490
+- Fix CLR json-buffer reflection waring 54be295
+
 ## 0.38.2 - 2023-04-02
 
 - Unmount notebook output item on dispose 0764a59
