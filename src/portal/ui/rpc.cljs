@@ -58,14 +58,15 @@
 
 (defmethod cson/tagged-str "remote" [{:keys [rep]}] rep)
 
-(extend-type default
-  cson/ToJson
-  (-to-json [value buffer]
-    (cson/-to-json
-     (with-meta
-       (cson/tagged-value "remote" (pr-str value))
-       (meta value))
-     buffer)))
+(when-not js/goog.DEBUG
+  (extend-type default
+    cson/ToJson
+    (-to-json [value buffer]
+      (cson/-to-json
+       (with-meta
+         (cson/tagged-value "remote" (pr-str value))
+         (meta value))
+       buffer))))
 
 (defn- read [string]
   (cson/read
