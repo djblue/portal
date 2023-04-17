@@ -240,7 +240,7 @@
                    :ms      (- (.now js/Date) start)})
                  (if-not error
                    return
-                   (throw (ex-info "invoke exception" error))))))))
+                   (throw (ex-info (pr-str error) error))))))))
 
 (defonce value-cache (r/atom {}))
 
