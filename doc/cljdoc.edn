@@ -1,6 +1,5 @@
 {:cljdoc.doc/tree
  [["Readme" {:file "README.md"}]
-  ["Changes" {:file "CHANGELOG.md"}]
   ["UI Concepts"
    {:file "doc/ui/index.md"}
    ["Selection" {:file "doc/ui/selection.md"}]
