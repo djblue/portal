@@ -1,3 +1,7 @@
+## 0.40.0 - 2023-04-18
+
+- Allow vscode extension to be used remotely
+
 ## 0.39.0 - 2023-04-16
 
 - Update bb invocation and portal version number (#176) 8cd2422
