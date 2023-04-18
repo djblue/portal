@@ -47,8 +47,12 @@
                                (get options :window-title "vs-code")
                                "0.39.0"])
                              (view-column)
-                             #js {:enableScripts           true
-                                  :retainContextWhenHidden true})
+                             (clj->js
+                              {:enableScripts           true
+                               :retainContextWhenHidden true
+                               :portMapping
+                               [{:webviewPort port
+                                 :extensionHostPort port}]}))
         ^js web-view        (.-webview panel)]
     (set! (.-iconPath panel)
           (.file vscode/Uri (.asAbsolutePath ^js (:context @!app-db) "icon.png")))
