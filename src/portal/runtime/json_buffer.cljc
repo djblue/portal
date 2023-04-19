@@ -107,7 +107,7 @@
      :clj  (.nextDouble ^JsonReader buffer)
      :cljs (-shift buffer)))
 
-(defn next-string [buffer]
+(defn next-string ^String [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
      :cljr (let [v ^JsonValue (first @buffer)]
              (vswap! buffer rest)

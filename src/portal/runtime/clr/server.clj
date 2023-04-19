@@ -126,6 +126,7 @@
      (or (:query-string request)
          (when-let [referer (get-in request [:headers "referer"])]
            (last (str/split referer #"\?"))))
+     str
      Guid/Parse)
     (catch Exception _ nil)))
 

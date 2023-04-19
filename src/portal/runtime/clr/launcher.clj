@@ -17,7 +17,7 @@
      :uri            uri
      :query-string   query-string
      :headers        (reduce
-                      (fn [out header]
+                      (fn [out ^String header]
                         (let [values (.GetValues headers header)]
                           (assoc out
                                  (str/lower-case header)
@@ -34,7 +34,7 @@
     (doseq [[k v] (:headers m)]
       (.Add headers ^String k ^String v))
     (when-let [body (:body m)]
-      (let [bytes   (.GetBytes Encoding/UTF8 body)
+      (let [bytes  (.GetBytes Encoding/UTF8 ^bytes body)
             length (.Length bytes)]
         (set! (.-ContentLength64 response) length)
         (.Write (.OutputStream response) bytes 0 length)))
@@ -70,8 +70,8 @@
             :host host})))))
 
 (defn stop []
-  (when-let [^HttpListener server @server]
-    (.Stop (:http-server server)))
+  (when-let [server @server]
+    (.Stop ^HttpListener (:http-server server)))
   (reset! server nil))
 
 (defn open

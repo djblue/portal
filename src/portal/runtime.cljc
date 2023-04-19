@@ -43,8 +43,8 @@
 
 (defonce request (atom nil))
 
-(defn- set-timeout [f timeout]
-  #?(:clj  (future (Thread/sleep ^long timeout) (f))
+(defn- set-timeout [f ^long timeout]
+  #?(:clj  (future (Thread/sleep timeout) (f))
      :cljr (future (System.Threading.Thread/Sleep timeout) (f))
      :cljs (js/setTimeout f timeout)))
 
