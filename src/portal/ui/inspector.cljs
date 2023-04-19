@@ -989,7 +989,7 @@
        (when (and selected
                   (not= (.. js/document -activeElement -tagName) "INPUT"))
          (when-let [el (.-current ref)]
-           (when-not (l/element-visible? el)
+           (when-not (and (.hasFocus js/document) (l/element-visible? el))
              (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
      #js [selected (.-current ref)])
     [s/div
@@ -1044,7 +1044,7 @@
         selected @(r/track is-selected? state context)]
     (react/useEffect
      (fn []
-       (when selected
+       (when (and selected (.hasFocus js/document))
          (some-> ref .-current (.focus #js {:preventScroll true}))))
      #js [selected (.-current ref)])
     (when-not (:readonly? context)
