@@ -28,4 +28,6 @@
   (step '(remove-tap #'p/submit))
   (step '(tap> :hello-world))
   (step '(p/eval-str "(js/alert 1)"))
-  (step '(p/close)))
+  (step '(p/close))
+  (when-not (= (first args) "web")
+    (step '(p/stop))))

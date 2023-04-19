@@ -57,14 +57,23 @@
 (defn start
   "Start the HTTP server with non-default options. Only use if you need
   control over the HTTP server."
-  {:added "0.6.2"}
+  {:added "0.6.2"
+   :see-also ["stop"]}
   [options]
   (l/start (rename options)))
+
+(defn stop
+  "Stop the HTTP server."
+  {:added "0.41.0"
+   :see-also ["start"]}
+  []
+  (l/stop))
 
 (defn open
   "Open a new inspector window. A previous instance can be passed as
   parameter to make sure it is open."
-  {:added "0.1.0"}
+  {:added "0.1.0"
+   :see-also ["close"]}
   ([] (open nil))
   ([portal-or-options]
    (if (:session-id portal-or-options)
@@ -75,7 +84,8 @@
 
 (defn close
   "Close all current inspector windows."
-  {:added "0.1.0"}
+  {:added "0.1.0"
+   :see-also ["open"]}
   ([]
    (l/close :all)
    nil)

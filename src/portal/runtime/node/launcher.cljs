@@ -77,8 +77,11 @@
                 instance (create-server #'server/handler port host)]
           (reset! server instance)))))
 
-(defn- stop [handle]
-  (some-> handle :http-server .close))
+(defn stop []
+  (doseq [socket @sockets] (.destroy socket))
+  (reset! sockets #{})
+  (some-> server deref :http-server .close)
+  (reset! server nil))
 
 (defn open
   ([options]
@@ -100,11 +103,6 @@
     (if (= portal :all)
       (c/request {:op :portal.rpc/close})
       (c/request (:session-id portal) {:op :portal.rpc/close}))
-    (when (or (= portal :all) (empty? @c/connections))
-      (doseq [socket @sockets] (.destroy socket))
-      (reset! sockets #{})
-      (stop @server)
-      (reset! server nil))
     (swap! rt/sessions dissoc (:session-id portal))
     (swap! rt/sessions select-keys (keys @c/connections)))
   true)

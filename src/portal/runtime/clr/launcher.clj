@@ -69,6 +69,11 @@
             :port port
             :host host})))))
 
+(defn stop []
+  (when-let [^HttpListener server @server]
+    (.Stop (:http-server server)))
+  (reset! server nil))
+
 (defn open
   ([options]
    (open nil options))
@@ -86,10 +91,6 @@
   (if (= portal :all)
     (c/request {:op :portal.rpc/close})
     (c/request (:session-id portal) {:op :portal.rpc/close}))
-  (when (or (= portal :all) (empty? @c/connections))
-    (when-let [^HttpListener server @server]
-      (.Stop (:http-server server)))
-    (reset! server nil))
   (swap! rt/sessions dissoc (:session-id portal))
   (swap! rt/sessions select-keys (keys @c/connections)))
 
