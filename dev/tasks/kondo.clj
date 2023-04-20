@@ -15,8 +15,8 @@
     (let [submit (partial p/submit {:port port :encoding :cson})]
       (doseq [{:keys [col row filename level message type]} findings]
         (submit
-         {:level  (keyword level)
-          :type   (keyword type)
+         {:level  level
+          :type   type
           :column col
           :ns     (file->ns filename)
           :line   row
