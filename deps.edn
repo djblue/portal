@@ -45,7 +45,7 @@
   :edn  {:main-opts ["-m" "portal.main" "edn"]}
   :json {:main-opts ["-m" "portal.main" "json"]}
   :kondo
-  {:main-opts  ["-m" "clj-kondo.main"]
+  {:main-opts  ["-m" "tasks.kondo"]
    :extra-deps {clj-kondo/clj-kondo {:mvn/version "2023.04.14"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]

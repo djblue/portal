@@ -3,7 +3,7 @@
            {:exclude [(portal.ui.sci.import/sci-import)
                       (portal.ui.sci.import/import-ns)]}}
  :lint-as
- {portal.async/let clojure.core/let
+ {#_#_portal.async/let clojure.core/let
   portal.sync/let  clojure.core/let
   reagent.core/with-let              clojure.core/let
   portal.bench/simple-benchmark      clojure.core/let
