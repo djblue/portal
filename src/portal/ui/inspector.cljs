@@ -507,7 +507,7 @@
      [s/div
       {:style
        {:display :flex
-        :align-items :center}}
+        :align-items :stretch}}
       [s/div
        {:style
         {:display :inline-block
