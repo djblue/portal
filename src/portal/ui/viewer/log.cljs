@@ -128,7 +128,8 @@
            [ins/inspector (:result log)]]]]]]
       [d/div
        {:on-click
-        (fn [_]
+        (fn [e]
+          (.stopPropagation e)
           (rpc/call 'portal.runtime.jvm.editor/goto-definition log))
         :style/hover
         {:opacity 1
