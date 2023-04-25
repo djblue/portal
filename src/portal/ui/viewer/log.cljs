@@ -4,6 +4,7 @@
             [portal.resources :refer [inline]]
             #_[shadow.resource :refer [inline]] ;; for hot reloading
             [portal.ui.inspector :as ins]
+            [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
@@ -126,10 +127,18 @@
           [ins/dec-depth
            [ins/inspector (:result log)]]]]]]
       [d/div
-       {:style
+       {:on-click
+        (fn [_]
+          (rpc/call 'portal.runtime.jvm.editor/goto-definition log))
+        :style/hover
+        {:opacity 1
+         :text-decoration :underline}
+        :style
         (merge
          flex
-         {:color           (::c/uri theme)
+         {:opacity         0.75
+          :cursor          :pointer
+          :color           (::c/uri theme)
           :border-top      [1 :solid (::c/border theme)]
           :justify-content :flex-end}
          border
