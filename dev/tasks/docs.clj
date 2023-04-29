@@ -164,7 +164,9 @@
     #_(->docs 'portal.client.jvm)]))
 
 (defn docs []
-  (spit "resources/portal/docs.json" (cson/write (gen-docs))))
+  (let [docs (io/file "resources/portal/docs.json")]
+    (.mkdirs (.getParentFile docs))
+    (spit docs (cson/write (gen-docs)))))
 
 (defn -main [] (docs))
 
