@@ -2,7 +2,6 @@
   (:require [babashka.fs :as fs]
             [hiccup.core :refer [html]]
             [tasks.build :refer [build extensions]]
-            [tasks.docs :refer [docs]]
             [tasks.info :refer [options version]]
             [tasks.tools :refer [clj]]))
 
@@ -103,7 +102,6 @@
   "Build a jar."
   []
   (build)
-  (docs)
   (pom)
   (when (seq
          (fs/modified-since

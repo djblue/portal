@@ -1,5 +1,6 @@
 (ns tasks.build
   (:require [babashka.fs :as fs]
+            [tasks.docs :refer [docs]]
             [tasks.info :refer [version]]
             [tasks.tools :refer [*cwd* gradle npm npx shadow]]))
 
@@ -41,7 +42,7 @@
            "--outfile" out
            "node_modules/ws"))))
 
-(defn build [] (main-js) (ws-js))
+(defn build [] (docs) (main-js) (ws-js))
 
 (defn prep [_] (install) (build) (shutdown-agents))
 

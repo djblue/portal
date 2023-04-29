@@ -164,6 +164,7 @@
     #_(->docs 'portal.client.jvm)]))
 
 (defn docs []
+  (println "=> Generating docs")
   (let [docs (io/file "resources/portal/docs.json")]
     (.mkdirs (.getParentFile docs))
     (spit docs (cson/write (gen-docs)))))
