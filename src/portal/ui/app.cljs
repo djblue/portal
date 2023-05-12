@@ -181,37 +181,57 @@
      (fn []
        (swap! commands/search-refs conj ref)
        #(swap! commands/search-refs disj ref)))
-    [s/input
-     {:ref ref
-      :disabled  (nil? context)
-      :on-change #(let [value (.-value (.-target %))]
-                    (when context
-                      (state/dispatch!
-                       state
-                       update
-                       :search-text
-                       (fn [filters]
-                         (if (str/blank? value)
-                           (dissoc filters location)
-                           (assoc filters location value))))))
-      :on-key-down (fn [e]
-                     (when (= (.-key e) "Enter")
-                       (.blur (.-current ref))))
-      :value (get-in @state [:search-text location] "")
-      :placeholder (if-not context
-                     "Select a value to enable filtering"
-                     "Type here to begin filtering")
-      :style
-      {:background (::c/background theme)
-       :padding (:padding theme)
-       :box-sizing :border-box
-       :font-family (:font-family theme)
-       :font-size (:font-size theme)
-       :color (get theme color)
-       :border [1 :solid (::c/border theme)]
-       :border-radius (:border-radius theme)}
-      :style/placeholder
-      {:color (if-not context (::c/border theme) (::c/text theme))}}]))
+    [s/div
+     {:style
+      {:display :flex
+       :position :relative
+       :align-items :center}}
+     [s/input
+      {:ref ref
+       :disabled  (nil? context)
+       :on-change #(let [value (.-value (.-target %))]
+                     (when context
+                       (state/dispatch!
+                        state
+                        update
+                        :search-text
+                        (fn [filters]
+                          (if (str/blank? value)
+                            (dissoc filters location)
+                            (assoc filters location value))))))
+       :on-key-down (fn [e]
+                      (when (= (.-key e) "Enter")
+                        (.blur (.-current ref))))
+       :value (get-in @state [:search-text location] "")
+       :placeholder (if-not context
+                      "Select a value to enable filtering"
+                      "Type here to begin filtering")
+       :style
+       {:flex "1"
+        :background (::c/background theme)
+        :padding (:padding theme)
+        :box-sizing :border-box
+        :font-family (:font-family theme)
+        :font-size (:font-size theme)
+        :color (get theme color)
+        :border [1 :solid (::c/border theme)]
+        :border-radius (:border-radius theme)}
+       :style/placeholder
+       {:color (if-not context (::c/border theme) (::c/text theme))}}]
+     (when (seq (:search-text @state))
+       [s/div
+        {:title "Clear all filters."
+         :style
+         {:cursor :pointer
+          :position :absolute
+          :right (:padding theme)
+          :color (::c/border theme)}
+         :style/hover
+         {:color (::c/exception theme)}
+         :on-click
+         (fn [_]
+           (commands/clear-filter state))}
+        [icons/times-circle]])]))
 
 (defn- button-hover [props child]
   (let [theme (theme/use-theme)]
