@@ -141,9 +141,10 @@
         :white-space :pre-bold
         :color (::c/exception theme)
         :padding [(:padding theme) (* 2 (:padding theme))]}}
-      (if message
-        message
-        (pr-str (:phase value type)))]
+      [ins/highlight-words
+       (if message
+         message
+         (pr-str (:phase value type)))]]
      [d/div
       {:style {:display         :flex
                :align-items     :stretch
@@ -152,7 +153,8 @@
        {:style {:display     :flex
                 :align-items :center
                 :padding [(:padding theme) (* 2 (:padding theme))]}}
-       (when message (pr-str (:phase value type)))]
+       [ins/highlight-words
+        (when message (pr-str (:phase value type)))]]
       (when-let [value (:runtime value)]
         [d/div
          {:style {:padding     (:padding theme)

@@ -1,6 +1,7 @@
 (ns portal.ui.viewer.date-time
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
+            [portal.ui.inspector :as ins]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
@@ -62,17 +63,20 @@
          :align-items :center}}
        [d/span
         {:title "Hour" :style style}
-        (let [hour (mod hour 12)]
-          (if (= hour 0) 12 hour))]
+        [ins/highlight-words
+         (str
+          (let [hour (mod hour 12)]
+            (if (= hour 0) 12 hour)))]]
        [d/span {:style border} ":"]
        [d/span
         {:title "Minute" :style style}
-        (when (< minute 10) "0") minute]
+        [ins/highlight-words
+         (str (when (< minute 10) "0") minute)]]
        [d/span {:style border} ":"]
        [d/span
         {:title "Second" :style style}
-        (when (< second 10) "0")
-        second]
+        [ins/highlight-words
+         (str (when (< second 10) "0") second)]]
        [d/div {:style {:width "0.25em"}}]
        [d/span
         {:style keyword}
@@ -94,15 +98,16 @@
        :align-items :center}}
      [d/span
       {:title (nth months month) :style style}
-      (inc month)]
+      [ins/highlight-words (str (inc month))]]
      [d/span {:style border} "/"]
      [d/span
       {:title (nth days day) :style style}
-      (when (< date 10) "0") date]
+      [ins/highlight-words
+       (str (when (< date 10) "0") date)]]
      [d/span {:style border} "/"]
      [d/span
       {:title "Year" :style style}
-      year]]))
+      [ins/highlight-words (str year)]]]))
 
 (defn inspect-date-time [value]
   (let [value (parse value)]

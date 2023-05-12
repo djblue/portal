@@ -147,9 +147,7 @@
            {:border-right               [1 :solid (::c/border theme)]
             :border-top-right-radius    (:border-radius theme)
             :border-bottom-right-radius (:border-radius theme)}))}
-       (:ns log)
-       ":"
-       (:line log)]
+       [ins/highlight-words (str (:ns log) ":" (:line log))]]
       (when runtime?
         [d/div
          {:style
