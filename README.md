@@ -2,6 +2,7 @@
 
 A clojure tool to navigate through your data.
 
+[![cljdoc][cljdoc-badge]][cljdoc]
 [![Clojars Project][clojars-badge]][clojars]
 [![VS Code Extension][vscode-badge]][vscode]
 [![Version][intellij-badge]][intellij]
@@ -151,15 +152,17 @@ Options for `portal.api/open`:
 
 For more documentation, take a look through the [docs][docs].
 
+[cljdoc]: https://cljdoc.org/d/djblue/portal/CURRENT
+[cljdoc-badge]: https://cljdoc.org/badge/djblue/portal
 [clojars]: https://clojars.org/djblue/portal
-[clojars-badge]: https://img.shields.io/clojars/v/djblue/portal?color=380036&style=flat-square
+[clojars-badge]: https://img.shields.io/clojars/v/djblue/portal?color=380036
 [vscode]: https://marketplace.visualstudio.com/items?itemName=djblue.portal
-[vscode-badge]: https://vsmarketplacebadges.dev/version-short/djblue.portal.png?color=007ACC&label=vs-code&logo=vs&style=flat-square
+[vscode-badge]: https://vsmarketplacebadges.dev/version-short/djblue.portal.png?color=007ACC&label=vs-code&logo=vs
 [intellij]: https://plugins.jetbrains.com/plugin/18467-portal
-[intellij-badge]: https://img.shields.io/jetbrains/plugin/v/18467?style=flat-square&label=intellij
+[intellij-badge]: https://img.shields.io/jetbrains/plugin/v/18467?label=intellij
 
 [clojurians]: https://clojurians.slack.com/channels/portal
-[clojurians-badge]: https://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?color=63B132&style=flat-square
+[clojurians-badge]: https://img.shields.io/badge/slack-clojurians%20%23portal-4A154B?color=63B132
 
 [live-demo]: https://www.youtube.com/watch?v=Tj-iyDo3bq0
 [london-clojurians]: https://www.youtube.com/channel/UC-pYfofTyvVDMwM4ttfFGqw
