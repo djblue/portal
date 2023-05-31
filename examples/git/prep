@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -rf ../../resources/portal
+clj -X:deps prep
