@@ -29,7 +29,10 @@
     hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.8.190"}
     org.babashka/sci          {:mvn/version "0.7.39"}
-    reagent/reagent           {:mvn/version "1.2.0"}}}
+    reagent/reagent           {:mvn/version "1.2.0"}
+    io.github.babashka/sci.configs
+    {:git/url "https://github.com/babashka/sci.configs"
+     :git/sha "d0ef6083fdfac86dc3dd8948918acde334442405"}}}
   :shadow
   {:jvm-opts ["-Xss16m"]
    :extra-deps

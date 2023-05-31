@@ -41,8 +41,8 @@
             portal.ui.viewer.tree
             portal.ui.viewer.vega
             portal.ui.viewer.vega-lite
-            reagent.core
-            reagent.dom
+            [reagent.core :as r]
+            [sci.configs.reagent.reagent :as reagent]
             [sci.core :as sci])
   (:import [goog.math Long]))
 
@@ -91,13 +91,17 @@
     portal.ui.viewer.transit
     portal.ui.viewer.tree
     portal.ui.viewer.vega
-    portal.ui.viewer.vega-lite
-    reagent.core
-    reagent.dom)
+    portal.ui.viewer.vega-lite)
    (sci-import/import
     cljs.core/random-uuid
     cljs.core/tap>
-    cljs.reader/read-string)))
+    cljs.reader/read-string)
+   {'reagent.core
+    (assoc reagent/reagent-namespace
+           'adapt-react-class
+           (sci/copy-var r/adapt-react-class reagent/rns))
+    'reagent.ratom reagent/reagent-ratom-namespace
+    'reagent.debug reagent/reagent-debug-namespace}))
 
 (defn init [opts]
   (sci/init
