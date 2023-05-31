@@ -6,6 +6,7 @@
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]
+            [portal.ui.sci :as sci]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.web :as p]))
@@ -69,6 +70,7 @@
    [["Portal"
      (section "Taps" tap-list)
      (section "State" state/state)
+     (section "SCI Context" sci/ctx)
      ["RPC"
       (section "Logs" state/log)]
      (section "Viewers" api/viewers)
