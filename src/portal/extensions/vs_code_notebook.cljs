@@ -3,9 +3,12 @@
             [portal.async :as a]
             [portal.runtime :as rt]
             [portal.runtime.edn :as edn]
+            [portal.ui.cljs :as cljs]
             [portal.ui.embed :as embed]
             [portal.ui.inspector :as ins]
+            [portal.ui.load :as load]
             [portal.ui.rpc :as rpc]
+            [portal.ui.sci]
             [portal.ui.state :as state]
             [reagent.core :as r]
             [reagent.dom :as dom]))
@@ -65,6 +68,7 @@
       value
       (a/do
         (rpc/connect (assoc conn :session session))
+        (reset! load/conn conn)
         (reset! state/sender rpc/request)
         (apply rpc/call value)))))
 
@@ -74,6 +78,7 @@
     (dom/render [app (.-id data) value] element functional-compiler)))
 
 (defn activate [ctx]
+  (cljs/init)
   (reset! context ctx)
   (reset! state/sender send!)
   #js {:renderOutputItem #(render-output-item %1 %2)

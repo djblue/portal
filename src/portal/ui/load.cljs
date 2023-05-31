@@ -1,15 +1,21 @@
-(ns portal.ui.load)
+(ns ^:no-doc portal.ui.load)
 
 (defn- module-wrapper
   "https://nodejs.org/api/modules.html#the-module-wrapper"
   [{:keys [source]}]
   (str "(function (exports, require, module, __filename, __dirname) { " source "\n });"))
 
+(def conn (atom nil))
+
 (defn load-fn-sync [m]
   (let [_label (str "load-fn-sync: " (pr-str m))
         xhr  (js/XMLHttpRequest.)]
     #_(.time js/console _label)
-    (.open xhr "POST" "/load" false)
+    (.open xhr "POST"
+           (if-let [{:keys [host port]} @conn]
+             (str "http://" host ":" port "/load")
+             "/load")
+           false)
     (.setRequestHeader xhr "content-type" "application/edn")
     (.send xhr (pr-str m))
     #_(.timeEnd js/console _label)

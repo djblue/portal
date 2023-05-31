@@ -15,6 +15,14 @@
   (:import [java.io File PushbackReader]
            [java.util UUID]))
 
+(def ^:private enable-cors
+  {:status 204
+   :headers
+   {"Access-Control-Allow-Origin"  "*"
+    "Access-Control-Allow-Headers" "origin, content-type"
+    "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
+    "Access-Control-Max-Age"       86400}})
+
 (defmulti route (juxt :request-method :uri))
 
 (defn- not-found [_request done]
@@ -144,9 +152,11 @@
     (some-> name npm/node-resolve ->js)
     (some-> name (npm/node-resolve parent) ->js)))
 
+(defmethod route [:options "/load"] [_] enable-cors)
 (defmethod route [:post "/load"] [request]
   {:headers
-   {"content-type" "application/json"}
+   {"content-type" "application/json"
+    "Access-Control-Allow-Origin" "*"}
    :body
    (json/write
     (let [{:keys [name path macros] :as m} (body request)]
@@ -162,18 +172,11 @@
            [".clj"  ".cljc"]
            [".cljs" ".cljc" ".js"])))))})
 
+(defmethod route [:options "/submit"] [_] enable-cors)
 (defmethod route [:post "/submit"] [request]
   (rt/update-value (body request))
   {:status  204
    :headers {"Access-Control-Allow-Origin" "*"}})
-
-(defmethod route [:options "/submit"] [_]
-  {:status 204
-   :headers
-   {"Access-Control-Allow-Origin"  "*"
-    "Access-Control-Allow-Headers" "origin, content-type"
-    "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
-    "Access-Control-Max-Age"       86400}})
 
 (defmethod route [:get "/"] [request]
   (if-let [session (:session request)]
