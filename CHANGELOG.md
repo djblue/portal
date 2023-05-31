@@ -1,3 +1,17 @@
+## 0.41.0 - 2023-05-30
+
+- Enable sci for calva notebooks 9cc28f1
+- Improve reagent sci bindings 26188ae
+- Improve word highlighting 6f58917
+- Add clear-filter command to search bar 6ddb05e
+- Call goto on link click for log viewer d6e24fc
+- Add `portal.api/stop` 49a7923
+
+### Bug Fixes
+
+- Fix CLR reflection warnings 0e2134b
+- Only focus value if window is focused a86fb81
+
 ## 0.40.0 - 2023-04-18
 
 - Allow vscode extension to be used remotely
