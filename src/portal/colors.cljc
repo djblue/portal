@@ -141,4 +141,21 @@
     ::package     "#ffffff"
     ::exception   "#a3be8c"
     ::diff-add    "#b8bb26"
-    ::diff-remove "#fb4934"}})
+    ::diff-remove "#fb4934"}
+   ::zenburn
+   {::text        "#dcdccc"
+    ::background  "#383838"
+    ::background2 "#303030"
+    ::boolean     "#bfebbf"
+    ::string      "#cc9393"
+    ::keyword     "#afd8af"
+    ::namespace   "#5c888b"
+    ::tag         "#f0dfaf"
+    ::symbol      "#dcdccc"
+    ::number      "#8cd0d3"
+    ::uri         "#dfaf8f"
+    ::border      "#4f4f4f"
+    ::package     "#8cd0d3"
+    ::exception   "#cc9393"
+    ::diff-add    "#9fc59f"
+    ::diff-remove "#cc9393"}})
