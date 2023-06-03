@@ -14,7 +14,9 @@
     (.open xhr "POST"
            (if-let [{:keys [host port]} @conn]
              (str "http://" host ":" port "/load")
-             "/load")
+             (if (exists? js/PORTAL_HOST)
+               (str "http://" js/PORTAL_HOST "/load")
+               "/load"))
            false)
     (.setRequestHeader xhr "content-type" "application/edn")
     (.send xhr (pr-str m))
