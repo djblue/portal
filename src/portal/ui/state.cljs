@@ -215,8 +215,7 @@
    {:type :set-title :title title}))
 
 (defn- log-message [message]
-  (when (and js/goog.DEBUG
-             (not= 'portal.runtime/ping (:f message)))
+  (when-not (= 'portal.runtime/ping (:f message))
     (swap! log
            (fn [log]
              (take 10 (conj log message))))))
@@ -226,18 +225,21 @@
         start (.now js/Date)]
     (-> (send! {:op :portal.rpc/invoke :f f :args args})
         (.then (fn [{:keys [return error] :as response}]
-                 (log-message
-                  {:runtime :portal
-                   :level   (if error :error :info)
-                   :ns      (-> f namespace symbol)
-                   :f       f
-                   :args    args
-                   :line    (:line response 1)
-                   :column  (:column response 1)
-                   :file    (:file response)
-                   :result  (or return error)
-                   :time    time
-                   :ms      (- (.now js/Date) start)})
+                 (when js/goog.DEBUG
+                   (log-message
+                    {:runtime :portal
+                     :level   (if error :error :info)
+                     :ns      (if-not (symbol? f)
+                                'unknown
+                                (-> f namespace symbol))
+                     :f       f
+                     :args    args
+                     :line    (:line response 1)
+                     :column  (:column response 1)
+                     :file    (:file response)
+                     :result  (or return error)
+                     :time    time
+                     :ms      (- (.now js/Date) start)}))
                  (if-not error
                    return
                    (throw (ex-info (pr-str error) error))))))))
