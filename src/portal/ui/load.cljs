@@ -25,7 +25,6 @@
      (update :lang keyword)
      (assoc :name (:name m)))))
 
-(def load-cache (atom {}))
 (def ^:private require-cache (atom {}))
 
 (deftype Module [exports])
@@ -39,8 +38,6 @@
         (assoc cache module-name (Module. export)))
       cache
       modules))))
-
-(declare node-require)
 
 (defn node-require
   ([module]
