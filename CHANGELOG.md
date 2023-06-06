@@ -1,3 +1,14 @@
+## 0.42.0 - 2023-06-06
+
+- Expose portal.ui.options to sci 5b88216
+- Add :launcher :auto for using installed extensions 1d3f91d
+- Allow any object to be invoked for rpc b5e422c
+- Add zenburn theme 0b6d901
+
+### Bug Fixes
+
+- Fix sci code loading in vs-code extension b5e422c
+
 ## 0.41.0 - 2023-05-30
 
 - Enable sci for calva notebooks 9cc28f1
