@@ -65,6 +65,13 @@
 
 (defmethod browser/-open :electron [args] (remote-open (assoc args :config-file "electron.edn")))
 
+(defmethod browser/-open :auto [args]
+  (browser/-open
+   (assoc-in args [:options :launcher]
+             (cond
+               (fs/exists ".portal/vs-code.edn") :vs-code
+               (fs/exists ".portal/intellij.edn") :intellij))))
+
 (defonce ^:private server (atom nil))
 
 (defn start [options]
