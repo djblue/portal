@@ -14,6 +14,7 @@
             portal.ui.commands
             portal.ui.icons
             portal.ui.inspector
+            portal.ui.options
             portal.ui.rpc
             [portal.ui.sci.import :as sci-import]
             portal.ui.select
@@ -66,6 +67,7 @@
     portal.ui.commands
     portal.ui.icons
     portal.ui.inspector
+    portal.ui.options
     portal.ui.rpc
     portal.ui.select
     portal.ui.state
