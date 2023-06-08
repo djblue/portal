@@ -58,6 +58,7 @@
              (or
               (fs/is-file path)
               (fs/is-file (str path ".js"))
+              (fs/is-file (str path "/index.js"))
               (package-resolve path))))
          search-paths)
         (throw
