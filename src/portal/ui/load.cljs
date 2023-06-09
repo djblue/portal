@@ -1,4 +1,6 @@
-(ns ^:no-doc portal.ui.load)
+(ns ^:no-doc portal.ui.load
+  (:require ["@babel/core" :as babel]
+            ["@babel/plugin-transform-modules-commonjs" :as commonjs]))
 
 (defn- module-wrapper
   "https://nodejs.org/api/modules.html#the-module-wrapper"
@@ -41,6 +43,9 @@
       cache
       modules))))
 
+(defn- ->common-js [source]
+  (.-code (babel/transformSync source #js {:plugins #js [commonjs]})))
+
 (defn node-require
   ([module]
    (node-require nil module))
@@ -54,7 +59,7 @@
           (let [exports    #js {}
                 module-obj (Module. exports)]
             (swap! require-cache assoc file module-obj)
-            ((js/eval (module-wrapper value))
+            ((js/eval (module-wrapper (update value :source ->common-js)))
              exports #(node-require (:dir value) %) module-obj (:file value) (:dir value))
             (.-exports module-obj))))
       (catch :default e

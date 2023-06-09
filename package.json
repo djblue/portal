@@ -17,6 +17,8 @@
     "vega-lite": "^5.1.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.22.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.22.5",
     "browserify": "^16.5.2",
     "source-map-support": "^0.5.20",
     "ws": "^8.2.3"
