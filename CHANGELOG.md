@@ -1,3 +1,9 @@
+## 0.42.1 - 2023-06-22
+
+### Bug Fixes
+
+- Fix npm module resolution
+
 ## 0.42.0 - 2023-06-06
 
 - Expose portal.ui.options to sci 5b88216
