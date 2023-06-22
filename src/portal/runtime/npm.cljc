@@ -58,8 +58,8 @@
              (or
               (fs/is-file path)
               (fs/is-file (str path ".js"))
-              (fs/is-file (str path "/index.js"))
-              (package-resolve path))))
+              (package-resolve path)
+              (fs/is-file (fs/join path "index.js")))))
          search-paths)
         (throw
          (ex-info (str "Unable to find node module: " (pr-str module))
