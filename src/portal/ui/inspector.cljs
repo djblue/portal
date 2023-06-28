@@ -378,7 +378,7 @@
               :background (str color "22")
               :border [1 :solid color]
               :border-radius (:border-radius theme)}}
-     [inspector (:props (use-context)) value]]))
+     [inspector (select-keys (:props (use-context)) [:portal.viewer/for]) value]]))
 
 (defn- diff-removed [value]
   (let [theme (theme/use-theme)
@@ -388,7 +388,7 @@
               :background (str color "22")
               :border [1 :solid color]
               :border-radius (:border-radius theme)}}
-     [inspector (:props (use-context)) value]]))
+     [inspector (select-keys (:props (use-context)) [:portal.viewer/for]) value]]))
 
 (defn- inspect-diff [value]
   (let [theme (theme/use-theme)
