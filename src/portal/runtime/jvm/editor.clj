@@ -125,6 +125,5 @@
               :editor
               (or (:editor options)
                   (:launcher options)
-                  :vs-code
                   :emacs)))
       true)))
