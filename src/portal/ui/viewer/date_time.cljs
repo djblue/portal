@@ -18,7 +18,9 @@
 
     ;; unix timestamps
     (number? date)
-    (js/Date. (* date 1000))
+    (let [d (js/Date. (* date 1000))]
+      ;; Assume timestamps after the years 10000 are actually encoded as ms
+      (if (< (.getFullYear d) 10000) d (js/Date. date)))
 
     (string? date)
     (let [date (.parse js/Date date)]
