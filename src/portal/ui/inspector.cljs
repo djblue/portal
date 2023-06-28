@@ -378,7 +378,7 @@
               :background (str color "22")
               :border [1 :solid color]
               :border-radius (:border-radius theme)}}
-     [inspector value]]))
+     [inspector (:props (use-context)) value]]))
 
 (defn- diff-removed [value]
   (let [theme (theme/use-theme)
@@ -388,7 +388,7 @@
               :background (str color "22")
               :border [1 :solid color]
               :border-radius (:border-radius theme)}}
-     [inspector value]]))
+     [inspector (:props (use-context)) value]]))
 
 (defn- inspect-diff [value]
   (let [theme (theme/use-theme)
@@ -592,7 +592,7 @@
        :border [1 :solid (::c/border theme)]}}
      child]))
 
-(defn- get-props [value k]
+(defn get-props [value k]
   (let [m (meta value)]
     (when-let [viewer (get-in m [:portal.viewer/for k])]
       (merge

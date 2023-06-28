@@ -143,7 +143,8 @@
                    [cell
                     (inc row-index)
                     (inc col-index)
-                    (when (contains? coll column) [ins/inspector (get coll column)])]]]))
+                    (when (contains? coll column)
+                      [ins/inspector (ins/get-props coll column) (get coll column)])]]]))
              cols)]]])
        rows)]]))
 
@@ -170,7 +171,8 @@
                  [cell
                   (inc row-index)
                   (inc col-index)
-                  (when (contains? row column) [ins/inspector (get row column)])]]])
+                  (when (contains? row column)
+                    [ins/inspector (ins/get-props row column) (get row column)])]]])
              cols)]]])
        rows)]]))
 
@@ -215,7 +217,7 @@
                [cell
                 (inc row-index)
                 1
-                [ins/inspector (get values row)]]]]]]]])
+                [ins/inspector (ins/get-props values row) (get values row)]]]]]]]])
        rows)]]))
 
 (defn- inspect-multi-map-table [values]
@@ -244,7 +246,7 @@
                    (inc row-index)
                    (inc col-index)
                    (when (contains? value column)
-                     [ins/inspector (get value column)])]]]])
+                     [ins/inspector (ins/get-props value column) (get value column)])]]]])
              cols)]]])
        (mapcat
         (fn [row]
