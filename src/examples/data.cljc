@@ -663,7 +663,8 @@
         "children"]}]}]})
 
 (def log-data
-  [{:ns      'user
+  [^{:portal.viewer/for {:time :portal.viewer/date-time}}
+   {:ns      'user
     :time    #inst "2006-03-24T14:49:31+00:00"
     :level   :info
     :column  1
@@ -671,6 +672,7 @@
     :result  :hello/clj
     :runtime :clj
     :form    :hello/clj}
+   ^{:portal.viewer/for {:time :portal.viewer/date-time}}
    {:ns      'user
     :time    #inst "2009-02-03T00:25:17-06:00"
     :level   :warn
@@ -679,6 +681,7 @@
     :result  :hello/cljr
     :runtime :cljr
     :form    :hello/cljr}
+   ^{:portal.viewer/for {:time :portal.viewer/date-time}}
    {:ns      'cljs.user
     :time    #inst "2011-06-02T19:45:57-04:00"
     :level   :error
@@ -687,6 +690,7 @@
     :result  :hello/cljs
     :runtime :cljs
     :form    :hello/cljs}
+   ^{:portal.viewer/for {:time :portal.viewer/date-time}}
    {:ns      'tasks
     :time    #inst "2019-08-09T14:51:42+02:00"
     :level   :debug
@@ -695,6 +699,7 @@
     :result  :hello/bb
     :runtime :bb
     :form    :hello/bb}
+   ^{:portal.viewer/for {:time :portal.viewer/date-time}}
    {:ns      'portal.api
     :time    #inst "2020-06-02T18:43:08-07:00"
     :level   :trace
@@ -708,7 +713,7 @@
   {::coll-of-maps
    (with-meta log-data
      {:portal.viewer/default :portal.viewer/table
-      :portal.viewer/table {:columns [:level :ns :result :runtime]}})
+      :portal.viewer/table {:columns [:level :ns :result :runtime :time]}})
    ::nested-maps
    ^{:portal.viewer/default :portal.viewer/table
      :portal.viewer/table
