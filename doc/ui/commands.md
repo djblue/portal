@@ -20,7 +20,7 @@ To register your own command, use the `portal.api/register!` function. For examp
 When multiple values are selected, commands will be applied as follows:
 
 ``` clojure
-(apply f [first-selected second-selcted ...])
+(apply f [first-selected second-selected ...])
 ```
 
 **NOTES:**
