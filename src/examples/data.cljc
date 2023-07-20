@@ -88,7 +88,7 @@
    ::atom (atom ::hello)
    ::function println
    (with-meta 'symbol-key-with-meta {:a :b}) ::value
-   ;;TODO: fix me, causes infininte loop in demo
+   ;;TODO: fix me, causes infinite loop in demo
    ;;::range (range)
    ::record #?(:bb {:x 0 :y 0} :default (->Point 0 0))})
 

@@ -69,7 +69,7 @@
   nil)
 
 (defn eval-str
-  "Evalute ClojureScript source given as a string in the UI runtime."
+  "Evaluate ClojureScript source given as a string in the UI runtime."
   {:added "0.19.0"}
   ([code]
    (eval-str :all code nil))
