@@ -267,6 +267,8 @@
    {::shortcuts/default #{"control" "enter"}}   `focus-selected
    {::shortcuts/default #{"e"}}                 `toggle-expand
    {::shortcuts/default #{" "}}                 `toggle-expand
+   {::shortcuts/default #{"shift" "e"}}         `toggle-expand-all
+   {::shortcuts/default #{"shift" " "}}         `toggle-expand-all
 
    {::shortcuts/default #{"enter"}}             'clojure.datafy/nav
    {::shortcuts/default #{"shift" "enter"}}     'clojure.datafy/datafy
@@ -809,6 +811,9 @@
 
 (defn ^:command toggle-expand [state]
   (state/dispatch! state state/toggle-expand))
+
+(defn ^:command toggle-expand-all [state]
+  (state/dispatch! state state/toggle-expand-all))
 
 (defn ^:command redo-previous-command [state]
   (a/let [commands (::state/previous-commands @state)]

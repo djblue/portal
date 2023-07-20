@@ -149,6 +149,35 @@
 (defn toggle-expand [state]
   (reduce toggle-expand-1 state (:selected state)))
 
+(defn- get-child-locations [{:keys [value stable-path] :as _context}]
+  (cond
+    (map? value) (mapcat (fn [[k v]]
+                           (let [child-context {:stable-path (conj stable-path k)
+                                                :value v}]
+                             (conj (get-child-locations child-context) child-context)))
+                         value)
+    (coll? value) (flatten
+                   (map-indexed (fn [i v]
+                                  (let [child-context {:stable-path (conj stable-path i)
+                                                       :value v}]
+                                    (conj (get-child-locations child-context)
+                                          child-context)))
+                                value))
+    :else [{:stable-path stable-path
+            :value value}]))
+
+(defn toggle-expand-all-1 [state context]
+  (let [location (get-location context)
+        all-locs (conj (get-child-locations context) location)
+        all-expanded? (every? true? (map #(get-in state [:expanded? %]) all-locs))]
+    (reduce (fn [state loc]
+              (assoc-in state [:expanded? loc] (not all-expanded?)))
+            state
+            all-locs)))
+
+(defn toggle-expand-all [state]
+  (reduce toggle-expand-all-1 state (:selected state)))
+
 (defn focus-selected [state context]
   (history-push state {:portal/value (:value context) :context context}))
 
