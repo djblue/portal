@@ -178,7 +178,7 @@
         children))
 
 (defn- get-stable-path
-  "Since seqs grow at the front, reverse indexing them will yeild a more stable
+  "Since seqs grow at the front, reverse indexing them will yield a more stable
   path."
   [context k]
   (let [{:keys [collection stable-path] :or {stable-path []}} context]

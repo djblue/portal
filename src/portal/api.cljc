@@ -130,7 +130,7 @@
              (flush))))
 
 (defn eval-str
-  "Evalute ClojureScript source given as a string in the UI runtime. The parameters:
+  "Evaluate ClojureScript source given as a string in the UI runtime. The parameters:
 
    - portal: portal instance returned from `portal.api/open` or `:all`
    - code (string): the ClojureScript source
