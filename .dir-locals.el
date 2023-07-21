@@ -1,4 +1,4 @@
-((nil . ((cider-clojure-cli-global-options     . "-A:dev:cljs:shadow")
+((nil . ((cider-clojure-cli-aliases            . ":dev:cljs:shadow")
          (cider-custom-cljs-repl-init-form     . "(user/cljs)")
          (cider-default-cljs-repl              . custom)
          (cider-preferred-build-tool           . clojure-cli)
