@@ -139,15 +139,38 @@
       (dissoc :portal/next-state)
       (push-viewer entry)))
 
+(defn- get-parents [context]
+  (rest (take-while some? (iterate :parent context))))
+
+(defn expanded? [state context]
+  (let [depth     (:depth context)
+        expanded? (:expanded? state)
+        location  (get-location context)]
+    (if-let [n (get expanded? location)]
+      (< 0 n)
+      (some (fn [parent-context]
+              (<
+               (-  depth (:depth parent-context))
+               (get expanded? (get-location parent-context) 0)))
+            (get-parents context)))))
+
 (defn toggle-expand-1 [state context]
-  (let [location (get-location context)
-        default  (get-in state [:default-expand location])]
-    (update-in state [:expanded? location]
-               (fn [value]
-                 (not (if (nil? value) default value))))))
+  (let [location (get-location context)]
+    (update state :expanded?
+            (fn [expanded]
+              (if (expanded? state context)
+                (assoc expanded location 0)
+                (assoc expanded location 1))))))
 
 (defn toggle-expand [state]
   (reduce toggle-expand-1 state (:selected state)))
+
+(defn expand-inc-1 [state context]
+  (let [location (get-location context)]
+    (update-in state [:expanded? location] (fnil inc 0))))
+
+(defn expand-inc [state]
+  (reduce expand-inc-1 state (:selected state)))
 
 (defn focus-selected [state context]
   (history-push state {:portal/value (:value context) :context context}))

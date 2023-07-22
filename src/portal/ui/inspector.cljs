@@ -140,6 +140,13 @@
                    assoc-in [:selected-viewers (state/get-location context)]
                    viewer-name))
 
+(def ^:private parent-context (react/createContext nil))
+
+(defn- use-parent [] (react/useContext parent-context))
+
+(defn- with-parent [context & children]
+  (into [:r> (.-Provider parent-context) #js {:value context}] children))
+
 (def ^:private inspector-context
   (react/createContext {:depth 0 :path [] :stable-path [] :alt-bg false}))
 
@@ -946,31 +953,30 @@
     :error      inspect-error
     inspect-object))
 
-(defn- get-info [state theme context value]
-  (let [{:keys [search-text expanded?]} @state
+(defn- default-expand? [state theme context value]
+  (let [depth   (:depth context)
+        viewer  (get-viewer state context value)]
+    (or (= depth 1)
+        (and (coll? value)
+             (= (:name viewer) :portal.viewer/inspector)
+             (<= depth (:max-depth theme))))))
+
+(defn- get-info [state context value]
+  (let [{:keys [search-text]} @state
         location       (state/get-location context)
-        search-text    (get search-text location)
-        value          (f/filter-value value search-text)
-        viewer         (get-viewer state context value)
-        depth          (:depth context)
-        default-expand (or (= depth 1)
-                           (and (coll? value)
-                                (= (:name viewer) :portal.viewer/inspector)
-                                (<= depth (:max-depth theme))))
-        expanded?      (if-some [expanded? (get expanded? location)] expanded? default-expand)]
-    {:selected       (state/selected @state context)
-     :expanded?      expanded?
-     :viewer         viewer
-     :value          value
-     :default-expand default-expand}))
+        search-text    (get search-text location)]
+    {:selected  (state/selected @state context)
+     :expanded? (state/expanded? @state context)
+     :viewer    (get-viewer state context value)
+     :value     (f/filter-value value search-text)}))
 
 (defn- inspector* [context value]
   (let [ref            (react/useRef nil)
         state          (state/use-state)
         location       (state/get-location context)
         theme          (theme/use-theme)
-        {:keys [value viewer selected default-expand expanded?] :as options}
-        @(r/track get-info state theme context value)
+        {:keys [value viewer selected expanded?] :as options}
+        @(r/track get-info state context value)
         type           (get-value-type value)
         component      (or
                         (when-not (= (:name viewer) :portal.viewer/inspector)
@@ -981,8 +987,10 @@
     (select/use-register-context context viewer)
     (react/useEffect
      (fn []
-       (state/dispatch! state assoc-in [:default-expand location] default-expand)
-       #(state/dispatch! state update :default-expand dissoc location))
+       (when (and (nil? expanded?)
+                  (default-expand? state theme context value))
+         (state/dispatch! state assoc-in [:expanded? location] 1))
+       #(state/dispatch! state update :expanded? dissoc location))
      #js [(hash location)])
     (react/useEffect
      (fn []
@@ -1063,18 +1071,19 @@
   ([value]
    (inspector nil value))
   ([props value]
-   (let [parent (use-context)
-         context
+   (let [context
          (cond->
-          (-> parent
+          (-> (use-context)
               (assoc :value value)
               (update :alt-bg not)
-              (update :depth inc))
+              (update :depth inc)
+              (assoc :parent (use-parent)))
            props
            (assoc :props props)
            (nil? props)
            (dissoc :props))]
-     [:<>
+     [with-parent
+      context
       ^{:key "tab-index"} [tab-index context]
       [with-context context [inspector* context value]]])))
 
