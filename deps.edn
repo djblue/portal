@@ -36,7 +36,7 @@
   :shadow
   {:jvm-opts ["-Xss16m"]
    :extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.24.0"}}}
+   {thheller/shadow-cljs {:mvn/version "2.20.10"}}}
   :build
   {:extra-paths ["src" "dev" "resources"]
    :ns-default  tasks.build
