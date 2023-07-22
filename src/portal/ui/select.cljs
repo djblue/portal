@@ -53,6 +53,11 @@
    (when-let [index (get selection-index context)]
      (get selection-index (pop index)))))
 
+(defn get-parents
+  ([context] (get-parents @selection-index context))
+  ([selection-index context]
+   (take-while some? (rest (iterate (partial get-parent selection-index) context)))))
+
 (defn- compute-relative-index [selection-index index context]
   (let [position-index  {index context context index}
         selection-index (into selection-index position-index)]
