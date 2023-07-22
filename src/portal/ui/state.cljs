@@ -139,6 +139,9 @@
       (dissoc :portal/next-state)
       (push-viewer entry)))
 
+(defn- get-parents [context]
+  (rest (take-while some? (iterate :parent context))))
+
 (defn expanded? [state context]
   (let [depth     (:depth context)
         expanded? (:expanded? state)
@@ -149,7 +152,7 @@
               (<
                (-  depth (:depth parent-context))
                (get expanded? (get-location parent-context) 0)))
-            (select/get-parents context)))))
+            (get-parents context)))))
 
 (defn toggle-expand-1 [state context]
   (let [location (get-location context)]

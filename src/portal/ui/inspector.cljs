@@ -140,8 +140,15 @@
                    assoc-in [:selected-viewers (state/get-location context)]
                    viewer-name))
 
+(def ^:private parent-context (react/createContext nil))
+
+(defn- use-parent [] (react/useContext parent-context))
+
+(defn- with-parent [context & children]
+  (into [:r> (.-Provider parent-context) #js {:value context}] children))
+
 (def ^:private inspector-context
-  (react/createContext {:depth 0 :path [] :stable-path [] :alt-bg false}))
+  (react/createContext {:depth 0 :path [] :stable-path [] :alt-bg false :parent nil}))
 
 (defn use-context [] (react/useContext inspector-context))
 
@@ -1064,18 +1071,19 @@
   ([value]
    (inspector nil value))
   ([props value]
-   (let [parent (use-context)
-         context
+   (let [context
          (cond->
-          (-> parent
+          (-> (use-context)
               (assoc :value value)
               (update :alt-bg not)
-              (update :depth inc))
+              (update :depth inc)
+              (assoc :parent (use-parent)))
            props
            (assoc :props props)
            (nil? props)
            (dissoc :props))]
-     [:<>
+     [with-parent
+      context
       ^{:key "tab-index"} [tab-index context]
       [with-context context [inspector* context value]]])))
 
