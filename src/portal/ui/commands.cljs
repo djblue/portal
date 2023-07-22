@@ -810,10 +810,14 @@
 (defn ^:command focus-selected [state]
   (apply-selected state state/focus-selected))
 
-(defn ^:command toggle-expand [state]
+(defn ^:command toggle-expand
+  "Expand or collapse currently selected values."
+  [state]
   (state/dispatch! state state/toggle-expand))
 
-(defn ^:command expand-inc [state]
+(defn ^:command expand-inc
+  "Expand 1 additional layer of children from selected values."
+  [state]
   (state/dispatch! state state/expand-inc))
 
 (defn ^:command redo-previous-command [state]
