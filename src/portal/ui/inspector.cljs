@@ -148,7 +148,7 @@
   (into [:r> (.-Provider parent-context) #js {:value context}] children))
 
 (def ^:private inspector-context
-  (react/createContext {:depth 0 :path [] :stable-path [] :alt-bg false :parent nil}))
+  (react/createContext {:depth 0 :path [] :stable-path [] :alt-bg false}))
 
 (defn use-context [] (react/useContext inspector-context))
 
