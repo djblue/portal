@@ -989,9 +989,12 @@
      (fn []
        (when (and (nil? expanded?)
                   (default-expand? state theme context value))
-         (state/dispatch! state assoc-in [:expanded? location] 1))
+         (state/dispatch! state assoc-in [:expanded? location] 1)))
+     #js [(hash location) (some? expanded?)])
+    (react/useEffect
+     (fn []
        #(state/dispatch! state update :expanded? dissoc location))
-     #js [(hash location)])
+     #js [])
     (react/useEffect
      (fn []
        (when (and selected
