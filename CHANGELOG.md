@@ -1,3 +1,16 @@
+## 0.43.0 - 2023-07-23
+
+- Add expand-inc for expanding children from parent (#189) d117347
+- Add heuristic for unix time stamps encoded as ms d4167b0
+- Improve goto fallback for symbols 30c7a3b
+- Enable :portal.viewer/for in table / diff viewers ee449af
+
+### Documentation
+
+- Fix some typos (#188) 13f408a - Thanks @dakra!
+- Use cider-clojure-cli-aliases (#187) a2a7332 - Thanks @dakra!
+- Fix typo (#184) 46eefd7 - Thanks @eval!
+
 ## 0.42.1 - 2023-06-22
 
 ### Bug Fixes
