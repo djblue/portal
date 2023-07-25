@@ -5,6 +5,7 @@
             [portal.jvm-test]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
+            [portal.runtime.edn]
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
             [portal.runtime.json-buffer-test]
@@ -35,6 +36,7 @@
   (let [{:keys [fail error]}
         (run-tests 'portal.jvm-test
                    'portal.runtime.cson-test
+                   'portal.runtime.edn
                    'portal.runtime.fs-test
                    'portal.runtime.json-buffer-test
                    'portal.runtime.npm-test)]

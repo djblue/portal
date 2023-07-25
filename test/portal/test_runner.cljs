@@ -5,6 +5,7 @@
             [portal.client.node :as p]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
+            [portal.runtime.edn]
             [portal.runtime.fs :as fs]
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
@@ -58,6 +59,7 @@
   (a/let [report
           (run-tests
            #(t/run-tests 'portal.runtime.cson-test
+                         'portal.runtime.edn
                          'portal.runtime.fs-test
                          'portal.runtime.json-buffer-test
                          'portal.runtime.npm-test))

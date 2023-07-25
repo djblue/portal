@@ -832,6 +832,16 @@
      [s/span {:style {:color (::c/tag theme)}} "#'"]
      [inspect-symbol (get-var-symbol value)]]))
 
+(defn- inspect-regex [value]
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style
+      {:display :flex}}
+     [s/span {:style {:color (::c/tag theme)}} "#"]
+     [select/with-position
+      {:column 0 :row 0}
+      [with-key :s [inspector (:rep value)]]]]))
+
 (defn- inspect-uri [value]
   (let [theme (theme/use-theme)
         value (str value)]
@@ -916,6 +926,7 @@
     :inst       inspect-inst
     :uuid       inspect-uuid
     "portal/var" inspect-var
+    "portal/re" inspect-regex
     "remote"    inspect-remote
     :char       inspect-char
     :ratio      inspect-ratio
@@ -945,6 +956,7 @@
     :inst       inspect-inst
     :uuid       inspect-uuid
     "portal/var" inspect-var
+    "portal/re" inspect-regex
     "remote"    inspect-remote
     :char       inspect-char
     :ratio      inspect-ratio
