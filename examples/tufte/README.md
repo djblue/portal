@@ -3,8 +3,10 @@
 If you are a [ptaoussanis/tufte](https://github.com/ptaoussanis/tufte) user,
 this guide will help you get profiling data into Portal.
 
+![Screenshot 2023-07-25 at 8 13 10 PM](https://github.com/djblue/portal/assets/1986211/d9532ca7-af28-4e33-a592-8704d589c371)
+
 The main advantages of using Portal are that your profiling data is always
-available as data and the :loc data can be used to jump directly to the source
+available as data and the `:loc` data can be used to jump directly to the source
 location using the `goto-definition` [command][commands].
 
 ### Setup
@@ -89,11 +91,9 @@ the equivalent:
     (p :get-y (get-y))))
 ```
 
-Which will produce the following output:
-
 > **Note** goto-definition will only work if `taoensso.tufte/p` calls are eval'd
-> via a repl that properly provide file/line/column info. This includes using
-> nrepl or using load-file to load your code.
+> via a repl that properly provide file/line/column info. This includes nrepl
+> or using load-file to load your code.
 
 [tufte-example]: https://github.com/ptaoussanis/tufte#10-second-example
 [commands]: ../../doc/ui/commands.md
