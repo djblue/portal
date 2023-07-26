@@ -1,3 +1,13 @@
+## 0.44.0 - 2023-07-25
+
+- Add expand / collapse actions to prepl title bar 0c6ca2c
+- Shift + click expand icon to expand-inc cf14231
+- Add tufte guide 223d49f
+- Add source-location viewer faf88c1
+- Add duration-ms and duration-ns viewers fed87f6
+- Improve filtering on various viewers 10d0145
+- Enable edn parsing containing regex 381017b
+
 ## 0.43.0 - 2023-07-23
 
 - Add expand-inc for expanding children from parent (#189) d117347
