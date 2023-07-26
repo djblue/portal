@@ -35,6 +35,7 @@
             [portal.ui.viewer.pprint :as pprint]
             [portal.ui.viewer.prepl :as prepl]
             [portal.ui.viewer.relative-time :as relative-time]
+            [portal.ui.viewer.source-location :as source-location]
             [portal.ui.viewer.table :as table]
             [portal.ui.viewer.test-report :as test-report]
             [portal.ui.viewer.text :as text]
@@ -457,7 +458,8 @@
    md/viewer
    hiccup/viewer
    date-time/viewer
-   relative-time/viewer])
+   relative-time/viewer
+   source-location/viewer])
 
 (reset! api/viewers viewers)
 

@@ -5,11 +5,11 @@
             [portal.ui.filter :as-alias f]
             #_[shadow.resource :refer [inline]] ;; for hot reloading
             [portal.ui.inspector :as ins]
-            [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
-            [portal.ui.viewer.date-time :as date-time]))
+            [portal.ui.viewer.date-time :as date-time]
+            [portal.ui.viewer.source-location :as src]))
 
 (defn- parse [xml-string]
   (let [parser (js/DOMParser.)
@@ -129,27 +129,17 @@
           [ins/dec-depth
            [ins/inspector (:result log')]]]]]]
       [d/div
-       {:on-click
-        (fn [e]
-          (.stopPropagation e)
-          (rpc/call 'portal.runtime.jvm.editor/goto-definition log'))
-        :style/hover
-        {:opacity 1
-         :text-decoration :underline}
-        :style
+       {:style
         (merge
          flex
-         {:opacity         0.75
-          :cursor          :pointer
-          :color           (::c/uri theme)
-          :border-top      [1 :solid (::c/border theme)]
+         {:border-top      [1 :solid (::c/border theme)]
           :justify-content :flex-end}
          border
          (when-not runtime?
            {:border-right               [1 :solid (::c/border theme)]
             :border-top-right-radius    (:border-radius theme)
             :border-bottom-right-radius (:border-radius theme)}))}
-       [ins/highlight-words (str (:ns log') ":" (:line log'))]]
+       [src/inspect-source log']]
       (when runtime?
         [d/div
          {:style
