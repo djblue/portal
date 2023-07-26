@@ -62,7 +62,7 @@ or for a **babashka >=0.2.4** repl, do:
 bb -Sdeps '{:deps {djblue/portal {:mvn/version "0.44.0"}}}'
 ```
 
-or for a Leiningen project, do:
+or for a lein `project.clj`, add:
 
 ```clojure
 {:profiles {:dev {:dependencies [[djblue/portal "0.44.0"]]}}}
