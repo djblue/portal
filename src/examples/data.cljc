@@ -709,6 +709,81 @@
     :runtime :portal
     :form    :hello/portal}])
 
+(def profile-data
+  (with-meta
+    {:get-x
+     ^{:portal.viewer/for
+       {:min :portal.viewer/duration-ns,
+        :mean :portal.viewer/duration-ns,
+        :p75 :portal.viewer/duration-ns,
+        :p99 :portal.viewer/duration-ns,
+        :p25 :portal.viewer/duration-ns,
+        :p90 :portal.viewer/duration-ns,
+        :max :portal.viewer/duration-ns,
+        :mad :portal.viewer/duration-ns,
+        :loc :portal.viewer/source-location,
+        :p50 :portal.viewer/duration-ns,
+        :sum :portal.viewer/duration-ns,
+        :p95 :portal.viewer/duration-ns}}
+     {:min 500379167,
+      :mean 5.0368755E8,
+      :p75 5.05059583E8,
+      :mad-sum 8368282.0,
+      :p99 5.0514774364E8,
+      :n 5,
+      :p25 5.02811792E8,
+      :p90 5.051146834E8,
+      :var 3.5110970180224E12,
+      :max 505151417,
+      :mad 1673656.4,
+      :loc
+      {:ns 'user,
+       :line 16,
+       :column 6,
+       :file "/Users/chris/repos/portal/examples/tufte/src/user.clj"},
+      :last 505151417,
+      :p50 5.05035791E8,
+      :sum 2518437750,
+      :p95 5.051330502E8,
+      :var-sum 1.7555485090112E13},
+     :get-y
+     ^{:portal.viewer/for
+       {:min :portal.viewer/duration-ns,
+        :mean :portal.viewer/duration-ns,
+        :p75 :portal.viewer/duration-ns,
+        :p99 :portal.viewer/duration-ns,
+        :p25 :portal.viewer/duration-ns,
+        :p90 :portal.viewer/duration-ns,
+        :max :portal.viewer/duration-ns,
+        :mad :portal.viewer/duration-ns,
+        :loc :portal.viewer/source-location,
+        :p50 :portal.viewer/duration-ns,
+        :sum :portal.viewer/duration-ns,
+        :p95 :portal.viewer/duration-ns}}
+     {:min 352537834,
+      :mean 6.41027925E8,
+      :p75 9.79101417E8,
+      :mad-sum 1.388414716E9,
+      :p99 9.964393760400001E8,
+      :n 5,
+      :p25 4.0308575E8,
+      :p90 9.899376414000001E8,
+      :var 8.1823301849941472E16,
+      :max 997161791,
+      :mad 2.776829432E8,
+      :loc
+      {:ns 'user,
+       :line 17,
+       :column 6,
+       :file "/Users/chris/repos/portal/examples/tufte/src/user.clj"},
+      :last 352537834,
+      :p50 4.73252833E8,
+      :sum 3205139625,
+      :p95 9.935497162E8,
+      :var-sum 4.0911650924970739E17}}
+    {:portal.viewer/default :portal.viewer/table,
+     :portal.viewer/table {:columns [:n :min :max :mean :sum :loc]}}))
+
 (def table-data
   {::coll-of-maps
    (with-meta log-data
@@ -961,6 +1036,7 @@
    ::data-visualization data-visualization
    ::string-data        string-data
    ::log-data           log-data
+   ::profile-data       profile-data
    ::test-data          test-report
    ::prepl-data         prepl-data
    ::exception-data     exception-data

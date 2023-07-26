@@ -83,7 +83,8 @@
             (with-meta {::eval true
                         :portal.viewer/for
                         {:code :portal.viewer/code
-                         :time :portal.viewer/relative-time}
+                         :time :portal.viewer/relative-time
+                         :ms   :portal.viewer/duration-ms}
                         :portal.viewer/code {:language :clojure}})
             tap>)))
     transport))

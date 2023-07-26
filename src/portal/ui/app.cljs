@@ -21,6 +21,7 @@
             [portal.ui.viewer.date-time :as date-time]
             [portal.ui.viewer.deref :as deref]
             [portal.ui.viewer.diff :as diff]
+            [portal.ui.viewer.duration :as duration]
             [portal.ui.viewer.edn :as edn]
             [portal.ui.viewer.exception :as ex]
             [portal.ui.viewer.hiccup :as hiccup]
@@ -435,6 +436,8 @@
    prepl/viewer
    cljdoc/viewer
    ins/viewer
+   duration/nano
+   duration/ms
    pprint/viewer
    vega-lite/viewer
    vega/viewer
