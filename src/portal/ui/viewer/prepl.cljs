@@ -6,6 +6,7 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
+            [portal.ui.state :as state]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
@@ -77,6 +78,49 @@
              (edn/read-string (:val value))
              (catch :default _ (:val value)))]]]]]]]))
 
+(defn- title-bar-actions []
+  (let [theme    (theme/use-theme)
+        state    (state/use-state)
+        context  (ins/use-context)
+        location (state/get-location context)]
+    [d/div
+     {:style
+      {:display       :flex
+       :gap           (:padding theme)
+       :box-sizing    :border-box
+       :padding       (* 1.6 (:padding theme))
+       :border-bottom [1 :solid (::c/border theme)]}}
+     [icons/times-circle
+      {:size :s
+       :style {:opacity 0.75
+               :color (::c/exception theme)}
+       :style/hover {:opacity 1}
+       :title "Click to do nothing. 😊"
+       :on-click (fn [e]
+                   (.stopPropagation e))}]
+
+     [icons/minus-circle
+      {:size :s
+       :style {:opacity 0.75
+               :cursor :pointer
+               :color (::c/tag theme)}
+       :style/hover {:opacity 1}
+       :title "Click to collapse."
+       :on-click (fn [e]
+                   (.stopPropagation e)
+                   (state/dispatch! state assoc-in [:expanded? location] 0))}]
+
+     [icons/plus-circle
+      {:size :s
+       :style {:opacity 0.75
+               :cursor :pointer
+               :color (::c/string theme)}
+       :style/hover {:opacity 1}
+       :title "Click to expand."
+       :on-click (fn [e]
+                   (.stopPropagation e)
+                   (state/dispatch! state assoc-in [:expanded? location] 1))}]]))
+
 (defn inspect-prepl [value]
   (let [theme (theme/use-theme)
         opts  (ins/use-options)
@@ -86,16 +130,7 @@
       {:background    bg
        :border-radius (:border-radius theme)
        :border        [1 :solid (::c/border theme)]}}
-     [d/div
-      {:style
-       {:display       :flex
-        :gap           (:padding theme)
-        :box-sizing    :border-box
-        :padding       (* 1.6 (:padding theme))
-        :border-bottom [1 :solid (::c/border theme)]}}
-      [icons/circle {:size :xs :style {:color (::c/exception theme)}}]
-      [icons/circle {:size :xs :style {:color (::c/tag theme)}}]
-      [icons/circle {:size :xs :style {:color (::c/string theme)}}]]
+     [title-bar-actions]
      [:pre
       {:style
        {:margin         0

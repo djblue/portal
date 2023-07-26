@@ -49,7 +49,7 @@
   (or (get @cache [selector style])
       (generate-class selector style)))
 
-(defn- attrs->css [attrs]
+(defn attrs->css [attrs]
   (reduce
    (fn [attrs selector]
      (if-not (contains? attrs selector)

@@ -25,10 +25,11 @@
             ["@fortawesome/free-solid-svg-icons/faStopCircle" :refer [faStopCircle]]
             ["@fortawesome/free-solid-svg-icons/faTerminal" :refer [faTerminal]]
             ["@fortawesome/free-solid-svg-icons/faTimesCircle" :refer [faTimesCircle]]
-            ["@fortawesome/react-fontawesome" :refer [FontAwesomeIcon]]))
+            ["@fortawesome/react-fontawesome" :refer [FontAwesomeIcon]]
+            [portal.ui.styled :as d]))
 
 (defn icon [icon props]
-  [:> FontAwesomeIcon (merge {:icon icon :size "lg"} props)])
+  [:> FontAwesomeIcon (d/attrs->css (merge {:icon icon :size "lg"} props))])
 
 (def arrow-down (partial icon faArrowDown))
 (def arrow-left (partial icon faArrowLeft))
