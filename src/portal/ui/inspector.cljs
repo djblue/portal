@@ -458,7 +458,9 @@
          :style/hover {:color color}
          :on-click (fn [e]
                      (.stopPropagation e)
-                     (state/dispatch! state state/toggle-expand-1 context))})
+                     (if (.-shiftKey e)
+                       (state/dispatch! state state/expand-inc-1 context)
+                       (state/dispatch! state state/toggle-expand-1 context)))})
        (if expanded?
          [icons/caret-down]
          [icons/caret-right])])))
