@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.filter :as-alias f]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
@@ -53,10 +54,12 @@
    :options ::c/package})
 
 (defn inspect-http-request [value]
-  (let [theme      (theme/use-theme)
+  (let [value'     (::f/value (meta value) value)
+        theme      (theme/use-theme)
         opts       (ins/use-options)
         background (ins/get-background)
-        color      (-> value :request-method method->color theme)
+        method     (:request-method value')
+        color      (-> method method->color theme)
         expanded?  (:expanded? opts)]
     [d/div
      [d/div
@@ -75,7 +78,7 @@
          :border-top-left-radius (:border-radius theme)
          :border-bottom-left-radius
          (when-not expanded? (:border-radius theme))}}
-       (str/upper-case (name (:request-method value)))]
+       (str/upper-case (name method))]
       [d/div
        {:style
         {:flex    "1"
@@ -93,7 +96,7 @@
         {:row -1 :column 0}
         [ins/with-key
          :uri
-         [ins/inspector (:uri value)]]]]]
+         [ins/inspector (:uri value')]]]]]
      (when (:expanded? opts)
        [ins/inspect-map-k-v (dissoc value :uri :request-method)])]))
 
@@ -106,13 +109,15 @@
     (<= 500 status 599) ::c/exception))
 
 (defn inspect-http-response [value]
-  (let [theme        (theme/use-theme)
+  (let [value'       (::f/value (meta value) value)
+        theme        (theme/use-theme)
         opts         (ins/use-options)
         expanded?    (:expanded? opts)
         background   (ins/get-background)
-        content-type (or (get-in value [:headers "Content-Type"])
-                         (get-in value [:headers :content-type]))
-        color        (-> value :status status->color theme)]
+        content-type (or (get-in value' [:headers "Content-Type"])
+                         (get-in value' [:headers :content-type]))
+        status       (:status value')
+        color        (-> status status->color theme)]
     [d/div
      [d/div
       {:style
@@ -128,7 +133,7 @@
          :border-top-left-radius (:border-radius theme)
          :border-bottom-left-radius
          (when-not expanded? (:border-radius theme))}}
-       (:status value)]
+       status]
       [d/div
        {:style
         {:flex                    "1"
@@ -160,7 +165,7 @@
     inspect-http-response))
 
 (defn inspect-http [value]
-  (let [component (get-component value)]
+  (let [component (get-component (::f/value (meta value) value))]
     [component value]))
 
 (def viewer

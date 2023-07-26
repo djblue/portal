@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.filter :as-alias f]
             [portal.ui.icons :as icon]
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as d]
@@ -126,9 +127,10 @@
              [inspect-sub-trace trace])))]))
 
 (defn- inspect-via [value]
-  (let [theme                  (theme/use-theme)
-        {:keys [type message]} (last (:via value))
-        message                (or (:cause value) message)]
+  (let [value'                 (::f/value (meta value) value)
+        theme                  (theme/use-theme)
+        {:keys [type message]} (last (:via value'))
+        message                (or (:cause value') message)]
     [d/div
      {:style
       {:display         :flex

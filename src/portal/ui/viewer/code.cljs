@@ -117,6 +117,15 @@
    (let [theme    (theme/use-theme)
          opts     (ins/use-options)
          context  (ins/use-context)
+         code     (if-let [search-text (ins/use-search-text)]
+                    (->> (str/split-lines code)
+                         (filter
+                          (fn [line-content]
+                            (some
+                             #(str/includes? line-content %)
+                             (str/split search-text #"\s+"))))
+                         (str/join "\n"))
+                    code)
          out      (if-let [language (or (:class attrs)
                                         (some->
                                          (get-in context [:portal.viewer/code :language])

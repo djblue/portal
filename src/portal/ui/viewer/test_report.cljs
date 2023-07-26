@@ -1,6 +1,7 @@
 (ns portal.ui.viewer.test-report
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
+            [portal.ui.filter :as-alias f]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
@@ -167,39 +168,43 @@
 (def ^:private empty-vec ^{:portal.viewer/default :portal.viewer/inspector} [])
 
 (defn- get-results [value]
-  (:results
-   (reduce
-    (fn [{:keys [test-ns test-var] :as state} row]
-      (case (:type row)
-        :summary        state
-        :begin-test-ns  (assoc  state :test-ns (:ns row))
-        :end-test-ns    (-> state
-                            (dissoc :test-ns :vars)
-                            (update :results
-                                    (fnil conj empty-vec)
-                                    (merge
-                                     (summary (:vars state))
-                                     {:ns   test-ns
-                                      :vars (:vars state)})))
-        :begin-test-var (assoc  state :test-var (:var row))
-        :end-test-var   (-> state
-                            (dissoc :test-var :asserts)
-                            (update :vars
-                                    (fnil conj empty-vec)
-                                    (merge
-                                     (summary (:asserts state))
-                                     {:ns      test-ns
-                                      :var     test-var
-                                      :asserts (:asserts state)})))
-        (update
-         state
-         :asserts
-         (fnil conj empty-vec)
-         (cond-> row
-           test-ns  (assoc :ns test-ns)
-           test-var (assoc :var test-var)))))
-    {:results empty-vec}
-    value)))
+  (let [value'   (::f/value (meta value))
+        include? (when value' (into #{} value))]
+    (:results
+     (reduce
+      (fn [{:keys [test-ns test-var] :as state} row]
+        (case (:type row)
+          :summary        state
+          :begin-test-ns  (assoc  state :test-ns (:ns row))
+          :end-test-ns    (-> state
+                              (dissoc :test-ns :vars)
+                              (update :results
+                                      (fnil conj empty-vec)
+                                      (merge
+                                       (summary (:vars state))
+                                       {:ns   test-ns
+                                        :vars (:vars state)})))
+          :begin-test-var (assoc  state :test-var (:var row))
+          :end-test-var   (-> state
+                              (dissoc :test-var :asserts)
+                              (update :vars
+                                      (fnil conj empty-vec)
+                                      (merge
+                                       (summary (:asserts state))
+                                       {:ns      test-ns
+                                        :var     test-var
+                                        :asserts (:asserts state 0)})))
+          (if (and value' (not (include? row)))
+            state
+            (update
+             state
+             :asserts
+             (fnil conj empty-vec)
+             (cond-> row
+               test-ns  (assoc :ns test-ns)
+               test-var (assoc :var test-var))))))
+      {:results empty-vec}
+      (or value' value)))))
 
 (defn- group-assertions [value]
   (let [results (get-results value)]
@@ -224,7 +229,7 @@
     inspect-assertion))
 
 (defn inspect-test [value]
-  (let [component (get-component value)]
+  (let [component (get-component (::f/value (meta value) value))]
     [component value]))
 
 (def viewer

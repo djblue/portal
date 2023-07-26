@@ -3,19 +3,14 @@
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
-            [portal.ui.state :as state]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r]))
+            [portal.ui.theme :as theme]))
 
 (defn inspect-text [value]
   (let [theme       (theme/use-theme)
-        state       (state/use-state)
-        context     (ins/use-context)
-        location    (state/get-location context)
         opts        (ins/use-options)
         background  (ins/get-background)
-        search-text @(r/cursor state [:search-text location])]
+        search-text (ins/use-search-text)]
     [s/div
      {:style
       {:overflow :auto

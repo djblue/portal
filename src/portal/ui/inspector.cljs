@@ -1102,6 +1102,12 @@
       ^{:key "tab-index"} [tab-index context]
       [with-context context [inspector* context value]]])))
 
+(defn use-search-text []
+  (let [state       (state/use-state)
+        context     (use-context)
+        location    (state/get-location context)]
+    @(r/cursor state [:search-text location])))
+
 (def viewer
   {:predicate (constantly true)
    :component inspector

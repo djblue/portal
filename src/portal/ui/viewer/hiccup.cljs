@@ -1,5 +1,6 @@
 (ns portal.ui.viewer.hiccup
   (:require [portal.colors :as c]
+            [portal.ui.filter :as-alias f]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
@@ -143,7 +144,13 @@
        {:overflow   :auto
         :max-height (when-not (:expanded? opts) "24rem")}}
       (process-hiccup
-       {:count (atom -1) :viewers viewers} value)]]))
+       {:count (atom -1) :viewers viewers}
+       (if-let [[tag attrs] (::f/value (meta value))]
+         (let [missing-tag?   (not= tag (first value))
+               missing-attrs? (and (map? attrs)
+                                   (not= attrs (second value)))]
+           (cond-> [] missing-tag? (conj tag) missing-attrs? (conj attrs) :always (into value)))
+         value))]]))
 
 (defn inspect-hiccup [value]
   [l/lazy-render [inspect-hiccup* value]])

@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.resources :refer [inline]]
+            [portal.ui.filter :as-alias f]
             #_[shadow.resource :refer [inline]] ;; for hot reloading
             [portal.ui.inspector :as ins]
             [portal.ui.rpc :as rpc]
@@ -83,10 +84,11 @@
    :report ::c/border})
 
 (defn inspect-log [log]
-  (let [theme      (theme/use-theme)
+  (let [log'       (::f/value (meta log) log)
+        theme      (theme/use-theme)
         background (ins/get-background)
-        color      (-> log :level level->color theme)
-        runtime    (:runtime log)
+        color      (-> log' :level level->color theme)
+        runtime    (:runtime log')
         runtime?   (contains? runtime->logo runtime)
         options    (ins/use-options)
         expanded?  (:expanded? options)
@@ -116,21 +118,21 @@
         (merge {:padding-left (:padding theme)} border)}]
       [d/div
        {:style (merge flex border)}
-       [date-time/inspect-time (:time log)]]
+       [date-time/inspect-time (:time log')]]
       [d/div
        {:style
         (merge flex {:border-top [1 :solid (::c/border theme)] :flex "1"} border)}
        [select/with-position
         {:row -1 :column 0}
-        [ins/with-collection log
+        [ins/with-collection log'
          [ins/with-key :result
           [ins/dec-depth
-           [ins/inspector (:result log)]]]]]]
+           [ins/inspector (:result log')]]]]]]
       [d/div
        {:on-click
         (fn [e]
           (.stopPropagation e)
-          (rpc/call 'portal.runtime.jvm.editor/goto-definition log))
+          (rpc/call 'portal.runtime.jvm.editor/goto-definition log'))
         :style/hover
         {:opacity 1
          :text-decoration :underline}
@@ -147,7 +149,7 @@
            {:border-right               [1 :solid (::c/border theme)]
             :border-top-right-radius    (:border-radius theme)
             :border-bottom-right-radius (:border-radius theme)}))}
-       [ins/highlight-words (str (:ns log) ":" (:line log))]]
+       [ins/highlight-words (str (:ns log') ":" (:line log'))]]
       (when runtime?
         [d/div
          {:style
@@ -168,7 +170,7 @@
 
      (when (:expanded? options)
        [ins/with-collection
-        log
+        log'
         [ins/inspect-map-k-v (dissoc log :level :result :line :column :ns :runtime)]])]))
 
 (def viewer
