@@ -27,8 +27,13 @@
         results (into [] (sort results))
         median  (nth results (quot n 2))
         total   (reduce + results)]
+    ^{:portal.viewer/for
+      {:min :portal.viewer/duration-ms
+       :max :portal.viewer/duration-ms
+       :avg :portal.viewer/duration-ms
+       :med :portal.viewer/duration-ms
+       :total :portal.viewer/duration-ms}}
     {:label expr
-     :unit  :ms
      :iter  n
      :min   (first results)
      :max   (last results)
