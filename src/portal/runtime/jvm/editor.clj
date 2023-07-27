@@ -35,39 +35,63 @@
    :clojure.error/line   :line
    :clojure.error/source :file})
 
+(defn- ns->paths [ns]
+  (for [ext [".cljc" ".clj" ".cljs"]]
+    (str (str/replace (munge ns) #"\." "/") ext)))
+
+(defn- get-resource-path [^URL resource]
+  (case (.getProtocol resource)
+    "file" (let [file (.getFile resource)]
+             (when (fs/exists file)
+               {:file file}))
+    "jar"  (let [file (fs/join
+                       (fs/cwd)
+                       ".portal/jar"
+                       (second (str/split (.getFile resource) #"!/")))]
+             (when-not (fs/exists file)
+               (fs/mkdir (fs/dirname file))
+               (spit file (slurp resource)))
+             {:file file})
+    nil))
+
+(defn- find-var* [s]
+  (try (find-var s) (catch Exception _)))
+
 (extend-protocol IResolve
+  nil
+  (resolve [_m] nil)
+
+  Object
+  (resolve [_m] nil)
+
   clojure.lang.PersistentHashMap
   (resolve [m]
     (let [m (set/rename-keys m mapping)]
-      (when-let [file (or (:file m) (:ns m))]
-        (when-let [resolved (resolve file)]
-          (merge m resolved)))))
+      (or
+       (some->> m :file resolve (merge m))
+       (some->> m :ns   resolve (merge m)))))
   clojure.lang.PersistentArrayMap
   (resolve [m]
     (let [m (set/rename-keys m mapping)]
-      (when-let [file (or (:file m) (:ns m))]
-        (when-let [resolved (resolve file)]
-          (merge m resolved)))))
+      (or
+       (some->> m :file resolve (merge m))
+       (some->> m :ns   resolve (merge m)))))
   clojure.lang.Var
   (resolve [v]
     (let [m (meta v)]
-      (merge m (resolve (:file m)))))
+      (some->> m :file resolve (merge m))))
   clojure.lang.Namespace
   (resolve [ns]
-    (let [base (str/escape (str ns) {\. "/" \- "_"})]
-      (some
-       (fn [ext]
-         (when-let [url (io/resource (str base ext))]
-           (resolve url)))
-       [".cljc" ".clj" ".cljs"])))
+    (resolve (symbol (str ns))))
   clojure.lang.Symbol
   (resolve [^clojure.lang.Symbol s]
     (or
-     (some-> s namespace symbol find-ns resolve (merge (meta s)))
-     (some-> s find-ns resolve (merge (meta s)))))
+     (when (namespace s) (some-> s find-var* resolve))
+     (some->> s ns->paths (some io/resource) resolve)))
   URL
   (resolve [^URL url]
-    (exists (.getPath url)))
+    (or (exists (.getPath url))
+        (get-resource-path url)))
   URI
   (resolve [^URI url]
     (exists (.getPath url)))

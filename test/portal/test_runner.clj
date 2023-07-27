@@ -9,6 +9,7 @@
             [portal.runtime.fs-test]
             [portal.runtime.json :as json]
             [portal.runtime.json-buffer-test]
+            [portal.runtime.jvm.editor-test]
             [portal.runtime.npm-test]))
 
 (def port (System/getenv "PORTAL_PORT"))
@@ -39,6 +40,7 @@
                    'portal.runtime.edn
                    'portal.runtime.fs-test
                    'portal.runtime.json-buffer-test
+                   'portal.runtime.jvm.editor-test
                    'portal.runtime.npm-test)]
     (table (bench/run (json/read (slurp "package-lock.json")) 50))
     (shutdown-agents)
