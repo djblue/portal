@@ -14,7 +14,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "1.7.0"
 
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij") version "1.10.0"
+    id("org.jetbrains.intellij") version "1.15.0"
 
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "1.3.1"
