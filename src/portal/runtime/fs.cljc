@@ -111,3 +111,8 @@
      :cljs (let [root (.-root (path/parse path))]
              (when-not (= path root) (path/dirname path)))
      :cljr (some-> (Directory/GetParent path) str)))
+
+(defn basename [path]
+  #?(:clj  (.getName (io/file path))
+     :cljs (path/basename path)
+     :cljr (Path/GetFileName path)))
