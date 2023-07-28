@@ -984,6 +984,59 @@
      :viewer    (get-viewer state context value)
      :value     (f/filter-value value search-text)}))
 
+(defn use-wrapper-options [context]
+  (let [state          (state/use-state)
+        location       (state/get-location context)
+        {:keys [viewer selected]} (use-options)]
+    (when-not (:readonly? context)
+      {:on-mouse-down
+       (fn [e]
+         (.stopPropagation e)
+         (when (= (.-button e) 1)
+           (state/dispatch! state state/toggle-expand location)))
+       :on-click
+       (fn [e]
+         (.stopPropagation e)
+         (a/do
+           (set-viewer! state context (:name viewer))
+           (state/dispatch!
+            state
+            (if selected
+              state/deselect-context
+              state/select-context)
+            context
+            (or (.-metaKey e) (.-altKey e)))))
+       :on-double-click
+       (fn [e]
+         (.stopPropagation e)
+         (a/do
+           (set-viewer! state context (:name viewer))
+           (state/dispatch! state state/select-context context)
+           (state/dispatch! state state/nav context)))})))
+
+(defn wrapper [context & children]
+  (let [theme          (theme/use-theme)
+        {:keys [ref value selected]} (use-options)
+        wrapper-options (use-wrapper-options context)]
+    (into
+     [s/div
+      (merge
+       wrapper-options
+       {:ref   ref
+        :title (-> value meta :doc)
+        :style
+        {:flex          "1"
+         :font-size     (:font-size theme)
+         :font-family   (:font-family theme)
+         :border-radius (:border-radius theme)
+         :border        (if selected
+                          [1 :solid (get theme (nth theme/order selected))]
+                          [1 :solid "rgba(0,0,0,0)"])
+         :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
+         :background    (let [bg (get-background context)]
+                          (when selected bg))}})]
+     children)))
+
 (defn- inspector* [context value]
   (let [ref            (react/useRef nil)
         props          (:props (meta context))
@@ -1019,48 +1072,10 @@
            (when-not (and (.hasFocus js/document) (l/element-visible? el))
              (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
      #js [selected (.-current ref)])
-    [s/div
-     (merge
-      (when-not (:readonly? context)
-        {:on-mouse-down
-         (fn [e]
-           (.stopPropagation e)
-           (when (= (.-button e) 1)
-             (state/dispatch! state state/toggle-expand location)))
-         :on-click
-         (fn [e]
-           (.stopPropagation e)
-           (a/do
-             (set-viewer! state context (:name viewer))
-             (state/dispatch!
-              state
-              (if selected
-                state/deselect-context
-                state/select-context)
-              context
-              (or (.-metaKey e) (.-altKey e)))))
-         :on-double-click
-         (fn [e]
-           (.stopPropagation e)
-           (a/do
-             (set-viewer! state context (:name viewer))
-             (state/dispatch! state state/select-context context)
-             (state/dispatch! state state/nav context)))})
-      {:ref   ref
-       :title (-> value meta :doc)
-       :style
-       {:flex          "1"
-        :font-size     (:font-size theme)
-        :font-family   (:font-family theme)
-        :border-radius (:border-radius theme)
-        :border        (if selected
-                         [1 :solid (get theme (nth theme/order selected))]
-                         [1 :solid "rgba(0,0,0,0)"])
-        :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
-        :background    (let [bg (get-background context)]
-                         (when selected bg))}})
-     [:> error-boundary
-      [with-options options [component value]]]]))
+    [:> error-boundary
+     [with-options options
+      [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
+       context [component value]]]]))
 
 (defn- is-selected? [state context]
   (some? (state/selected @state context)))
