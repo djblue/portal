@@ -27,9 +27,17 @@
   (install)
   (cljs* {'org.clojure/clojurescript {:mvn/version version}} :portal.test-runtime-runner))
 
+(defn- get-cljs-deps []
+  (get-in (read-string (slurp "deps.edn")) [:aliases :cljs :extra-deps]))
+
+(defn cljs-ui []
+  (install)
+  (cljs* (get-cljs-deps) :portal.test-ui-runner))
+
 (defn cljs []
   (cljs-runtime "1.10.773")
-  (cljs-runtime "1.10.844"))
+  (cljs-runtime "1.10.844")
+  (cljs-ui))
 
 (defn clj
   []
