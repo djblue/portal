@@ -13,8 +13,8 @@
 (s/def ::file string?)
 
 (s/def ::source-location
-  (s/keys :req-un [::ns ::line ::column]
-          :opt-un [::file]))
+  (s/keys :req-un [::line ::column]
+          :opt-un [::ns ::file]))
 ;;;
 
 (defn- source-location? [value]
@@ -34,7 +34,13 @@
       {:opacity 0.75
        :cursor  :pointer
        :color   (::c/uri theme)}}
-     [ins/highlight-words (str (:ns value (:file value)) ":" (:line value))]]))
+     [ins/highlight-words
+      (str
+       (or (:label value)
+           (:ns value)
+           (:file value))
+       ":"
+       (:line value))]]))
 
 (def viewer
   {:predicate source-location?

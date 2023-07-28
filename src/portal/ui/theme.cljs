@@ -42,6 +42,12 @@
 
 (defonce ^:private theme-context (react/createContext nil))
 
+(defn use-theme [] (react/useContext theme-context))
+
+(defn with-theme+ [theme & children]
+  (let [theme (merge (use-theme) theme)]
+    (into [:r> (.-Provider theme-context) #js {:value theme}] children)))
+
 (defn with-theme [theme-name & children]
   (let [dark-theme (use-theme-detector)
         theme      (get-theme (or theme-name (default-theme dark-theme)))
@@ -51,8 +57,6 @@
             background)
      #js [background])
     (into [:r> (.-Provider theme-context) #js {:value theme}] children)))
-
-(defn use-theme [] (react/useContext theme-context))
 
 (defonce ^:no-doc order
   (cycle [::c/diff-remove ::c/diff-add ::c/keyword ::c/tag ::c/number ::c/uri]))

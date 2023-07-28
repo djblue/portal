@@ -426,6 +426,7 @@
     :portal.viewer/table {:columns [:name :doc]}}
   [ex/viewer
    ex/trace-viewer
+   ex/sub-trace-viewer
    charts/line-chart
    charts/scatter-chart
    charts/histogram-chart

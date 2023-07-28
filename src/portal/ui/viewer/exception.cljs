@@ -5,23 +5,24 @@
             [portal.ui.filter :as-alias f]
             [portal.ui.icons :as icon]
             [portal.ui.inspector :as ins]
+            [portal.ui.select :as select]
+            [portal.ui.state :as state]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
-            [portal.ui.viewer.log :as log]
-            [reagent.core :as r]))
+            [portal.ui.viewer.log :as log]))
 
 ;;; :spec
 (s/def ::cause string?)
 
 (s/def ::trace-line
-  (s/cat :class symbol?
-         :method symbol?
-         :file (s/or :str string? :nil nil?)
-         :line number?))
+  (s/cat :class  (s/or :symbol symbol? :string string?)
+         :method (s/or :symbol symbol? :string string?)
+         :file   (s/or :str string? :nil nil?)
+         :line   number?))
 
 (s/def ::trace (s/coll-of ::trace-line :min-count 1))
 
-(s/def ::type symbol?)
+(s/def ::type (s/or :symbol symbol? :string string?))
 (s/def ::message string?)
 (s/def ::at ::trace-line)
 
@@ -42,89 +43,191 @@
   (s/valid? ::exception value))
 
 (defn- inspect-sub-trace [trace]
-  (r/with-let [expanded? (r/atom (zero? (:index (first trace))))]
-    (let [theme (theme/use-theme)
-          {:keys [clj? sym class file]} (first trace)]
-      [:<>
-       [(if @expanded?
-          icon/chevron-down
-          icon/chevron-right)
-        {:size "sm"
-         :style
-         {:grid-column "1"
-          :width       (* 3 (:padding theme))
-          :color       (::c/border theme)}}]
-       [d/div
-        {:on-click (fn [e]
-                     (swap! expanded? not)
-                     (.stopPropagation e))
-         :style
-         {:grid-column "2"
-          :cursor      :pointer}}
+  (let [trace (map meta trace)
+        theme               (theme/use-theme)
+        context             (ins/use-context)
+        state               (state/use-state)
+        {:keys [expanded? selected]}  (ins/use-options)
+        background                    (ins/get-background)
+        {:keys [clj? sym class file]} (first trace)
+        border (if selected
+                 (get theme (nth theme/order selected))
+                 (::c/border theme))
+        can-expand? (> (count trace) 1)
+        wrapper-options (ins/use-wrapper-options context)]
+    [:<>
+     [d/div
+      {:on-click (:on-click wrapper-options)
+       :on-double-click (:on-double-click wrapper-options)
+       :style {:grid-column "1"}}
+      [d/div
+       {:style
+        {:background                background
+         :display                   :flex
+         :align-items               :center
+         :position                  :relative
+         :cursor                    :pointer
+         :padding                   [(* 0.5 (:padding theme)) (:padding theme)]
+         :border-top-left-radius    (:border-radius theme)
+         :border-bottom-left-radius (:border-radius theme)
+         :border-left               [1 :solid border]
+         :border-top                [1 :solid border]
+         :border-bottom             [1 :solid border]}}
 
-        [d/span
-         {:title file
-          :style {:color (if clj?
-                           (::c/namespace theme)
-                           (::c/package theme))}}
-         (if-not clj? class (namespace sym))]]
-       [d/span
+       [d/div
         {:style
-         {:grid-column "3"
-          :color       (::c/border theme)}}
-        " [" (count trace) "]"]
-       (when @expanded?
-         (for [{:keys [clj? sym method line index]} trace]
-           [:<>
-            {:key index}
-            [d/div]
+         {:width      1
+          :position   :absolute
+          :top        0
+          :right      -1
+          :bottom     0
+          :background background}}]
+
+       [d/div
+        {:style {:width "1em"}}
+        [(if (and can-expand? expanded?)
+           icon/caret-down
+           icon/caret-right)
+         {:on-click
+          (fn [e]
+            (state/dispatch! state state/toggle-expand-1 context)
+            (.stopPropagation e))
+          :on-double-click
+          (fn [e]
+            (state/dispatch! state state/toggle-expand-1 context)
+            (.stopPropagation e))
+          :style
+          {:opacity (if (> (count trace) 1) 1 0)
+           :width (* 3 (:padding theme))
+           :color (::c/border theme)}}]]
+
+       [d/div
+        {:title file
+         :style {:display :flex
+                 :flex-direction :row
+                 :color (if clj?
+                          [(::c/namespace theme) " !important"]
+                          [(::c/package theme) " !important"])}}
+        [theme/with-theme+
+         {::c/symbol (if clj?
+                       (::c/namespace theme)
+                       (::c/package theme))}
+         [select/with-position
+          {:row 0 :column 0}
+          [ins/inspector (symbol (if-not clj? class (namespace sym)))]]]]]]
+     [d/div
+      {:on-click (:on-click wrapper-options)
+       :on-double-click (:on-double-click wrapper-options)
+       :style
+       {:grid-column "2"
+        :display :flex
+        :gap (:padding theme)
+        :background                 background
+        :padding                    [(* 0.5 (:padding theme)) (:padding theme)]
+        :border                [1 :solid border]
+        :border-top-right-radius    (:border-radius theme)
+        :border-bottom-right-radius (:border-radius theme)
+        :border-bottom-left-radius (when (and can-expand? expanded?) (:border-radius theme))}}
+      [d/div
+       {:style {:flex "1" :display :flex :flex-direction :column}}
+       (map-indexed
+        (fn [idx {:keys [clj? sym method index] :as source}]
+          [ins/with-key
+           index
+           [d/div
+            {:key idx
+             :style {:display :flex
+                     :flex "1"
+                     :justify-content :space-between}}
             [d/div
-             (if clj?
-               (name sym)
-               [d/div method])]
-            [ins/inspector line]]))])))
+             [select/with-position
+              {:row idx :column 1}
+              [ins/inspector {:portal.viewer/default :portal.viewer/source-location}
+               (assoc source :label (if clj?  (symbol nil (name sym)) method))]]]]])
+        (if expanded? trace (take 1 trace)))]
+      [d/div
+       {:style
+        {:width "2em" :text-align :right}}
+       (when can-expand?
+         [d/span
+          {:style
+           {;;:grid-column "3"
+            :color       (::c/border theme)}}
+          " [" (count trace) "]"])]]]))
 
 (defn- analyze-trace-item [index trace]
   (let [[class method file line] trace
+        class (cond-> class (string? class) symbol)
         clj-name (demunge class)
         clj? (or (and (string? file)
                       (str/ends-with? file ".clj"))
                  (not= clj-name class))]
-    (merge
-     {:class  class
-      :method method
-      :file   file
-      :line   line
-      :index  index}
-     (when clj?
-       {:clj? true
-        :sym  clj-name}))))
+    (with-meta
+      trace
+      (merge
+       {:class  class
+        :method method
+        :file   file
+        :line   line
+        :column 1
+        :index  index}
+       (when clj?
+         {:clj? true
+          :ns   (symbol (namespace clj-name))
+          :sym  clj-name})))))
+
+(defn- wrapper [context & children]
+  (let [opts   (ins/use-options)
+        viewer (get-in opts [:viewer :name])]
+    (if (= viewer :portal.viewer/sub-trace)
+      (into [:<>] children)
+      [d/div
+       {:style {:grid-column "1 / 3"}}
+       (into [ins/wrapper context] children)])))
 
 (defn- inspect-stack-trace [trace]
   (let [theme   (theme/use-theme)
         options (ins/use-options)]
     [d/div
      {:style
-      {:background            (ins/get-background)
-       :box-sizing            :border-box
-       :padding               (:padding theme)
-       :display               :grid
-       :grid-template-columns "auto 1fr auto"
-       :align-items           :center
-       :grid-gap              [0 (:padding theme)]
-       :border-radius         (:border-radius theme)
-       :border                [1 :solid (::c/border theme)]}}
-     (->> trace
-          (map-indexed
-           analyze-trace-item)
-          (filter
-           (fn [{:keys [clj?]}]
-             (if (:expanded? options) true clj?)))
-          (partition-by :file)
-          (map
-           (fn [trace]
-             ^{:key (hash trace)}
-             [inspect-sub-trace trace])))]))
+      {:border-top-left-radius (:border-radius theme)
+       :border-bottom-left-radius (:border-radius theme)
+       :border-left [5 :solid (::c/exception theme)]}}
+     [d/div
+      {:style
+       {:background            (ins/get-background)
+        :box-sizing            :border-box
+        :padding               (:padding theme)
+        :display               :grid
+        :grid-template-columns "auto 1fr"
+        :grid-gap              [(* 0.5 (:padding theme)) 0]
+        :border-top-right-radius (:border-radius theme)
+        :border-bottom-right-radius (:border-radius theme)
+        :border-right         [1 :solid (::c/border theme)]
+        :border-top           [1 :solid (::c/border theme)]
+        :border-bottom        [1 :solid (::c/border theme)]}}
+      (->> trace
+           (map-indexed
+            analyze-trace-item)
+           (filter
+            (fn [line]
+              (let [{:keys [clj? ns]} (meta line)]
+                (if (:expanded? options) true
+                    (and clj? (not (or
+                                    (str/starts-with? (str ns) "nrepl.middleware")
+                                    (str/starts-with? (str ns) "clojure.lang.Compiler"))))))))
+           (partition-by (comp :file meta))
+           (map-indexed
+            (fn [index trace]
+              ^{:key index}
+              [select/with-position
+               {:column 0 :row index}
+               [ins/with-key
+                index
+                [ins/inspector
+                 {:portal.viewer/inspector {:wrapper wrapper}
+                  :portal.viewer/default :portal.viewer/sub-trace}
+                 (with-meta trace (meta (first trace)))]]])))]]))
 
 (defn- inspect-via [value]
   (let [value'                 (::f/value (meta value) value)
@@ -156,7 +259,7 @@
                 :align-items :center
                 :padding [(:padding theme) (* 2 (:padding theme))]}}
        [ins/highlight-words
-        (when message (pr-str (:phase value type)))]]
+        (when message (str (:phase value type)))]]
       (when-let [value (:runtime value)]
         [d/div
          {:style {:padding     (:padding theme)
@@ -221,3 +324,8 @@
   {:predicate trace?
    :component inspect-stack-trace
    :name      :portal.viewer/stack-trace})
+
+(def sub-trace-viewer
+  {:predicate trace?
+   :component inspect-sub-trace
+   :name      :portal.viewer/sub-trace})
