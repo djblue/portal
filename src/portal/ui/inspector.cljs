@@ -117,7 +117,7 @@
 (defn get-compatible-viewers [viewers {:keys [value] :as context}]
   (let [by-name        (viewers-by-name viewers)
         default-viewer (get by-name
-                            (or (get-in context [:props :portal.viewer/default])
+                            (or (get-in (meta context) [:props :portal.viewer/default])
                                 (:portal.viewer/default (meta value))
                                 (:portal.viewer/default context)
                                 (when (scalar-seq? value)
@@ -385,7 +385,7 @@
               :background (str color "22")
               :border [1 :solid color]
               :border-radius (:border-radius theme)}}
-     [inspector (select-keys (:props (use-context)) [:portal.viewer/for]) value]]))
+     [inspector (select-keys (:props (meta (use-context))) [:portal.viewer/for]) value]]))
 
 (defn- diff-removed [value]
   (let [theme (theme/use-theme)
@@ -395,7 +395,7 @@
               :background (str color "22")
               :border [1 :solid color]
               :border-radius (:border-radius theme)}}
-     [inspector (select-keys (:props (use-context)) [:portal.viewer/for]) value]]))
+     [inspector (select-keys (:props (meta (use-context))) [:portal.viewer/for]) value]]))
 
 (defn- inspect-diff [value]
   (let [theme (theme/use-theme)
@@ -986,11 +986,13 @@
 
 (defn- inspector* [context value]
   (let [ref            (react/useRef nil)
+        props          (:props (meta context))
         state          (state/use-state)
         location       (state/get-location context)
         theme          (theme/use-theme)
         {:keys [value viewer selected expanded?] :as options}
         @(r/track get-info state context value)
+        options        (assoc options :ref ref :props props)
         type           (get-value-type value)
         component      (or
                         (when-not (= (:name viewer) :portal.viewer/inspector)
@@ -1096,9 +1098,9 @@
               (update :depth inc)
               (assoc :parent (use-parent)))
            props
-           (assoc :props props)
+           (vary-meta assoc :props props)
            (nil? props)
-           (dissoc :props))]
+           (vary-meta dissoc :props props))]
      [with-parent
       context
       ^{:key "tab-index"} [tab-index context]
