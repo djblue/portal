@@ -119,6 +119,28 @@
     (assoc-in state [:selected-viewers {:stable-path [] :value value}] viewer)
     state))
 
+(defn- get-parents [context]
+  (rest (take-while some? (iterate :parent context))))
+
+(defn- expanded [state context]
+  (let [depth     (:depth context)
+        expanded? (:expanded? state)
+        location  (get-location context)]
+    (or (get expanded? location)
+        (some (fn [parent-context]
+                (let [parent-expanded   (get expanded? (get-location parent-context) 0)
+                      relative-expanded (-  parent-expanded (- depth (:depth parent-context)))]
+                  (when (> relative-expanded 0) relative-expanded)))
+              (get-parents context)))))
+
+(defn expanded? [state context]
+  (when-let [n (expanded state context)] (< 0 n)))
+
+(defn- push-expanded [state {:keys [context] :portal/keys [value]}]
+  (if-let [n (expanded state context)]
+    (assoc-in state [:expanded? {:stable-path [] :value value}] n)
+    state))
+
 (defn history-push [state {:portal/keys [key value f] :as entry}]
   (-> (push-command state entry)
       (assoc
@@ -137,22 +159,8 @@
                                    :alt-bg      true)))
                       (:selected state)))
       (dissoc :portal/next-state)
-      (push-viewer entry)))
-
-(defn- get-parents [context]
-  (rest (take-while some? (iterate :parent context))))
-
-(defn expanded? [state context]
-  (let [depth     (:depth context)
-        expanded? (:expanded? state)
-        location  (get-location context)]
-    (if-let [n (get expanded? location)]
-      (< 0 n)
-      (some (fn [parent-context]
-              (<
-               (-  depth (:depth parent-context))
-               (get expanded? (get-location parent-context) 0)))
-            (get-parents context)))))
+      (push-viewer entry)
+      (push-expanded entry)))
 
 (defn toggle-expand-1 [state context]
   (let [location (get-location context)]
