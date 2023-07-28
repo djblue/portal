@@ -1,16 +1,8 @@
 (ns portal.test-runner
-  (:require [cljs.test :as t]
-            [clojure.pprint :as pp]
+  (:require [clojure.pprint :as pp]
+            [clojure.test :as t]
             [portal.async :as a]
-            [portal.client.node :as p]
-            [portal.runtime.bench-cson :as bench]
-            [portal.runtime.cson-test]
-            [portal.runtime.edn]
-            [portal.runtime.fs :as fs]
-            [portal.runtime.fs-test]
-            [portal.runtime.json :as json]
-            [portal.runtime.json-buffer-test]
-            [portal.runtime.npm-test]))
+            [portal.client.node :as p]))
 
 (defn- error->data [ex]
   (with-meta
@@ -55,16 +47,7 @@
         (f))
       (a/do (submit @report) @report))))
 
-(defn -main []
-  (a/let [report
-          (run-tests
-           #(t/run-tests 'portal.runtime.cson-test
-                         'portal.runtime.edn
-                         'portal.runtime.fs-test
-                         'portal.runtime.json-buffer-test
-                         'portal.runtime.npm-test))
+(defn run [f]
+  (a/let [report (run-tests f)
           errors (count (filter (comp #{:fail} :type) report))]
-    (table (bench/run (json/read (fs/slurp "package-lock.json")) 100))
     (.exit js/process errors)))
-
-(-main)

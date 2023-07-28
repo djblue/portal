@@ -5,31 +5,31 @@
             [tasks.build :refer [build install]]
             [tasks.tools :as t]))
 
-(defn cljs* [version]
-  (let [out (str "target/test." version ".js")]
+(defn cljs* [deps main]
+  (let [version (get-in deps ['org.clojure/clojurescript :mvn/version])
+        out     (str "target/" (name main) "." version ".js")]
     (when (seq
            (fs/modified-since
             out
             (concat
              (fs/glob "src" "**")
              (fs/glob "test" "**"))))
-      (t/clj "-Sdeps"
-             (pr-str
-              {:deps
-               {'org.clojure/clojurescript
-                {:mvn/version version}}})
+      (t/clj "-Sdeps" (pr-str {:deps deps})
              "-M:test"
              "-m" :cljs.main
              "--output-dir" (str "target/cljs-output-" version)
              "--target" :node
              "--output-to" out
-             "--compile" :portal.test-runner))
+             "--compile" main))
     (t/node out)))
 
-(defn cljs []
+(defn cljs-runtime [version]
   (install)
-  (cljs* "1.10.773")
-  (cljs* "1.10.844"))
+  (cljs* {'org.clojure/clojurescript {:mvn/version version}} :portal.test-runtime-runner))
+
+(defn cljs []
+  (cljs-runtime "1.10.773")
+  (cljs-runtime "1.10.844"))
 
 (defn clj
   []
@@ -45,8 +45,8 @@
     (t/cljr "-m" :portal.test-clr)))
 
 (defn test* []
-  (future (cljs* "1.10.773"))
-  (future (cljs* "1.10.844"))
+  (future (cljs-runtime "1.10.773"))
+  (future (cljs-runtime "1.10.844"))
   (future
     (build)
     (future (t/clj "-M:test" "-m" :portal.test-runner))
