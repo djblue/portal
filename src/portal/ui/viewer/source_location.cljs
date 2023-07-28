@@ -34,7 +34,7 @@
       {:opacity 0.75
        :cursor  :pointer
        :color   (::c/uri theme)}}
-     [ins/highlight-words (str (:ns value) ":" (:line value))]]))
+     [ins/highlight-words (str (:ns value (:file value)) ":" (:line value))]]))
 
 (def viewer
   {:predicate source-location?
