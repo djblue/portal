@@ -3,6 +3,7 @@
   (:require ["anser" :as anser]
             ["react" :as react]
             [clojure.string :as str]
+            [clojure.set :as set]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.async :as a]
             [portal.colors :as c]
@@ -125,6 +126,14 @@
         viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
 
+(defn get-compatible-viewers-intersection [viewers contexts]
+  (if (nil? contexts)
+    (get-compatible-viewers viewers contexts)
+    (->> contexts
+         (map #(get-compatible-viewers viewers %))
+         (map set)
+         (apply set/intersection))))
+
 (defn get-viewer
   ([state context]
    (get-viewer state context (:value context)))
@@ -139,6 +148,10 @@
   (state/dispatch! state
                    assoc-in [:selected-viewers (state/get-location context)]
                    viewer-name))
+
+(defn set-viewer-contexts! [state contexts viewer-name]
+  (doseq [context contexts]
+    (set-viewer! state context viewer-name)))
 
 (def ^:private parent-context (react/createContext nil))
 
