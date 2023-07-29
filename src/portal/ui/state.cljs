@@ -50,6 +50,8 @@
 
 (defn get-selected-context [state] (first (:selected state)))
 
+(defn get-all-selected-context [state] (:selected state))
+
 (defn get-selected-value [state] (:value (get-selected-context state)))
 
 (defn selected-values [state] (map :value (:selected state)))
