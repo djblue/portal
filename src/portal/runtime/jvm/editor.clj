@@ -44,10 +44,8 @@
     "file" (let [file (.getFile resource)]
              (when (fs/exists file)
                {:file file}))
-    "jar"  (let [file (fs/join
-                       (fs/cwd)
-                       ".portal/jar"
-                       (second (str/split (.getFile resource) #"!/")))]
+    "jar"  (let [[jar file] (str/split (.getFile resource) #"!/")
+                 file (fs/join (fs/cwd) ".portal/jar" (fs/basename jar) file)]
              (when-not (fs/exists file)
                (fs/mkdir (fs/dirname file))
                (spit file (slurp resource)))
