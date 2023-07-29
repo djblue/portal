@@ -6,7 +6,6 @@
             [portal.ui.icons :as icon]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
-            [portal.ui.state :as state]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.log :as log]))
@@ -46,10 +45,9 @@
   (let [trace (map meta trace)
         theme               (theme/use-theme)
         context             (ins/use-context)
-        state               (state/use-state)
-        {:keys [expanded? selected]}  (ins/use-options)
-        background                    (ins/get-background)
-        {:keys [clj? sym class file]} (first trace)
+        {:keys [expanded? selected]} (ins/use-options)
+        background                   (ins/get-background)
+        {:keys [clj? sym class]}     (first trace)
         border (if selected
                  (get theme (nth theme/order selected))
                  (::c/border theme))
@@ -85,36 +83,15 @@
 
        [d/div
         {:style {:width "1em"}}
-        [(if (and can-expand? expanded?)
-           icon/caret-down
-           icon/caret-right)
-         {:on-click
-          (fn [e]
-            (state/dispatch! state state/toggle-expand-1 context)
-            (.stopPropagation e))
-          :on-double-click
-          (fn [e]
-            (state/dispatch! state state/toggle-expand-1 context)
-            (.stopPropagation e))
-          :style
-          {:opacity (if (> (count trace) 1) 1 0)
-           :width (* 3 (:padding theme))
-           :color (::c/border theme)}}]]
+        (when can-expand? [ins/toggle-expand])]
 
-       [d/div
-        {:title file
-         :style {:display :flex
-                 :flex-direction :row
-                 :color (if clj?
-                          [(::c/namespace theme) " !important"]
-                          [(::c/package theme) " !important"])}}
-        [theme/with-theme+
-         {::c/symbol (if clj?
-                       (::c/namespace theme)
-                       (::c/package theme))}
-         [select/with-position
-          {:row 0 :column 0}
-          [ins/inspector (symbol (if-not clj? class (namespace sym)))]]]]]]
+       [theme/with-theme+
+        {::c/symbol (if clj?
+                      (::c/namespace theme)
+                      (::c/package theme))}
+        [select/with-position
+         {:row 0 :column 0}
+         [ins/inspector (symbol (if-not clj? class (namespace sym)))]]]]]
      [d/div
       {:on-click (:on-click wrapper-options)
        :on-double-click (:on-double-click wrapper-options)
@@ -151,8 +128,7 @@
        (when can-expand?
          [d/span
           {:style
-           {;;:grid-column "3"
-            :color       (::c/border theme)}}
+           {:color       (::c/border theme)}}
           " [" (count trace) "]"])]]]))
 
 (defn- analyze-trace-item [index trace]
