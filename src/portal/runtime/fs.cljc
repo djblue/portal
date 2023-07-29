@@ -54,10 +54,11 @@
     f))
 
 (defn is-file [f]
-  (when #?(:clj  (.isFile (io/file f))
-           :cljs (and (exists f)
-                      (.isFile (fs/lstatSync f)))
-           :cljr (File/Exists f))
+  (when (and f
+             #?(:clj  (.isFile (io/file f))
+                :cljs (and (exists f)
+                           (.isFile (fs/lstatSync f)))
+                :cljr (File/Exists f)))
     f))
 
 (defn can-execute [f]

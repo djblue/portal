@@ -55,6 +55,14 @@
 (defn- find-var* [s]
   (try (find-var s) (catch Exception _)))
 
+(defn- resolve-map [m]
+  (let [m (set/rename-keys m mapping)]
+    (if (fs/is-file (:file m))
+      m
+      (or
+       (some->> m :ns   resolve (merge m))
+       (some->> m :file resolve (merge m))))))
+
 (extend-protocol IResolve
   nil
   (resolve [_m] nil)
@@ -63,17 +71,10 @@
   (resolve [_m] nil)
 
   clojure.lang.PersistentHashMap
-  (resolve [m]
-    (let [m (set/rename-keys m mapping)]
-      (or
-       (some->> m :file resolve (merge m))
-       (some->> m :ns   resolve (merge m)))))
+  (resolve [m] (resolve-map m))
   clojure.lang.PersistentArrayMap
-  (resolve [m]
-    (let [m (set/rename-keys m mapping)]
-      (or
-       (some->> m :file resolve (merge m))
-       (some->> m :ns   resolve (merge m)))))
+  (resolve [m] (resolve-map m))
+
   clojure.lang.Var
   (resolve [v]
     (let [m (meta v)]
