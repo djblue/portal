@@ -74,7 +74,8 @@ or as a global profile, add to `~/.lein/profiles.clj`:
 {:portal {:dependencies [[djblue/portal "0.44.0"]]}}
 ```
 
-> **Note** If you add Portal to a profile other than `:dev`, when starting a REPL
+> **Note**
+> If you add Portal to a profile other than `:dev`, when starting a REPL
 > start it with `with-profiles +portal`. The `+` is important.
 
 or for [**Clojure CLR**][clojure-clr], checkout this [example project](./examples/clr),
