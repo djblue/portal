@@ -1,6 +1,5 @@
 (ns portal.ui.viewer.tree
-  (:require ["react" :as react]
-            [portal.ui.inspector :as ins]
+  (:require [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
@@ -13,155 +12,191 @@
     (vector? value) ["[" "]"]
     :else           ["(" ")"]))
 
-(def ^:private cursor-pointer {:cursor :pointer})
-(def ^:private select-none    {:user-select :none})
-(def ^:private flex-wrap      {:flex-wrap :wrap})
-(def ^:private flex-row       {:display :flex :flex-direction :row})
-(def ^:private flex-col       {:display :flex :flex-direction :column})
-(def ^:private flex-center    {:display :flex :align-items :center})
-
-(defn- use-node-styles []
-  (let [theme (theme/use-theme)
-        color (theme/use-rainbow)]
-    {:color          color
-     :font-weigth    :bold
-     :margin-right   (:padding theme)
-     :padding-top    (* 0.5 (:padding theme))
-     :padding-bottom (* 0.5 (:padding theme))}))
-
-(defn- center [& children]
-  (into [s/div {:style flex-center}] children))
-
-(defn- inspect-tree-item [{:keys [values] :as opts}]
-  (let [[open? set-open] (react/useState (if-some [expand (get-in (meta values) [:portal.viewer/tree :expand])]
-                                           expand
-                                           true))
-        theme (theme/use-theme)
-        value (:value opts)
+(defn- wrapper [context & children]
+  (let [opts   (ins/use-options)
+        {:keys [expanded? selected]} opts
+        value (:value context)
         [open close] (delimiter value)
-        style  (use-node-styles)
-        open   [s/div {:style style} open]
-        close  [s/div {:style style} close]
-        toggle [s/div
-                {:on-click
-                 (fn [e]
-                   (.stopPropagation e)
-                   (set-open not))
-                 :style (merge style cursor-pointer select-none)}
-                (if open? "▼" "▶")]
-        child [s/div
-               {:style
-                (merge
-                 {:position :relative
-                  :padding-right (:padding theme)
-                  :padding-left (:padding theme)
-                  :margin-left "0.3em"}
-                 flex-wrap
-                 flex-col)}
-               [s/div
-                {:style
-                 {:position :absolute
-                  :top 0
-                  :bottom 0
-                  :left 0
-                  :opacity 0.4
-                  :border-left [1 :dashed (:color style)]}}]
-               (:value-child opts)]
-        ellipsis  [s/div {:style {:margin-right (:padding theme)}} "..."]]
-    (cond
-      (not (coll? value))
-      [center
-       (:key-child opts)
-       (:value-child opts)]
-
-      (not (coll? (:key opts)))
+        theme (theme/use-theme)
+        viewer (get-in opts [:viewer :name])
+        border-color (if selected
+                       (get theme (nth theme/order selected))
+                       "rgba(0,0,0,0)")
+        border [1 :solid border-color]
+        color (get theme (nth theme/order (:depth context)))
+        wrapper-options (ins/use-wrapper-options context)
+        background (ins/get-background)
+        selected-background (when selected background)]
+    (if-not (= viewer :portal.viewer/tree)
       [s/div
-       [center
-        toggle
-        (:key-child opts)
+       {:style {:grid-row "1"
+                :grid-column "3 / 4"
+                :padding-left (:padding theme)}}
+       (into [ins/wrapper context] children)]
+      [:<>
+       [s/div {:style {:grid-row "1" :grid-column "1"
+                       :width (:padding theme)
+                       :text-align :center}}
+        [ins/toggle-expand]]
+       [s/div {:style (merge
+                       {:grid-row "1"
+                        :grid-column "3"
+                        :color color
+                        :position :relative
+                        :border-left border
+                        :border-right border
+                        :border-top border
+                        :border-top-right-radius (:border-radius theme)
+                        :border-top-left-radius (:border-radius theme)
+                        :background selected-background}
+                       (when-not expanded?
+                         {:border-bottom border
+                          :border-bottom-right-radius (:border-radius theme)
+                          :border-bottom-left-radius (:border-radius theme)}))
+               :on-click (:on-click wrapper-options)}
         open
-        (when-not open?
-          [:<> ellipsis close])]
-       (when open?
-         [:<> child close])]
-
-      :else
-      [s/div
-       {:style {:padding-left (:padding theme)}}
-       [center
-        (:key-child opts)
-        (if-not open?
-          [center toggle open ellipsis close]
+        (when-not expanded? [:<> close [:sub (count value)]])
+        (when (and selected expanded?)
           [s/div
-           {:style flex-col}
-           [s/div {:style flex-row} toggle open]
-           child
-           close])]])))
+           {:style
+            {:position :absolute
+             :left 0
+             :right 0
+             :bottom -1
+             :background selected-background
+             :height 1}}])]
+       (when expanded?
+         [s/div {:style
+                 {:grid-row "2" :grid-column "1/4"
+                  :box-sizing :border-box
+                  :padding-left (:padding theme)
+                  :border-top border
+                  :border-right  border
+                  :border-left border
+                  :background selected-background
+                  :border-top-left-radius (:border-radius theme)}}
+          (into [s/div {:style
+                        {:position :relative
+                         :padding-left (:padding theme)
+                         :border-left [1 :dashed color]}}]
+                children)])
+       (when expanded?
+         [s/div
+          {:style
+           {:grid-row "3" :grid-column "1 / 4"
+            :color color
+            :border-left border
+            :border-right border
+            :border-bottom border
+            :background selected-background
+            :border-bottom-left-radius (:border-radius theme)
+            :border-bottom-right-radius (:border-radius theme)}
+           :on-click (:on-click wrapper-options)}
+          [s/div
+           {:style
+            {:display :inline-block
+             :width (:padding theme)
+             :text-align :center}}
+           close]])])))
 
-(defn- parent-tree? [context]
-  (and (not (true? (:key? context)))
-       (map? (:collection context))
-       (= (:portal.viewer/default context)
-          :portal.viewer/tree)))
-
-(defn- with-tree-item [child]
-  (let [context (ins/use-context)]
-    (if (parent-tree? context)
-      child
-      [ins/with-default-viewer
-       :portal.viewer/tree
-       [inspect-tree-item
-        {:value (:value context)
-         :value-child child}]])))
+(defn- tree-grid [context & children]
+  (let [theme (theme/use-theme)]
+    [s/div
+     {:style {:display :grid
+              :grid-template-columns "auto auto 1fr"}}
+     [s/div
+      {:style {:grid-row "1" :grid-column "2"
+               :padding [0 (:padding theme)]}}]
+     (into [wrapper context] children)]))
 
 (defn- inspect-tree-map [value]
   (let [theme (theme/use-theme)]
-    [with-tree-item
-     [theme/cycle-rainbow
-      [ins/with-collection value
-       [l/lazy-seq
-        (map-indexed
-         (fn [index [k v]]
-           ^{:key index}
-           [inspect-tree-item
-            {:key k
-             :key-child
-             [ins/with-context
-              {:key? true}
-              [select/with-position
-               {:row index :column 0}
-               [s/div
-                {:style {:white-space :nowrap
-                         :padding-right (:padding theme)}}
-                [ins/inspector k]]]]
-             :value v
-             :value-child
-             [s/div
-              [ins/with-key k
-               [select/with-position
-                {:row index :column 1}
-                [ins/inspector v]]]]}])
-         (ins/try-sort-map value))]]]]))
-
-(defn- inspect-tree-coll [value]
-  [with-tree-item
-   [theme/cycle-rainbow
     [ins/with-collection value
      [l/lazy-seq
       (map-indexed
-       (fn [idx item]
-         ^{:key idx}
-         [ins/with-key idx
-          [select/with-position
-           {:row idx :column 0}
-           [ins/inspector item]]])
-       value)]]]])
+       (fn [idx [k v]]
+         (if-not (ins/coll? v)
+           ^{:key idx}
+           [s/div
+            {:style {:display :flex
+                     :gap (:padding theme)}}
+            [s/div
+             [ins/with-key k
+              [select/with-position
+               {:row idx :column 0}
+               [ins/inspector {:portal.viewer/inspector {:toggle-bg false}} k]]]]
+            [ins/with-key k
+             [select/with-position
+              {:row idx :column 1}
+              [ins/inspector {:portal.viewer/inspector {:toggle-bg false}} v]]]]
+
+           ^{:key idx}
+           [ins/toggle-bg
+            [s/div
+             {:style {:display :grid
+                      :grid-template-columns "auto auto 1fr"}}
+             [s/div
+              {:style {:grid-row "1" :grid-column "2"
+                       :padding [0 (:padding theme)]}}
+              [ins/with-key k
+               [select/with-position
+                {:row idx :column 0}
+                [ins/inspector
+                 {:portal.viewer/default :portal.viewer/tree
+                  :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
+                 k]]]]
+             [ins/with-key k
+              [select/with-position
+               {:row idx :column 1}
+               [ins/inspector
+                {:portal.viewer/default :portal.viewer/tree
+                 :portal.viewer/tree {:parent :tree}
+                 :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
+                v]]]]]))
+       (ins/try-sort-map value))]]))
+
+(defn- inspect-tree-coll [value]
+  (let [theme (theme/use-theme)]
+    [ins/with-collection value
+     [l/lazy-seq
+      (map-indexed
+       (fn [idx v]
+         (if-not (ins/coll? v)
+           ^{:key idx}
+           [s/div
+            [ins/with-key idx
+             [select/with-position
+              {:row idx :column 0}
+              [ins/inspector
+               {:portal.viewer/inspector {:toggle-bg false}}
+               v]]]]
+           ^{:key idx}
+           [s/div
+            {:style {:display :grid
+                     :grid-template-columns "auto auto 1fr"}}
+            [s/div
+             {:style {:grid-row "1" :grid-column "2"
+                      :padding [0 (:padding theme)]}}]
+            [ins/with-key idx
+             [select/with-position
+              {:row idx :column 0}
+              [ins/inspector
+               {:portal.viewer/default :portal.viewer/tree
+                :portal.viewer/tree {:parent :tree}
+                :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
+               v]]]]))
+       value)]]))
 
 (defn inspect-tree [value]
-  [ins/inc-depth
-   (cond
-     (map? value)  [inspect-tree-map value]
-     (coll? value) [inspect-tree-coll value])])
+  (let [opts (ins/use-options)
+        context (ins/use-context)
+        parent (get-in opts [:props :portal.viewer/tree :parent])
+        child (cond
+                (map? value)  [inspect-tree-map value]
+                (coll? value) [inspect-tree-coll value])]
+    (if (= parent :tree)
+      child
+      [tree-grid context child])))
 
 (def viewer
   {:predicate ins/coll?

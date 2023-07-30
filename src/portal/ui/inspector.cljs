@@ -985,6 +985,7 @@
   (let [depth   (:depth context)
         viewer  (get-viewer state context value)]
     (or (= depth 1)
+        (= (:name viewer) :portal.viewer/tree)
         (and (coll? value)
              (= (:name viewer) :portal.viewer/inspector)
              (<= depth (:max-depth theme))))))
@@ -1123,9 +1124,10 @@
          (cond->
           (-> (use-context)
               (assoc :value value)
-              (update :alt-bg not)
               (update :depth inc)
               (assoc :parent (use-parent)))
+           (get-in props [:portal.viewer/inspector :toggle-bg] true)
+           (update :alt-bg not)
            props
            (vary-meta assoc :props props)
            (nil? props)
