@@ -2,8 +2,8 @@
   (:refer-clojure :exclude [coll? map? char?])
   (:require ["anser" :as anser]
             ["react" :as react]
-            [clojure.string :as str]
             [clojure.set :as set]
+            [clojure.string :as str]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.async :as a]
             [portal.colors :as c]
