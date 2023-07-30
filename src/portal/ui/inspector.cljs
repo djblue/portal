@@ -115,7 +115,7 @@
        (seq value)
        (every? scalar? value)))
 
-(defn get-compatible-viewers [viewers {:keys [value] :as context}]
+(defn get-compatible-viewers-1 [viewers {:keys [value] :as context}]
   (let [by-name        (viewers-by-name viewers)
         default-viewer (get by-name
                             (or (get-in (meta context) [:props :portal.viewer/default])
@@ -126,11 +126,11 @@
         viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
 
-(defn get-compatible-viewers-intersection [viewers contexts]
+(defn get-compatible-viewers [viewers contexts]
   (if (nil? contexts)
-    (get-compatible-viewers viewers contexts)
+    (get-compatible-viewers-1 viewers contexts)
     (->> contexts
-         (map #(get-compatible-viewers viewers %))
+         (map #(get-compatible-viewers-1 viewers %))
          (map set)
          (apply set/intersection))))
 
@@ -142,16 +142,17 @@
             (and (= (:value context) value)
                  (get-in @state [:selected-viewers (state/get-location context)]))]
      (some #(when (= (:name %) selected-viewer) %) @api/viewers)
-     (first (get-compatible-viewers @api/viewers (assoc context :value value))))))
+     (first (get-compatible-viewers-1 @api/viewers (assoc context :value value))))))
 
-(defn set-viewer! [state context viewer-name]
-  (state/dispatch! state
-                   assoc-in [:selected-viewers (state/get-location context)]
-                   viewer-name))
+(defn set-viewer-1 [state context viewer-name]
+  (let [location (state/get-location context)]
+    (assoc-in state [:selected-viewers location] viewer-name)))
 
-(defn set-viewer-contexts! [state contexts viewer-name]
-  (doseq [context contexts]
-    (set-viewer! state context viewer-name)))
+(defn set-viewer [state contexts viewer-name]
+  (reduce (fn [state context] (set-viewer-1 state context viewer-name)) state contexts))
+
+(defn set-viewer! [state contexts viewer-name]
+  (state/dispatch! state set-viewer contexts viewer-name))
 
 (def ^:private parent-context (react/createContext nil))
 

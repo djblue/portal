@@ -733,13 +733,13 @@
   "Set the viewer for the currently selected value(s)."
   [state]
   (when-let [selected-context (state/get-all-selected-context @state)]
-    (let [viewers (ins/get-compatible-viewers-intersection @ins/viewers selected-context)]
+    (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
       (when (> (count viewers) 1)
         (a/let [[selected-viewer] (pick-one state (map :name viewers))]
-          (ins/set-viewer-contexts! state selected-context selected-viewer))))))
+          (ins/set-viewer! state selected-context selected-viewer))))))
 
 (defn- get-viewer [state context direction]
-  (let [viewers (map :name (ins/get-compatible-viewers-intersection @ins/viewers context))
+  (let [viewers (map :name (ins/get-compatible-viewers @ins/viewers context))
         current (:name (ins/get-viewer state (first context)))]
     (when (> (count viewers) 1)
       (some
@@ -752,12 +752,12 @@
 (defn ^:command select-prev-viewer [state]
   (when-let [selected-context (state/get-all-selected-context @state)]
     (when-let [prev-viewer (get-viewer state selected-context :prev)]
-      (ins/set-viewer-contexts! state selected-context prev-viewer))))
+      (ins/set-viewer! state selected-context prev-viewer))))
 
 (defn ^:command select-next-viewer [state]
   (when-let [selected-context (state/get-all-selected-context @state)]
     (when-let [next-viewer (get-viewer state selected-context :next)]
-      (ins/set-viewer-contexts! state selected-context next-viewer))))
+      (ins/set-viewer! state selected-context next-viewer))))
 
 (defn ^:command copy-path
   "Copy the path from the root value to the currently selected item."
