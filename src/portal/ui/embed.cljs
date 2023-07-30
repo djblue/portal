@@ -92,8 +92,8 @@
 (defn select-viewer []
   (let [theme              (theme/use-theme)
         state              (state/use-state)
-        selected-context   (state/get-selected-context @state)
-        viewer             (ins/get-viewer state selected-context)
+        selected-context   (state/get-all-selected-context @state)
+        viewer             (ins/get-viewer state (first selected-context))
         compatible-viewers (ins/get-compatible-viewers @ins/viewers selected-context)
         disabled?          (nil? selected-context)]
     [s/div
