@@ -116,7 +116,7 @@
         state (state/use-state)
         selected-context (state/get-all-selected-context @state)
         viewer           (ins/get-viewer state (first selected-context))
-        compatible-viewers (ins/get-compatible-viewers-intersection @ins/viewers selected-context)]
+        compatible-viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
     [s/div
      {:style
       {:display :flex
@@ -134,7 +134,7 @@
        :value (pr-str (:name viewer))
        :on-change
        (fn [e]
-         (ins/set-viewer-contexts!
+         (ins/set-viewer!
           state
           selected-context
           (keyword (.substr (.. e -target -value) 1))))
