@@ -27,7 +27,7 @@
   (deploy-clojars)
   (deploy-vscode)
   (deploy-open-vsx)
-  #_(deploy-intellij))
+  (deploy-intellij))
 
 (defn all
   "Deploy all artifacts."
