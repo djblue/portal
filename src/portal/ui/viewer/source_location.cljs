@@ -20,6 +20,13 @@
 (defn- source-location? [value]
   (s/valid? ::source-location value))
 
+(defn ->source-location [value]
+  (when (source-location? value)
+    (with-meta
+      (select-keys value [:ns :column :line :file :label])
+      (assoc (meta value)
+             :portal.viewer/default :portal.viewer/source-location))))
+
 (defn inspect-source [value]
   (let [theme (theme/use-theme)]
     [d/div

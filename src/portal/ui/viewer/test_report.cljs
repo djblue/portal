@@ -6,7 +6,8 @@
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+            [portal.ui.theme :as theme]
+            [portal.ui.viewer.source-location :as src]))
 
 ;;; :spec
 (s/def :test-run/type #{:end-run-tests})
@@ -147,12 +148,11 @@
          :border-bottom-right-radius (when-not expanded? (:border-radius theme))}}
        [ins/toggle-expand {:padding-left (:padding theme)}]
        [label value]
-       (when-let [file (:file value)]
+       (when-let [location (src/->source-location value)]
          [d/div
-          {:style {:color (::c/uri theme)}}
-          file
-          (when-let [line (:line value)]
-            [:<> ":" line])])]]
+          [select/with-position
+           {:row -1 :column 1}
+           [ins/with-key :loc [ins/inspector location]]]])]]
 
      (when (:expanded? options)
        [ins/inspect-map-k-v (dissoc value :type :message :file :line :ns :var)])]))
