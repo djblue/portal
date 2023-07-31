@@ -15,7 +15,7 @@
     (let [submit (partial p/submit {:port port :encoding :cson})]
       (doseq [{:keys [col row filename level message type]} findings]
         (submit
-         {:level  (get {:warning :warn} level level)
+         {:level  (get {:warning :warn :fail :fatal} level level)
           :type   type
           :column col
           :ns     (file->ns filename)
