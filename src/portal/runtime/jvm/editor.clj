@@ -133,6 +133,14 @@
                  :response  (select-keys response [:body :headers :status])}
                 error)))))
 
+(defmethod -open-editor :auto [info]
+  (-open-editor
+   (assoc info :editor
+          (cond
+            (fs/exists ".portal/vs-code.edn")  :vs-code
+            (fs/exists ".portal/intellij.edn") :intellij
+            :else                              :emacs))))
+
 (defn can-goto [input]
   (or (and (satisfies? IResolve input) (resolve input))
       (when-let [m (meta input)] (recur m))))
@@ -148,5 +156,5 @@
               :editor
               (or (:editor options)
                   (:launcher options)
-                  :emacs)))
+                  :auto)))
       true)))
