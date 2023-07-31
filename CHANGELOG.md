@@ -1,3 +1,19 @@
+## 0.45.0 - 2023-07-31
+
+- Use source location viewer in test report viewer bd884f6
+- Next iteration of tree viewer d228657
+- Multi selection updates Thanks @MarlonCorreia!
+  - Add multi selection change from viewers embed commands 1f11c05
+  - Add multi selection change from viewers commands e8b363a
+  - Add multi selection change from viewers list 18289b3
+- Prefer :ns when resolving source location 5297dff
+- Next iteration of the exception viewer 8a299f4
+- Use :file as fallback for source-location viewer 30c2dbe
+- Capture expanded on history-push 3d7c8e9
+- Improve goto-definition a4dd8f1
+  - Set :auto for :editor option in goto-definition c9c174f
+- Updates IJ plugin for 2023.2 (#190) b2d2ad5 - Thanks @coyotesqrl!
+
 ## 0.44.0 - 2023-07-25
 
 - Add expand / collapse actions to prepl title bar 0c6ca2c
