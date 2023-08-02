@@ -2,7 +2,14 @@
 
 After [installing dependencies](./deps.md) and
 [setting up an editor](./editors.md), the following should be enough to get you
-started with Portal development.
+started with Portal development. To kick off a dev server, do:
+
+```bash
+bb dev
+bb tasks # List all bb tasks
+```
+
+For more info on dev tasks, see [tasks.md](./tasks.md).
 
 ## [`user.clj`](../../dev/user.clj)
 
