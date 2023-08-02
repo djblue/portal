@@ -169,7 +169,7 @@
     (.mkdirs (.getParentFile docs))
     (spit docs (cson/write (gen-docs)))))
 
-(defn -main [] (docs))
+(defn -main "Generate Portal docs." [] (docs))
 
 (comment
   (def docs (atom nil))

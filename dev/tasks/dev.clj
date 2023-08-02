@@ -59,4 +59,4 @@
          "-m" "shadow.cljs.devtools.cli"
          :watch #_:pwa :client :vs-code :vs-code-notebook #_:electron)))
 
-(defn -main [] (prepl) (dev))
+(defn -main "Start dev server." [] (prepl) (dev))
