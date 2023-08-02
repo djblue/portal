@@ -1,3 +1,7 @@
+## 0.45.1 - 2023-08-01
+
+- Improve ex viewer stack trace parsing
+
 ## 0.45.0 - 2023-07-31
 
 - Use source location viewer in test report viewer bd884f6
