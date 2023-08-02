@@ -147,10 +147,8 @@
         :line   line
         :column 1
         :index  index}
-       (when clj?
-         {:clj? true
-          :ns   (symbol (namespace clj-name))
-          :sym  clj-name})))))
+       (when-let [ns (and clj? (some-> clj-name namespace symbol))]
+         {:clj? true :ns ns :sym clj-name})))))
 
 (defn- wrapper [context & children]
   (let [opts   (ins/use-options)
