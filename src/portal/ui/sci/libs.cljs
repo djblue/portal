@@ -101,7 +101,9 @@
    {'reagent.core
     (assoc reagent/reagent-namespace
            'adapt-react-class
-           (sci/copy-var r/adapt-react-class reagent/rns))
+           (sci/copy-var r/adapt-react-class reagent/rns)
+           'render
+           (sci/copy-var r/render reagent/rns))
     'reagent.ratom reagent/reagent-ratom-namespace
     'reagent.debug reagent/reagent-debug-namespace}))
 
