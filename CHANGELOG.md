@@ -373,7 +373,7 @@
 ### New Features
 
 - Add notebook renderer for vscode e1485e5
-- Port extenion code to node 3119a24
+- Port extension code to node 3119a24
 - Attach :portal.viewer/default meta to command args 7872e0a
 - Support reading vars from edn strings 311ff43
 
@@ -772,7 +772,7 @@ Selecting multiple values allows for invoking n-arity functions.
 The semantics will be:
 
 ```clojure
-(apply f [first-selected second-selcted ...])
+(apply f [first-selected second-selected ...])
 ```
 
 ### Improvements

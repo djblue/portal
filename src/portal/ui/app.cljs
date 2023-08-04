@@ -4,7 +4,7 @@
             [portal.colors :as c]
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
-            [portal.ui.connecton-status :as status]
+            [portal.ui.connection-status :as status]
             [portal.ui.drag-and-drop :as dnd]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]

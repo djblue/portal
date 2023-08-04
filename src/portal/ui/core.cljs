@@ -2,7 +2,7 @@
   (:require ["react" :as react]
             [portal.ui.app :as app]
             [portal.ui.cljs :as cljs]
-            [portal.ui.connecton-status :as conn]
+            [portal.ui.connection-status :as conn]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
             [portal.ui.rpc :as rpc]

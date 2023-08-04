@@ -1,4 +1,4 @@
-(ns ^:no-doc portal.ui.connecton-status
+(ns ^:no-doc portal.ui.connection-status
   (:require ["react" :as react]
             [portal.ui.state :as state]))
 
