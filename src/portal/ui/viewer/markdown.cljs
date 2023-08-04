@@ -187,18 +187,19 @@
 
 (defn- inspect-markdown* [value]
   (binding [*context* {:theme (theme/use-theme)}]
-    [inspect-hiccup
-     [:div
-      {:style
-       (merge
-        {:gap 16
-         :width 896
-         :max-width "100%"
-         :display :flex
-         :box-sizing :border-box
-         :flex-direction :column}
-        (get-in (ins/use-context) [:props :style]))}
-      (parse-markdown value)]]))
+    (let [opts (ins/use-options)]
+      [inspect-hiccup
+       [:div
+        {:style
+         (merge
+          {:gap 16
+           :width 896
+           :max-width "100%"
+           :display :flex
+           :box-sizing :border-box
+           :flex-direction :column}
+          (get-in opts [:props :style]))}
+        (parse-markdown value)]])))
 
 (defn inspect-markdown [value]
   [l/lazy-render [inspect-markdown* value]])
