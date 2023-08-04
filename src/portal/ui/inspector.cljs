@@ -752,14 +752,6 @@
         {:row 0 :column 1}
         [s/div [inspector (.-denominator value)]]]]]]))
 
-(defn- hex-color? [string]
-  (re-matches #"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}gi" string))
-
-(defn- rgb-color? [string]
-  (re-matches #"rgb\(\d+,\d+,\d+\)" string))
-
-(def ^:private color? (some-fn hex-color? rgb-color?))
-
 (defn- url-string? [string]
   (re-matches #"https?://.*" string))
 
@@ -780,19 +772,6 @@
          :style  {:color (::c/string theme)}}
         [highlight-words (trim-string value limit)]]
        "\""]
-
-      (color? value)
-      [s/div
-       {:style {:display     :flex
-                :gap         (:padding theme)
-                :align-items :center}}
-       [s/div
-        {:style {:width         (:font-size theme)
-                 :height        (:font-size theme)
-                 :border        [1 :solid (::c/border theme)]
-                 :background    value
-                 :border-radius (:border-radius theme)}}]
-       [s/div [highlight-words value]]]
 
       (or (< (count value) limit)
           (= (:depth context) 1)
