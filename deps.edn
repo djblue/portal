@@ -3,7 +3,7 @@
  {com.cognitect/transit-clj  {:mvn/version "1.0.333"}
   com.cognitect/transit-cljs {:mvn/version "0.8.280"}
   org.clojure/data.json      {:mvn/version "2.4.0"}
-  http-kit/http-kit          {:mvn/version "2.6.0"}
+  http-kit/http-kit          {:mvn/version "2.7.0"}
   com.google.code.gson/gson  {:mvn/version "2.10.1"}}
  :deps/prep-lib
  {:ensure "resources/portal"
@@ -27,12 +27,12 @@
    {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
                                :git/sha "219951678b16575ec29bb9b88047356cf1437aec"}
     hickory/hickory           {:mvn/version "0.7.1"}
-    lambdaisland/deep-diff2   {:mvn/version "2.9.202"}
-    org.babashka/sci          {:mvn/version "0.7.39"}
+    lambdaisland/deep-diff2   {:mvn/version "2.10.211"}
+    org.babashka/sci          {:mvn/version "0.8.40"}
     reagent/reagent           {:mvn/version "1.2.0"}
     io.github.babashka/sci.configs
     {:git/url "https://github.com/babashka/sci.configs"
-     :git/sha "d0ef6083fdfac86dc3dd8948918acde334442405"}}}
+     :git/sha "b0d7dc331a3e5817703ecb579f4476eeb84d04cb"}}}
   :shadow
   {:jvm-opts ["-Xss16m"]
    :extra-deps
@@ -40,13 +40,13 @@
   :build
   {:extra-paths ["src" "dev" "resources"]
    :ns-default  tasks.build
-   :extra-deps  {babashka/babashka {:mvn/version "1.3.181"}
+   :extra-deps  {babashka/babashka {:mvn/version "1.3.182"}
                  babashka/fs       {:mvn/version "0.4.19"}
                  ;; need to duplicate main deps here for prep build
                  com.cognitect/transit-clj  {:mvn/version "1.0.333"}
                  com.cognitect/transit-cljs {:mvn/version "0.8.280"}
                  org.clojure/data.json      {:mvn/version "2.4.0"}
-                 http-kit/http-kit          {:mvn/version "2.6.0"}
+                 http-kit/http-kit          {:mvn/version "2.7.0"}
                  com.google.code.gson/gson  {:mvn/version "2.10.1"}}}
   :deploy
   {:replace-deps {slipset/deps-deploy {:mvn/version "0.2.1"}}
@@ -56,14 +56,14 @@
   :kondo
   {:extra-paths ["dev"]
    :main-opts   ["-m" "tasks.kondo"]
-   :extra-deps  {clj-kondo/clj-kondo {:mvn/version "2023.05.26"}}}
+   :extra-deps  {clj-kondo/clj-kondo {:mvn/version "2023.07.13"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
    :extra-deps {cljfmt/cljfmt {:mvn/version "0.9.2"}}}
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "1.0.0"}
-    cider/cider-nrepl {:mvn/version "0.31.0"}}}
+    cider/cider-nrepl {:mvn/version "0.34.0"}}}
   :check
   {:extra-paths ["dev"]
    :main-opts ["-m" "tasks.load"]}
