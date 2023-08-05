@@ -58,11 +58,13 @@
 (defn fetch-hn [path]
   (a/let [url   (as-url (str root path))
           res   (fetch-json url)
-          item  (with-meta res {:hacker-news/api-url url
-                                :portal.viewer/for
-                                {:text    :portal.viewer/text
-                                 :time    :portal.viewer/relative-time
-                                 :created :portal.viewer/relative-time}})]
+          item  (vary-meta res merge
+                           {:hacker-news/api-url url
+                            :portal.viewer/for
+                            {:text    :portal.viewer/text
+                             :time    :portal.viewer/relative-time
+                             :created :portal.viewer/relative-time}
+                            :portal.viewer/default :portal.viewer/inspector})]
     (if-not (map? item)
       item
       (cond-> item
@@ -79,10 +81,14 @@
         (update :type keyword)
 
         (contains? item :kids)
-        (update :kids vary-meta assoc `nav #'nav-item)
+        (update :kids vary-meta assoc
+                `nav #'nav-item
+                :portal.viewer/default :portal.viewer/inspector)
 
         (contains? item :submitted)
-        (update :submitted vary-meta assoc `nav #'nav-item)))))
+        (update :submitted vary-meta assoc
+                `nav #'nav-item
+                :portal.viewer/default :portal.viewer/inspector)))))
 
 (defn fetch-user [user]
   (a/let [res (fetch-hn (str "/user/" user ".json"))]
@@ -101,7 +107,7 @@
 
 (defn fetch-stories [type]
   (a/let [res (fetch-hn (str "/" (name type) ".json"))]
-    (vary-meta (take 15 res) assoc `nav #'nav-item)))
+    (with-meta (take 15 res) (merge (meta res) {`nav #'nav-item}))))
 
 (defn nav-hn [coll k v]
   (cond
