@@ -8,7 +8,9 @@ A clojure tool to navigate through your data.
 [![Version][intellij-badge]][intellij]
 [![Get help on Slack][clojurians-badge]][clojurians]
 
-<a target="_blank" href="https://djblue.github.io/portal/">
+
+
+<a target="_blank" href="https://djblue.github.io/portal/?content-type=application/edn&content-url=https://gist.githubusercontent.com/djblue/249bf97598666dfa902013e64a248608/raw/38044cd5bf0834fb92fce64fdb56f60dff44b179/docs.clj">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/1986211/196015562-238cf450-6467-451c-a985-04c7a9b49dba.png">
   <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/1986211/196015567-74ba9153-341a-4fd7-be47-2c26f0c88c2e.png">
