@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [hiccup.core :refer [html]]
             [portal.colors :as c]
+            [portal.runtime.cson :as cson]
             [portal.runtime.json :as json]
             [tasks.build :refer [install]]
             [tasks.docs :as docs]
@@ -46,6 +47,13 @@
          :background (::c/background settings)})}
       [:div {:id "root"}]
       [:script {:src "main.js"}]]])))
+
+(defmethod print-method (Class/forName "[B") [v ^java.io.Writer w]
+  (.write w "#portal/bin \"")
+  (.write w (cson/base64-encode v))
+  (.write w "\""))
+
+(comment (remove-method print-method (Class/forName "[B")))
 
 (defn- ->edn [v] (binding [*print-meta* true] (pr-str v)))
 
