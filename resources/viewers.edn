@@ -1,5 +1,6 @@
 ({:name :portal.viewer/ex, :doc "Viewer for datafied exceptions."}
  {:name :portal.viewer/stack-trace}
+ {:name :portal.viewer/sub-trace}
  {:name :portal.viewer/line-chart}
  {:name :portal.viewer/scatter-chart}
  {:name :portal.viewer/histogram-chart}
@@ -17,7 +18,14 @@
   :doc
   "View interlacing of stdout, stderr and tap values. Useful for build output."}
  {:name :portal.viewer/cljdoc}
+ {:name :portal.viewer/color, :doc "View hex / rgb / rgba colors"}
  {:name :portal.viewer/inspector}
+ {:name :portal.viewer/duration-ns,
+  :doc
+  "Interpret number as a duration in nanoseconds, round up to minutes."}
+ {:name :portal.viewer/duration-ms,
+  :doc
+  "Interpret number as a duration in milliseconds, round up to minutes."}
  {:name :portal.viewer/pprint,
   :doc "View value printed via clojure.pprint/pprint."}
  {:name :portal.viewer/vega-lite}
@@ -52,4 +60,7 @@
   :doc "Render a hiccup value as html via reagent."}
  {:name :portal.viewer/date-time}
  {:name :portal.viewer/relative-time,
-  :doc "View value relative to the current time."})
+  :doc "View value relative to the current time."}
+ {:name :portal.viewer/source-location,
+  :doc
+  "View a map as a source location, provides goto definition on click."})

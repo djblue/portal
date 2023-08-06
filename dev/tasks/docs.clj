@@ -5,6 +5,7 @@
             [clojure.walk :as walk]
             [examples.data :as d]
             [portal.api :as p]
+            [portal.colors :as c]
             [portal.runtime.cson :as cson]
             [portal.viewer :as-alias v]))
 
@@ -39,6 +40,15 @@
                  (when-let [doc (:doc m)]
                    [:portal.viewer/markdown doc])]}]))))
        (into [(name namespace)])))
+
+(defn- ->loc [v]
+  (-> v
+      meta
+      (update :ns #(symbol (str %)))
+      (select-keys [:file :line :column :ns])))
+
+(comment
+  (mapv ->loc [#'conj #'assoc #'io/file #'p/open #'p/inspect]))
 
 (defn- info []
   {::v/log
@@ -103,7 +113,24 @@
    ::v/text
    {:examples [(::d/markdown d/string-data)]}
    ::v/pprint
-   {:examples [d/basic-data]}})
+   {:examples [d/basic-data]}
+   ::v/duration-ns
+   {:examples [1 1e3 1e6 1e9 6e10]}
+   ::v/duration-ms
+   {:examples [1 1e3 6e4]}
+   ::v/color
+   {:examples (vals (first (vals c/themes)))
+    :file "portal/ui/viewer/color.cljs"}
+   ::v/source-location
+   {:examples '[{:file "clojure/core.clj", :line 75, :column 1, :ns clojure.core}
+                {:file "clojure/core.clj", :line 183, :column 1, :ns clojure.core}
+                {:file "clojure/java/io.clj",
+                 :line 418,
+                 :column 1,
+                 :ns clojure.java.io}
+                {:file "portal/api.cljc", :line 72, :column 1, :ns portal.api}
+                {:file "portal/api.cljc", :line 196, :column 1, :ns portal.api}]
+    :file "portal/ui/viewer/source_location.cljs"}})
 
 (defn- ->render [{:keys [doc spec examples] :as entry}]
   [(name (:name entry))

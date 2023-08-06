@@ -69,7 +69,8 @@
 (def nano
   {:predicate number?
    :name :portal.viewer/duration-ns
-   :component inspect-nano})
+   :component inspect-nano
+   :doc "Interpret number as a duration in nanoseconds, round up to minutes."})
 
 (defn inspect-ms [ns]
   (cond
@@ -80,4 +81,5 @@
 (def ms
   {:predicate number?
    :name :portal.viewer/duration-ms
-   :component inspect-ms})
+   :component inspect-ms
+   :doc "Interpret number as a duration in milliseconds, round up to minutes."})
