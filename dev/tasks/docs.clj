@@ -175,7 +175,7 @@
           :when (or (:doc info) (:examples info) (:spec info))]
       (->render info))))
 
-(defn- gen-docs []
+(defn gen-docs []
   (update
    (walk/postwalk
     (fn [v]

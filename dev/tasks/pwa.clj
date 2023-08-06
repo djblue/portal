@@ -6,6 +6,7 @@
             [portal.colors :as c]
             [portal.runtime.json :as json]
             [tasks.build :refer [install]]
+            [tasks.docs :as docs]
             [tasks.tools :refer [shadow]]))
 
 (defn- manifest-json [settings]
@@ -46,12 +47,15 @@
       [:div {:id "root"}]
       [:script {:src "main.js"}]]])))
 
+(defn- ->edn [v] (binding [*print-meta* true] (pr-str v)))
+
 (defn- get-files [settings]
   (let [settings (merge settings (::c/nord c/themes))]
     {"index.html"     (index-html settings)
      "manifest.json"  (manifest-json settings)
      "icon.svg"       (slurp (io/resource "icon.svg"))
-     "sw.js"          (slurp (io/resource "sw.js"))}))
+     "sw.js"          (slurp (io/resource "sw.js"))
+     "docs.edn"       (->edn (docs/gen-docs))}))
 
 (def envs
   {:dev  {:name "portal-dev"
