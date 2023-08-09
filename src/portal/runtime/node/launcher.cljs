@@ -29,11 +29,13 @@
            :config-file  config-file
            :search-paths search-paths})))))
 
+(defn- localhost [host] (if (= "localhost" host) "127.0.0.1" host))
+
 (defn- remote-open [{:keys [portal options server] :as args}]
   (a/let [config (get-config args)
           {:keys [status error] :as response}
           (client/fetch
-           (str "http://" (:host config) ":" (:port config) "/open")
+           (str "http://" (localhost (:host config)) ":" (:port config) "/open")
            {:method  "POST"
             :headers {"content-type" "application/edn"}
             :body    (pr-str {:portal  (into {} portal)
