@@ -16,7 +16,10 @@
           {:portal.viewer/default :portal.viewer/inspector})))
 
 (defn dashboard-submit [value]
-  (swap! tap-list (fn [taps] (take 10 (conj taps value)))))
+  (swap! tap-list (fn [taps]
+                    (with-meta
+                      (take 10 (conj taps value))
+                      (meta taps)))))
 
 (defn ^:command clear-taps
   "Clear tap list."
