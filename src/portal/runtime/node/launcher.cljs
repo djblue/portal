@@ -56,10 +56,10 @@
 (defn- create-server [handler port host]
   (js/Promise.
    (fn [resolve _reject]
-     (let [server (http/createServer #(handler %1 %2))]
+     (let [^js server (http/createServer #(handler %1 %2))]
        (.on server
             "connection"
-            (fn [socket]
+            (fn [^js socket]
               (swap! sockets conj socket)
               (.on socket
                    "close"
@@ -78,9 +78,10 @@
           (reset! server instance)))))
 
 (defn stop []
-  (doseq [socket @sockets] (.destroy socket))
+  (doseq [^js socket @sockets] (.destroy socket))
   (reset! sockets #{})
-  (some-> server deref :http-server .close)
+  (when-let [^js server (some-> server deref :http-server)]
+    (.close server))
   (reset! server nil))
 
 (defn open

@@ -52,7 +52,7 @@
      req
      (.-socket req)
      (.-headers req)
-     (fn [ws]
+     (fn [^js ws]
        (let [session (rt/open-session session)
              send!
              (fn send! [message]

@@ -12,7 +12,7 @@
                   http
                   url
                   (clj->js options)
-                  (fn [res]
+                  (fn [^js res]
                     (let [body (atom "")]
                       (.on res "data" #(swap! body str %))
                       (.on res "error" reject)
