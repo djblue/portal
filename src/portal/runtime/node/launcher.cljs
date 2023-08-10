@@ -29,7 +29,10 @@
            :config-file  config-file
            :search-paths search-paths})))))
 
-(defn- localhost [host] (if (= "localhost" host) "127.0.0.1" host))
+(defn- localhost
+  "https://github.com/nodejs/node/issues/40537"
+  [host]
+  (if (= "localhost" host) "127.0.0.1" host))
 
 (defn- remote-open [{:keys [portal options server] :as args}]
   (a/let [config (get-config args)
@@ -66,7 +69,7 @@
               (.on socket
                    "close"
                    (fn [] (swap! sockets disj sockets)))))
-       (.listen server #js {:port port :host host}
+       (.listen server #js {:port port :host (localhost host)}
                 #(resolve {:http-server server
                            :port (.-port (.address server))
                            :host host}))))))
