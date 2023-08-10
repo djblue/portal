@@ -124,7 +124,7 @@
       (throw (ex-info (:message response) response)))))
 
 (defn sessions []
-  (for [session-id (key @c/connections)] (c/make-atom session-id)))
+  (for [session-id (keys @c/connections)] (c/make-atom session-id)))
 
 (defn url [portal]
   (browser/url {:portal portal :server @server}))
