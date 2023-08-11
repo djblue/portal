@@ -1,5 +1,6 @@
 (ns ^:no-doc portal.runtime.node.client
-  (:require [portal.runtime :as rt]))
+  (:require [portal.async :as a]
+            [portal.runtime :as rt]))
 
 (defonce connections (atom {}))
 
@@ -15,23 +16,47 @@
        (when-let [[resolve] (get @pending-requests id)]
          (resolve message))))})
 
+(def timeout 60000)
+
+(defn- get-connection [session-id]
+  (.race
+   js/Promise
+   [(js/Promise.
+     (fn [resolve _reject]
+       (js/setTimeout #(resolve nil) timeout)))
+    (js/Promise.
+     (fn [resolve _reject]
+       (let [watch-key (keyword (gensym))]
+         (if-let [send! (get @connections session-id)]
+           (resolve send!)
+           (add-watch
+            connections
+            watch-key
+            (fn [_ _ _old new]
+              (when-let [send! (get new session-id)]
+                (remove-watch connections watch-key)
+                (resolve send!))))))))]))
+
 (defn request
   ([message]
-   (js/Promise.all
-    (for [session-id (keys @connections)]
-      (request session-id message))))
+   (a/let [responses
+           (.all js/Promise
+                 (for [session-id (keys @connections)]
+                   (request session-id message)))]
+     (last responses)))
   ([session-id message]
-   (if-let [send! (@connections session-id)]
-     (let [id      (next-id)
-           message (assoc message :portal.rpc/id id)]
-       (.then
-        (js/Promise.
-         (fn [resolve reject]
-           (swap! pending-requests assoc id [resolve reject])
-           (send! message)))
-        #(do (swap! pending-requests dissoc id) %)))
-     (throw (ex-info "No such portal session"
-                     {:session-id session-id :message message})))))
+   (a/let [send! (get-connection session-id)]
+     (if send!
+       (let [id      (next-id)
+             message (assoc message :portal.rpc/id id)]
+         (.then
+          (js/Promise.
+           (fn [resolve reject]
+             (swap! pending-requests assoc id [resolve reject])
+             (send! message)))
+          #(do (swap! pending-requests dissoc id) %)))
+       (throw (ex-info "No such portal session"
+                       {:session-id session-id :message message}))))))
 
 (defn- push-state [session-id new-value]
   (request session-id {:op :portal.rpc/push-state :state new-value})
