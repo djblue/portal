@@ -114,11 +114,10 @@
   true)
 
 (defn eval-str [portal msg]
-  (a/let [responses (if (= portal :all)
-                      (c/request (assoc msg :op :portal.rpc/eval-str))
-                      (c/request (:session-id portal)
-                                 (assoc msg :op :portal.rpc/eval-str)))
-          response (last responses)]
+  (a/let [response (if (= portal :all)
+                     (c/request (assoc msg :op :portal.rpc/eval-str))
+                     (c/request (:session-id portal)
+                                (assoc msg :op :portal.rpc/eval-str)))]
     (if-not (:error response)
       response
       (throw (ex-info (:message response) response)))))
