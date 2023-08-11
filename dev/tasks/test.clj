@@ -25,6 +25,7 @@
 
 (defn cljs-runtime [version]
   (install)
+  (build)
   (cljs* {'org.clojure/clojurescript {:mvn/version version}} :portal.test-runtime-runner))
 
 (defn- get-cljs-deps []

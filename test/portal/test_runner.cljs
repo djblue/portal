@@ -42,10 +42,13 @@
 (defn run-tests [f]
   (if-not port
     (f)
-    (let [report (atom [])]
-      (with-redefs [t/report #(swap! report conj %)]
-        (f))
-      (a/do (submit @report) @report))))
+    (a/let [report  (atom [])
+            report' t/report]
+      (set! t/report  #(swap! report conj %))
+      (f)
+      (set! t/report report')
+      (submit @report)
+      @report)))
 
 (defn run [f]
   (a/let [report (run-tests f)
