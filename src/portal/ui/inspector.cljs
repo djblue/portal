@@ -992,7 +992,7 @@
        (fn [e]
          (.stopPropagation e)
          (a/do
-           (set-viewer! state context (:name viewer))
+           (set-viewer! state [context] (:name viewer))
            (state/dispatch!
             state
             (if selected
@@ -1004,7 +1004,7 @@
        (fn [e]
          (.stopPropagation e)
          (a/do
-           (set-viewer! state context (:name viewer))
+           (set-viewer! state [context] (:name viewer))
            (state/dispatch! state state/select-context context)
            (state/dispatch! state state/nav context)))})))
 
