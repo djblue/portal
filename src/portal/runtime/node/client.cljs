@@ -19,23 +19,26 @@
 (def timeout 60000)
 
 (defn- get-connection [session-id]
-  (.race
-   js/Promise
-   [(js/Promise.
-     (fn [resolve _reject]
-       (js/setTimeout #(resolve nil) timeout)))
-    (js/Promise.
-     (fn [resolve _reject]
-       (let [watch-key (keyword (gensym))]
+  (let [done (atom nil)]
+    (.race
+     js/Promise
+     [(js/Promise.
+       (fn [resolve _reject]
+         (let [handle (js/setTimeout #(resolve nil) timeout)]
+           (reset! done #(js/clearTimeout handle)))))
+      (js/Promise.
+       (fn [resolve _reject]
          (if-let [send! (get @connections session-id)]
-           (resolve send!)
-           (add-watch
-            connections
-            watch-key
-            (fn [_ _ _old new]
-              (when-let [send! (get new session-id)]
-                (remove-watch connections watch-key)
-                (resolve send!))))))))]))
+           (do (@done) (resolve send!))
+           (let [watch-key (keyword (gensym))]
+             (add-watch
+              connections
+              watch-key
+              (fn [_ _ _old new]
+                (when-let [send! (get new session-id)]
+                  (@done)
+                  (remove-watch connections watch-key)
+                  (resolve send!))))))))])))
 
 (defn request
   ([message]
