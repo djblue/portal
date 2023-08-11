@@ -68,7 +68,9 @@
               (swap! sockets conj socket)
               (.on socket
                    "close"
-                   (fn [] (swap! sockets disj sockets)))))
+                   (fn []
+                     (.destroy socket)
+                     (swap! sockets disj socket)))))
        (.listen server #js {:port port :host (localhost host)}
                 #(resolve {:http-server server
                            :port (.-port (.address server))
