@@ -1065,6 +1065,7 @@
 
 (defn- inspector* [context value]
   (let [ref            (react/useRef nil)
+        context        (vary-meta context assoc ::ref ref)
         props          (:props (meta context))
         state          (state/use-state)
         location       (state/get-location context)

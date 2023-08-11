@@ -1,5 +1,6 @@
 (ns portal.ui.commands
-  (:require ["react" :as react]
+  (:require ["html2canvas" :as ->canvas]
+            ["react" :as react]
             [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
@@ -11,6 +12,7 @@
             [portal.ui.drag-and-drop :as dnd]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
+            [portal.ui.png :as png]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -694,14 +696,15 @@
     (js/document.execCommand "copy")
     (js/document.body.removeChild el)))
 
-(defn- copy-edn! [value]
-  (copy-to-clipboard!
-   (str/trim
-    (with-out-str
-      (binding [*print-meta* true
-                *print-length* 1000
-                *print-level* 100]
-        (pp/pprint value))))))
+(defn- ->edn [value]
+  (str/trim
+   (with-out-str
+     (binding [*print-meta* true
+               *print-length* 1000
+               *print-level* 100]
+       (pp/pprint value)))))
+
+(defn- copy-edn! [value] (copy-to-clipboard! (->edn value)))
 
 (defn- selected-values [state-val]
   (let [values (state/selected-values state-val)]
@@ -728,6 +731,59 @@
       pprint-json
       str/trim
       copy-to-clipboard!))
+
+#_(defn- ->hiccup [^js el]
+    (case (.-nodeType el)
+      3 (.-wholeText el)
+      1 (let [attrs (.-attributes el)]
+          (into
+           [(keyword (str/lower-case (.-tagName el)))
+            (persistent!
+             (reduce
+              (fn [attrs ^js attr]
+                (assoc! attrs (keyword (.-name attr)) (.-value attr)))
+              (transient {})
+              attrs))]
+           (map ->hiccup)
+           (.-childNodes el)))))
+
+#_(defn ^:command copy-hiccup
+    [state]
+    (when-let [el (some-> ^js @state
+                          state/get-selected-context
+                          meta
+                          :portal.ui.inspector/ref
+                          .-current)]
+      (copy-to-clipboard!
+       (.-innerHTML el)
+       #_(binding [*print-meta* true]
+           (pr-str (with-meta (->hiccup el) {:portal.viewer/default :portal.viewer/hiccup}))))))
+
+(defn- ->blob ^js [^js canvas]
+  (js/Promise.
+   (fn [resolve reject]
+     (try
+       (.toBlob canvas (fn [blob] (resolve blob)) "image/png" 1)
+       (catch :default e (reject e))))))
+
+(defn- ->buffer [^js blob]
+  (a/let [buffer (.arrayBuffer blob)] (js/Uint8Array. buffer)))
+
+(defn- ->png [buffer value]
+  (js/Blob. [(png/encode buffer {"portal/value" (->edn value)})] #js {:type "image/png"}))
+
+(defn ^:command copy-png
+  "Copy selected value as a png. Will also embed edn into png."
+  [state]
+  (let [context (some-> @state state/get-selected-context)
+        ^js ref (some-> context meta (:portal.ui.inspector/ref))]
+    (when-let [el (some-> ref .-current)]
+      (a/let [canvas (->canvas el #js {:scale 2 :backgroundColor nil})
+              blob   (->blob canvas)
+              buffer (->buffer blob)
+              png    (->png buffer (:value context))]
+        #_(js/console.log png (get (png/decode (->buffer png)) "portal/value"))
+        (js/navigator.clipboard.write [(js/ClipboardItem. #js {"image/png" png})])))))
 
 (defn ^:command select-none
   "Deselect all values."
