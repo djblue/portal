@@ -16,12 +16,15 @@
   (let [[{:keys [errors connected?]} set-status!]
         (react/useState {:connected? true :errors 0})]
     (use-interval
-     (if (> errors 5)
-       (.error js/console "Unable to establish connection to runtime.")
-       (fn []
-         (-> (state/invoke 'portal.runtime/ping)
-             (.then  #(set-status! {:connected? true  :errors 0}))
-             (.catch #(set-status! {:connected? false :errors (inc errors)})))))
+     (fn []
+       (-> (state/invoke 'portal.runtime/ping)
+           (.then  (fn [_]
+                     ;; reconnecting to runtime
+                     (when-not (zero? errors)
+                       (state/reset-value-cache!)
+                       (set-status! {:connected? true :errors 0}))))
+           (.catch (fn [_]
+                     (set-status! {:connected? false :errors (inc errors)})))))
      5000)
     connected?))
 

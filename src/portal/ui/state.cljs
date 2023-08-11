@@ -279,10 +279,15 @@
 
 (defonce value-cache (r/atom {}))
 
+(defn reset-value-cache!
+  "Useful when establishing or re-establishing a connection with the runtime."
+  []
+  (reset! value-cache (with-meta {} {:key (.now js/Date)})))
+
 (defn clear [state]
   (a/do
     (invoke 'portal.runtime/clear-values)
-    (reset! value-cache (with-meta {} {:key (.now js/Date)}))
+    (reset-value-cache!)
     (-> state
         (dissoc :portal/value
                 :search-text

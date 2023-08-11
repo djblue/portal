@@ -1,6 +1,7 @@
 (ns portal.ui.rpc
   (:refer-clojure :exclude [read type])
-  (:require [portal.async :as a]
+  (:require [clojure.string :as str]
+            [portal.async :as a]
             [portal.runtime.cson :as cson]
             [portal.ui.cljs :as cljs]
             [portal.ui.rpc.runtime :as rt]
@@ -189,23 +190,27 @@
 
 (defn- get-host []
   (if (exists? js/PORTAL_HOST)
-    js/PORTAL_HOST
+    (first (str/split js/PORTAL_HOST #":"))
     (.-hostname js/location)))
 
 (defn- get-proto []
   (if (= (.-protocol js/location) "https:") "wss:" "ws:"))
 
 (defn- get-port []
-  (when-not (= (.-port js/location) "")
-    (.-port js/location)))
+  (if (exists? js/PORTAL_HOST)
+    (js/parseInt (second (str/split js/PORTAL_HOST #":")))
+    (when-not (= (.-port js/location) "")
+      (js/parseInt (.-port js/location)))))
+
+(defn resolve-connection []
+  {:host     (get-host)
+   :port     (get-port)
+   :protocol (get-proto)
+   :session  (get-session)})
 
 (defn connect
   ([]
-   (connect
-    {:host     (get-host)
-     :port     (get-port)
-     :protocol (get-proto)
-     :session  (get-session)}))
+   (connect (resolve-connection)))
   ([{:keys [host port protocol session]}]
    (if-let [ws @ws-promise]
      ws
@@ -220,7 +225,6 @@
                                                  (send! message))))
            (set! (.-onerror chan)   (fn [e]
                                       (reject e)
-                                      (.error js/console (pr-str e))
                                       (doseq [[_ [_ reject]] @pending-requests]
                                         (reject e))))
            (set! (.-onclose chan)   #(reset!  ws-promise nil))

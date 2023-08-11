@@ -9,6 +9,7 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
+            [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
@@ -87,10 +88,9 @@
       [s/div {:style {:grid-row "1"}} "]"]]
      [s/div {:style {:flex "1"}}]]))
 
-(defn- runtime-info []
+(defn- use-runtime-info []
   (let [opts       (opts/use-options)
         theme      (theme/use-theme)
-        connected? (status/use-status)
         header     (if (= :dev (:mode opts))
                      (::c/diff-add theme)
                      (::c/background2 theme))]
@@ -106,18 +106,16 @@
           (str/join
            " - "
            [(:window-title opts name) platform version]))))
-     #js [opts])
-    (when-not connected?
-      [s/div
-       {:style {:color (::c/exception theme)}}
-       "ERROR: Disconnected from runtime!"])))
+     #js [opts])))
 
 (defn inspect-footer []
   (let [theme (theme/use-theme)
         state (state/use-state)
+        connected?       (status/use-status)
         selected-context (state/get-all-selected-context @state)
         viewer           (ins/get-viewer state (first selected-context))
         compatible-viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
+    (use-runtime-info)
     [s/div
      {:style
       {:display :flex
@@ -125,51 +123,69 @@
        :padding-bottom (:padding theme)
        :padding-right (* 1.5 (:padding theme))
        :padding-left (* 1.5 (:padding theme))
-       :align-items :stretch
+       :align-items :center
        :justify-content :space-between
-       :background (::c/background2 theme)
+       :background (if-not connected?
+                     (::c/exception theme)
+                     (::c/background2 theme))
        :box-sizing :border-box
        :border-top [1 :solid (::c/border theme)]}}
-     [s/select
-      {:title "Select a different viewer."
-       :value (pr-str (:name viewer))
-       :on-change
-       (fn [e]
-         (ins/set-viewer!
-          state
-          selected-context
-          (keyword (.substr (.. e -target -value) 1))))
-       :style
-       {:background (::c/background theme)
-        :padding (:padding theme)
-        :box-sizing :border-box
-        :font-family (:font-family theme)
-        :font-size (:font-size theme)
-        :color (::c/text theme)
-        :border-radius (:border-radius theme)
-        :border [1 :solid (::c/border theme)]}}
-      (for [{:keys [name]} compatible-viewers]
-        ^{:key name}
-        [s/option {:value (pr-str name)} (pr-str name)])]
-     [runtime-info]
-     [s/button
-      {:title    "Open command palette."
-       :on-click #(commands/open-command-palette state)
-       :style
-       {:font-family (:font-family theme)
-        :background (::c/background theme)
-        :border-radius (:border-radius theme)
-        :border [1 :solid (::c/border theme)]
-        :box-sizing :border-box
-        :padding-top (:padding theme)
-        :padding-bottom (:padding theme)
-        :padding-left (* 2.5 (:padding theme))
-        :padding-right (* 2.5 (:padding theme))
-        :color (::c/tag theme)
-        :font-size (:font-size theme)
-        :font-weight :bold
-        :cursor :pointer}}
-      [icons/terminal]]]))
+     [s/div
+      {:style {:flex "1"}}
+      [s/select
+       {:title "Select a different viewer."
+        :value (pr-str (:name viewer))
+        :on-change
+        (fn [e]
+          (ins/set-viewer!
+           state
+           selected-context
+           (keyword (.substr (.. e -target -value) 1))))
+        :style
+        {:background (::c/background theme)
+         :padding (:padding theme)
+         :box-sizing :border-box
+         :font-family (:font-family theme)
+         :font-size (:font-size theme)
+         :color (::c/text theme)
+         :border-radius (:border-radius theme)
+         :border [1 :solid (::c/border theme)]}}
+       (for [{:keys [name]} compatible-viewers]
+         ^{:key name}
+         [s/option {:value (pr-str name)} (pr-str name)])]]
+
+     (when-not connected?
+       [s/div
+        {:style {:text-align :center :flex "1" :color (::c/text theme)}}
+        [s/div
+         #_{:style {:display :flex :gap (:padding theme)}}
+         [s/span {:style {:font-weight :bold}} "Error: "]
+         "Connection lost"]
+        [s/div
+         "(portal.api/start "
+         (pr-str (select-keys (rpc/resolve-connection) [:port]))
+         ")"]])
+
+     [s/div
+      {:style {:flex "1" :text-align :right}}
+      [s/button
+       {:title    "Open command palette."
+        :on-click #(commands/open-command-palette state)
+        :style
+        {:font-family (:font-family theme)
+         :background (::c/background theme)
+         :border-radius (:border-radius theme)
+         :border [1 :solid (::c/border theme)]
+         :box-sizing :border-box
+         :padding-top (:padding theme)
+         :padding-bottom (:padding theme)
+         :padding-left (* 3 (:padding theme))
+         :padding-right (* 3 (:padding theme))
+         :color (::c/tag theme)
+         :font-size (:font-size theme)
+         :font-weight :bold
+         :cursor :pointer}}
+       [icons/terminal]]]]))
 
 (defn- search-input []
   (let [ref      (react/useRef nil)
