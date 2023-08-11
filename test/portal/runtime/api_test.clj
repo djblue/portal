@@ -1,4 +1,4 @@
-(ns portal.jvm-test
+(ns portal.runtime.api-test
   (:require [clojure.test :refer [deftest is]]
             [portal.api :as p]
             [portal.runtime.browser :as browser]))
@@ -6,11 +6,12 @@
 (defn- headless-chrome-flags [url]
   ["--remote-debugging-port=9222" "--headless" "--disable-gpu" url])
 
-(defn- open [f]
-  (with-redefs [browser/flags f] (p/open {:mode :test})))
+(defn- open []
+  (p/open {:mode :test
+           ::browser/flags headless-chrome-flags}))
 
-(deftest e2e-jvm
-  (when-let [portal (open headless-chrome-flags)]
+(deftest e2e-jvm-test
+  (let [portal (open)]
     (reset! portal 0)
     (is (= @portal 0))
     (swap! portal inc)

@@ -113,10 +113,11 @@
   (str "http://" (:host server) ":" (:port server) "?" (:session-id portal)))
 
 (defmethod -open :default [{:keys [options] :as args}]
-  (let [chrome-bin (get-chrome-bin)]
+  (let [chrome-bin   (get-chrome-bin)
+        chrome-flags (::flags options flags)]
     (if (and (some? chrome-bin)
              (:app options true))
-      (apply shell/sh chrome-bin (flags (url args)))
+      (apply shell/sh chrome-bin (chrome-flags (url args)))
       (browse (url args)))))
 
 (defmethod -open false [_args])
