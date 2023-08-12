@@ -487,7 +487,7 @@
 (defn- catch* [value]
   (-> js/Promise (.resolve value) (.catch ex-data)))
 
-(defn- can-meta? [value] (implements? IMeta value))
+(defn- can-meta? [value] (implements? IWithMeta value))
 
 (defn- with-meta* [obj m]
   (if-not (can-meta? obj)
