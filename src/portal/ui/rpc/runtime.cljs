@@ -91,10 +91,16 @@
     (->RuntimeAtom call object)
     (->RuntimeObject call object)))
 
+(declare ->value)
+
 (defn- cleanup [id]
-  (swap! state/value-cache dissoc id)
-  (swap! current-values dissoc id)
-  (call 'portal.runtime/cache-evict id))
+  (when-not (->value id)
+    ;; Only evict a value if the id hasn't been re-used as part of a new ws
+    ;; connection session which wouldn't have any knowledge of previously sent
+    ;; values, especially on process restarts.
+    (swap! state/value-cache dissoc id)
+    (swap! current-values dissoc id)
+    (call 'portal.runtime/cache-evict id)))
 
 (defonce ^:private registry
   (when (exists? js/FinalizationRegistry)
