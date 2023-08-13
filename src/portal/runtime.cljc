@@ -100,6 +100,11 @@
      :cljr (instance? clojure.lang.IRef value)
      :cljs (satisfies? cljs.core/IDeref value)))
 
+(defn- pr-str' [value]
+  (if-not (deref? value)
+    (pr-str value)
+    (str "#object " (pr-str [(type value) {:val ::elided}]))))
+
 (defn- to-object [buffer value tag rep]
   (if-not *session*
     (cson/-to-json
@@ -115,12 +120,11 @@
        (cond-> {:tag       tag
                 :id        (value->id value)
                 :type      (pr-str (type value))
+                :pr-str    (pr-str' value)
                 :protocols (cond-> #{}
                              (deref? value) (conj :IDeref))}
          m   (assoc :meta m)
-         rep (assoc :rep rep)
-         (not (deref? value))
-         (assoc :pr-str (pr-str value)))))))
+         rep (assoc :rep rep))))))
 
 (extend-type #?(:clj  Object
                 :cljr Object

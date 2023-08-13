@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.ui.rpc.runtime
   (:refer-clojure :exclude [deref pr-str])
-  (:require [portal.runtime.cson :as cson]
+  (:require [clojure.pprint :as pprint]
+            [portal.runtime.cson :as cson]
             [portal.ui.state :as state]
             [reagent.core :as r]))
 
@@ -20,30 +21,22 @@
       (.then #(swap! current-values
                      assoc-in [(id this) 'clojure.core/deref] %))))
 
-(defn pr-str [this]
-  (-> ((.-runtime this) 'clojure.core/pr-str this)
-      (.then #(swap! current-values
-                     assoc-in [(id this) 'clojure.core/pr-str] %))))
-
 (defn- runtime-deref [this]
   (when (= ::not-found (get-in @current-values [(id this) 'clojure.core/deref] ::not-found))
     (deref this))
   (get-in @current-values [(id this) 'clojure.core/deref]))
 
-(defn- runtime-print [this writer _opts]
-  (when (= ::not-found (get-in @current-values [(id this) 'clojure.core/pr-str] ::not-found))
-    (pr-str this))
-  (-write writer
-          (or (get-in @current-values [(id this) 'clojure.core/pr-str])
-              (if (not= (tag this) :var)
-                "loading"
-                (str "#'" (rep this))))))
+(declare ->id)
 
 (defn- runtime-to-json [buffer this]
   (let [object (.-object this)]
     (if-let [to-object (:to-object cson/*options*)]
       (to-object buffer this :runtime-object nil)
-      (cson/tag buffer "ref" (:id object)))))
+      (if-let [id (->id this)]
+        (cson/tag buffer "ref" id)
+        (cson/-to-json
+         (cson/tagged-value "remote" (:pr-str object))
+         buffer)))))
 
 (defprotocol Runtime)
 
@@ -65,6 +58,8 @@
   (-pr-writer [_this writer _opts]
     (-write writer (:pr-str object))))
 
+(defmethod pprint/simple-dispatch RuntimeObject [value] (pr value))
+
 (deftype RuntimeAtom [runtime object]
   Runtime
   cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
@@ -81,8 +76,10 @@
      runtime
      (assoc object :meta m)))
   IPrintWithWriter
-  (-pr-writer [this writer _opts]
-    (runtime-print this writer _opts)))
+  (-pr-writer [_this writer _opts]
+    (-write writer (:pr-str object))))
+
+(defmethod pprint/simple-dispatch RuntimeAtom [value] (pr value))
 
 (defn runtime? [value]
   (satisfies? Runtime value))
@@ -120,6 +117,10 @@
                   (.deref value)
                   js/undefined)]
         (when-not (undefined? obj) obj)))))
+
+(defn ->id [value]
+  (when-let [id (runtime-id value)]
+    (when (= value (->value id)) id)))
 
 (defn transform [value]
   (when-let [id (runtime-id value)]

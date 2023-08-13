@@ -32,7 +32,6 @@
 (defmethod pprint-dispatch :map     [value] (#'pp/pprint-map value))
 (defmethod pprint-dispatch :set     [value] (#'pp/pprint-set value))
 (defmethod pprint-dispatch :queue   [value] (#'pp/pprint-pqueue value))
-(defmethod pprint-dispatch :deref   [value] (#'pp/pprint-ideref value))
 (defmethod pprint-dispatch nil      [_]     (-write *out* "nil"))
 (defmethod pprint-dispatch :default [value] (#'pp/pprint-simple-default value))
 

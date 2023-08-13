@@ -86,7 +86,7 @@
    value
    {:transform
     (fn [value]
-      (if-let [id (-> value meta :portal.runtime/id)]
+      (if-let [id (rt/->id value)]
         (cson/tagged-value "ref" id)
         value))}))
 
