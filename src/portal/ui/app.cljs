@@ -490,6 +490,7 @@
                   (::c/theme opts))]
     [state/with-state
      state
+     [status/poller]
      [theme/with-theme
       theme
       [dnd/area

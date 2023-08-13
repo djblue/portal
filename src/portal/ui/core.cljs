@@ -2,7 +2,6 @@
   (:require ["react" :as react]
             [portal.ui.app :as app]
             [portal.ui.cljs :as cljs]
-            [portal.ui.connection-status :as conn]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
             [portal.ui.rpc :as rpc]
@@ -28,13 +27,12 @@
 
 (defn connected-app []
   (let [opts (opts/use-options)]
-    [conn/with-status
-     (cond
-       (= opts ::opts/loading) nil
-       (contains? opts :main) [app/root
-                               [:> ins/error-boundary
-                                [custom-app opts]]]
-       :else [app/app (:value opts)])]))
+    (cond
+      (= opts ::opts/loading) nil
+      (contains? opts :main) [app/root
+                              [:> ins/error-boundary
+                               [custom-app opts]]]
+      :else [app/app (:value opts)])))
 
 (defn with-cache [& children]
   (into [:<> (meta @state/value-cache)] children))
