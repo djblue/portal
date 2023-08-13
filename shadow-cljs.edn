@@ -14,7 +14,7 @@
    {:infer-externs true
     :warnings-as-errors true
     :output-feature-set :es2018}
-   :build-hooks [(portal.shadow.remote/hook)]
+   :build-hooks [(portal.shadow.remote/hook {:port 7891})]
    :modules {:main {:init-fn portal.ui.core/main!}}
    :release {:output-dir "resources/portal/"}
    :devtools {:after-load portal.ui.core/reload!
