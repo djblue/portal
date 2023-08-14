@@ -39,7 +39,8 @@ In the client process, do:
 (add-tap #'submit)
 ```
 
-**NOTE:** `tap>`'d values must be serializable as edn, transit or json.
+> **Note**
+> `tap>`'d values must be serializable as edn, transit or json.
 
 ## Tips
 

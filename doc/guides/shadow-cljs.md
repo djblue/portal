@@ -5,7 +5,8 @@ way to get portal setup is via a
 [preload](https://shadow-cljs.github.io/docs/UsersGuide.html#_preloads). It
 allows you to inject a namespace for instrumentation during development.
 
-> **Note** that this guide will focus on ClojureScript in the context of a web
+> **Note**
+> This guide will focus on ClojureScript in the context of a web
 > browser, but shadow-cljs supports other JavaScript environments.
 
 ## `portal.web` vs `portal.shadow.remote`
@@ -29,7 +30,8 @@ The pros and cons of `portal.shadow.remote` are:
      leverage
 
 
-> **Note** you can run both types at the same time without any issues.
+> **Note**
+> You can run both types at the same time without any issues.
 
 ## Setup
 
@@ -74,7 +76,8 @@ A basic setup with `portal.web` is as follows:
 (add-tap p/submit)
 ```
 
-> **Note** To quickly open the Portal UI, you can use the `ctrl | cmd + shift +
+> **Note**
+> To quickly open the Portal UI, you can use the `ctrl | cmd + shift +
 > o` shortcut from the parent page.
 
 ### Remote Setup

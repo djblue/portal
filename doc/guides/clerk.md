@@ -3,7 +3,8 @@
 If you would like to leverage Portal in the context of a clerk notebook, you can
 setup a viewer such as the following:
 
-> **Warning** every viewer is a new iframe so having too many on the page will
+> **Warning**
+> Every viewer is a new iframe so having too many on the page will
 > cause performance issues.
 
 ```clojure

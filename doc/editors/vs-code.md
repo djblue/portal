@@ -12,7 +12,8 @@ particularly with [calva][calva], take a look at
 For a more complete workflow guide, checkout [Calva, Joyride, and
 Portal][guide] by [@seancorfield][seancorfield].
 
-> **Note** The version of portal being run in the webview is still decided by
+> **Note**
+> The version of portal being run in the webview is still decided by
 > the runtime in which `(portal.api/open {:launcher :vs-code})` is run.
 
 [calva]: https://calva.io/

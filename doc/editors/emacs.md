@@ -46,7 +46,8 @@ following code.
 (portal.api/open {:launcher :emacs})
 ```
 
-> **Warning** I haven't tested this extensively so you might run into some weird
+> **Warning**
+> I haven't tested this extensively so you might run into some weird
 > issues
 
 [1]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Embedded-WebKit-Widgets.html

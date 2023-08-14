@@ -16,7 +16,8 @@ file by right clicking the file in the file explorer and selecting `Open
 With...` and selecting `Clojure Notebook`. The output cells have a three dot
 menu where you can change the presentation to Portal!
 
-> **Note** Calva gives Portal the evaluation results as an edn string therefore
+> **Note**
+> Calva gives Portal the evaluation results as an edn string therefore
 > this mode of Portal will not be the same as a process connected Portal
 > instance.
 
