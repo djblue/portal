@@ -13,7 +13,7 @@
   (s/and string? #(re-matches vega-lite-url %)))
 
 (s/def ::vega-lite
-  (s/keys :req-un [::data]
+  (s/keys :req-un [(or ::data ::datasets)]
           :opt-un [::name ::description ::$schema]))
 ;;;
 
