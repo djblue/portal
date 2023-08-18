@@ -1,5 +1,6 @@
 (ns ^:no-doc portal.ui.connection-status
   (:require ["react" :as react]
+            [portal.ui.rpc.runtime :as rt]
             [portal.ui.state :as state]
             [reagent.core :as r]))
 
@@ -30,7 +31,7 @@
                      ;; reconnecting to runtime
                      (let [connected (::connected @state)]
                        (when-not connected
-                         (when (false? connected) (state/reset-value-cache!))
+                         (when (false? connected) (rt/reset-cache!))
                          (state/dispatch! state assoc ::connected true)))))
            (.catch (fn [_]
                      (when (::connected @state)

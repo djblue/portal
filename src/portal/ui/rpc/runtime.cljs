@@ -115,14 +115,15 @@
     value
     (js/WeakRef. value)))
 
+(defn- weak-ref-value [^js weak-ref]
+  (let [object (if weak-ref
+                 (.deref weak-ref)
+                 js/undefined)]
+    (when-not (undefined? object) object)))
+
 (defn ->value [id]
   (let [value (get @state/value-cache id)]
-    (if-not registry
-      value
-      (let [obj (if value
-                  (.deref value)
-                  js/undefined)]
-        (when-not (undefined? obj) obj)))))
+    (if-not registry value (weak-ref-value value))))
 
 (defn ->id [value]
   (when-let [id (runtime-id value)]
@@ -132,9 +133,21 @@
   (when-let [id (runtime-id value)]
     (when-not (contains? @state/value-cache id)
       (when registry
-        (.register registry value id))
+        (.register ^js registry value id))
       (swap! state/value-cache assoc id (->weak-ref value))))
   value)
 
 (defn ->object [call object]
   (or (->value (:id object)) (->runtime call object)))
+
+(defn reset-cache! []
+  (swap!
+   state/value-cache
+   (fn [cache]
+     (when registry
+       (doseq [weak-ref (vals cache)
+               :let [object (weak-ref-value weak-ref)]
+               :when object]
+         (.unregister ^js registry object)))
+     {}))
+  (state/reset-value-cache!))
