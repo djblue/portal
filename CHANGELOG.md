@@ -1,3 +1,31 @@
+## 0.46.0 - 2023-08-17
+
+### Improvements
+
+- Add `:format/csv` as a paste-as format dfc84d0
+- Support vega-lite :datasets as well as :data (#192) 82adea3
+  -  Thanks @athos!
+- Prefer selected viewer over default in metadata fcaec0e
+- Improve runtime re-connection mechanism 74b0099
+- Update node runtime client to wait for session 750d3fa
+
+### Documentation
+
+- Update docs to include binary data b0413f6
+- Build docs into standalone app 08b2022
+- Update viewer docs with more examples fab6637
+
+### Bug Fixes
+
+- Fix runtime object equality 88708c3
+- Fix `can-meta?` predicate b9c7e33
+- Fix viewer context bug from #191 c49f649
+- Fix socket tracking for node runtime 8a57602
+- Fix `portal.runtime.node.launcher/eval-str` d2bf42c
+- Fix `portal.runtime.node.launcher/sessions` 7d09451
+- Fix node ipv6 default for localhost e1e9324
+- Localhost fix for node `ECONNREFUSED` d3fc041
+
 ## 0.45.1 - 2023-08-01
 
 - Improve ex viewer stack trace parsing
