@@ -55,7 +55,7 @@
   IEquiv
   (-equiv [_this other]
     (and (instance? RuntimeObject other)
-         (= (:id object) (:id other))))
+         (= (:id object) (id other))))
   IWithMeta
   (-with-meta [_this m]
     (RuntimeObject.
@@ -74,7 +74,7 @@
   IEquiv
   (-equiv [_this other]
     (and (instance? RuntimeAtom other)
-         (= (:id object) (:id other))))
+         (= (:id object) (id other))))
   IWithMeta
   (-with-meta [_this m]
     (RuntimeAtom.
