@@ -13,6 +13,7 @@
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
+            [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.edn :as edn]
             [reagent.core :as r]))
 
@@ -1013,6 +1014,7 @@
   {:format/json    parse-json
    :format/edn     edn/read-string
    :format/transit parse-transit
+   :format/csv     csv/parse-csv
    :format/text    identity})
 
 (defn- parse-as
