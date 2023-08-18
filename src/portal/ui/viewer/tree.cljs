@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.tree
+(ns ^:no-doc portal.ui.viewer.tree
   (:require [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]

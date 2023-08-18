@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.test-report
+(ns ^:no-doc portal.ui.viewer.test-report
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.filter :as-alias f]

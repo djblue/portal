@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.markdown
+(ns ^:no-doc portal.ui.viewer.markdown
   (:require ["marked" :refer [marked]]
             [clojure.string :as str]
             [hickory.core :as h]

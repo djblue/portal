@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.relative-time
+(ns ^:no-doc portal.ui.viewer.relative-time
   (:refer-clojure :exclude [second])
   (:require ["react" :as react]
             [clojure.spec.alpha :as s]

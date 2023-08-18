@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.jwt
+(ns ^:no-doc portal.ui.viewer.jwt
   (:require [clojure.string :as str]
             [goog.crypt.base64 :as Base64]
             [portal.ui.inspector :as ins]))

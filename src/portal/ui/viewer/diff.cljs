@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.diff
+(ns ^:no-doc portal.ui.viewer.diff
   (:require [clojure.spec.alpha :as s]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]

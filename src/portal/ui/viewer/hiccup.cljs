@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.hiccup
+(ns ^:no-doc portal.ui.viewer.hiccup
   (:require [portal.colors :as c]
             [portal.ui.filter :as-alias f]
             [portal.ui.inspector :as ins]

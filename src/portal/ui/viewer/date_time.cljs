@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.date-time
+(ns ^:no-doc portal.ui.viewer.date-time
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]

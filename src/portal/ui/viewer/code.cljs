@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.code
+(ns ^:no-doc portal.ui.viewer.code
   (:require ["highlight.js" :as hljs]
             [clojure.string :as str]
             [portal.colors :as c]

@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.deref
+(ns ^:no-doc portal.ui.viewer.deref
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]

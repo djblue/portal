@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.exception
+(ns ^:no-doc portal.ui.viewer.exception
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]

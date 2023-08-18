@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.text
+(ns ^:no-doc portal.ui.viewer.text
   (:require [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]

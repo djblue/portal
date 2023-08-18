@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.vega
+(ns ^:no-doc portal.ui.viewer.vega
   "Viewer for the Vega-Lite specification
   https://vega.github.io/vega/docs/specification/"
   (:require ["react" :as react]

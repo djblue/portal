@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.transit
+(ns ^:no-doc portal.ui.viewer.transit
   (:require [cognitect.transit :as t]
             [portal.ui.inspector :as ins]))
 

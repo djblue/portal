@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.prepl
+(ns ^:no-doc portal.ui.viewer.prepl
   (:require ["anser" :as anser]
             [clojure.spec.alpha :as s]
             [portal.colors :as c]

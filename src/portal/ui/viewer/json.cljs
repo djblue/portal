@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.json
+(ns ^:no-doc portal.ui.viewer.json
   (:require [portal.ui.inspector :as ins]))
 
 (defn- parse-json [json-string]

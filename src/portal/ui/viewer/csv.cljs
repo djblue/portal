@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.csv
+(ns ^:no-doc portal.ui.viewer.csv
   (:require ["papaparse" :refer [parse]]
             [portal.ui.inspector :as ins]))
 

@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.cljdoc
+(ns ^:no-doc portal.ui.viewer.cljdoc
   (:require ["react" :as react]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]

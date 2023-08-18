@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.http
+(ns ^:no-doc portal.ui.viewer.http
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]

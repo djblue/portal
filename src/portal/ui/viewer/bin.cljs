@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.bin
+(ns ^:no-doc portal.ui.viewer.bin
   (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]

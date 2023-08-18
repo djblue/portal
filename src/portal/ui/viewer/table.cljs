@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.table
+(ns ^:no-doc portal.ui.viewer.table
   (:require ["react" :as react]
             [clojure.spec.alpha :as s]
             [portal.colors :as c]

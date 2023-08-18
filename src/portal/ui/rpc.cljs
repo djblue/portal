@@ -1,4 +1,4 @@
-(ns portal.ui.rpc
+(ns ^:no-doc portal.ui.rpc
   (:refer-clojure :exclude [read type])
   (:require [clojure.string :as str]
             [portal.async :as a]

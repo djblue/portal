@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.log
+(ns ^:no-doc portal.ui.viewer.log
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.resources :refer [inline]]

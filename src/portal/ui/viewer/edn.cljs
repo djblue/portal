@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.edn
+(ns ^:no-doc portal.ui.viewer.edn
   (:require [portal.runtime.edn :as edn]
             [portal.ui.inspector :as ins]))
 

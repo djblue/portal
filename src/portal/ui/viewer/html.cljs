@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.html
+(ns ^:no-doc portal.ui.viewer.html
   (:require [portal.colors :as c]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
