@@ -12,4 +12,6 @@
     (is (= "hi" (:rep tagged))))
   (let [tagged (edn/read-string (pr-str #"\\Qhi\\E"))]
     (is (= "portal/re" (:tag tagged)))
-    (is (= "\\Qhi\\E" (:rep tagged)))))
+    (is (= "\\Qhi\\E" (:rep tagged))))
+  (let [s "#function [clojure.core/constantly/fn--5740]"]
+    (is (= s (pr-str (edn/read-string s))))))

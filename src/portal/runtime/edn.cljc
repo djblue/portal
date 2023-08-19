@@ -1,6 +1,8 @@
 (ns ^:no-doc portal.runtime.edn
   (:refer-clojure :exclude [read-string])
-  (:require [clojure.edn :as edn]
+  (:require #?(:cljs [cljs.tools.reader.impl.commons :as commons])
+            #?(:cljs [cljs.tools.reader.impl.utils :refer [numeric?]])
+            [clojure.edn :as edn]
             [clojure.string :as str]
             [portal.runtime.cson :as cson]))
 
@@ -30,15 +32,37 @@
       ;; \Q and \E produce invalid escape characters
       (str/replace #"[^\\]\\(Q|E)" "\\\\$1")))
 
+#?(:cljs
+   (defn parse-symbol
+     "Parses a string into a vector of the namespace and symbol
+     Fork: https://github.com/clojure/tools.reader/blob/master/src/main/cljs/cljs/tools/reader/impl/commons.cljs#L97-L118"
+     [token]
+     (when-not (or (identical? "" token)
+                   (true? (.test #":$" token))
+                   (true? (.test #"^::" token)))
+       (let [ns-idx (.indexOf token "/")
+             ns (when (pos? ns-idx)
+                  (subs token 0 ns-idx))]
+         (if-not (nil? ns)
+           (let [ns-idx (inc ns-idx)]
+             (when-not (== ns-idx (count token))
+               (let [sym (subs token ns-idx)]
+                 (when (and (not (numeric? (nth sym 0)))
+                            (not (identical? "" sym))
+                            (false? (.test #":$" ns)))
+                   [ns sym]))))
+           [nil token])))))
+
 (defn read-string
   ([edn-string]
    (read-string {} edn-string))
   ([{:keys [readers]} edn-string]
-   (edn/read-string
-    {:readers (merge
-               {'portal/var ->var
-                'portal/re ->regex
-                'portal/bin cson/base64-decode}
-               readers)
-     :default tagged-literal}
-    (-> edn-string escape-var escape-regex))))
+   (with-redefs  #?(:cljs [commons/parse-symbol parse-symbol] :clj [])
+     (edn/read-string
+      {:readers (merge
+                 {'portal/var ->var
+                  'portal/re ->regex
+                  'portal/bin cson/base64-decode}
+                 readers)
+       :default tagged-literal}
+      (-> edn-string escape-var escape-regex)))))
