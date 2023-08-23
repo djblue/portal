@@ -74,7 +74,7 @@
              (when-let [stdio (-> handler-msg :stdio deref not-empty)]
                {:stdio stdio}))
             (update :ns (fnil symbol 'user))
-            (assoc :time     (Date.)
+            (assoc :time     (:time handler-msg)
                    :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
                    :runtime  (cond
                                (shadow-cljs? handler-msg) :cljs
@@ -103,7 +103,8 @@
                    (assoc msg
                           :report report
                           :stdio  (atom [])
-                          :start  (System/nanoTime)))
+                          :start  (System/nanoTime)
+                          :time   (Date.)))
            (update :session
                    (fn [session]
                      (swap! session assoc
