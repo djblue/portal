@@ -19,6 +19,6 @@
                  'portal.runtime.fs-test
                  'portal.runtime.json-buffer-test
                  'portal.runtime.npm-test))
-  (runner/table (bench/run (json/read (fs/slurp "package-lock.json")) 100)))
+  (runner/table (bench/run (json/read (fs/slurp "package-lock.json") {:key-fn identity}) 100)))
 
 (-main)

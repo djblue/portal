@@ -25,4 +25,4 @@
 
 (defn -main []
   (run-tests 'portal.runtime.cson-test)
-  (table (bench/run (json/read (slurp "package-lock.json")) 50)))
+  (table (bench/run (json/read (slurp "package-lock.json") {:key-fn identity}) 50)))

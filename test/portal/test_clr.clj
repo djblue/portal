@@ -42,5 +42,5 @@
          'portal.runtime.fs-test
          'portal.runtime.json-buffer-test
          'portal.runtime.npm-test)]
-    (table (bench/run (json/read (slurp "package-lock.json" :encoding "utf8")) 50))
+    (table (bench/run (json/read (slurp "package-lock.json" :encoding "utf8") {:key-fn identity}) 50))
     (Environment/Exit (+ fail error))))

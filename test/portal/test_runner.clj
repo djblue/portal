@@ -42,6 +42,6 @@
                    'portal.runtime.json-buffer-test
                    'portal.runtime.jvm.editor-test
                    'portal.runtime.npm-test)]
-    (table (bench/run (json/read (slurp "package-lock.json")) 50))
+    (table (bench/run (json/read (slurp "package-lock.json") {:key-fn identity}) 50))
     (shutdown-agents)
     (System/exit (+ fail error))))
