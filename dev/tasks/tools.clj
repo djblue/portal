@@ -24,7 +24,7 @@
        (when (> h 0)
          (str h " hours, "))
        (when (> m 0)
-         (str h " minutes, "))
+         (str m " minutes, "))
        s "." ms " seconds")))))
 
 (def ^:private in-bb? (some? (System/getProperty "babashka.version")))
