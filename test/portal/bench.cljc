@@ -41,7 +41,7 @@
      :med   median
      :total (trunc total)}))
 
-(defn run* [expr f n]
+(defn run* [expr f ^long n]
   (dotimes [_ n] (f))
   (simple-stats
    expr

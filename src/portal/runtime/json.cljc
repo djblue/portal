@@ -2,8 +2,8 @@
   (:refer-clojure :exclude [read])
   #?(:bb   (:require [cheshire.core :as json])
      :clj  (:require [clojure.data.json :as json])
-     :cljr (:require [clojure.data.json :as json]
-                     [portal.runtime.clr.assembly])))
+     :cljr (:require [portal.runtime.clr.assembly]
+                     [clojure.data.json :as json])))
 
 (defn write [value]
   #?(:bb   (json/generate-string value)

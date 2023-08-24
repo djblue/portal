@@ -60,7 +60,7 @@
    ::character \A
    ::char-seq (seq "hi\n")
    "string-key" "string-value"
-   ::list (range 3)
+   ::list (list 1 2 3)
    ::set #{1 2 3}
    ::ns-symbol 'hello/world
    ::keyword :hello-world
