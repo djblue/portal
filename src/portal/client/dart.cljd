@@ -1,0 +1,22 @@
+(ns portal.client.dart
+  (:require ["dart:io" :as io]))
+
+(defn submit
+  {:added "0.47.0" :see-also ["portal.api/submit"]}
+  ([value] (submit nil value))
+  ([{:keys [encoding port host]
+     :or   {encoding :edn
+            host     "localhost"
+            port     7891}}
+    value]
+   (let [client (io/HttpClient.)
+         request (await (.post client host port "/submit"))]
+     (.add (.-headers request)
+           "content-type"
+           (case encoding
+             :edn     "application/edn"))
+     (.write request
+             (case encoding
+               :edn (binding [*print-meta* true]
+                      (pr-str value))))
+     (.close request))))
