@@ -57,7 +57,7 @@
   ([edn-string]
    (read-string {} edn-string))
   ([{:keys [readers]} edn-string]
-   (with-redefs  #?(:cljs [commons/parse-symbol parse-symbol] :clj [])
+   (with-redefs  #?(:cljs [commons/parse-symbol parse-symbol] :default [])
      (edn/read-string
       {:readers (merge
                  {'portal/var ->var
