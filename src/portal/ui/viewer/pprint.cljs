@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.pprint
+(ns ^:no-doc portal.ui.viewer.pprint
   (:require [clojure.pprint :as pp]
             [clojure.string :as str]
             [portal.runtime.cson :as cson]
