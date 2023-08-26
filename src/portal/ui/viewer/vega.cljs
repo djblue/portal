@@ -35,7 +35,8 @@
         :cursor :default
         :position :absolute
         :right (:padding theme)
-        :top (:padding theme)}})]))
+        :top (:padding theme)
+        :transform "scale(0.6)"}})]))
 
 (defn- default-config
   "Specifies a nicer set of vega-lite specification styles.
@@ -60,7 +61,8 @@
        :gridColor border
        :gridDash [10 2]
        :titleColor text
-       :labelColor text}}
+       :labelColor text}
+      :range {:category (map theme (take 10 theme/order))}}
      :background background}))
 
 (defn- deep-merge
@@ -133,8 +135,7 @@
      [d/div
       {:ref relative
        :style
-       {:width "100%"
-        :min-width 400
+       {:min-width 400
         :height height
         :position :relative
         :border [:solid 1 (::c/border theme)]
