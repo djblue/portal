@@ -115,7 +115,7 @@
        #(when-let [view (.-current view)]
           (.finalize view)
           (set! (.-current view) nil)))
-     #js [])
+     #js [(hash theme)])
 
     (react/useEffect
      (fn []
