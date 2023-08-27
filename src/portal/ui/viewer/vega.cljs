@@ -34,8 +34,8 @@
        {:opacity 1
         :cursor :default
         :position :absolute
-        :right (:padding theme)
-        :top (:padding theme)
+        :right (* 0.5 (:padding theme))
+        :top (* 0.5 (:padding theme))
         :transform "scale(0.6)"}})]))
 
 (defn- default-config
@@ -44,10 +44,14 @@
   [theme]
   (let [background (ins/get-background)
         text (::c/text theme)
-        border (::c/border theme)]
-    {:padding "30"
+        border (::c/border theme)
+        padding (:padding theme)]
+    {:padding {:bottom padding
+               :top (* 3 padding)
+               :left (* 4 padding)
+               :right (* 4 padding)}
      :autosize
-     {:type "fit" :resize true :contains "padding"}
+     {:type "fit-x" :resize true :contains "padding"}
      :config
      {:legend
       {:labelColor text
@@ -123,7 +127,6 @@
          (let [width (- width 2
                         (* 2 (:padding theme)))]
            (.width view width)
-           (.height view (* width 0.8))
            (.run view))))
      #js [init (.-current view) width])
 
