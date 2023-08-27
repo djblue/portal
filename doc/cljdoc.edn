@@ -39,4 +39,5 @@
    ["System Deps" {:file "doc/dev/deps.md"}]
    ["Editor Setup" {:file "doc/dev/editors.md"}]
    ["Dev Tasks" {:file "doc/dev/tasks.md"}]]
-  ["Inspiration" {:file "doc/inspiration.md"}]]}
+  ["Inspiration" {:file "doc/inspiration.md"}]
+  ["Limitations" {:file "doc/limitations.md"}]]}
