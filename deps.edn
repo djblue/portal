@@ -17,7 +17,7 @@
     hiccup/hiccup                 {:mvn/version "2.0.0-RC1"}
     io.aviso/pretty               {:mvn/version "1.4.4"}
     vlaaad/reveal                 {:mvn/version "1.3.280"}
-    io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "76b78fe"}
+    io.github.clojure/tools.build {:git/tag "v0.9.5" :git/sha "24f2894"}
     io.github.djblue/tetris       {:git/url "https://github.com/djblue/tetris.git"
                                    :git/sha "d40ae6b96f918ab7bb7f09ac071f77ca086e8b7f"}}}
   :plk
@@ -25,14 +25,14 @@
   :cljs
   {:extra-deps
    {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
-                               :git/sha "219951678b16575ec29bb9b88047356cf1437aec"}
+                               :git/sha "8eba755046ff3ae915ed3378574486840621a491"}
     hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.10.211"}
     org.babashka/sci          {:mvn/version "0.8.40"}
     reagent/reagent           {:mvn/version "1.2.0"}
     io.github.babashka/sci.configs
     {:git/url "https://github.com/babashka/sci.configs"
-     :git/sha "b0d7dc331a3e5817703ecb579f4476eeb84d04cb"}}}
+     :git/sha "0817bbbc70c8de1af0ec8de6883a102967ad86b1"}}}
   :shadow
   {:jvm-opts ["-Xss16m"]
    :extra-deps
@@ -40,7 +40,7 @@
   :build
   {:extra-paths ["src" "dev" "resources"]
    :ns-default  tasks.build
-   :extra-deps  {babashka/babashka {:mvn/version "1.3.182"}
+   :extra-deps  {babashka/babashka {:mvn/version "1.3.184"}
                  babashka/fs       {:mvn/version "0.4.19"}
                  ;; need to duplicate main deps here for prep build
                  com.cognitect/transit-clj  {:mvn/version "1.0.333"}
@@ -63,7 +63,7 @@
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "1.0.0"}
-    cider/cider-nrepl {:mvn/version "0.34.0"}}}
+    cider/cider-nrepl {:mvn/version "0.36.1"}}}
   :check
   {:extra-paths ["dev"]
    :main-opts ["-m" "tasks.load"]}
@@ -75,7 +75,7 @@
      :sha     "6ad6d6333d2e9baf1644a870072c12f206a9b722"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "2.5.1095"}
+   {com.github.liquidz/antq {:mvn/version "2.5.1109"}
     org.slf4j/slf4j-nop     {:mvn/version "2.0.7"}}}
   :yaml
-  {:extra-deps {clj-commons/clj-yaml {:mvn/version "1.0.26"}}}}}
+  {:extra-deps {clj-commons/clj-yaml {:mvn/version "1.0.27"}}}}}
