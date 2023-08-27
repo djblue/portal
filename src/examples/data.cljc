@@ -243,7 +243,8 @@
 
 (def line-chart
   ^{:portal.viewer/default :portal.viewer/vega-lite}
-  {:data {:values
+  {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
+   :data {:values
           (map #(-> {:time % :value (sin %)})
                (range 0 (* 2 3.14) 0.25))}
    :encoding {:x {:field "time" :type "quantitative"}
@@ -252,7 +253,8 @@
 
 (def bar-chart
   ^{:portal.viewer/default :portal.viewer/vega-lite}
-  {:data
+  {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
+   :data
    {:values
     [{:a "A", :b 28}
      {:a "B", :b 55}
@@ -270,8 +272,8 @@
 
 (def pie-chart
   ^{:portal.viewer/default :portal.viewer/vega-lite}
-  {:description
-   "A simple pie chart with labels."
+  {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
+   :description "A simple pie chart with labels."
    :data
    {:values
     [{:category "a", :value 4}
@@ -308,8 +310,7 @@
 
 (def scatter-chart
   ^{:portal.viewer/default :portal.viewer/vega-lite}
-  {:$schema
-   "https://vega.github.io/schema/vega-lite/v4.json"
+  {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
    :description
    "A scatterplot showing horsepower and miles per gallons for various cars."
    :data {:url "https://vega.github.io/vega-lite/data/cars.json"}
@@ -323,7 +324,8 @@
 
 (def geographic-data
   ^{:portal.viewer/default :portal.viewer/vega-lite}
-  {:width "container"
+  {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
+   :width "container"
    :height "container"
    :data {:url "https://vega.github.io/vega-lite/data/airports.csv"}
    :projection {:type "albersUsa"}
@@ -338,8 +340,7 @@
 
 (def histogram-heatmap-2D
   ^{:portal.viewer/default :portal.viewer/vega-lite}
-  {:$schema
-   "https://vega.github.io/schema/vega-lite/v4.json"
+  {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
    :data {:url "https://vega.github.io/vega-lite/data/movies.json"}
    :transform
    [{:filter
