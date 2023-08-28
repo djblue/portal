@@ -36,6 +36,7 @@
         :position :absolute
         :right (* 0.5 (:padding theme))
         :top (* 0.5 (:padding theme))
+        :z-index 0
         :transform "scale(0.6)"}})]))
 
 (defn- default-config
