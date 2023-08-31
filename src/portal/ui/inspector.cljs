@@ -1056,10 +1056,6 @@
      #js [(hash location) (some? expanded?)])
     (react/useEffect
      (fn []
-       #(state/dispatch! state update :expanded? dissoc location))
-     #js [])
-    (react/useEffect
-     (fn []
        (when (and selected
                   (not= (.. js/document -activeElement -tagName) "INPUT"))
          (when-let [el (.-current ref)]
