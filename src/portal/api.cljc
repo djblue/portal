@@ -56,7 +56,13 @@
 
 (defn start
   "Start the HTTP server with non-default options. Only use if you need
-  control over the HTTP server."
+  control over the HTTP server.
+
+  - options (map): start options.
+    - `:host` (string) optional, server host to use for Portal server.
+      - Ignored if server already started.
+    - `:port` (number) optional, server port to use for Portal server.
+      - Ignored if server already started."
   {:added "0.6.2"
    :see-also ["stop"]}
   [options]
@@ -71,7 +77,16 @@
 
 (defn open
   "Open a new inspector window. A previous instance can be passed as
-  parameter to make sure it is open."
+  parameter to make sure it is open.
+
+  - options (map): open options.
+    - `:theme` (keyword) theme to use for Portal UI, see `portal.colors/themes` for themes.
+      - Themes are applied per UI instance, not globally.
+    - `:window-title` (string) browser window title.
+      - Useful for distinguishing multiple UI instances.
+    - `:app` (boolean) Run in `--app` mode via chrome.
+      - Defaults to true when chrome is installed.
+      - Will use PWA at https://djblue.github.io/portal/ when installed."
   {:added "0.1.0"
    :see-also ["close"]}
   ([] (open nil))
@@ -83,7 +98,10 @@
    (l/open portal (rename options))))
 
 (defn close
-  "Close all current inspector windows."
+  "Close all current inspector windows.
+
+   - portal: Portal session returned via `portal.api/open`.
+   "
   {:added "0.1.0"
    :see-also ["open"]}
   ([]
@@ -135,9 +153,10 @@
    - portal: portal instance returned from `portal.api/open` or `:all`
    - code (string): the ClojureScript source
    - opts (map): evaluation options.
-     - `:verbose` optional, return a map containing more info that just the value.
-       - Defaults to false.
-     - `:await`   - optional, await a promise result. Defaults to `false`."
+     - `:verbose` (boolean) optional, return a map containing more info that just the value.
+       - Defaults to `false`.
+     - `:await`   (boolean) optional, await a promise result.
+       - Defaults to `false`."
   {:added "0.19.0"
    :see-also ["open"]}
   ([code]
@@ -160,7 +179,9 @@
   (l/sessions))
 
 (defn url
-  "Get url for portal session."
+  "Get url for portal session.
+
+   - portal: Portal session returned via `portal.api/open`"
   {:added "0.33.0"}
   [portal]
   (l/url portal))
@@ -168,7 +189,9 @@
 (def ^:no-doc ^:dynamic *nrepl-init* nil)
 
 (defn repl
-  "Start a repl for the given Portal session."
+  "Start a repl for the given Portal session.
+
+  - portal: Portal session returned via `portal.api/open`"
   {:added "0.31.0"}
   [portal]
   (if *nrepl-init*
@@ -185,7 +208,9 @@
       :cljs (io/inline "portal/docs.json"))))
 
 (defn docs
-  "Open portal docs."
+  "Open portal docs.
+
+  - options: see `portal.api/open` for options."
   {:added "035.0"
    :see-also ["open"]}
   ([]
@@ -194,7 +219,10 @@
    (open (assoc options :window-title "portal-docs" :value (get-docs)))))
 
 (defn inspect
-  "Open a new portal window to inspect a particular value."
+  "Open a new portal window to inspect a particular value.
+
+   - value: a value to inspect.
+   - options: see `portal.api/open` for options."
   {:command true
    :added "0.38.0"
    :see-also ["open"]}
