@@ -1,3 +1,24 @@
+## 0.47.0 - 2023-09-14
+
+- Remembers state of UI on change (#194) fbc5463
+  - Thanks @Cyrik!
+- Initial commit of portal.viewer 2d6762c
+- Add portal.client.dart (#193) 54d7c9d
+- Allow cljs to read non-standard edn symbols 0b35b6a
+  - Thanks @Lambeaux for the bug report!
+
+### Vega
+
+- Improve vega styles 6e71096
+- Improve vega responsive sizing logic a7de0e9
+- Re-render vega viewer on theme change 268b131
+- Improve vega theme integration ae240b1
+
+### Documentation
+
+- Improve `portal.api` docs 9d62ccb
+- Start documenting limitations af37b6f
+
 ## 0.46.0 - 2023-08-17
 
 ### Improvements
