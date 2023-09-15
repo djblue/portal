@@ -30,6 +30,6 @@ runs:
         distribution: 'adopt'
         java-version: '11'
     - name: Install Babashka
-      uses: turtlequeue/setup-babashka@v1.5.0
+      uses: turtlequeue/setup-babashka@v1.5.2
       with:
         babashka-version: 1.0.165
