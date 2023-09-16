@@ -320,6 +320,39 @@
      {:field "Miles_per_Gallon"
       :type "quantitative"}}}))
 
+(def vconcat-chart
+  (v/vega-lite
+   {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
+    :data {:url "https://vega.github.io/editor/data/weather.csv"},
+    :transform [{:filter "datum.location === 'Seattle'"}],
+    :vconcat
+    [{:mark "bar",
+      :encoding
+      {:x {:timeUnit "month", :field "date", :type "ordinal"},
+       :y
+       {:aggregate "mean", :field "precipitation", :type "quantitative"}}}
+     {:mark "point",
+      :encoding
+      {:x {:field "temp_min", :type "quantitative", :bin true},
+       :y {:field "temp_max", :type "quantitative", :bin true},
+       :size {:aggregate "count", :type "quantitative"}}}]}))
+
+(def hconcat-chart
+  (v/vega-lite
+   {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
+    :data {:url "https://vega.github.io/editor/data/weather.csv"},
+    :transform [{:filter "datum.location === 'Seattle'"}],
+    :hconcat
+    [{:mark "bar",
+      :encoding
+      {:x {:timeUnit "month", :field "date", :type "ordinal"},
+       :y {:aggregate "mean", :field "precipitation"}}}
+     {:mark "point",
+      :encoding
+      {:x {:field "temp_min", :bin true},
+       :y {:field "temp_max", :bin true},
+       :size {:aggregate "count"}}}]}))
+
 (def geographic-data
   (v/vega-lite
    {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
@@ -1007,6 +1040,8 @@
     ::pie-chart            pie-chart
     ::bar-chart            bar-chart
     ::scatter-chart        scatter-chart
+    ::vconcat-chart        vconcat-chart
+    ::hconcat-chart        hconcat-chart
     ::histogram-heatmap-2D histogram-heatmap-2D
     ::geographic-data      geographic-data}
    ::portal-charts
