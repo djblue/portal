@@ -323,8 +323,6 @@
 (def geographic-data
   (v/vega-lite
    {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
-    :width "container"
-    :height "container"
     :data {:url "https://vega.github.io/vega-lite/data/airports.csv"}
     :projection {:type "albersUsa"}
     :mark "circle"
@@ -347,8 +345,7 @@
         {:field "Rotten Tomatoes Rating"
          :valid true}]}}]
     :mark "rect"
-    :width "container"
-    :height "container"
+    :height 400
     :encoding
     {:x
      {:bin {:maxbins 60}
