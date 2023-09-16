@@ -203,8 +203,33 @@
   (atom (with-meta (list)
           {:portal.viewer/default :portal.viewer/inspector})))
 
+(defn- realize-value! [x]
+  (cond
+    (map? x)
+    (doseq [[k v] x]
+      (realize-value! k)
+      (realize-value! v))
+    (coll? x)
+    (doseq [v (take 100000 x)]
+      (realize-value! v))))
+
+#_{:clj-kondo/ignore [:unused-private-var]}
+(defn- runtime []
+  #?(:portal :portal :bb :bb :clj :clj :cljs :cljs :cljr :cljr))
+
+(defn- error->data [e]
+  #?(:clj  (assoc (Throwable->map e) :runtime (runtime))
+     :cljr (assoc (Throwable->map e) :runtime (runtime))
+     :cljs e))
+
 (defn update-value [new-value]
-  (swap! tap-list conj new-value))
+  (try
+    (realize-value! new-value)
+    (swap! tap-list conj new-value)
+    (catch #?(:clj Exception :cljr Exception :cljs :default) e
+      (swap! tap-list conj
+             (error->data
+              (ex-info "Failed to receive value." {:value-type (type new-value)} e))))))
 
 (defn- get-options []
   (let [options (:options *session*)]
