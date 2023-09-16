@@ -6,7 +6,8 @@
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.viewer.csv :as csv]
-            [portal.ui.viewer.markdown :as md]))
+            [portal.ui.viewer.markdown :as md]
+            [portal.viewer :as v]))
 
 (defn read-file
   ([file]
@@ -33,9 +34,7 @@
 (defn- read-html
   [file]
   (a/let [content (read-file file)]
-    (with-meta
-      [:portal.viewer/html content]
-      {:portal.viewer/default :portal.viewer/hiccup})))
+    (v/hiccup [:portal.viewer/html content])))
 
 (def handlers
   {"json" (fn [file]
@@ -46,14 +45,10 @@
               (edn/read-string content)))
    "md"   (fn [file]
             (a/let [content (read-file file)]
-              (with-meta
-                (md/parse-markdown content)
-                {:portal.viewer/default :portal.viewer/hiccup})))
+              (v/hiccup (md/parse-markdown content))))
    "csv"  (fn [file]
             (a/let [content (read-file file)]
-              (with-meta
-                (csv/parse-csv content)
-                {:portal.viewer/default :portal.viewer/table})))
+              (v/table (csv/parse-csv content))))
    "txt"  read-file
    "svg"  read-html
    "htm"  read-html

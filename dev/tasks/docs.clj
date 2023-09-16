@@ -7,7 +7,7 @@
             [portal.api :as p]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
-            [portal.viewer :as-alias v]))
+            [portal.viewer :as v]))
 
 (def ^:private flex
   {:gap 9
@@ -26,19 +26,19 @@
             (when-not (:no-doc m)
               [(name symbol-name)
                {:hiccup
-                ^{:portal.viewer/default :portal.viewer/hiccup}
-                [:div
-                 {:style flex}
-                 [:h2 [:portal.viewer/inspector v]]
-                 (into
-                  [:<>]
-                  (map-indexed
-                   (fn [idx itm]
-                     ^{:key idx}
-                     [:portal.viewer/pr-str (concat [symbol-name] itm)])
-                   (:arglists m)))
-                 (when-let [doc (:doc m)]
-                   [:portal.viewer/markdown doc])]}]))))
+                (v/hiccup
+                 [:div
+                  {:style flex}
+                  [:h2 [:portal.viewer/inspector v]]
+                  (into
+                   [:<>]
+                   (map-indexed
+                    (fn [idx itm]
+                      ^{:key idx}
+                      [:portal.viewer/pr-str (concat [symbol-name] itm)])
+                    (:arglists m)))
+                  (when-let [doc (:doc m)]
+                    [:portal.viewer/markdown doc])])}]))))
        (into [(name namespace)])))
 
 (defn- ->loc [v]

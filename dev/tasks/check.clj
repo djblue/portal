@@ -1,17 +1,15 @@
 (ns tasks.check
   (:require [portal.runtime.json :as json]
+            [portal.viewer :as v]
             [tasks.format :as fmt]
-            [tasks.tools :refer [sh clj gradle *cwd*]]))
+            [tasks.tools :refer [*cwd* clj gradle sh]]))
 
 (defn cloc []
   (-> (sh :cloc "--json" :src :dev :test)
       (with-out-str)
       (json/read)
       (dissoc :header)
-      (with-meta
-        {:portal.viewer/default :portal.viewer/table
-         :portal.viewer/table
-         {:columns [:nFiles :blank :comment :code]}})))
+      (v/table {:columns [:nFiles :blank :comment :code]})))
 
 (defn clj-kondo []
   (clj "-M:kondo"
