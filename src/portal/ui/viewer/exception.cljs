@@ -109,6 +109,7 @@
        {:style {:flex "1" :display :flex :flex-direction :column}}
        (map-indexed
         (fn [idx {:keys [clj? sym method index] :as source}]
+          ^{:key index}
           [ins/with-key
            index
            [d/div
