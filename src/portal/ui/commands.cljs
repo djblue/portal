@@ -3,6 +3,7 @@
             [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
+            [clojure.walk :as walk]
             [cognitect.transit :as t]
             [portal.async :as a]
             [portal.colors :as c]
@@ -892,6 +893,7 @@
    #'clojure.core/get         {:predicate map? :args (when-one (comp pick-one keys))}
    #'clojure.core/get-in      {:predicate map? :args (when-one pick-in)}
    #'clojure.core/select-keys {:predicate map? :args (when-one (comp pick-many keys))}
+   #'walk/keywordize-keys     {}
    #'clojure.core/dissoc      {:predicate map? :args (when-one (comp then-first pick-many keys))}
    #'clojure.core/vector      {}
    #'clojure.core/str         {}
