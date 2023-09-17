@@ -17,3 +17,7 @@
                viewers))
              (count viewers))
             viewer-spec))))
+
+(def ^:no-doc portal-api "Portal API for JS interop." #js {})
+
+(set! (.-portal_api js/window) portal-api)

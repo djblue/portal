@@ -1,5 +1,7 @@
 (ns ^:no-doc portal.ui.core
   (:require ["react" :as react]
+            [portal.extensions.vs-code-notebook :as notebook]
+            [portal.ui.api :as api]
             [portal.ui.app :as app]
             [portal.ui.cljs :as cljs]
             [portal.ui.inspector :as ins]
@@ -38,11 +40,12 @@
   (into [:<> (meta @state/value-cache)] children))
 
 (defn render-app []
-  (dom/render [with-cache
-               [opts/with-options
-                [connected-app]]]
-              (.getElementById js/document "root")
-              functional-compiler))
+  (when-let [el (.getElementById js/document "root")]
+    (dom/render [with-cache
+                 [opts/with-options
+                  [connected-app]]]
+                el
+                functional-compiler)))
 
 (defn main! []
   (cljs/init)
@@ -50,3 +53,5 @@
   (render-app))
 
 (defn reload! [] (render-app))
+
+(set! (.-embed api/portal-api) notebook/activate)

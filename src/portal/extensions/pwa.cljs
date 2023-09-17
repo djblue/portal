@@ -8,6 +8,8 @@
             [portal.runtime.edn :as edn]
             [portal.runtime.json :as json]
             [portal.runtime.transit :as transit]
+            [portal.extensions.vs-code-notebook :as notebook]
+            [portal.ui.api :as api]
             [portal.ui.app :as app]
             [portal.ui.commands :as commands]
             [portal.ui.drag-and-drop :as dnd]
@@ -119,9 +121,8 @@
 (def functional-compiler (r/create-compiler {:function-components true}))
 
 (defn render-app []
-  (dom/render [pwa-app]
-              (.getElementById js/document "root")
-              functional-compiler))
+  (when-let [el (.getElementById js/document "root")]
+    (dom/render [pwa-app] el functional-compiler)))
 
 (defn ->map [entries]
   (persistent!
@@ -214,3 +215,5 @@
   (let [[mode] (get-mode)]
     (when (= mode :app)
       (render-app))))
+
+(set! (.-embed api/portal-api) notebook/activate)
