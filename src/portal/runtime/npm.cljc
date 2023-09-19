@@ -10,9 +10,11 @@
      (fs/join
       module
       (let [json    (json/read (fs/slurp package) {})
+            umd     (get-in json ["exports" "umd"])
             browser (get json "browser")
             main    (get json "main")]
-        (or (when (string? browser)
+        (or umd
+            (when (string? browser)
               browser)
             (get browser main)
             (get browser (str "./" main))
