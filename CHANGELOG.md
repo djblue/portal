@@ -1,3 +1,19 @@
+## 0.48.0 - 2023-09-18
+
+- Prefer `umd` export for npm modules 86b2b61
+- Expose portal embed view via `js/portal_api` 5f8d51a
+- Add `clojure.walk/keywordize-keys` to commands 5fb3bd3
+
+### Documentation
+
+- Add limitation docs around lazy values 6a0853a
+- Add vega-lite concat chart examples 7966410
+### Bug Fixes
+
+- Add gaurds to tap-list around bad lazy values a56b786
+- Fix vega-lite examples 718b5a4
+- Fix `:key` issue in exception viewer 111725d
+
 ## 0.47.0 - 2023-09-14
 
 - Remembers state of UI on change (#194) fbc5463
