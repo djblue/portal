@@ -77,6 +77,15 @@
             (fn [] (f)))))
   (c/make-atom (:session-id @c/session)))
 
+(defn iframe-url [options]
+  (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
+  (swap! c/session rt/open-session)
+  (c/make-atom (:session-id @c/session))
+  (let [options (merge options @rt/default-options)]
+    (str->src (index/html {:code-url (main-js options)
+                           :platform "web"})
+              "text/html")))
+
 (defn init [options]
   (when-let [string (get-item ":portal/open")]
     (if (< (- (js/Date.now) (js/parseInt string)) 5000)

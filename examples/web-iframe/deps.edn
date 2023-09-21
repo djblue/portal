@@ -1,0 +1,11 @@
+{:deps {thheller/shadow-cljs {:mvn/version "2.20.10"}}
+
+ :paths ["src/main"]
+
+ :aliases
+ {:cljs
+  {:extra-deps
+   {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
+                               :git/sha "8eba755046ff3ae915ed3378574486840621a491"}
+    reagent/reagent {:mvn/version "1.2.0"}
+    djblue/portal  {:local/root "../../"}}}}}
