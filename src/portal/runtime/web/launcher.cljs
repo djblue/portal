@@ -77,14 +77,25 @@
             (fn [] (f)))))
   (c/make-atom (:session-id @c/session)))
 
-(defn iframe-url [options]
+(defn iframe [options parent]
   (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
   (swap! c/session rt/open-session)
   (c/make-atom (:session-id @c/session))
-  (let [options (merge options @rt/default-options)]
-    (str->src (index/html {:code-url (main-js options)
-                           :platform "web"})
-              "text/html")))
+  (let [options (merge options @rt/default-options)
+        url (str->src (index/html {:code-url (main-js options)
+                                   :platform "web"})
+                      "text/html")
+
+        iframe (doto (js/document.createElement "iframe")
+                 (.setAttribute "src" url))
+
+        observer (js/MutationObserver.
+                  (fn [[mutation] _observer]
+                    (when (.-addedNodes mutation)
+                      (-> iframe .-contentWindow .-window .-opener (set! js/window))
+                      (reset! c/connection (.-contentWindow iframe)))))]
+    (.observe observer parent #js {:childList true})
+     iframe))
 
 (defn init [options]
   (when-let [string (get-item ":portal/open")]

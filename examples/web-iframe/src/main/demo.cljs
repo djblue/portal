@@ -1,19 +1,22 @@
 (ns demo
   (:require
    [reagent.dom :as rdom]
-
-   [portal.runtime.web.client :as c]
    [portal.runtime.web.launcher :as pwl]
    [portal.web :as pw]))
 
-(defn- portal-iframe []
-  [:iframe {:style {:width "100vw" :height "100vh" :border 0}
-            :src (pwl/iframe-url {})
-            :ref (fn [x]
-                   (when x
-                     (-> x .-contentWindow .-window .-opener (set! js/window))
-                     (reset! c/connection (-> x .-contentWindow))
-                     (pw/submit {:hello :world})))}])
+(defn- app []
+  [:<>
+   [:div {:style {:display :flex, :justify-content :center}}
+    [:button {:on-click #(pw/submit {:hello :world, :n (rand-int 10)})
+              :style {:padding 8, :margin 8, :width "100%"}}
+     "Test"]]
+   [:div
+    {:ref
+     (fn [x]
+       (when x
+         (let [iframe (doto (pwl/iframe {} x)
+                        (.setAttribute "style" "width: 100vw; height: 90vh; border: 0"))]
+           (.appendChild x iframe))))}]])
 
 (defn ^:dev/after-load init []
-  (rdom/render [portal-iframe] (js/document.getElementById "root")))
+  (rdom/render [app] (js/document.getElementById "root")))
