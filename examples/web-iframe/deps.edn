@@ -5,7 +5,6 @@
  :aliases
  {:cljs
   {:extra-deps
-   {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
-                               :git/sha "8eba755046ff3ae915ed3378574486840621a491"}
+   {org.clojure/clojurescript {:mvn/version "1.11.60"}
     reagent/reagent {:mvn/version "1.2.0"}
     djblue/portal  {:local/root "../../"}}}}}
