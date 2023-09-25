@@ -52,7 +52,7 @@
       response
       (throw (ex-info (:message response) response)))))
 
-(defn open [options]
+(defn- open-window [options]
   (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
   (swap! c/session rt/open-session)
   (let [options (merge options @rt/default-options)
@@ -77,7 +77,7 @@
             (fn [] (f)))))
   (c/make-atom (:session-id @c/session)))
 
-(defn iframe [options parent]
+(defn- open-iframe [{:portal.launcher/keys [iframe-parent] :as options}]
   (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
   (swap! c/session rt/open-session)
   (c/make-atom (:session-id @c/session))
@@ -94,8 +94,13 @@
                     (when (.-addedNodes mutation)
                       (-> iframe .-contentWindow .-window .-opener (set! js/window))
                       (reset! c/connection (.-contentWindow iframe)))))]
-    (.observe observer parent #js {:childList true})
+    (.observe observer iframe-parent #js {:childList true})
      iframe))
+
+(defn open [options]
+  (if (:portal.launcher/iframe-parent options)
+    (open-iframe options)
+    (open-window options)))
 
 (defn init [options]
   (when-let [string (get-item ":portal/open")]

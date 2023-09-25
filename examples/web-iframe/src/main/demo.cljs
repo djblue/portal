@@ -1,7 +1,6 @@
 (ns demo
   (:require
    [reagent.dom :as rdom]
-   [portal.runtime.web.launcher :as pwl]
    [portal.web :as pw]))
 
 (defn- app []
@@ -14,7 +13,7 @@
     {:ref
      (fn [x]
        (when x
-         (let [iframe (doto (pwl/iframe {} x)
+         (let [iframe (doto (pw/open {:portal.launcher/iframe-parent x})
                         (.setAttribute "style" "width: 100vw; height: 90vh; border: 0"))]
            (.appendChild x iframe))))}]])
 
