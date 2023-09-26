@@ -759,8 +759,7 @@
   (let [theme     (theme/use-theme)
         limit     (:string-length theme)
         context   (use-context)
-        location  (state/get-location context)
-        expanded? @(r/cursor (state/use-state) [:expanded? location])]
+        expanded? (:expanded? (use-options))]
     (cond
       (url-string? value)
       [s/span
@@ -871,8 +870,7 @@
   (let [theme     (theme/use-theme)
         limit     (:string-length theme)
         context   (use-context)
-        location  (state/get-location context)
-        expanded? @(r/cursor (state/use-state) [:expanded? location])]
+        expanded? (:expanded? (use-options))]
     [s/span {:style
              {:color (::c/text theme)}}
      [inspect-ansi
