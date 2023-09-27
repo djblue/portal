@@ -1,5 +1,7 @@
 # Emacs
 
+## CIDER
+
 If you are an emacs + cider user and would like tighter integration with portal,
 the following section may be of interest to you.
 
@@ -40,7 +42,9 @@ the following section may be of interest to you.
 If you would like to run the Portal UI in emacs itself, you can do so with the
 following code.
 
-> **Note** You need a build of emacs with [Embedded-WebKit-Widgets][1]
+> **Note**
+> You need a build of emacs with [Embedded-WebKit-Widgets][1]
+> This only works if you're using [emacs server](https://www.gnu.org/software/emacs/manual/html_node/emacs/Emacs-Server.html) as it relies on `emacsclient` command
 
 ```clojure
 (portal.api/open {:launcher :emacs})
@@ -51,3 +55,43 @@ following code.
 > issues
 
 [1]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Embedded-WebKit-Widgets.html
+
+# Monroe & xwidget-embed
+
+For [Monroe](https://github.com/sanel/monroe) nREPL client users:
+
+The following function starts a Portal session and opens it in `xwidget-webkit` frame. 
+Some assumptions:
+
+1. You are connected to a Clojure nREPL server already
+2. You are using `projectile` (not strictly required, it's just that this function depends on it)
+3. Your emacs is compiled with xwidgets support
+
+Add the following to your emacs config
+
+```elisp
+(defun monroe-launch-portal ()
+  (interactive)
+  (let* ((project-root (projectile-acquire-root))
+         (default-directory project-root)
+         (portal-url-file (format "%s.portal-url" project-root)))
+    ;; initiate portal session and store session URL in the project root
+    (monroe-input-sender
+     (get-buffer-process (monroe-repl-buffer))
+     (format "(require 'portal.api) (spit \"%s\" (portal.api/url (portal.api/open {:launcher false})))"
+             portal-url-file))
+    (sleep-for 1) ;; uh... this is a hack, things can run too fast
+    ;; read the url and open a webkit frame
+    (let ((url (with-temp-buffer
+                 (insert-file-contents portal-url-file)
+                 (buffer-string))))
+      (xwidget-webkit-browse-url url))))
+```
+
+When in a Clojure buffer with active Monroe session run `M-x monroe-launch-portal`.
+
+> **Note**
+> 
+> This is just a jump-off point, you might want to customize this function to your
+> liking, e.g. run the code in your `user` namespace, set a different theme and so on.
+> See CIDER section for how you can extend it further.
