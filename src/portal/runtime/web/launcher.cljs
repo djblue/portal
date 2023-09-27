@@ -80,22 +80,21 @@
 (defn- open-iframe [{:keys [iframe-parent] :as options}]
   (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
   (swap! c/session rt/open-session)
-  (let [options (merge options @rt/default-options)
-        url (str->src (index/html {:code-url (main-js options)
-                                   :platform "web"})
-                      "text/html")
+  (let [options
+        (merge options @rt/default-options)
 
-        iframe (doto (js/document.createElement "iframe")
-                 (.setAttribute "src" url)
-                 (.setAttribute "style" "width: 100%; height: 100%; border: 0"))
+        url
+        (str->src (index/html {:code-url (main-js options)
+                               :platform "web"})
+                  "text/html")
 
-        observer (js/MutationObserver.
-                  (fn [[mutation] _observer]
-                    (when (.-addedNodes mutation)
-                      (-> iframe .-contentWindow .-window .-opener (set! js/window))
-                      (reset! c/connection (.-contentWindow iframe)))))]
-    (.observe observer iframe-parent #js {:childList true})
+        iframe
+        (doto (js/document.createElement "iframe")
+          (.setAttribute "src" url)
+          (.setAttribute "style" "width: 100%; height: 100%; border: 0"))]
     (.appendChild iframe-parent iframe)
+    (-> iframe .-contentWindow .-window .-opener (set! js/window))
+    (reset! c/connection (.-contentWindow iframe))
     (c/make-atom (:session-id @c/session))))
 
 (defn open [options]
