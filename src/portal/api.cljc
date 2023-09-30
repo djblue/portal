@@ -95,7 +95,10 @@
      (open portal-or-options nil)
      (open nil portal-or-options)))
   ([portal options]
-   (l/open portal (rename options))))
+   (l/open portal
+           (merge
+            (dissoc (:options rt/*session*) :value)
+            (rename options)))))
 
 (defn close
   "Close all current inspector windows.
