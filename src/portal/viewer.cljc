@@ -4,11 +4,26 @@
    Note: Support for input validation may come in the future."
   (:refer-clojure :exclude [pr-str for]))
 
+(declare hiccup)
+
+(defn- can-meta? [value]
+  #?(:clj  (instance? clojure.lang.IObj value)
+     :cljr (instance? clojure.lang.IObj value)
+     :cljs (implements? IMeta value)))
+
 (defn default
+  "Set the default viewer for a value.
+
+  Note: The return for values that don't support metadata may change in the
+        future."
   ([value viewer]
-   (vary-meta value assoc ::default viewer))
+   (if (can-meta? value)
+     (vary-meta value assoc ::default viewer)
+     (hiccup [::inspector {::default viewer} value])))
   ([value viewer opts]
-   (vary-meta value assoc ::default viewer viewer opts)))
+   (if-not (can-meta? value)
+     (vary-meta value assoc ::default viewer viewer opts)
+     (hiccup [::inspector {::default viewer viewer opts} value]))))
 
 (defn for [value opts]
   (vary-meta value update ::for merge opts))
@@ -95,3 +110,52 @@
   "View interlacing of stdout, stderr and tap values. Useful for build output."
   ([value] (default value ::prepl))
   ([value opts] (default value ::prepl opts)))
+
+(defn markdown
+  "Parse string as markdown and view as html."
+  ([value] (default value ::markdown))
+  ([value opts] (default value ::markdown opts)))
+
+(defn bin
+  "View binary data as a hexdump."
+  ([value] (default value ::bin))
+  ([value opts] (default value ::bin opts)))
+
+(defn image
+  "View a binary value as an image."
+  ([value] (default value ::image))
+  ([value opts] (default value ::image opts)))
+
+(defn text
+  "View string as a text file."
+  ([value] (default value ::text))
+  ([value opts] (default value ::text opts)))
+
+(defn json
+  "Parse a string as JSON. Will render error if parsing fails."
+  ([value] (default value ::json))
+  ([value opts] (default value ::json opts)))
+
+(defn jwt
+  "Parse a string as a JWT. Will render error if parsing fails."
+  ([value] (default value ::jwt))
+  ([value opts] (default value ::jwt opts)))
+
+(defn edn
+  "Parse a string as EDN. Will render error if parsing fails."
+  ([value] (default value ::edn))
+  ([value opts] (default value ::edn opts)))
+
+(defn transit
+  "Parse a string as transit. Will render error if parsing fails."
+  ([value] (default value ::transit))
+  ([value opts] (default value ::transit opts)))
+
+(defn csv
+  "Parse a string as a CSV and use the table viewer by default."
+  ([value] (default value ::csv))
+  ([value opts] (default value ::csv opts)))
+
+(defn html
+  ([value] (default value ::html))
+  ([value opts] (default value ::html opts)))
