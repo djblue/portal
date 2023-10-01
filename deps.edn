@@ -26,7 +26,6 @@
   {:extra-deps
    {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
                                :git/sha "8eba755046ff3ae915ed3378574486840621a491"}
-    hickory/hickory           {:mvn/version "0.7.1"}
     lambdaisland/deep-diff2   {:mvn/version "2.10.211"}
     org.babashka/sci          {:mvn/version "0.8.40"}
     reagent/reagent           {:mvn/version "1.2.0"}
