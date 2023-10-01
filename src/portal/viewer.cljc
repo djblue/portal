@@ -62,7 +62,9 @@
   ([value opts] (default value ::vega opts)))
 
 (defn table
-  "View value as a table. Supports sticky headers and keyboard navigation."
+  "View value as a table. Supports sticky headers and keyboard navigation.
+   opts:
+   - columns: vector of keys to use as columns in table."
   ([value] (default value ::table))
   ([value opts] (default value ::table opts)))
 
