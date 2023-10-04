@@ -6,9 +6,8 @@ node_modules/
 cljs-runtime/
 resources/portal/
 resources/portal-dev/
-.clj-kondo/.cache/
-.clj-kondo/rewrite-clj/
-.clj-kondo/babashka/
+!.clj-kondo/config
+.clj-kondo/*
 .DS_Store
 .nrepl-port
 .bb-repl
