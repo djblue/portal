@@ -95,28 +95,29 @@
 
 (defn- wrap-portal* [handler msg]
   (let [report         (atom [])
-        [test-var test-report] (case (:op msg)
-                                 "test-var-query"
-                                 (let [v (requiring-resolve `cider.nrepl.middleware.test/report)]
-                                   [v @v])
-                                 [#'test/report test/report])
+        test-report    (if (= "test-var-query" (:op msg))
+                         (requiring-resolve 'cider.nrepl.middleware.test/report)
+                         test/report)
         portal-report  (fn [value]
                          (swap! report conj value)
                          (test-report value))]
-    (handler
-     (cond-> msg
-       (#{"test-var-query" "eval"} (:op msg))
-       (-> (update :transport
-                   ->PortalTransport
-                   (assoc msg
-                          :report report
-                          :stdio  (atom [])
-                          :start  (System/nanoTime)
-                          :time   (Date.)))
-           (update :session
-                   (fn [session]
-                     (swap! session assoc test-var portal-report)
-                     session)))))))
+    (with-redefs-fn
+      {(requiring-resolve 'cider.nrepl.middleware.test/report) portal-report}
+      (fn []
+        (handler
+         (cond-> msg
+           (#{"test-var-query" "eval"} (:op msg))
+           (-> (update :transport
+                       ->PortalTransport
+                       (assoc msg
+                              :report report
+                              :stdio  (atom [])
+                              :start  (System/nanoTime)
+                              :time   (Date.)))
+               (update :session
+                       (fn [session]
+                         (swap! session assoc #'test/report portal-report)
+                         session)))))))))
 
 (defn wrap-portal [handler] (partial #'wrap-portal* handler))
 
