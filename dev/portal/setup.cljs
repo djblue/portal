@@ -1,5 +1,7 @@
 (ns portal.setup
-  (:require [examples.data :refer [data]]
+  (:require [clojure.datafy :refer [datafy]]
+            [examples.data :refer [data]]
+            [lambdaisland.dom-types]
             [portal.console :as log]
             [portal.runtime :as rt]
             [portal.shadow.remote :as remote]
@@ -40,8 +42,9 @@
 (p/register! #'clear-rpc)
 
 (defn submit [value]
-  (comment (remote/submit value))
-  (dashboard-submit value))
+  (let [value (datafy value)]
+    (comment (remote/submit value))
+    (dashboard-submit value)))
 
 (defn async-submit [value]
   (cond
