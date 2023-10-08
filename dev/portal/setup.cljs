@@ -8,6 +8,7 @@
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]
+            [portal.ui.rpc :as rpc]
             [portal.ui.sci :as sci]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
@@ -35,7 +36,7 @@
 
 (defn ^:command goto
   [v]
-  (state/invoke 'portal.runtime.jvm.editor/goto-definition v))
+  (rpc/call 'portal.runtime.jvm.editor/goto-definition v))
 
 (rt/register! #'goto {:name 'portal.runtime.jvm.editor/goto-definition})
 (p/register! #'clear-taps)
