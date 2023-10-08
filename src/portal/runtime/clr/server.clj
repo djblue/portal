@@ -57,7 +57,7 @@
               ws    (.WebSocket (.Result task))
               send! (fn [message]
                       (send-message ws (rt/write message session)))]
-          (swap! c/connections assoc (:session-id session) send!)
+          (swap! rt/connections assoc (:session-id session) send!)
           (when-let [f (get-in session [:options :on-load])]
             (f))
           (while (= (.State ws) WebSocketState/Open)
@@ -74,7 +74,7 @@
         (catch Exception e
           (tap> (Throwable->map e)))
         (finally
-          (swap! c/connections dissoc (:session-id session)))))))
+          (swap! rt/connections dissoc (:session-id session)))))))
 
 (defn- send-resource [content-type resource]
   {:status  200

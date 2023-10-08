@@ -3,18 +3,11 @@
             [portal.runtime :as rt])
   (:import [clojure.lang IAtom IDeref]))
 
-(defonce connections (atom {}))
-
-(defonce ^:private id (atom 0))
-(defonce ^:private pending-requests (atom {}))
-
-(defn- next-id [] (swap! id inc))
-
 (def ops
   {:portal.rpc/response
    (fn [message _send!]
      (let [id (:portal.rpc/id message)]
-       (when-let [response (get @pending-requests id)]
+       (when-let [response (get @rt/pending-requests id)]
          (deliver response message))))})
 
 (def timeout 60000)
@@ -22,32 +15,32 @@
 (defn- get-connection [session-id]
   (let [p (promise)
         watch-key (keyword (gensym))]
-    (if-let [send! (get @connections session-id)]
+    (if-let [send! (get @rt/connections session-id)]
       (deliver p send!)
       (add-watch
-       connections
+       rt/connections
        watch-key
        (fn [_ _ _old new]
          (when-let [send! (get new session-id)]
            (deliver p send!)))))
     (let [result (deref p timeout nil)]
-      (remove-watch connections watch-key)
+      (remove-watch rt/connections watch-key)
       result)))
 
 (defn request
   ([message]
    (last
-    (for [session-id (keys @connections)]
+    (for [session-id (keys @rt/connections)]
       (request session-id message))))
   ([session-id message]
    (if-let [send! (get-connection session-id)]
-     (let [id       (next-id)
+     (let [id       (rt/next-id)
            response (promise)
            message  (assoc message :portal.rpc/id id)]
-       (swap! pending-requests assoc id response)
+       (swap! rt/pending-requests assoc id response)
        (send! message)
        (let [response (deref response timeout ::timeout)]
-         (swap! pending-requests dissoc id)
+         (swap! rt/pending-requests dissoc id)
          (if-not (= response ::timeout)
            response
            (throw (ex-info "Portal request timeout"
@@ -81,4 +74,4 @@
 (defn make-atom [session-id] (Portal. session-id))
 
 (defn open? [session-id]
-  (contains? @connections session-id))
+  (contains? @rt/connections session-id))

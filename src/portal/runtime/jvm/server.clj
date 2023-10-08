@@ -67,12 +67,12 @@
                                :op :portal.rpc/response)))))))
       :on-open
       (fn [ch]
-        (swap! c/connections assoc (:session-id session) (partial send! ch))
+        (swap! rt/connections assoc (:session-id session) (partial send! ch))
         (when-let [f (get-in session [:options :on-load])]
           (f)))
       :on-close
       (fn [_ch _status]
-        (swap! c/connections dissoc (:session-id session)))})))
+        (swap! rt/connections dissoc (:session-id session)))})))
 
 (defmethod route [:get "/rpc"] [request]
   (if (get-in request [:session :options :runtime])

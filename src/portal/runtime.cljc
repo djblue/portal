@@ -17,8 +17,16 @@
 (defonce default-options (atom nil))
 
 (defonce ^:dynamic *session* nil)
-(defn- next-id [] (swap! (:id *session*) inc))
+
 (defonce sessions (atom {}))
+(defonce connections (atom {}))
+(defonce pending-requests (atom {}))
+
+(defonce id (atom 0))
+
+(defn next-id
+  ([] (swap! id inc))
+  ([{:keys [id]}] (swap! id inc)))
 
 (defn get-session [session-id]
   (-> @sessions
@@ -85,7 +93,7 @@
          (fn [cache]
            (if (contains? cache k)
              cache
-             (let [id (next-id)]
+             (let [id (next-id *session*)]
                (assoc cache [:id id] value k id)))))
         (get k))))
 
