@@ -74,7 +74,7 @@
 
 (defn dashboard []
   {:cljdoc.doc/tree
-   [["Portal"
+   [["Portal Client"
      (section "Taps" tap-list)
      (section "State" state/state)
      (section "SCI Context" sci/ctx)
