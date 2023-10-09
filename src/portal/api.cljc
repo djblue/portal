@@ -230,7 +230,7 @@
    :added "0.38.0"
    :see-also ["open"]}
   ([value]
-   (inspect value (:options rt/*session*)))
+   (open {:value value}))
   ([value options]
    (open (assoc options :value value))))
 
