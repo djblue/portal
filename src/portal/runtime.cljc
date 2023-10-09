@@ -170,7 +170,8 @@
       (empty? value)
       (cson/tagged-value? value)
       (not (can-meta? value))
-      (has? value :portal.rpc/id)))
+      (has? value :portal.rpc/id)
+      (::no-cache (meta value))))
 
 (defn- id-coll [value]
   (if (no-cache value)
@@ -249,22 +250,24 @@
 
 (defn- get-options []
   (let [options (:options *session*)]
-    (merge
-     {:name (if (= :dev (:mode options))
-              "portal-dev"
-              "portal")
-      :version "0.48.0"
-      :platform
-      #?(:bb   "bb"
-         :clj  "jvm"
-         :cljr "clr"
-         :cljs (cond
-                 (exists? js/window)         "web"
-                 (exists? js/process)        "node"
-                 (exists? js/PLANCK_VERSION) "planck"
-                 :else                        "web"))
-      :value tap-list}
-     options)))
+    (with-meta
+      (merge
+       {:name (if (= :dev (:mode options))
+                "portal-dev"
+                "portal")
+        :version "0.48.0"
+        :platform
+        #?(:bb   "bb"
+           :clj  "jvm"
+           :cljr "clr"
+           :cljs (cond
+                   (exists? js/window)         "web"
+                   (exists? js/process)        "node"
+                   (exists? js/PLANCK_VERSION) "planck"
+                   :else                        "web"))
+        :value tap-list}
+       options)
+      {::no-cache true})))
 
 (defn clear-values
   ([] (clear-values nil identity))
@@ -302,8 +305,9 @@
     (keep
      (fn [[name opts]]
        (let [m      (merge (meta (:var opts)) opts)
-             result (merge {:name name}
-                           (select-keys m [:doc :command]))]
+             result (-> (select-keys m [:doc :command])
+                        (assoc :name name)
+                        (vary-meta assoc ::no-cache true))]
          (when-not (:private m)
            (if-let [predicate (:predicate m)]
              (try
@@ -311,7 +315,9 @@
                (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
              result))))
      @registry)
-    {:portal.viewer/default :portal.viewer/table}))
+    {::no-cache true
+     :portal.viewer/table {:columns [:name :doc :command]}
+     :portal.viewer/default :portal.viewer/table}))
 
 (defn- ping [] ::pong)
 
