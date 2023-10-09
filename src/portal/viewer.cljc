@@ -21,7 +21,7 @@
      (vary-meta value assoc ::default viewer)
      (hiccup [::inspector {::default viewer} value])))
   ([value viewer opts]
-   (if-not (can-meta? value)
+   (if (can-meta? value)
      (vary-meta value assoc ::default viewer viewer opts)
      (hiccup [::inspector {::default viewer viewer opts} value]))))
 
