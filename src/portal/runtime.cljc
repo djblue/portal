@@ -22,6 +22,11 @@
 (defonce connections (atom {}))
 (defonce pending-requests (atom {}))
 
+(defn active-sessions [] (keys @connections))
+
+(defn cleanup-sessions []
+  (swap! sessions select-keys (keys @connections)))
+
 (defonce id (atom 0))
 
 (defn next-id
@@ -41,6 +46,9 @@
     :value-cache    (atom {})
     :watch-registry (atom #{})}
    session))
+
+(defn close-session [session-id]
+  (swap! sessions dissoc session-id))
 
 (defn reset-session [{:keys [session-id value-cache watch-registry] :as session}]
   (reset! value-cache {})
