@@ -47,10 +47,23 @@
 
 (def ^:private ops (merge c/ops rt/ops))
 
+(defn- open-debug [{:keys [options] :as session}]
+  (try
+    (when (:debug options)
+      ((requiring-resolve 'portal.runtime.debug/open) session))
+    (catch Exception e (tap> e) nil)))
+
+(defn- close-debug [instance]
+  (try
+    (when instance
+      ((requiring-resolve 'portal.runtime.debug/close) instance))
+    (catch Exception e (tap> e) nil)))
+
 (defn- rpc-handler-local [request]
   (let [session (rt/open-session (:session request))
         send!   (fn send! [ch message]
-                  (server/send! ch (rt/write message session)))]
+                  (server/send! ch (rt/write message session)))
+        debug   (open-debug session)]
     (server/as-channel
      request
      {:on-receive
@@ -72,6 +85,7 @@
           (f)))
       :on-close
       (fn [_ch _status]
+        (close-debug debug)
         (swap! rt/connections dissoc (:session-id session)))})))
 
 (defmethod route [:get "/rpc"] [request]
