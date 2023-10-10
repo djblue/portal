@@ -59,27 +59,28 @@
   (recv [_this timeout]
     (transport/recv transport timeout))
   (send [_this  msg]
+    #_(tap> {:in handler-msg :out msg})
     (transport/send transport msg)
     (when (and (not= "eval" (:op handler-msg))
                (contains? (:status msg) :done))
-      (when-let [report (-> handler-msg :report deref not-empty)]
+      (when-let [report (-> handler-msg ::report deref not-empty)]
         (tap> report)))
     (when (and (seq (p/sessions)) (:file handler-msg))
       (when-let [out (:out msg)]
-        (swap! (:stdio handler-msg) conj {:tag :out :val out}))
+        (swap! (::stdio handler-msg) conj {:tag :out :val out}))
       (when-let [err (:err msg)]
-        (swap! (:stdio handler-msg) conj {:tag :err :val err}))
+        (swap! (::stdio handler-msg) conj {:tag :err :val err}))
       (when-let [result (get-result msg)]
         (-> result
             (merge
              (select-keys handler-msg [:ns :file :column :line :code])
-             (when-let [report (-> handler-msg :report deref not-empty)]
+             (when-let [report (-> handler-msg ::report deref not-empty)]
                {:report report})
-             (when-let [stdio (-> handler-msg :stdio deref not-empty)]
+             (when-let [stdio (-> handler-msg ::stdio deref not-empty)]
                {:stdio stdio}))
             (update :ns (fnil symbol 'user))
-            (assoc :time     (:time handler-msg)
-                   :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
+            (assoc :time     (::time handler-msg)
+                   :ms       (quot (- (System/nanoTime) (::start handler-msg)) 1000000)
                    :runtime  (cond
                                (shadow-cljs? handler-msg) :cljs
                                (in-portal? handler-msg)   :portal
@@ -109,10 +110,10 @@
        (-> (update :transport
                    ->PortalTransport
                    (assoc msg
-                          :report report
-                          :stdio  (atom [])
-                          :start  (System/nanoTime)
-                          :time   (Date.)))
+                          ::report report
+                          ::stdio  (atom [])
+                          ::start  (System/nanoTime)
+                          ::time   (Date.)))
            (update :session
                    (fn [session]
                      (swap! session assoc test-var portal-report)
