@@ -29,7 +29,9 @@
 (defn open [session]
   (p/inspect
    (dashboard session)
-   {:mode :dev :window-title "portal-debug-server"}))
+   (-> (:options session)
+       (dissoc :debug)
+       (assoc :window-title "portal-debug-server"))))
 
 (defn close [instance]
   (when instance (p/close instance)))
