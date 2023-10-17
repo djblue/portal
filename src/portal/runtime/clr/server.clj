@@ -47,9 +47,22 @@
           (recur (+ receive-count (.Count result)))
           (.GetString Encoding/UTF8 buffer 0 (+ (.Count result) receive-count)))))))
 
+(defn- open-debug [{:keys [options] :as session}]
+  (try
+    (when (:debug options)
+      ((requiring-resolve 'portal.runtime.debug/open) session))
+    (catch Exception e (tap> e) nil)))
+
+(defn- close-debug [instance]
+  (try
+    (when instance
+      ((requiring-resolve 'portal.runtime.debug/close) instance))
+    (catch Exception e (tap> e) nil)))
+
 (defmethod route [:get "/rpc"] [request]
   (future
-    (let [session (rt/open-session (:session request))]
+    (let [session (rt/open-session (:session request))
+          debug   (open-debug session)]
       (try
         (let [^HttpListenerContext context (:context request)
               task  (.AcceptWebSocketAsync context nil)
@@ -74,6 +87,7 @@
         (catch Exception e
           (tap> (Throwable->map e)))
         (finally
+          (close-debug debug)
           (swap! rt/connections dissoc (:session-id session)))))))
 
 (defn- send-resource [content-type resource]
