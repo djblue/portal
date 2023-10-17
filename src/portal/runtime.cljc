@@ -3,6 +3,7 @@
   (:require #?(:clj  [portal.sync  :as a]
                :cljr [portal.sync  :as a]
                :cljs [portal.async :as a])
+            [portal.viewer :as v]
             [clojure.datafy :refer [datafy nav]]
             [clojure.pprint :as pprint]
             [portal.runtime.cson :as cson]))
@@ -18,7 +19,7 @@
 
 (defonce ^:dynamic *session* nil)
 
-(defonce sessions (atom {}))
+(defonce sessions (atom (v/table {} {:columns [:options :selected]})))
 (defonce connections (atom {}))
 (defonce pending-requests (atom {}))
 
@@ -298,26 +299,24 @@
    (swap! sessions assoc-in [session-id :selected] value)
    nil))
 
-(def ^:private registry (atom {}))
+(def ^:private registry (atom (v/table {} {:columns [:var :predicate :private]})))
 
 (defn- get-functions [v]
-  (with-meta
-    (keep
-     (fn [[name opts]]
-       (let [m      (merge (meta (:var opts)) opts)
-             result (-> (select-keys m [:doc :command])
-                        (assoc :name name)
-                        (vary-meta assoc ::no-cache true))]
-         (when-not (:private m)
-           (if-let [predicate (:predicate m)]
-             (try
-               (when (predicate v) result)
-               (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
-             result))))
-     @registry)
-    {::no-cache true
-     :portal.viewer/table {:columns [:name :doc :command]}
-     :portal.viewer/default :portal.viewer/table}))
+  (-> (keep
+       (fn [[name opts]]
+         (let [m      (merge (meta (:var opts)) opts)
+               result (-> (select-keys m [:doc :command])
+                          (assoc :name name)
+                          (vary-meta assoc ::no-cache true))]
+           (when-not (:private m)
+             (if-let [predicate (:predicate m)]
+               (try
+                 (when (predicate v) result)
+                 (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
+               result))))
+       @registry)
+      (v/table {:columns [:name :doc :command]})
+      (vary-meta assoc ::no-cache true)))
 
 (defn- ping [] ::pong)
 
