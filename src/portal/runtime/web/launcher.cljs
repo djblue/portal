@@ -98,8 +98,8 @@
     (c/make-atom (:session-id @c/session))))
 
 (defn open [options]
-  (if (:iframe-parent options)
-    (open-iframe options)
+  (case (:launcher options)
+    :iframe (open-iframe options)
     (open-window options)))
 
 (defn init [options]
