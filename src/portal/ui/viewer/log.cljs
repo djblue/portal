@@ -42,13 +42,19 @@
    :bb     {:icon (inline "runtime/babashka.svg") :color ::c/exception}
    :portal {:icon (inline "runtime/portal.svg")   :color ::c/boolean}})
 
-(defn icon [value color]
-  [d/img
-   {:style
-    {:height 22 :width 22}
-    :src (str
-          "data:image/svg+xml;base64,"
-          (-> value runtime->logo :icon parse (theme-svg color) stringify js/btoa))}])
+(defn icon
+  ([value]
+   (let [theme (theme/use-theme)]
+     [icon
+      value
+      (get theme (get-in runtime->logo [value :color] ::c/text))]))
+  ([value color]
+   [d/img
+    {:style
+     {:height 22 :width 22}
+     :src (str
+           "data:image/svg+xml;base64,"
+           (-> value runtime->logo :icon parse (theme-svg color) stringify js/btoa))}]))
 
 ;;; :spec
 (def ^:private levels
@@ -154,9 +160,7 @@
             :border-top-right-radius    (:border-radius theme)
             :border-bottom-right-radius (when-not expanded? (:border-radius theme))}
            border)}
-         [icon
-          runtime
-          (get theme (get-in runtime->logo [runtime :color] ::c/text))]])]
+         [icon runtime]])]
 
      (when (:expanded? options)
        [ins/with-collection

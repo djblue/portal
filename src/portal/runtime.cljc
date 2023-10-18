@@ -257,6 +257,11 @@
                 "portal-dev"
                 "portal")
         :version "0.48.0"
+        :runtime
+        #?(:bb   :bb
+           :clj  :clj
+           :cljr :cljr
+           :cljs :cljs)
         :platform
         #?(:bb   "bb"
            :clj  "jvm"
