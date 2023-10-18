@@ -52,18 +52,12 @@
       response
       (throw (ex-info (:message response) response)))))
 
-(defn- open-window [options]
-  (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
-  (swap! c/session rt/open-session)
-  (let [options (merge options @rt/default-options)
-        url     (str->src (index/html {:code-url (main-js options)
-                                       :platform "web"})
-                          "text/html")
-        child   (js/window.open
-                 url
-                 "portal"
-                 (when (:app options true)
-                   "resizable,scrollbars,status"))]
+(defn- open-window [options url]
+  (let [child (.open js/window
+                     url
+                     "portal"
+                     (when (:app options true)
+                       "resizable,scrollbars,status"))]
     (reset! c/connection child)
     (set! (.-onunload child)
           (fn []
@@ -74,33 +68,28 @@
               (set-item ":portal/open" (js/Date.now)))))
     (when-let [f (:on-load options)]
       (set! (.-onload child)
-            (fn [] (f)))))
-  (c/make-atom (:session-id @c/session)))
+            (fn [] (f))))))
 
-(defn- open-iframe [{:keys [iframe-parent] :as options}]
-  (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
-  (swap! c/session rt/open-session)
-  (let [options
-        (merge options @rt/default-options)
-
-        url
-        (str->src (index/html {:code-url (main-js options)
-                               :platform "web"})
-                  "text/html")
-
-        iframe
-        (doto (js/document.createElement "iframe")
+(defn- open-iframe [{:keys [iframe-parent]} url]
+  (let [iframe
+        (doto (.createElement js/document "iframe")
           (.setAttribute "src" url)
           (.setAttribute "style" "width: 100%; height: 100%; border: 0"))]
     (.appendChild iframe-parent iframe)
     (-> iframe .-contentWindow .-window .-opener (set! js/window))
-    (reset! c/connection (.-contentWindow iframe))
-    (c/make-atom (:session-id @c/session))))
+    (reset! c/connection (.-contentWindow iframe))))
 
 (defn open [options]
-  (case (:launcher options)
-    :iframe (open-iframe options)
-    (open-window options)))
+  (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
+  (swap! c/session rt/open-session)
+  (let [options (merge options @rt/default-options)
+        url     (str->src (index/html {:code-url (main-js options)
+                                       :platform "web"})
+                          "text/html")]
+    (case (:launcher options)
+      :iframe (open-iframe options url)
+      (open-window options url)))
+  (c/make-atom (:session-id @c/session)))
 
 (defn init [options]
   (when-let [string (get-item ":portal/open")]
