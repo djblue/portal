@@ -60,13 +60,14 @@
       (get theme (get-in runtime->logo [value :color] ::c/text))]))
   ([value color]
    (let [{:keys [icon title]} (runtime->logo value)]
-     [d/img
-      {:title title
-       :style
-       {:height 22 :width 22}
-       :src (str
-             "data:image/svg+xml;base64,"
-             (-> icon parse (theme-svg color) stringify js/btoa))}])))
+     (when icon
+       [d/img
+        {:title title
+         :style
+         {:height 22 :width 22}
+         :src (str
+               "data:image/svg+xml;base64,"
+               (-> icon parse (theme-svg color) stringify js/btoa))}]))))
 
 ;;; :spec
 (def ^:private levels

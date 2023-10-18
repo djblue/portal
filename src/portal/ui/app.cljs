@@ -88,11 +88,12 @@
          [s/div {:style {:grid-row "1"}} [ins/preview k]])
        path)
       [s/div {:style {:grid-row "1"}} "]"]]
-     [s/div {:style
-             {:display :flex
-              :padding (:padding theme)
-              :border-left [1 :solid (::c/border theme)]}}
-      [log/icon (:runtime opts)]]]))
+     (when-let [runtime (:runtime opts)]
+       [s/div {:style
+               {:display :flex
+                :padding (:padding theme)
+                :border-left [1 :solid (::c/border theme)]}}
+        [log/icon runtime]])]))
 
 (defn- use-runtime-info []
   (let [opts       (opts/use-options)
