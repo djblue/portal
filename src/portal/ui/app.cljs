@@ -88,8 +88,7 @@
          [s/div {:style {:grid-row "1"}} [ins/preview k]])
        path)
       [s/div {:style {:grid-row "1"}} "]"]]
-     [s/div {:title (some-> opts :runtime name)
-             :style
+     [s/div {:style
              {:display :flex
               :padding (:padding theme)
               :border-left [1 :solid (::c/border theme)]}}
