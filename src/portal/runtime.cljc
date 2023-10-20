@@ -3,6 +3,7 @@
   (:require #?(:clj  [portal.sync  :as a]
                :cljr [portal.sync  :as a]
                :cljs [portal.async :as a])
+            [portal.viewer :as v]
             [clojure.datafy :refer [datafy nav]]
             [clojure.pprint :as pprint]
             [portal.runtime.cson :as cson]))
@@ -17,8 +18,21 @@
 (defonce default-options (atom nil))
 
 (defonce ^:dynamic *session* nil)
-(defn- next-id [] (swap! (:id *session*) inc))
-(defonce sessions (atom {}))
+
+(defonce sessions (atom (v/table {} {:columns [:options :selected]})))
+(defonce connections (atom {}))
+(defonce pending-requests (atom {}))
+
+(defn active-sessions [] (keys @connections))
+
+(defn cleanup-sessions []
+  (swap! sessions select-keys (keys @connections)))
+
+(defonce id (atom 0))
+
+(defn next-id
+  ([] (swap! id inc))
+  ([{:keys [id]}] (swap! id inc)))
 
 (defn get-session [session-id]
   (-> @sessions
@@ -33,6 +47,9 @@
     :value-cache    (atom {})
     :watch-registry (atom #{})}
    session))
+
+(defn close-session [session-id]
+  (swap! sessions dissoc session-id))
 
 (defn reset-session [{:keys [session-id value-cache watch-registry] :as session}]
   (reset! value-cache {})
@@ -85,7 +102,7 @@
          (fn [cache]
            (if (contains? cache k)
              cache
-             (let [id (next-id)]
+             (let [id (next-id *session*)]
                (assoc cache [:id id] value k id)))))
         (get k))))
 
@@ -154,7 +171,8 @@
       (empty? value)
       (cson/tagged-value? value)
       (not (can-meta? value))
-      (has? value :portal.rpc/id)))
+      (has? value :portal.rpc/id)
+      (::no-cache (meta value))))
 
 (defn- id-coll [value]
   (if (no-cache value)
@@ -233,22 +251,25 @@
 
 (defn- get-options []
   (let [options (:options *session*)]
-    (merge
-     {:name (if (= :dev (:mode options))
-              "portal-dev"
-              "portal")
-      :version "0.48.0"
-      :platform
-      #?(:bb   "bb"
-         :clj  "jvm"
-         :cljr "clr"
-         :cljs (cond
-                 (exists? js/window)         "web"
-                 (exists? js/process)        "node"
-                 (exists? js/PLANCK_VERSION) "planck"
-                 :else                        "web"))
-      :value tap-list}
-     options)))
+    (with-meta
+      (merge
+       {:name (if (= :dev (:mode options))
+                "portal-dev"
+                "portal")
+        :version "0.48.0"
+        :runtime (runtime)
+        :platform
+        #?(:bb   "bb"
+           :clj  "jvm"
+           :cljr "clr"
+           :cljs (cond
+                   (exists? js/window)         "web"
+                   (exists? js/process)        "node"
+                   (exists? js/PLANCK_VERSION) "planck"
+                   :else                        "web"))
+        :value tap-list}
+       options)
+      {::no-cache true})))
 
 (defn clear-values
   ([] (clear-values nil identity))
@@ -279,23 +300,24 @@
    (swap! sessions assoc-in [session-id :selected] value)
    nil))
 
-(def ^:private registry (atom {}))
+(def ^:private registry (atom (v/table {} {:columns [:var :predicate :private]})))
 
 (defn- get-functions [v]
-  (with-meta
-    (keep
-     (fn [[name opts]]
-       (let [m      (merge (meta (:var opts)) opts)
-             result (merge {:name name}
-                           (select-keys m [:doc :command]))]
-         (when-not (:private m)
-           (if-let [predicate (:predicate m)]
-             (try
-               (when (predicate v) result)
-               (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
-             result))))
-     @registry)
-    {:portal.viewer/default :portal.viewer/table}))
+  (-> (keep
+       (fn [[name opts]]
+         (let [m      (merge (meta (:var opts)) opts)
+               result (-> (select-keys m [:doc :command])
+                          (assoc :name name)
+                          (vary-meta assoc ::no-cache true))]
+           (when-not (:private m)
+             (if-let [predicate (:predicate m)]
+               (try
+                 (when (predicate v) result)
+                 (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
+               result))))
+       @registry)
+      (v/table {:columns [:name :doc :command]})
+      (vary-meta assoc ::no-cache true)))
 
 (defn- ping [] ::pong)
 

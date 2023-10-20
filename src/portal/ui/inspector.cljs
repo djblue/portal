@@ -646,8 +646,8 @@
   [with-collection
    values
    [:<>
-    [collection-header values]
-    [inspect-map-k-v values]]])
+    ^{:key "header"} [collection-header values]
+    ^{:key "values"} [inspect-map-k-v values]]])
 
 (defn- container-coll [values child]
   (let [theme (theme/use-theme)]

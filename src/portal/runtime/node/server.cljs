@@ -57,7 +57,7 @@
              send!
              (fn send! [message]
                (.send ws (rt/write message session)))]
-         (swap! c/connections assoc (:session-id session) send!)
+         (swap! rt/connections assoc (:session-id session) send!)
          (when-let [f (get-in session [:options :on-load])]
            (f))
          (.on ws "message"
@@ -72,7 +72,7 @@
                     (op req done)))))
          (.on ws "close"
               (fn []
-                (swap! c/connections dissoc (:session-id session)))))))))
+                (swap! rt/connections dissoc (:session-id session)))))))))
 
 (defn- send-resource [^js res content-type body]
   (-> res

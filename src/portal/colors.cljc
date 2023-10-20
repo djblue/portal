@@ -103,7 +103,7 @@
     ::boolean     "var(--vscode-debugTokenExpression-boolean)"
     ::keyword     "var(--vscode-textLink-foreground)"
     ::symbol      "var(--vscode-editor-foreground)"
-    ::namespace   "var(--vscode-descriptionForeground)"
+    ::namespace   "var(--vscode-editorBracketHighlight-foreground2)"
     ::package     "var(--vscode-descriptionForeground)"
     ::exception   "var(--vscode-editorError-foreground)"
     ::diff-add    "var(--vscode-terminal-ansiGreen)"

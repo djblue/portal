@@ -1,11 +1,14 @@
 (ns portal.setup
-  (:require [examples.data :refer [data]]
+  (:require [clojure.datafy :refer [datafy]]
+            [examples.data :refer [data]]
+            [lambdaisland.dom-types]
             [portal.console :as log]
             [portal.runtime :as rt]
             [portal.shadow.remote :as remote]
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]
+            [portal.ui.rpc :as rpc]
             [portal.ui.sci :as sci]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
@@ -33,15 +36,16 @@
 
 (defn ^:command goto
   [v]
-  (state/invoke 'portal.runtime.jvm.editor/goto-definition v))
+  (rpc/call 'portal.runtime.jvm.editor/goto-definition v))
 
 (rt/register! #'goto {:name 'portal.runtime.jvm.editor/goto-definition})
 (p/register! #'clear-taps)
 (p/register! #'clear-rpc)
 
 (defn submit [value]
-  (comment (remote/submit value))
-  (dashboard-submit value))
+  (let [value (datafy value)]
+    (comment (remote/submit value))
+    (dashboard-submit value)))
 
 (defn async-submit [value]
   (cond
@@ -70,7 +74,7 @@
 
 (defn dashboard []
   {:cljdoc.doc/tree
-   [["Portal"
+   [["Portal Client"
      (section "Taps" tap-list)
      (section "State" state/state)
      (section "SCI Context" sci/ctx)

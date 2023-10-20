@@ -36,19 +36,38 @@
   svg)
 
 (def ^:private runtime->logo
-  {:clj    {:icon (inline "runtime/clojure.svg")  :color ::c/package}
-   :cljr   {:icon (inline "runtime/clojure.svg")  :color ::c/string}
-   :cljs   {:icon (inline "runtime/cljs.svg")     :color ::c/tag}
-   :bb     {:icon (inline "runtime/babashka.svg") :color ::c/exception}
-   :portal {:icon (inline "runtime/portal.svg")   :color ::c/boolean}})
+  {:clj    {:color ::c/package
+            :title "Clojure"
+            :icon (inline "runtime/clojure.svg")}
+   :cljr   {:color ::c/string
+            :title "Clojure CLR"
+            :icon (inline "runtime/clojure.svg")}
+   :cljs   {:color ::c/tag
+            :title "ClojureScript"
+            :icon (inline "runtime/cljs.svg")}
+   :bb     {:color ::c/exception
+            :title "Babashka"
+            :icon (inline "runtime/babashka.svg")}
+   :portal {:color ::c/boolean
+            :title "Portal"
+            :icon (inline "runtime/portal.svg")}})
 
-(defn icon [value color]
-  [d/img
-   {:style
-    {:height 22 :width 22}
-    :src (str
-          "data:image/svg+xml;base64,"
-          (-> value runtime->logo :icon parse (theme-svg color) stringify js/btoa))}])
+(defn icon
+  ([value]
+   (let [theme (theme/use-theme)]
+     [icon
+      value
+      (get theme (get-in runtime->logo [value :color] ::c/text))]))
+  ([value color]
+   (let [{:keys [icon title]} (runtime->logo value)]
+     (when icon
+       [d/img
+        {:title title
+         :style
+         {:height 22 :width 22}
+         :src (str
+               "data:image/svg+xml;base64,"
+               (-> icon parse (theme-svg color) stringify js/btoa))}]))))
 
 ;;; :spec
 (def ^:private levels
@@ -154,9 +173,7 @@
             :border-top-right-radius    (:border-radius theme)
             :border-bottom-right-radius (when-not expanded? (:border-radius theme))}
            border)}
-         [icon
-          runtime
-          (get theme (get-in runtime->logo [runtime :color] ::c/text))]])]
+         [icon runtime]])]
 
      (when (:expanded? options)
        [ins/with-collection

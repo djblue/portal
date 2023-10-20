@@ -50,6 +50,7 @@
 (defn- selected-context-view []
   (let [theme (theme/use-theme)
         state (state/use-state)
+        opts  (opts/use-options)
         path  (state/get-path @state)]
     [s/div
      {:style
@@ -73,7 +74,8 @@
       [icons/copy]]
      [s/div
       {:style
-       {:cursor :pointer
+       {:flex "1"
+        :cursor :pointer
         :overflow :auto
         :display :flex
         :box-sizing :border-box
@@ -86,7 +88,11 @@
          [s/div {:style {:grid-row "1"}} [ins/preview k]])
        path)
       [s/div {:style {:grid-row "1"}} "]"]]
-     [s/div {:style {:flex "1"}}]]))
+     [s/div {:style
+             {:display :flex
+              :padding (:padding theme)
+              :border-left [1 :solid (::c/border theme)]}}
+      [log/icon (:runtime opts :portal)]]]))
 
 (defn- use-runtime-info []
   (let [opts       (opts/use-options)

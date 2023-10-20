@@ -4,21 +4,25 @@ If you would like to add some logic around which viewer to use by default in
 Portal, the easiest way is to provide a `:portal.viewer/default` key as part of
 a value's metadata. Unfortunately, not all values support metadata, such as
 strings. They way around this limitation is to wrap the value in a container
-that does support metadata, such as vectors.
+that does support metadata, such as vectors. However, instead of managing this
+manually, we can leverage the `portal.viewer` ns to help provide default viewers
+for values.
 
 Here is on such default viewer selector:
 
 ```clojure
-(def defaults
-  {string? :portal.viewer/text
-   bytes?  :portal.viewer/bin})
+(require '[portal.viewer :as v])
 
-(defn- get-viewer [value]
+(def defaults
+  {string? v/text
+   bytes?  v/bin})
+
+(defn- get-viewer-f [value]
   (or (some (fn [[predicate viewer]]
               (when (predicate value)
                 viewer))
             defaults)
-      :portal.viewer/tree))
+      v/tree))
 ```
 
 With a corresponding submit function:
@@ -27,10 +31,8 @@ With a corresponding submit function:
 (require '[portal.api :as p])
 
 (defn submit [value]
-  (p/submit
-   (with-meta
-     [(get-viewer value) value]
-     {:portal.viewer/default :portal.viewer/hiccup})))
+  (let [f (get-viewer-f value)]
+    (p/submit (f value))))
 
 (add-tap #'submit)
 ```

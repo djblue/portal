@@ -2,18 +2,11 @@
   (:require [portal.async :as a]
             [portal.runtime :as rt]))
 
-(defonce connections (atom {}))
-
-(defonce ^:private id (atom 0))
-(defonce ^:private pending-requests (atom {}))
-
-(defn- next-id [] (swap! id inc))
-
 (def ops
   {:portal.rpc/response
    (fn [message _done]
      (let [id (:portal.rpc/id message)]
-       (when-let [[resolve] (get @pending-requests id)]
+       (when-let [[resolve] (get @rt/pending-requests id)]
          (resolve message))))})
 
 (def timeout 60000)
@@ -28,36 +21,36 @@
            (reset! done #(js/clearTimeout handle)))))
       (js/Promise.
        (fn [resolve _reject]
-         (if-let [send! (get @connections session-id)]
+         (if-let [send! (get @rt/connections session-id)]
            (do (@done) (resolve send!))
            (let [watch-key (keyword (gensym))]
              (add-watch
-              connections
+              rt/connections
               watch-key
               (fn [_ _ _old new]
                 (when-let [send! (get new session-id)]
                   (@done)
-                  (remove-watch connections watch-key)
+                  (remove-watch rt/connections watch-key)
                   (resolve send!))))))))])))
 
 (defn request
   ([message]
    (a/let [responses
            (.all js/Promise
-                 (for [session-id (keys @connections)]
+                 (for [session-id (keys @rt/connections)]
                    (request session-id message)))]
      (last responses)))
   ([session-id message]
    (a/let [send! (get-connection session-id)]
      (if send!
-       (let [id      (next-id)
+       (let [id      (rt/next-id)
              message (assoc message :portal.rpc/id id)]
          (.then
           (js/Promise.
            (fn [resolve reject]
-             (swap! pending-requests assoc id [resolve reject])
+             (swap! rt/pending-requests assoc id [resolve reject])
              (send! message)))
-          #(do (swap! pending-requests dissoc id) %)))
+          #(do (swap! rt/pending-requests dissoc id) %)))
        (throw (ex-info "No such portal session"
                        {:session-id session-id :message message}))))))
 
@@ -84,4 +77,4 @@
 (defn make-atom [session-id] (Portal. session-id))
 
 (defn open? [session-id]
-  (contains? @connections session-id))
+  (contains? @rt/connections session-id))

@@ -95,7 +95,10 @@
      (open portal-or-options nil)
      (open nil portal-or-options)))
   ([portal options]
-   (l/open portal (rename options))))
+   (l/open portal
+           (merge
+            (dissoc (:options rt/*session*) :value)
+            (rename options)))))
 
 (defn close
   "Close all current inspector windows.
@@ -227,7 +230,7 @@
    :added "0.38.0"
    :see-also ["open"]}
   ([value]
-   (inspect value (:options rt/*session*)))
+   (open {:value value}))
   ([value options]
    (open (assoc options :value value))))
 

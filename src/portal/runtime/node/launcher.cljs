@@ -101,18 +101,19 @@
      portal)))
 
 (defn clear [portal]
-  (if (= portal :all)
-    (c/request {:op :portal.rpc/clear})
-    (c/request (:session-id portal) {:op :portal.rpc/clear}))
-  (swap! rt/sessions select-keys (keys @c/connections)))
+  (a/do
+    (if (= portal :all)
+      (c/request {:op :portal.rpc/clear})
+      (c/request (:session-id portal) {:op :portal.rpc/clear}))
+    (rt/cleanup-sessions)))
 
 (defn close [portal]
   (a/do
     (if (= portal :all)
       (c/request {:op :portal.rpc/close})
       (c/request (:session-id portal) {:op :portal.rpc/close}))
-    (swap! rt/sessions dissoc (:session-id portal))
-    (swap! rt/sessions select-keys (keys @c/connections)))
+    (rt/close-session (:session-id portal))
+    (rt/cleanup-sessions))
   true)
 
 (defn eval-str [portal msg]
@@ -125,7 +126,7 @@
       (throw (ex-info (:message response) response)))))
 
 (defn sessions []
-  (for [session-id (keys @c/connections)] (c/make-atom session-id)))
+  (for [session-id (rt/active-sessions)] (c/make-atom session-id)))
 
 (defn url [portal]
   (browser/url {:portal portal :server @server}))

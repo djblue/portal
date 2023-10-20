@@ -1,12 +1,11 @@
 (ns ^:no-doc portal.ui.viewer.markdown
   (:require ["marked" :refer [marked]]
             [clojure.string :as str]
-            [hickory.core :as h]
-            [hickory.utils :as utils]
             [portal.colors :as c]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
+            [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
 
@@ -26,9 +25,43 @@
 (defn- ->text [^js token]
   (unescape (.-text token)))
 
+(defn- ->style [string]
+  (persistent!
+   (reduce
+    (fn [style rule]
+      (let [[k v] (str/split rule #":")]
+        (assoc! style (keyword (str/trim k)) (str/trim v))))
+    (transient {})
+    (str/split string #";"))))
+
+(defn- dom->hiccup [^js el]
+  (case (.-nodeType el)
+    3 (.-wholeText el)
+    1 (let [attrs (.-attributes el)]
+        (into
+         [(keyword (str/lower-case (.-tagName el)))
+          (persistent!
+           (reduce
+            (fn [attrs ^js attr]
+              (let [k (keyword (.-name attr))]
+                (assoc! attrs k
+                        (case k
+                          :style (->style (.-value attr))
+                          (.-value attr)))))
+            (transient {})
+            attrs))]
+         (map dom->hiccup)
+         (.-childNodes el)))))
+
+(defn- parse-dom [string]
+  (-> (js/DOMParser.)
+      (.parseFromString string "text/html")
+      (.getElementsByTagName "body")
+      (aget 0)
+      (.-childNodes)))
+
 (defn- parse-html [html]
-  (with-redefs [utils/html-escape identity]
-    (h/as-hiccup (first (h/parse-fragment html)))))
+  (into [:<>] (map dom->hiccup) (parse-dom html)))
 
 (defn- absolute-link? [href]
   (or (str/starts-with? href "http")
@@ -189,7 +222,7 @@
   (binding [*context* {:theme (theme/use-theme)}]
     (let [opts (ins/use-options)]
       [inspect-hiccup
-       [:div
+       [d/div
         {:style
          (merge
           {:gap 16
