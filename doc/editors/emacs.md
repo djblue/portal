@@ -44,7 +44,7 @@ following code.
 
 > **Note**
 > You need a build of emacs with [Embedded-WebKit-Widgets][1]
-> This only works if you're using [emacs server](https://www.gnu.org/software/emacs/manual/html_node/emacs/Emacs-Server.html) as it relies on `emacsclient` command
+> Also, this method only works if you're using [emacs server](https://www.gnu.org/software/emacs/manual/html_node/emacs/Emacs-Server.html) functionality as it relies on `emacsclient` command
 
 ```clojure
 (portal.api/open {:launcher :emacs})
@@ -56,11 +56,11 @@ following code.
 
 [1]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Embedded-WebKit-Widgets.html
 
-# Monroe & xwidget-webkit
+## Monroe & xwidget-webkit
 
-For [Monroe](https://github.com/sanel/monroe) nREPL client users:
+For [Monroe](https://github.com/sanel/monroe) nREPL client users.
 
-## The code
+### The code
 
 Add the following to your Emacs config:
 
@@ -85,18 +85,21 @@ Add the following to your Emacs config:
 
 (defun monroe-launch-portal ()
   (interactive)
-  (lk/monroe-eval-code-and-callback-with-value
+  (monroe-eval-code-and-callback-with-value
    "(do
      (require 'portal.api)
-     (let [url (portal.api/url (portal.api/open {:window-title \"monroe portal\" :launcher false :theme ::your-theme}))]
-     (add-tap #'portal.api/submit)
-     url)"
+     (let [url (portal.api/url (portal.api/open {:launcher false}))]
+       (add-tap #'portal.api/submit)
+       url)"
    (lambda (value)
      ;; value is a raw string, so we need to remove " from it
      (let ((url (string-replace "\"" "" value)))
        (message "Opening portal %s" url)
        (xwidget-webkit-browse-url url)))))
+
 ```
+
+### Usage
 
 Then in the Monroe REPL or Clojure buffer with an active Monroe session run `M-x monroe-launch-portal`.
 
