@@ -56,42 +56,52 @@ following code.
 
 [1]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Embedded-WebKit-Widgets.html
 
-# Monroe & xwidget-embed
+# Monroe & xwidget-webkit
 
 For [Monroe](https://github.com/sanel/monroe) nREPL client users:
 
-The following function starts a Portal session and opens it in `xwidget-webkit` frame. 
-Some assumptions:
+## The code
 
-1. You are connected to a Clojure nREPL server already
-2. You are using `projectile` (not strictly required, it's just that this function depends on it)
-3. Your emacs is compiled with xwidgets support
-
-Add the following to your emacs config
+Add the following to your Emacs config:
 
 ```elisp
+; -*- lexical-binding: t; -*-
+;; The line above is really important, otherwise things will not work.
+
+;; A little helper to simplify communication between Emacs and the nREPL process
+(defun monroe-eval-code-and-callback-with-value (code-str on-value)
+  (monroe-send-eval-string
+   code-str
+   (lambda (response)
+     (condition-case err
+         (monroe-dbind-response response
+                                (value status id)
+                                (when value (funcall on-value value))
+                                (when (member "done" status)
+                                  (remhash id monroe-requests)))
+       (error (message "Eval error %s" err))))))
+
+
+
 (defun monroe-launch-portal ()
   (interactive)
-  (let* ((project-root (projectile-acquire-root))
-         (default-directory project-root)
-         (portal-url-file (format "%s.portal-url" project-root)))
-    ;; initiate portal session and store session URL in the project root
-    (monroe-input-sender
-     (get-buffer-process (monroe-repl-buffer))
-     (format "(require 'portal.api) (spit \"%s\" (portal.api/url (portal.api/open {:launcher false})))"
-             portal-url-file))
-    (sleep-for 1) ;; uh... this is a hack, things can run too fast
-    ;; read the url and open a webkit frame
-    (let ((url (with-temp-buffer
-                 (insert-file-contents portal-url-file)
-                 (buffer-string))))
-      (xwidget-webkit-browse-url url))))
+  (lk/monroe-eval-code-and-callback-with-value
+   "(do
+     (require 'portal.api)
+     (let [url (portal.api/url (portal.api/open {:window-title \"monroe portal\" :launcher false :theme ::your-theme}))]
+     (add-tap #'portal.api/submit)
+     url)"
+   (lambda (value)
+     ;; value is a raw string, so we need to remove " from it
+     (let ((url (string-replace "\"" "" value)))
+       (message "Opening portal %s" url)
+       (xwidget-webkit-browse-url url)))))
 ```
 
-When in a Clojure buffer with active Monroe session run `M-x monroe-launch-portal`.
+Then in the Monroe REPL or Clojure buffer with an active Monroe session run `M-x monroe-launch-portal`.
 
 > **Note**
-> 
+>
 > This is just a jump-off point, you might want to customize this function to your
 > liking, e.g. run the code in your `user` namespace, set a different theme and so on.
 > See CIDER section for how you can extend it further.
