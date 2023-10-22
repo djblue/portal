@@ -702,12 +702,18 @@
                 *print-level* 100]
         (pp/pprint value))))))
 
+(defn- selected-values [state-val]
+  (let [values (state/selected-values state-val)]
+    (if (= (count values) 1)
+      (first values)
+      values)))
+
 (defn ^:command copy
   "Copy selected value as an edn string to the clipboard."
   [state]
   (if-let [selection (not-empty (.. js/window getSelection toString))]
     (copy-to-clipboard! selection)
-    (copy-edn! (state/get-selected-value @state))))
+    (copy-edn! (selected-values @state))))
 
 (defn- pprint-json [v]
   (.stringify js/JSON v nil 2))
@@ -716,7 +722,7 @@
   "Copy selected value as a json string to the clipboard."
   [state]
   (-> @state
-      state/get-selected-value
+      selected-values
       clj->js
       pprint-json
       str/trim
