@@ -59,7 +59,8 @@
   (future
     (build)
     (future (t/clj "-M:test" "-m" :portal.test-runner))
-    (future (t/bb "-m" :portal.test-runner))))
+    (future (t/bb "-m" :portal.test-runner))
+    (future (cljr))))
 
 (defn test "Run all clj/s tests." [] (cljs) (clj))
 
