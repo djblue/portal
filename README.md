@@ -34,6 +34,8 @@ Clojurians][london-clojurians].
 <img src="https://img.youtube.com/vi/Tj-iyDo3bq0/hqdefault.jpg" alt="London Clojurians Demo" />
 </a>
 
+More video presentations on Portal can be found [here](./doc/videos.md).
+
 ## Usage
 
 To start a repl with portal, run the **clojure >= 1.10.0** cli with:
