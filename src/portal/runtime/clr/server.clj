@@ -114,7 +114,7 @@
       (some
        (fn [file]
          (when file
-           (send-resource "application/json" (slurp file))))
+           (send-resource "application/json" (fs/slurp file))))
        [(resource (str "portal-dev/" uri))
         (resource uri)]))))
 
