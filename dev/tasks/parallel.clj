@@ -1,12 +1,19 @@
 (ns tasks.parallel
   (:require [org.httpkit.server :as http]
             [portal.runtime.cson :as cson]
+            [portal.viewer :as v]
             [tasks.tools :refer [*opts*]]))
 
 (def ^:private ^:dynamic *sessions* nil)
 
 (defn- create-sessions []
-  (atom (with-meta [] {:stdio [] :results {} :done (promise)})))
+  (atom (with-meta [] (v/for
+                       {:stdio []
+                        :results {}
+                        :done (promise)
+                        :start (System/currentTimeMillis)}
+                        {:start :portal.viewer/date-time
+                         :time  :portal.viewer/duration-ms}))))
 
 (defn- new-session [sessions]
   (-> sessions
@@ -17,19 +24,22 @@
       dec))
 
 (defn- append-result [sessions id result]
-  (let [sessions
-        (swap!
-         sessions
-         (fn [sessions]
-           (let [m       (meta sessions)
-                 results (-> m
-                             :results
-                             (assoc id result))]
-             (with-meta
-               sessions
-               (assoc m :results results)))))
-        {:keys [stdio results done]} (meta sessions)]
+  (let [{:keys [stdio results done]}
+        (meta
+         (swap!
+          sessions
+          (fn [sessions]
+            (let [m       (meta sessions)
+                  results (-> m
+                              :results
+                              (assoc id result))]
+              (with-meta
+                sessions
+                (assoc m :results results))))))]
     (when (= (count stdio) (count results))
+      (let [start (:start (meta @sessions))
+            stop  (System/currentTimeMillis)]
+        (swap! sessions vary-meta assoc :time (- stop start)))
       (deliver done true))))
 
 (defn- append-stdio [sessions id data]
