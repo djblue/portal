@@ -5,7 +5,7 @@
 If you are an emacs + cider user and would like tighter integration with portal,
 the following section may be of interest to you.
 
-``` emacs-lisp
+```elisp
 ;; Leverage an existing cider nrepl connection to evaluate portal.api functions
 ;; and map them to convenient key bindings.
 

@@ -84,7 +84,7 @@
    (for [[class style] styles]
      (str class "{" (s/style->css style) "}"))))
 
-(def ^:private language-map {"emacs-lisp" "lisp"})
+(def ^:private language-map {"emacs-lisp" "lisp" "elisp" "lisp"})
 
 (defn ^:no-doc stylesheet []
   (let [theme    (theme/use-theme)]
