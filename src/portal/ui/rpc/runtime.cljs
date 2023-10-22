@@ -8,23 +8,11 @@
 (defn call [f & args]
   (apply state/invoke f args))
 
-(defonce current-values (r/atom {}))
-
 (defn tag [value] (:tag (.-object value)))
 
 (defn rep [value] (:rep (.-object value)))
 
 (defn id [value] (:id (.-object value)))
-
-(defn deref [this]
-  (-> ((.-runtime this) 'clojure.core/deref this)
-      (.then #(swap! current-values
-                     assoc-in [(id this) 'clojure.core/deref] %))))
-
-(defn- runtime-deref [this]
-  (when (= ::not-found (get-in @current-values [(id this) 'clojure.core/deref] ::not-found))
-    (deref this))
-  (get-in @current-values [(id this) 'clojure.core/deref]))
 
 (declare ->id)
 
@@ -60,10 +48,37 @@
 
 (defmethod pprint/simple-dispatch RuntimeObject [value] (pr value))
 
-(deftype RuntimeAtom [runtime object]
+(defn watching? [^RuntimeAtom runtime-atom]
+  (not= ::loading @(.-a runtime-atom)))
+
+(defn fetch [^RuntimeAtom this]
+  (-> ((.-runtime this) 'clojure.core/deref this)
+      (.then (fn [value]
+               (reset! (.-a this) value))))
+  nil)
+
+(deftype RuntimeAtom [runtime object a]
   Runtime
   cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
-  IDeref      (-deref   [this] (runtime-deref this))
+
+  IAtom
+  IDeref
+  (-deref [this]
+    (let [v @a]
+      (if-not (= ::loading v)
+        v
+        (fetch this))))
+  IWatchable
+  (-add-watch [this key f]
+    (-add-watch
+     a key
+     (fn [key _a old new]
+       (f key this old new))))
+  (-remove-watch [_this key]
+    (-remove-watch a key))
+  (-notify-watches [_this oldval newval]
+    (-notify-watches a oldval newval))
+
   IMeta       (-meta    [_] (:meta object))
   IHash       (-hash    [_] (:id object))
   IEquiv
@@ -72,9 +87,7 @@
          (= (:id object) (id other))))
   IWithMeta
   (-with-meta [_this m]
-    (RuntimeAtom.
-     runtime
-     (assoc object :meta m)))
+    (RuntimeAtom. runtime (assoc object :meta m) a))
   IPrintWithWriter
   (-pr-writer [_this writer _opts]
     (-write writer (:pr-str object))))
@@ -88,7 +101,7 @@
   (if (and
        (not= (:tag object) :var)
        (contains? (:protocols object) :IDeref))
-    (->RuntimeAtom call object)
+    (->RuntimeAtom call object (r/atom ::loading))
     (->RuntimeObject call object)))
 
 (declare ->value)
@@ -99,7 +112,6 @@
     ;; connection session which wouldn't have any knowledge of previously sent
     ;; values, especially on process restarts.
     (swap! state/value-cache dissoc id)
-    (swap! current-values dissoc id)
     (call 'portal.runtime/cache-evict id)))
 
 (defonce ^:private registry

@@ -148,7 +148,8 @@
            (error e)))))
    :portal.rpc/invalidate
    (fn [message send!]
-     (rt/deref (:atom message))
+     (when (rt/watching? (:atom message))
+       (rt/fetch (:atom message)))
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/close
@@ -164,7 +165,6 @@
    (fn [message send!]
      (a/do
        (state/dispatch! state/state state/clear)
-       (reset! rt/current-values {})
        (send! {:op :portal.rpc/response
                :portal.rpc/id (:portal.rpc/id message)})))
    :portal.rpc/push-state
