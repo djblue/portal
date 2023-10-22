@@ -54,6 +54,8 @@
          (into [] (apply concat stdio))
          (assoc m :stdio stdio))))))
 
+(def ^:dynamic *portal* true)
+
 (defn- with-session* [f & args]
   (let [sessions *sessions*
         id       (new-session sessions)
@@ -72,7 +74,7 @@
     (try
       (binding [*out*  out
                 *err*  err
-                *opts* (assoc-in *opts* [:extra-env "PORTAL_PORT"] port)]
+                *opts* (cond-> *opts* *portal* (assoc-in [:extra-env "PORTAL_PORT"] port))]
         (let [result (apply f args)]
           (append-result sessions id result)
           result))
