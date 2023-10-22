@@ -49,7 +49,7 @@
 
 (defn- open-debug [{:keys [options] :as session}]
   (try
-    (when (:debug options)
+    (when (= :server (:debug options))
       ((requiring-resolve 'portal.runtime.debug/open) session))
     (catch Exception e (tap> e) nil)))
 
