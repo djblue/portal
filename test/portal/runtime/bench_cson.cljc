@@ -22,35 +22,34 @@
 (defn- pr-meta [v] (binding [*print-meta* true] (pr-str v)))
 
 (defn run-benchmark []
-  (let [n 1000 bench-data (assoc bench-data :all bench-data)]
-    (concat
-     (for [[data value] bench-data
-           encoding [:transit :edn :cson]]
-       {:time
-        (:total
+  (doall
+   (let [n 100 bench-data (assoc bench-data :all bench-data)]
+     (concat
+      (for [[data value] bench-data
+            encoding [:transit :edn :cson]]
+        (merge
          (case encoding
            :transit (let [value (transit/write value)]
-                      (b/run :transit (transit/read value) n))
+                      (b/run (transit/read value) n))
            :edn     (let [value (pr-meta value)]
-                      (b/run :edn     (edn/read-string value) n))
+                      (b/run (edn/read-string value) n))
            :cson    (let [value (cson/write value)]
-                      (b/run :cson    (cson/read value) n))))
-        :test :read
-        :encoding encoding
-        :data data
-        :benchmark (pr-str (keyword (name encoding) "read"))})
-     (for [[data value] bench-data
-           encoding [:transit :edn :cson]]
-       {:time
-        (:total
+                      (b/run (cson/read value) n)))
+         {:test :read
+          :encoding encoding
+          :data data
+          :benchmark (pr-str (keyword (name encoding) "read"))}))
+      (for [[data value] bench-data
+            encoding [:transit :edn :cson]]
+        (merge
          (case encoding
-           :transit (b/run :transit (transit/write value) n)
-           :edn     (b/run :edn     (pr-meta value) n)
-           :cson    (b/run :cson    (cson/write value) n)))
-        :test :write
-        :encoding encoding
-        :data data
-        :benchmark (pr-str (keyword (name encoding) "write"))}))))
+           :transit (b/run (transit/write value) n)
+           :edn     (b/run (pr-meta value) n)
+           :cson    (b/run (cson/write value) n))
+         {:test :write
+          :encoding encoding
+          :data data
+          :benchmark (pr-str (keyword (name encoding) "write"))}))))))
 
 (defn charts [data]
   (->> (group-by :data data)
@@ -59,9 +58,9 @@
           (reduce
            +
            (keep
-            (fn [{:keys [encoding time]}]
+            (fn [{:keys [encoding total]}]
               (when (= :cson encoding)
-                time))
+                total))
             values)))
         >)
        (map
@@ -70,16 +69,17 @@
             [:div
              [:h3 {:style {:text-align :center}} label]
              [:portal.viewer/inspector
-              (v/vega-lite
-               {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
-                :data {:values values}
-                :mark {:type :bar :tooltip true}
-                :encoding
-                {:x {:aggregate :sum :field :time}
-                 :y {:field :benchmark
-                     :type :ordinal
-                     :sort {:op :sum :field :time :order :descending}}
-                 :color {:field :encoding}}})]]
+              (-> {:$schema "https://vega.github.io/schema/vega-lite/v5.json"
+                   :data {:values values}
+                   :mark {:type :bar :tooltip true}
+                   :encoding
+                   {:x {:aggregate :sum :field :total}
+                    :y {:field :benchmark
+                        :type :ordinal
+                        :sort {:op :sum :field :total :order :descending}}
+                    :color {:field :encoding}}}
+                  (v/vega-lite)
+                  (vary-meta assoc :value (get bench-data label bench-data)))]]
             {:key (str label)})))
        (into [:div
               {:style {:display :grid
@@ -93,8 +93,8 @@
     (for [[label tests] (group-by :data data)]
       (with-meta
         (into {:label label}
-              (for [{:keys [encoding test time]} tests]
-                [(keyword (name encoding) (name test)) time]))
+              (for [{:keys [encoding test total]} tests]
+                [(keyword (name encoding) (name test)) total]))
         {:portal.viewer/for
          (zipmap (for [{:keys [encoding test]} tests]
                    (keyword (name encoding) (name test)))
@@ -116,16 +116,16 @@
     :mark :bar
     :encoding
     {:x {:field :data
-         :sort {:op :sum :field :time :order :descending}}
-     :y {:field :time
+         :sort {:op :sum :field :total :order :descending}}
+     :y {:field :total
          :type :quantitative
          :aggregate :sum}
      :xOffset {:field :benchmark
-               :sort {:op :sum :field :time :order :descending}}
+               :sort {:op :sum :field :total :order :descending}}
      :color {:field :benchmark}}}))
 
 (comment
-  (def data (doall (run-benchmark)))
+  (def data (run-benchmark))
   (tap> [data (table data) (charts data) (combined-chart data)])
 
   (def no-edn (remove (comp #{:edn} :encoding) data))

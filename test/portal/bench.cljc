@@ -22,7 +22,7 @@
 (defn trunc [v]
   (/ (floor (* 100 v)) 100.0))
 
-(defn- simple-stats [expr results]
+(defn- simple-stats [results]
   (let [n       (count results)
         results (into [] (sort results))
         median  (nth results (quot n 2))
@@ -33,18 +33,16 @@
        :avg :portal.viewer/duration-ms
        :med :portal.viewer/duration-ms
        :total :portal.viewer/duration-ms}}
-    {:label expr
-     :iter  n
+    {:iter  n
      :min   (first results)
      :max   (last results)
      :avg   (trunc (/ total n))
      :med   median
      :total (trunc total)}))
 
-(defn run* [expr f ^long n]
+(defn run* [f ^long n]
   (dotimes [_ n] (f))
   (simple-stats
-   expr
    (loop [i 0 results (transient [])]
      (if (== i n)
        (persistent! results)
@@ -54,4 +52,4 @@
          (recur (unchecked-inc i)
                 (conj! results (trunc end))))))))
 
-(defmacro run [label expr n] `(run* ~label #(do ~expr) ~n))
+(defmacro run [expr n] `(run* #(do ~expr) ~n))
