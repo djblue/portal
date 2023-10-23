@@ -36,7 +36,7 @@
 
        [:p.hiccup]
        {:font-family "-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji"
-        :font-size (:font-size theme)
+        :font-size "1.1em"
         :line-height "1.5em"
         :margin 0}
 
@@ -46,8 +46,10 @@
                      :border-radius (:border-radius theme)}
 
        [:code.hiccup]
-       {:background (::c/background2 theme)
+       {:background bg2
+        :display :inline-block
         :border-radius (:border-radius theme)
+        :border [1 :solid (::c/border theme)]
         :box-sizing :border-box
         :padding [0 (* 1.5 (:padding theme))]}
 
