@@ -282,6 +282,7 @@
      (doseq [a @watch-registry]
        (remove-watch a session-id))
      (reset! watch-registry #{}))
+   (cleanup-sessions)
    (done nil)))
 
 (defn- cache-evict [id]
