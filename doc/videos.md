@@ -1,3 +1,10 @@
+## 2023-10-25 - Portal Internals (by Chris Badahdah)
+
+<a target="_blank" href="https://www.youtube.com/watch?v=NO9D3LSS4WU">
+<img src="https://img.youtube.com/vi/NO9D3LSS4WU/hqdefault.jpg"
+     alt="Portal Internals (by Chris Badahdah)" />
+</a>
+
 ## 2023-04-06 - Clojure visual-tools meeting 17 - Various Updates
 
 <a target="_blank" href="https://www.youtube.com/watch?v=OwcoAbsJP8g&t=4002">
