@@ -1,3 +1,31 @@
+## 0.49.0 - 2023-10-30
+
+- Add more viewer fns to portal.viewer 062f3a8
+- Improve style parsing for markdown viewer 65e0873
+- Better vscode theme color mapping 4d6cd8f
+
+### New Features
+
+- Adds portal.api/selected 2984451
+  - Thanks @handerpeder!
+- Support multi-selection in copy and copy-json commands 1eb0f69
+- Add runtime icon indicator 3e6b60e
+- Add `:launcher :iframe` as flag for portal.web 3d5d5a5
+  - Thanks @FelipeCortez !
+
+### Documentation
+
+- Add video presentations to docs 51e5756
+- Update emacs.md with a guide for Monroe and xwidget brower 88f7ce5
+  - Thanks @lukaszkorecki!
+- Update default viewer doc to use portal.viewer ns b939f75
+- Document table viewer options 0ec96a5
+
+### Bug Fixes
+
+- Fix rendering bug where maps contain `:key` key 89b381d
+- Fix toggle-expand for string / objects d0def02
+
 ## 0.48.0 - 2023-09-18
 
 - Prefer `umd` export for npm modules 86b2b61
@@ -8,6 +36,7 @@
 
 - Add limitation docs around lazy values 6a0853a
 - Add vega-lite concat chart examples 7966410
+
 ### Bug Fixes
 
 - Add gaurds to tap-list around bad lazy values a56b786
