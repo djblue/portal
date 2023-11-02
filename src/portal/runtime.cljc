@@ -3,10 +3,10 @@
   (:require #?(:clj  [portal.sync  :as a]
                :cljr [portal.sync  :as a]
                :cljs [portal.async :as a])
-            [portal.viewer :as v]
             [clojure.datafy :refer [datafy nav]]
             [clojure.pprint :as pprint]
-            [portal.runtime.cson :as cson]))
+            [portal.runtime.cson :as cson]
+            [portal.viewer :as v]))
 
 (def ^:private tagged-type (type (cson/->Tagged "tag" [])))
 
