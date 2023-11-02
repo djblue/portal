@@ -116,7 +116,6 @@
   ([attrs code]
    (let [theme    (theme/use-theme)
          opts     (ins/use-options)
-         context  (ins/use-context)
          code     (if-let [search-text (ins/use-search-text)]
                     (->> (str/split-lines code)
                          (filter
@@ -128,7 +127,7 @@
                     code)
          out      (if-let [language (or (:class attrs)
                                         (some->
-                                         (get-in context [:portal.viewer/code :language])
+                                         (get-in opts [:props :portal.viewer/code :language])
                                          name))]
                     (hljs/highlight
                      code

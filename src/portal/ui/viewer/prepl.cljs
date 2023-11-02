@@ -43,7 +43,8 @@
        [:.ansi-bold]       {:font-weight :bold}})]))
 
 (defn- inspect-prepl-ret [value index]
-  (let [theme (theme/use-theme)]
+  (let [theme (theme/use-theme)
+        row   (* 2 index)]
     [ins/with-collection
      value
      [d/div
@@ -51,24 +52,29 @@
         [ins/with-key
          :form
          [select/with-position
-          {:row (* 2 index) :column 0}
-          [ins/with-context
-           {:portal.viewer/code {:language "clojure"}}
-           [ins/inspector {:portal.viewer/default :portal.viewer/code} form]]]])
+          {:row row :column 0}
+          [ins/inspector
+           {:portal.viewer/code {:language "clojure"}
+            :portal.viewer/default :portal.viewer/code}
+           form]]])
       [d/div
        {:style {:display :flex
-                :align-items :center}}
+                :position :relative
+                :gap (:padding theme)}}
        (when (= :ret (:tag value))
          [icons/sign-out-alt
           {:style
-           {:padding (:padding theme)
+           {:top 0
+            :position :sticky
+            :height :fit-content
+            :padding [(:padding theme) 0]
             :color (if (:exception value)
                      (::c/exception theme)
                      (::c/border theme))}}])
        [ins/with-key
         :val
         [select/with-position
-         {:row (inc (* 2 index)) :column 0}
+         {:row (inc row) :column 0}
          [d/div
           {:style {:width "100%"
                    :padding
@@ -76,20 +82,57 @@
           [ins/inspector
            (try
              (edn/read-string (:val value))
-             (catch :default _ (:val value)))]]]]]]]))
+             (catch :default _ (:val value)))]]]]
+       (when-let [ms (:ms value)]
+         (when (> ms 100)
+           [ins/with-key
+            :ms
+            [select/with-position
+             {:row (inc row) :column 1}
+             [d/div
+              {:style {:top 0
+                       :position :sticky
+                       :height :fit-content
+                       :padding [(:padding theme) 0]}}
+              [ins/inspector
+               {:portal.viewer/default :portal.viewer/duration-ms}
+               ms]]]]))]]]))
 
-(defn- title-bar-actions []
+(defn- has-exception? [value] (some :exception value))
+
+(defn- title-bar-actions [value]
   (let [theme    (theme/use-theme)
         state    (state/use-state)
         context  (ins/use-context)
-        location (state/get-location context)]
+        location (state/get-location context)
+        ex?      (has-exception? value)
+        border   (if ex?
+                   (::c/exception theme)
+                   (::c/border theme))]
     [d/div
      {:style
       {:display       :flex
        :gap           (:padding theme)
        :box-sizing    :border-box
+       :position      :relative
        :padding       (* 1.6 (:padding theme))
-       :border-bottom [1 :solid (::c/border theme)]}}
+       :border        [1 :solid border]
+       :z-index       1
+       :border-top-left-radius (:border-radius theme)
+       :border-top-right-radius (:border-radius theme)}}
+
+     (when ex?
+       [d/div
+        {:style
+         {:opacity    0.15
+          :position :absolute
+          :left 0
+          :right 0
+          :top 0
+          :bottom 0
+          :z-index -1
+          :background (::c/exception theme)}}])
+
      [icons/times-circle
       {:size :s
        :style {:opacity 0.75
@@ -127,43 +170,48 @@
         bg    (ins/get-background)]
     [d/div
      {:style
-      {:background    bg
-       :border-radius (:border-radius theme)
-       :border        [1 :solid (::c/border theme)]}}
-     [title-bar-actions]
-     [:pre
+      {:background    bg}}
+     [title-bar-actions value]
+     [d/div
       {:style
-       {:margin         0
-        :display        :flex
-        :background     bg
-        :max-height     (when-not (:expanded? opts) "24rem")
-        :overflow       :auto
-        :flex-direction :column-reverse
-        :white-space    :pre-wrap
-        :box-sizing     :border-box
-        :padding        (:padding theme)
-        :font-size      (:font-size theme)
-        :font-family    (:font-family theme)}}
-      [ins/with-collection
-       value
-       (reverse
-        (map-indexed
-         (fn [index value]
-           (with-meta
-             (if (#{:tap :ret} (:tag value))
-               [ins/with-key
-                index
-                [inspect-prepl-ret value index]]
-               [d/span
-                {:style
-                 {:color
-                  (if (= (:tag value) :err)
-                    (::c/exception theme)
-                    (::c/text theme))}
-                 :dangerouslySetInnerHTML
-                 {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
-             {:key index}))
-         value))]]]))
+       {:border-left    [1 :solid (::c/border theme)]
+        :border-right   [1 :solid (::c/border theme)]
+        :border-bottom  [1 :solid (::c/border theme)]
+        :border-bottom-left-radius (:border-radius theme)
+        :border-bottom-right-radius (:border-radius theme)}}
+      [:pre
+       {:style
+        {:margin         0
+         :display        :flex
+         :background     bg
+         :max-height     (when-not (:expanded? opts) "24rem")
+         :overflow       (when-not (:expanded? opts) :auto)
+         :flex-direction :column-reverse
+         :white-space    :pre-wrap
+         :box-sizing     :border-box
+         :padding        (:padding theme)
+         :font-size      (:font-size theme)
+         :font-family    (:font-family theme)}}
+       [ins/with-collection
+        value
+        (reverse
+         (map-indexed
+          (fn [index value]
+            (with-meta
+              (if (#{:tap :ret} (:tag value))
+                [ins/with-key
+                 index
+                 [inspect-prepl-ret value index]]
+                [d/span
+                 {:style
+                  {:color
+                   (if (= (:tag value) :err)
+                     (::c/exception theme)
+                     (::c/text theme))}
+                  :dangerouslySetInnerHTML
+                  {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
+              {:key index}))
+          value))]]]]))
 
 (defn io? [value]
   (s/valid? ::prepl value))
