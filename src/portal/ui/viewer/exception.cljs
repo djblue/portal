@@ -125,7 +125,7 @@
         (if expanded? trace (take 1 trace)))]
       [d/div
        {:style
-        {:width "2em" :text-align :right}}
+        {:min-width "3em" :text-align :right}}
        (when can-expand?
          [d/span
           {:style
