@@ -70,23 +70,43 @@
       (set! (.-onload child)
             (fn [] (f))))))
 
-(defn- open-iframe [{:keys [iframe-parent]} url]
-  (let [iframe
-        (doto (.createElement js/document "iframe")
-          (.setAttribute "src" url)
-          (.setAttribute "style" "width: 100%; height: 100%; border: 0"))]
-    (.appendChild iframe-parent iframe)
-    (-> iframe .-contentWindow .-window .-opener (set! js/window))
-    (reset! c/connection (.-contentWindow iframe))))
+(defn- open-iframe [{:keys [iframe-parent opener] :as options} url]
+  (prn (dissoc options :opener))
+  (js/console.log opener)
+  (let [iframe (doto (.createElement js/document "iframe")
+                 (.setAttribute "src" url)
+                 (.setAttribute "style" "width: 100%; height: 100%; border: 0"))
+        ^js el (or
+                (when-not (string? iframe-parent) iframe-parent)
+                (.querySelector js/document iframe-parent)
+                (.-body js/document)
+                #_(throw (ex-info
+                          "Failed to find :iframe-parent"
+                          {:iframe-parent iframe-parent})))]
+    (.appendChild el iframe)
+    (set! (-> iframe .-contentWindow .-window .-opener) opener)
+    (.portal.runtime.web.client.setWindow opener (.-contentWindow iframe))
+    #_(reset! c/connection (.-contentWindow iframe))))
+
+(defn- open-parent [options url]
+  (js/window.parent.portal.web.open
+   (pr-str (-> options
+               (select-keys [:mode :theme :iframe-parent])
+               (assoc :launcher :iframe :url url)))
+   js/window))
 
 (defn open [options]
   (swap! rt/sessions assoc-in [(:session-id @c/session) :options] options)
   (swap! c/session rt/open-session)
-  (let [options (merge options @rt/default-options)
-        url     (str->src (index/html {:code-url (main-js options)
-                                       :platform "web"})
-                          "text/html")]
+  (let [options (if (= :iframe (:launcher options))
+                  options
+                  (merge options @rt/default-options))
+        url     (or (:url options)
+                    (str->src (index/html {:code-url (main-js options)
+                                           :platform "web"})
+                              "text/html"))]
     (case (:launcher options)
+      :parent (open-parent options url)
       :iframe (open-iframe options url)
       (open-window options url)))
   (c/make-atom (:session-id @c/session)))

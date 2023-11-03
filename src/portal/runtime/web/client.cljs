@@ -3,6 +3,9 @@
 
 (defonce connection (atom nil))
 
+(defn setWindow [window]
+  (reset! connection window))
+
 (defonce session (atom {:session-id ::id}))
 
 (defn request

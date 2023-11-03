@@ -8,6 +8,7 @@
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]
+            [portal.ui.options :as options]
             [portal.ui.rpc :as rpc]
             [portal.ui.sci :as sci]
             [portal.ui.select :as select]
@@ -97,6 +98,30 @@
 
 (.addEventListener js/window "error" error-handler)
 (.addEventListener js/window "unhandledrejection" error-handler)
+
+(defn- in-iframe? []
+  (not (identical? (.-self js/window) (.-top js/window))))
+
+(defonce ^:private instance (atom nil))
+
+(defn debug []
+  (when (nil? @instance)
+    (if-not (in-iframe?)
+      (p/open {:mode :dev :value (dashboard)})
+      (let [id "portal-debug-client"]
+        (-> (rpc/call 'portal.internals.viewer/portal-web id)
+            (.then (fn []
+                     (js/setTimeout
+                      (fn []
+                        (reset! instance
+                                (p/open {:mode :dev
+                                         :value (dashboard)
+                                         :launcher :parent
+                                         :iframe-parent (str "#" id)
+                                         :window-title id})))
+                      500))))))))
+
+(reset! options/debug debug)
 
 (comment
   (def portal (p/open))

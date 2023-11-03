@@ -17,13 +17,17 @@
 
 (defonce ^:private options-context (react/createContext nil))
 
+(def ^:no-doc debug (atom nil))
+
 (defn with-options [& children]
-  (let [[options set-options!] (react/useState ::loading)]
+  (let [[options set-options!] (react/useState ::loading)
+        debug-fn (and (= :client (:debug options)) @debug)]
     (react/useEffect
      (fn []
        (-> (state/invoke `portal.runtime/get-options)
            (.then set-options!)))
      #js [])
+    (react/useEffect #(when debug-fn (debug-fn)) #js [debug-fn])
     (into [:r> (.-Provider options-context)
            #js {:value (if (= options ::loading)
                          options

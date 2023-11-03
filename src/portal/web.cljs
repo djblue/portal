@@ -1,5 +1,6 @@
 (ns portal.web
-  (:require [clojure.set :as set]
+  (:require [clojure.edn :as edn]
+            [clojure.set :as set]
             [portal.runtime :as rt]
             [portal.runtime.web.client :as c]
             [portal.runtime.web.launcher :as l]
@@ -40,10 +41,18 @@
 
 (defn ^:export open
   "Open a new inspector window."
-  ([] (open nil))
+  ([]
+   (open nil))
   ([options]
-   (s/assert-options options)
-   (l/open (rename options))))
+   (open options (or js/window
+                     (nth (js-arguments) 1))))
+  ([options opener]
+   (let [options (-> (if-not (string? options)
+                       options
+                       (edn/read-string options))
+                     (assoc :opener opener))]
+     (s/assert-options options)
+     (l/open (rename options)))))
 
 (defn ^:export close
   "Close all current inspector windows."

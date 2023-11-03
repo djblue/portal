@@ -88,10 +88,10 @@
     (binding [*sessions* sessions
               *opts*     (assoc *opts* :session with-session*)]
       (try
-        (f)
-        (deref (-> sessions deref meta :done) 60000 ::timeout)
-        (->> sessions deref meta :results (sort-by first) (map second))
-        @sessions
+        (future (f))
+        #_(deref (-> sessions deref meta :done) 60000 ::timeout)
+        #_(->> sessions deref meta :results (sort-by first) (map second))
+        sessions
         (catch Exception e
           (throw (ex-info (ex-message e) (assoc (ex-data e) :stdio @sessions))))))))
 

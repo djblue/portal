@@ -2,7 +2,9 @@
   (:require ["highlight.js" :as hljs]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
+            [portal.ui.rpc :as rpc]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
@@ -110,12 +112,16 @@
 
 (defn inspect-pr-str [value] [highlight-clj (pr-str value)])
 
+(defn eval-fn [s]
+  (rpc/call 'portal.internals.viewer/eval-str s))
+
 (defn inspect-code
   ([code]
    (inspect-code nil code))
   ([attrs code]
    (let [theme    (theme/use-theme)
          opts     (ins/use-options)
+         eval-fn  (:eval-fn opts eval-fn)
          code     (if-let [search-text (ins/use-search-text)]
                     (->> (str/split-lines code)
                          (filter
@@ -146,6 +152,19 @@
         :background    (ins/get-background)
         :border-radius (:border-radius theme)
         :max-height    (when-not (:expanded? opts) "24rem")}}
+      (when eval-fn
+        [icons/play-circle
+         {:style {:cursor :pointer
+                  :position :absolute
+                  :right (:padding theme)
+                  :top (:padding theme)
+                  :opacity 0.25}
+          :style/hover
+          {:opacity 1
+           :color (::c/diff-add theme)}
+          :on-click (fn [e]
+                      (.stopPropagation e)
+                      (eval-fn code))}])
       [:pre
        {:on-click
         (fn [e]
