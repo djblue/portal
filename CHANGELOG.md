@@ -1,3 +1,11 @@
+## 0.49.1 - 2023-11-07
+
+- Make docs more responsive 326e8a8
+- Make markdown and hiccup viewer css more responsive 9c0e968
+- Improve default hiccup styles 47e6fd9
+- Improve prepl viewer styles 7786680
+- Improve exception viewer styles ed7b4ad
+
 ## 0.49.0 - 2023-10-30
 
 - Add more viewer fns to portal.viewer 062f3a8
