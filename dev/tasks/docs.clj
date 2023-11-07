@@ -11,7 +11,7 @@
 
 (def ^:private flex
   {:gap 9
-   :width 896
+   :max-width 896
    :padding 40
    :display :flex
    :flex-direction :column
