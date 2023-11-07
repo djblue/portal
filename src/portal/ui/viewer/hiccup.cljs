@@ -61,16 +61,16 @@
         :border-left [(:padding theme) :solid (::c/border theme)]}
 
        [:table.hiccup]
-       {:margin-left 1
-        :margin-right 1
+       {:margin 1
         :color (::c/text theme)
+        :display :block
         :font-size (:font-size theme)
-        :width "calc(100% - 2px)"
         :overflow :auto
+        :max-width "calc(100% - 2px)"
+        :width :max-content
         :border-style :hidden
         :border-collapse :collapse
-        :border-radius (:border-radius theme)
-        :box-shadow [0 0 0 1 (::c/border theme)]}
+        :border-radius (:border-radius theme)}
 
        [:th.hiccup]
        {:font-weight :bold

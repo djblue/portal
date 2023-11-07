@@ -227,7 +227,7 @@
          (merge
           {:gap 16
            :width 896
-           :max-width "100%"
+           :max-width "calc(100vw - 36px)"
            :display :flex
            :box-sizing :border-box
            :flex-direction :column}
