@@ -3,6 +3,7 @@
             ["@fortawesome/free-solid-svg-icons/faArrowLeft" :refer [faArrowLeft]]
             ["@fortawesome/free-solid-svg-icons/faArrowRight" :refer [faArrowRight]]
             ["@fortawesome/free-solid-svg-icons/faArrowUp" :refer [faArrowUp]]
+            ["@fortawesome/free-solid-svg-icons/faAt" :refer [faAt]]
             ["@fortawesome/free-solid-svg-icons/faBan" :refer [faBan]]
             ["@fortawesome/free-solid-svg-icons/faCaretDown" :refer [faCaretDown]]
             ["@fortawesome/free-solid-svg-icons/faCaretLeft" :refer [faCaretLeft]]
@@ -19,6 +20,8 @@
             ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt" :refer [faExternalLinkAlt]]
             ["@fortawesome/free-solid-svg-icons/faInfoCircle" :refer [faInfoCircle]]
             ["@fortawesome/free-solid-svg-icons/faMinusCircle" :refer [faMinusCircle]]
+            ["@fortawesome/free-solid-svg-icons/faPause" :refer [faPause]]
+            ["@fortawesome/free-solid-svg-icons/faPlay" :refer [faPlay]]
             ["@fortawesome/free-solid-svg-icons/faPlayCircle" :refer [faPlayCircle]]
             ["@fortawesome/free-solid-svg-icons/faPlusCircle" :refer [faPlusCircle]]
             ["@fortawesome/free-solid-svg-icons/faSignOutAlt" :refer [faSignOutAlt]]
@@ -35,6 +38,7 @@
 (def arrow-left (partial icon faArrowLeft))
 (def arrow-right (partial icon faArrowRight))
 (def arrow-up (partial icon faArrowUp))
+(def at (partial icon faAt))
 (def ban (partial icon faBan))
 (def caret-down (partial icon faCaretDown))
 (def caret-left (partial icon faCaretLeft))
@@ -51,6 +55,8 @@
 (def external-link (partial icon faExternalLinkAlt))
 (def info-circle (partial icon faInfoCircle))
 (def minus-circle (partial icon faMinusCircle))
+(def pause (partial icon faPause))
+(def play (partial icon faPlay))
 (def play-circle (partial icon faPlayCircle))
 (def plus-circle (partial icon faPlusCircle))
 (def sign-out-alt (partial icon faSignOutAlt))

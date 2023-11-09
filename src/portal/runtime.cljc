@@ -271,7 +271,7 @@
               (ex-info "Failed to receive value." {:value-type (type new-value)} e))))))
 
 (defn- get-options []
-  (let [options (:options *session*)]
+  (let [{:keys [options watch-registry]} *session*]
     (with-meta
       (merge
        {:name (if (= :dev (:mode options))
@@ -288,7 +288,8 @@
                    (exists? js/process)        "node"
                    (exists? js/PLANCK_VERSION) "planck"
                    :else                        "web"))
-        :value tap-list}
+        :value tap-list
+        :watch-registry watch-registry}
        options)
       {::no-cache true})))
 
