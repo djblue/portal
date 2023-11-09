@@ -70,12 +70,14 @@
      :cljr (instance? clojure.lang.Atom o)
      :cljs (satisfies? cljs.core/IAtom o)))
 
+(defn- notify [session-id a]
+  (when-let [request @request]
+    (request session-id {:op :portal.rpc/invalidate :atom a})))
+
 (defn- invalidate [session-id a old new]
   (when-not (= old new)
     (set-timeout
-     #(when (= @a new)
-        (when-let [request @request]
-          (request session-id {:op :portal.rpc/invalidate :atom a})))
+     #(when (= @a new) (notify session-id a))
      100)))
 
 (defn- watch-atom [a]
@@ -89,6 +91,25 @@
            (do
              (add-watch a session-id #'invalidate)
              (conj atoms a))))))))
+
+(defn- toggle-watch
+  "Toggle watching an atom for a given Portal session."
+  {:command true}
+  [a]
+  (let [{:keys [session-id watch-registry]} *session*]
+    (when
+     (contains?
+      (swap!
+       watch-registry
+       (fn [atoms]
+         (if (contains? atoms a)
+           (do
+             (remove-watch a session-id)
+             (disj atoms a))
+           (do
+             (add-watch a session-id #'invalidate)
+             (conj atoms a))))) a)
+      (set-timeout #(notify session-id a) 0))))
 
 (defn- value->key
   "Include metadata when capturing values in cache."
@@ -377,5 +398,8 @@
                     #'meta            {:predicate can-meta?}
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
-                    #'nav             {:private true}}]
+                    #'nav             {:private true}
+                    #'toggle-watch    {:private false
+                                       :predicate atom?
+                                       :name 'portal.api/toggle-watch}}]
   (register! var opts))
