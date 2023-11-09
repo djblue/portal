@@ -45,6 +45,19 @@
    (s/assert-options options)
    (l/open (rename options))))
 
+(defn inspect
+  "Open a new portal window to inspect a particular value.
+
+   - value: a value to inspect.
+   - options: see `portal.web/open` for options."
+  {:command true
+   :added "0.50.0"
+   :see-also ["open"]}
+  ([value]
+   (open {:value value}))
+  ([value options]
+   (open (assoc options :value value))))
+
 (defn ^:export close
   "Close all current inspector windows."
   []

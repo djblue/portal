@@ -100,8 +100,8 @@
 
 (comment
   (def portal (p/open))
-  (def portal (p/open {:mode :dev :value (dashboard)}))
-  (def portal (p/open {:mode :dev :value state/state}))
+  (def portal (p/inspect (dashboard) {:mode :dev}))
+  (def portal (p/inspect state/state {:mode :dev}))
 
   (def ex (ex-info "error" {}))
   (js/Promise.reject ex)
