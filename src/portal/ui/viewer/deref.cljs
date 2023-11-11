@@ -42,10 +42,6 @@
 
         :on-mouse-enter (fn [_e] (reset! hover true))
         :on-mouse-leave (fn [_e] (reset! hover false))}
-       [icons/at
-        {:title (str "Click to select atom. "
-                     (when-not deref?
-                       "(watch paused)"))}]
        (when @hover
          (if deref?
            [icons/pause
@@ -59,7 +55,11 @@
              :on-click
              (fn [e]
                (.stopPropagation e)
-               (rpc/call 'portal.api/toggle-watch value))}]))])))
+               (rpc/call 'portal.api/toggle-watch value))}]))
+       [icons/at
+        {:title (str "Click to select atom. "
+                     (when-not deref?
+                       "(watch paused)"))}]])))
 
 (defn inspect-deref [value]
   [d/div
