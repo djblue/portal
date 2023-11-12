@@ -3,6 +3,7 @@
   (:require [clojure.string :as str]
             [portal.async :as a]
             [portal.runtime.cson :as cson]
+            [portal.runtime.macros :as m]
             [portal.ui.cljs :as cljs]
             [portal.ui.rpc.runtime :as rt]
             [portal.ui.state :as state]
@@ -12,14 +13,14 @@
 (defn call [f & args]
   (apply state/invoke f args))
 
-(when (exists? js/BigInt)
-  (extend-type js/BigInt
-    IHash
-    (-hash [this]
-      (hash (.toString this)))
-    IPrintWithWriter
-    (-pr-writer [this writer _opts]
-      (-write writer (str this "N")))))
+(m/extend-type?
+ js/BigInt
+ IHash
+ (-hash [this]
+        (hash (.toString this)))
+ IPrintWithWriter
+ (-pr-writer [this writer _opts]
+             (-write writer (str this "N"))))
 
 (when (exists? js/Uint8Array)
   (extend-type js/Uint8Array
