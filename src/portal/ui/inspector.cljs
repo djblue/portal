@@ -538,6 +538,20 @@
          :padding (:padding theme)
          :border-right [1 :solid (::c/border theme)]}}
        [preview values]]
+
+      (when-let [ns (:map-ns (use-options))]
+        [s/div {:title "Namespaced map."
+                :style
+                {:box-sizing :border-box
+                 :padding (:padding theme)
+                 :display :flex
+                 :border-right [1 :solid (::c/border theme)]}}
+         [s/span {:style {:color (::c/tag theme)}} "#"]
+         [theme/with-theme+
+          {::c/keyword (::c/namespace theme)}
+          [select/with-position {:row -2 :column 0}
+           [with-key 'ns [inspector ns]]]]])
+
       (when (seq metadata)
         [coll-action
          {:on-click
@@ -547,11 +561,12 @@
           :title "metadata"}])
 
       (when-let [type (-> values meta :portal.runtime/type)]
-        [s/div {:style
+        [s/div {:title "Value type."
+                :style
                 {:box-sizing :border-box
                  :padding (:padding theme)
                  :border-right [1 :solid (::c/border theme)]}}
-         [select/with-position {:row 0 :column 0} [inspector type]]])]
+         [select/with-position {:row -2 :column 1} [inspector type]]])]
      (when show-meta?
        [s/div
         {:style
@@ -633,7 +648,10 @@
          {:row index :column 0}
          [with-context
           {:key? true}
-          [container-map-k [inspector k]]]]
+          [container-map-k
+           [inspector
+            {:map-ns (:map-ns (use-options))}
+            k]]]]
         [select/with-position
          {:row index :column 1}
          [with-key k
@@ -642,12 +660,28 @@
      (try-sort-map values))
     {:context (use-context)}]])
 
+(defn- get-namespaces [value]
+  (when (map? value)
+    (into #{}
+          (map (fn [k]
+                 (when (keyword? k)
+                   (some-> (namespace k) keyword))))
+          (keys value))))
+
+(defn- namespaced-map [value]
+  (let [namespaces (get-namespaces value)]
+    (when (= 1 (count namespaces)) (first namespaces))))
+
 (defn- inspect-map [values]
-  [with-collection
-   values
-   [:<>
-    ^{:key "header"} [collection-header values]
-    ^{:key "values"} [inspect-map-k-v values]]])
+  (let [map-ns  (namespaced-map values)
+        options (use-options)]
+    [with-options
+     (assoc options :map-ns map-ns)
+     [with-collection
+      values
+      [:<>
+       ^{:key "header"} [collection-header values]
+       ^{:key "values"} [inspect-map-k-v values]]]]))
 
 (defn- container-coll [values child]
   (let [theme (theme/use-theme)]
@@ -805,7 +839,8 @@
   (let [theme (theme/use-theme)]
     [s/span {:style {:color (::c/keyword theme) :white-space :nowrap}}
      ":"
-     [inspect-namespace value]
+     (when-not (:map-ns (:props (use-options)))
+       [inspect-namespace value])
      [highlight-words (name value)]]))
 
 (defn- inspect-inst [value]
