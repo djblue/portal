@@ -167,6 +167,28 @@
 
 (def ^:private empty-vec ^{:portal.viewer/default :portal.viewer/inspector} [])
 
+(defn- end-test-var [{:keys [test-ns test-var] :as state}]
+  (cond-> state
+    test-var
+    (-> (dissoc :test-var :asserts)
+        (update :vars
+                (fnil conj empty-vec)
+                (merge
+                 (summary (:asserts state))
+                 {:ns      test-ns
+                  :var     test-var
+                  :asserts (:asserts state 0)})))))
+
+(defn- end-test-ns [{:keys [test-ns vars] :as state}]
+  (-> state
+      (dissoc :test-ns :vars)
+      (update :results
+              (fnil conj empty-vec)
+              (merge
+               (summary vars)
+               {:ns   test-ns
+                :vars vars}))))
+
 (defn- get-results [value]
   (let [value'   (::f/value (meta value))
         include? (when value' (into #{} value))]
@@ -175,25 +197,10 @@
       (fn [{:keys [test-ns test-var] :as state} row]
         (case (:type row)
           :summary        state
-          :begin-test-ns  (assoc  state :test-ns (:ns row))
-          :end-test-ns    (-> state
-                              (dissoc :test-ns :vars)
-                              (update :results
-                                      (fnil conj empty-vec)
-                                      (merge
-                                       (summary (:vars state))
-                                       {:ns   test-ns
-                                        :vars (:vars state)})))
-          :begin-test-var (assoc  state :test-var (:var row))
-          :end-test-var   (-> state
-                              (dissoc :test-var :asserts)
-                              (update :vars
-                                      (fnil conj empty-vec)
-                                      (merge
-                                       (summary (:asserts state))
-                                       {:ns      test-ns
-                                        :var     test-var
-                                        :asserts (:asserts state 0)})))
+          :begin-test-ns  (assoc state :test-ns (:ns row))
+          :end-test-ns    (-> state end-test-var end-test-ns)
+          :begin-test-var (assoc state :test-var (:var row))
+          :end-test-var   (end-test-var state)
           (if (and value' (not (include? row)))
             state
             (update
