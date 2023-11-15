@@ -8,7 +8,8 @@
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
-            [portal.ui.viewer.log :as log]))
+            [portal.ui.viewer.log :as log]
+            [portal.viewer :as v]))
 
 ;;; :spec
 (s/def ::cause string?)
@@ -287,7 +288,10 @@
       (when expanded?
         [ins/with-collection
          value
-         [ins/inspect-map-k-v (dissoc value :cause :phase :runtime)]])]]))
+         [ins/inspect-map-k-v
+          (v/for
+           (dissoc value :cause :phase :runtime)
+            {:trace :portal.viewer/stack-trace})]])]]))
 
 (def viewer
   {:predicate exception?
