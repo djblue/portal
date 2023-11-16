@@ -16,7 +16,8 @@
            {:portal.viewer/for
             {:auth_time :portal.viewer/date-time
              :exp :portal.viewer/date-time
-             :iat :portal.viewer/date-time}})
+             :iat :portal.viewer/date-time
+             :nbf :portal.viewer/date-time}})
          :jwt/signature
          (Base64/decodeStringToUint8Array signature)}
         {:portal.viewer/for
