@@ -16,6 +16,7 @@
             [portal.ui.theme :as theme]
             [portal.ui.viewer.csv :as csv]
             [portal.ui.viewer.edn :as edn]
+            [portal.ui.viewer.jwt :as jwt]
             [reagent.core :as r]))
 
 (def ^:dynamic *state* nil)
@@ -1023,6 +1024,7 @@
    :format/edn     edn/read-string
    :format/transit parse-transit
    :format/csv     csv/parse-csv
+   :format/jwt     jwt/parse-jwt
    :format/text    identity})
 
 (defn- parse-as

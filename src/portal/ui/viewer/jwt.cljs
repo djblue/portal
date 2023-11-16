@@ -6,7 +6,7 @@
 (defn- parse-json [value]
   (js->clj (.parse js/JSON (js/atob value)) :keywordize-keys true))
 
-(defn- parse-jwt [jwt]
+(defn parse-jwt [jwt]
   (try
     (let [[header payload signature] (str/split jwt ".")]
       (with-meta
