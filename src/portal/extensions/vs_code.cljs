@@ -115,6 +115,21 @@
     (-open (edn/read-string body))
     (.end res)))
 
+(defn- open-file [{:keys [file line column]}]
+  (a/let [document (.openTextDocument
+                    vscode/workspace
+                    (.parse vscode/Uri file))
+          editor   (.showTextDocument vscode/window document 1 false)
+          position (vscode/Position. (dec line) (dec column))
+          range    (vscode/Range. position position)]
+    (set! (.-selection editor) (vscode/Selection. (.-start range) (.-end range)))
+    (.revealRange editor range)))
+
+(defmethod server/route [:post "/open-file"] [req res]
+  (a/let [body (server/get-body req)]
+    (open-file (edn/read-string body))
+    (.end res)))
+
 (defn- set-status [workspace]
   (when (fs/exists (fs/join workspace "resources/portal-dev/main.js"))
     (.executeCommand vscode/commands "setContext" "portal:is-dev" true)))

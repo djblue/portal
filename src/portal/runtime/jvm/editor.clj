@@ -113,12 +113,8 @@
   (or (fs/can-execute "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code")
       "code"))
 
-(defmethod -open-editor :vs-code [{:keys [line column file]}]
-  (sh (get-vs-code) "--goto" (str file ":" line ":" column)))
-
-(defmethod -open-editor :intellij [info]
+(defn- extension-open-editor [info config]
   (let [file-info (select-keys info [:file :line :column])
-        config    (launcher/get-config {:config-file "intellij.edn"})
         {:keys [error status] :as response}
         @(http/request
           {:url     (str "http://" (:host config) ":" (:port config) "/open-file")
@@ -132,6 +128,15 @@
                  :config    config
                  :response  (select-keys response [:body :headers :status])}
                 error)))))
+
+(defmethod -open-editor :vs-code [{:keys [file line column] :as info}]
+  (try
+    (extension-open-editor info (launcher/get-config {:config-file "vs-code.edn"}))
+    (catch Exception _
+      (sh (get-vs-code) "--goto" (str file ":" line ":" column)))))
+
+(defmethod -open-editor :intellij [info]
+  (extension-open-editor info (launcher/get-config {:config-file "intellij.edn"})))
 
 (defmethod -open-editor :auto [info]
   (-open-editor
