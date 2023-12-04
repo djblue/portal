@@ -1,3 +1,20 @@
+## 0.50.0 - 2023-12-04
+
+- Provide better open-file support for vs-code 16c4a91
+- Add `:format/jwt` for paste command a7cf814
+- JWT viwer, show nbf as date-time by default (#202) 85bfd11
+  - Thanks @handerpeder!
+- Implement namespaced maps for `portal.inspector` 939b33a
+- Add toggle-watch to deref viewer 5ce1773
+- Add `toggle-watch` command 8c1cb5b
+- Add `portal.web/inspect` bd5332e
+
+### Bug Fixes
+
+- Lower stack-trace viewer priority 30a2438
+- Fix test-report viewer edge case a566265
+- Fix serialization for new cljs bigint changes 5762ba7
+
 ## 0.49.1 - 2023-11-07
 
 - Make docs more responsive 326e8a8
