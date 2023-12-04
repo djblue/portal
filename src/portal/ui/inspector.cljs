@@ -638,27 +638,28 @@
        {:portal.viewer/default viewer}))))
 
 (defn inspect-map-k-v [values]
-  [container-map
-   [l/lazy-seq
-    (map-indexed
-     (fn [index [k v]]
-       ^{:key (str (->id k) (->id v))}
-       [:<>
-        [select/with-position
-         {:row index :column 0}
-         [with-context
-          {:key? true}
-          [container-map-k
-           [inspector
-            {:map-ns (:map-ns (use-options))}
-            k]]]]
-        [select/with-position
-         {:row index :column 1}
-         [with-key k
-          [container-map-v
-           [inspector (get-props values k) v]]]]])
-     (try-sort-map values))
-    {:context (use-context)}]])
+  (let [options (use-options)]
+    [container-map
+     [l/lazy-seq
+      (map-indexed
+       (fn [index [k v]]
+         ^{:key (str (->id k) (->id v))}
+         [:<>
+          [select/with-position
+           {:row index :column 0}
+           [with-context
+            {:key? true}
+            [container-map-k
+             [inspector
+              {:map-ns (:map-ns options)}
+              k]]]]
+          [select/with-position
+           {:row index :column 1}
+           [with-key k
+            [container-map-v
+             [inspector (get-props values k) v]]]]])
+       (try-sort-map values))
+      {:context (use-context)}]]))
 
 (defn- get-namespaces [value]
   (when (map? value)
