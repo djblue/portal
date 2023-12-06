@@ -12,17 +12,21 @@
     (/ (Math/round (* d factor)) factor)))
 
 (def ^:private unit->color
-  {:m  ::c/exception
-   :s  ::c/uri
-   :ms ::c/string
-   :μs ::c/package
-   :ns ::c/tag})
+  {:w  {:color ::c/string :title "week"}
+   :d  {:color ::c/package :title "day"}
+   :h  {:color ::c/tag :title "hour"}
+   :m  {:color ::c/exception :title "minue"}
+   :s  {:color ::c/uri :title "second"}
+   :ms {:color ::c/string :title "millisecond"}
+   :μs {:color ::c/package :title "microsecond"}
+   :ns {:color ::c/tag :title "nanosecond"}})
 
 (defn- view [scalar unit]
   (let [theme (theme/use-theme)
         bg    (ins/get-background)
-        color (::c/border theme) #_(-> unit unit->color theme)
-        unit-color (-> unit unit->color theme)]
+        color (::c/border theme)
+        info  (unit->color unit)
+        unit-color (get theme (:color info))]
     [d/div
      {:style
       {:display :flex
@@ -44,11 +48,12 @@
         unit
         [ins/inspector (round 2 scalar)]]]]
      [d/div
-      {:style
+      {:title (:title info)
+       :style
        {:display :flex
         :font-weight :bold
         :color (ins/get-background)
-        :background (-> unit unit->color theme)
+        :background unit-color
         :border-top [1 :solid unit-color]
         :border-bottom [1 :solid unit-color]
         :border-right [1 :solid unit-color]
@@ -72,11 +77,14 @@
    :component inspect-nano
    :doc "Interpret number as a duration in nanoseconds, round up to minutes."})
 
-(defn inspect-ms [ns]
+(defn inspect-ms [ms]
   (cond
-    (>= ns 6e4)  [view (/ ns 6e4) :m]
-    (>= ns 1e3)  [view (/ ns 1e3) :s]
-    :else        [view ns         :ms]))
+    (>= ms 6048e5) [view (/ ms 6048e5) :w]
+    (>= ms 864e5)  [view (/ ms 864e5)  :d]
+    (>= ms 36e5)   [view (/ ms 36e5)   :h]
+    (>= ms 6e4)    [view (/ ms 6e4)    :m]
+    (>= ms 1e3)    [view (/ ms 1e3)    :s]
+    :else          [view ms            :ms]))
 
 (def ms
   {:predicate number?
