@@ -47,6 +47,7 @@
 
 (defmethod route [:get "/rpc"] [^js req _res]
   (let [session (get-session req)]
+    (.on (.-socket req) "error" js/console.error)
     (.handleUpgrade
      (Server. #js {:noServer true})
      req

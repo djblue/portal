@@ -62,6 +62,8 @@
   (js/Promise.
    (fn [resolve _reject]
      (let [^js server (http/createServer #(handler %1 %2))]
+       (set! (.-requestTimeout server) 0)
+       (set! (.-headersTimeout server) 0)
        (.on server
             "connection"
             (fn [^js socket]
