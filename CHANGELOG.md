@@ -1,3 +1,11 @@
+## 0.51.0 - 2023-12-12
+
+- Add `size-bytes` viewer 8ce9813
+- Updates IJ plugin for 2023.3 (#205) 006da80
+  - Thanks @coyotesqrl!
+- Disable socket timeout for node server 94e359f
+- Include larger units in duration viewer e0983f6
+
 ## 0.50.0 - 2023-12-04
 
 - Provide better open-file support for vs-code 16c4a91
