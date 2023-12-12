@@ -15,6 +15,7 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.bin :as bin]
+            [portal.ui.viewer.bytes :as bytes]
             [portal.ui.viewer.charts :as charts]
             [portal.ui.viewer.cljdoc :as cljdoc]
             [portal.ui.viewer.code :as code]
@@ -464,6 +465,7 @@
    ex/sub-trace-viewer
    duration/nano
    duration/ms
+   bytes/viewer
    pprint/viewer
    vega-lite/viewer
    vega/viewer
