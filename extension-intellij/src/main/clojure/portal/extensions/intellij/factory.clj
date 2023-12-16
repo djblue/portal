@@ -99,12 +99,20 @@
     (requiring-resolve 'nrepl.server/start-server)
     (catch Exception _e)))
 
+;; Methods for: com.intellij.openapi.wm.ToolWindowFactory
+;; - https://github.com/JetBrains/intellij-community/blob/master/platform/platform-api/src/com/intellij/openapi/wm/ToolWindowFactory.kt
+
 (defn -init [_this ^ToolWindow _window]
   (WithLoader/bind)
   (when-let [start-server (get-nrepl)] (start-server :port 7888)))
 
 (defn -isApplicable [_this ^Project _project] true)
+(defn -isApplicableAsync [_this ^Project _project _] true)
 (defn -shouldBeAvailable [_this ^Project _project] true)
+(defn -manage [_this ^ToolWindow _window _ _])
+
+(defn -getIcon [_this])
+(defn -getAnchor [_this])
 
 (defn -createToolWindowContent [_this ^Project project ^ToolWindow window]
   (let [component (.getComponent window)]

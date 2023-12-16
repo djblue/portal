@@ -14,5 +14,6 @@
          test   tasks.test/test
          tag    tasks.version/tag
          ext    tasks.build/extensions
+         ide    tasks.ide/open
          pkg    tasks.package/all
          deploy tasks.deploy/all}}
