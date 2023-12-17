@@ -16,7 +16,6 @@
    {babashka/process              {:mvn/version "0.5.21"}
     hiccup/hiccup                 {:mvn/version "2.0.0-RC2"}
     io.aviso/pretty               {:mvn/version "1.4.4"}
-    vlaaad/reveal                 {:mvn/version "1.3.280"}
     com.lambdaisland/dom-types    {:mvn/version "0.6.42"}
     io.github.clojure/tools.build {:git/tag "v0.9.6" :git/sha "8e78bcc"}
     io.github.djblue/tetris       {:git/url "https://github.com/djblue/tetris.git"
