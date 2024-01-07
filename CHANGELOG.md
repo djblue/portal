@@ -1,3 +1,10 @@
+## 0.51.1 - 2024-01-07
+
+- Add ubuntu's chromium-browser exe to list of browsers (#207) ed2b8a1
+  - Thanks @mrnhrd for the PR!
+- Remove hash-able requirement for runtime objects 486bcc5
+  - Thanks @seancorfield for isolating this issue! (#208)
+
 ## 0.51.0 - 2023-12-12
 
 - Add `size-bytes` viewer 8ce9813
