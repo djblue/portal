@@ -111,21 +111,30 @@
              (conj atoms a))))) a)
       (set-timeout #(notify session-id a) 0))))
 
+(defn- hashable? [value]
+  (try
+    (and (hash value) true)
+    (catch #?(:clj Exception :cljr Exception :cljs :default) _
+      false)))
+
 (defn- value->key
   "Include metadata when capturing values in cache."
   [value]
-  [:value value (meta value) (type value)])
+  (when (hashable? value)
+    [:value value (meta value) (type value)]))
 
 (defn- value->id [value]
-  (let [k (value->key value)]
-    (-> (:value-cache *session*)
-        (swap!
-         (fn [cache]
-           (if (contains? cache k)
-             cache
-             (let [id (next-id *session*)]
-               (assoc cache [:id id] value k id)))))
-        (get k))))
+  (let [k   (value->key value)
+        out (atom nil)]
+    (swap!
+     (:value-cache *session*)
+     (fn [cache]
+       (if-let [id (and k (get cache k))]
+         (do (reset! out id) cache)
+         (let [id (next-id *session*)]
+           (reset! out id)
+           (cond-> (assoc cache [:id id] value) k (assoc k id))))))
+    @out))
 
 (defn- value->id? [value]
   (get @(:value-cache *session*) (value->key value)))
