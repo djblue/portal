@@ -29,7 +29,7 @@
      "/mnt/c/Program Files/Google/Chrome/Application"
      "/mnt/c/Program Files (x86)/Google/Chrome/Application"]
     (fs/paths))
-   ["chrome" "chrome.exe" "google-chrome-stable" "chromium" "Google Chrome"]))
+   ["chrome" "chrome.exe" "google-chrome-stable" "chromium-browser" "chromium" "Google Chrome"]))
 
 (defn- get-app-id-profile-osx [app-name]
   (let [info (fs/join
