@@ -4,5 +4,37 @@
     "titleBar.activeForeground": "#272c36",
     "titleBar.inactiveBackground": "#00a2ff",
     "titleBar.inactiveForeground": "#272c36"
-  }
+  },
+  "calva.replConnectSequences": [
+    {
+      "name": "portal",
+      "projectType": "deps.edn",
+      "autoSelectForJackIn": true,
+      "autoSelectForConnect": true,
+      "projectRootPath": [
+        "."
+      ],
+      "customJackInCommandLine": "bb dev",
+      "nReplPortFile": [
+        ".shadow-cljs",
+        "nrepl.port"
+      ],
+      "shouldOpenUrl": false,
+      "cljsType": "shadow-cljs",
+      "menuSelections": {
+        "cljAliases": [
+          ":dev",
+          ":cider",
+          ":cljs",
+          ":shadow"
+        ],
+        "cljsLaunchBuilds": [
+          ":client",
+          ":vs-code",
+          ":vs-code-notebook"
+        ],
+        "cljsDefaultBuild": ":client"
+      }
+    }
+  ]
 }
