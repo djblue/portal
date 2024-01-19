@@ -15,6 +15,15 @@ Since JavaScript doesn't support the full range of numbers provided by longs,
 integers outside of a certain range must be boxed and shipped as string to the
 UI. This precludes them from participating in viewers that expect `js/Number`.
 
+## Doubles
+
+Since Portal serializes values as JSON, the treatment of doubles can become
+inexact. Any double value submitted to Portal with no decimal component can get
+"downcast" to a long when rendered or brought back into the REPL. This is
+further complicated since container values (maps, sets, vectors, lists) are
+captured and can be returned to the REPL exactly therefore avoiding this issue.
+In any case, Portal should not be replied upon to preserve exact numeric types.
+
 ## Lazy Values
 
 Lazy values that contain exceptions will cause Portal's internals to break if
