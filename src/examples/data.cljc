@@ -818,7 +818,8 @@
      [0 1 0 0 0]
      [0 0 1 0 0]
      [0 0 0 1 0]
-     [0 0 0 0 1]])
+     [0 0 0 0 1]]
+    {:columns [:a :b :c :d :e]})
    ::multi-map map-reflection-data})
 
 (def test-report

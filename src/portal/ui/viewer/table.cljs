@@ -178,6 +178,8 @@
 
 (defn- inspect-vector-table [values]
   [table
+   (when-let [cols (get-in (meta values) [:portal.viewer/table :columns])]
+     [columns cols])
    [l/lazy-seq
     (map-indexed
      (fn [row-index row]
