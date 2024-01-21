@@ -6,78 +6,83 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
+(def ^:private root-class "portal-viewer-code")
+
 (defn- ->styles [theme]
   (let [{::c/keys [uri keyword text namespace background string package number tag border]} theme]
-    {"pre code.hljs"                                 {:display :block :overflow-x :auto :padding "1em"}
-     "code.hljs"                                     {:padding "3px 5px"}
-     ".hljs"                                         {:background background}
-     ".hljs,.hljs-subst"                             {:color text}
-     ".hljs-selector-tag"                            {:color "#81a1c1"}
-     ".hljs-selector-id"                             {:color namespace :font-weight 700}
-     ".hljs-selector-attr,.hljs-selector-class"      {:color namespace}
-     ".hljs-property,.hljs-selector-pseudo"          {:color package}
-     ".hljs-addition"                                {:background-color "rgba(163,190,140,.5)"}
-     ".hljs-deletion"                                {:background-color "rgba(191,97,106,.5)"}
-     ".hljs-built_in,.hljs-class,.hljs-type"         {:color namespace}
-     ".hljs-function"                                {:color package}
-     ".hljs-function>.hljs-title"                    {:color package}
-     ".hljs-title.hljs-function"                     {:color package}
-     ".hljs-keyword"                                 {:color keyword}
-     ".hljs-literal"                                 {:color text}
-     ".hljs-symbol"                                  {:color keyword}
-     ".hljs-number"                                  {:color number}
-     ".hljs-regexp"                                  {:color tag}
-     ".hljs-string"                                  {:color string}
-     ".hljs-title"                                   {:color symbol}
-     ".hljs-params"                                  {:color text}
-     ".hljs-bullet"                                  {:color border}
-     ".hljs-code"                                    {:color namespace}
-     ".hljs-emphasis"                                {:font-style :italic}
-     ".hljs-formula"                                 {:color namespace}
-     ".hljs-strong"                                  {:font-weight 700}
-     ".hljs-link:hover"                              {:text-decoration :underline}
-     ".hljs-comment,.hljs-quote"                     {:color border}
-     ".hljs-doctag"                                  {:color namespace}
-     ".hljs-meta,.hljs-meta .hljs-keyword"           {:color keyword}
-     ".hljs-meta .hljs-string"                       {:color string}
-     ".hljs-attr"                                    {:color namespace}
-     ".hljs-attribute"                               {:color text}
-     ".hljs-name"                                    {:color namespace}
-     ".hljs-section"                                 {:color package}
-     ".hljs-tag"                                     {:color tag}
-     ".hljs-template-variable,.hljs-variable"        {:color text}
-     ".hljs-template-tag"                            {:color keyword}
-     ".language-abnf .hljs-attribute"                {:color package}
-     ".language-abnf .hljs-symbol"                   {:color tag}
-     ".language-apache .hljs-attribute"              {:color package}
-     ".language-apache .hljs-section"                {:color border}
-     ".language-arduino .hljs-built_in"              {:color package}
-     ".language-aspectj .hljs-meta"                  {:color uri}
-     ".language-aspectj>.hljs-title"                 {:color package}
-     ".language-bnf .hljs-attribute"                 {:color namespace}
-     ".language-coq .hljs-built_in"                  {:color package}
-     ".language-cpp .hljs-meta .hljs-string"         {:color string}
-     ".language-css .hljs-built_in"                  {:color package}
-     ".language-css .hljs-keyword"                   {:color uri}
-     ".language-diff .hljs-meta"                     {:color namespace}
-     ".language-ebnf .hljs-attribute"                {:color namespace}
-     ".language-glsl .hljs-built_in"                 {:color package}
-     ".language-groovy .hljs-meta:not(:first-child)" {:color uri}
-     ".language-haxe .hljs-meta"                     {:color uri}
-     ".language-java .hljs-meta"                     {:color uri}
-     ".language-ldif .hljs-attribute"                {:color namespace}
-     ".language-lisp .hljs-name"                     {:color package}
-     ".language-lua .hljs-built_in"                  {:color package}
-     ".language-moonscript .hljs-built_in"           {:color package}
-     ".language-nginx .hljs-attribute"               {:color package}
-     ".language-nginx .hljs-section"                 {:color keyword}
-     ".language-pf .hljs-built_in"                   {:color package}
-     ".language-processing .hljs-built_in"           {:color package}
-     ".language-scss .hljs-keyword"                  {:color keyword}
-     ".language-stylus .hljs-keyword"                {:color keyword}
-     ".language-swift .hljs-meta"                    {:color uri}
-     ".language-vim .hljs-built_in"                  {:color package :font-style :italic}
-     ".language-yaml .hljs-meta"                     {:color uri}}))
+    (update-keys
+     {"pre code.hljs"                                 {:display :block :overflow-x :auto :padding "1em"}
+      "code.hljs"                                     {:padding "3px 5px"}
+      ".hljs"                                         {:background background}
+      ".hljs,.hljs-subst"                             {:color text}
+      ".hljs-selector-tag"                            {:color "#81a1c1"}
+      ".hljs-selector-id"                             {:color namespace :font-weight 700}
+      ".hljs-selector-attr,.hljs-selector-class"      {:color namespace}
+      ".hljs-property,.hljs-selector-pseudo"          {:color package}
+      ".hljs-addition"                                {:background-color "rgba(163,190,140,.5)"}
+      ".hljs-deletion"                                {:background-color "rgba(191,97,106,.5)"}
+      ".hljs-built_in,.hljs-class,.hljs-type"         {:color namespace}
+      ".hljs-function"                                {:color package}
+      ".hljs-function>.hljs-title"                    {:color package}
+      ".hljs-title.hljs-function"                     {:color package}
+      ".hljs-keyword"                                 {:color keyword}
+      ".hljs-literal"                                 {:color text}
+      ".hljs-symbol"                                  {:color keyword}
+      ".hljs-number"                                  {:color number}
+      ".hljs-regexp"                                  {:color tag}
+      ".hljs-string"                                  {:color string}
+      ".hljs-title"                                   {:color symbol}
+      ".hljs-params"                                  {:color text}
+      ".hljs-bullet"                                  {:color border}
+      ".hljs-code"                                    {:color namespace}
+      ".hljs-emphasis"                                {:font-style :italic}
+      ".hljs-formula"                                 {:color namespace}
+      ".hljs-strong"                                  {:font-weight 700}
+      ".hljs-link:hover"                              {:text-decoration :underline}
+      ".hljs-comment,.hljs-quote"                     {:color border}
+      ".hljs-doctag"                                  {:color namespace}
+      ".hljs-meta,.hljs-meta .hljs-keyword"           {:color keyword}
+      ".hljs-meta .hljs-string"                       {:color string}
+      ".hljs-attr"                                    {:color namespace}
+      ".hljs-attribute"                               {:color text}
+      ".hljs-name"                                    {:color namespace}
+      ".hljs-section"                                 {:color package}
+      ".hljs-tag"                                     {:color tag}
+      ".hljs-template-variable,.hljs-variable"        {:color text}
+      ".hljs-template-tag"                            {:color keyword}
+      ".language-abnf .hljs-attribute"                {:color package}
+      ".language-abnf .hljs-symbol"                   {:color tag}
+      ".language-apache .hljs-attribute"              {:color package}
+      ".language-apache .hljs-section"                {:color border}
+      ".language-arduino .hljs-built_in"              {:color package}
+      ".language-aspectj .hljs-meta"                  {:color uri}
+      ".language-aspectj>.hljs-title"                 {:color package}
+      ".language-bnf .hljs-attribute"                 {:color namespace}
+      ".language-coq .hljs-built_in"                  {:color package}
+      ".language-cpp .hljs-meta .hljs-string"         {:color string}
+      ".language-css .hljs-built_in"                  {:color package}
+      ".language-css .hljs-keyword"                   {:color uri}
+      ".language-diff .hljs-meta"                     {:color namespace}
+      ".language-ebnf .hljs-attribute"                {:color namespace}
+      ".language-glsl .hljs-built_in"                 {:color package}
+      ".language-groovy .hljs-meta:not(:first-child)" {:color uri}
+      ".language-haxe .hljs-meta"                     {:color uri}
+      ".language-java .hljs-meta"                     {:color uri}
+      ".language-ldif .hljs-attribute"                {:color namespace}
+      ".language-lisp .hljs-name"                     {:color package}
+      ".language-lua .hljs-built_in"                  {:color package}
+      ".language-moonscript .hljs-built_in"           {:color package}
+      ".language-nginx .hljs-attribute"               {:color package}
+      ".language-nginx .hljs-section"                 {:color keyword}
+      ".language-pf .hljs-built_in"                   {:color package}
+      ".language-processing .hljs-built_in"           {:color package}
+      ".language-scss .hljs-keyword"                  {:color keyword}
+      ".language-stylus .hljs-keyword"                {:color keyword}
+      ".language-swift .hljs-meta"                    {:color uri}
+      ".language-vim .hljs-built_in"                  {:color package :font-style :italic}
+      ".language-yaml .hljs-meta"                     {:color uri}}
+     (fn [selector]
+       (str "." root-class " " selector)))))
 
 (defn- ->css [styles]
   (str/join
@@ -136,7 +141,8 @@
          html     (.-value out)
          language (or (:class attrs) (.-language out))]
      [s/div
-      {:title language
+      {:class root-class
+       :title language
        :style
        {:overflow      :auto
         :position      :relative
