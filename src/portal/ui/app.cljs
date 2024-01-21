@@ -501,6 +501,7 @@
      [status/poller]
      [theme/with-theme
       theme
+      [theme/with-background]
       [dnd/area
        [container children]]]]))
 

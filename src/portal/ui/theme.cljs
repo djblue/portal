@@ -48,14 +48,17 @@
   (let [theme (merge (use-theme) theme)]
     (into [:r> (.-Provider theme-context) #js {:value theme}] children)))
 
-(defn with-theme [theme-name & children]
-  (let [dark-theme (use-theme-detector)
-        theme      (get-theme (or theme-name (default-theme dark-theme)))
-        background (::c/background theme)]
+(defn ^:no-doc with-background []
+  (let [background (::c/background (use-theme))]
     (react/useEffect
      #(set! (.. js/document -body -style -backgroundColor)
             background)
      #js [background])
+    nil))
+
+(defn with-theme [theme-name & children]
+  (let [dark-theme (use-theme-detector)
+        theme      (get-theme (or theme-name (default-theme dark-theme)))]
     (into [:r> (.-Provider theme-context) #js {:value theme}] children)))
 
 (defonce ^:no-doc order
