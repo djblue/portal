@@ -9,6 +9,7 @@
             [portal.runtime.edn :as edn]
             [portal.runtime.json :as json]
             [portal.runtime.transit :as transit]
+            [portal.shortcuts :as shortcuts]
             [portal.ui.api :as api]
             [portal.ui.app :as app]
             [portal.ui.commands :as commands]
@@ -22,6 +23,8 @@
 
 (defn open-demo
   "Load demo data"
+  {:shortcuts [^::shortcuts/osx #{"meta" "d"}
+               ^::shortcuts/windows ^::shortcuts/linux #{"control" "d"}]}
   [state]
   (state/dispatch! state state/history-push {:portal/value demo/data}))
 

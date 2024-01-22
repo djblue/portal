@@ -208,96 +208,11 @@
                 doall)]]]))))
 
 (def default-map
-  {^::shortcuts/windows
-   ^::shortcuts/linux
-   #{"control" "shift" "p"} `open-command-palette
-   #{"control" "j"}         `open-command-palette
-   #{"shift" ":"}           `open-command-palette
+  {#{"enter"}         'clojure.datafy/nav
+   #{"shift" "enter"} 'clojure.datafy/datafy
+   ["g" "d"]          `portal.runtime.jvm.editor/goto-definition})
 
-   ^::shortcuts/windows
-   ^::shortcuts/linux
-   #{"control" "c"} `copy
-   #{"shift" "c"}   `copy-str
-
-   #{"shift" "h"} `history-back
-   #{"shift" "l"} `history-forward
-
-   ^::shortcuts/windows ^::shortcuts/linux
-   #{"control" "arrowleft"}  `history-back
-   ^::shortcuts/windows ^::shortcuts/linux
-   #{"control" "arrowright"} `history-forward
-
-   ^::shortcuts/windows ^::shortcuts/linux
-   #{"control" "shift" "arrowleft"} `history-first
-   ^::shortcuts/windows ^::shortcuts/linux
-   #{"control" "shift" "arrowright"} `history-last
-
-   ["/"] `focus-filter
-
-   #{"shift" "escape"}    `select-none
-   #{"escape"}            `select-pop
-   #{"v"}                 `select-viewer
-
-   #{"shift" "k"}         `select-prev-viewer
-   #{"shift" "arrowup"}   `select-prev-viewer
-   #{"shift" "j"}         `select-next-viewer
-   #{"shift" "arrowdown"} `select-next-viewer
-
-   #{"arrowup"}           `select-prev
-   #{"k"}                 `select-prev
-   #{"arrowdown"}         `select-next
-   #{"j"}                 `select-next
-   #{"arrowleft"}         `select-parent
-   #{"h"}                 `select-parent
-   #{"arrowright"}        `select-child
-   #{"l"}                 `select-child
-
-   #{"control" "enter"}   `focus-selected
-   #{"e"}                 `toggle-expand
-   #{" "}                 `toggle-expand
-   ["z" "a"]              `toggle-expand
-   #{"shift" "e"}         `expand-inc
-   #{"shift" " "}         `expand-inc
-
-   #{"enter"}             'clojure.datafy/nav
-   #{"shift" "enter"}     'clojure.datafy/datafy
-
-   #{"control" "r"}       `redo-previous-command
-   #{"control" "l"}       `clear
-
-   ["g" "g"]              `scroll-top
-   #{"shift" "g"}         `scroll-bottom
-
-   ;; TODO Move to metadata of var when possible
-   ["g" "d"] `portal.runtime.jvm.editor/goto-definition
-
-   ["p" "p"] `paste
-   ["y"]     `copy
-
-   ;; PWA
-   ^::shortcuts/windows ^::shortcuts/linux
-   #{"control" "o"} `open-file
-   ^::shortcuts/windows ^::shortcuts/linux
-   #{"control" "v"} `paste
-   ^::shortcuts/windows ^::shortcuts/linux
-   #{"control" "d"} `portal.extensions.pwa/open-demo
-
-   ["p" "s"] `parse-selected})
-
-(def osx-map
-  {^::shortcuts/osx #{"meta" "shift" "p"} `open-command-palette
-   ^::shortcuts/osx #{"meta" "c"} `copy
-   ^::shortcuts/osx #{"meta" "arrowleft"}  `history-back
-   ^::shortcuts/osx #{"meta" "arrowright"} `history-forward
-   ^::shortcuts/osx #{"meta" "shift" "arrowleft"}  `history-first
-   ^::shortcuts/osx #{"meta" "shift" "arrowright"} `history-last
-   ;; PWA
-   ^::shortcuts/osx #{"meta" "o"} `open-file
-   ^::shortcuts/osx #{"meta" "v"} `paste
-   ^::shortcuts/osx #{"meta" "d"} `portal.extensions.pwa/open-demo})
-
-(def keymap
-  (r/atom (merge default-map osx-map)))
+(def keymap (r/atom default-map))
 
 (def ^:private aliases {"cljs.core" "clojure.core"})
 
@@ -553,7 +468,13 @@
 
 (defn ^:command open-command-palette
   "Show All Commands"
-  {:shortcuts [#{"control" "shift" "p"} #{"control" "j"} #{"shift" ":"}]}
+  {:shortcuts [#{"control" "j"}
+               #{"shift" ":"}
+               ^::shortcuts/windows
+               ^::shortcuts/linux
+               #{"control" "shift" "p"}
+               ^::shortcuts/osx
+               #{"meta" "shift" "p"}]}
   [state]
   (a/let [commands (sort-by
                     :name
@@ -714,7 +635,9 @@
 
 (defn ^:command copy
   "Copy selected value as an edn string to the clipboard."
-  {:shortcuts [#{"control" "c"} ["y"]]}
+  {:shortcuts [["y"]
+               ^::shortcuts/osx #{"meta" "c"}
+               ^::shortcuts/windows ^::shortcuts/linux #{"control" "c"}]}
   [state]
   (if-let [selection (not-empty (.. js/window getSelection toString))]
     (copy-to-clipboard! selection)
@@ -735,15 +658,18 @@
 
 (defn ^:command select-none
   "Deselect all values."
+  {:shortcuts [#{"shift" "escape"}]}
   [state]
   (state/dispatch! state dissoc :selected))
 
 (defn ^:command select-pop
+  {:shortcuts [#{"escape"}]}
   [state]
   (state/dispatch! state state/select-pop))
 
 (defn ^:command select-viewer
   "Set the viewer for the currently selected value(s)."
+  {:shortcuts [#{"v"}]}
   [state]
   (when-let [selected-context (state/get-all-selected-context @state)]
     (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
@@ -762,12 +688,16 @@
            :next (when (= prev current) next)))
        (partition 2 1 (conj viewers (last viewers)))))))
 
-(defn ^:command select-prev-viewer [state]
+(defn ^:command select-prev-viewer
+  {:shortcuts [#{"shift" "k"} #{"shift" "arrowup"}]}
+  [state]
   (when-let [selected-context (state/get-all-selected-context @state)]
     (when-let [prev-viewer (get-viewer state selected-context :prev)]
       (ins/set-viewer! state selected-context prev-viewer))))
 
-(defn ^:command select-next-viewer [state]
+(defn ^:command select-next-viewer
+  {:shortcuts [#{"shift" "j"} #{"shift" "arrowdown"}]}
+  [state]
   (when-let [selected-context (state/get-all-selected-context @state)]
     (when-let [next-viewer (get-viewer state selected-context :next)]
       (ins/set-viewer! state selected-context next-viewer))))
@@ -780,18 +710,26 @@
 
 (defonce search-refs (atom #{}))
 
-(defn ^:command focus-filter [_]
+(defn ^:command focus-filter
+  {:shortcuts [["/"]]}
+  [_]
   (doseq [ref @search-refs]
     (when-let [input (.-current ref)] (.focus input))))
 
-(defn ^:command clear-filter [state]
+(defn ^:command clear-filter
+  {:shortcuts [#{"control" "l"}]}
+  [state]
   (state/dispatch! state dissoc :search-text))
 
-(defn ^:command scroll-top [state]
+(defn ^:command scroll-top
+  {:shortcuts [["g" "g"]]}
+  [state]
   (when-let [el (:scroll-element @state)]
     (.scroll el #js {:top 0})))
 
-(defn ^:command scroll-bottom [state]
+(defn ^:command scroll-bottom
+  {:shortcuts [#{"shift" "g"}]}
+  [state]
   (when-let [el (:scroll-element @state)]
     (.scroll el #js {:top (+ (.-scrollHeight el) 1000)})))
 
@@ -808,32 +746,46 @@
 (defn ^:command select-root [state]
   (state/dispatch! state state/select-root))
 
-(defn ^:command select-prev [state]
+(defn ^:command select-prev
+  {:shortcuts [#{"arrowup"} #{"k"}]}
+  [state]
   (apply-selected state state/select-prev))
 
-(defn ^:command select-next [state]
+(defn ^:command select-next
+  {:shortcuts [#{"arrowdown"} #{"j"}]}
+  [state]
   (apply-selected state state/select-next))
 
-(defn ^:command select-parent [state]
+(defn ^:command select-parent
+  {:shortcuts [#{"arrowleft"} #{"h"}]}
+  [state]
   (apply-selected state state/select-parent))
 
-(defn ^:command select-child [state]
+(defn ^:command select-child
+  {:shortcuts [#{"arrowright"} #{"l"}]}
+  [state]
   (apply-selected state state/select-child))
 
-(defn ^:command focus-selected [state]
+(defn ^:command focus-selected
+  {:shortcuts [#{"control" "enter"}]}
+  [state]
   (apply-selected state state/focus-selected))
 
 (defn ^:command toggle-expand
   "Expand or collapse currently selected values."
+  {:shortcuts [#{"e"} #{" "} ["z" "a"]]}
   [state]
   (state/dispatch! state state/toggle-expand))
 
 (defn ^:command expand-inc
   "Expand 1 additional layer of children from selected values."
+  {:shortcuts [#{"shift" "e"} #{"shift" " "}]}
   [state]
   (state/dispatch! state state/expand-inc))
 
-(defn ^:command redo-previous-command [state]
+(defn ^:command redo-previous-command
+  {:shortcuts [#{"control" "r"}]}
+  [state]
   (a/let [commands (::state/previous-commands @state)]
     (when (seq commands)
       (open
@@ -872,14 +824,36 @@
   (a/let [[theme] (pick-one state (keys c/themes))]
     (state/dispatch! state state/set-theme! theme)))
 
-(defn ^:command history-back [state]
+(defn ^:command history-back
+  {:shortcuts
+   [#{"shift" "h"}
+    ^::shortcuts/osx #{"meta" "arrowleft"}
+    ^::shortcuts/windows ^::shortcuts/linux #{"control" "arrowleft"}]}
+  [state]
   (state/dispatch! state state/history-back))
-(defn ^:command history-forward [state]
+
+(defn ^:command history-forward
+  {:shortcuts
+   [#{"shift" "l"}
+    ^::shortcuts/osx #{"meta" "arrowright"}
+    ^::shortcuts/windows ^::shortcuts/linux #{"control" "arrowright"}]}
+  [state]
   (state/dispatch! state state/history-forward))
-(defn ^:command history-first [state]
+
+(defn ^:command history-first
+  {:shortcuts
+   [^::shortcuts/osx #{"meta" "shift" "arrowleft"}
+    ^::shortcuts/windows ^::shortcuts/linux #{"control" "shift" "arrowleft"}]}
+  [state]
   (state/dispatch! state state/history-first))
-(defn ^:command history-last [state]
+
+(defn ^:command history-last
+  {:shortcuts
+   [^::shortcuts/osx #{"meta" "shift" "arrowright"}
+    ^::shortcuts/windows ^::shortcuts/linux #{"control" "shift" "arrowright"}]}
+  [state]
   (state/dispatch! state state/history-last))
+
 (defn ^:command clear [state]
   (state/dispatch! state state/clear))
 
@@ -927,6 +901,8 @@
   ([var opts]
    (let [m    (meta var)
          name (or (:name opts) (var->name var))]
+     (doseq [shortcut (concat (:shortcuts m) (:shortcuts opts))]
+       (swap! keymap assoc shortcut name))
      (swap! registry
             assoc name (merge {:name name :run  var}
                               (when-let [doc (or (:doc m) (:doc opts))] {:doc doc})
@@ -1015,6 +991,9 @@
 
 (defn open-file
   "Open a File"
+  {:shortcuts
+   [^::shortcuts/osx #{"meta" "o"}
+    ^::shortcuts/windows ^::shortcuts/linux #{"control" "o"}]}
   [state]
   (a/let [value (prompt-file)]
     (state/dispatch! state state/history-push {:portal/value value})))
@@ -1049,6 +1028,10 @@
 
 (defn paste
   "Paste value from clipboard"
+  {:shortcuts
+   [["p" "p"]
+    ^::shortcuts/osx #{"meta" "v"}
+    ^::shortcuts/windows ^::shortcuts/linux #{"control" "v"}]}
   [state]
   (a/let [value (clipboard)] (parse-as state value)))
 
@@ -1056,6 +1039,7 @@
 
 (defn parse-selected
   "Parse currently select text"
+  {:shortcuts [["p" "s"]]}
   [state]
   (parse-as state (.toString (.getSelection js/window))))
 
