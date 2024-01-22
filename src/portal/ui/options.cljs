@@ -17,6 +17,13 @@
 
 (defonce ^:private options-context (react/createContext nil))
 
+(defn ^:no-doc with-options* [options & children]
+  (into [:r> (.-Provider options-context)
+         #js {:value (if (= options ::loading)
+                       options
+                       (merge options @extension-options))}]
+        children))
+
 (defn with-options [& children]
   (let [[options set-options!] (react/useState ::loading)]
     (react/useEffect
@@ -24,10 +31,6 @@
        (-> (state/invoke `portal.runtime/get-options)
            (.then set-options!)))
      #js [])
-    (into [:r> (.-Provider options-context)
-           #js {:value (if (= options ::loading)
-                         options
-                         (merge options @extension-options))}]
-          children)))
+    (into [with-options* options] children)))
 
 (defn use-options [] (react/useContext options-context))

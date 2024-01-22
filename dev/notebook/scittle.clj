@@ -51,6 +51,7 @@
                             {:ref (fn [el]
                                     (.renderOutputItem embed
                                                        (clj->js {:mime "x-application/edn"
+                                                                 :theme "portal.colors/nord-light"
                                                                  :text (fn [] edn-str)})
                                                        el))}]])))]
     (->> widgets

@@ -7,6 +7,7 @@
             [portal.ui.embed :as embed]
             [portal.ui.inspector :as ins]
             [portal.ui.load :as load]
+            [portal.ui.options :as opts]
             [portal.ui.rpc :as rpc]
             [portal.ui.sci]
             [portal.ui.state :as state]
@@ -30,11 +31,13 @@
 
 (rt/register! #'inspect {:name `portal.api/inspect})
 
-(defn app [id value]
-  [@component
-   {:id id
-    :value value
-    :on-open #(rpc/call `portal.api/inspect % {:launcher :vs-code})}])
+(defn- app [id options value]
+  [opts/with-options*
+   options
+   [@component
+    {:id id
+     :value value
+     :on-open #(rpc/call `portal.api/inspect % {:launcher :vs-code})}]])
 
 (defonce functional-compiler (r/create-compiler {:function-components true}))
 
@@ -72,10 +75,14 @@
         (reset! state/sender rpc/request)
         (apply rpc/call value)))))
 
+(defn- ->options [^js data]
+  (when-let [theme (.-theme data)]
+    {:portal.colors/theme (keyword theme)}))
+
 (defn render-output-item [^js data element]
   (a/let [value (->value data)]
     (dom/unmount-component-at-node element)
-    (dom/render [app (.-id data) value] element functional-compiler)))
+    (dom/render [app (.-id data) (->options data) value] element functional-compiler)))
 
 (defn activate [ctx]
   (cljs/init)
