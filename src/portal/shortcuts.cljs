@@ -8,6 +8,14 @@
       (#{"Win32" "Win64" "Windows" "WinCE"} platform)         ::windows
       (str/includes? platform "Linux")                        ::linux)))
 
+(defn platform-supported? [shortcut]
+  (let [platform (get-platform)]
+    (cond
+      (::osx (meta shortcut))     (= ::osx platform)
+      (::windows (meta shortcut)) (= ::windows platform)
+      (::linux (meta shortcut))   (= ::linux platform)
+      :else                       true)))
+
 (defn get-shortcut [definition]
   (cond
     (string? definition) #{definition}
@@ -47,22 +55,26 @@
           (= combo (get-shortcut definition)))
         (concat [(log->combo log)] (log->seq log))))
 
+(defn match [mapping log]
+  (or (get mapping (log->combo log))
+      (some #(get mapping %) (log->seq log))))
+
 (defn input? [log]
   (when-let [e (first log)]
     (#{"BUTTON" "INPUT" "SELECT"}
      (.. e -target -tagName))))
 
-(defn- keydown [e] (swap! log #(take 5 (conj % e))))
+(defn- keydown [e] (swap! log #(take 5 (conj % e))) nil)
 
 (defn- init []
   (when (nil? @log)
     (clear!)
-    (js/window.addEventListener "blur" #(clear!))
-    (js/window.addEventListener "keydown" #(keydown %))))
+    (.addEventListener js/window "blur" #(clear!))
+    (.addEventListener js/window "keydown" #(keydown %))))
 
 (defn matched! [log]
   (clear!)
-  (when-let [e (first log)] (.preventDefault e)))
+  (when-let [e (first log)] (.preventDefault ^js e)))
 
 (defn add! [k f]
   (init)

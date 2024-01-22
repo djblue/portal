@@ -2,6 +2,7 @@
   (:require [clojure.datafy :refer [datafy]]
             [examples.data :refer [data]]
             [lambdaisland.dom-types]
+            [portal.shortcuts :as shortcuts]
             [portal.console :as log]
             [portal.runtime :as rt]
             [portal.shadow.remote :as remote]
@@ -81,6 +82,9 @@
      ["RPC"
       (section "Logs" state/log)]
      (section "Viewers" api/viewers)
+     ["Shortcuts"
+      (section "Key Log"  @#'shortcuts/log)
+      (section "Key Map" commands/keymap)]
      ["Commands"
       (section "UI" commands/registry)
       (section "Runtime" commands/runtime-registry)]

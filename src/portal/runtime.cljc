@@ -335,20 +335,24 @@
 (def ^:private registry (atom (v/table {} {:columns [:var :predicate :private]})))
 
 (defn- get-functions [v]
-  (-> (keep
-       (fn [[name opts]]
+  (-> (reduce-kv
+       (fn [out name opts]
          (let [m      (merge (meta (:var opts)) opts)
                result (-> (select-keys m [:doc :command])
                           (assoc :name name)
                           (vary-meta assoc ::no-cache true))]
-           (when-not (:private m)
+           (if (:private m)
+             out
              (if-let [predicate (:predicate m)]
                (try
-                 (when (predicate v) result)
-                 (catch #?(:clj Exception :cljr Exception :cljs :default) _ex))
-               result))))
+                 (cond-> out
+                   (predicate v)
+                   (assoc name result))
+                 (catch #?(:clj Exception :cljr Exception :cljs :default) _ex out))
+               (assoc out name result)))))
+       {}
        @registry)
-      (v/table {:columns [:name :doc :command]})
+      (v/table {:columns [:doc :command]})
       (vary-meta assoc ::no-cache true)))
 
 (defn- ping [] ::pong)

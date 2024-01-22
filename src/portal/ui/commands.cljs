@@ -207,96 +207,97 @@
                       [ins/inspector option]])))
                 doall)]]]))))
 
-(def ^:private keymap
-  {{::shortcuts/osx     #{"meta" "shift" "p"}
-    ::shortcuts/default #{"control" "shift" "p"}}
-   `open-command-palette
+(def default-map
+  {^::shortcuts/windows
+   ^::shortcuts/linux
+   #{"control" "shift" "p"} `open-command-palette
+   #{"control" "j"}         `open-command-palette
+   #{"shift" ":"}           `open-command-palette
 
-   {::shortcuts/default #{"control" "j"}}
-   `open-command-palette
+   ^::shortcuts/windows
+   ^::shortcuts/linux
+   #{"control" "c"} `copy
+   #{"shift" "c"}   `copy-str
 
-   {::shortcuts/default #{"shift" ":"}}
-   `open-command-palette
+   #{"shift" "h"} `history-back
+   #{"shift" "l"} `history-forward
 
-   {::shortcuts/osx     #{"meta" "c"}
-    ::shortcuts/default #{"control" "c"}}
-   `copy
+   ^::shortcuts/windows ^::shortcuts/linux
+   #{"control" "arrowleft"}  `history-back
+   ^::shortcuts/windows ^::shortcuts/linux
+   #{"control" "arrowright"} `history-forward
 
-   {::shortcuts/default #{"shift" "c"}}
-   `copy-str
+   ^::shortcuts/windows ^::shortcuts/linux
+   #{"control" "shift" "arrowleft"} `history-first
+   ^::shortcuts/windows ^::shortcuts/linux
+   #{"control" "shift" "arrowright"} `history-last
 
-   {::shortcuts/osx     #{"meta" "arrowleft"}
-    ::shortcuts/default #{"control" "arrowleft"}}
-   `history-back
+   ["/"] `focus-filter
 
-   {::shortcuts/default #{"shift" "h"}}
-   `history-back
+   #{"shift" "escape"}    `select-none
+   #{"escape"}            `select-pop
+   #{"v"}                 `select-viewer
 
-   {::shortcuts/osx     #{"meta" "arrowright"}
-    ::shortcuts/default #{"control" "arrowright"}}
-   `history-forward
+   #{"shift" "k"}         `select-prev-viewer
+   #{"shift" "arrowup"}   `select-prev-viewer
+   #{"shift" "j"}         `select-next-viewer
+   #{"shift" "arrowdown"} `select-next-viewer
 
-   {::shortcuts/default #{"shift" "l"}}
-   `history-forward
+   #{"arrowup"}           `select-prev
+   #{"k"}                 `select-prev
+   #{"arrowdown"}         `select-next
+   #{"j"}                 `select-next
+   #{"arrowleft"}         `select-parent
+   #{"h"}                 `select-parent
+   #{"arrowright"}        `select-child
+   #{"l"}                 `select-child
 
-   {::shortcuts/osx     #{"meta" "shift" "arrowleft"}
-    ::shortcuts/default #{"control" "shift" "arrowleft"}}
-   `history-first
+   #{"control" "enter"}   `focus-selected
+   #{"e"}                 `toggle-expand
+   #{" "}                 `toggle-expand
+   ["z" "a"]              `toggle-expand
+   #{"shift" "e"}         `expand-inc
+   #{"shift" " "}         `expand-inc
 
-   {::shortcuts/osx     #{"meta" "shift" "arrowright"}
-    ::shortcuts/default #{"control" "shift" "arrowright"}}
-   `history-last
+   #{"enter"}             'clojure.datafy/nav
+   #{"shift" "enter"}     'clojure.datafy/datafy
 
-   {::shortcuts/default ["/"]}                  `focus-filter
+   #{"control" "r"}       `redo-previous-command
+   #{"control" "l"}       `clear
 
-   {::shortcuts/default #{"shift" "escape"}}    `select-none
-   {::shortcuts/default #{"escape"}}            `select-pop
-   {::shortcuts/default #{"v"}}                 `select-viewer
-
-   {::shortcuts/default #{"shift" "k"}}         `select-prev-viewer
-   {::shortcuts/default #{"shift" "arrowup"}}   `select-prev-viewer
-   {::shortcuts/default #{"shift" "j"}}         `select-next-viewer
-   {::shortcuts/default #{"shift" "arrowdown"}} `select-next-viewer
-
-   {::shortcuts/default #{"arrowup"}}           `select-prev
-   {::shortcuts/default #{"k"}}                 `select-prev
-   {::shortcuts/default #{"arrowdown"}}         `select-next
-   {::shortcuts/default #{"j"}}                 `select-next
-   {::shortcuts/default #{"arrowleft"}}         `select-parent
-   {::shortcuts/default #{"h"}}                 `select-parent
-   {::shortcuts/default #{"arrowright"}}        `select-child
-   {::shortcuts/default #{"l"}}                 `select-child
-
-   {::shortcuts/default #{"control" "enter"}}   `focus-selected
-   {::shortcuts/default #{"e"}}                 `toggle-expand
-   {::shortcuts/default #{" "}}                 `toggle-expand
-   {::shortcuts/default ["z" "a"]}              `toggle-expand
-   {::shortcuts/default #{"shift" "e"}}         `expand-inc
-   {::shortcuts/default #{"shift" " "}}         `expand-inc
-
-   {::shortcuts/default #{"enter"}}             'clojure.datafy/nav
-   {::shortcuts/default #{"shift" "enter"}}     'clojure.datafy/datafy
-
-   {::shortcuts/default #{"control" "r"}}       `redo-previous-command
-   {::shortcuts/default #{"control" "l"}}       `clear
-
-   {::shortcuts/default ["g" "g"]}              `scroll-top
-   {::shortcuts/default #{"shift" "g"}}         `scroll-bottom
+   ["g" "g"]              `scroll-top
+   #{"shift" "g"}         `scroll-bottom
 
    ;; TODO Move to metadata of var when possible
-   {::shortcuts/default ["g" "d"]}              `portal.runtime.jvm.editor/goto-definition
+   ["g" "d"] `portal.runtime.jvm.editor/goto-definition
 
-   {::shortcuts/default ["p" "p"]}              `paste
-   {::shortcuts/default ["y"]}                  `copy
+   ["p" "p"] `paste
+   ["y"]     `copy
 
    ;; PWA
-   {::shortcuts/osx     #{"meta" "o"}
-    ::shortcuts/default #{"control" "o"}}       `open-file
-   {::shortcuts/osx     #{"meta" "v"}
-    ::shortcuts/default #{"control" "v"}}       `paste
-   {::shortcuts/default ["p" "s"]}              `parse-selected
-   {::shortcuts/osx     #{"meta" "d"}
-    ::shortcuts/default #{"control" "d"}}       `portal.extensions.pwa/open-demo})
+   ^::shortcuts/windows ^::shortcuts/linux
+   #{"control" "o"} `open-file
+   ^::shortcuts/windows ^::shortcuts/linux
+   #{"control" "v"} `paste
+   ^::shortcuts/windows ^::shortcuts/linux
+   #{"control" "d"} `portal.extensions.pwa/open-demo
+
+   ["p" "s"] `parse-selected})
+
+(def osx-map
+  {^::shortcuts/osx #{"meta" "shift" "p"} `open-command-palette
+   ^::shortcuts/osx #{"meta" "c"} `copy
+   ^::shortcuts/osx #{"meta" "arrowleft"}  `history-back
+   ^::shortcuts/osx #{"meta" "arrowright"} `history-forward
+   ^::shortcuts/osx #{"meta" "shift" "arrowleft"}  `history-first
+   ^::shortcuts/osx #{"meta" "shift" "arrowright"} `history-last
+   ;; PWA
+   ^::shortcuts/osx #{"meta" "o"} `open-file
+   ^::shortcuts/osx #{"meta" "v"} `paste
+   ^::shortcuts/osx #{"meta" "d"} `portal.extensions.pwa/open-demo})
+
+(def keymap
+  (r/atom (merge default-map osx-map)))
 
 (def ^:private aliases {"cljs.core" "clojure.core"})
 
@@ -306,15 +307,15 @@
     (symbol (aliases ns ns) (str name))))
 
 (defn- find-combos [command]
-  (let [command-name (or (:name command)
-                         (var->name command))]
-    (sort-by
+  (let [command-name (:name command)]
+    (keep
      #(into [] (sort %))
      (keep
       (fn [[combo f]]
-        (when (= f command-name)
-          (shortcuts/get-shortcut combo)))
-      keymap))))
+        (when (and (= f command-name)
+                   (shortcuts/platform-supported? combo))
+          combo))
+      @keymap))))
 
 (def ^:private shortcut->symbol
   {"arrowright" [icons/arrow-right {:size "xs"}]
@@ -544,13 +545,15 @@
 (def ^:no-doc registry
   (atom ^{:portal.viewer/default :portal.viewer/table
           :portal.viewer/table {:columns [:doc :command]}} {}))
+
 (def ^:no-doc runtime-registry (atom nil))
 
 (defn- get-commands []
-  (concat @runtime-registry (vals @registry)))
+  (merge @runtime-registry @registry))
 
 (defn ^:command open-command-palette
   "Show All Commands"
+  {:shortcuts [#{"control" "shift" "p"} #{"control" "j"} #{"shift" ":"}]}
   [state]
   (a/let [commands (sort-by
                     :name
@@ -561,7 +564,7 @@
                          (:name option))
                         (when-let [predicate (:predicate option)]
                           (not (predicate @state)))))
-                     (get-commands)))]
+                     (vals (get-commands))))]
     (open
      state
      (fn [state]
@@ -711,6 +714,7 @@
 
 (defn ^:command copy
   "Copy selected value as an edn string to the clipboard."
+  {:shortcuts [#{"control" "c"} ["y"]]}
   [state]
   (if-let [selection (not-empty (.. js/window getSelection toString))]
     (copy-to-clipboard! selection)
@@ -921,11 +925,12 @@
 (defn register!
   ([var] (register! var {}))
   ([var opts]
-   (let [name (var->name var)]
+   (let [m    (meta var)
+         name (or (:name opts) (var->name var))]
      (swap! registry
-            assoc name (merge {:name name
-                               :run  var
-                               :doc  (:doc (meta var))}
+            assoc name (merge {:name name :run  var}
+                              (when-let [doc (or (:doc m) (:doc opts))] {:doc doc})
+                              (when-let [command (:command m)] {:command command})
                               opts)))))
 
 (doseq [var (vals (ns-publics 'portal.ui.commands))
@@ -934,10 +939,15 @@
 
 (doseq [[var opts] (merge clojure-commands portal-data-commands)]
   (let [name (var->name var)]
-    (swap! registry
-           assoc name (make-command (merge (meta var) {:f var :name name} opts)))))
+    (register! var (make-command (merge (meta var) {:f var :name name} opts)))))
 
-(defn- nav [state]
+(defn- nav
+  "Returns (possibly transformed) v in the context of coll and k (a
+  key/index or nil). Callers should attempt to provide the key/index
+  context k for Indexed/Associative/ILookup colls if possible, but not
+  to fabricate one e.g. for sequences (pass nil). nav will return the
+  value of clojure.core.protocols/nav."
+  [state]
   (state/dispatch!
    state
    state/nav
@@ -976,6 +986,7 @@
 
 (defn copy-str
   "Copy string to the clipboard."
+  {:shortcuts [#{"shift" "c"}]}
   [state]
   (copy-to-clipboard! (state/get-selected-value @state)))
 
@@ -1075,23 +1086,20 @@
        (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
          (reset!
           runtime-registry
-          (with-meta
-            (for [{:keys [name] :as opts} fns]
-              (make-command
-               (assoc opts :f #(state/invoke name %))))
-            {:portal.viewer/default :portal.viewer/table
-             :portal.viewer/table {:columns [:name :doc :command]}}))))
+          (update-vals
+           fns
+           (fn [opts]
+             (make-command
+              (assoc opts :f (partial state/invoke (:name opts)))))))))
      #js [(hash value)])
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)
-         (first
-          (for [[shortcut f] keymap
-                command      (get-commands)
-                :when        (and (= (:name command) f)
-                                  (shortcuts/match? shortcut log))]
-            (do
-              (shortcuts/matched! log)
-              ((:run command) state))))))
+         (when-let [f (shortcuts/match @keymap log)]
+           (when-let [{:keys [run]} (or (get @registry f)
+                                        (get @runtime-registry f))]
+
+             (shortcuts/matched! log)
+             (run state)))))
      (when-let [component (::input @state)]
        [ins/with-readonly [(or container pop-up) [component state]]])]))
