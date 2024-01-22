@@ -99,7 +99,8 @@
 (defn highlight-clj [string-value]
   (let [theme (theme/use-theme)]
     [:pre
-     {:style {:margin      0
+     {:class root-class
+      :style {:margin      0
               :padding     0
               :background  :none
               :width       "100%"
