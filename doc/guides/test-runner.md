@@ -27,14 +27,14 @@ let's go with that.
 (defn run-test [ns]
   (let [report (atom [])]
     (tap> report)
-    (with-redefs [t/report #(swap! report conj %)]
+    (with-redefs [t/do-report #(swap! report conj %)]
       (t/run-tests ns))))
 
 (run-test 'user)
 ```
 
 That's pretty much it. The key here is that you simply need to intercept values
-passed to [`clojure.test/report`](https://clojuredocs.org/clojure.test/report)
+passed to [`clojure.test/do-report`](https://clojuredocs.org/clojure.test/do-report)
 and send them directly to Portal.
 
 With the code above, you should get something like:
