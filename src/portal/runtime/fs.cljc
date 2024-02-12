@@ -71,7 +71,7 @@
      :cljr (exists f)))
 
 (defn paths []
-  (s/split (path) (re-pattern (separator))))
+  (s/split (or (path) "") (re-pattern (separator))))
 
 (defn find-bin [paths files]
   (first
