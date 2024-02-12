@@ -205,10 +205,12 @@
       {:portal-instance    portal
        :missing-middleware 'portal.nrepl/wrap-repl}))))
 
+#?(:cljs (def ^:private docs-json (io/inline "portal/docs.json")))
+
 (defn- get-docs []
   (cson/read
    #?(:clj  (slurp (io/resource "portal/docs.json"))
-      :cljs (io/inline "portal/docs.json"))))
+      :cljs docs-json)))
 
 (defn docs
   "Open portal docs.

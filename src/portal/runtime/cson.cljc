@@ -3,11 +3,15 @@
   (:refer-clojure :exclude [read])
   #?(:clj  (:require [portal.runtime.json-buffer :as json])
      :cljr (:require [portal.runtime.json-buffer :as json])
+     :joyride
+     (:require [portal.runtime.json-buffer :as json]
+               [portal.runtime.macros :as m])
      :cljs (:require [goog.crypt.base64 :as Base64]
                      [portal.runtime.json-buffer :as json]
                      [portal.runtime.macros :as m]))
   #?(:clj  (:import [java.net URL]
                     [java.util Base64 Date UUID])
+     :joyride (:import)
      :cljs (:import [goog.math Long])))
 
 (defprotocol ToJson (-to-json [value buffer]))
@@ -48,6 +52,8 @@
      (-> buffer
          (json/push-string "long")
          (json/push-string (str value)))))
+
+#?(:joyride (def Long js/Number))
 
 (extend-type #?(:cljr System.Int64
                 :clj  Long
@@ -125,6 +131,7 @@
            (json/push-string "R")
            (json/push-long (long (numerator value)))
            (json/push-long (long (denominator value))))))
+   :joyride nil
    :cljs
    (deftype Ratio [numerator denominator]
      ToJson
@@ -142,7 +149,7 @@
 (defn ->ratio [buffer]
   (let [n (json/next-long buffer)
         d (json/next-long buffer)]
-    #?(:cljs (Ratio. n d) :default (/ n d))))
+    #?(:joyride (/ n d) :cljs (Ratio. n d) :default (/ n d))))
 
 (extend-type #?(:cljr System.String
                 :clj  String
@@ -171,6 +178,9 @@
 (defn- can-meta? [value]
   #?(:clj  (instance? clojure.lang.IObj value)
      :cljr (instance? clojure.lang.IObj value)
+     :joyride
+     (try (with-meta value {}) true
+          (catch :default _e false))
      :cljs (implements? IMeta value)))
 
 (defn- ->meta [buffer]
@@ -203,6 +213,7 @@
 #?(:clj
    (defmethod print-method Tagged [v ^java.io.Writer w]
      (.write w ^String (tagged-str v)))
+   :joyride nil
    :cljs
    (extend-type Tagged
      IPrintWithWriter
@@ -215,11 +226,13 @@
 
 (defn base64-encode ^String [byte-array]
   #?(:clj  (.encodeToString (Base64/getEncoder) byte-array)
+     :joyride (.toString (.from js/Buffer byte-array) "base64")
      :cljs (Base64/encodeByteArray byte-array)
      :cljr (Convert/ToBase64String byte-array)))
 
 (defn base64-decode [string]
   #?(:clj  (.decode (Base64/getDecoder) ^String string)
+     :joyride (js/Uint8Array. (.from js/Buffer string "base64"))
      :cljs (Base64/decodeStringToUint8Array string)
      :cljr (Convert/FromBase64String string)))
 
@@ -273,6 +286,7 @@
      ToJson
      {:-to-json (fn [value buffer]
                   (tag buffer "C" (int value)))})
+   :joyride nil
    :cljs
    (deftype Character [code]
      ToJson
@@ -300,6 +314,7 @@
 (defn- ->char [buffer]
   #?(:clj  (char (->value buffer))
      :cljr (char (->value buffer))
+     :joyride nil
      :cljs (Character. (->value buffer))))
 
 #?(:bb (defn inst-ms [inst] (.getTime inst)))
@@ -322,9 +337,11 @@
              (json/next-long buffer)))
      :cljs (js/Date. (json/next-long buffer))))
 
+#?(:joyride (def UUID (type (random-uuid))))
+
 (extend-type #?(:clj  UUID
                 :cljr System.Guid
-                :cljs cljs.core/UUID)
+                :cljs UUID)
   ToJson
   (-to-json [value buffer]
     (-> buffer
@@ -365,10 +382,11 @@
      :cljr (System.Uri. (json/next-string buffer))
      :cljs (js/URL. (json/next-string buffer))))
 
+#?(:joyride (def Keyword (type :kw)))
+
 (extend-type #?(:clj  clojure.lang.Keyword
                 :cljr clojure.lang.Keyword
-                :cljs cljs.core/Keyword)
-
+                :cljs Keyword)
   ToJson
   (-to-json [value buffer]
     (if-let [ns (namespace value)]
@@ -386,9 +404,11 @@
 (defn- ->keyword-2 [buffer]
   (keyword (json/next-string buffer) (json/next-string buffer)))
 
+#?(:joyride (def Symbol (type 'sym)))
+
 (extend-type #?(:clj  clojure.lang.Symbol
                 :cljr clojure.lang.Symbol
-                :cljs cljs.core/Symbol)
+                :cljs Symbol)
   ToJson
   (-to-json [value buffer]
     (if-let [ns (namespace value)]
@@ -434,50 +454,86 @@
      (-to-json [value buffer]
        (tagged-coll buffer "(" value))))
 
-(extend-type #?(:clj  clojure.lang.Cons
-                :cljr clojure.lang.Cons
-                :cljs cljs.core/Cons)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
+(def coll-types
+  #?(:bb   [clojure.lang.Cons
+            clojure.lang.PersistentList$EmptyList
+            clojure.lang.LazySeq
+            clojure.lang.ArraySeq
+            clojure.lang.APersistentMap$KeySeq
+            clojure.lang.APersistentMap$ValSeq
+            clojure.lang.LongRange
+            clojure.lang.Repeat
+            clojure.lang.PersistentList
+            clojure.lang.PersistentQueue
+            clojure.lang.PersistentVector$ChunkedSeq
+            clojure.lang.PersistentArrayMap$Seq]
+     :clj  [clojure.lang.Cons
+            clojure.lang.PersistentList$EmptyList
+            clojure.lang.LazySeq
+            clojure.lang.ArraySeq
+            clojure.lang.APersistentMap$KeySeq
+            clojure.lang.APersistentMap$ValSeq
+            clojure.lang.LongRange
+            clojure.lang.Repeat
+            clojure.lang.PersistentList
+            clojure.lang.ChunkedCons
+            clojure.lang.PersistentQueue
+            clojure.lang.PersistentVector$ChunkedSeq
+            clojure.lang.PersistentArrayMap$Seq]
+     :cljr [clojure.lang.Cons
+            clojure.lang.PersistentList+EmptyList
+            clojure.lang.LazySeq
+            clojure.lang.ArraySeq
+            clojure.lang.APersistentMap+KeySeq
+            clojure.lang.APersistentMap+ValSeq
+            clojure.lang.LongRange
+            clojure.lang.Repeat
+            clojure.lang.PersistentList
+            clojure.lang.PersistentQueue
+            clojure.lang.PersistentVector+ChunkedSeq
+            clojure.lang.PersistentArrayMap+Seq]
+     :joyride [(type (cons 1 [])) ;; cljs.core/Cons
+               (type (list)) ;; cljs.core/EmptyList
+               (type (lazy-seq)) ;; cljs.core/LazySeq
+               (type (keys {:a 1})) ;; cljs.core/KeySeq
+               (type (vals {:a 1})) ;; cljs.core/ValSeq
+               (type (repeat 1)) ;; cljs.core/Repeat
+               (type (list 1 2 3)) ;; cljs.core/List
+               (type (range)) ;; cljs.core/IntegerRange
+               (type (range 10)) ;; cljs.core/Range
+               (type (seq {:a 1}))
+               (type (seq [1]))]
+     :cljs [cljs.core/Cons
+            cljs.core/EmptyList
+            cljs.core/LazySeq
+            cljs.core/IndexedSeq
+            cljs.core/KeySeq
+            cljs.core/ValSeq
+            cljs.core/Repeat
+            cljs.core/List
+            cljs.core/ChunkedCons
+            cljs.core/ChunkedSeq
+            cljs.core/RSeq
+            cljs.core/PersistentQueue
+            cljs.core/PersistentQueueSeq
+            cljs.core/PersistentArrayMapSeq
+            cljs.core/PersistentTreeMapSeq
+            cljs.core/NodeSeq
+            cljs.core/ArrayNodeSeq]))
 
-(extend-type #?(:clj  clojure.lang.PersistentList$EmptyList
-                :cljr clojure.lang.PersistentList+EmptyList
-                :cljs cljs.core/EmptyList)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-(extend-type #?(:clj  clojure.lang.LazySeq
-                :cljr clojure.lang.LazySeq
-                :cljs cljs.core/LazySeq)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-(extend-type #?(:clj  clojure.lang.ArraySeq
-                :cljr clojure.lang.ArraySeq
-                :cljs cljs.core/IndexedSeq)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-(extend-type #?(:clj  clojure.lang.APersistentMap$KeySeq
-                :cljr clojure.lang.APersistentMap+KeySeq
-                :cljs cljs.core/KeySeq)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-(extend-type #?(:clj  clojure.lang.APersistentMap$ValSeq
-                :cljr clojure.lang.APersistentMap+ValSeq
-                :cljs cljs.core/ValSeq)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-#?(:clj
-   (extend-type clojure.lang.LongRange
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value)))
-   :cljr
-   (extend-type clojure.lang.LongRange
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value))))
+(doseq [coll-type coll-types]
+  #?(:clj
+     (extend coll-type
+       ToJson
+       {:-to-json (fn [value buffer] (tagged-coll buffer "(" value))})
+     :cljr
+     (extend coll-type
+       ToJson
+       {:-to-json (fn [value buffer] (tagged-coll buffer "(" value))})
+     :cljs
+     (extend-type coll-type
+       ToJson
+       (-to-json [value buffer] (tagged-coll buffer "(" value)))))
 
 #?(:cljs
    (m/extend-type?
@@ -486,94 +542,41 @@
     ToJson
     (-to-json [value buffer] (tagged-coll buffer "(" value))))
 
+#?(:joyride (def Range (type (range))))
+
 (extend-type #?(:clj  clojure.lang.Range
                 :cljr clojure.lang.Range
-                :cljs cljs.core/Range)
+                :cljs Range)
   ToJson
   (-to-json [value buffer] (tagged-coll buffer "(" (into [] value))))
 
-(extend-type #?(:clj  clojure.lang.Repeat
-                :cljr clojure.lang.Repeat
-                :cljs cljs.core/Repeat)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
+(def vector-types
+  #?(:clj  [clojure.lang.PersistentVector
+            clojure.lang.APersistentVector$SubVector
+            clojure.lang.MapEntry]
+     :joyride [(type [])
+               (type (subvec [0 1] 1))
+               (type (first {:a 1}))]
+     :cljr [clojure.lang.PersistentVector
+            clojure.lang.APersistentVector+SubVector
+            clojure.lang.MapEntry]
+     :cljs [cljs.core/PersistentVector
+            cljs.core/Subvec
+            cljs.core/MapEntry]))
 
-(extend-type #?(:clj  clojure.lang.PersistentList
-                :cljr clojure.lang.PersistentList
-                :cljs cljs.core/List)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-(extend-type #?(:clj  clojure.lang.PersistentQueue
-                :cljr clojure.lang.PersistentQueue
-                :cljs cljs.core/PersistentQueue)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-#?(:cljs
-   (extend-type cljs.core/RSeq
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value))))
-
-#?(:bb nil
-   :clj
-   (extend-type clojure.lang.ChunkedCons
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value)))
-   :cljs
-   (extend-type cljs.core/ChunkedCons
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value))))
-
-(extend-type #?(:clj  clojure.lang.PersistentVector$ChunkedSeq
-                :cljr clojure.lang.PersistentVector+ChunkedSeq
-                :cljs cljs.core/ChunkedSeq)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-#?(:cljs
-   (extend-type cljs.core/PersistentQueueSeq
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value))))
-
-(extend-type #?(:clj  clojure.lang.PersistentArrayMap$Seq
-                :cljr clojure.lang.PersistentArrayMap+Seq
-                :cljs cljs.core/PersistentArrayMapSeq)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "(" value)))
-
-#?(:cljs
-   (extend-type cljs.core/PersistentTreeMapSeq
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value))))
-
-#?(:cljs
-   (extend-type cljs.core/NodeSeq
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value))))
-
-#?(:cljs
-   (extend-type cljs.core/ArrayNodeSeq
-     ToJson
-     (-to-json [value buffer] (tagged-coll buffer "(" value))))
-
-(extend-type #?(:clj  clojure.lang.PersistentVector
-                :cljr clojure.lang.PersistentVector
-                :cljs cljs.core/PersistentVector)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "[" value)))
-
-(extend-type #?(:clj  clojure.lang.APersistentVector$SubVector
-                :cljr clojure.lang.APersistentVector+SubVector
-                :cljs cljs.core/Subvec)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "[" value)))
-
-(extend-type #?(:clj  clojure.lang.MapEntry
-                :cljr clojure.lang.MapEntry
-                :cljs cljs.core/MapEntry)
-  ToJson
-  (-to-json [value buffer] (tagged-coll buffer "[" (into [] value))))
+(doseq [vector-type vector-types]
+  #?(:clj
+     (extend vector-type
+       ToJson
+       {:-to-json (fn [value buffer] (tagged-coll buffer "[" value))})
+     :cljr
+     (extend vector-type
+       ToJson
+       {:-to-json (fn [value buffer] (tagged-coll buffer "[" value))})
+     :cljs
+     (extend-protocol ToJson
+       vector-type
+       (-to-json [value buffer] (tagged-coll buffer "[" value)))))
 
 (defn- ->into [zero buffer]
   (let [n (json/next-long buffer)]
@@ -584,15 +587,19 @@
          (unchecked-inc i)
          (conj! out (->value buffer)))))))
 
+#?(:joyride (def PersistentHashSet (type #{1})))
+
 (extend-type #?(:clj  clojure.lang.PersistentHashSet
                 :cljr clojure.lang.PersistentHashSet
-                :cljs cljs.core/PersistentHashSet)
+                :cljs PersistentHashSet)
   ToJson
   (-to-json [value buffer] (tagged-coll buffer "#" value)))
 
+#?(:joyride (def PersistentTreeSet (type (sorted-set))))
+
 (extend-type #?(:clj  clojure.lang.PersistentTreeSet
                 :cljr clojure.lang.PersistentTreeSet
-                :cljs cljs.core/PersistentTreeSet)
+                :cljs PersistentTreeSet)
   ToJson
   (-to-json [value buffer] (tagged-coll buffer "sset" value)))
 
@@ -620,15 +627,19 @@
         (json/push-long (count value)))
     value)))
 
+#?(:joyride (def PersistentHashMap (type (hash-map))))
+
 (extend-type #?(:clj  clojure.lang.PersistentHashMap
                 :cljr clojure.lang.PersistentHashMap
-                :cljs cljs.core/PersistentHashMap)
+                :cljs PersistentHashMap)
   ToJson
   (-to-json [value buffer] (tagged-map buffer value)))
 
+#?(:joyride (def PersistentTreeMap (type (sorted-map))))
+
 (extend-type #?(:clj  clojure.lang.PersistentTreeMap
                 :cljr clojure.lang.PersistentTreeMap
-                :cljs cljs.core/PersistentTreeMap)
+                :cljs PersistentTreeMap)
   ToJson
   (-to-json [value buffer] (tagged-map buffer "smap" value)))
 
@@ -637,9 +648,11 @@
      ToJson
      (-to-json [value buffer] (tagged-map buffer value))))
 
+#?(:joyride (def PersistentArrayMap (type {})))
+
 (extend-type #?(:clj  clojure.lang.PersistentArrayMap
                 :cljr clojure.lang.PersistentArrayMap
-                :cljs cljs.core/PersistentArrayMap)
+                :cljs PersistentArrayMap)
   ToJson
   (-to-json [value buffer] (tagged-map buffer value)))
 
@@ -671,9 +684,11 @@
 
 #?(:bb (def clojure.lang.TaggedLiteral (type (tagged-literal 'a :a))))
 
+#?(:joyride (def TaggedLiteral (type (tagged-literal 'f :v))))
+
 (extend-type #?(:clj  clojure.lang.TaggedLiteral
                 :cljr clojure.lang.TaggedLiteral
-                :cljs cljs.core/TaggedLiteral)
+                :cljs TaggedLiteral)
   ToJson
   (-to-json [value buffer]
     (-> buffer

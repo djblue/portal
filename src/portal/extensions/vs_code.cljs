@@ -4,6 +4,7 @@
             [clojure.string :as str]
             [portal.api :as p]
             [portal.async :as a]
+            [portal.resources :as io]
             [portal.runtime.browser :as browser]
             [portal.runtime.fs :as fs]
             [portal.runtime.index :as index]
@@ -134,6 +135,57 @@
   (when (fs/exists (fs/join workspace "resources/portal-dev/main.js"))
     (.executeCommand vscode/commands "setContext" "portal:is-dev" true)))
 
+(def ^:private portal-source
+  [(io/inline "portal/async.cljc")
+   (io/inline "portal/runtime/datafy.cljc")
+   (io/inline "portal/runtime/json_buffer.cljc")
+   (io/inline "portal/runtime/macros.cljc")
+   (io/inline "portal/runtime/cson.cljc")
+   (io/inline "portal/viewer.cljc")
+   (io/inline "portal/runtime.cljc")
+   (io/inline "portal/runtime/json.cljc")
+   (io/inline "portal/runtime/transit.cljc")
+   (io/inline "portal/client/common.cljs")
+   (io/inline "portal/client/node.cljs")
+   (io/inline "portal/runtime/fs.cljc")
+   (io/inline "portal/runtime/node/client.cljs")
+   (io/inline "portal/runtime/shell.cljc")
+   (io/inline "portal/runtime/browser.cljc")
+   (io/inline "portal/resources.cljc")
+   (io/inline "portal/runtime/index.cljc")
+   (io/inline "portal/runtime/node/server.cljs")
+   (io/inline "portal/runtime/node/launcher.cljs")
+   (io/inline "portal/api.cljc")
+   (io/inline "portal/console.cljc")])
+
+(defn- get-extension ^js/Promise [extension-name]
+  (js/Promise.
+   (fn [resolve reject]
+     (let [n (atom 16) delay 250]
+       (js/setTimeout
+        (fn work []
+          (try
+            (resolve (.-exports (.getExtension vscode/extensions extension-name)))
+            (catch :default e
+              (if (zero? (swap! n dec))
+                (reject (ex-info "Max attempts reached" {} e))
+                (js/setTimeout work delay)))))
+        delay)))))
+
+(defn- setup-joyride! []
+  (-> (get-extension "betterthantomorrow.joyride")
+      (.then (fn [^js joyride]
+               (reduce
+                (fn [^js/Promise chain source]
+                  (-> chain
+                      (.then
+                       (fn [_]
+                         (.runCode joyride source)))))
+                (.resolve js/Promise 0)
+                portal-source)))
+      (.catch #(.error js/console %)))
+  (clj->js {:resources {:inline io/inline}}))
+
 (defn activate
   [^js ctx]
   (when ctx
@@ -149,7 +201,8 @@
     (setup-notebook-handler)
     (add-tap #'p/submit))
   (doseq [[command f] (get-commands)]
-    (register-disposable! (vscode/commands.registerCommand (name command) f))))
+    (register-disposable! (vscode/commands.registerCommand (name command) f)))
+  (setup-joyride!))
 
 (defn deactivate
   []

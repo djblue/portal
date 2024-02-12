@@ -9,11 +9,20 @@
             [portal.runtime.node.client :as c]
             [portal.runtime.node.server :as server]))
 
-(defn- get-search-paths []
-  (->> (fs/cwd) (iterate fs/dirname) (take-while some?)))
+(defn- get-workspace-folder []
+  (try
+    (let [vscode (js/require "vscode")
+          ^js uri (-> vscode .-workspace .-workspaceFolders (aget 0) .-uri)
+          fs-path (.-fsPath uri)]
+      (if-not (undefined? fs-path) fs-path (.-path uri)))
+    (catch :default _e)))
+
+(defn- get-search-paths [base-path]
+  (->> base-path (iterate fs/dirname) (take-while some?)))
 
 (defn get-config [{:keys [options config-file]}]
-  (let [search-paths (get-search-paths)]
+  (let [search-paths (concat (get-search-paths (fs/cwd))
+                             (some-> (get-workspace-folder) get-search-paths))]
     (or (some
          (fn [parent]
            (some-> parent

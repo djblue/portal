@@ -9,6 +9,9 @@
 (defn- can-meta? [value]
   #?(:clj  (instance? clojure.lang.IObj value)
      :cljr (instance? clojure.lang.IObj value)
+     :joyride
+     (try (with-meta value {}) true
+          (catch :default _e false))
      :cljs (implements? IMeta value)))
 
 (defn default

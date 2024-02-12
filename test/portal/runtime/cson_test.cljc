@@ -18,6 +18,7 @@
     1.5
     #?(:clj  42N
        :cljr 42N
+       :joyride (js/BigInt "42")
        :cljs (when (exists? js/BigInt)
                (js/BigInt "42")))
     \newline
@@ -82,7 +83,8 @@
 (deftest special-collections
   (are [value]
        (= value (pass value))
-    (range 10)))
+    (range 10)
+    (first {:a 1})))
 
 (deftest range-with-meta
   (let [v (with-meta (range 0 5 1.0) {:my :meta})]
@@ -179,6 +181,7 @@
    (deftest java-chars
      (is (= \A (pass \A)))
      (is (= (seq "hi") (pass (seq "hi")))))
+   :joyride nil
    :cljs
    (deftest js-chars
      (let [a (cson/Character. 10) b (cson/Character. 10)]

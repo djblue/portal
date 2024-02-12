@@ -14,15 +14,15 @@
                      JsonValue
                      JsonNodeOptions))))
 
-(defprotocol IShift (-shift [this]))
+(defn -shift [this] (this))
 
-#?(:cljs (deftype Shifter [source ^int n]
-           IShift
-           (-shift [this]
-             (let [n      (.-n this)
-                   result (aget source n)]
-               (set! (.-n this) (unchecked-inc n))
-               result))))
+#?(:cljs (defn shifter [source]
+           (let [this #js {:n 0}]
+             (fn []
+               (let [n      (.-n this)
+                     result (aget source n)]
+                 (set! (.-n this) (unchecked-inc n))
+                 result)))))
 
 (defn ->reader [data]
   #?(:bb
@@ -37,7 +37,7 @@
      (doto (JsonReader. (StringReader. data))
        (.beginArray))
      :cljs
-     (Shifter. (.parse js/JSON data) 0)))
+     (shifter (.parse js/JSON data))))
 
 (defn push-null   [buffer]
   #?(:bb   (conj! buffer nil)
