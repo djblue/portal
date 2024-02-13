@@ -717,7 +717,6 @@
     (when-let [input (.-current ref)] (.focus input))))
 
 (defn ^:command clear-filter
-  {:shortcuts [#{"control" "l"}]}
   [state]
   (state/dispatch! state dissoc :search-text))
 
@@ -854,7 +853,9 @@
   [state]
   (state/dispatch! state state/history-last))
 
-(defn ^:command clear [state]
+(defn ^:command clear
+  {:shortcuts [#{"control" "l"}]}
+  [state]
   (state/dispatch! state state/clear))
 
 (defn ^:command show-rpc-log
