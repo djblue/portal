@@ -31,7 +31,7 @@
 
 (defn- get-session-id [^js req]
   (some->
-   (or (last (str/split (.-url req) #"\?"))
+   (or (second (str/split (.-url req) #"\?"))
        (when-let [referer (get-header req "referer")]
          (last (str/split referer #"\?"))))
    uuid))
