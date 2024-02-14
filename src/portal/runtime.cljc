@@ -414,8 +414,7 @@
              #'cache-evict
              #'get-options
              #'get-functions
-             #'type
-             #'datafy]]
+             #'type]]
   (register! var))
 
 (doseq [[var opts] {#'pr-str          {:name 'clojure.core/pr-str}
@@ -424,6 +423,7 @@
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
                     #'nav             {:private true}
+                    #'datafy          {:name 'clojure.datafy/datafy}
                     #'toggle-watch    {:private false
                                        :predicate atom?
                                        :name 'portal.api/toggle-watch}}]
