@@ -3,17 +3,21 @@
   (:require #?(:clj  [portal.sync  :as a]
                :cljr [portal.sync  :as a]
                :cljs [portal.async :as a])
-            [clojure.datafy :refer [datafy nav]]
-            [clojure.pprint :as pprint]
+            #?(:joyride [portal.runtime.datafy :refer [datafy nav]]
+               :default [clojure.datafy :refer [datafy nav]])
+            #?(:joyride [cljs.pprint :as pprint]
+               :default [clojure.pprint :as pprint])
             [portal.runtime.cson :as cson]
             [portal.viewer :as v]))
 
 (def ^:private tagged-type (type (cson/->Tagged "tag" [])))
 
-(defmethod pprint/simple-dispatch tagged-type [value]
-  (if (not= (:tag value) "remote")
-    (pr value)
-    (print (:rep value))))
+#?(:joyride nil
+   :default
+   (defmethod pprint/simple-dispatch tagged-type [value]
+     (if (not= (:tag value) "remote")
+       (pr value)
+       (print (:rep value)))))
 
 (defonce default-options (atom nil))
 
@@ -65,9 +69,12 @@
      :cljr (future (System.Threading.Thread/Sleep timeout) (f))
      :cljs (js/setTimeout f timeout)))
 
+#?(:joyride (def Atom (type (atom nil))))
+
 (defn- atom? [o]
   #?(:clj  (instance? clojure.lang.Atom o)
      :cljr (instance? clojure.lang.Atom o)
+     :joyride (= Atom (type o))
      :cljs (satisfies? cljs.core/IAtom o)))
 
 (defn- notify [session-id a]
@@ -189,6 +196,9 @@
                 (var? value)))
      :cljr (or (instance? clojure.lang.IObj value)
                (var? value))
+     :joyride
+     (try (with-meta value {}) true
+          (catch :default _e false))
      :cljs (implements? IMeta value)))
 
 (defn- has? [m k]
@@ -263,7 +273,7 @@
 
 #_{:clj-kondo/ignore [:unused-private-var]}
 (defn- runtime []
-  #?(:portal :portal :bb :bb :clj :clj :cljs :cljs :cljr :cljr))
+  #?(:portal :portal :bb :bb :clj :clj :joyride :joyride :cljs :cljs :cljr :cljr))
 
 (defn- error->data [e]
   #?(:clj  (assoc (Throwable->map e) :runtime (runtime))
@@ -292,6 +302,7 @@
         #?(:bb   "bb"
            :clj  "jvm"
            :cljr "clr"
+           :joyride "joyride"
            :cljs (cond
                    (exists? js/window)         "web"
                    (exists? js/process)        "node"
@@ -403,8 +414,7 @@
              #'cache-evict
              #'get-options
              #'get-functions
-             #'type
-             #'datafy]]
+             #'type]]
   (register! var))
 
 (doseq [[var opts] {#'pr-str          {:name 'clojure.core/pr-str}
@@ -413,6 +423,7 @@
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
                     #'nav             {:private true}
+                    #'datafy          {:name 'clojure.datafy/datafy}
                     #'toggle-watch    {:private false
                                        :predicate atom?
                                        :name 'portal.api/toggle-watch}}]

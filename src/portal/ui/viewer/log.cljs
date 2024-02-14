@@ -36,21 +36,24 @@
   svg)
 
 (def ^:private runtime->logo
-  {:clj    {:color ::c/package
-            :title "Clojure"
-            :icon (inline "runtime/clojure.svg")}
-   :cljr   {:color ::c/string
-            :title "Clojure CLR"
-            :icon (inline "runtime/clojure.svg")}
-   :cljs   {:color ::c/tag
-            :title "ClojureScript"
-            :icon (inline "runtime/cljs.svg")}
-   :bb     {:color ::c/exception
-            :title "Babashka"
-            :icon (inline "runtime/babashka.svg")}
-   :portal {:color ::c/boolean
-            :title "Portal"
-            :icon (inline "runtime/portal.svg")}})
+  {:clj     {:color ::c/package
+             :title "Clojure"
+             :icon (inline "runtime/clojure.svg")}
+   :cljr    {:color ::c/string
+             :title "Clojure CLR"
+             :icon (inline "runtime/clojure.svg")}
+   :cljs    {:color ::c/tag
+             :title "ClojureScript"
+             :icon (inline "runtime/cljs.svg")}
+   :bb      {:color ::c/exception
+             :title "Babashka"
+             :icon (inline "runtime/babashka.svg")}
+   :portal  {:color ::c/boolean
+             :title "Portal"
+             :icon (inline "runtime/portal.svg")}
+   :joyride {:color ::c/exception
+             :title "Joyride"
+             :icon (inline "runtime/joyride.svg")}})
 
 (defn icon
   ([value]

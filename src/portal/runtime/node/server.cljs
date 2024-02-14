@@ -1,25 +1,24 @@
 (ns ^:no-doc portal.runtime.node.server
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
-            [cognitect.transit :as transit]
-            [goog.object :as g]
             [portal.async :as a]
             [portal.resources :as io]
             [portal.runtime :as rt]
             [portal.runtime.fs :as fs]
             [portal.runtime.index :as index]
             [portal.runtime.json :as json]
-            [portal.runtime.node.client :as c]))
+            [portal.runtime.node.client :as c]
+            [portal.runtime.transit :as transit]))
 
 (defn- get-header [^js req k]
-  (-> req .-headers (g/get k)))
+  (-> req .-headers (aget k)))
 
 (defn- not-found [_request done]
   (done {:status :not-found}))
 
 (defn- require-string [src file-name]
   (let [Module (js/require "module")
-        ^js m (Module. file-name js/module.parent)]
+        ^js m (Module. file-name (some-> js/module .-parent))]
     (set! (.-filename m) file-name)
     (._compile m src file-name)
     (.-exports m)))
@@ -91,11 +90,12 @@
          #js {"Location" (str "?" session-id)})
         (.end)))))
 
+(def ^:private favicon (io/inline "portal/icon.svg"))
+
 (defmethod route [:get "/icon.svg"] [_req res]
-  (send-resource
-   res
-   "image/svg+xml"
-   (io/inline "portal/icon.svg")))
+  (send-resource res "image/svg+xml" favicon))
+
+(def ^:private main-js (io/inline "portal/main.js"))
 
 (defmethod route [:get "/main.js"] [req res]
   (let [options (-> req get-session :options)]
@@ -103,8 +103,9 @@
      res
      "text/javascript"
      (case (:mode options)
-       :dev (fs/slurp (get-in options [:resource "main.js"]))
-       (io/inline "portal/main.js")))))
+       :dev (fs/slurp (or (get-in options [:resource "main.js"])
+                          (io/resource "portal-dev/main.js")))
+       main-js))))
 
 (defn get-body [^js req]
   (js/Promise.
@@ -118,7 +119,7 @@
   (a/let [body (get-body req)]
     (rt/update-value
      (case (get-header req "content-type")
-       "application/transit+json" (transit/read (transit/reader :json) body)
+       "application/transit+json" (transit/read body)
        "application/json"         (js->clj (json/read body))
        "application/edn"          (edn/read-string {:default tagged-literal} body)))
     (doto res

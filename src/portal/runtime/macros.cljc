@@ -17,6 +17,10 @@
      (when (or (= (namespace type) "js")
                (:type (resolve-var &env type)))
        `(extend-type ~(->type type) ~@args)))
+   :joyride
+   (defmacro extend-type? [type & args]
+     (when (contains? #{'js/BigInt 'js/URL} type)
+       `(extend-type ~type ~@args)))
    :cljs
    (defmacro extend-type? [type & args]
      `(when (exists? ~type)
