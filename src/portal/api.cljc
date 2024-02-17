@@ -135,6 +135,7 @@
 
   The function name and doc string will show up in the command palette."
   {:added "0.16.0"
+   :command true
    :predicate var?}
   [var]
   (rt/register! var)
