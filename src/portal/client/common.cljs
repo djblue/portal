@@ -4,6 +4,27 @@
             [portal.runtime.json :as json]
             [portal.runtime.transit :as transit]))
 
+(defn- error->data [ex]
+  (merge
+   (when-let [data (ex-data ex)]
+     {:data data})
+   {:runtime :cljs
+    :cause   (ex-message ex)
+    :via     [{:type    (symbol (.-name (type ex)))
+               :message (ex-message ex)}]
+    :stack   (.-stack ex)}))
+
+(defn- serialize [encoding value]
+  (try
+    (case encoding
+      :json    (json/write value)
+      :transit (transit/write value)
+      :cson    (cson/write value)
+      :edn     (binding [*print-meta* true]
+                 (pr-str value)))
+    (catch :default ex
+      (serialize encoding (error->data ex)))))
+
 (defn ->submit [fetch]
   (fn submit
     ([value] (submit nil value))
@@ -22,10 +43,4 @@
           :cson    "application/cson"
           :transit "application/transit+json"
           :edn     "application/edn")}
-       :body
-       (case encoding
-         :json    (json/write value)
-         :transit (transit/write value)
-         :cson    (cson/write value)
-         :edn     (binding [*print-meta* true]
-                    (pr-str value)))}))))
+       :body (serialize encoding value)}))))

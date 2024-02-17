@@ -1,12 +1,21 @@
 (ns ^:no-doc ^:no-check portal.client.clr
+  (:require [portal.runtime]
+            [portal.runtime.cson :as cson])
   (:import (System.Net.Http
             HttpClient
             HttpMethod
             HttpRequestMessage
             StringContent)
-           (System.Text Encoding))
-  (:require [portal.runtime]
-            [portal.runtime.cson :as cson]))
+           (System.Text Encoding)))
+
+(defn- serialize [encoding value]
+  (try
+    (case encoding
+      :edn (binding [*print-meta* true]
+             (pr-str value))
+      :cson (cson/write value))
+    (catch Exception ex
+      (serialize encoding (Throwable->map ex)))))
 
 (def client (HttpClient.))
 
@@ -23,12 +32,9 @@
                   (str "http://" host ":" port "/submit"))]
      (set! (.-Content request)
            (StringContent.
-            (case encoding
-              :edn (binding [*print-meta* true]
-                     (pr-str value))
-              :cson (cson/write value))
+            (serialize encoding value)
             Encoding/UTF8
             (case encoding
               :edn     "application/edn"
               :cson    "application/cson")))
-     (.Send ^HttpClient client request))))
+     (.EnsureSuccessStatusCode (.Send ^HttpClient client request)))))

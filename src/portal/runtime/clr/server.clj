@@ -155,11 +155,11 @@
           first))
 
 (defmethod route [:post "/submit"] [request]
-  (let [body (:body request)]
+  (let [body (slurp (:body request) :encoding "utf8")]
     (rt/update-value
      (case (content-type request)
-       "application/json"         (json/read body)
-       "application/edn"          (edn/read-string {:default tagged-literal} body)))
+       "application/json" (json/read body)
+       "application/edn"  (edn/read-string {:default tagged-literal} body)))
     {:status  204
      :headers {"Access-Control-Allow-Origin" "*"}}))
 

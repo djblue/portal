@@ -1,6 +1,7 @@
 (ns portal.test-clr
   (:require [clojure.pprint :as pp]
             [clojure.test :as t]
+            [portal.client-test]
             [portal.client.clr :as p]
             [portal.runtime.api-test]
             [portal.runtime.bench-cson :as bench]
@@ -35,6 +36,7 @@
 (defn -main []
   (let [{:keys [fail error]}
         (run-tests
+         'portal.client-test
          'portal.runtime.api-test
          'portal.runtime.cson-test
          'portal.runtime.edn-test

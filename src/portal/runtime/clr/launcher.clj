@@ -25,6 +25,7 @@
                       {}
                       (.AllKeys headers))
      :websocket?     (.IsWebSocketRequest request)
+     :body           (.InputStream request)
      :context        context}))
 
 (defn- write-response [^HttpListenerContext context m]

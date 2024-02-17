@@ -5,6 +5,17 @@
             [portal.runtime.json :as json]
             [portal.runtime.transit :as transit]))
 
+(defn- serialize [encoding value]
+  (try
+    (case encoding
+      :json    (json/write value)
+      :transit (transit/write value)
+      :cson    (cson/write value)
+      :edn     (binding [*print-meta* true]
+                 (pr-str value)))
+    (catch Exception ex
+      (serialize encoding (Throwable->map ex)))))
+
 (defn submit
   "Tap target function.
 
@@ -38,13 +49,7 @@
          :cson    "application/cson"
          :transit "application/transit+json"
          :edn     "application/edn")}
-      :body
-      (case encoding
-        :json    (json/write value)
-        :transit (transit/write value)
-        :cson    (cson/write value)
-        :edn     (binding [*print-meta* true]
-                   (pr-str value)))})))
+      :body (serialize encoding value)})))
 
 (comment
   (submit {:runtime :jvm :value "hello jvm"})
