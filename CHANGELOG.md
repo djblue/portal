@@ -1,3 +1,26 @@
+## 0.52.0 - 2024-02-17
+
+- Register `portal.api/register!` as a command 6a66bc7
+- Get Portal runtime working in Joyride (#204) a60396d
+- Allow passing theme for embedded view 8f09472
+- Add support for `:column` metadata for coll-of-vector tables 2a55d25
+
+### Docs
+
+- Replace t/report with t/do-report (#209) 2b2a18e
+  - Thanks @mrkam2!
+- Document limitations with doubles 4ecccaf
+
+### Bug Fixes
+
+- Improve `portal.client.*` error handling 8550bf2
+- Fix `portal.runtime.node.server` session-id issue 2d81be8
+- Fix: the environment variable `PATH` might be undefined. In this case
+  `clojure.string/split` fails since the first argument is `nil`. (#210) a30264a
+  - Thanks @maxweber!
+- Prevent body background-color from being set in embedded mode ae9017a
+- Scope `highlight.js` classes to code viewer 0060083
+
 ## 0.51.1 - 2024-01-07
 
 - Add ubuntu's chromium-browser exe to list of browsers (#207) ed2b8a1
