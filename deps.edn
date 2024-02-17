@@ -17,7 +17,9 @@
     hiccup/hiccup                 {:mvn/version "2.0.0-RC3"}
     io.aviso/pretty               {:mvn/version "1.4.4"}
     com.lambdaisland/dom-types    {:mvn/version "0.6.42"}
-    io.github.clojure/tools.build {:git/tag "v0.9.6" :git/sha "8e78bcc"}
+    io.github.clojure/tools.build {:git/tag "v0.9.6"
+                                   :git/sha "8e78bcc"
+                                   :exclusions [com.google.guava/guava]}
     io.github.djblue/tetris       {:git/url "https://github.com/djblue/tetris.git"
                                    :git/sha "d40ae6b96f918ab7bb7f09ac071f77ca086e8b7f"}}}
   :plk
@@ -34,7 +36,7 @@
   :shadow
   {:jvm-opts ["-Xss16m"]
    :extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.27.4"}}}
+   {thheller/shadow-cljs   {:mvn/version "2.27.4"}}}
   :build
   {:extra-paths ["src" "dev" "resources"]
    :ns-default  tasks.build
