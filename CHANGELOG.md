@@ -1,3 +1,7 @@
+## 0.52.1 - 2024-02-17
+
+- Bump deep-diff to preserve metadata
+
 ## 0.52.0 - 2024-02-17
 
 - Register `portal.api/register!` as a command 6a66bc7
