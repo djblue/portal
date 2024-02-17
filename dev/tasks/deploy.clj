@@ -17,6 +17,7 @@
     (gradle :publishPlugin)))
 
 (defn- deploy-clojars []
+  (pkg/pom)
   (clj "-X:deploy"
        ":installer" ":remote"
        ":artifact"  (-> options :jar-file str pr-str)
