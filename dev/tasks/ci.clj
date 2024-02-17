@@ -1,6 +1,6 @@
 (ns tasks.ci
   (:require [tasks.check :refer [check check*]]
-            [tasks.test :refer [test test*]]
+            [tasks.test :refer [test test*] :as test]
             [tasks.tools :refer [clj]]))
 
 (def ^:private commands
@@ -13,6 +13,7 @@
    "-X:deploy"])
 
 (defn setup []
+  (test/setup)
   (doseq [command commands] (clj "-Sforce" "-Spath" command)))
 
 (defn ci

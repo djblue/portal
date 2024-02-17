@@ -35,6 +35,15 @@
   (install)
   (cljs* (get-cljs-deps) :portal.test-ui-runner))
 
+(defn- setup* [version]
+  (t/clj
+   "-Sforce" "-Spath" "-Sdeps"
+   (pr-str {:deps {'org.clojure/clojurescript {:mvn/version version}}})))
+
+(defn setup []
+  (setup* "1.10.773")
+  (setup* "1.10.844"))
+
 (defn cljs []
   (cljs-runtime "1.10.773")
   (cljs-runtime "1.10.844")
