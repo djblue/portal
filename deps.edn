@@ -2,7 +2,7 @@
  :deps
  {com.cognitect/transit-clj  {:mvn/version "1.0.333"}
   com.cognitect/transit-cljs {:mvn/version "0.8.280"}
-  org.clojure/data.json      {:mvn/version "2.4.0"}
+  org.clojure/data.json      {:mvn/version "2.5.0"}
   http-kit/http-kit          {:mvn/version "2.7.0"}
   com.google.code.gson/gson  {:mvn/version "2.10.1"}}
  :deps/prep-lib
@@ -14,7 +14,7 @@
   {:extra-paths ["dev" "test"]
    :extra-deps
    {babashka/process              {:mvn/version "0.5.21"}
-    hiccup/hiccup                 {:mvn/version "2.0.0-RC2"}
+    hiccup/hiccup                 {:mvn/version "2.0.0-RC3"}
     io.aviso/pretty               {:mvn/version "1.4.4"}
     com.lambdaisland/dom-types    {:mvn/version "0.6.42"}
     io.github.clojure/tools.build {:git/tag "v0.9.6" :git/sha "8e78bcc"}
@@ -26,24 +26,24 @@
   {:extra-deps
    {org.clojure/clojurescript {:mvn/version "1.11.132"}
     lambdaisland/deep-diff2   {:mvn/version "2.10.211"}
-    org.babashka/sci          {:mvn/version "0.8.40"}
+    org.babashka/sci          {:mvn/version "0.8.41"}
     reagent/reagent           {:mvn/version "1.2.0"}
     io.github.babashka/sci.configs
     {:git/url "https://github.com/babashka/sci.configs"
-     :git/sha "3de736f2e8889c77fc63ef3abee4b8d763b71206"}}}
+     :git/sha "ffa88d796a3a2fe0a0fce332c6bf56f36b7c5cd7"}}}
   :shadow
   {:jvm-opts ["-Xss16m"]
    :extra-deps
-   {thheller/shadow-cljs {:mvn/version "2.20.10"}}}
+   {thheller/shadow-cljs {:mvn/version "2.27.4"}}}
   :build
   {:extra-paths ["src" "dev" "resources"]
    :ns-default  tasks.build
-   :extra-deps  {babashka/babashka {:mvn/version "1.3.186"}
-                 babashka/fs       {:mvn/version "0.4.19"}
+   :extra-deps  {babashka/babashka {:mvn/version "1.3.188"}
+                 babashka/fs       {:mvn/version "0.5.20"}
                  ;; need to duplicate main deps here for prep build
                  com.cognitect/transit-clj  {:mvn/version "1.0.333"}
                  com.cognitect/transit-cljs {:mvn/version "0.8.280"}
-                 org.clojure/data.json      {:mvn/version "2.4.0"}
+                 org.clojure/data.json      {:mvn/version "2.5.0"}
                  http-kit/http-kit          {:mvn/version "2.7.0"}
                  com.google.code.gson/gson  {:mvn/version "2.10.1"}}}
   :deploy
@@ -61,7 +61,7 @@
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "1.1.0"}
-    cider/cider-nrepl {:mvn/version "0.43.3"}}}
+    cider/cider-nrepl {:mvn/version "0.45.0"}}}
   :check
   {:extra-paths ["dev"]
    :main-opts ["-m" "tasks.load"]}
@@ -73,7 +73,7 @@
      :sha     "6ad6d6333d2e9baf1644a870072c12f206a9b722"}}}
   :antq
   {:replace-deps
-   {com.github.liquidz/antq {:mvn/version "2.7.1133"}
-    org.slf4j/slf4j-nop     {:mvn/version "2.0.9"}}}
+   {com.github.liquidz/antq {:mvn/version "2.8.1173"}
+    org.slf4j/slf4j-nop     {:mvn/version "2.0.12"}}}
   :yaml
   {:extra-deps {clj-commons/clj-yaml {:mvn/version "1.0.27"}}}}}
