@@ -7,19 +7,35 @@ on:
     branches: [ master ]
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - run: |
+        clojure -Stree -M:cljfmt
+        clojure -Stree -M:cljs
+        clojure -Stree -M:cljs:shadow
+        clojure -Stree -M:dev
+        clojure -Stree -M:kondo
+        clojure -Stree -M:test
+        clojure -Stree -X:deploy
   check:
+    needs: [ setup ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: bb check
   test-clj:
+    needs: [ setup ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: bb -m tasks.test/clj
   test-cljs:
+    needs: [ setup ]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
