@@ -24,8 +24,7 @@
   {:extra-deps {planck/planck {:mvn/version "2.27.0"}}}
   :cljs
   {:extra-deps
-   {org.clojure/clojurescript {:git/url "https://github.com/clojure/clojurescript.git"
-                               :git/sha "067eaef03678a06d83caf3f66ddf20f9ee71db5b"}
+   {org.clojure/clojurescript {:mvn/version "1.11.132"}
     lambdaisland/deep-diff2   {:mvn/version "2.10.211"}
     org.babashka/sci          {:mvn/version "0.8.40"}
     reagent/reagent           {:mvn/version "1.2.0"}
