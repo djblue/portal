@@ -38,23 +38,28 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./target/pwa-release/
         force_orphan: true
-  deploy:
+  package:
     runs-on: ubuntu-latest
     needs: [ test-clj, test-cljs, check ]
     if: startsWith(github.event.head_commit.message, 'Release ')
-    environment: deploy
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
     - id: info
       run: bb -m tasks.info
-    - run: bb -m tasks.deploy
-      env:
-        CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
-        CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
-        VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        OVSX_PAT: ${{ secrets.OVSX_PAT }}
-        JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
+    - run: bb pkg
+    - uses: actions/upload-artifact@v4
+      with:
+        name: jar
+        path: target/*.jar
+    - uses: actions/upload-artifact@v4
+      with:
+        name: extension-vscode
+        path: extension-vscode/*.vsix
+    - uses: actions/upload-artifact@v4
+      with:
+        name: extension-intellij
+        path: extension-intellij/build/distributions/*.zip
     - uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.info.outputs.version }}
@@ -62,3 +67,68 @@ jobs:
           target/*.jar
           extension-vscode/*.vsix
           extension-intellij/build/distributions/*.zip
+  deploy-clojars:
+    runs-on: ubuntu-latest
+    needs: [ package ]
+    if: startsWith(github.event.head_commit.message, 'Release ')
+    environment: deploy
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - uses: actions/download-artifact@v4
+      with:
+        name: jar
+        path: target/
+    - run: ls target/
+    - run: echo "bb -m tasks.deploy/deploy-clojars"
+      env:
+        CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+  deploy-vsx:
+    runs-on: ubuntu-latest
+    needs: [ package ]
+    if: startsWith(github.event.head_commit.message, 'Release ')
+    environment: deploy
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - uses: actions/download-artifact@v4
+      with:
+        name: extension-vscode
+        path: extension-vscode/
+    - run: ls extension-vscode/
+    - run: echo "bb -m tasks.deploy/deploy-vscode"
+      env:
+        VSCE_PAT: ${{ secrets.VSCE_PAT }}
+  deploy-open-vsx:
+    runs-on: ubuntu-latest
+    needs: [ package ]
+    if: startsWith(github.event.head_commit.message, 'Release ')
+    environment: deploy
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - uses: actions/download-artifact@v4
+      with:
+        name: extension-vscode
+        path: extension-vscode/
+    - run: ls extension-vscode/
+    - run: echo "bb -m tasks.deploy/deploy-open-vsx"
+      env:
+        OVSX_PAT: ${{ secrets.OVSX_PAT }}
+  deploy-intellij:
+    runs-on: ubuntu-latest
+    needs: [ package ]
+    if: startsWith(github.event.head_commit.message, 'Release ')
+    environment: deploy
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - uses: actions/download-artifact@v4
+      with:
+        name: extension-intellij
+        path: extension-intellij/build/distributions/
+    - run: ls extension-intellij/build/distributions/
+    - run: echo "bb -m tasks.deploy/deploy-intellij"
+      env:
+        JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_TOKEN }}
