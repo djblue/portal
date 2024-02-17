@@ -134,10 +134,13 @@
   ```
 
   The function name and doc string will show up in the command palette."
-  {:added "0.16.0"}
+  {:added "0.16.0"
+   :predicate var?}
   [var]
   (rt/register! var)
   nil)
+
+(register! #'register!)
 
 (defn- print-err [s]
   #?(:clj  (binding [*out* *err*]
