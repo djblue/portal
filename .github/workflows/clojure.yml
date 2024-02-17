@@ -79,7 +79,7 @@ jobs:
   deploy-clojars:
     runs-on: ubuntu-latest
     needs: [ package ]
-    environment: deploy
+    # environment: deploy
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
@@ -95,7 +95,7 @@ jobs:
   deploy-vsx:
     runs-on: ubuntu-latest
     needs: [ package ]
-    environment: deploy
+    # environment: deploy
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
@@ -110,7 +110,7 @@ jobs:
   deploy-open-vsx:
     runs-on: ubuntu-latest
     needs: [ package ]
-    environment: deploy
+    # environment: deploy
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
@@ -125,7 +125,7 @@ jobs:
   deploy-intellij:
     runs-on: ubuntu-latest
     needs: [ package ]
-    environment: deploy
+    # environment: deploy
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
