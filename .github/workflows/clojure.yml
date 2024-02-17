@@ -12,14 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
-    - run: |
-        clojure -Stree -M:cljfmt
-        clojure -Stree -M:cljs
-        clojure -Stree -M:cljs:shadow
-        clojure -Stree -M:dev
-        clojure -Stree -M:kondo
-        clojure -Stree -M:test
-        clojure -Stree -X:deploy
+    - run: bb -m tasks.ci/setup
   check:
     needs: [ setup ]
     runs-on: ubuntu-latest

@@ -43,7 +43,8 @@
                                       {:out *out* :err *err*})))
         start  (now)
         result @(if-let [f (get fns (first args))]
-                  (f (map name (rest args)) opts)
+                  (or (f (map name (rest args)) opts)
+                      (atom {:exit 0}))
                   (p/process (map name args) opts))
         exit   (:exit result)]
     (when-not (:inherit opts)
