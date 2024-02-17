@@ -50,12 +50,9 @@ jobs:
   package:
     runs-on: ubuntu-latest
     needs: [ test-clj, test-cljs, check ]
-    if: startsWith(github.event.head_commit.message, 'Release ')
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
-    - id: info
-      run: bb -m tasks.info
     - run: bb pkg
     - uses: actions/upload-artifact@v4
       with:
@@ -69,6 +66,27 @@ jobs:
       with:
         name: extension-intellij
         path: extension-intellij/build/distributions/*.zip
+  release:
+    runs-on: ubuntu-latest
+    needs: [ package ]
+    if: startsWith(github.event.head_commit.message, 'Release ')
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - id: info
+      run: bb -m tasks.info
+    - uses: actions/download-artifact@v4
+      with:
+        name: jar
+        path: target/
+    - uses: actions/download-artifact@v4
+      with:
+        name: extension-vscode
+        path: extension-vscode/
+    - uses: actions/download-artifact@v4
+      with:
+        name: extension-intellij
+        path: extension-intellij/build/distributions/
     - uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.info.outputs.version }}
@@ -78,7 +96,7 @@ jobs:
           extension-intellij/build/distributions/*.zip
   deploy-clojars:
     runs-on: ubuntu-latest
-    needs: [ package ]
+    needs: [ release ]
     environment: deploy
     steps:
     - uses: actions/checkout@v3
@@ -94,7 +112,7 @@ jobs:
         CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
   deploy-vsx:
     runs-on: ubuntu-latest
-    needs: [ package ]
+    needs: [ release ]
     environment: deploy
     steps:
     - uses: actions/checkout@v3
@@ -109,7 +127,7 @@ jobs:
         VSCE_PAT: ${{ secrets.VSCE_PAT }}
   deploy-open-vsx:
     runs-on: ubuntu-latest
-    needs: [ package ]
+    needs: [ release ]
     environment: deploy
     steps:
     - uses: actions/checkout@v3
@@ -124,7 +142,7 @@ jobs:
         OVSX_PAT: ${{ secrets.OVSX_PAT }}
   deploy-intellij:
     runs-on: ubuntu-latest
-    needs: [ package ]
+    needs: [ release ]
     environment: deploy
     steps:
     - uses: actions/checkout@v3
