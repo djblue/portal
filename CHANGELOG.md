@@ -1,3 +1,7 @@
+## 0.52.2 - 2024-02-17
+
+- Fix deploys
+
 ## 0.52.1 - 2024-02-17
 
 - Bump deep-diff to preserve metadata
