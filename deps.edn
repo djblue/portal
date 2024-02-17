@@ -27,7 +27,7 @@
   :cljs
   {:extra-deps
    {org.clojure/clojurescript {:mvn/version "1.11.132"}
-    lambdaisland/deep-diff2   {:mvn/version "2.10.211"}
+    lambdaisland/deep-diff2   {:mvn/version "2.11.216"}
     org.babashka/sci          {:mvn/version "0.8.41"}
     reagent/reagent           {:mvn/version "1.2.0"}
     io.github.babashka/sci.configs
