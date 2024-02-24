@@ -289,6 +289,8 @@
              (error->data
               (ex-info "Failed to receive value." {:value-type (type new-value)} e))))))
 
+(def ^:private runtime-keymap (atom ^::no-cache {}))
+
 (defn- get-options []
   (let [{:keys [options watch-registry]} *session*]
     (with-meta
@@ -309,6 +311,7 @@
                    (exists? js/PLANCK_VERSION) "planck"
                    :else                        "web"))
         :value tap-list
+        :keymap runtime-keymap
         :watch-registry watch-registry}
        options)
       {::no-cache true})))
@@ -405,10 +408,14 @@
 (defn register!
   ([var] (register! var {}))
   ([var opts]
-   (swap! registry
-          assoc
-          (or (:name opts) (var->name var))
-          (merge {:var var} opts))))
+   (let [m    (meta var)
+         name (or (:name opts) (var->name var))]
+     (doseq [shortcut (concat (:shortcuts m) (:shortcuts opts))]
+       (swap! runtime-keymap assoc shortcut name))
+     (swap! registry
+            assoc
+            name
+            (merge {:var var} opts)))))
 
 (doseq [var [#'ping
              #'cache-evict
@@ -422,8 +429,10 @@
                     #'meta            {:predicate can-meta?}
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
-                    #'nav             {:private true}
-                    #'datafy          {:name 'clojure.datafy/datafy}
+                    #'nav             {:private true
+                                       :shortcuts [#{"enter"}]}
+                    #'datafy          {:name 'clojure.datafy/datafy
+                                       :shortcuts [#{"shift" "enter"}]}
                     #'toggle-watch    {:private false
                                        :predicate atom?
                                        :name 'portal.api/toggle-watch}}]

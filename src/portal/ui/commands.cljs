@@ -11,6 +11,7 @@
             [portal.ui.drag-and-drop :as dnd]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
+            [portal.ui.options :as options]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -207,12 +208,7 @@
                       [ins/inspector option]])))
                 doall)]]]))))
 
-(def default-map
-  {#{"enter"}         'clojure.datafy/nav
-   #{"shift" "enter"} 'clojure.datafy/datafy
-   ["g" "d"]          `portal.runtime.jvm.editor/goto-definition})
-
-(def keymap (r/atom default-map))
+(def ^:private client-keymap (r/atom {}))
 
 (def ^:private aliases {"cljs.core" "clojure.core"})
 
@@ -221,16 +217,14 @@
         ns                (str ns)]
     (symbol (aliases ns ns) (str name))))
 
-(defn- find-combos [command]
+(defn- find-combos [keymap command]
   (let [command-name (:name command)]
     (keep
-     #(into [] (sort %))
-     (keep
-      (fn [[combo f]]
-        (when (and (= f command-name)
-                   (shortcuts/platform-supported? combo))
-          combo))
-      @keymap))))
+     (fn [[combo f]]
+       (when (and (= f command-name)
+                  (shortcuts/platform-supported? combo))
+         combo))
+     keymap)))
 
 (def ^:private shortcut->symbol
   {"arrowright" [icons/arrow-right {:size "xs"}]
@@ -260,13 +254,15 @@
                           :border-right [1 :solid (::c/border theme)]}}]])))]))
 
 (defn shortcut [command]
-  (let [theme (theme/use-theme)]
+  (let [theme (theme/use-theme)
+        opts  (options/use-options)]
     [s/div {:style
             {:display :flex
              :align-items :stretch
              :white-space :nowrap}}
      [separate
-      (for [combo (find-combos command)]
+      (for [combo (concat (find-combos @client-keymap command)
+                          (find-combos (some-> opts :keymap deref) command))]
         [:<>
          {:key (hash combo)}
          (map-indexed
@@ -903,7 +899,7 @@
    (let [m    (meta var)
          name (or (:name opts) (var->name var))]
      (doseq [shortcut (concat (:shortcuts m) (:shortcuts opts))]
-       (swap! keymap assoc shortcut name))
+       (swap! client-keymap assoc shortcut name))
      (swap! registry
             assoc name (merge {:name name :run  var}
                               (when-let [doc (or (:doc m) (:doc opts))] {:doc doc})
@@ -1065,7 +1061,8 @@
 
 (defn palette [{:keys [container]}]
   (let [state (state/use-state)
-        value (state/get-selected-value @state)]
+        value (state/get-selected-value @state)
+        opts  (options/use-options)]
     (react/useEffect
      (fn []
        (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
@@ -1080,10 +1077,10 @@
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)
-         (when-let [f (shortcuts/match @keymap log)]
+         (when-let [f (or (shortcuts/match @client-keymap log)
+                          (shortcuts/match (some-> opts :keymap deref) log))]
            (when-let [{:keys [run]} (or (get @registry f)
                                         (get @runtime-registry f))]
-
              (shortcuts/matched! log)
              (run state)))))
      (when-let [component (::input @state)]

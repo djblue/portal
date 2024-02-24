@@ -84,7 +84,7 @@
      (section "Viewers" api/viewers)
      ["Shortcuts"
       (section "Key Log"  @#'shortcuts/log)
-      (section "Key Map" commands/keymap)]
+      (section "Key Map" @#'commands/client-keymap)]
      ["Commands"
       (section "UI" commands/registry)
       (section "Runtime" commands/runtime-registry)]

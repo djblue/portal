@@ -152,7 +152,9 @@
 
 (defn goto-definition
   "Goto the definition of a value in an editor."
-  {:predicate can-goto :command true}
+  {:command true
+   :predicate can-goto
+   :shortcuts [["g" "d"]]}
   [input]
   (when-let [location (can-goto input)]
     (let [{:keys [options]} rt/*session*]
