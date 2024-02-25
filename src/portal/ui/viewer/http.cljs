@@ -71,7 +71,7 @@
        {:style
         {:cursor     :pointer
          :color      background
-         :padding    [(:padding theme) (* 2.5 (:padding theme))]
+         :padding    [(* 0.5 (:padding theme)) (* 1.5 (:padding theme))]
          :background color
          :border     [1 :solid color]
 
@@ -84,7 +84,7 @@
         {:flex    "1"
          :display :flex
          :gap     (:padding theme)
-         :padding [(:padding theme) (* 2 (:padding theme))]
+         :padding [(* 0.5 (:padding theme)) (:padding theme)]
          :border  [1 :solid (::c/border theme)]
 
          :border-bottom-style     (when expanded? :none)
@@ -127,7 +127,7 @@
        {:style
         {:cursor                 :pointer
          :background             color
-         :padding                [(:padding theme) (* 2.5 (:padding theme))]
+         :padding                [(* 0.5 (:padding theme)) (* 1.5 (:padding theme))]
          :color                  background
          :border                 [1 :solid color]
          :border-top-left-radius (:border-radius theme)
@@ -139,7 +139,7 @@
         {:flex                    "1"
          :display                 :flex
          :gap                     (:padding theme)
-         :padding                 (:padding theme)
+         :padding                 (* 0.5 (:padding theme))
          :border                  [1 :solid (::c/border theme)]
          :border-bottom-style     (when expanded? :none)
          :border-top-right-radius (:border-radius theme)
