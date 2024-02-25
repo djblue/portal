@@ -1,7 +1,8 @@
 (ns portal.ui.api
-  (:require [reagent.core :as r]))
+  (:require [portal.viewer :as v]
+            [reagent.core :as r]))
 
-(defonce viewers (r/atom []))
+(defonce viewers (r/atom (v/table [] {:columns [:name :doc]})))
 
 (defn register-viewer! [viewer-spec]
   (swap! viewers
