@@ -97,9 +97,10 @@
      {:style
       {:margin-top    (:padding theme)
        :margin-bottom (:padding theme)}}
-     [ins/with-context
-      {:portal.viewer/code {:language (:class attrs)}}
-      [ins/inspector {:portal.viewer/default :portal.viewer/code} code]]]))
+     [ins/inspector
+      {:portal.viewer/default :portal.viewer/code
+       :portal.viewer/code {:language (:class attrs)}}
+      code]]))
 
 (def tag->viewer
   {:pre inspect-code})
