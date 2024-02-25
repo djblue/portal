@@ -238,7 +238,7 @@
         (when message (str (:phase value type)))]]
       (when-let [value (:runtime value)]
         [d/div
-         {:style {:padding     (:padding theme)
+         {:style {:padding     (* 0.5 (:padding theme))
                   :display     :flex
                   :align-items :center
                   :box-sizing  :border-box

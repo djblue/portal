@@ -91,7 +91,7 @@
       [s/div {:style {:grid-row "1"}} "]"]]
      [s/div {:style
              {:display :flex
-              :padding (:padding theme)
+              :padding (* 0.5 (:padding theme))
               :border-left [1 :solid (::c/border theme)]}}
       [log/icon (:runtime opts :portal)]]]))
 

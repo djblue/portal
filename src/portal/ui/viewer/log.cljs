@@ -166,7 +166,7 @@
         [d/div
          {:style
           (merge
-           {:padding                    (:padding theme)
+           {:padding                    (* 0.5 (:padding theme))
             :display                    :flex
             :align-items                :center
             :color                      (::c/uri theme)
