@@ -1,9 +1,12 @@
 (ns ^:no-doc portal.ui.viewer.json
-  (:require [portal.ui.inspector :as ins]))
+  (:require [portal.ui.inspector :as ins]
+            [portal.ui.parsers :as p]))
 
 (defn- parse-json [json-string]
   (try (js->clj (js/JSON.parse json-string) :keywordize-keys true)
        (catch :default e (ins/error->data e))))
+
+(defmethod p/parse-string :format/json [_ s] (parse-json s))
 
 (defn json? [value] (string? value))
 

@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.ui.viewer.csv
   (:require ["papaparse" :refer [parse]]
-            [portal.ui.inspector :as ins]))
+            [portal.ui.inspector :as ins]
+            [portal.ui.parsers :as p]))
 
 (defn parse-csv [csv-string]
   (try
@@ -8,6 +9,8 @@
       (js->clj (.-data (parse csv-string)))
       {:portal.viewer/default :portal.viewer/table})
     (catch :default _e ::invalid)))
+
+(defmethod p/parse-string :format/csv [_ s] (parse-csv s))
 
 (defn csv? [value] (string? value))
 

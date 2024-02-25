@@ -4,7 +4,6 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.walk :as walk]
-            [cognitect.transit :as t]
             [portal.async :as a]
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
@@ -12,12 +11,10 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as options]
+            [portal.ui.parsers :as p]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
-            [portal.ui.viewer.csv :as csv]
-            [portal.ui.viewer.edn :as edn]
-            [portal.ui.viewer.jwt :as jwt]
             [reagent.core :as r]))
 
 (def ^:dynamic *state* nil)
@@ -1000,28 +997,14 @@
 (defn- clipboard []
   (js/navigator.clipboard.readText))
 
-(defn- parse-json [string]
-  (js->clj (.parse js/JSON string)))
-
-(defn- parse-transit [string]
-  (t/read (t/reader :json) string))
-
-(def parsers
-  {:format/json    parse-json
-   :format/edn     edn/read-string
-   :format/transit parse-transit
-   :format/csv     csv/parse-csv
-   :format/jwt     jwt/parse-jwt
-   :format/text    identity})
-
 (defn- parse-as
   "Paste value from clipboard"
   [state value]
-  (a/let [[choice] (pick-one state (keys parsers))
-          parse    (get parsers choice identity)]
+  (a/let [[format] (pick-one state (p/formats))]
     (state/dispatch! state
                      state/history-push
-                     {:portal/value (try (parse value) (catch :default e e))})))
+                     {:portal/value
+                      (try (p/parse-string format value) (catch :default e e))})))
 
 (defn paste
   "Paste value from clipboard"

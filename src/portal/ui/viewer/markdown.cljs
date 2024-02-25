@@ -5,6 +5,7 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
+            [portal.ui.parsers :as p]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.hiccup :refer [inspect-hiccup]]))
@@ -217,6 +218,8 @@
 
 (defn ^:no-doc parse-markdown [value]
   (->hiccup (.lexer marked value)))
+
+(defmethod p/parse-string :format/markdown [_ s] (parse-markdown s))
 
 (defn- inspect-markdown* [value]
   (binding [*context* {:theme (theme/use-theme)}]

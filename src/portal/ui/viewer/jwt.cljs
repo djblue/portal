@@ -1,7 +1,8 @@
 (ns ^:no-doc portal.ui.viewer.jwt
   (:require [clojure.string :as str]
             [goog.crypt.base64 :as Base64]
-            [portal.ui.inspector :as ins]))
+            [portal.ui.inspector :as ins]
+            [portal.ui.parsers :as p]))
 
 (defn- parse-json [value]
   (js->clj (.parse js/JSON (js/atob value)) :keywordize-keys true))
@@ -23,6 +24,8 @@
         {:portal.viewer/for
          {:jwt/signature :portal.viewer/bin}}))
     (catch :default e (ins/error->data e))))
+
+(defmethod p/parse-string :format/jwt [_ s] (parse-jwt s))
 
 (defn inspect-jwt [jwt]
   [ins/tabs

@@ -2,11 +2,9 @@
   (:require ["react" :as react]
             [clojure.string :as string]
             [portal.async :as a]
-            [portal.runtime.edn :as edn]
+            [portal.ui.parsers :as p]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
-            [portal.ui.viewer.csv :as csv]
-            [portal.ui.viewer.markdown :as md]
             [portal.viewer :as v]))
 
 (defn read-file
@@ -39,16 +37,16 @@
 (def handlers
   {"json" (fn [file]
             (a/let [content (read-file file)]
-              (js->clj (js/JSON.parse content))))
+              (p/parse-string :format/json content)))
    "edn"  (fn [file]
             (a/let [content (read-file file)]
-              (edn/read-string content)))
+              (p/parse-string :format/edn content)))
    "md"   (fn [file]
             (a/let [content (read-file file)]
-              (v/hiccup (md/parse-markdown content))))
+              (v/hiccup (p/parse-string :format/md content))))
    "csv"  (fn [file]
             (a/let [content (read-file file)]
-              (v/table (csv/parse-csv content))))
+              (v/table (p/parse-string :format/csv content))))
    "txt"  read-file
    "svg"  read-html
    "htm"  read-html
@@ -86,7 +84,7 @@
       (fn [e]
         (.preventDefault e)
         (a/let [value (handle-files
-                       (for [item (.-dataTransfer.items e)
+                       (for [item (.items (.-dataTransfer e))
                              :when (= (.-kind item) "file")]
                          (.getAsFile item)))]
           (state/dispatch! state state/history-push {:portal/value value}))
