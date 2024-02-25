@@ -148,7 +148,7 @@
        {:overflow      :auto
         :position      :relative
         :box-sizing    :border-box
-        :padding       (* 2.5 (:padding theme))
+        :padding       (* 1.5 (:padding theme))
         :border        [1 :solid (::c/border theme)]
         :background    (ins/get-background)
         :border-radius (:border-radius theme)
