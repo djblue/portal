@@ -173,17 +173,18 @@
         delay)))))
 
 (defn- setup-joyride! []
-  (-> (get-extension "betterthantomorrow.joyride")
-      (.then (fn [^js joyride]
-               (reduce
-                (fn [^js/Promise chain source]
-                  (-> chain
-                      (.then
-                       (fn [_]
-                         (.runCode joyride source)))))
-                (.resolve js/Promise 0)
-                portal-source)))
-      (.catch #(.error js/console %)))
+  (a/try
+    (a/let [^js joyride (get-extension "betterthantomorrow.joyride")]
+      (reduce
+       (fn [^js/Promise chain source]
+         (-> chain
+             (.then
+              (fn [_]
+                (.runCode joyride source)))))
+       (.resolve js/Promise 0)
+       portal-source))
+    (catch :default e
+      (.error js/console e)))
   (clj->js {:resources {:inline io/inline}}))
 
 (defn activate

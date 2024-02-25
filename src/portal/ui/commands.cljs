@@ -396,9 +396,6 @@
                         option]]])))
                 doall)]]]))))
 
-(defn- catch* [value]
-  (-> js/Promise (.resolve value) (.catch ex-data)))
-
 (defn- can-meta? [value] (implements? IWithMeta value))
 
 (defn- with-meta* [obj m]
@@ -418,7 +415,8 @@
                                      (:value context)
                                      {:portal.viewer/default (:name (ins/get-viewer state context))}))
                         args     (when args (binding [*state* state] (apply args selected)))
-                        result   (catch* (apply f (concat selected args)))]
+                        result   (a/try (apply f (concat selected args))
+                                        (catch :default e (ex-data e)))]
                   (when-not command
                     (state/dispatch!
                      state
