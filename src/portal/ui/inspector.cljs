@@ -727,7 +727,7 @@
     [s/span {:style {:color (::c/string theme)}}
      [highlight-words (pr-str value)]]))
 
-(defn- inspect-ratio [value]
+(defn- inspect-ratio [^js value]
   (let [theme (theme/use-theme)]
     [with-collection
      value
