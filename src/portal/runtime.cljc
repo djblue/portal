@@ -380,7 +380,7 @@
 
 (defn invoke [{:keys [f args]} done]
   (let [f (if (symbol? f) (get-function f) f)]
-    (try
+    (a/try
       (a/let [return (apply f args)]
         (done (assoc (source-info f) :return return)))
       (catch #?(:clj Exception :cljr Exception :cljs js/Error) e
@@ -388,13 +388,14 @@
                (source-info f)
                :error
                (-> (ex-info
-                    "invoke exception"
-                    {:function f
-                     :args     args
-                     :found?   (boolean (get-function f))}
+                    (ex-message e)
+                    {::function f
+                     ::args     args
+                     ::found?   (some? f)
+                     ::data     (ex-data e)}
                     e)
                    datafy
-                   (assoc :runtime #?(:bb :bb :clj :clj :cljs :cljs :cljr :cljr)))))))))
+                   (assoc :runtime (runtime)))))))))
 
 (def ops {:portal.rpc/invoke #'invoke})
 

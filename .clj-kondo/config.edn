@@ -5,6 +5,8 @@
  :lint-as
  {portal.async/let clojure.core/let
   portal.sync/let  clojure.core/let
+  portal.async/try clojure.core/try
+  portal.sync/try  clojure.core/try
   reagent.core/with-let              clojure.core/let
   portal.bench/simple-benchmark      clojure.core/let
   portal.runtime.macros/extend-type? clojure.core/extend-type}}
