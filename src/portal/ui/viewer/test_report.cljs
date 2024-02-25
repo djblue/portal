@@ -114,7 +114,7 @@
         :background     background}}
       [d/div
        {:style
-        {:padding    (:padding theme)
+        {:padding    (* 0.75 (:padding theme))
          :background color
 
          :border-top    [1 :solid color]
@@ -139,7 +139,7 @@
          :display       :flex
          :gap           (:padding theme)
          :align-items   :center
-         :padding       (:padding theme)
+         :padding       (* 0.5 (:padding theme))
          :border-top    [1 :solid (::c/border theme)]
          :border-bottom (when-not expanded? [1 :solid (::c/border theme)])
          :border-right  [1 :solid (::c/border theme)]
