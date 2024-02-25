@@ -4,7 +4,6 @@
             ["react" :as react]
             [clojure.set :as set]
             [clojure.string :as str]
-            [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.async :as a]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
@@ -234,10 +233,6 @@
     (cson/tagged-value? value)
     (:tag value)
 
-    (instance? diff/Deletion value)   :diff
-    (instance? diff/Insertion value)  :diff
-    (instance? diff/Mismatch value)   :diff
-
     (long? value)     :number
     (bin? value)      :binary
     (map? value)      :map
@@ -390,43 +385,6 @@
        {:row 0 :column 0}
        [dec-depth
         [with-key option [inspector (get value option)]]]]]]))
-
-(defn- diff-added [value]
-  (let [theme (theme/use-theme)
-        color (::c/diff-add theme)]
-    [s/div
-     {:style {:flex 1
-              :background (str color "22")
-              :border [1 :solid color]
-              :border-radius (:border-radius theme)}}
-     [inspector (select-keys (:props (meta (use-context))) [:portal.viewer/for]) value]]))
-
-(defn- diff-removed [value]
-  (let [theme (theme/use-theme)
-        color (::c/diff-remove theme)]
-    [s/div
-     {:style {:flex 1
-              :background (str color "22")
-              :border [1 :solid color]
-              :border-radius (:border-radius theme)}}
-     [inspector (select-keys (:props (meta (use-context))) [:portal.viewer/for]) value]]))
-
-(defn- inspect-diff [value]
-  (let [theme (theme/use-theme)
-        removed (get value :- ::not-found)
-        added   (get value :+ ::not-found)]
-    [s/div
-     {:style {:display :flex :width "100%"}}
-     (when-not (= removed ::not-found)
-       [s/div {:style
-               {:flex 1
-                :margin-right
-                (when-not (= added ::not-found)
-                  (:padding theme))}}
-        [diff-removed removed]])
-     (when-not (= added ::not-found)
-       [s/div {:style {:flex 1}}
-        [diff-added added]])]))
 
 (defn- tagged-value [tag value]
   (let [theme (theme/use-theme)]
@@ -938,7 +896,6 @@
 
 (defn- get-preview-component [type]
   (case type
-    :diff       inspect-diff
     :map        preview-map
     :set        preview-set
     :vector     preview-vector
@@ -971,7 +928,6 @@
 
 (defn- get-inspect-component [type]
   (case type
-    :diff       inspect-diff
     (:set :vector :list :coll) inspect-coll
     :js-array   inspect-js-array
     :js-object  inspect-js-object

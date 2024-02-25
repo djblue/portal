@@ -460,6 +460,7 @@
    prepl/viewer
    cljdoc/viewer
    color/viewer
+   diff/deep-diff2
    ins/viewer
    ex/trace-viewer
    ex/sub-trace-viewer
