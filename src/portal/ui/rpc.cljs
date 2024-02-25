@@ -6,8 +6,7 @@
             [portal.runtime.macros :as m]
             [portal.ui.cljs :as cljs]
             [portal.ui.rpc.runtime :as rt]
-            [portal.ui.state :as state]
-            [portal.ui.viewer.diff :as diff])
+            [portal.ui.state :as state])
   (:import [goog.math Long]))
 
 (defn call [f & args]
@@ -70,17 +69,17 @@
          (meta value))
        buffer))))
 
+(defmulti ^:no-doc -read (fn [tag _] tag))
+
+(defmethod -read "ref" [_ value] (rt/->value value))
+(defmethod -read "object" [_ value] (rt/->object call value))
+(defmethod -read :default [tag value] (cson/tagged-value tag value))
+
 (defn- read [string]
   (cson/read
    string
    {:transform rt/transform
-    :default-handler
-    (fn [op value]
-      (or (case op
-            "ref"    (rt/->value value)
-            "object" (rt/->object call value)
-            (diff/->diff op value))
-          (cson/tagged-value op value)))}))
+    :default-handler -read}))
 
 (defn- write [value]
   (cson/write

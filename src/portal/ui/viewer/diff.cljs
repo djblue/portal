@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
+            [portal.ui.rpc :as rpc]
             [portal.runtime.cson :as cson]
             [portal.ui.commands :as commands]
             [portal.ui.icons :as icons]
@@ -20,13 +21,9 @@
   diff/Mismatch
   (-to-json [this buffer] (cson/tag buffer "diff/Mismatch" ((juxt :- :+) this))))
 
-(defn ^:no-doc ->diff [op value]
-  (case op
-    "diff/Deletion"  (diff/Deletion.  value)
-    "diff/Insertion" (diff/Insertion. value)
-    "diff/Mismatch"  (let [[a b] value]
-                       (diff/Mismatch. a b))
-    nil))
+(defmethod rpc/-read "diff/Deletion"  [_ value]  (diff/Deletion. value))
+(defmethod rpc/-read "diff/Insertion" [_ value]  (diff/Insertion. value))
+(defmethod rpc/-read "diff/Mismatch"  [_ [ a b]] (diff/Mismatch. a b))
 
 ;;; :spec
 (defn diff? [value]
