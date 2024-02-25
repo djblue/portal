@@ -77,8 +77,15 @@
                   :border-top-left-radius (:border-radius theme)}}
           (into [s/div {:style
                         {:position :relative
-                         :padding-left (:padding theme)
-                         :border-left [1 :dashed color]}}]
+                         :padding-left (:padding theme)}}
+                 [s/div
+                  {:style
+                   {:position :absolute
+                    :top 1
+                    :left -3
+                    :bottom 4
+                    :opacity 0.15
+                    :border-left [1 :dashed color]}}]]
                 children)])
        (when expanded?
          [s/div
