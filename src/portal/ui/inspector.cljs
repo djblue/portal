@@ -998,6 +998,31 @@
            (state/dispatch! state state/select-context context)
            (state/dispatch! state state/nav context)))})))
 
+(defonce ^:no-doc hover? (r/atom nil))
+
+(defn- hover-border [context]
+  (let [theme    (theme/use-theme)
+        selected (:selected (use-options))
+        hover    (and (not selected)
+                      (not (:readonly? context))
+                      @(r/track #(= % @hover?) context))]
+    [s/div
+     {:style
+      {:position :absolute
+       :pointer-events :none
+       :z-index 2
+       :top 0
+       :left 0
+       :right 0
+       :bottom 0
+       :opacity 0.75
+       :border-radius (:border-radius theme)
+       :background (when hover "rgba(0,0,0,0.15)")
+       :transition "border 0.35s, background 0.35s"
+       :border [1 :solid (if-not hover
+                           "rgba(0,0,0,0)"
+                           (get theme (nth theme/order (:depth context))))]}}]))
+
 (defn wrapper [context & children]
   (let [theme          (theme/use-theme)
         {:keys [ref value selected]} (use-options)
@@ -1008,8 +1033,14 @@
        wrapper-options
        {:ref   ref
         :title (-> value meta :doc)
+        :on-mouse-over
+        (fn [e]
+          (.stopPropagation e)
+          (reset! hover? context))
         :style
-        {:flex          "1"
+        {:position      :relative
+         :z-index       0
+         :flex          "1"
          :font-family   (:font-family theme)
          :border-radius (:border-radius theme)
          :border        (if selected
@@ -1017,7 +1048,8 @@
                           [1 :solid "rgba(0,0,0,0)"])
          :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
          :background    (let [bg (get-background context)]
-                          (when selected bg))}})]
+                          (when selected bg))}})
+      [hover-border context]]
      children)))
 
 (defn- inspector* [context value]

@@ -411,7 +411,10 @@
   (let [theme (theme/use-theme)]
     (into
      [s/div
-      {:style
+      {:on-mouse-over
+       (fn [_e]
+         (reset! ins/hover? nil))
+       :style
        {:-webkit-app-region (when-not (theme/is-vs-code?) :drag)
         :display :flex
         :flex-direction :column
