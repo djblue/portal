@@ -2,7 +2,7 @@
  :deps
  {com.cognitect/transit-clj  {:mvn/version "1.0.333"}
   com.cognitect/transit-cljs {:mvn/version "0.8.280"}
-  org.clojure/data.json      {:mvn/version "2.5.0"}
+  org.clojure/data.json      {:mvn/version "2.4.0"}
   http-kit/http-kit          {:mvn/version "2.7.0"}
   com.google.code.gson/gson  {:mvn/version "2.10.1"}}
  :deps/prep-lib
