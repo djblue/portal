@@ -245,5 +245,7 @@
 (defn selected
   "Get a sequence of all currently selected values."
   {:added "0.49.0"}
-  [session]
-  (get-in @rt/sessions [(:session-id session) :selected]))
+  ([]
+   (mapcat selected (sessions)))
+  ([session]
+   (get-in @rt/sessions [(:session-id session) :selected])))
