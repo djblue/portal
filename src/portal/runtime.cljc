@@ -379,9 +379,10 @@
     (select-keys (meta f) [:file :line :column])))
 
 (defn invoke [{:keys [f args]} done]
-  (let [f (if (symbol? f) (get-function f) f)]
+  (let [session *session*
+        f (if (symbol? f) (get-function f) f)]
     (a/try
-      (a/let [return (apply f args)]
+      (a/let [return (binding [*session* session] (apply f args))]
         (done (assoc (source-info f) :return return)))
       (catch #?(:clj Exception :cljr Exception :cljs js/Error) e
         (done (assoc
