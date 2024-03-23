@@ -163,6 +163,10 @@
   ([value] (default value ::html))
   ([value opts] (default value ::html opts)))
 
+(defn code
+  ([value] (default value ::code))
+  ([value opts] (default value  ::code opts)))
+
 (defn size-bytes
   ([value] (default value ::size-bytes))
   ([value opts] (default value  ::size-bytes opts)))
