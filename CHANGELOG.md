@@ -1,3 +1,13 @@
+## 0.53.0 - 2024-03-22
+
+- Add `portal.viewer/code` helper 7a3b67e
+- Get selected values for all sessions 6f8c4a5
+- Revert `org.clojure/data.json` to fix transitive issues in bb 92c0258
+- Add `clojure.zip` to sci cf1bf85
+- Highlight context on mouse hover 4848083
+- Improve `portal.runtime` async error handling 57e9e62
+- Initial support for user specified shortcuts f76a0ed
+
 ## 0.52.2 - 2024-02-17
 
 - Fix deploys
