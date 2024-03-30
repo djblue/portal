@@ -1098,8 +1098,8 @@
          :font-family   (:font-family theme)
          :border        [1 :solid "rgba(0,0,0,0)"]
          :background    (when selected background)}})
-      [inspector-border context]
-      [multi-select-counter context]]
+      ^{:key "inspector-border"} [inspector-border context]
+      ^{:key "multi-select-counter"} [multi-select-counter context]]
      children)))
 
 (defn- inspector* [context value]
