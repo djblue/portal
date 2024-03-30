@@ -87,25 +87,32 @@
          (filter some?))
     [(str "--app=" url)]))
 
+(defn- get-browser []
+  #?(:clj  (System/getenv "BROWSER")
+     :cljs (.-BROWSER js/process.env)
+     :cljr (Environment/GetEnvironmentVariable "BROWSER")))
+
 (defn- browse [url]
-  #?(:clj
-     (try (browse-url url)
-          (catch Exception _e
-            (println "Goto" url "to view portal ui.")))
-     :cljs
-     (case (.-platform js/process)
-       ("android" "linux") (shell/sh "xdg-open" url)
-       "darwin"            (shell/sh "open" url)
-       "win32"             (shell/sh "cmd" "/c" "start" url)
-       (println "Goto" url "to view portal ui."))
-     :cljr
-     (condp identical? (.Platform Environment/OSVersion)
-       PlatformID/Win32NT      (shell/sh "cmd" "/c" "start" url)
-       PlatformID/Win32Windows (shell/sh "cmd" "/c" "start" url)
-       PlatformID/Unix         (if (RuntimeInformation/IsOSPlatform OSPlatform/OSX)
-                                 (shell/sh "open" url)
-                                 (shell/sh "xdg-open" url))
-       (println "Goto" url "to view portal ui."))))
+  (or
+   (some-> (get-browser) (shell/sh url))
+   #?(:clj
+      (try (browse-url url)
+           (catch Exception _e
+             (println "Goto" url "to view portal ui.")))
+      :cljs
+      (case (.-platform js/process)
+        ("android" "linux") (shell/sh "xdg-open" url)
+        "darwin"            (shell/sh "open" url)
+        "win32"             (shell/sh "cmd" "/c" "start" url)
+        (println "Goto" url "to view portal ui."))
+      :cljr
+      (condp identical? (.Platform Environment/OSVersion)
+        PlatformID/Win32NT      (shell/sh "cmd" "/c" "start" url)
+        PlatformID/Win32Windows (shell/sh "cmd" "/c" "start" url)
+        PlatformID/Unix         (if (RuntimeInformation/IsOSPlatform OSPlatform/OSX)
+                                  (shell/sh "open" url)
+                                  (shell/sh "xdg-open" url))
+        (println "Goto" url "to view portal ui.")))))
 
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
 
