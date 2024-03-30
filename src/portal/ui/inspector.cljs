@@ -1000,33 +1000,87 @@
 
 (defonce ^:no-doc hover? (r/atom nil))
 
-(defn- hover-border [context]
+(defn- multi-select-counter [context]
+  (let [theme      (theme/use-theme)
+        selected   (:selected (use-options))
+        state      (state/use-state)
+        background (get-background)
+        multi?     @(r/track #(> (count (:selected @state)) 1))]
+    (when (and multi? selected)
+      [s/div {:style
+              {:position :absolute
+               :font-size "0.8rem"
+               :color background
+               :border-radius 100
+               :top "-0.5rem"
+               :right "-0.5rem"
+               :min-width "1rem"
+               :height "1rem"
+               :display :flex
+               :align-items :center
+               :justify-content :center
+               :background (get theme (nth theme/order (:depth context)))}}
+       selected])))
+
+(defn- inspector-border [context]
   (let [theme    (theme/use-theme)
         selected (:selected (use-options))
-        hover    (and (not selected)
-                      (not (:readonly? context))
-                      @(r/track #(= % @hover?) context))]
-    [s/div
-     {:style
-      {:position :absolute
-       :pointer-events :none
-       :z-index 2
-       :top 0
-       :left 0
-       :right 0
-       :bottom 0
-       :opacity 0.75
-       :border-radius (:border-radius theme)
-       :background (when hover "rgba(0,0,0,0.15)")
-       :transition "border 0.35s, background 0.35s"
-       :border [1 :solid (if-not hover
-                           "rgba(0,0,0,0)"
-                           (get theme (nth theme/order (:depth context))))]}}]))
+        hover    (and (not (:readonly? context))
+                      @(r/track #(= % @hover?) context))
+        color    (get theme (nth theme/order (:depth context)))
+        transition "border 0.35s, background 0.35s, box-shadow 0.35s, border-radius 0.35s"]
+    [:<>
+     [s/div
+      {:style
+       (merge
+        {:position :absolute
+         :pointer-events :none
+         :top -1
+         :left -1
+         :right -1
+         :bottom -1
+         :transition transition}
+        (when (and selected (not hover))
+          {:box-shadow [0 0 3 color]})
+        (cond
+          (and selected hover)
+          {:border-top-right-radius (:border-radius theme)
+           :border-bottom-right-radius (:border-radius theme)
+           :border [1 :solid color]}
+          selected
+          {:border-radius (:border-radius theme)
+           :border [1 :solid color]}
+          :else
+          {:border-radius (:border-radius theme)
+           :border [1 :solid "rgba(0,0,0,0)"]}))}]
+     [s/div
+      {:style
+       (merge
+        {:position :absolute
+         :pointer-events :none
+         :z-index 2
+         :left (- (dec (:padding theme)))
+         :top 0
+         :bottom 0
+         :border-radius (:border-radius theme)
+         :transition transition}
+        (when selected
+          {:right -1
+           :top -1
+           :bottom -1})
+        (when-not selected
+          {:opacity 0.85})
+        (when (and selected hover)
+          {:box-shadow [0 0 3 (get theme (nth theme/order (:depth context)))]})
+        (if-not hover
+          {:border-left [(- (:padding theme) 1) :solid "rgba(0,0,0,0)"]}
+          {:border-left [(- (:padding theme) 1) :solid  color]}))}]]))
 
 (defn wrapper [context & children]
   (let [theme          (theme/use-theme)
         {:keys [ref value selected]} (use-options)
-        wrapper-options (use-wrapper-options context)]
+        wrapper-options (use-wrapper-options context)
+        background (get-background context)]
     (into
      [s/div
       (merge
@@ -1042,14 +1096,10 @@
          :z-index       0
          :flex          "1"
          :font-family   (:font-family theme)
-         :border-radius (:border-radius theme)
-         :border        (if selected
-                          [1 :solid (get theme (nth theme/order selected))]
-                          [1 :solid "rgba(0,0,0,0)"])
-         :box-shadow    (when selected [0 0 3 (get theme (nth theme/order selected))])
-         :background    (let [bg (get-background context)]
-                          (when selected bg))}})
-      [hover-border context]]
+         :border        [1 :solid "rgba(0,0,0,0)"]
+         :background    (when selected background)}})
+      [inspector-border context]
+      [multi-select-counter context]]
      children)))
 
 (defn- inspector* [context value]
