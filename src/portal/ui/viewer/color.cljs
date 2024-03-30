@@ -6,8 +6,14 @@
             [portal.ui.theme :as theme]))
 
 ;;; :spec
-(defn- hex-color? [string]
-  (re-matches #"#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}gi" string))
+(defn- hex-short? [string]
+  (re-matches #"#[0-9a-fA-F]{3}gi" string))
+
+(defn- hex-full? [string]
+  (re-matches #"#[0-9a-fA-F]{6}" string))
+
+(defn- hex-alpha? [string]
+  (re-matches #"#[0-9a-fA-F]{8}" string))
 
 (defn- rgb-color? [string]
   (re-matches #"rgb\(\d+,\d+,\d+\)" string))
@@ -15,12 +21,16 @@
 (defn- rgba-color? [string]
   (re-matches #"rgba\(.+,.+,.+,.+\)" string))
 
+(s/def ::hex
+  (s/or :short hex-short?
+        :full  hex-full?
+        :alpha hex-alpha?))
+
+(s/def ::rgb
+  (s/or :rgb rgb-color? :rgba rgba-color?))
+
 (s/def ::color
-  (s/and
-   string?
-   (s/or :hex  hex-color?
-         :rgb  rgb-color?
-         :rgba rgba-color?)))
+  (s/and string? (s/or :hex ::hex :rgb ::rgb)))
 ;;;
 
 (defn inspect-color [value]
