@@ -1,29 +1,47 @@
 (ns ^:no-doc portal.ui.filter
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [portal.ui.rpc.runtime :as rt]))
 
-(defn match [value text]
+#?(:clj (defn regexp? [value] (instance? java.util.regex.Pattern value)))
+
+(defn- match* [value pattern]
   (cond
     (or (nil? value)
         (boolean? value)
         (number? value)
         (string? value)
         (keyword? value)
-        (symbol? value))
-    (str/includes? (str value) text)
+        (symbol? value)
+        (regexp? value))
+    (re-find pattern (str value))
+
+    (rt/runtime? value)
+    (re-find pattern (pr-str value))
 
     (map? value)
     (some
      (fn [[k v]]
-       (or (match k text) (match v text)))
+       (or (match* k pattern) (match* v pattern)))
      value)
 
     (coll? value)
     (some
      (fn [v]
-       (match v text))
+       (match* v pattern))
      value)
 
-    :else (match (pr-str value) text)))
+    :else false))
+
+(defn- ->pattern [search-text]
+  (when-not (str/blank? search-text)
+    (let [text    (str/replace search-text #"[.*+?^${}()|\[\]\\]" "\\$&")
+          tokens  (str/split text #"\s+")]
+      (re-pattern (str "(?i)" (str/join "|" tokens))))))
+
+(defn match [value search-text]
+  (if-let [pattern (->pattern search-text)]
+    (match* value pattern)
+    true))
 
 (defn- add-filter-meta [value old-value]
   (with-meta
@@ -33,11 +51,8 @@
         (dissoc :portal.runtime/id))))
 
 (defn filter-value [value text]
-  (if (str/blank? text)
-    value
-    (let [tokens (str/split text #"\s+")
-          matcher (fn [value]
-                    (every? #(match value %) tokens))]
+  (if-let [pattern (->pattern text)]
+    (let [matcher #(match* % pattern)]
       (cond
         (map? value)
         (add-filter-meta
@@ -52,7 +67,7 @@
            value))
          value)
 
-        (list? value)
+        (or (seq? value) (list? value))
         (add-filter-meta (filter matcher value) value)
 
         (coll? value)
@@ -62,7 +77,8 @@
 
         (matcher value) value
 
-        :else ::not-found))))
+        :else ::not-found))
+    value))
 
 (defn split [s search-words]
   (let [string-length (count s)]
