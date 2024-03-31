@@ -143,6 +143,15 @@
     (assoc-in state [:expanded? {:stable-path [] :value value}] n)
     state))
 
+(defn- push-search-text [state {:keys [context] :portal/keys [value]}]
+  (let [location    (get-location context)
+        search-text (get-in state [:search-text location])]
+    (assoc state
+           :search-text
+           (if-not search-text
+             {}
+             {{:value value :stable-path []} search-text}))))
+
 (defn history-push [state {:portal/keys [key value f] :as entry}]
   (-> (push-command state entry)
       (assoc
@@ -150,7 +159,6 @@
        :portal/key   key
        :portal/f     f
        :portal/value value
-       :search-text  {}
        :selected     (mapv
                       (fn [context]
                         (-> context
@@ -161,6 +169,7 @@
                                    :alt-bg      true)))
                       (:selected state)))
       (dissoc :portal/next-state)
+      (push-search-text entry)
       (push-viewer entry)
       (push-expanded entry)))
 
