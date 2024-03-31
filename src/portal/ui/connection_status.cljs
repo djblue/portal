@@ -1,16 +1,15 @@
 (ns ^:no-doc portal.ui.connection-status
-  (:require ["react" :as react]
+  (:require [portal.ui.react :refer [use-effect]]
             [portal.ui.rpc.runtime :as rt]
             [portal.ui.state :as state]
             [reagent.core :as r]))
 
 (defn- use-interval [f milliseconds]
-  (react/useEffect
-   (fn []
-     (when (fn? f)
-       (let [interval (js/setInterval f milliseconds)]
-         (fn [] (js/clearInterval interval)))))
-   #js [f]))
+  (use-effect
+   #js [f]
+   (when (fn? f)
+     (let [interval (js/setInterval f milliseconds)]
+       (fn [] (js/clearInterval interval))))))
 
 (defn- timeout [ms]
   (js/Promise.

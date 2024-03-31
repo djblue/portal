@@ -1,7 +1,8 @@
 (ns portal.ui.theme
   (:require ["react" :as react]
             [portal.colors :as c]
-            [portal.ui.options :as opts]))
+            [portal.ui.options :as opts]
+            [portal.ui.react :refer [use-effect]]))
 
 (defn ^:no-doc is-vs-code? []
   (-> js/document
@@ -25,13 +26,12 @@
 (defn- use-theme-detector []
   (let [media-query (.matchMedia js/window "(prefers-color-scheme: dark)")
         [dark-theme set-dark-theme!] (react/useState (.-matches media-query))]
-    (react/useEffect
-     (fn []
-       (let [listener (fn [e] (set-dark-theme! (.-matches e)))]
-         (.addListener media-query listener)
-         (fn []
-           (.removeListener media-query listener))))
-     #js [])
+    (use-effect
+     :once
+     (let [listener (fn [e] (set-dark-theme! (.-matches e)))]
+       (.addListener media-query listener)
+       (fn []
+         (.removeListener media-query listener))))
     dark-theme))
 
 (defn- default-theme [dark-theme]
@@ -50,10 +50,9 @@
 
 (defn ^:no-doc with-background []
   (let [background (::c/background (use-theme))]
-    (react/useEffect
-     #(set! (.. js/document -body -style -backgroundColor)
-            background)
-     #js [background])
+    (use-effect
+     #js [background]
+     (set! (.. js/document -body -style -backgroundColor) background))
     nil))
 
 (defn with-theme [theme-name & children]

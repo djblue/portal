@@ -12,6 +12,7 @@
             [portal.ui.filter :as f]
             [portal.ui.icons :as icons]
             [portal.ui.lazy :as l]
+            [portal.ui.react :refer [use-effect]]
             [portal.ui.rpc.runtime :as rt]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
@@ -1119,20 +1120,18 @@
                           (get-inspect-component type)
                           (get-preview-component type)))]
     (select/use-register-context context viewer)
-    (react/useEffect
-     (fn []
-       (when (and (nil? expanded?)
-                  (default-expand? state theme context value))
-         (state/dispatch! state assoc-in [:expanded? location] 1)))
-     #js [(hash location) (some? expanded?)])
-    (react/useEffect
-     (fn []
-       (when (and selected
-                  (not= (.. js/document -activeElement -tagName) "INPUT"))
-         (when-let [el (.-current ref)]
-           (when-not (and (.hasFocus js/document) (l/element-visible? el))
-             (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
-     #js [selected (.-current ref)])
+    (use-effect
+     #js [(hash location) (some? expanded?)]
+     (when (and (nil? expanded?)
+                (default-expand? state theme context value))
+       (state/dispatch! state assoc-in [:expanded? location] 1)))
+    (use-effect
+     #js [selected (.-current ref)]
+     (when (and selected
+                (not= (.. js/document -activeElement -tagName) "INPUT"))
+       (when-let [el (.-current ref)]
+         (when-not (and (.hasFocus js/document) (l/element-visible? el))
+           (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
     [:> error-boundary
      [with-options options
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
@@ -1145,11 +1144,10 @@
   (let [ref      (react/useRef nil)
         state    (state/use-state)
         selected @(r/track is-selected? state context)]
-    (react/useEffect
-     (fn []
-       (when (and selected (.hasFocus js/document))
-         (some-> ref .-current (.focus #js {:preventScroll true}))))
-     #js [selected (.-current ref)])
+    (use-effect
+     #js [selected (.-current ref)]
+     (when (and selected (.hasFocus js/document))
+       (some-> ref .-current (.focus #js {:preventScroll true}))))
     (when-not (:readonly? context)
       [s/div
        {:ref         ref

@@ -2,6 +2,7 @@
   (:require ["react" :as react]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
+            [portal.ui.react :refer [use-effect]]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
@@ -10,24 +11,23 @@
 
 (defn- with-observer [f & children]
   (let [[observer set-observer!] (react/useState nil)]
-    (react/useEffect
-     (fn []
-       (set-observer!
-        (js/IntersectionObserver.
-         (fn [entries]
-           (f
-            (reduce
-             (fn [result entry]
-               (let [element (.-target entry)
-                     id      (.getAttribute element "data-observer")]
-                 (assoc result
-                        id
-                        {:element element
-                         :ratio   (.-intersectionRatio entry)})))
-             {}
-             entries)))
-         #js {:root nil :rootMargin "0px" :threshold 0})))
-     #js [f])
+    (use-effect
+     #js [f]
+     (set-observer!
+      (js/IntersectionObserver.
+       (fn [entries]
+         (f
+          (reduce
+           (fn [result entry]
+             (let [element (.-target entry)
+                   id      (.getAttribute element "data-observer")]
+               (assoc result
+                      id
+                      {:element element
+                       :ratio   (.-intersectionRatio entry)})))
+           {}
+           entries)))
+       #js {:root nil :rootMargin "0px" :threshold 0})))
     (when observer
       (into [:r>
              (.-Provider observer-context)
@@ -38,13 +38,12 @@
   (let [ref      (react/useRef nil)
         observer (react/useContext observer-context)
         id       (str id)]
-    (react/useEffect
-     (fn []
-       (when-let [el (.-current ref)]
-         (.setAttribute el "data-observer" id)
-         (.observe observer el)
-         #(.unobserve observer el)))
-     #js [id ref observer])
+    (use-effect
+     #js [id ref observer]
+     (when-let [el (.-current ref)]
+       (.setAttribute el "data-observer" id)
+       (.observe observer el)
+       #(.unobserve observer el)))
     ref))
 
 (def ^:private index-context (react/createContext 0))

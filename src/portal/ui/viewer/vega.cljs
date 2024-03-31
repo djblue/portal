@@ -6,6 +6,7 @@
             [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
+            [portal.ui.react :refer [use-effect]]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
@@ -83,17 +84,16 @@
 (defn- use-resize []
   (let [ref              (react/useRef nil)
         [rect set-rect!] (react/useState #js {:height 200 :width 200})]
-    (react/useEffect
-     (fn []
-       (when-let [el (.-current ref)]
-         (let [resize-observer
-               (js/ResizeObserver.
-                (fn []
-                  (set-rect! (.getBoundingClientRect el))))]
-           (.observe resize-observer el)
-           (fn []
-             (.disconnect resize-observer)))))
-     #js [(.-current ref)])
+    (use-effect
+     #js [(.-current ref)]
+     (when-let [el (.-current ref)]
+       (let [resize-observer
+             (js/ResizeObserver.
+              (fn []
+                (set-rect! (.getBoundingClientRect el))))]
+         (.observe resize-observer el)
+         (fn []
+           (.disconnect resize-observer)))))
     [ref rect]))
 
 (defn vega-embed [opts value]
@@ -109,27 +109,25 @@
         [relative relative-rect] (use-resize)
         width (.-width relative-rect)]
 
-    (react/useEffect
-     (fn []
-       (when-let [el (.-current absolute)]
-         (-> (vegaEmbed el (clj->js (assoc doc :width width)) (clj->js opts))
-             (.then (fn [value]
-                      (set! (.-current view) (.-view value))
-                      (set-init! true)))
-             (.catch (fn [err] (js/console.error err)))))
-       #(when-let [view (.-current view)]
-          (.finalize view)
-          (set! (.-current view) nil)))
-     #js [(hash theme)])
+    (use-effect
+     #js [(hash theme)]
+     (when-let [el (.-current absolute)]
+       (-> (vegaEmbed el (clj->js (assoc doc :width width)) (clj->js opts))
+           (.then (fn [value]
+                    (set! (.-current view) (.-view value))
+                    (set-init! true)))
+           (.catch (fn [err] (js/console.error err)))))
+     #(when-let [view (.-current view)]
+        (.finalize view)
+        (set! (.-current view) nil)))
 
-    (react/useEffect
-     (fn []
-       (when-let [view (.-current view)]
-         (let [width (- width 2
-                        (* 2 (:padding theme)))]
-           (.width view width)
-           (.run view))))
-     #js [init (.-current view) width])
+    (use-effect
+     #js [init (.-current view) width]
+     (when-let [view (.-current view)]
+       (let [width (- width 2
+                      (* 2 (:padding theme)))]
+         (.width view width)
+         (.run view))))
 
     [d/div
      (when-let [title (:title value)]

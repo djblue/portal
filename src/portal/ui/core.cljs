@@ -6,6 +6,7 @@
             [portal.ui.cljs :as cljs]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
+            [portal.ui.react :refer [use-effect]]
             [portal.ui.rpc :as rpc]
             [portal.ui.sci]
             [portal.ui.state :as state]
@@ -16,14 +17,13 @@
 
 (defn- custom-app [opts]
   (let [[app set-app!] (react/useState nil)]
-    (react/useEffect
-     (fn []
-       (let [component
-             (-> {:code (str "(require '" (namespace (:main opts)) ")" (:main opts))}
-                 (cljs/eval-string)
-                 :value)]
-         (set-app! (fn [] component))))
-     #js [])
+    (use-effect
+     :once
+     (let [component
+           (-> {:code (str "(require '" (namespace (:main opts)) ")" (:main opts))}
+               (cljs/eval-string)
+               :value)]
+       (set-app! (fn [] component))))
     (when app
       [app/root [app]])))
 

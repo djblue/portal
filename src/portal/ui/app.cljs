@@ -9,6 +9,7 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
+            [portal.ui.react :refer [use-effect]]
             [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
@@ -101,19 +102,17 @@
         header     (if (= :dev (:mode opts))
                      (::c/diff-add theme)
                      (::c/background2 theme))]
-    (react/useEffect
-     (fn []
-       (state/set-theme header)
-       (state/notify-parent {:type :set-theme :color header}))
-     #js [header])
-    (react/useEffect
-     (fn []
-       (when-let [{:keys [name platform version]} opts]
-         (state/set-title!
-          (str/join
-           " - "
-           [(:window-title opts name) platform version]))))
-     #js [opts])))
+    (use-effect
+     #js [header]
+     (state/set-theme header)
+     (state/notify-parent {:type :set-theme :color header}))
+    (use-effect
+     #js [opts]
+     (when-let [{:keys [name platform version]} opts]
+       (state/set-title!
+        (str/join
+         " - "
+         [(:window-title opts name) platform version]))))))
 
 (defn inspect-footer []
   (let [theme (theme/use-theme)
@@ -203,10 +202,11 @@
         color    (if-let [depth (:depth context)]
                    (nth theme/order depth)
                    ::c/border)]
-    (react/useEffect
-     (fn []
-       (swap! commands/search-refs conj ref)
-       #(swap! commands/search-refs disj ref)))
+    (use-effect
+     :always
+     (swap! commands/search-refs conj ref)
+     #(swap! commands/search-refs disj ref))
+
     [s/div
      {:style
       {:display :flex
@@ -338,11 +338,10 @@
   (let [theme (theme/use-theme)
         state (state/use-state)
         ref   (react/useRef)]
-    (react/useEffect
-     (fn []
-       (when-let [el (.-current ref)]
-         (state/dispatch! state assoc :scroll-element el)))
-     #js [(.-current ref)])
+    (use-effect
+     #js [(.-current ref)]
+     (when-let [el (.-current ref)]
+       (state/dispatch! state assoc :scroll-element el)))
     [s/div
      {:style
       {:height "100vh"

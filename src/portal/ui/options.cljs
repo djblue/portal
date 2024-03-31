@@ -1,6 +1,7 @@
 (ns portal.ui.options
   (:require ["react" :as react]
             [clojure.edn :as edn]
+            [portal.ui.react :refer [use-effect]]
             [portal.ui.state :as state]
             [reagent.core :as r]))
 
@@ -26,11 +27,10 @@
 
 (defn with-options [& children]
   (let [[options set-options!] (react/useState ::loading)]
-    (react/useEffect
-     (fn []
-       (-> (state/invoke `portal.runtime/get-options)
-           (.then set-options!)))
-     #js [])
+    (use-effect
+     :once
+     (-> (state/invoke `portal.runtime/get-options)
+         (.then set-options!)))
     (into [with-options* options] children)))
 
 (defn use-options [] (react/useContext options-context))

@@ -12,6 +12,7 @@
             [portal.ui.inspector :as ins]
             [portal.ui.options :as options]
             [portal.ui.parsers :as p]
+            [portal.ui.react :refer [use-effect]]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -56,17 +57,16 @@
 
 (defn- with-shortcuts [f & children]
   (let [i (react/useContext shortcut-context)]
-    (react/useEffect
+    (use-effect
+     #js [f]
+     (swap! handlers assoc i f)
      (fn []
-       (swap! handlers assoc i f)
-       (fn []
-         (swap! handlers dissoc i)))
-     #js [f])
-    (react/useEffect
+       (swap! handlers dissoc i)))
+    (use-effect
+     :always
+     (shortcuts/add! ::with-shortcuts dispatch)
      (fn []
-       (shortcuts/add! ::with-shortcuts dispatch)
-       (fn []
-         (shortcuts/remove! ::with-shortcuts))))
+       (shortcuts/remove! ::with-shortcuts)))
     (into [:r> (.-Provider shortcut-context) #js {:value (inc i)}] children)))
 
 (defn- checkbox [checked?]
@@ -1044,17 +1044,16 @@
   (let [state (state/use-state)
         value (state/get-selected-value @state)
         opts  (options/use-options)]
-    (react/useEffect
-     (fn []
-       (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
-         (reset!
-          runtime-registry
-          (update-vals
-           fns
-           (fn [opts]
-             (make-command
-              (assoc opts :f (partial state/invoke (:name opts)))))))))
-     #js [(hash value)])
+    (use-effect
+     #js [(hash value)]
+     (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
+       (reset!
+        runtime-registry
+        (update-vals
+         fns
+         (fn [opts]
+           (make-command
+            (assoc opts :f (partial state/invoke (:name opts)))))))))
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)
