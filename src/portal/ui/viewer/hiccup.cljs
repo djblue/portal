@@ -148,7 +148,7 @@
         :max-height (when-not (:expanded? opts) "24rem")}}
       (process-hiccup
        {:count (atom -1) :viewers viewers}
-       (if-let [[tag attrs] (::f/value (meta value))]
+       (if-let [[tag attrs] value]
          (let [missing-tag?   (not= tag (first value))
                missing-attrs? (and (map? attrs)
                                    (not= attrs (second value)))]

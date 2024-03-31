@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]
-            [portal.ui.filter :as-alias f]
+            [portal.ui.filter :as f]
             [portal.ui.icons :as icon]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
@@ -53,7 +53,8 @@
                  (get theme (nth theme/order selected))
                  (::c/border theme))
         can-expand? (> (count trace) 1)
-        wrapper-options (ins/use-wrapper-options context)]
+        wrapper-options (ins/use-wrapper-options context)
+        search-text (ins/use-search-text)]
     [:<>
      [d/div
       {:on-click (:on-click wrapper-options)
@@ -110,19 +111,20 @@
        {:style {:flex "1" :display :flex :flex-direction :column}}
        (map-indexed
         (fn [idx {:keys [clj? sym method index] :as source}]
-          ^{:key index}
-          [ins/with-key
-           index
-           [d/div
-            {:key idx
-             :style {:display :flex
-                     :flex "1"
-                     :justify-content :space-between}}
-            [d/div
-             [select/with-position
-              {:row idx :column 1}
-              [ins/inspector {:portal.viewer/default :portal.viewer/source-location}
-               (assoc source :label (if clj?  (symbol nil (name sym)) method))]]]]])
+          (when (f/match method search-text)
+            ^{:key index}
+            [ins/with-key
+             index
+             [d/div
+              {:key idx
+               :style {:display :flex
+                       :flex "1"
+                       :justify-content :space-between}}
+              [d/div
+               [select/with-position
+                {:row idx :column 1}
+                [ins/inspector {:portal.viewer/default :portal.viewer/source-location}
+                 (assoc source :label (if clj?  (symbol nil (name sym)) method))]]]]]))
         (if expanded? trace (take 1 trace)))]
       [d/div
        {:style
@@ -163,7 +165,8 @@
 
 (defn- inspect-stack-trace [trace]
   (let [theme   (theme/use-theme)
-        options (ins/use-options)]
+        options (ins/use-options)
+        search-text (ins/use-search-text)]
     [d/div
      {:style
       {:border-top-left-radius (:border-radius theme)
@@ -187,11 +190,12 @@
             analyze-trace-item)
            (filter
             (fn [line]
-              (let [{:keys [clj? ns]} (meta line)]
-                (if (:expanded? options) true
-                    (and clj? (not (or
-                                    (str/starts-with? (str ns) "nrepl.middleware")
-                                    (str/starts-with? (str ns) "clojure.lang.Compiler"))))))))
+              (when (f/match line search-text)
+                (let [{:keys [clj? ns]} (meta line)]
+                  (if (:expanded? options) true
+                      (and clj? (not (or
+                                      (str/starts-with? (str ns) "nrepl.middleware")
+                                      (str/starts-with? (str ns) "clojure.lang.Compiler")))))))))
            (partition-by (comp :file meta))
            (map-indexed
             (fn [index trace]
@@ -206,10 +210,9 @@
                  (with-meta trace (meta (first trace)))]]])))]]))
 
 (defn- inspect-via [value]
-  (let [value'                 (::f/value (meta value) value)
-        theme                  (theme/use-theme)
-        {:keys [type message]} (last (:via value'))
-        message                (or (:cause value') message)]
+  (let [theme                  (theme/use-theme)
+        {:keys [type message]} (last (:via value))
+        message                (or (:cause value) message)]
     [d/div
      {:style
       {:display         :flex

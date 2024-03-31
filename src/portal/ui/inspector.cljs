@@ -195,7 +195,7 @@
 (defn with-collection [coll & children]
   (into [with-context
          {:key nil
-          :collection (:portal.ui.filter/value (meta coll) coll)}]
+          :collection coll}]
         children))
 
 (defn- get-stable-path
@@ -596,27 +596,36 @@
        (select-keys m [viewer])
        {:portal.viewer/default viewer}))))
 
+(defn use-search-text []
+  (let [state       (state/use-state)
+        context     (use-context)
+        location    (state/get-location context)]
+    @(r/cursor state [:search-text location])))
+
 (defn inspect-map-k-v [values]
-  (let [options (use-options)]
+  (let [options (use-options)
+        search-text (use-search-text)]
     [container-map
      [l/lazy-seq
       (map-indexed
        (fn [index [k v]]
-         ^{:key (str (->id k) (->id v))}
-         [:<>
-          [select/with-position
-           {:row index :column 0}
-           [with-context
-            {:key? true}
-            [container-map-k
-             [inspector
-              {:map-ns (:map-ns options)}
-              k]]]]
-          [select/with-position
-           {:row index :column 1}
-           [with-key k
-            [container-map-v
-             [inspector (get-props values k) v]]]]])
+         (when (or (f/match k search-text)
+                   (f/match v search-text))
+           ^{:key (str (->id k) (->id v))}
+           [:<>
+            [select/with-position
+             {:row index :column 0}
+             [with-context
+              {:key? true}
+              [container-map-k
+               [inspector
+                {:map-ns (:map-ns options)}
+                k]]]]
+            [select/with-position
+             {:row index :column 1}
+             [with-key k
+              [container-map-v
+               [inspector (get-props values k) v]]]]]))
        (try-sort-map values))
       {:context (use-context)}]]))
 
@@ -666,20 +675,22 @@
        child]]]))
 
 (defn- inspect-coll [values]
-  (let [n (count values)]
+  (let [n (count values)
+        search-text (use-search-text)]
     [container-coll
      values
      [l/lazy-seq
       (map-indexed
        (fn [index value]
-         (let [key (str (if (vector? values)
-                          index
-                          (- n index 1))
-                        (->id value))]
-           ^{:key key}
-           [select/with-position
-            {:row index :column 0}
-            [with-key index [inspector value]]]))
+         (when (f/match value search-text)
+           (let [key (str (if (vector? values)
+                            index
+                            (- n index 1))
+                          (->id value))]
+             ^{:key key}
+             [select/with-position
+              {:row index :column 0}
+              [with-key index [inspector value]]])))
        values)
       {:context (use-context)}]]))
 
@@ -961,13 +972,9 @@
              (<= depth (:max-depth theme))))))
 
 (defn- get-info [state context value]
-  (let [{:keys [search-text]} @state
-        location       (state/get-location context)
-        search-text    (get search-text location)]
-    {:selected  (state/selected @state context)
-     :expanded? (state/expanded? @state context)
-     :viewer    (get-viewer state context value)
-     :value     (f/filter-value value search-text)}))
+  {:selected  (state/selected @state context)
+   :expanded? (state/expanded? @state context)
+   :viewer    (get-viewer state context value)})
 
 (defn use-wrapper-options [context]
   (let [state          (state/use-state)
@@ -1109,7 +1116,7 @@
         state          (state/use-state)
         location       (state/get-location context)
         theme          (theme/use-theme)
-        {:keys [value viewer selected expanded?] :as options}
+        {:keys [viewer selected expanded?] :as options}
         @(r/track get-info state context value)
         options        (assoc options :ref ref :props props)
         type           (get-value-type value)
@@ -1180,12 +1187,6 @@
       context
       ^{:key "tab-index"} [tab-index context]
       [with-context context [inspector* context value]]])))
-
-(defn use-search-text []
-  (let [state       (state/use-state)
-        context     (use-context)
-        location    (state/get-location context)]
-    @(r/cursor state [:search-text location])))
 
 (def viewer
   {:predicate (constantly true)

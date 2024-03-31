@@ -190,8 +190,7 @@
                 :vars vars}))))
 
 (defn- get-results [value]
-  (let [value'   (::f/value (meta value))
-        include? (when value' (into #{} value))]
+  (let [include? (when value (into #{} value))]
     (:results
      (reduce
       (fn [{:keys [test-ns test-var] :as state} row]
@@ -201,7 +200,7 @@
           :end-test-ns    (-> state end-test-var end-test-ns)
           :begin-test-var (assoc state :test-var (:var row))
           :end-test-var   (end-test-var state)
-          (if (and value' (not (include? row)))
+          (if (and value (not (include? row)))
             state
             (update
              state
@@ -211,7 +210,7 @@
                test-ns  (assoc :ns test-ns)
                test-var (assoc :var test-var))))))
       {:results empty-vec}
-      (or value' value)))))
+      value))))
 
 (defn- group-assertions [value]
   (let [results (get-results value)]
@@ -236,7 +235,7 @@
     inspect-assertion))
 
 (defn inspect-test [value]
-  (let [component (get-component (::f/value (meta value) value))]
+  (let [component (get-component value)]
     [component value]))
 
 (def viewer

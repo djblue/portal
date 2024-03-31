@@ -3,6 +3,7 @@
             [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.runtime.edn :as edn]
+            [portal.ui.filter :as f]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
@@ -167,7 +168,8 @@
 (defn inspect-prepl [value]
   (let [theme (theme/use-theme)
         opts  (ins/use-options)
-        bg    (ins/get-background)]
+        bg    (ins/get-background)
+        search-text (ins/use-search-text)]
     [d/div
      {:style
       {:background    bg}}
@@ -197,20 +199,21 @@
         (reverse
          (map-indexed
           (fn [index value]
-            (with-meta
-              (if (#{:tap :ret} (:tag value))
-                [ins/with-key
-                 index
-                 [inspect-prepl-ret value index]]
-                [d/span
-                 {:style
-                  {:color
-                   (if (= (:tag value) :err)
-                     (::c/exception theme)
-                     (::c/text theme))}
-                  :dangerouslySetInnerHTML
-                  {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
-              {:key index}))
+            (when (f/match value search-text)
+              (with-meta
+                (if (#{:tap :ret} (:tag value))
+                  [ins/with-key
+                   index
+                   [inspect-prepl-ret value index]]
+                  [d/span
+                   {:style
+                    {:color
+                     (if (= (:tag value) :err)
+                       (::c/exception theme)
+                       (::c/text theme))}
+                    :dangerouslySetInnerHTML
+                    {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
+                {:key index})))
           value))]]]]))
 
 (defn io? [value]

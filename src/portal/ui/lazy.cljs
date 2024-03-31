@@ -65,12 +65,7 @@
 (defn lazy-seq [_coll opts]
   (let [{:keys [default-take step]
          :or   {default-take 0 step 10}} opts
-
-        state (state/use-state)
-        path  (-> opts :context :stable-path)
-        n     (if-not path
-                (r/atom default-take)
-                (r/cursor state [:lazy-take path]))]
+        n     (r/atom default-take)]
     (fn [coll _opts]
       (let [[head tail] (split-at (or @n default-take) coll)]
         [:<>

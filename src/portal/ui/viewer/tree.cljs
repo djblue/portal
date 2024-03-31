@@ -1,5 +1,6 @@
 (ns ^:no-doc portal.ui.viewer.tree
-  (:require [portal.ui.inspector :as ins]
+  (:require [portal.ui.filter :as f]
+            [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
@@ -117,81 +118,86 @@
      (into [wrapper context] children)]))
 
 (defn- inspect-tree-map [value]
-  (let [theme (theme/use-theme)]
+  (let [theme (theme/use-theme)
+        search-text (ins/use-search-text)]
     [ins/with-collection value
      [l/lazy-seq
       (map-indexed
        (fn [idx [k v]]
-         (if-not (ins/coll? v)
-           ^{:key idx}
-           [s/div
-            {:style {:display :flex
-                     :gap (:padding theme)}}
-            [s/div
-             [ins/with-key k
-              [select/with-position
-               {:row idx :column 0}
-               [ins/inspector {:portal.viewer/inspector {:toggle-bg false}} k]]]]
-            [ins/with-key k
-             [select/with-position
-              {:row idx :column 1}
-              [ins/inspector {:portal.viewer/inspector {:toggle-bg false}} v]]]]
-
-           ^{:key idx}
-           [ins/toggle-bg
-            [s/div
-             {:style {:display :grid
-                      :grid-template-columns "auto auto 1fr"}}
+         (when (or (f/match k search-text)
+                   (f/match v search-text))
+           (if-not (ins/coll? v)
+             ^{:key idx}
              [s/div
-              {:style {:grid-row "1" :grid-column "2"
-                       :padding [0 (:padding theme)]}}
+              {:style {:display :flex
+                       :gap (:padding theme)}}
+              [s/div
+               [ins/with-key k
+                [select/with-position
+                 {:row idx :column 0}
+                 [ins/inspector {:portal.viewer/inspector {:toggle-bg false}} k]]]]
               [ins/with-key k
                [select/with-position
-                {:row idx :column 0}
-                [ins/inspector
-                 {:portal.viewer/default :portal.viewer/tree
-                  :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
-                 k]]]]
-             [ins/with-key k
-              [select/with-position
-               {:row idx :column 1}
-               [ins/inspector
-                {:portal.viewer/default :portal.viewer/tree
-                 :portal.viewer/tree {:parent :tree}
-                 :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
-                v]]]]]))
+                {:row idx :column 1}
+                [ins/inspector {:portal.viewer/inspector {:toggle-bg false}} v]]]]
+
+             ^{:key idx}
+             [ins/toggle-bg
+              [s/div
+               {:style {:display :grid
+                        :grid-template-columns "auto auto 1fr"}}
+               [s/div
+                {:style {:grid-row "1" :grid-column "2"
+                         :padding [0 (:padding theme)]}}
+                [ins/with-key k
+                 [select/with-position
+                  {:row idx :column 0}
+                  [ins/inspector
+                   {:portal.viewer/default :portal.viewer/tree
+                    :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
+                   k]]]]
+               [ins/with-key k
+                [select/with-position
+                 {:row idx :column 1}
+                 [ins/inspector
+                  {:portal.viewer/default :portal.viewer/tree
+                   :portal.viewer/tree {:parent :tree}
+                   :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
+                  v]]]]])))
        (ins/try-sort-map value))]]))
 
 (defn- inspect-tree-coll [value]
-  (let [theme (theme/use-theme)]
+  (let [theme (theme/use-theme)
+        search-text (ins/use-search-text)]
     [ins/with-collection value
      [l/lazy-seq
       (map-indexed
        (fn [idx v]
-         (if-not (ins/coll? v)
-           ^{:key idx}
-           [s/div
-            [ins/with-key idx
-             [select/with-position
-              {:row idx :column 0}
-              [ins/inspector
-               {:portal.viewer/inspector {:toggle-bg false}}
-               v]]]]
-           ^{:key idx}
-           [s/div
-            {:style {:display :grid
-                     :grid-template-columns "auto auto 1fr"}}
-            [s/div
-             {:style {:grid-row "1" :grid-column "2"
-                      :padding [0 (:padding theme)]}}]
-            [ins/with-key idx
-             [select/with-position
-              {:row idx :column 0}
-              [ins/inspector
-               {:portal.viewer/default :portal.viewer/tree
-                :portal.viewer/tree {:parent :tree}
-                :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
-               v]]]]))
+         (when (f/match v search-text)
+           (if-not (ins/coll? v)
+             ^{:key idx}
+             [s/div
+              [ins/with-key idx
+               [select/with-position
+                {:row idx :column 0}
+                [ins/inspector
+                 {:portal.viewer/inspector {:toggle-bg false}}
+                 v]]]]
+             ^{:key idx}
+             [s/div
+              {:style {:display :grid
+                       :grid-template-columns "auto auto 1fr"}}
+              [s/div
+               {:style {:grid-row "1" :grid-column "2"
+                        :padding [0 (:padding theme)]}}]
+              [ins/with-key idx
+               [select/with-position
+                {:row idx :column 0}
+                [ins/inspector
+                 {:portal.viewer/default :portal.viewer/tree
+                  :portal.viewer/tree {:parent :tree}
+                  :portal.viewer/inspector {:wrapper wrapper :toggle-bg false}}
+                 v]]]])))
        value)]]))
 
 (defn inspect-tree [value]

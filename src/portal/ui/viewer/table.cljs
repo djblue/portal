@@ -2,6 +2,7 @@
   (:require ["react" :as react]
             [clojure.spec.alpha :as s]
             [portal.colors :as c]
+            [portal.ui.filter :as f]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
@@ -122,134 +123,147 @@
 (defn- inspect-map-table [values]
   (let [rows (seq (ins/try-sort (keys values)))
         cols (or (get-in (meta values) [:portal.viewer/table :columns])
-                 (seq (ins/try-sort (into #{} (mapcat keys (vals values))))))]
+                 (seq (ins/try-sort (into #{} (mapcat keys (vals values))))))
+        search-text (ins/use-search-text)]
     [table
      [columns cols]
      [l/lazy-seq
       (map-indexed
        (fn [row-index row]
-         [:<>
-          {:key (hash row)}
-          [ins/with-key row
-           [special (inc row-index) 0 [ins/inspector row]]]
-          [ins/toggle-bg
-           [ins/with-key row
-            (map-indexed
-             (fn [col-index column]
-               (let [coll (get values row)]
-                 ^{:key col-index}
-                 [ins/with-collection coll
-                  [ins/with-key column
-                   [cell
-                    (inc row-index)
-                    (inc col-index)
-                    (when (contains? coll column)
-                      [ins/inspector (ins/get-props coll column) (get coll column)])]]]))
-             cols)]]])
+         (when (or (f/match row search-text)
+                   (f/match (get values row) search-text))
+           [:<>
+            {:key (hash row)}
+            [ins/with-key row
+             [special (inc row-index) 0 [ins/inspector row]]]
+            [ins/toggle-bg
+             [ins/with-key row
+              (map-indexed
+               (fn [col-index column]
+                 (let [coll (get values row)]
+                   ^{:key col-index}
+                   [ins/with-collection coll
+                    [ins/with-key column
+                     [cell
+                      (inc row-index)
+                      (inc col-index)
+                      (when (contains? coll column)
+                        [ins/inspector (ins/get-props coll column) (get coll column)])]]]))
+               cols)]]]))
        rows)]]))
 
 (defn- inspect-coll-table [values]
   (let [rows (seq values)
         cols (or (get-in (meta values) [:portal.viewer/table :columns])
-                 (seq (ins/try-sort (into #{} (mapcat keys values)))))]
+                 (seq (ins/try-sort (into #{} (mapcat keys values)))))
+        search-text (ins/use-search-text)]
     [table
      [columns cols]
      [l/lazy-seq
       (map-indexed
        (fn [row-index row]
-         ^{:key row-index}
-         [:<>
-          [ins/with-key row-index
-           [special (inc row-index) 0 [ins/inspector row-index]]]
-          [ins/toggle-bg
-           [ins/with-key row-index
-            (map-indexed
-             (fn [col-index column]
-               ^{:key col-index}
-               [ins/with-collection row
-                [ins/with-key column
-                 [cell
-                  (inc row-index)
-                  (inc col-index)
-                  (when (contains? row column)
-                    [ins/inspector (ins/get-props row column) (get row column)])]]])
-             cols)]]])
+         (when (f/match row search-text)
+           ^{:key row-index}
+           [:<>
+            [ins/with-key row-index
+             [special (inc row-index) 0 [ins/inspector row-index]]]
+            [ins/toggle-bg
+             [ins/with-key row-index
+              (map-indexed
+               (fn [col-index column]
+                 ^{:key col-index}
+                 [ins/with-collection row
+                  [ins/with-key column
+                   [cell
+                    (inc row-index)
+                    (inc col-index)
+                    (when (contains? row column)
+                      [ins/inspector (ins/get-props row column) (get row column)])]]])
+               cols)]]]))
        rows)]]))
 
 (defn- inspect-vector-table [values]
-  [table
-   (when-let [cols (get-in (meta values) [:portal.viewer/table :columns])]
-     [columns cols])
-   [l/lazy-seq
-    (map-indexed
-     (fn [row-index row]
-       ^{:key row-index}
-       [:<>
-        [ins/with-key row-index
-         [special (inc row-index) 0 [ins/inspector row-index]]]
-        [ins/toggle-bg
-         [ins/with-key row-index
-          (map-indexed
-           (fn [col-index value]
-             ^{:key col-index}
-             [ins/with-collection row
-              [ins/with-key col-index
-               [cell
-                (inc row-index)
-                (inc col-index)
-                [ins/inspector value]]]])
-           row)]]])
-     values)]])
+  (let [search-text (ins/use-search-text)]
+    [table
+     (when-let [cols (get-in (meta values) [:portal.viewer/table :columns])]
+       [columns cols])
+     [l/lazy-seq
+      (map-indexed
+       (fn [row-index row]
+         (when (f/match row search-text)
+           ^{:key row-index}
+           [:<>
+            [ins/with-key row-index
+             [special (inc row-index) 0 [ins/inspector row-index]]]
+            [ins/toggle-bg
+             [ins/with-key row-index
+              (map-indexed
+               (fn [col-index value]
+                 ^{:key col-index}
+                 [ins/with-collection row
+                  [ins/with-key col-index
+                   [cell
+                    (inc row-index)
+                    (inc col-index)
+                    [ins/inspector value]]]])
+               row)]]]))
+       values)]]))
 
 (defn- inspect-map [values]
-  (let [rows (seq (ins/try-sort (keys values)))]
+  (let [rows (seq (ins/try-sort (keys values)))
+        search-text (ins/use-search-text)]
     [table
      [l/lazy-seq
       (map-indexed
        (fn [row-index row]
-         [:<>
-          {:key row-index}
-          [ins/with-key row
-           [special (inc row-index) 0 [ins/inspector row]]]
-          [ins/toggle-bg
-           [ins/with-key row
-            [ins/with-collection values
-             [ins/with-key row-index
-              [ins/with-key row
-               [cell
-                (inc row-index)
-                1
-                [ins/inspector (ins/get-props values row) (get values row)]]]]]]]])
+         (when (or (f/match row search-text)
+                   (f/match (get values row) search-text))
+           [:<>
+            {:key row-index}
+            [ins/with-key row
+             [special (inc row-index) 0 [ins/inspector row]]]
+            [ins/toggle-bg
+             [ins/with-key row
+              [ins/with-collection values
+               [ins/with-key row-index
+                [ins/with-key row
+                 [cell
+                  (inc row-index)
+                  1
+                  [ins/inspector (ins/get-props values row) (get values row)]]]]]]]]))
        rows)]]))
 
 (defn- inspect-multi-map-table [values]
   (let [rows (seq (ins/try-sort (keys values)))
         cols (or (get-in (meta values) [:portal.viewer/table :columns])
-                 (seq (ins/try-sort (into #{} (comp (mapcat second) (mapcat keys)) values))))]
+                 (seq (ins/try-sort (into #{} (comp (mapcat second) (mapcat keys)) values))))
+        search-text (ins/use-search-text)]
     [table
      [columns cols]
      [l/lazy-seq
       (map-indexed
        (fn [row-index {:keys [row value index]}]
-         [:<>
-          {:key row-index}
-          (when (zero? index)
-            [ins/with-key row
-             [special (inc row-index) 0 [ins/inspector row] (count (get values row))]])
-          [ins/toggle-bg
-           [ins/with-key row
-            (map-indexed
-             (fn [col-index column]
-               ^{:key col-index}
-               [ins/with-collection value
-                [ins/with-key index
-                 [ins/with-key column
-                  [cell
-                   (inc row-index)
-                   (inc col-index)
-                   (when (contains? value column)
-                     [ins/inspector (ins/get-props value column) (get value column)])]]]])
-             cols)]]])
+         (when (or (f/match row search-text)
+                   (f/match value search-text))
+           [:<>
+            {:key row-index}
+            (when (zero? index)
+              [ins/with-key row
+               [special (inc row-index) 0 [ins/inspector row] (count (get values row))]])
+            [ins/toggle-bg
+             [ins/with-key row
+              (map-indexed
+               (fn [col-index column]
+                 ^{:key col-index}
+                 [ins/with-collection value
+                  [ins/with-key index
+                   [ins/with-key column
+                    [cell
+                     (inc row-index)
+                     (inc col-index)
+                     (when (contains? value column)
+                       [ins/inspector (ins/get-props value column) (get value column)])]]]])
+               cols)]]]))
        (mapcat
         (fn [row]
           (map-indexed

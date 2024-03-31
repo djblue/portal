@@ -1,6 +1,6 @@
 (ns ^:no-doc portal.ui.filter
   (:require [clojure.string :as str]
-            [portal.ui.rpc.runtime :as rt]))
+            #?(:cljs [portal.ui.rpc.runtime :as rt])))
 
 #?(:clj (defn regexp? [value] (instance? java.util.regex.Pattern value)))
 
@@ -15,8 +15,8 @@
         (regexp? value))
     (re-find pattern (str value))
 
-    (rt/runtime? value)
-    (re-find pattern (pr-str value))
+    #?(:cljs (rt/runtime? value))
+    #?(:cljs (re-find pattern (pr-str value)))
 
     (map? value)
     (some
@@ -43,37 +43,26 @@
     (match* value pattern)
     true))
 
-(defn- add-filter-meta [value old-value]
-  (with-meta
-    value
-    (-> (meta old-value)
-        (assoc ::value old-value)
-        (dissoc :portal.runtime/id))))
-
 (defn filter-value [value text]
   (if-let [pattern (->pattern text)]
     (let [matcher #(match* % pattern)]
       (cond
         (map? value)
-        (add-filter-meta
-         (persistent!
-          (reduce-kv
-           (fn [result k v]
-             (if-not (or (matcher k)
-                         (matcher v))
-               result
-               (assoc! result k v)))
-           (transient {})
-           value))
-         value)
+        (persistent!
+         (reduce-kv
+          (fn [result k v]
+            (if-not (or (matcher k)
+                        (matcher v))
+              result
+              (assoc! result k v)))
+          (transient {})
+          value))
 
         (or (seq? value) (list? value))
-        (add-filter-meta (filter matcher value) value)
+        (filter matcher value)
 
         (coll? value)
-        (add-filter-meta
-         (into (empty value) (filter matcher) value)
-         value)
+        (into (empty value) (filter matcher) value)
 
         (matcher value) value
 

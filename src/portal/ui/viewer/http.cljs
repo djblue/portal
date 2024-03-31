@@ -54,11 +54,10 @@
    :options ::c/package})
 
 (defn inspect-http-request [value]
-  (let [value'     (::f/value (meta value) value)
-        theme      (theme/use-theme)
+  (let [theme      (theme/use-theme)
         opts       (ins/use-options)
         background (ins/get-background)
-        method     (:request-method value')
+        method     (:request-method value)
         color      (-> method method->color theme)
         expanded?  (:expanded? opts)]
     [d/div
@@ -96,7 +95,7 @@
         {:row -1 :column 0}
         [ins/with-key
          :uri
-         [ins/inspector (:uri value')]]]]]
+         [ins/inspector (:uri value)]]]]]
      (when (:expanded? opts)
        [ins/inspect-map-k-v (dissoc value :uri :request-method)])]))
 
@@ -109,14 +108,13 @@
     (<= 500 status 599) ::c/exception))
 
 (defn inspect-http-response [value]
-  (let [value'       (::f/value (meta value) value)
-        theme        (theme/use-theme)
+  (let [theme        (theme/use-theme)
         opts         (ins/use-options)
         expanded?    (:expanded? opts)
         background   (ins/get-background)
-        content-type (or (get-in value' [:headers "Content-Type"])
-                         (get-in value' [:headers :content-type]))
-        status       (:status value')
+        content-type (or (get-in value [:headers "Content-Type"])
+                         (get-in value [:headers :content-type]))
+        status       (:status value)
         color        (-> status status->color theme)]
     [d/div
      [d/div
@@ -165,7 +163,7 @@
     inspect-http-response))
 
 (defn inspect-http [value]
-  (let [component (get-component (::f/value (meta value) value))]
+  (let [component (get-component value)]
     [component value]))
 
 (def viewer
