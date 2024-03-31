@@ -311,7 +311,7 @@
 (defn get-background2 []
   (get-background (update (use-context) :alt-bg not)))
 
-(defn highlight-words [string]
+(defn- highlight-words* [string]
   (let [theme        (theme/use-theme)
         state        (state/use-state)
         search-words (use-search-words)
@@ -335,6 +335,16 @@
           (subs string start end)])
        {:default-take 5}]
       string)))
+
+(defn highlight-words [string]
+  (let [[sensor visible?] (l/use-visible)]
+    (if visible?
+      [highlight-words* string]
+      [s/span
+       {:style {:position :relative}}
+       string
+       [s/div {:style {:position :absolute :top 0 :left 0}}
+        sensor]])))
 
 (defn- ->id [value]
   (str (hash value) (pr-str (type value))))

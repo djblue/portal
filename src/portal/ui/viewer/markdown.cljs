@@ -2,6 +2,7 @@
   (:require ["marked" :refer [marked]]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.html :as h]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
@@ -25,44 +26,6 @@
 
 (defn- ->text [^js token]
   (unescape (.-text token)))
-
-(defn- ->style [string]
-  (persistent!
-   (reduce
-    (fn [style rule]
-      (let [[k v] (str/split rule #":")]
-        (assoc! style (keyword (str/trim k)) (str/trim v))))
-    (transient {})
-    (str/split string #";"))))
-
-(defn- dom->hiccup [^js el]
-  (case (.-nodeType el)
-    3 (.-wholeText el)
-    1 (let [attrs (.-attributes el)]
-        (into
-         [(keyword (str/lower-case (.-tagName el)))
-          (persistent!
-           (reduce
-            (fn [attrs ^js attr]
-              (let [k (keyword (.-name attr))]
-                (assoc! attrs k
-                        (case k
-                          :style (->style (.-value attr))
-                          (.-value attr)))))
-            (transient {})
-            attrs))]
-         (map dom->hiccup)
-         (.-childNodes el)))))
-
-(defn- parse-dom [string]
-  (-> (js/DOMParser.)
-      (.parseFromString string "text/html")
-      (.getElementsByTagName "body")
-      (aget 0)
-      (.-childNodes)))
-
-(defn- parse-html [html]
-  (into [:<>] (map dom->hiccup) (parse-dom html)))
 
 (defn- absolute-link? [href]
   (or (str/starts-with? href "http")
@@ -182,7 +145,7 @@
    (fn [out ^js token]
      (case (.-type token)
        "escape"   (conj out (->text token))
-       "html"     (conj out (parse-html (.-text token)))
+       "html"     (conj out (h/parse-html (.-text token)))
        "link"     (conj out (->link token))
        "image"    (conj out (->image token))
        "strong"   (conj out (->strong token))
@@ -208,7 +171,7 @@
         "table"      (conj out (->table token))
         "blockquote" (conj out (->blockquote token))
         "list"       (conj out (->list token))
-        "html"       (conj out (parse-html (->text token)))
+        "html"       (conj out (h/parse-html (->text token)))
         "paragraph"  (conj out (->paragraph token))
         "text"       (if-let [tokens (.-tokens token)]
                        (->inline out tokens)

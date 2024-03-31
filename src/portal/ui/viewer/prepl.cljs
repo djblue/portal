@@ -4,6 +4,7 @@
             [portal.colors :as c]
             [portal.runtime.edn :as edn]
             [portal.ui.filter :as f]
+            [portal.ui.html :as h]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
@@ -210,9 +211,10 @@
                     {:color
                      (if (= (:tag value) :err)
                        (::c/exception theme)
-                       (::c/text theme))}
-                    :dangerouslySetInnerHTML
-                    {:__html (anser/ansiToHtml (:val value) #js {:use_classes true})}}])
+                       (::c/text theme))}}
+                   [h/html+ (anser/ansiToHtml
+                             (:val value)
+                             #js {:use_classes true})]])
                 {:key index})))
           value))]]]]))
 

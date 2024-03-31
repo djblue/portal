@@ -2,6 +2,7 @@
   (:require ["highlight.js" :as hljs]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.html :as h]
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
@@ -108,11 +109,11 @@
               :line-height "1rem"
               :color       (::c/text theme)
               :font-size   (:font-size theme)
-              :font-family (:font-family theme)}
-      :dangerouslySetInnerHTML
-      {:__html (-> string-value
-                   (hljs/highlight  #js {:language "clojure"})
-                   .-value)}}]))
+              :font-family (:font-family theme)}}
+     [h/html+
+      (-> string-value
+          (hljs/highlight  #js {:language "clojure"})
+          .-value)]]))
 
 (defn inspect-pr-str [value] [highlight-clj (pr-str value)])
 
@@ -164,8 +165,8 @@
                                   :width       :fit-content
                                   :color       (::c/text theme)
                                   :font-family (:font-family theme)
-                                  :font-size   (:font-size theme)}
-        :dangerouslySetInnerHTML {:__html html}}]])))
+                                  :font-size   (:font-size theme)}}
+       [h/html+ html]]])))
 
 (def viewer
   {:predicate string?

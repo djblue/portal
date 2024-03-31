@@ -57,10 +57,16 @@
          #(.removeEventListener ^js container "scroll" on-scroll))))
     [:div {:ref ref :style {:height "1em" :width "1em"}}]))
 
-(defn visible-sensor [f]
+(defn- visible-sensor [f]
   (if (exists? js/IntersectionObserver)
     [observer-visible-sensor f]
     [fallback-visible-sensor f]))
+
+(defn use-visible []
+  (let [[visible? set-visible!] (react/useState false)]
+    [(when-not visible?
+       [visible-sensor #(set-visible! true)])
+     visible?]))
 
 (defn lazy-seq [_coll opts]
   (let [{:keys [default-take step]
