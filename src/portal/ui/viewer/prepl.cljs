@@ -135,7 +135,7 @@
           :background (::c/exception theme)}}])
 
      [icons/times-circle
-      {:size :s
+      {:size "1x"
        :style {:opacity 0.75
                :color (::c/exception theme)}
        :style/hover {:opacity 1}
@@ -144,7 +144,7 @@
                    (.stopPropagation e))}]
 
      [icons/minus-circle
-      {:size :s
+      {:size "1x"
        :style {:opacity 0.75
                :cursor :pointer
                :color (::c/tag theme)}
@@ -155,7 +155,7 @@
                    (state/dispatch! state assoc-in [:expanded? location] 0))}]
 
      [icons/plus-circle
-      {:size :s
+      {:size "1x"
        :style {:opacity 0.75
                :cursor :pointer
                :color (::c/string theme)}
