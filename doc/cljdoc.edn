@@ -30,7 +30,8 @@
   ["Editors"
    ["Emacs"    {:file "doc/editors/emacs.md"}]
    ["VS Code"  {:file "doc/editors/vs-code.md"}
-    ["Clojure Notebooks" {:file "doc/editors/vs-code-notebook.md"}]]
+    ["Clojure Notebooks" {:file "doc/editors/vs-code-notebook.md"}]
+    ["Joyride" {:file "doc/editors/vs-code-joyride.md"}]]
    ["Intellij" {:file "doc/editors/intellij.md"}]]
   ["CLI Usage" {:file "doc/cli.md"}]
   ["Datafy / Nav" {:file "doc/datafy.md"}]
