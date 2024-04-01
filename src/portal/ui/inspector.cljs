@@ -337,9 +337,12 @@
       string)))
 
 (defn highlight-words [string]
-  (let [[sensor visible?] (l/use-visible)]
-    (if visible?
-      [highlight-words* string]
+  (let [[sensor visible?] (l/use-visible)
+        readonly?  (:readonly? (use-context))]
+    (cond
+      readonly? string
+      visible?  [highlight-words* string]
+      :else
       [s/span
        {:style {:position :relative}}
        string
