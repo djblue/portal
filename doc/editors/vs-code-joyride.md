@@ -1,5 +1,7 @@
 # Joyride
 
+![image](https://github.com/djblue/portal/assets/1986211/1fd37185-7304-4572-86c6-4207adc3f449)
+
 To leverage the `portal.api` namespace from your Joyride script, ensure you have
 the following VS Code extensions installed:
 
