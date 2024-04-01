@@ -7,11 +7,11 @@
   (:require-macros portal.ui.lazy))
 
 (defn- observer-visible? [entries]
-  (= 1 (reduce
-        (fn [sum entry]
-          (if-not (.-isIntersecting entry)
-            sum
-            (+ sum (.-intersectionRatio entry)))) 0 entries)))
+  (< 0.5 (reduce
+          (fn [sum entry]
+            (if-not (.-isIntersecting entry)
+              sum
+              (+ sum (.-intersectionRatio entry)))) 0 entries)))
 
 (defn- observer-visible-sensor [f]
   (let [ref (react/useRef nil)]
@@ -22,12 +22,12 @@
              (js/IntersectionObserver.
               (fn [entries]
                 (when (observer-visible? entries) (f)))
-              #js {:root nil :rootMargin "0px" :threshold 1.0})]
+              #js {:root nil :rootMargin "0px" :threshold 0.5})]
          (.observe observer (.-current ref))
          (fn []
            (when (.-current ref)
              (.unobserve observer (.-current ref)))))))
-    [:div {:ref ref :style {:height "1em" :width "1em"}}]))
+    [:div {:ref ref :style {:height "0.5em" :width "0.5em"}}]))
 
 (defn element-visible? [element]
   (let [buffer 100
@@ -55,7 +55,7 @@
                  (f)))]
          (.addEventListener ^js container "scroll" on-scroll)
          #(.removeEventListener ^js container "scroll" on-scroll))))
-    [:div {:ref ref :style {:height "1em" :width "1em"}}]))
+    [:div {:ref ref :style {:height "0.5em" :width "0.5em"}}]))
 
 (defn- visible-sensor [f]
   (if (exists? js/IntersectionObserver)

@@ -346,7 +346,7 @@
       [s/span
        {:style {:position :relative}}
        string
-       [s/div {:style {:position :absolute :top 0 :left 0}}
+       [s/div {:style {:position :absolute :top 2 :left 1}}
         sensor]])))
 
 (defn- ->id [value]
