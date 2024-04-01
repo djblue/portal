@@ -1,3 +1,15 @@
+## 0.54.0 - 2024-03-31
+
+- Add basic Joyride guide 72e8be2
+- Implement toggle-expand for pprint viewer 4cc4d66
+- Add highlight-words to several viewers 57f074a
+- Allow filtering for pprint viewer 27625d3
+- Move filtering to view layer to improve performance 96bbfc1
+- Improve filter match fn b9e2e6d
+- Improve color viewer e50988e
+- Add `$BROWSER` support for vscode remote development ab23682
+- Unify styles for selection and hover states b588c9c
+
 ## 0.53.0 - 2024-03-22
 
 - Add `portal.viewer/code` helper 7a3b67e
