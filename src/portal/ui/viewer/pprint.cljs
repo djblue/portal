@@ -4,7 +4,6 @@
             [portal.runtime.cson :as cson]
             [portal.ui.filter :as f]
             [portal.ui.inspector :as ins]
-            [portal.ui.styled :as d]
             [portal.ui.viewer.code :as code]))
 
 (defn- queue? [obj]
@@ -61,18 +60,13 @@
 
 (defn pprint-data [value]
   (let [options (:portal.viewer/pprint (meta value))
-        search-text (ins/use-search-text)
-        expanded?   (:expanded? (ins/use-options))]
+        search-text (ins/use-search-text)]
     (binding [*print-meta*   (:print-meta   options (coll? value))
               *print-length* (:print-length options 25)
               *print-level*  (:print-level  options 5)
               *elide-binary* true]
-      [d/div
-       {:style (when-not expanded?
-                 {:max-height  "24rem"
-                  :overflow-y  :auto})}
-       [code/highlight-clj
-        (str/trim (with-out-str (pp/pprint (f/filter-value value search-text))))]])))
+      [code/highlight-clj
+       (str/trim (with-out-str (pp/pprint (f/filter-value value search-text))))])))
 
 (def viewer
   {:predicate (constantly true)
