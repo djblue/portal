@@ -2,6 +2,7 @@
   (:require ["highlight.js" :as hljs]
             [clojure.string :as str]
             [portal.colors :as c]
+            [portal.ui.filter :as f]
             [portal.ui.html :as h]
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
@@ -115,7 +116,9 @@
           (hljs/highlight  #js {:language "clojure"})
           .-value)]]))
 
-(defn inspect-pr-str [value] [highlight-clj (pr-str value)])
+(defn inspect-pr-str [value]
+  (let [search-text (ins/use-search-text)]
+    [highlight-clj (pr-str (f/filter-value value search-text))]))
 
 (defn inspect-code
   ([code]
