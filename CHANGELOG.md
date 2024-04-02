@@ -1,3 +1,7 @@
+## 0.54.1 - 2024-04-01
+
+- Fix bug in prepl viewer around html escaping
+
 ## 0.54.0 - 2024-03-31
 
 - Add basic Joyride guide 72e8be2
