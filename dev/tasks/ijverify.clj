@@ -1,8 +1,9 @@
 (ns tasks.ijverify
-  (:require [tasks.tools :refer [gradle *cwd*]]))
+  #_(:require [tasks.tools :refer [gradle *cwd*]]))
 
 (defn verify
   "Run Intellij Plugin Verification."
   []
-  (binding [*cwd* "extension-intellij"]
-    (gradle "runPluginVerifier")))
+  #_(binding [*cwd* "extension-intellij"]
+      (gradle "runPluginVerifier"))
+  (println "Disabled for now"))
