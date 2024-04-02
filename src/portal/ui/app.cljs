@@ -92,6 +92,9 @@
       [s/div {:style {:grid-row "1"}} "]"]]
      [s/div {:style
              {:display :flex
+              :height "100%"
+              :align-items :center
+              :box-sizing :border-box
               :padding (* 0.5 (:padding theme))
               :border-left [1 :solid (::c/border theme)]}}
       [log/icon (:runtime opts :portal)]]]))
