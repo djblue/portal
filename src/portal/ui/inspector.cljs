@@ -639,8 +639,7 @@
              [with-key k
               [container-map-v
                [inspector (get-props values k) v]]]]]))
-       (try-sort-map values))
-      {:context (use-context)}]]))
+       (try-sort-map values))]]))
 
 (defn- get-namespaces [value]
   (when (map? value)
@@ -704,8 +703,7 @@
              [select/with-position
               {:row index :column 0}
               [with-key index [inspector value]]])))
-       values)
-      {:context (use-context)}]]))
+       values)]]))
 
 (defn- inspect-js-array [value]
   (let [v (into [] value)]
