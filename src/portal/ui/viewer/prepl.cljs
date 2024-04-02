@@ -166,6 +166,11 @@
                    (.stopPropagation e)
                    (state/dispatch! state assoc-in [:expanded? location] 1))}]]))
 
+(defn- escape-html [text]
+  (let [el (.createElement js/document "div")]
+    (set! (.-innerText el) text)
+    (.-innerHTML el)))
+
 (defn inspect-prepl [value]
   (let [theme (theme/use-theme)
         opts  (ins/use-options)
@@ -213,7 +218,7 @@
                        (::c/exception theme)
                        (::c/text theme))}}
                    [h/html+ (anser/ansiToHtml
-                             (:val value)
+                             (escape-html (:val value))
                              #js {:use_classes true})]])
                 {:key index})))
           value))]]]]))
