@@ -66,7 +66,7 @@
              (and (.exists file) (.canExecute file) f))
      :cljs (when (not
                   (try (fs/accessSync f fs/constants.X_OK)
-                       (catch js/Error _e true)))
+                       (catch :default _e true)))
              f)
      :cljr (exists f)))
 
