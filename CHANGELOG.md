@@ -1,3 +1,8 @@
+## 0.54.2 - 2024-04-04
+
+- Updates IJ plugin for 2024.1 (#217) b50db57
+  - Thanks @coyotesqrl!
+
 ## 0.54.1 - 2024-04-01
 
 - Fix bug in prepl viewer around html escaping
