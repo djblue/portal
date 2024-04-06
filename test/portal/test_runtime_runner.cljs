@@ -1,5 +1,6 @@
 (ns portal.test-runtime-runner
-  (:require [clojure.test :as t]
+  (:require [clojure.string :as str]
+            [clojure.test :as t]
             [portal.client-test]
             [portal.runtime-test]
             [portal.runtime.api-test]
@@ -23,4 +24,5 @@
                  'portal.runtime.npm-test))
   (runner/table (bench/run)))
 
-(-main)
+(when-not (str/ends-with? (second js/process.argv) "nbb")
+  (-main))

@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "browserify": "^16.5.2",
+    "nbb": "^1.2.187",
     "source-map-support": "^0.5.20",
     "ws": "^8.2.3"
   }

@@ -48,6 +48,9 @@
    :bb      {:color ::c/exception
              :title "Babashka"
              :icon (inline "runtime/babashka.svg")}
+   :nbb     {:color ::c/diff-add
+             :title "Node Babashka"
+             :icon (inline "runtime/babashka.svg")}
    :portal  {:color ::c/boolean
              :title "Portal"
              :icon (inline "runtime/portal.svg")}

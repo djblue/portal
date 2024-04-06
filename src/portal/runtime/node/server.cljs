@@ -23,8 +23,11 @@
     (._compile m src file-name)
     (.-exports m)))
 
-(def Server (-> (io/inline "portal/ws.js")
-                (require-string "portal/ws.js") .-Server))
+(def Server (try
+              (.-Server (js/require "ws"))
+              (catch :default _
+                (-> (io/inline "portal/ws.js")
+                    (require-string "portal/ws.js") .-Server))))
 
 (def ops (merge c/ops rt/ops))
 

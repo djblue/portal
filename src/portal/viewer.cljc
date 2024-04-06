@@ -12,6 +12,9 @@
      :joyride
      (try (with-meta value {}) true
           (catch :default _e false))
+     :org.babashka/nbb
+     (try (with-meta value {}) true
+          (catch :default _e false))
      :cljs (implements? IMeta value)))
 
 (defn default

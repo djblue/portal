@@ -1,6 +1,7 @@
 (ns examples.data
   (:require #?(:clj [clojure.java.io :as io])
-            [examples.hacker-news :as hn]
+            #?(:org.babashka/nbb [clojure.core]
+               :default [examples.hacker-news :as hn])
             [examples.macros :refer [read-file]]
             [portal.colors :as c]
             [portal.viewer :as v])
@@ -8,6 +9,7 @@
                     [java.net URI]
                     [java.util Date]
                     [java.util UUID])
+     :org.babashka/nbb (:import)
      :cljs (:import [goog.math Long])
      :cljr (:import [System DateTime Guid Uri]
                     [System.IO File])))
@@ -19,40 +21,51 @@
        (.toByteArray out))))
 
 (def platform-data
-  #?(:clj {::ratio 22/7
-           ::long 4611681620380904123
-           ::class File
-           ::file (io/file "deps.edn")
-           ::directory  (io/file ".")
-           ::uri (URI. "https://github.com/djblue/portal")
-           ::exception (try (/ 1 0) (catch Exception e e))
-           ::io-exception (try (slurp "/hello") (catch Exception e e))
-           ::user-exception (Exception. "hi")
-           ::ex-info (ex-info "My message" {:my :data})
-           ::uuid (UUID/randomUUID)
-           ::date (Date.)
-           ::binary (slurp-bytes (io/resource "screenshot.png"))
-           ::bigint 42N}
-     :cljr {::ratio 22/7
-            ::long 4611681620380904123
-            ::class File
-            ::uri (Uri. "https://github.com/djblue/portal")
-            ::exception (try (/ 1 0) (catch Exception e e))
-            ::io-exception (try (slurp "/hello" :enc "utf8") (catch Exception e e))
-            ::user-exception (Exception. "hi")
-            ::ex-info (ex-info "My message" {:my :data})
-            ::uuid (Guid/NewGuid)
-            ::date (DateTime/Now)
-            ::binary (File/ReadAllBytes "resources/screenshot.png")
-            ::bigint 42N}
-     :cljs {::long (.fromString Long "4611681620380904123")
-            ::promise (js/Promise.resolve 123)
-            ::url (js/URL. "https://github.com/djblue/portal")
-            ::uuid (random-uuid)
-            ::date (js/Date.)
-            ::bigint (js/BigInt "42")
-            ::js-array #js [0 1 2 3 4]
-            ::js-object #js {:hello "world"}}))
+  #?(:clj
+     {::ratio 22/7
+      ::long 4611681620380904123
+      ::class File
+      ::file (io/file "deps.edn")
+      ::directory  (io/file ".")
+      ::uri (URI. "https://github.com/djblue/portal")
+      ::exception (try (/ 1 0) (catch Exception e e))
+      ::io-exception (try (slurp "/hello") (catch Exception e e))
+      ::user-exception (Exception. "hi")
+      ::ex-info (ex-info "My message" {:my :data})
+      ::uuid (UUID/randomUUID)
+      ::date (Date.)
+      ::binary (slurp-bytes (io/resource "screenshot.png"))
+      ::bigint 42N}
+     :cljr
+     {::ratio 22/7
+      ::long 4611681620380904123
+      ::class File
+      ::uri (Uri. "https://github.com/djblue/portal")
+      ::exception (try (/ 1 0) (catch Exception e e))
+      ::io-exception (try (slurp "/hello" :enc "utf8") (catch Exception e e))
+      ::user-exception (Exception. "hi")
+      ::ex-info (ex-info "My message" {:my :data})
+      ::uuid (Guid/NewGuid)
+      ::date (DateTime/Now)
+      ::binary (File/ReadAllBytes "resources/screenshot.png")
+      ::bigint 42N}
+     :org.babashka/nbb
+     {::promise (js/Promise.resolve 123)
+      ::url (js/URL. "https://github.com/djblue/portal")
+      ::uuid (random-uuid)
+      ::date (js/Date.)
+      ::bigint (js/BigInt "42")
+      ::js-array #js [0 1 2 3 4]
+      ::js-object #js {:hello "world"}}
+     :cljs
+     {::long (.fromString Long "4611681620380904123")
+      ::promise (js/Promise.resolve 123)
+      ::url (js/URL. "https://github.com/djblue/portal")
+      ::uuid (random-uuid)
+      ::date (js/Date.)
+      ::bigint (js/BigInt "42")
+      ::js-array #js [0 1 2 3 4]
+      ::js-object #js {:hello "world"}}))
 
 (def basic-data
   {::booleans #{true false}
@@ -1051,7 +1064,7 @@
 
 (def data
   {::platform-data      platform-data
-   ::hacker-news        hn/stories
+   ::hacker-news        #?(:org.babashka/nbb nil :default hn/stories)
    ::table-data         table-data
    ::diff               diff-data
    ::basic-data         basic-data

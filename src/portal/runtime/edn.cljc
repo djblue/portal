@@ -1,14 +1,17 @@
 (ns ^:no-doc portal.runtime.edn
   (:refer-clojure :exclude [read-string])
-  (:require #?(:cljs [cljs.tools.reader.impl.commons :as commons])
-            #?(:cljs [cljs.tools.reader.impl.utils :refer [numeric?]])
+  (:require #?(:org.babashka/nbb [clojure.core]
+               :cljs [cljs.tools.reader.impl.commons :as commons])
+            #?(:org.babashka/nbb [clojure.core]
+               :cljs [cljs.tools.reader.impl.utils :refer [numeric?]])
             [clojure.edn :as edn]
             [clojure.string :as str]
             [portal.runtime.cson :as cson]))
 
 ;; Discard metadata on tagged-literals to improve success rate of read-string.
 ;; Consider using a different type in the future.
-#?(:cljs
+#?(:org.babashka/nbb nil
+   :cljs
    (extend-type cljs.core/TaggedLiteral
      IMeta     (-meta [_this] nil)
      IWithMeta (-with-meta [this _m] this)))
@@ -32,7 +35,8 @@
       ;; \Q and \E produce invalid escape characters
       (str/replace #"[^\\]\\(Q|E)" "\\\\$1")))
 
-#?(:cljs
+#?(:org.babashka/nbb :nil
+   :cljs
    (defn parse-symbol
      "Parses a string into a vector of the namespace and symbol
      Fork: https://github.com/clojure/tools.reader/blob/master/src/main/cljs/cljs/tools/reader/impl/commons.cljs#L97-L118"
@@ -57,7 +61,7 @@
   ([edn-string]
    (read-string {} edn-string))
   ([{:keys [readers]} edn-string]
-   (with-redefs  #?(:cljs [commons/parse-symbol parse-symbol] :default [])
+   (with-redefs  #?(:org.babashka/nbb [] :cljs [commons/parse-symbol parse-symbol] :default [])
      (edn/read-string
       {:readers (merge
                  {'portal/var ->var

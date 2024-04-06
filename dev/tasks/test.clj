@@ -47,7 +47,8 @@
 (defn cljs []
   (cljs-runtime "1.10.773")
   (cljs-runtime "1.10.844")
-  (cljs-ui))
+  (cljs-ui)
+  (t/nbb "-m" :portal.test-runtime-runner))
 
 (defn clj
   []
