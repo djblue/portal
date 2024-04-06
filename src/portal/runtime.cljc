@@ -69,6 +69,58 @@
      :cljr (future (System.Threading.Thread/Sleep timeout) (f))
      :cljs (js/setTimeout f timeout)))
 
+(defn- hashable? [value]
+  (try
+    (and (hash value) true)
+    (catch #?(:clj Exception :cljr Exception :cljs :default) _
+      false)))
+
+#?(:bb (def clojure.lang.Range (type (range 1.0))))
+
+(defn- can-meta? [value]
+  #?(:clj  (and
+            (not (instance? clojure.lang.Range value))
+            (or (instance? clojure.lang.IObj value)
+                (var? value)))
+     :cljr (or (instance? clojure.lang.IObj value)
+               (var? value))
+     :joyride
+     (try (with-meta value {}) true
+          (catch :default _e false))
+     :cljs (implements? IMeta value)))
+
+(defn- hash+ [x]
+  (cond
+    (map? x)
+    (reduce-kv
+     (fn [out k v]
+       (+ out (hash+ k) (hash+ v)))
+     (+ 1 (if (sorted? x) 1 0) (hash+ (meta x)))
+     x)
+
+    (coll? x)
+    (reduce
+     (fn [out v]
+       (+ out (hash+ v)))
+     (+ (cond
+          (list? x)   3
+          (set? x)    (if (sorted? x) 4 5)
+          (vector? x) 6
+          :else       7)
+        (hash+ (meta x)))
+     x)
+
+    :else
+    (cond-> (hash x)
+      (can-meta? x)
+      (+ (hash+ (meta x))))))
+
+(defn- value->key
+  "Include metadata when capturing values in cache."
+  [value]
+  (when (hashable? value)
+    [:value value (hash+ value)]))
+
 #?(:joyride (def Atom (type (atom nil))))
 
 (defn- atom? [o]
@@ -82,7 +134,7 @@
     (request session-id {:op :portal.rpc/invalidate :atom a})))
 
 (defn- invalidate [session-id a old new]
-  (when-not (= old new)
+  (when-not (= (value->key old) (value->key new))
     (set-timeout
      #(when (= @a new) (notify session-id a))
      100)))
@@ -117,18 +169,6 @@
              (add-watch a session-id #'invalidate)
              (conj atoms a))))) a)
       (set-timeout #(notify session-id a) 0))))
-
-(defn- hashable? [value]
-  (try
-    (and (hash value) true)
-    (catch #?(:clj Exception :cljr Exception :cljs :default) _
-      false)))
-
-(defn- value->key
-  "Include metadata when capturing values in cache."
-  [value]
-  (when (hashable? value)
-    [:value value (meta value) (type value)]))
 
 (defn- value->id [value]
   (let [k   (value->key value)
@@ -186,20 +226,6 @@
   cson/ToJson
   (-to-json [value buffer]
     (to-object buffer value :object nil)))
-
-#?(:bb (def clojure.lang.Range (type (range 1.0))))
-
-(defn- can-meta? [value]
-  #?(:clj  (and
-            (not (instance? clojure.lang.Range value))
-            (or (instance? clojure.lang.IObj value)
-                (var? value)))
-     :cljr (or (instance? clojure.lang.IObj value)
-               (var? value))
-     :joyride
-     (try (with-meta value {}) true
-          (catch :default _e false))
-     :cljs (implements? IMeta value)))
 
 (defn- has? [m k]
   (try
