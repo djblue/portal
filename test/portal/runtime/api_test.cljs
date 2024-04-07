@@ -5,10 +5,11 @@
             [portal.runtime.browser :as browser]))
 
 (defn- headless-chrome-flags [url]
-  ["--remote-debugging-port=9222" "--headless" "--disable-gpu" url])
+  ["--headless=new" "--disable-gpu" url])
 
 (defn- open []
   (p/open {:mode :test
+           ::browser/chrome-bin ["chromium"]
            ::browser/flags headless-chrome-flags}))
 
 (defn- is= [a b]

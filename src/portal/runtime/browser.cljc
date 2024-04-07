@@ -20,7 +20,7 @@
 
 (defmulti -open (comp :launcher :options))
 
-(defn- get-chrome-bin []
+(defn- get-chrome-bin [{::keys [chrome-bin]}]
   (fs/find-bin
    (concat
     ["/Applications/Google Chrome.app/Contents/MacOS"
@@ -29,7 +29,8 @@
      "/mnt/c/Program Files/Google/Chrome/Application"
      "/mnt/c/Program Files (x86)/Google/Chrome/Application"]
     (fs/paths))
-   ["chrome" "chrome.exe" "google-chrome-stable" "chromium-browser" "chromium" "Google Chrome"]))
+   (concat chrome-bin
+           ["chrome" "chrome.exe" "google-chrome-stable" "chromium-browser" "Google Chrome"])))
 
 (defn- get-app-id-profile-osx [app-name]
   (let [info (fs/join
@@ -120,7 +121,7 @@
   (str "http://" (:host server) ":" (:port server) "?" (:session-id portal)))
 
 (defmethod -open :default [{:keys [options] :as args}]
-  (let [chrome-bin   (get-chrome-bin)
+  (let [chrome-bin   (get-chrome-bin options)
         chrome-flags (::flags options flags)]
     (if (and (some? chrome-bin)
              (:app options true))
