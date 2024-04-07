@@ -23,11 +23,12 @@
     (._compile m src file-name)
     (.-exports m)))
 
+(def ^:private ws-code (io/inline "portal/ws.js"))
+
 (def Server (try
               (.-Server (js/require "ws"))
               (catch :default _
-                (-> (io/inline "portal/ws.js")
-                    (require-string "portal/ws.js") .-Server))))
+                (.-Server (require-string ws-code "portal/ws.js")))))
 
 (def ops (merge c/ops rt/ops))
 
