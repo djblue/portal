@@ -87,8 +87,9 @@
      :cljr (or (instance? clojure.lang.IObj value)
                (var? value))
      :joyride
-     (try (with-meta value {}) true
-          (catch :default _e false))
+     (and (some? value)
+          (try (with-meta value {}) true
+               (catch :default _e false)))
 
      :org.babashka/nbb
      (and (some? value)
