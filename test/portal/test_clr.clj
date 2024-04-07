@@ -3,6 +3,7 @@
             [clojure.test :as t]
             [portal.client-test]
             [portal.client.clr :as p]
+            [portal.runtime-test]
             [portal.runtime.api-test]
             [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]
@@ -37,6 +38,7 @@
   (let [{:keys [fail error]}
         (run-tests
          'portal.client-test
+         'portal.runtime-test
          'portal.runtime.api-test
          'portal.runtime.cson-test
          'portal.runtime.edn-test
