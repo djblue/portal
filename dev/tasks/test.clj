@@ -35,6 +35,9 @@
   (install)
   (cljs* (get-cljs-deps) :portal.test-ui-runner))
 
+(defn cljs-nbb []
+  (t/nbb "-m" :portal.test-runtime-runner))
+
 (defn- setup* [version]
   (t/clj
    "-Sforce" "-Spath" "-Sdeps"
@@ -47,8 +50,8 @@
 (defn cljs []
   (cljs-runtime "1.10.773")
   (cljs-runtime "1.10.844")
-  (cljs-ui)
-  (t/nbb "-m" :portal.test-runtime-runner))
+  (cljs-nbb)
+  (cljs-ui))
 
 (defn clj
   []
