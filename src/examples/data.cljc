@@ -719,36 +719,52 @@
      :form    :hello/clj}
     {:ns      'user
      :time    #inst "2009-02-03T00:25:17-06:00"
-     :level   :warn
+     :level   :debug
      :column  1
-     :line    1
+     :line    2
      :result  :hello/cljr
      :runtime :cljr
      :form    :hello/cljr}
     {:ns      'cljs.user
      :time    #inst "2011-06-02T19:45:57-04:00"
-     :level   :error
+     :level   :warn
      :column  1
-     :line    2
+     :line    3
      :result  :hello/cljs
      :runtime :cljs
      :form    :hello/cljs}
     {:ns      'tasks
      :time    #inst "2019-08-09T14:51:42+02:00"
-     :level   :debug
+     :level   :error
      :column  1
-     :line    42
+     :line    4
      :result  :hello/bb
      :runtime :bb
      :form    :hello/bb}
     {:ns      'portal.api
      :time    #inst "2020-06-02T18:43:08-07:00"
-     :level   :trace
+     :level   :info
      :column  1
-     :line    7
+     :line    5
      :result  :hello/portal
      :runtime :portal
-     :form    :hello/portal}]))
+     :form    :hello/portal}
+    {:ns      'nbb.core
+     :time    #inst "2021-07-27T15:38:51+02:00"
+     :level   :debug
+     :column  1
+     :line    6
+     :result  :hello/nbb
+     :runtime :nbb
+     :form    :hello/nbb}
+    {:ns      'joyride.core
+     :time    #inst "2022-04-24T00:24:46+02:00"
+     :level   :error
+     :column  1
+     :line    7
+     :result  :hello/joyride
+     :runtime :joyride
+     :form    :hello/joyride}]))
 
 (defn- profile-ms [v]
   (v/for v
