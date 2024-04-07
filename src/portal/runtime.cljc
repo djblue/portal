@@ -457,7 +457,8 @@
                     #'meta            {:predicate can-meta?}
                     #'update-selected {:private true}
                     #'clear-values    {:private true}
-                    #'nav             {:private true
+                    #'nav             {:name 'clojure.datafy/nav
+                                       :private true
                                        :shortcuts [#{"enter"}]}
                     #'datafy          {:name 'clojure.datafy/datafy
                                        :shortcuts [#{"shift" "enter"}]}
