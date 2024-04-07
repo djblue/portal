@@ -4,6 +4,7 @@
                :cljr [portal.sync  :as a]
                :cljs [portal.async :as a])
             #?(:joyride [portal.runtime.datafy :refer [datafy nav]]
+               :org.babashka/nbb [portal.runtime.datafy :refer [datafy nav]]
                :default [clojure.datafy :refer [datafy nav]])
             #?(:joyride [cljs.pprint :as pprint]
                :default [clojure.pprint :as pprint])
@@ -13,6 +14,7 @@
 (def ^:private tagged-type (type (cson/->Tagged "tag" [])))
 
 #?(:joyride nil
+   :org.babashka/nbb nil
    :default
    (defmethod pprint/simple-dispatch tagged-type [value]
      (if (not= (:tag value) "remote")
@@ -87,6 +89,12 @@
      :joyride
      (try (with-meta value {}) true
           (catch :default _e false))
+
+     :org.babashka/nbb
+     (and (some? value)
+          (try (with-meta value {}) true
+               (catch :default _e false)))
+
      :cljs (implements? IMeta value)))
 
 (defn- hash+ [x]
@@ -122,11 +130,13 @@
     [:value value (hash+ value)]))
 
 #?(:joyride (def Atom (type (atom nil))))
+#?(:org.babashka/nbb (def Atom (type (atom nil))))
 
 (defn- atom? [o]
   #?(:clj  (instance? clojure.lang.Atom o)
      :cljr (instance? clojure.lang.Atom o)
      :joyride (= Atom (type o))
+     :org.babashka/nbb (= Atom (type o))
      :cljs (satisfies? cljs.core/IAtom o)))
 
 (defn- notify [session-id a]
@@ -299,7 +309,7 @@
 
 #_{:clj-kondo/ignore [:unused-private-var]}
 (defn- runtime []
-  #?(:portal :portal :bb :bb :clj :clj :joyride :joyride :cljs :cljs :cljr :cljr))
+  #?(:portal :portal :bb :bb :clj :clj :joyride :joyride :org.babashka/nbb :nbb :cljs :cljs :cljr :cljr))
 
 (defn- error->data [e]
   #?(:clj  (assoc (Throwable->map e) :runtime (runtime))
@@ -331,6 +341,7 @@
            :clj  "jvm"
            :cljr "clr"
            :joyride "joyride"
+           :org.babashka/nbb "nbb"
            :cljs (cond
                    (exists? js/window)         "web"
                    (exists? js/process)        "node"

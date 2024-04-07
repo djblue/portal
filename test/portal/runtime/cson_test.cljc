@@ -182,6 +182,7 @@
      (is (= \A (pass \A)))
      (is (= (seq "hi") (pass (seq "hi")))))
    :joyride nil
+   :org.babashka/nbb nil
    :cljs
    (deftest js-chars
      (let [a (cson/Character. 10) b (cson/Character. 10)]

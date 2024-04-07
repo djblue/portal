@@ -4,14 +4,22 @@
   #?(:clj  (:require [portal.runtime.json-buffer :as json])
      :cljr (:require [portal.runtime.json-buffer :as json])
      :joyride
-     (:require [portal.runtime.json-buffer :as json]
-               [portal.runtime.macros :as m])
-     :cljs (:require [goog.crypt.base64 :as Base64]
-                     [portal.runtime.json-buffer :as json]
-                     [portal.runtime.macros :as m]))
+     (:require
+      [portal.runtime.json-buffer :as json]
+      [portal.runtime.macros :as m])
+     :org.babashka/nbb
+     (:require
+      [portal.runtime.json-buffer :as json]
+      [portal.runtime.macros :as m])
+     :cljs
+     (:require
+      [goog.crypt.base64 :as Base64]
+      [portal.runtime.json-buffer :as json]
+      [portal.runtime.macros :as m]))
   #?(:clj  (:import [java.net URL]
                     [java.util Base64 Date UUID])
      :joyride (:import)
+     :org.babashka/nbb (:import)
      :cljs (:import [goog.math Long])))
 
 (defprotocol ToJson (-to-json [value buffer]))
@@ -54,6 +62,7 @@
          (json/push-string (str value)))))
 
 #?(:joyride (def Long js/Number))
+#?(:org.babashka/nbb (def Long js/Number))
 
 (extend-type #?(:cljr System.Int64
                 :clj  Long
@@ -132,6 +141,7 @@
            (json/push-long (long (numerator value)))
            (json/push-long (long (denominator value))))))
    :joyride nil
+   :org.babashka/nbb nil
    :cljs
    (deftype Ratio [numerator denominator]
      ToJson
@@ -149,7 +159,10 @@
 (defn ->ratio [buffer]
   (let [n (json/next-long buffer)
         d (json/next-long buffer)]
-    #?(:joyride (/ n d) :cljs (Ratio. n d) :default (/ n d))))
+    #?(:joyride (/ n d)
+       :org.babashka/nbb (/ n d)
+       :cljs (Ratio. n d)
+       :default (/ n d))))
 
 (extend-type #?(:cljr System.String
                 :clj  String
@@ -179,6 +192,9 @@
   #?(:clj  (instance? clojure.lang.IObj value)
      :cljr (instance? clojure.lang.IObj value)
      :joyride
+     (try (with-meta value {}) true
+          (catch :default _e false))
+     :org.babashka/nbb
      (try (with-meta value {}) true
           (catch :default _e false))
      :cljs (implements? IMeta value)))
@@ -214,6 +230,7 @@
    (defmethod print-method Tagged [v ^java.io.Writer w]
      (.write w ^String (tagged-str v)))
    :joyride nil
+   :org.babashka/nbb nil
    :cljs
    (extend-type Tagged
      IPrintWithWriter
@@ -227,12 +244,14 @@
 (defn base64-encode ^String [byte-array]
   #?(:clj  (.encodeToString (Base64/getEncoder) byte-array)
      :joyride (.toString (.from js/Buffer byte-array) "base64")
+     :org.babashka/nbb (.toString (.from js/Buffer byte-array) "base64")
      :cljs (Base64/encodeByteArray byte-array)
      :cljr (Convert/ToBase64String byte-array)))
 
 (defn base64-decode [string]
   #?(:clj  (.decode (Base64/getDecoder) ^String string)
      :joyride (js/Uint8Array. (.from js/Buffer string "base64"))
+     :org.babashka/nbb (js/Uint8Array. (.from js/Buffer string "base64"))
      :cljs (Base64/decodeStringToUint8Array string)
      :cljr (Convert/FromBase64String string)))
 
@@ -287,6 +306,8 @@
      {:-to-json (fn [value buffer]
                   (tag buffer "C" (int value)))})
    :joyride nil
+   :org.babashka/nbb nil
+
    :cljs
    (deftype Character [code]
      ToJson
@@ -315,6 +336,7 @@
   #?(:clj  (char (->value buffer))
      :cljr (char (->value buffer))
      :joyride nil
+     :org.babashka/nbb nil
      :cljs (Character. (->value buffer))))
 
 #?(:bb (defn inst-ms [inst] (.getTime inst)))
@@ -455,71 +477,88 @@
        (tagged-coll buffer "(" value))))
 
 (def coll-types
-  #?(:bb   [clojure.lang.Cons
-            clojure.lang.PersistentList$EmptyList
-            clojure.lang.LazySeq
-            clojure.lang.ArraySeq
-            clojure.lang.APersistentMap$KeySeq
-            clojure.lang.APersistentMap$ValSeq
-            clojure.lang.LongRange
-            clojure.lang.Repeat
-            clojure.lang.PersistentList
-            clojure.lang.PersistentQueue
-            clojure.lang.PersistentVector$ChunkedSeq
-            clojure.lang.PersistentArrayMap$Seq]
-     :clj  [clojure.lang.Cons
-            clojure.lang.PersistentList$EmptyList
-            clojure.lang.LazySeq
-            clojure.lang.ArraySeq
-            clojure.lang.APersistentMap$KeySeq
-            clojure.lang.APersistentMap$ValSeq
-            clojure.lang.LongRange
-            clojure.lang.Repeat
-            clojure.lang.PersistentList
-            clojure.lang.ChunkedCons
-            clojure.lang.PersistentQueue
-            clojure.lang.PersistentVector$ChunkedSeq
-            clojure.lang.PersistentArrayMap$Seq]
-     :cljr [clojure.lang.Cons
-            clojure.lang.PersistentList+EmptyList
-            clojure.lang.LazySeq
-            clojure.lang.ArraySeq
-            clojure.lang.APersistentMap+KeySeq
-            clojure.lang.APersistentMap+ValSeq
-            clojure.lang.LongRange
-            clojure.lang.Repeat
-            clojure.lang.PersistentList
-            clojure.lang.PersistentQueue
-            clojure.lang.PersistentVector+ChunkedSeq
-            clojure.lang.PersistentArrayMap+Seq]
-     :joyride [(type (cons 1 [])) ;; cljs.core/Cons
-               (type (list)) ;; cljs.core/EmptyList
-               (type (lazy-seq)) ;; cljs.core/LazySeq
-               (type (keys {:a 1})) ;; cljs.core/KeySeq
-               (type (vals {:a 1})) ;; cljs.core/ValSeq
-               (type (repeat 1)) ;; cljs.core/Repeat
-               (type (list 1 2 3)) ;; cljs.core/List
-               (type (range)) ;; cljs.core/IntegerRange
-               (type (range 10)) ;; cljs.core/Range
-               (type (seq {:a 1}))
-               (type (seq [1]))]
-     :cljs [cljs.core/Cons
-            cljs.core/EmptyList
-            cljs.core/LazySeq
-            cljs.core/IndexedSeq
-            cljs.core/KeySeq
-            cljs.core/ValSeq
-            cljs.core/Repeat
-            cljs.core/List
-            cljs.core/ChunkedCons
-            cljs.core/ChunkedSeq
-            cljs.core/RSeq
-            cljs.core/PersistentQueue
-            cljs.core/PersistentQueueSeq
-            cljs.core/PersistentArrayMapSeq
-            cljs.core/PersistentTreeMapSeq
-            cljs.core/NodeSeq
-            cljs.core/ArrayNodeSeq]))
+  #?(:bb
+     [clojure.lang.Cons
+      clojure.lang.PersistentList$EmptyList
+      clojure.lang.LazySeq
+      clojure.lang.ArraySeq
+      clojure.lang.APersistentMap$KeySeq
+      clojure.lang.APersistentMap$ValSeq
+      clojure.lang.LongRange
+      clojure.lang.Repeat
+      clojure.lang.PersistentList
+      clojure.lang.PersistentQueue
+      clojure.lang.PersistentVector$ChunkedSeq
+      clojure.lang.PersistentArrayMap$Seq]
+     :clj
+     [clojure.lang.Cons
+      clojure.lang.PersistentList$EmptyList
+      clojure.lang.LazySeq
+      clojure.lang.ArraySeq
+      clojure.lang.APersistentMap$KeySeq
+      clojure.lang.APersistentMap$ValSeq
+      clojure.lang.LongRange
+      clojure.lang.Repeat
+      clojure.lang.PersistentList
+      clojure.lang.ChunkedCons
+      clojure.lang.PersistentQueue
+      clojure.lang.PersistentVector$ChunkedSeq
+      clojure.lang.PersistentArrayMap$Seq]
+     :cljr
+     [clojure.lang.Cons
+      clojure.lang.PersistentList+EmptyList
+      clojure.lang.LazySeq
+      clojure.lang.ArraySeq
+      clojure.lang.APersistentMap+KeySeq
+      clojure.lang.APersistentMap+ValSeq
+      clojure.lang.LongRange
+      clojure.lang.Repeat
+      clojure.lang.PersistentList
+      clojure.lang.PersistentQueue
+      clojure.lang.PersistentVector+ChunkedSeq
+      clojure.lang.PersistentArrayMap+Seq]
+     :joyride
+     [(type (cons 1 [])) ;; cljs.core/Cons
+      (type (list)) ;; cljs.core/EmptyList
+      (type (lazy-seq)) ;; cljs.core/LazySeq
+      (type (keys {:a 1})) ;; cljs.core/KeySeq
+      (type (vals {:a 1})) ;; cljs.core/ValSeq
+      (type (repeat 1)) ;; cljs.core/Repeat
+      (type (list 1 2 3)) ;; cljs.core/List
+      (type (range)) ;; cljs.core/IntegerRange
+      (type (range 10)) ;; cljs.core/Range
+      (type (seq {:a 1}))
+      (type (seq [1]))]
+     :org.babashka/nbb
+     [(type (cons 1 [])) ;; cljs.core/Cons
+      (type (list)) ;; cljs.core/EmptyList
+      (type (lazy-seq)) ;; cljs.core/LazySeq
+      (type (keys {:a 1})) ;; cljs.core/KeySeq
+      (type (vals {:a 1})) ;; cljs.core/ValSeq
+      (type (repeat 1)) ;; cljs.core/Repeat
+      (type (list 1 2 3)) ;; cljs.core/List
+      (type (range)) ;; cljs.core/IntegerRange
+      (type (range 10)) ;; cljs.core/Range
+      (type (seq {:a 1}))
+      (type (seq [1]))]
+     :cljs
+     [cljs.core/Cons
+      cljs.core/EmptyList
+      cljs.core/LazySeq
+      cljs.core/IndexedSeq
+      cljs.core/KeySeq
+      cljs.core/ValSeq
+      cljs.core/Repeat
+      cljs.core/List
+      cljs.core/ChunkedCons
+      cljs.core/ChunkedSeq
+      cljs.core/RSeq
+      cljs.core/PersistentQueue
+      cljs.core/PersistentQueueSeq
+      cljs.core/PersistentArrayMapSeq
+      cljs.core/PersistentTreeMapSeq
+      cljs.core/NodeSeq
+      cljs.core/ArrayNodeSeq]))
 
 (doseq [coll-type coll-types]
   #?(:clj
@@ -535,7 +574,8 @@
        ToJson
        (-to-json [value buffer] (tagged-coll buffer "(" value)))))
 
-#?(:cljs
+#?(:org.babashka/nbb nil
+   :cljs
    (m/extend-type?
     ^:cljs.analyzer/no-resolve
     cljs.core/IntegerRange
@@ -543,6 +583,7 @@
     (-to-json [value buffer] (tagged-coll buffer "(" value))))
 
 #?(:joyride (def Range (type (range))))
+#?(:org.babashka/nbb (def Range (type (range))))
 
 (extend-type #?(:clj  clojure.lang.Range
                 :cljr clojure.lang.Range
@@ -551,18 +592,26 @@
   (-to-json [value buffer] (tagged-coll buffer "(" (into [] value))))
 
 (def vector-types
-  #?(:clj  [clojure.lang.PersistentVector
-            clojure.lang.APersistentVector$SubVector
-            clojure.lang.MapEntry]
-     :joyride [(type [])
-               (type (subvec [0 1] 1))
-               (type (first {:a 1}))]
-     :cljr [clojure.lang.PersistentVector
-            clojure.lang.APersistentVector+SubVector
-            clojure.lang.MapEntry]
-     :cljs [cljs.core/PersistentVector
-            cljs.core/Subvec
-            cljs.core/MapEntry]))
+  #?(:clj
+     [clojure.lang.PersistentVector
+      clojure.lang.APersistentVector$SubVector
+      clojure.lang.MapEntry]
+     :joyride
+     [(type [])
+      (type (subvec [0 1] 1))
+      (type (first {:a 1}))]
+     :org.babashka/nbb
+     [(type [])
+      (type (subvec [0 1] 1))
+      (type (first {:a 1}))]
+     :cljr
+     [clojure.lang.PersistentVector
+      clojure.lang.APersistentVector+SubVector
+      clojure.lang.MapEntry]
+     :cljs
+     [cljs.core/PersistentVector
+      cljs.core/Subvec
+      cljs.core/MapEntry]))
 
 (doseq [vector-type vector-types]
   #?(:clj
@@ -588,6 +637,7 @@
          (conj! out (->value buffer)))))))
 
 #?(:joyride (def PersistentHashSet (type #{1})))
+#?(:org.babashka/nbb (def PersistentHashSet (type #{1})))
 
 (extend-type #?(:clj  clojure.lang.PersistentHashSet
                 :cljr clojure.lang.PersistentHashSet
@@ -596,6 +646,7 @@
   (-to-json [value buffer] (tagged-coll buffer "#" value)))
 
 #?(:joyride (def PersistentTreeSet (type (sorted-set))))
+#?(:org.babashka/nbb (def PersistentTreeSet (type (sorted-set))))
 
 (extend-type #?(:clj  clojure.lang.PersistentTreeSet
                 :cljr clojure.lang.PersistentTreeSet
@@ -628,6 +679,7 @@
     value)))
 
 #?(:joyride (def PersistentHashMap (type (hash-map))))
+#?(:org.babashka/nbb (def PersistentHashMap (type (hash-map))))
 
 (extend-type #?(:clj  clojure.lang.PersistentHashMap
                 :cljr clojure.lang.PersistentHashMap
@@ -636,6 +688,7 @@
   (-to-json [value buffer] (tagged-map buffer value)))
 
 #?(:joyride (def PersistentTreeMap (type (sorted-map))))
+#?(:org.babashka/nbb (def PersistentTreeMap (type (sorted-map))))
 
 (extend-type #?(:clj  clojure.lang.PersistentTreeMap
                 :cljr clojure.lang.PersistentTreeMap
@@ -649,6 +702,7 @@
      (-to-json [value buffer] (tagged-map buffer value))))
 
 #?(:joyride (def PersistentArrayMap (type {})))
+#?(:org.babashka/nbb (def PersistentArrayMap (type {})))
 
 (extend-type #?(:clj  clojure.lang.PersistentArrayMap
                 :cljr clojure.lang.PersistentArrayMap
@@ -685,6 +739,7 @@
 #?(:bb (def clojure.lang.TaggedLiteral (type (tagged-literal 'a :a))))
 
 #?(:joyride (def TaggedLiteral (type (tagged-literal 'f :v))))
+#?(:org.babashka/nbb (def TaggedLiteral (type (tagged-literal 'f :v))))
 
 (extend-type #?(:clj  clojure.lang.TaggedLiteral
                 :cljr clojure.lang.TaggedLiteral

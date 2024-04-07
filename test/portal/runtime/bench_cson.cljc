@@ -21,12 +21,15 @@
 
 (defn- pr-meta [v] (binding [*print-meta* true] (pr-str v)))
 
+(def ^:private formats
+  #?(:org.babashka/nbb [:edn :cson] :default [:transit :edn :cson]))
+
 (defn run-benchmark []
   (doall
-   (let [n 100 bench-data (assoc bench-data :all bench-data)]
+   (let [n 10 bench-data (assoc bench-data :all bench-data)]
      (concat
       (for [[data value] bench-data
-            encoding [:transit :edn :cson]]
+            encoding formats]
         (merge
          (case encoding
            :transit (let [value (transit/write value)]
@@ -40,7 +43,7 @@
           :data data
           :benchmark (pr-str (keyword (name encoding) "read"))}))
       (for [[data value] bench-data
-            encoding [:transit :edn :cson]]
+            encoding formats]
         (merge
          (case encoding
            :transit (b/run (transit/write value) n)
@@ -102,12 +105,18 @@
     (sort-by :cson/read)
     (into []))
    {:columns
-    #?(:cljr    [:label
-                 :edn/write :cson/write
-                 :edn/read  :cson/read]
-       :default [:label
-                 :edn/write :transit/write :cson/write
-                 :edn/read  :transit/read  :cson/read])}))
+    #?(:cljr
+       [:label
+        :edn/write :cson/write
+        :edn/read  :cson/read]
+       :org.babashka/nbb
+       [:label
+        :edn/write :cson/write
+        :edn/read  :cson/read]
+       :default
+       [:label
+        :edn/write :transit/write :cson/write
+        :edn/read  :transit/read  :cson/read])}))
 
 (defn combined-chart [values]
   (v/vega-lite

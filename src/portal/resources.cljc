@@ -1,11 +1,14 @@
 (ns ^:no-doc portal.resources
   #?(:cljs (:require-macros portal.resources))
   #?(:clj (:require [clojure.java.io :as io]))
-  #?(:joyride (:require ["vscode" :as vscode]
+  #?(:org.babashka/nbb (:require ["fs" :as fs]
+                                 ["path" :as path])
+     :joyride (:require ["vscode" :as vscode]
                         ["ext://djblue.portal$resources" :as resources])))
 
 (defn resource [_resource-name]
-  #?(:joyride
+  #?(:org.babashka/nbb (path/join "resources" _resource-name)
+     :joyride
      (let [vscode  (js/require "vscode")
            path    (js/require "path")
            ^js uri (-> vscode .-workspace .-workspaceFolders (aget 0) .-uri)
@@ -29,4 +32,6 @@
        (catch Exception e
          (println e))))
    :joyride (defn inline [resourece-name] (resources/inline resourece-name))
+   :org.babashka/nbb (defn inline [resource-name]
+                       (fs/readFileSync (resource resource-name)))
    :cljs    (defn inline [resourece-name] (get @resources resourece-name)))

@@ -4,6 +4,7 @@
 
 (deftest un-hashable-values
   (let [value   #?(:bb   :skip
+                   :org.babashka/nbb :skip
                    :clj  (reify Object
                            (hashCode [_] (throw (Exception. "test"))))
                    :cljs (reify IHash

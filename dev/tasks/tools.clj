@@ -73,6 +73,7 @@
   (.getCanonicalPath (io/file (str bin (when windows? ".bat")))))
 
 (def bb     (partial #'sh :bb))
+(def nbb    (partial #'sh :npx :nbb))
 (def clj    (partial #'sh :clojure))
 (def cljr   (partial #'sh :Clojure.Main))
 (def git    (partial #'sh :git))
