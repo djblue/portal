@@ -1,4 +1,4 @@
-(ns portal.ui.react
+(ns ^:no-doc portal.ui.react
   #?(:cljs (:require ["react" :as react]))
   #?(:cljs (:require-macros portal.ui.react)))
 

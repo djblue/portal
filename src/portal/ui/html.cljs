@@ -1,4 +1,4 @@
-(ns portal.ui.html
+(ns ^:no-doc portal.ui.html
   (:require [clojure.string :as str]
             [portal.ui.inspector :as ins]))
 

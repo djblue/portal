@@ -1,4 +1,4 @@
-(ns portal.ui.parsers)
+(ns ^:no-doc portal.ui.parsers)
 
 (defmulti parse-string (fn [format _] format))
 
