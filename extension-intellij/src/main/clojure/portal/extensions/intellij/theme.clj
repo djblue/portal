@@ -66,15 +66,19 @@
   ([key]
    (get-color (.getGlobalScheme (EditorColorsManager/getInstance)) key))
   ([^EditorColorsScheme theme key]
-   (some->
-    (if-let [attrs (language-colors key)]
-      (cond
-        (instance? ColorKey attrs)
-        (.getColor theme ^ColorKey attrs)
-        (instance? TextAttributesKey attrs)
-        (some-> theme (.getAttributes ^TextAttributesKey attrs) .getForegroundColor))
-      (.getColor theme (ColorKey/createColorKey (name key))))
-    format-color)))
+   (let [defaults (.getScheme (EditorColorsManager/getInstance) EditorColorsManager/DEFAULT_SCHEME_NAME)]
+     (some->
+       (if-let [attrs (language-colors key)]
+         (cond
+           (instance? ColorKey attrs)
+           (.getColor theme ^ColorKey attrs)
+
+           (instance? TextAttributesKey attrs)
+           (or
+             (some-> theme (.getAttributes ^TextAttributesKey attrs) .getForegroundColor)
+             (some-> defaults (.getAttributes ^TextAttributesKey attrs) .getForegroundColor)))
+         (.getColor theme (ColorKey/createColorKey (name key))))
+       format-color))))
 
 (defn- get-font
   ([]
