@@ -58,15 +58,22 @@
 
 (pp/set-pprint-dispatch pprint-dispatch)
 
+(defn- code? [value]
+  (and (or (seq? value) (list? value))
+       (symbol (first value))))
+
 (defn pprint-data [value]
   (let [options (:portal.viewer/pprint (meta value))
         search-text (ins/use-search-text)]
     (binding [*print-meta*   (:print-meta   options (coll? value))
               *print-length* (:print-length options 25)
-              *print-level*  (:print-level  options 5)
+              *print-level*  (:print-level  options 10)
               *elide-binary* true]
       [code/highlight-clj
-       (str/trim (with-out-str (pp/pprint (f/filter-value value search-text))))])))
+       (str/trim
+        (with-out-str
+          (pp/with-pprint-dispatch (if (code? value) pp/code-dispatch pprint-dispatch)
+            (pp/pprint (f/filter-value value search-text)))))])))
 
 (def viewer
   {:predicate (constantly true)
