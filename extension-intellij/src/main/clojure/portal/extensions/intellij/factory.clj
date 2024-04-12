@@ -1,14 +1,16 @@
 (ns portal.extensions.intellij.factory
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
+            [clojure.string :as str]
             [org.httpkit.server :as http]
             [portal.extensions.intellij.file :as file]
             [portal.extensions.intellij.theme :as theme])
   (:import
+   (com.intellij.openapi.diagnostic Logger)
    (com.intellij.openapi.project Project)
    (com.intellij.openapi.util Disposer)
    (com.intellij.openapi.wm ToolWindow)
-   (com.intellij.ui.jcef JBCefBrowser)
+   (com.intellij.ui.jcef JBCefBrowser JBCefJSQuery)
    (java.io PushbackReader)
    (javax.swing JComponent)
    (org.cef.browser CefBrowser)
@@ -22,6 +24,13 @@
                 com.intellij.openapi.wm.ToolWindowFactory
                 com.intellij.openapi.project.DumbAware]
    :name portal.extensions.intellij.Factory))
+
+(deftype PortalLogger [])
+
+(def LOG (Logger/getInstance PortalLogger))
+
+(defn info [message]
+  (.info ^Logger LOG ^String message))
 
 ; instances are indexed per project, each instance will contain the keys
 ; :browser and :server
@@ -42,18 +51,24 @@
    (doseq [instance (vals @instances)]
      (patch-options (.getCefBrowser ^JBCefBrowser (:browser instance)))))
   ([^CefBrowser browser]
-   (.executeJavaScript browser (str "portal.ui.options.patch(" (get-options) ")") "" 0)))
+   (let [js (str "portal.ui.options.patch(" (get-options) ")")]
+     (info (str "Running " js))
+     (.executeJavaScript browser js "" 0))))
 
 (defn -uiSettingsChanged  [_this _] (patch-options))
 (defn -globalSchemeChange [_this _] (patch-options))
 
 (defn handler [request project]
+  (info (str "Request: " (:uri request)))
   (let [body (edn/read (PushbackReader. (io/reader (:body request))))
         browser (get-in @instances [project :browser])]
     (case (:uri request)
       "/open"
-      (do (.loadURL ^JBCefBrowser browser (format-url body))
-          {:status 200})
+      (do
+        (let [url (format-url body)]
+          (info (str "Opening " url))
+          (.loadURL ^JBCefBrowser browser url)
+          {:status 200}))
       "/open-file" (do (file/open project body) {:status 200})
       {:status 404})))
 
@@ -65,6 +80,7 @@
     (.deleteOnExit file)))
 
 (defn start [^Project project]
+  (info "Starting Portal plugin")
   (swap! instances update project
          (fn [m]
            (cond-> m
@@ -75,18 +91,53 @@
    {:host "localhost"
     :port (http/server-port (get-in @instances [project :server]))}))
 
-(defn- init-browser [^JBCefBrowser browser]
+(defn ^java.util.function.Function as-function [f]
+  (reify java.util.function.Function
+    (apply [this arg] (f arg))))
+
+(defn- setup-java-error-handler [^JBCefBrowser browser]
+  (doto (JBCefJSQuery/create browser)
+    (.addHandler (as-function #(throw (ex-info (str "JavaScript error: " %)
+                                               {}))))))
+
+(defn- inject-js-error-handler [^JBCefBrowser browser ^JBCefJSQuery js-query]
+  (let [js-fn (str "window.portal_reportError = function(error) { "
+                   (.inject js-query "error")
+                   "};"
+                   "window.addEventListener('error', function(e) {"
+                   "  window.portal_reportError(e.error.stack);"
+                   "  return false;"
+                   "}, true);"
+                   "window.addEventListener('unhandledrejection', function(e) {"
+                   "  window.portal_reportError(e.reason.stack);"
+                   "  return false;"
+                   "});")]
+    (.executeJavaScript (.getCefBrowser browser) js-fn "" 0)))
+
+(defn- setup-load-handler [^JBCefBrowser browser js-query]
   (.addLoadHandler
-   (.getJBCefClient browser)
-   (reify CefLoadHandler
-     (onLoadingStateChange [_this _browser _isLoading _canGoBack _canGoForward])
-     (onLoadStart [_this _browser _frame _transitionType])
-     (onLoadEnd [_this browser _frame _httpStatusCode]
-       (patch-options browser))
-     (onLoadError [_this _browser _frame _errorCode _errorText _failedUrl]))
-   (.getCefBrowser browser)))
+    (.getJBCefClient browser)
+    (reify CefLoadHandler
+      (onLoadingStateChange [_this _browser _isLoading _canGoBack _canGoForward])
+      (onLoadStart [_this _browser _frame _transitionType]
+        (info "Starting loading")
+        (inject-js-error-handler browser js-query))
+      (onLoadEnd [_this browser _frame _httpStatusCode]
+        (info "Patching options")
+        (patch-options browser))
+      (onLoadError [_this _browser _frame errorCode errorText failedUrl]
+        (throw (ex-info errorText {:errorCode errorCode
+                                   :errorText errorText
+                                   :failedUrl failedUrl}))))
+    (.getCefBrowser browser)))
+
+(defn- init-browser [^JBCefBrowser browser]
+  (info "Initializing browser")
+  (let [js-query (setup-java-error-handler browser)]
+    (setup-load-handler browser js-query)))
 
 (defn- get-window ^JComponent [^Project project]
+  (info "Getting window")
   (start project)
   (let [browser (JBCefBrowser.)]
     (init-browser browser)
@@ -104,7 +155,9 @@
 
 (defn -init [_this ^ToolWindow _window]
   (WithLoader/bind)
-  (when-let [start-server (get-nrepl)] (start-server :port 7888)))
+  (when-let [start-server (get-nrepl)]
+    (info "Starting REPL")
+    (start-server :port 7888)))
 
 (defn -isApplicable [_this ^Project _project] true)
 (defn -isApplicableAsync [_this ^Project _project _] true)
