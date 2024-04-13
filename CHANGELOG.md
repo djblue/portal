@@ -1,3 +1,9 @@
+## 0.55.1 - 2024-04-13
+
+- Add nbb docs 3c7b86c
+- Update `portal.console` for nbb 89a4fa1
+- Fix nbb resource loading edfe6e5
+
 ## 0.55.0 - 2024-04-13
 
 - Ensure that theme values are non-nil 282fe27
