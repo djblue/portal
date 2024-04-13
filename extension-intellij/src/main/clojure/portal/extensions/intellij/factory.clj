@@ -116,20 +116,20 @@
 
 (defn- setup-load-handler [^JBCefBrowser browser js-query]
   (.addLoadHandler
-    (.getJBCefClient browser)
-    (reify CefLoadHandler
-      (onLoadingStateChange [_this _browser _isLoading _canGoBack _canGoForward])
-      (onLoadStart [_this _browser _frame _transitionType]
-        (info "Starting loading")
-        (inject-js-error-handler browser js-query))
-      (onLoadEnd [_this browser _frame _httpStatusCode]
-        (info "Patching options")
-        (patch-options browser))
-      (onLoadError [_this _browser _frame errorCode errorText failedUrl]
-        (throw (ex-info errorText {:errorCode errorCode
-                                   :errorText errorText
-                                   :failedUrl failedUrl}))))
-    (.getCefBrowser browser)))
+   (.getJBCefClient browser)
+   (reify CefLoadHandler
+     (onLoadingStateChange [_this _browser _isLoading _canGoBack _canGoForward])
+     (onLoadStart [_this _browser _frame _transitionType]
+       (info "Starting loading")
+       (inject-js-error-handler browser js-query))
+     (onLoadEnd [_this browser _frame _httpStatusCode]
+       (info "Patching options")
+       (patch-options browser))
+     (onLoadError [_this _browser _frame errorCode errorText failedUrl]
+       (throw (ex-info errorText {:errorCode errorCode
+                                  :errorText errorText
+                                  :failedUrl failedUrl}))))
+   (.getCefBrowser browser)))
 
 (defn- init-browser [^JBCefBrowser browser]
   (info "Initializing browser")
