@@ -1,3 +1,14 @@
+## 0.55.0 - 2024-04-13
+
+- Ensure that theme values are non-nil 282fe27
+  - Thanks @rads!
+- Use code-dispatch for lists in pprint viewer 7023348
+- Initial nbb support (#219) f22bac3
+- Fully qualify nav in runtime registry 176ee35
+  - Fixes nav for Joyride.
+- Add type/metadata disambiguation for value cache 94171f4
+  - Thanks @mrkam2 for the bug report! #218
+
 ## 0.54.2 - 2024-04-04
 
 - Updates IJ plugin for 2024.1 (#217) b50db57
