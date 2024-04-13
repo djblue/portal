@@ -66,24 +66,3 @@ Then at the REPL, do:
 (add-tap #'submit)
 (tap> :hello-from-planck)
 ```
-
-### nbb
-
-For nbb, currently it can only consume file system based libraries so Portal
-needs to be fetched from source via git.
-
-To start a nbb with Portal REPL, do:
-
-```bash
-clj -Sdeps '{:deps {djblue/portal {:git/url "https://github.com/djblue/portal" :git/sha "1009dd87a8975eca0d3724cd8bf957ac94712b6a"}}}' -Spath > .classpath
-nbb --classpath `cat .classpath`
-```
-
-Then at the REPL, do:
-
-```clojure
-(require '[portal.client.node :as p])
-(def submit (partial p/submit {:port 5678}))
-(add-tap #'submit)
-(tap> :hello-from-nbb)
-```
