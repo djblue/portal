@@ -1,0 +1,2 @@
+{:paths ["dev"]
+ :deps {djblue/portal {:local/root "../../"}}}

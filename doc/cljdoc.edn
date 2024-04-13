@@ -11,6 +11,7 @@
    ["Themes" {:file "doc/ui/themes.md"}]]
   ["Remote API" {:file "doc/remote-api.md"}]
   ["Guides"
+   ["Node Babashka" {:file "examples/nbb/README.md"}]
    ["Exceptions" {:file "doc/guides/exceptions.md"}]
    ["Logging"
     ["Portal Console" {:file "doc/guides/portal-console.md"}]

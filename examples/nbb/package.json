@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "nbb -m start"
+  },
+  "dependencies": {
+    "nbb": "^1.2.187"
+  }
+}
