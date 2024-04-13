@@ -1,7 +1,6 @@
 (ns portal.extensions.intellij.factory
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as str]
             [org.httpkit.server :as http]
             [portal.extensions.intellij.file :as file]
             [portal.extensions.intellij.theme :as theme])
@@ -12,6 +11,7 @@
    (com.intellij.openapi.wm ToolWindow)
    (com.intellij.ui.jcef JBCefBrowser JBCefJSQuery)
    (java.io PushbackReader)
+   (java.util.function Function)
    (javax.swing JComponent)
    (org.cef.browser CefBrowser)
    (org.cef.handler CefLoadHandler)
@@ -64,11 +64,10 @@
         browser (get-in @instances [project :browser])]
     (case (:uri request)
       "/open"
-      (do
-        (let [url (format-url body)]
-          (info (str "Opening " url))
-          (.loadURL ^JBCefBrowser browser url)
-          {:status 200}))
+      (let [url (format-url body)]
+        (info (str "Opening " url))
+        (.loadURL ^JBCefBrowser browser url)
+        {:status 200})
       "/open-file" (do (file/open project body) {:status 200})
       {:status 404})))
 
@@ -91,9 +90,9 @@
    {:host "localhost"
     :port (http/server-port (get-in @instances [project :server]))}))
 
-(defn ^java.util.function.Function as-function [f]
-  (reify java.util.function.Function
-    (apply [this arg] (f arg))))
+(defn as-function ^Function [f]
+  (reify Function
+    (apply [_this arg] (f arg))))
 
 (defn- setup-java-error-handler [^JBCefBrowser browser]
   (doto (JBCefJSQuery/create browser)
