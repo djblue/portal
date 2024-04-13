@@ -60,7 +60,7 @@
 
 (defn- code? [value]
   (and (or (seq? value) (list? value))
-       (symbol (first value))))
+       (symbol? (first value))))
 
 (defn pprint-data [value]
   (let [options (:portal.viewer/pprint (meta value))
