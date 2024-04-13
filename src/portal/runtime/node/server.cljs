@@ -25,10 +25,7 @@
 
 (def ^:private ws-code (io/inline "portal/ws.js"))
 
-(def Server (try
-              (.-Server (js/require "ws"))
-              (catch :default _
-                (.-Server (require-string ws-code "portal/ws.js")))))
+(def Server (.-Server (require-string ws-code "portal/ws.js")))
 
 (def ops (merge c/ops rt/ops))
 
