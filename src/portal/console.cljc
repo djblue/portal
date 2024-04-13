@@ -14,7 +14,13 @@
       [:throw ex])))
 
 (defn ^:no-doc runtime []
-  #?(:portal :portal :joyride :joyride :bb :bb :clj :clj :cljs :cljs :cljr :cljr))
+  #?(:portal :portal
+     :org.babashka/nbb :nbb
+     :joyride :joyride
+     :bb :bb
+     :clj :clj
+     :cljs :cljs
+     :cljr :cljr))
 
 #?(:clj
    (defn ^:no-doc get-file [env file]
@@ -37,6 +43,7 @@
            :file     ~#?(:clj (get-file env file)
                          :portal *file*
                          :joyride '*file*
+                         :org.babashka/nbb *file*
                          :cljs nil
                          :cljr *file*)
            :line     ~line
