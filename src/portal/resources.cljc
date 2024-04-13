@@ -6,8 +6,14 @@
      :joyride (:require ["vscode" :as vscode]
                         ["ext://djblue.portal$resources" :as resources])))
 
+#?(:org.babashka/nbb (def file *file*))
+
 (defn resource [_resource-name]
-  #?(:org.babashka/nbb (path/join "resources" _resource-name)
+  #?(:org.babashka/nbb (some
+                        (fn [file]
+                          (when (fs/existsSync file) file))
+                        [(path/join file "../../" _resource-name)
+                         (path/join file "../../../resources" _resource-name)])
      :joyride
      (let [vscode  (js/require "vscode")
            path    (js/require "path")
