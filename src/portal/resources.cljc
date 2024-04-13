@@ -39,5 +39,5 @@
          (println e))))
    :joyride (defn inline [resourece-name] (resources/inline resourece-name))
    :org.babashka/nbb (defn inline [resource-name]
-                       (fs/readFileSync (resource resource-name)))
+                       (fs/readFileSync (resource resource-name) "utf8"))
    :cljs    (defn inline [resourece-name] (get @resources resourece-name)))
