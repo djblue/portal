@@ -107,7 +107,6 @@
               :background  :none
               :width       "100%"
               :white-space :pre-wrap
-              :line-height "1rem"
               :color       (::c/text theme)
               :font-size   (:font-size theme)
               :font-family (:font-family theme)}}
