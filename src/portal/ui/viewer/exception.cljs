@@ -109,7 +109,7 @@
         :border-bottom-left-radius (when (and can-expand? expanded?) (:border-radius theme))}}
       [d/div
        {:style {:flex "1" :display :flex :flex-direction :column}}
-       (map-indexed
+       (keep-indexed
         (fn [idx {:keys [clj? sym method index] :as source}]
           (when (f/match method search-text)
             ^{:key index}

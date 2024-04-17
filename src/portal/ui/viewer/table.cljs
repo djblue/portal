@@ -128,7 +128,7 @@
     [table
      [columns cols]
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [row-index row]
          (when (or (f/match row search-text)
                    (f/match (get values row) search-text))
@@ -160,7 +160,7 @@
     [table
      [columns cols]
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [row-index row]
          (when (f/match row search-text)
            ^{:key row-index}
@@ -188,7 +188,7 @@
      (when-let [cols (get-in (meta values) [:portal.viewer/table :columns])]
        [columns cols])
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [row-index row]
          (when (f/match row search-text)
            ^{:key row-index}
@@ -214,7 +214,7 @@
         search-text (ins/use-search-text)]
     [table
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [row-index row]
          (when (or (f/match row search-text)
                    (f/match (get values row) search-text))
@@ -241,7 +241,7 @@
     [table
      [columns cols]
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [row-index {:keys [row value index]}]
          (when (or (f/match row search-text)
                    (f/match value search-text))

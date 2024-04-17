@@ -122,7 +122,7 @@
         search-text (ins/use-search-text)]
     [ins/with-collection value
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [idx [k v]]
          (when (or (f/match k search-text)
                    (f/match v search-text))
@@ -171,7 +171,7 @@
         search-text (ins/use-search-text)]
     [ins/with-collection value
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [idx v]
          (when (f/match v search-text)
            (if-not (ins/coll? v)

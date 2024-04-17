@@ -203,7 +203,7 @@
        [ins/with-collection
         value
         (reverse
-         (map-indexed
+         (keep-indexed
           (fn [index value]
             (when (f/match value search-text)
               (with-meta

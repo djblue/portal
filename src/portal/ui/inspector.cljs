@@ -620,7 +620,7 @@
         search-text (use-search-text)]
     [container-map
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [index [k v]]
          (when (or (f/match k search-text)
                    (f/match v search-text))
@@ -692,7 +692,7 @@
     [container-coll
      values
      [l/lazy-seq
-      (map-indexed
+      (keep-indexed
        (fn [index value]
          (when (f/match value search-text)
            (let [key (str (if (vector? values)
