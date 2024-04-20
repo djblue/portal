@@ -54,7 +54,8 @@
                  (::c/border theme))
         can-expand? (> (count trace) 1)
         wrapper-options (ins/use-wrapper-options context)
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [:<>
      [d/div
       {:on-click (:on-click wrapper-options)
@@ -111,7 +112,7 @@
        {:style {:flex "1" :display :flex :flex-direction :column}}
        (keep-indexed
         (fn [idx {:keys [clj? sym method index] :as source}]
-          (when (f/match method search-text)
+          (when (matcher method)
             ^{:key index}
             [ins/with-key
              index
@@ -166,7 +167,8 @@
 (defn- inspect-stack-trace [trace]
   (let [theme   (theme/use-theme)
         options (ins/use-options)
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [d/div
      {:style
       {:border-top-left-radius (:border-radius theme)
@@ -190,7 +192,7 @@
             analyze-trace-item)
            (filter
             (fn [line]
-              (when (f/match line search-text)
+              (when (matcher line)
                 (let [{:keys [clj? ns]} (meta line)]
                   (if (:expanded? options) true
                       (and clj? (not (or

@@ -175,7 +175,8 @@
   (let [theme (theme/use-theme)
         opts  (ins/use-options)
         bg    (ins/get-background)
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [d/div
      {:style
       {:background    bg}}
@@ -205,7 +206,7 @@
         (reverse
          (keep-indexed
           (fn [index value]
-            (when (f/match value search-text)
+            (when (matcher value)
               (with-meta
                 (if (#{:tap :ret} (:tag value))
                   [ins/with-key

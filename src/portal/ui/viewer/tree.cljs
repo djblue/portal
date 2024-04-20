@@ -119,13 +119,13 @@
 
 (defn- inspect-tree-map [value]
   (let [theme (theme/use-theme)
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [ins/with-collection value
      [l/lazy-seq
       (keep-indexed
        (fn [idx [k v]]
-         (when (or (f/match k search-text)
-                   (f/match v search-text))
+         (when (or (matcher k) (matcher v))
            (if-not (ins/coll? v)
              ^{:key idx}
              [s/div
@@ -168,12 +168,13 @@
 
 (defn- inspect-tree-coll [value]
   (let [theme (theme/use-theme)
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [ins/with-collection value
      [l/lazy-seq
       (keep-indexed
        (fn [idx v]
-         (when (f/match v search-text)
+         (when (matcher v)
            (if-not (ins/coll? v)
              ^{:key idx}
              [s/div

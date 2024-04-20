@@ -617,13 +617,13 @@
 
 (defn inspect-map-k-v [values]
   (let [options (use-options)
-        search-text (use-search-text)]
+        search-text (use-search-text)
+        matcher     (f/match search-text)]
     [container-map
      [l/lazy-seq
       (keep-indexed
        (fn [index [k v]]
-         (when (or (f/match k search-text)
-                   (f/match v search-text))
+         (when (or (matcher k) (matcher v))
            ^{:key (str (->id k) (->id v))}
            [:<>
             [select/with-position
@@ -688,13 +688,14 @@
 
 (defn- inspect-coll [values]
   (let [n (count values)
-        search-text (use-search-text)]
+        search-text (use-search-text)
+        matcher     (f/match search-text)]
     [container-coll
      values
      [l/lazy-seq
       (keep-indexed
        (fn [index value]
-         (when (f/match value search-text)
+         (when (matcher value)
            (let [key (str (if (vector? values)
                             index
                             (- n index 1))

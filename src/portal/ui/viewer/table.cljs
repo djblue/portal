@@ -124,14 +124,15 @@
   (let [rows (seq (ins/try-sort (keys values)))
         cols (or (get-in (meta values) [:portal.viewer/table :columns])
                  (seq (ins/try-sort (into #{} (mapcat keys (vals values))))))
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [table
      [columns cols]
      [l/lazy-seq
       (keep-indexed
        (fn [row-index row]
-         (when (or (f/match row search-text)
-                   (f/match (get values row) search-text))
+         (when (or (matcher row)
+                   (matcher (get values row)))
            [:<>
             {:key (hash row)}
             [ins/with-key row
@@ -156,13 +157,14 @@
   (let [rows (seq values)
         cols (or (get-in (meta values) [:portal.viewer/table :columns])
                  (seq (ins/try-sort (into #{} (mapcat keys values)))))
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [table
      [columns cols]
      [l/lazy-seq
       (keep-indexed
        (fn [row-index row]
-         (when (f/match row search-text)
+         (when (matcher row)
            ^{:key row-index}
            [:<>
             [ins/with-key row-index
@@ -183,14 +185,15 @@
        rows)]]))
 
 (defn- inspect-vector-table [values]
-  (let [search-text (ins/use-search-text)]
+  (let [search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [table
      (when-let [cols (get-in (meta values) [:portal.viewer/table :columns])]
        [columns cols])
      [l/lazy-seq
       (keep-indexed
        (fn [row-index row]
-         (when (f/match row search-text)
+         (when (matcher row)
            ^{:key row-index}
            [:<>
             [ins/with-key row-index
@@ -211,13 +214,14 @@
 
 (defn- inspect-map [values]
   (let [rows (seq (ins/try-sort (keys values)))
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [table
      [l/lazy-seq
       (keep-indexed
        (fn [row-index row]
-         (when (or (f/match row search-text)
-                   (f/match (get values row) search-text))
+         (when (or (matcher row)
+                   (matcher (get values row)))
            [:<>
             {:key row-index}
             [ins/with-key row
@@ -237,14 +241,14 @@
   (let [rows (seq (ins/try-sort (keys values)))
         cols (or (get-in (meta values) [:portal.viewer/table :columns])
                  (seq (ins/try-sort (into #{} (comp (mapcat second) (mapcat keys)) values))))
-        search-text (ins/use-search-text)]
+        search-text (ins/use-search-text)
+        matcher     (f/match search-text)]
     [table
      [columns cols]
      [l/lazy-seq
       (keep-indexed
        (fn [row-index {:keys [row value index]}]
-         (when (or (f/match row search-text)
-                   (f/match value search-text))
+         (when (or (matcher row) (matcher value))
            [:<>
             {:key row-index}
             (when (zero? index)

@@ -38,10 +38,18 @@
           tokens  (str/split text #"\s+")]
       (re-pattern (str "(?i)" (str/join "|" tokens))))))
 
-(defn match [value search-text]
-  (if-let [pattern (->pattern search-text)]
-    (match* value pattern)
-    true))
+(defn- ->true [_] true)
+
+(defn match
+  ([search-text]
+   (if-let [pattern (->pattern search-text)]
+     (fn matcher [value]
+       (match* value pattern))
+     ->true))
+  ([value search-text]
+   (if-let [pattern (->pattern search-text)]
+     (match* value pattern)
+     true)))
 
 (defn filter-value [value text]
   (if-let [pattern (->pattern text)]
