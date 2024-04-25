@@ -582,6 +582,9 @@
     (try (sort-by first values)
          (catch :default _e values))))
 
+(defn use-sort-map [values]
+  (react/useMemo #(try-sort-map values) #js [values]))
+
 (defn- container-map [child]
   (let [theme (theme/use-theme)]
     [s/div
@@ -615,10 +618,10 @@
         location    (state/get-location context)]
     @(r/cursor state [:search-text location])))
 
-(defn inspect-map-k-v [values]
-  (let [options (use-options)
-        search-text (use-search-text)
-        matcher     (f/match search-text)]
+(defn- inspect-map-k-v* [map-ns search-text values]
+  (let [matcher       (f/match search-text)
+        sorted-values (use-sort-map values)]
+    ^{:key search-text}
     [container-map
      [l/lazy-seq
       (keep-indexed
@@ -632,14 +635,18 @@
               {:key? true}
               [container-map-k
                [inspector
-                {:map-ns (:map-ns options)}
+                {:map-ns map-ns}
                 k]]]]
             [select/with-position
              {:row index :column 1}
              [with-key k
               [container-map-v
                [inspector (get-props values k) v]]]]]))
-       (try-sort-map values))]]))
+       sorted-values)]]))
+
+(defn inspect-map-k-v [values]
+  (let [map-ns (:map-ns (use-options))]
+    [inspect-map-k-v* map-ns (use-search-text) values]))
 
 (defn- get-namespaces [value]
   (when (map? value)
@@ -686,10 +693,10 @@
          :border [1 :solid (::c/border theme)]}}
        child]]]))
 
-(defn- inspect-coll [values]
+(defn- inspect-coll* [search-text values]
   (let [n (count values)
-        search-text (use-search-text)
         matcher     (f/match search-text)]
+    ^{:key search-text}
     [container-coll
      values
      [l/lazy-seq
@@ -705,6 +712,10 @@
               {:row index :column 0}
               [with-key index [inspector value]]])))
        values)]]))
+
+(defn- inspect-coll [values]
+  (let [search-text (use-search-text)]
+    [inspect-coll* search-text values]))
 
 (defn- inspect-js-array [value]
   (let [v (into [] value)]
