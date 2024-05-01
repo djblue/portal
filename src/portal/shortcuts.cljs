@@ -61,7 +61,7 @@
 
 (defn input? [log]
   (when-let [e (first log)]
-    (#{"BUTTON" "INPUT" "SELECT"}
+    (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"}
      (.. e -target -tagName))))
 
 (defn- keydown [e] (swap! log #(take 5 (conj % e))) nil)
