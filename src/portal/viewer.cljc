@@ -34,6 +34,11 @@
 (defn for [value opts]
   (vary-meta value update ::for merge opts))
 
+(defn inspector
+  "Default data viewer."
+  ([value] (default value ::inspector))
+  ([value opts] (default value ::inspector opts)))
+
 (defn ex
   "Viewer for datafied exceptions."
   ([value] (default value ::ex))

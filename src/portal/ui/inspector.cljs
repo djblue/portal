@@ -1154,7 +1154,9 @@
      #js [(hash location) (some? expanded?)]
      (when (and (nil? expanded?)
                 (default-expand? state theme context value))
-       (state/dispatch! state assoc-in [:expanded? location] 1)))
+       (state/dispatch!
+        state assoc-in [:expanded? location]
+        (get-in (meta value) [:portal.viewer/inspector :expanded] 1))))
     (use-effect
      #js [selected (.-current ref)]
      (when (and selected
