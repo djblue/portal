@@ -1,6 +1,6 @@
 (ns ^:no-doc portal.runtime.index)
 
-(defn html [{:keys [name version host session-id code-url platform mode]
+(defn html [{:keys [name version host port session-id code-url platform mode]
              :or   {name       "portal"
                     version    "0.55.1"
                     code-url   "main.js"
@@ -19,7 +19,7 @@
    "<div id=\"root\"></div>"
    "<script>"
    (when host
-     (str "window.PORTAL_HOST    = " (pr-str host) ";"))
+     (str "window.PORTAL_HOST    = " (pr-str (str host ":" port)) ";"))
    (when session-id
      (str "window.PORTAL_SESSION = " (pr-str session-id) ";"))
    "</script>"
