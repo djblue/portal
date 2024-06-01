@@ -77,6 +77,14 @@
         :else ::not-found))
     value))
 
+(defn re-index
+  ([re s]
+   (re-index re s 0))
+  ([re s from-index]
+   #?(:clj  (let [m (.matcher ^java.util.regex.Pattern re ^String s)]
+              (when (and (.find m ^long from-index)) (.start m)))
+      :cljs (some-> (.exec re (subs s from-index)) .-index (+ from-index)))))
+
 (defn split [s search-words]
   (let [string-length (count s)]
     (loop [i            0
@@ -87,7 +95,7 @@
         (let [search-words
               (keep
                (fn [{:keys [substring] :as search-word}]
-                 (when-let [start (str/index-of s substring i)]
+                 (when-let [start (re-index (->pattern substring) s i)]
                    (let [end (+ start (count substring))]
                      (assoc search-word :start start :end end))))
                search-words)]
