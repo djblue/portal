@@ -1,3 +1,15 @@
+## 0.56.0 - 2024-06-02
+
+- Make filter highlighting case insensitive c40db67
+- Darken intellij icon to improve visibility 3534272
+  - Thanks for the bug report @devurandom!
+- Include port in ws url when host is specified (#228) 59f9977
+  - Thanks for the PR @momerath42!
+- Ignore shortcuts when inside textarea (#224) 92435d7
+  - Thanks for the PR @dundalek!
+- Improve filtering performance 31d3486
+- Fix line-height for pprint 7a8d112
+
 ## 0.55.1 - 2024-04-13
 
 - Add nbb docs 3c7b86c

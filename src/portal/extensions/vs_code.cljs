@@ -46,7 +46,7 @@
                               " - "
                               ["portal"
                                (get options :window-title "vs-code")
-                               "0.55.1"])
+                               "0.56.0"])
                              (view-column)
                              (clj->js
                               {:enableScripts           true
