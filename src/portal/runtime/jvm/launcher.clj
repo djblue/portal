@@ -20,7 +20,9 @@
                    (fs/join ".portal" config-file)
                    fs/exists
                    fs/slurp
-                   edn/read-string))
+                   edn/read-string
+                   (merge (when-let [config (:launcher-config options)]
+                            config))))
          search-paths)
         (throw
          (ex-info
