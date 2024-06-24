@@ -1078,9 +1078,33 @@
    {::tabular-data         tabular-data
     ::numerical-collection numerical-collection}})
 
+(def spec-data
+  (v/default
+   '{:clojure.spec.alpha/problems
+     ({:path [:user/inst],
+       :pred clojure.core/inst?,
+       :val 1,
+       :via [:user/coll :user/map :user/inst],
+       :in [0 :user/inst]}
+      {:path [:user/hello],
+       :pred clojure.core/string?,
+       :val :user/world,
+       :via [:user/coll :user/map :user/hello],
+       :in [0 :user/hello]}
+      {:path [:user/test],
+       :pred clojure.core/true?,
+       :val nil,
+       :via [:user/coll :user/map :user/test],
+       :in [0 :user/test]}),
+     :clojure.spec.alpha/spec :user/coll,
+     :clojure.spec.alpha/value
+     [{:user/inst 1, :user/hello :user/world, :user/test nil, :user/set d}]}
+   :portal.viewer/spec))
+
 (def data
   {::platform-data      platform-data
    ::hacker-news        #?(:org.babashka/nbb nil :default hn/stories)
+   ::spec-data          spec-data
    ::table-data         table-data
    ::diff               diff-data
    ::basic-data         basic-data
