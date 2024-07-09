@@ -231,6 +231,31 @@
          m   (assoc :meta m)
          rep (assoc :rep rep))))))
 
+#?(:bb nil
+   :clj
+   (extend-type java.util.Collection
+     cson/ToJson
+     (-to-json [value buffer]
+       (cson/tagged-coll
+        buffer
+        (cond
+          (instance? java.util.Set value)          "#"
+          (instance? java.util.RandomAccess value) "["
+          :else                                    "(")
+        {::id (value->id value) ::type (type value)}
+        value))))
+
+#?(:bb nil
+   :clj
+   (extend-type java.util.Map
+     cson/ToJson
+     (-to-json [value buffer]
+       (cson/tagged-map
+        buffer
+        "{"
+        {::id (value->id value) ::type (type value)}
+        value))))
+
 (extend-type #?(:clj  Object
                 :cljr Object
                 :cljs default)

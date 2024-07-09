@@ -67,6 +67,19 @@
       ::js-array #js [0 1 2 3 4]
       ::js-object #js {:hello "world"}}))
 
+(def platform-collections
+  #?(:bb nil
+     :clj
+     {:java.util/ArrayList (java.util.ArrayList.)
+      :java.util/HashMap (java.util.HashMap.)
+      :java.util/HashSet (java.util.HashSet.)
+      :java.util/LinkedHashSet (java.util.LinkedHashSet.)
+      :java.util/LinkedList (java.util.LinkedList.)
+      :java.util/Stack (java.util.Stack.)
+      :java.util/TreeSet (java.util.TreeSet.)
+      :java.util/Vector (java.util.Vector.)}
+     :default nil))
+
 (def basic-data
   {::booleans #{true false}
    ::nil nil
@@ -1102,21 +1115,24 @@
    :portal.viewer/spec))
 
 (def data
-  {::platform-data      platform-data
-   ::hacker-news        #?(:org.babashka/nbb nil :default hn/stories)
-   ::spec-data          spec-data
-   ::table-data         table-data
-   ::diff               diff-data
-   ::basic-data         basic-data
-   ::themes             c/themes
-   ::clojure-data       clojure-data
-   ::hiccup             hiccup
-   ::data-visualization data-visualization
-   ::string-data        string-data
-   ::log-data           log-data
-   ::profile-data       profile-data
-   ::test-data          test-report
-   ::prepl-data         prepl-data
-   ::exception-data     exception-data
-   ::http-requests      http-requests
-   ::http-responses     http-responses})
+  (merge
+   {::platform-data      platform-data
+    ::hacker-news        #?(:org.babashka/nbb nil :default hn/stories)
+    ::spec-data          spec-data
+    ::table-data         table-data
+    ::diff               diff-data
+    ::basic-data         basic-data
+    ::themes             c/themes
+    ::clojure-data       clojure-data
+    ::hiccup             hiccup
+    ::data-visualization data-visualization
+    ::string-data        string-data
+    ::log-data           log-data
+    ::profile-data       profile-data
+    ::test-data          test-report
+    ::prepl-data         prepl-data
+    ::exception-data     exception-data
+    ::http-requests      http-requests
+    ::http-responses     http-responses}
+   (when platform-data
+     {::platform-collections platform-collections})))

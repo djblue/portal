@@ -203,10 +203,13 @@
   (let [m (->value buffer) v (->value buffer)]
     (if-not (can-meta? v) v (with-meta v m))))
 
-(defn- tagged-meta [buffer value]
-  (if-let [m (meta value)]
+(defn- push-meta [buffer m]
+  (if (map? m)
     (-to-json m (json/push-string buffer "^"))
     buffer))
+
+(defn- tagged-meta [buffer value]
+  (push-meta buffer (meta value)))
 
 (defn- bb-fix
   "Remove bb type tag for records which cause an infinite loop."
@@ -450,14 +453,17 @@
 (defn- ->symbol-2 [buffer]
   (symbol (json/next-string buffer) (json/next-string buffer)))
 
-(defn- tagged-coll [buffer tag value]
-  (reduce
-   to-json
-   (-> buffer
-       (tagged-meta value)
-       (json/push-string tag)
-       (json/push-long (count value)))
-   value))
+(defn tagged-coll
+  ([buffer tag value]
+   (tagged-coll buffer tag (meta value) value))
+  ([buffer tag meta-map  value]
+   (reduce
+    to-json
+    (-> buffer
+        (push-meta meta-map)
+        (json/push-string tag)
+        (json/push-long (count value)))
+    value)))
 
 #?(:bb (def clojure.lang.APersistentMap$KeySeq (type (keys {0 0}))))
 #?(:bb (def clojure.lang.APersistentMap$ValSeq (type (vals {0 0}))))
@@ -664,16 +670,19 @@
         (compare (get order a) (get order b))))
      values)))
 
-(defn- tagged-map
-  ([buffer value] (tagged-map buffer "{" value))
+(defn tagged-map
+  ([buffer value]
+   (tagged-map buffer "{" value))
   ([buffer tag value]
+   (tagged-map buffer tag (meta value) value))
+  ([buffer tag meta-map  value]
    (reduce-kv
     (fn [buffer k v]
       (-> buffer
           (to-json k)
           (to-json v)))
     (-> buffer
-        (tagged-meta value)
+        (push-meta meta-map)
         (json/push-string tag)
         (json/push-long (count value)))
     value)))
