@@ -120,7 +120,7 @@
      x)
 
     :else
-    (cond-> (hash x)
+    (cond-> (+ (hash x) (hash (type x)))
       (can-meta? x)
       (+ (hash+ (meta x))))))
 
