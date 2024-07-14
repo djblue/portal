@@ -60,6 +60,10 @@
     (transport/recv transport timeout))
   (send [_this  msg]
     (transport/send transport msg)
+    (when (and (not= "eval" (:op handler-msg))
+               (contains? (:status msg) :done))
+      (when-let [report (-> handler-msg :report deref not-empty)]
+        (tap> report)))
     (when (and (seq (p/sessions)) (:file handler-msg))
       (when-let [out (:out msg)]
         (swap! (:stdio handler-msg) conj {:tag :out :val out}))
@@ -91,13 +95,17 @@
 
 (defn- wrap-portal* [handler msg]
   (let [report         (atom [])
-        test-report    test/report
+        [test-var test-report] (case (:op msg)
+                                 "test-var-query"
+                                 (let [v (requiring-resolve `cider.nrepl.middleware.test/report)]
+                                   [v @v])
+                                 [#'test/report test/report])
         portal-report  (fn [value]
                          (swap! report conj value)
                          (test-report value))]
     (handler
      (cond-> msg
-       (= (:op msg) "eval")
+       (#{"test-var-query" "eval"} (:op msg))
        (-> (update :transport
                    ->PortalTransport
                    (assoc msg
@@ -107,8 +115,7 @@
                           :time   (Date.)))
            (update :session
                    (fn [session]
-                     (swap! session assoc
-                            #'test/report portal-report)
+                     (swap! session assoc test-var portal-report)
                      session)))))))
 
 (defn wrap-portal [handler] (partial #'wrap-portal* handler))
