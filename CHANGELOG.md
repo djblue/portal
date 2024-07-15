@@ -1,3 +1,10 @@
+## 0.57.0 - 2024-07-14
+
+- Improve support for native java interfaces dc33869
+- Add `portal.ui.parsers` to sci b0c19fc
+- Initial spec error viewer (#231) 73d07cb (Experimental)
+- Allow users to override launcher configs (#230) c6619bd
+
 ## 0.56.0 - 2024-06-02
 
 - Make filter highlighting case insensitive c40db67
