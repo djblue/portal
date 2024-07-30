@@ -59,7 +59,8 @@
           (.file vscode/Uri (.asAbsolutePath ^js (:context @!app-db) "icon.png")))
     (set! (.-html web-view)
           (index/html {:code-url   (str "http://" host ":" port "/main.js?" session-id)
-                       :host       (str host ":" port)
+                       :host       host
+                       :port       port
                        :session-id (str session-id)}))
     (.onDidReceiveMessage
      web-view
