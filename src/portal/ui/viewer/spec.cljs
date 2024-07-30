@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.spec
+(ns ^:no-doc portal.ui.viewer.spec
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.icons :as icons]
