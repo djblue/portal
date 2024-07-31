@@ -198,8 +198,7 @@
             config    (fs/join folder "vs-code.edn")]
       (set-status workspace)
       (fs/mkdir folder)
-      (fs/spit config (pr-str (select-keys info [:host :port])))
-      (fs/rm-exit config))
+      (fs/spit config (pr-str (select-keys info [:host :port]))))
     (setup-notebook-handler)
     (add-tap #'p/submit))
   (doseq [[command f] (get-commands)]
