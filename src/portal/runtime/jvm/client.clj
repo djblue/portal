@@ -27,26 +27,54 @@
       (remove-watch rt/connections watch-key)
       result)))
 
+(defn- request! [session-id message]
+  (if-let [send! (get-connection session-id)]
+    (let [id       (rt/next-id)
+          response (promise)
+          message  (assoc message :portal.rpc/id id)]
+      (swap! rt/pending-requests assoc id response)
+      (send! message)
+      (let [response (deref response timeout ::timeout)]
+        (swap! rt/pending-requests dissoc id)
+        (if-not (= response ::timeout)
+          response
+          (throw (ex-info
+                  "Portal request timeout"
+                  {::timeout true
+                   :session-id session-id
+                   :message message})))))
+    (throw (ex-info "No such portal session"
+                    {:session-id session-id :message message}))))
+
+(defn- broadcast! [message]
+  (when-let [sessions (keys @rt/connections)]
+    (let [response (promise)]
+      (doseq [session-id sessions]
+        (future
+          (try
+            (deliver response (request! session-id message))
+            (catch Exception ex
+              (when (-> ex ex-data ::timeout)
+                (swap! rt/connections dissoc session-id))
+              (deliver response ex)))))
+      (let [response (deref response timeout ::timeout)]
+        (cond
+          (instance? Throwable response)
+          (throw response)
+          (not= response ::timeout)
+          response
+          :else
+          (throw (ex-info
+                  "Portal request timeout"
+                  {::timeout true
+                   :session-id :all
+                   :message message})))))))
+
 (defn request
   ([message]
-   (last
-    (for [session-id (keys @rt/connections)]
-      (request session-id message))))
+   (broadcast! message))
   ([session-id message]
-   (if-let [send! (get-connection session-id)]
-     (let [id       (rt/next-id)
-           response (promise)
-           message  (assoc message :portal.rpc/id id)]
-       (swap! rt/pending-requests assoc id response)
-       (send! message)
-       (let [response (deref response timeout ::timeout)]
-         (swap! rt/pending-requests dissoc id)
-         (if-not (= response ::timeout)
-           response
-           (throw (ex-info "Portal request timeout"
-                           {:session-id session-id :message message})))))
-     (throw (ex-info "No such portal session"
-                     {:session-id session-id :message message})))))
+   (request! session-id message)))
 
 (defn- push-state [session-id new-value]
   (request session-id {:op :portal.rpc/push-state :state new-value})
