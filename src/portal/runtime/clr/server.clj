@@ -88,6 +88,7 @@
           (tap> (Throwable->map e)))
         (finally
           (close-debug debug)
+          (rt/reset-session session)
           (swap! rt/connections dissoc (:session-id session)))))))
 
 (defn- send-resource [content-type resource]

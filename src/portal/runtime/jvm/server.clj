@@ -86,6 +86,7 @@
       :on-close
       (fn [_ch _status]
         (close-debug debug)
+        (rt/reset-session session)
         (swap! rt/connections dissoc (:session-id session)))})))
 
 (defmethod route [:get "/rpc"] [request]

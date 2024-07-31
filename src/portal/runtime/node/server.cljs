@@ -73,6 +73,7 @@
                     (op req done)))))
          (.on ws "close"
               (fn []
+                (rt/reset-session session)
                 (swap! rt/connections dissoc (:session-id session)))))))))
 
 (defn- send-resource [^js res content-type body]
