@@ -1,3 +1,9 @@
+## 0.57.1 - 2024-07-30
+
+- Race client requests and remove connection on timeout 39c30cb
+- Clear session on websocket disconnect 3f70820
+- Fix code loading for vs-code extension 55242ab
+
 ## 0.57.0 - 2024-07-14
 
 - Improve support for native java interfaces dc33869
