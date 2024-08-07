@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [0.57.2]
+- Bumped to support Intellij 2024.2 and added background fill for plugin icon
+
 ## [0.54.2]
 - Bumped to support Intellij 2024.1
 
