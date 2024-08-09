@@ -1,3 +1,9 @@
+## 0.57.2 - 2024-08-08
+
+- Updates IJ plugin for 2024.2 (#235) 6e013a0
+  - Also adds background fill for plugin icon
+  - Thanks @coyotesqrl!
+
 ## 0.57.1 - 2024-07-30
 
 - Race client requests and remove connection on timeout 39c30cb
