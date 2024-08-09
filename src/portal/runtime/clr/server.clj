@@ -2,10 +2,10 @@
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
             [portal.runtime :as rt]
-            [portal.runtime.clr.client :as c]
             [portal.runtime.fs :as fs]
             [portal.runtime.index :as index]
-            [portal.runtime.json :as json])
+            [portal.runtime.json :as json]
+            [portal.runtime.rpc :as rpc])
   (:import (clojure.lang RT)
            (System Environment Guid)
            (System.IO Path)
@@ -15,11 +15,6 @@
            (System.Threading CancellationToken Thread)))
 
 (defmulti route (juxt :request-method :uri))
-
-(def ^:private ops (merge c/ops rt/ops))
-
-(defn- not-found [_request done]
-  (done {:status :not-found}))
 
 (defmacro array-segment [& args]
   `(new ~(RT/classForName "System.ArraySegment`1[System.Byte]") ~@args))
@@ -33,7 +28,7 @@
      true
      CancellationToken/None)))
 
-(defn- recieve-messgae [^WebSocket ws]
+(defn- receive-message [^WebSocket ws]
   (let [max-size (* 50 1024 1024)
         buffer   (byte-array max-size)]
     (loop [receive-count 0]
@@ -67,29 +62,16 @@
         (let [^HttpListenerContext context (:context request)
               task  (.AcceptWebSocketAsync context nil)
               _     (.Wait task)
-              ws    (.WebSocket (.Result task))
-              send! (fn [message]
-                      (send-message ws (rt/write message session)))]
-          (swap! rt/connections assoc (:session-id session) send!)
-          (when-let [f (get-in session [:options :on-load])]
-            (f))
+              ws    (.WebSocket (.Result task))]
+          (rpc/on-open session #(send-message ws %))
           (while (= (.State ws) WebSocketState/Open)
-            (when-let [message (not-empty (recieve-messgae ws))]
-              (let [body     (rt/read message session)
-                    id       (:portal.rpc/id body)
-                    op       (get ops (:op body) not-found)]
-                (binding [rt/*session* session]
-                  (op body (fn [response]
-                             (send!
-                              (assoc response
-                                     :portal.rpc/id id
-                                     :op :portal.rpc/response)))))))))
+            (when-let [message (not-empty (receive-message ws))]
+              (rpc/on-receive session message))))
         (catch Exception e
           (tap> (Throwable->map e)))
         (finally
           (close-debug debug)
-          (rt/reset-session session)
-          (swap! rt/connections dissoc (:session-id session)))))))
+          (rpc/on-close session))))))
 
 (defn- send-resource [content-type resource]
   {:status  200

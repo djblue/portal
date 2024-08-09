@@ -9,9 +9,9 @@
             [portal.runtime.fs :as fs]
             [portal.runtime.index :as index]
             [portal.runtime.json :as json]
-            [portal.runtime.jvm.client :as c]
             [portal.runtime.npm :as npm]
-            [portal.runtime.remote.socket :as socket])
+            [portal.runtime.remote.socket :as socket]
+            [portal.runtime.rpc :as rpc])
   (:import [java.io File PushbackReader]
            [java.util UUID]))
 
@@ -24,9 +24,6 @@
     "Access-Control-Max-Age"       86400}})
 
 (defmulti route (juxt :request-method :uri))
-
-(defn- not-found [_request done]
-  (done {:status :not-found}))
 
 (defn- rpc-handler-remote [request]
   (let [conn (socket/open (:session request))]
@@ -45,8 +42,6 @@
       (fn [_ch _status]
         (socket/close conn))})))
 
-(def ^:private ops (merge c/ops rt/ops))
-
 (defn- open-debug [{:keys [options] :as session}]
   (try
     (when (= :server (:debug options))
@@ -61,33 +56,14 @@
 
 (defn- rpc-handler-local [request]
   (let [session (rt/open-session (:session request))
-        send!   (fn send! [ch message]
-                  (server/send! ch (rt/write message session)))
         debug   (open-debug session)]
     (server/as-channel
      request
-     {:on-receive
-      (fn [ch message]
-        (let [body  (rt/read message session)
-              id    (:portal.rpc/id body)
-              op    (get ops (:op body) not-found)]
-          (binding [rt/*session* session]
-            (op body (fn [response]
-                       (send!
-                        ch
-                        (assoc response
-                               :portal.rpc/id id
-                               :op :portal.rpc/response)))))))
-      :on-open
-      (fn [ch]
-        (swap! rt/connections assoc (:session-id session) (partial send! ch))
-        (when-let [f (get-in session [:options :on-load])]
-          (f)))
-      :on-close
-      (fn [_ch _status]
-        (close-debug debug)
-        (rt/reset-session session)
-        (swap! rt/connections dissoc (:session-id session)))})))
+     {:on-receive (fn [_ch message] (rpc/on-receive session message))
+      :on-open    (fn [ch] (rpc/on-open session #(server/send! ch %)))
+      :on-close   (fn [_ch _status]
+                    (close-debug debug)
+                    (rpc/on-close session))})))
 
 (defmethod route [:get "/rpc"] [request]
   (if (get-in request [:session :options :runtime])

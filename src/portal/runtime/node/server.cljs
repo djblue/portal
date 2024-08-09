@@ -7,14 +7,11 @@
             [portal.runtime.fs :as fs]
             [portal.runtime.index :as index]
             [portal.runtime.json :as json]
-            [portal.runtime.node.client :as c]
+            [portal.runtime.rpc :as rpc]
             [portal.runtime.transit :as transit]))
 
 (defn- get-header [^js req k]
   (-> req .-headers (aget k)))
-
-(defn- not-found [_request done]
-  (done {:status :not-found}))
 
 (defn- require-string [src file-name]
   (let [Module (js/require "module")
@@ -26,8 +23,6 @@
 (def ^:private ws-code (io/inline "portal/ws.js"))
 
 (def Server (.-Server (require-string ws-code "portal/ws.js")))
-
-(def ops (merge c/ops rt/ops))
 
 (defn- get-session-id [^js req]
   (some->
@@ -54,27 +49,10 @@
      (.-socket req)
      (.-headers req)
      (fn [^js ws]
-       (let [session (rt/open-session session)
-             send!
-             (fn send! [message]
-               (.send ws (rt/write message session)))]
-         (swap! rt/connections assoc (:session-id session) send!)
-         (when-let [f (get-in session [:options :on-load])]
-           (f))
-         (.on ws "message"
-              (fn [message]
-                (a/let [req  (rt/read message session)
-                        id   (:portal.rpc/id req)
-                        op   (get ops (get req :op) not-found)
-                        done #(send! (assoc %
-                                            :portal.rpc/id id
-                                            :op :portal.rpc/response))]
-                  (binding [rt/*session* session]
-                    (op req done)))))
-         (.on ws "close"
-              (fn []
-                (rt/reset-session session)
-                (swap! rt/connections dissoc (:session-id session)))))))))
+       (let [session (rt/open-session session)]
+         (rpc/on-open session #(.send ws %))
+         (.on ws "message" (fn [message] (rpc/on-receive session message)))
+         (.on ws "close"   (fn [] (rpc/on-close session))))))))
 
 (defn- send-resource [^js res content-type body]
   (-> res
