@@ -13,6 +13,11 @@
     (try
       (f)
       (catch #?(:cljs :default :default Exception) e
+        (tap> e))))
+  (when-let [f (get-in session [:options :on-load-1])]
+    (try
+      (f (c/make-atom (:session-id session)))
+      (catch #?(:cljs :default :default Exception) e
         (tap> e)))))
 
 (def ^:private ops (merge c/ops rt/ops))
