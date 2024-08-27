@@ -141,6 +141,7 @@
         :height height
         :position :relative
         :border [:solid 1 (::c/border theme)]
+        :border-radius (:border-radius theme)
         :background (ins/get-background)}}
       [:div#viz
        {:ref absolute
