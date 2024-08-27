@@ -1066,10 +1066,11 @@
        (merge
         {:position :absolute
          :pointer-events :none
-         :top -1
-         :left -1
-         :right -1
-         :bottom -1
+         :top 0
+         :left 0
+         :right 0
+         :bottom 0
+         :z-index 2
          :transition transition}
         (when (and selected (not hover))
           {:box-shadow [0 0 3 color]})
@@ -1096,9 +1097,9 @@
          :border-radius (:border-radius theme)
          :transition transition}
         (when selected
-          {:right -1
-           :top -1
-           :bottom -1})
+          {:right 0
+           :top 0
+           :bottom 0})
         (when-not selected
           {:opacity 0.85})
         (when (and selected hover)
