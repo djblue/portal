@@ -117,6 +117,11 @@
   ([value] (default value ::diff))
   ([value opts] (default value ::diff opts)))
 
+(defn diff-text
+  "Diff two strings."
+  ([value] (default value ::diff-text))
+  ([value opts] (default value ::diff-text opts)))
+
 (defn prepl
   "View interlacing of stdout, stderr and tap values. Useful for build output."
   ([value] (default value ::prepl))
