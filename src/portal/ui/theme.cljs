@@ -1,5 +1,6 @@
 (ns portal.ui.theme
   (:require ["react" :as react]
+            [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.options :as opts]
             [portal.ui.react :refer [use-effect]]))
@@ -11,8 +12,27 @@
       (.getPropertyValue "--vscode-font-size")
       (not= "")))
 
+(defn- get-style []
+  (some-> js/document
+          (.getElementsByTagName "html")
+          (aget 0)
+          (.getAttribute "style")
+          not-empty))
+
+(defn ^:no-doc get-vs-code-css-vars []
+  (when-let [style (get-style)]
+    (persistent!
+     (reduce
+      (fn [vars rule]
+        (if-let [[attr value] (str/split rule #"\s*:\s*")]
+          (assoc! vars (str "var(" attr ")") value)
+          vars))
+      (transient {})
+      (str/split style #"\s*;\s*")))))
+
 (defn- get-theme [theme-name]
-  (let [opts (opts/use-options)]
+  (let [opts (opts/use-options)
+        vars (get-vs-code-css-vars)]
     (merge
      {:font-family   "monospace"
       :font-size     "12pt"
@@ -20,8 +40,10 @@
       :max-depth     2
       :padding       6
       :border-radius 2}
-     (or (get c/themes theme-name)
-         (get (:themes opts) theme-name)))))
+     (update-vals
+      (or (get c/themes theme-name)
+          (get (:themes opts) theme-name))
+      #(get vars % %)))))
 
 (defn- use-theme-detector []
   (let [media-query (.matchMedia js/window "(prefers-color-scheme: dark)")
@@ -33,6 +55,20 @@
        (fn []
          (.removeListener media-query listener))))
     dark-theme))
+
+(defn- use-vscode-theme-detector []
+  (let [[change-id set-change-id!] (react/useState 0)]
+    (when (is-vs-code?)
+      (react/useEffect
+       (fn []
+         (let [observer (js/MutationObserver. #(set-change-id! inc))]
+           (.observe observer
+                     js/document.documentElement
+                     #js {:attributes true
+                          :attributeFilter #js ["style"]})
+           #(.disconnect observer)))
+       #js []))
+    change-id))
 
 (defn- default-theme [dark-theme]
   (cond
@@ -57,8 +93,9 @@
 
 (defn with-theme [theme-name & children]
   (let [dark-theme (use-theme-detector)
+        theme-key  (use-vscode-theme-detector)
         theme      (get-theme (or theme-name (default-theme dark-theme)))]
-    (into [:r> (.-Provider theme-context) #js {:value theme}] children)))
+    (into [:r> (.-Provider theme-context) #js {:key theme-key :value theme}] children)))
 
 (defonce ^:no-doc order
   (cycle [::c/diff-remove ::c/diff-add ::c/keyword ::c/tag ::c/number ::c/uri]))

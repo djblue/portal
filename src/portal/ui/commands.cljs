@@ -924,33 +924,23 @@
 (register! #'nav {:name      'clojure.datafy/nav
                   :predicate (comp :collection state/get-selected-context)})
 
-(defn- get-style []
-  (some-> js/document
-          (.getElementsByTagName "html")
-          (aget 0)
-          (.getAttribute "style")
-          not-empty))
-
-(defn- get-vs-code-css-vars []
-  (when-let [style (get-style)]
-    (persistent!
-     (reduce
-      (fn [vars rule]
-        (if-let [[attr value] (str/split rule #"\s*:\s*")]
-          (assoc! vars attr value)
-          vars))
-      (transient {})
-      (str/split style #"\s*;\s*")))))
-
 (defn- vs-code-vars
   "List all available css variable provided by vs-code."
   [state]
   (state/dispatch!
    state
    state/history-push
-   {:portal/value (get-vs-code-css-vars)}))
+   {:portal/value (theme/get-vs-code-css-vars)}))
 
 (register! #'vs-code-vars {:predicate theme/is-vs-code?})
+
+(defn- vs-code-copy-theme
+  [_]
+  (-> (theme/get-vs-code-css-vars)
+      (walk/postwalk-replace (::c/vs-code-embedded c/themes))
+      (copy-edn!)))
+
+(register! #'vs-code-copy-theme {:predicate theme/is-vs-code?})
 
 (defn copy-str
   "Copy string to the clipboard."
