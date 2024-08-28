@@ -2,10 +2,11 @@
   (:require #?(:clj [clojure.java.io :as io])
             #?(:org.babashka/nbb [clojure.core]
                :default [examples.hacker-news :as hn])
+            [clojure.pprint :as pp]
             [examples.macros :refer [read-file]]
             [portal.colors :as c]
             [portal.viewer :as v])
-  #?(:clj  (:import [java.io File ByteArrayOutputStream]
+  #?(:clj  (:import [java.io ByteArrayOutputStream File]
                     [java.net URI]
                     [java.util Date]
                     [java.util UUID])
@@ -241,6 +242,11 @@
      ::set #{1 2 3}
      ::vector [::a ::added ::b]
      ::different-value ::new-key}]))
+
+(def diff-text-data
+  (v/diff-text
+   [(with-out-str (pp/pprint (first diff-data)))
+    (with-out-str (pp/pprint (second diff-data)))]))
 
 (def string-data
   (v/for
@@ -1121,6 +1127,7 @@
     ::spec-data          spec-data
     ::table-data         table-data
     ::diff               diff-data
+    ::diff-text          diff-text-data
     ::basic-data         basic-data
     ::themes             c/themes
     ::clojure-data       clojure-data
