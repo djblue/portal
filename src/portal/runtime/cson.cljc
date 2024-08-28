@@ -258,7 +258,7 @@
      :cljs (Base64/decodeStringToUint8Array string)
      :cljr (Convert/FromBase64String string)))
 
-(extend-type #?(:clj  (Class/forName "[B")
+(extend-type #?(:clj  #_:clj-kondo/ignore (Class/forName "[B")
                 :cljr (Type/GetType "System.Byte[]")
                 :cljs js/Uint8Array)
   ToJson
