@@ -69,6 +69,9 @@
         (-> result
             (merge
              (select-keys handler-msg [:ns :file :column :line :code])
+             (when (= "load-file" (:op handler-msg))
+               {:code (:file handler-msg)
+                :file (:file-path handler-msg)})
              (when-let [report (-> handler-msg :report deref not-empty)]
                {:report report})
              (when-let [stdio (-> handler-msg :stdio deref not-empty)]
@@ -97,7 +100,7 @@
                          (test-report value))]
     (handler
      (cond-> msg
-       (= (:op msg) "eval")
+       (#{"eval" "load-file"} (:op msg))
        (-> (update :transport
                    ->PortalTransport
                    (assoc msg
