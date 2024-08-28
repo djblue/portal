@@ -1,3 +1,16 @@
+## 0.57.3 - 2024-08-27
+
+- Prefer default viewer meta on history push d0dc39d
+- Add `:on-load-1` launcher option 6953d2d
+
+### Bug Fixes
+
+- Prevent issue with records and serialization 5cfd6f2
+  - Fixes #236
+  - Issue caused by dc33869
+  - Thanks for the bug report @ognen!
+- Fix overflow css issue for inspector 65c463d
+
 ## 0.57.2 - 2024-08-08
 
 - Updates IJ plugin for 2024.2 (#235) 6e013a0
