@@ -1,5 +1,6 @@
 (ns portal.ui.viewer.diff-text
   (:require ["diff" :as df]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.icons :as icons]
@@ -7,6 +8,13 @@
             [portal.ui.lazy :as l]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
+
+;;; :spec
+(s/def ::diff-text (s/cat :a string? :b string?))
+;;;
+
+(defn- diff-text? [value]
+  (s/valid? ::diff-text value))
 
 (defn- changed? [^js item]
   (or (some-> item .-added)
@@ -106,13 +114,8 @@
                :border-bottom-left-radius (:border-radius theme)
                :border-bottom-right-radius (:border-radius theme)}}]]))
 
-(defn- text-diff? [value]
-  (and (coll? value)
-       (string? (first value))
-       (string? (second value))))
-
 (def viewer
-  {:predicate text-diff?
+  {:predicate diff-text?
    :component inspect-text-diff
    :name :portal.viewer/diff-text
    :doc "Diff two strings."})

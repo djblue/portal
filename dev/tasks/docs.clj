@@ -94,6 +94,9 @@
    ::v/diff
    {:file "portal/ui/viewer/diff.cljs"
     :examples [(vary-meta d/diff-data dissoc ::v/default)]}
+   ::v/diff-text
+   {:file "portal/ui/viewer/diff_text.cljs"
+    :examples [d/diff-text-data]}
    ::v/tree
    {:examples [(vary-meta d/hiccup dissoc ::v/default)]}
    ::v/code
