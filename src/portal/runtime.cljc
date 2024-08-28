@@ -257,7 +257,9 @@
          (cson/tagged-map
           buffer
           "{"
-          {::id (value->id value) ::type (type value)}
+          (if (record? value)
+            (meta value)
+            {::id (value->id value) ::type (type value)})
           value)))))
 
 (extend-type #?(:clj  Object
