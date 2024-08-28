@@ -57,6 +57,7 @@
  {:name :portal.viewer/diff,
   :doc
   "Diff a collection of values successively starting with the first two."}
+ {:name :portal.viewer/diff-text, :doc "Diff two strings."}
  {:name :portal.viewer/markdown,
   :doc "Parse string as markdown and view as html."}
  {:name :portal.viewer/hiccup,
