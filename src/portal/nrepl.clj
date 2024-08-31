@@ -177,7 +177,7 @@
                  {:requires #{"clone"
                               #'print/wrap-print
                               #'caught/wrap-caught}
-                  :expects (into #{"eval"})
+                  :expects (into #{"eval"} (get-shadow-middleware))
                   :handles {}})
 
 (def ^:private id-gen (atom 0))
