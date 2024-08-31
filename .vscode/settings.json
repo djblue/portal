@@ -7,10 +7,8 @@
   },
   "calva.replConnectSequences": [
     {
-      "name": "portal",
+      "name": "shadow-cljs",
       "projectType": "deps.edn",
-      "autoSelectForJackIn": true,
-      "autoSelectForConnect": true,
       "projectRootPath": [
         "."
       ],
@@ -34,6 +32,33 @@
           ":vs-code-notebook"
         ],
         "cljsDefaultBuild": ":client"
+      }
+    },
+    {
+      "name": "portal",
+      "projectType": "deps.edn",
+      "projectRootPath": [
+        "."
+      ],
+      "customJackInCommandLine": "bb dev",
+      "nReplPortFile": [
+        ".shadow-cljs",
+        "nrepl.port"
+      ],
+      "shouldOpenUrl": false,
+      "cljsType": {
+        "dependsOn": "User provided",
+        "isStarted": false,
+        "connectCode": "((requiring-resolve 'portal.api/repl))",
+        "isConnectedRegExp": ":repl"
+      },
+      "menuSelections": {
+        "cljAliases": [
+          ":dev",
+          ":cider",
+          ":cljs",
+          ":shadow"
+        ]
       }
     }
   ]
