@@ -180,6 +180,7 @@
 
 (set-descriptor! #'wrap-repl
                  {:requires #{"clone"
+                              #'wrap-portal
                               #'print/wrap-print
                               #'caught/wrap-caught}
                   :expects (into #{"eval"} (get-shadow-middleware))
