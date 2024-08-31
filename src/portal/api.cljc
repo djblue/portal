@@ -200,14 +200,16 @@
 
   - portal: Portal session returned via `portal.api/open`"
   {:added "0.31.0"}
-  [portal]
-  (if *nrepl-init*
-    (*nrepl-init* portal)
-    (throw
-     (ex-info
-      "Please start nREPL with `portal.nrepl/wrap-repl` middleware to enable the portal subrepl."
-      {:portal-instance    portal
-       :missing-middleware 'portal.nrepl/wrap-repl}))))
+  ([]
+   (repl :all))
+  ([portal]
+   (if *nrepl-init*
+     (*nrepl-init* portal)
+     (throw
+      (ex-info
+       "Please start nREPL with `portal.nrepl/wrap-repl` middleware to enable the portal subrepl."
+       {:portal-instance    portal
+        :missing-middleware 'portal.nrepl/wrap-repl})))))
 
 #?(:cljs (def ^:private docs-json (io/inline "portal/docs.json")))
 

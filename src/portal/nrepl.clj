@@ -139,7 +139,7 @@
                                 [:repl portal])))
   (if-let [portal (and (#{"eval" "load-file"} op)
                        (get @session #'*portal-session*))]
-    (->> (if-not (contains? (into #{} (p/sessions)) portal)
+    (->> (if-not (contains? (into #{:all} (p/sessions)) portal)
            (do (swap! session dissoc #'*portal-session* #'*portal-ns*)
                {:value       :cljs/quit
                 :status      :done
