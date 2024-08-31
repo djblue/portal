@@ -9,8 +9,8 @@
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]
+            [portal.ui.repl.sci.eval :as sci]
             [portal.ui.rpc :as rpc]
-            [portal.ui.sci :as sci]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.web :as p]))

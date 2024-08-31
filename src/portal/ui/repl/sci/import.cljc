@@ -1,6 +1,6 @@
-(ns ^:no-doc portal.ui.sci.import
+(ns ^:no-doc portal.ui.repl.sci.import
   (:refer-clojure :exclude [import])
-  #?(:cljs (:require-macros portal.ui.sci.import))
+  #?(:cljs (:require-macros portal.ui.repl.sci.import))
   #?(:cljs (:require [sci.core :as sci])))
 
 (defn- sci-import [symbols]

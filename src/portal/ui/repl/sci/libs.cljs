@@ -1,4 +1,4 @@
-(ns ^:no-doc portal.ui.sci.libs
+(ns ^:no-doc portal.ui.repl.sci.libs
   (:require ["react" :as react]
             ["react-dom" :as react-dom]
             ["react/jsx-runtime" :as jsx-runtime]
@@ -17,8 +17,8 @@
             portal.ui.inspector
             portal.ui.options
             portal.ui.parsers
+            [portal.ui.repl.sci.import :as sci-import]
             portal.ui.rpc
-            [portal.ui.sci.import :as sci-import]
             portal.ui.select
             portal.ui.state
             portal.ui.styled

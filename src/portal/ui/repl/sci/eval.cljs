@@ -1,8 +1,8 @@
-(ns ^:no-doc portal.ui.sci
+(ns ^:no-doc portal.ui.repl.sci.eval
   (:require [clojure.string :as str]
             [portal.ui.cljs :as cljs]
             [portal.ui.load :as load]
-            [portal.ui.sci.libs :as libs]
+            [portal.ui.repl.sci.libs :as libs]
             [sci.core :as sci]))
 
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))

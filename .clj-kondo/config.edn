@@ -1,7 +1,7 @@
 {:linters {:unsorted-required-namespaces {:level :fail}
            :unresolved-symbol
-           {:exclude [(portal.ui.sci.import/sci-import)
-                      (portal.ui.sci.import/import-ns)]}}
+           {:exclude [(portal.ui.repl.sci.import/sci-import)
+                      (portal.ui.repl.sci.import/import-ns)]}}
  :lint-as
  {portal.async/let clojure.core/let
   portal.sync/let  clojure.core/let

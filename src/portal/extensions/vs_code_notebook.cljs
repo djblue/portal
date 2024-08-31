@@ -8,8 +8,8 @@
             [portal.ui.inspector :as ins]
             [portal.ui.load :as load]
             [portal.ui.options :as opts]
+            [portal.ui.repl.sci.eval]
             [portal.ui.rpc :as rpc]
-            [portal.ui.sci]
             [portal.ui.state :as state]
             [reagent.core :as r]
             [reagent.dom :as dom]))
