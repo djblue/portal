@@ -137,7 +137,7 @@
                                 (set! *portal-session* portal)
                                 (println "To quit, type:" :cljs/quit)
                                 [:repl portal])))
-  (if-let [portal (and (= op "eval")
+  (if-let [portal (and (#{"eval" "load-file"} op)
                        (get @session #'*portal-session*))]
     (->> (if-not (contains? (into #{} (p/sessions)) portal)
            (do (swap! session dissoc #'*portal-session* #'*portal-ns*)
@@ -145,13 +145,18 @@
                 :status      :done
                 ::print/keys #{:value}})
            (try
-             (let [{:keys [value] :as response}
+             (let [[code file]
+                   (if (= "load-file" (:op msg))
+                     [(:file msg) (:file-path msg)]
+                     [(:code msg) (:file msg)])
+                   {:keys [value] :as response}
                    (p/eval-str
                     portal
-                    (:code msg)
+                    code
                     (-> {:ns (get @session #'*portal-ns*)}
                         (merge  msg)
-                        (select-keys  [:ns :file :line :column])
+                        (select-keys  [:ns :line :column])
+                        (assoc :file file)
                         (assoc  :verbose true)))]
                (when-let [namespace (:ns response)]
                  (swap! session assoc #'*portal-ns* namespace))
