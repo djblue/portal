@@ -16,7 +16,6 @@
    {babashka/process              {:mvn/version "0.5.22"}
     hiccup/hiccup                 {:mvn/version "2.0.0-RC3"}
     io.aviso/pretty               {:mvn/version "1.4.4"}
-    com.lambdaisland/dom-types    {:mvn/version "0.6.42"}
     io.github.clojure/tools.build {:git/tag "v0.10.5"
                                    :git/sha "2a21b7a"
                                    :exclusions [com.google.guava/guava]}

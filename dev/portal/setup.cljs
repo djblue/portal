@@ -1,7 +1,6 @@
 (ns portal.setup
   (:require [clojure.datafy :refer [datafy]]
             [examples.data :refer [data]]
-            [lambdaisland.dom-types]
             [portal.console :as log]
             [portal.runtime :as rt]
             [portal.shadow.remote :as remote]
