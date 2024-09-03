@@ -51,6 +51,6 @@
 
 (def viewer
   {:predicate color?
-   :component inspect-color
+   :component #'inspect-color
    :name :portal.viewer/color
    :doc "View hex / rgb / rgba colors"})

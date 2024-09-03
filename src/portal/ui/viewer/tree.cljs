@@ -214,6 +214,6 @@
 
 (def viewer
   {:predicate ins/coll?
-   :component inspect-tree
+   :component #'inspect-tree
    :name      :portal.viewer/tree
    :doc       "For viewing highly nested values, such as hiccup."})

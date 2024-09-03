@@ -166,6 +166,6 @@
 
 (def viewer
   {:predicate can-view?
-   :component inspect-spec
+   :component #'inspect-spec
    :name :portal.viewer/spec
    :doc "A viewer for data produced via clojure.spec.alpha/explain-data"})

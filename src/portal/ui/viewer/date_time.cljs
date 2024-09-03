@@ -123,5 +123,5 @@
 
 (def viewer
   {:predicate parse
-   :component inspect-date-time
+   :component #'inspect-date-time
    :name :portal.viewer/date-time})

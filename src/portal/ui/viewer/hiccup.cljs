@@ -164,6 +164,6 @@
 
 (def viewer
   {:predicate hiccup?
-   :component inspect-hiccup
+   :component #'inspect-hiccup
    :name :portal.viewer/hiccup
    :doc "Render a hiccup value as html via reagent."})

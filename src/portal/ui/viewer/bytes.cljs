@@ -76,5 +76,5 @@
 (def viewer
   {:predicate number?
    :name :portal.viewer/size-bytes
-   :component inspect-bytes
+   :component #'inspect-bytes
    :doc "Interpret number as amount of bytes."})

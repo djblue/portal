@@ -51,6 +51,6 @@
 
 (def viewer
   {:predicate source-location?
-   :component inspect-source
+   :component #'inspect-source
    :name :portal.viewer/source-location
    :doc "View a map as a source location, provides goto definition on click."})

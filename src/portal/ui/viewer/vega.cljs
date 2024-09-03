@@ -159,5 +159,5 @@
 
 (def viewer
   {:predicate (partial s/valid? ::vega)
-   :component vega-viewer
+   :component #'vega-viewer
    :name :portal.viewer/vega})

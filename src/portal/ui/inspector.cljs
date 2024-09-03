@@ -1216,5 +1216,5 @@
 
 (def viewer
   {:predicate (constantly true)
-   :component inspector
+   :component #'inspector
    :name :portal.viewer/inspector})

@@ -17,6 +17,6 @@
 
 (def viewer
   {:predicate json?
-   :component inspect-json
+   :component #'inspect-json
    :name :portal.viewer/json
    :doc "Parse a string as JSON. Will render error if parsing fails."})

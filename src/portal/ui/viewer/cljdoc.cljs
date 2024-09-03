@@ -251,5 +251,5 @@
 
 (def viewer
   {:predicate cljdoc?
-   :component inspect-cljdoc
+   :component #'inspect-cljdoc
    :name      :portal.viewer/cljdoc})

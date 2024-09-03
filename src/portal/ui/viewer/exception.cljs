@@ -300,16 +300,16 @@
 
 (def viewer
   {:predicate exception?
-   :component inspect-exception
+   :component #'inspect-exception
    :name      :portal.viewer/ex
    :doc       "Viewer for datafied exceptions."})
 
 (def trace-viewer
   {:predicate trace?
-   :component inspect-stack-trace
+   :component #'inspect-stack-trace
    :name      :portal.viewer/stack-trace})
 
 (def sub-trace-viewer
   {:predicate trace?
-   :component inspect-sub-trace
+   :component #'inspect-sub-trace
    :name      :portal.viewer/sub-trace})

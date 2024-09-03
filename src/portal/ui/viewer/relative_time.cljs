@@ -77,6 +77,6 @@
 
 (def viewer
   {:predicate date-time/parse
-   :component inspect-relative
+   :component #'inspect-relative
    :name :portal.viewer/relative-time
    :doc "View value relative to the current time."})

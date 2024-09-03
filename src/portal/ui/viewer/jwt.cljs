@@ -34,6 +34,6 @@
 
 (def viewer
   {:predicate string?
-   :component inspect-jwt
+   :component #'inspect-jwt
    :name :portal.viewer/jwt
    :doc "Parse a string as a JWT. Will render error if parsing fails."})

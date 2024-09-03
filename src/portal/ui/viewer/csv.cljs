@@ -21,6 +21,6 @@
 
 (def viewer
   {:predicate csv?
-   :component inspect-csv
+   :component #'inspect-csv
    :name :portal.viewer/csv
    :doc "Parse a string as a CSV and use the table viewer by default."})

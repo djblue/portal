@@ -172,10 +172,10 @@
 
 (def viewer
   {:predicate string?
-   :component inspect-code
+   :component #'inspect-code
    :name      :portal.viewer/code})
 
 (def pr-str-viewer
   {:predicate (constantly true)
-   :component inspect-pr-str
+   :component #'inspect-pr-str
    :name      :portal.viewer/pr-str})

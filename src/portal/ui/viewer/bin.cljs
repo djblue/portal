@@ -66,6 +66,6 @@
 
 (def viewer
   {:predicate ins/bin?
-   :component inspect-bin
+   :component #'inspect-bin
    :name      :portal.viewer/bin
    :doc       "View binary data as a hexdump."})

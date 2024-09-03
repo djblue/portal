@@ -229,6 +229,6 @@
 
 (def viewer
   {:predicate io?
-   :component inspect-prepl
+   :component #'inspect-prepl
    :name      :portal.viewer/prepl
    :doc       "View interlacing of stdout, stderr and tap values. Useful for build output."})

@@ -311,6 +311,6 @@
 
 (def viewer
   {:predicate table-view?
-   :component inspect-table
+   :component #'inspect-table
    :name :portal.viewer/table
    :doc "View value as a table. Supports sticky headers and keyboard navigation."})

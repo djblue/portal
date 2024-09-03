@@ -18,6 +18,6 @@
 
 (def viewer
   {:predicate transit?
-   :component inspect-transit
+   :component #'inspect-transit
    :name :portal.viewer/transit
    :doc "Parse a string as transit. Will render error if parsing fails."})

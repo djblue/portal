@@ -168,6 +168,6 @@
 
 (def viewer
   {:predicate get-component
-   :component inspect-http
+   :component #'inspect-http
    :name      :portal.viewer/http
    :doc       "Highlight HTTP method and status code for http request and response."})

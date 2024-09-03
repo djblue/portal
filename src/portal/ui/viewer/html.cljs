@@ -13,5 +13,5 @@
 
 (def viewer
   {:predicate string?
-   :component inspect-html
+   :component #'inspect-html
    :name :portal.viewer/html})

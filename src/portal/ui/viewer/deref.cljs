@@ -72,5 +72,5 @@
 
 (def viewer
   {:predicate atom?
-   :component inspect-deref
+   :component #'inspect-deref
    :name :portal.viewer/deref})

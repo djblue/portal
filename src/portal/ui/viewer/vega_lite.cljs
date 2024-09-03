@@ -24,5 +24,5 @@
 
 (def viewer
   {:predicate (partial s/valid? ::vega-lite)
-   :component vega-lite-viewer
+   :component #'vega-lite-viewer
    :name :portal.viewer/vega-lite})

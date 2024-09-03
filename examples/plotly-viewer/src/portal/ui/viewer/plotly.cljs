@@ -22,7 +22,7 @@
 (def viewer
   {#_#_:predicate (partial sp/valid? ::plotly)
    :predicate (constantly true)
-   :component plotly-viewer
+   :component #'plotly-viewer
    :name :portal.viewer/plotly})
 
 ;; (comment

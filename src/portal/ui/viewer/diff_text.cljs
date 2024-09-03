@@ -116,6 +116,6 @@
 
 (def viewer
   {:predicate diff-text?
-   :component inspect-text-diff
+   :component #'inspect-text-diff
    :name :portal.viewer/diff-text
    :doc "Diff two strings."})
