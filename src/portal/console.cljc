@@ -44,7 +44,7 @@
                          :portal *file*
                          :joyride '*file*
                          :org.babashka/nbb *file*
-                         :cljs nil
+                         :cljs file
                          :cljr *file*)
            :line     ~line
            :column   ~column
