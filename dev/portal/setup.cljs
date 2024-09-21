@@ -1,14 +1,14 @@
 (ns portal.setup
   (:require [clojure.datafy :refer [datafy]]
             [examples.data :refer [data]]
+            [portal.client.web :as remote]
             [portal.console :as log]
             [portal.runtime :as rt]
-            [portal.shadow.remote :as remote]
+            #_[portal.shadow.remote :as remote]
             [portal.shortcuts :as shortcuts]
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
             [portal.ui.inspector :as ins]
-            [portal.ui.repl.sci.eval :as sci]
             [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
@@ -44,7 +44,7 @@
 
 (defn submit [value]
   (let [value (datafy value)]
-    (comment (remote/submit value))
+    (remote/submit {:encoding :cson :port js/location.port} value)
     (dashboard-submit value)))
 
 (defn async-submit [value]
@@ -77,7 +77,6 @@
    [["Portal Client"
      (section "Taps" tap-list)
      (section "State" state/state)
-     (section "SCI Context" sci/ctx)
      ["RPC"
       (section "Logs" state/log)]
      (section "Viewers" api/viewers)

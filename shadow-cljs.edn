@@ -15,7 +15,9 @@
     :warnings-as-errors true
     :output-feature-set :es2018}
    :build-hooks [(portal.shadow.remote/hook {:port 53755})]
-   :modules {:main {:init-fn portal.ui.core/main!}}
+   :modules {:main {:init-fn portal.ui.core/main!
+                    :entries [portal.ui.core
+                              portal.ui.repl.sci.eval]}}
    :release {:output-dir "resources/portal/"}
    :devtools {:after-load portal.ui.core/reload!
               :use-document-host false

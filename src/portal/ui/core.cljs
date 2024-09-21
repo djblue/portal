@@ -7,7 +7,6 @@
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
             [portal.ui.react :refer [use-effect]]
-            [portal.ui.repl.sci.eval]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [reagent.core :as r]
