@@ -61,6 +61,13 @@
                 :cljr (File/Exists f)))
     f))
 
+(defn modified [f]
+  (when f
+    #?(:clj  (.lastModified (io/file f))
+       :cljs (.getTime ^js/Date (.-mtime (fs/lstatSync f)))
+       :cljr (.ToUnixTimeMilliseconds
+              (DateTimeOffset. (File/GetLastWriteTime f))))))
+
 (defn can-execute [f]
   #?(:clj  (let [file (io/file f)]
              (and (.exists file) (.canExecute file) f))

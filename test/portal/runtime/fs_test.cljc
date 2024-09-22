@@ -28,3 +28,8 @@
   (is (= "deps.edn" (fs/basename "deps.edn")))
   (is (= "portal" (fs/basename "src/portal")))
   (is (= "runtime.cljc" (fs/basename "src/portal/runtime.cljc"))))
+
+(deftest modified
+  (fs/spit "target/new" "hi")
+  (is (< (fs/modified "deps.edn")
+         (fs/modified "target/new"))))
