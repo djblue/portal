@@ -1,0 +1,8 @@
+;; clj -M:cljs -m cljs.main -co boot.edn --compile
+{:main portal.ui.boot
+ :optimizations :simple
+ :target :nodejs
+ :output-to "resources/portal-boot/main.js"
+ :output-dir "resources/portal-boot/"
+ :pretty-print false
+ :static-fns true}

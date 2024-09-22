@@ -19,9 +19,17 @@
            path    (js/require "path")
            ^js uri (-> vscode .-workspace .-workspaceFolders (aget 0) .-uri)
            fs-path (.-fsPath uri)]
-       (.join path (if-not (undefined? fs-path) fs-path (.-path uri))
-              "resources"
-              _resource-name))))
+       (p/join  (if-not (undefined? fs-path) fs-path (.-path uri))
+                "resources"
+                _resource-name))
+     :cljs
+     (let [path (js/require "path")
+           fs   (js/require "fs")]
+       (some (fn [prefix]
+               (let [absolute-path (.join path prefix _resource-name)]
+                 (when (.existsSync fs absolute-path)
+                   absolute-path)))
+             ["resources" "src"]))))
 
 (defonce ^:no-doc resources (atom {}))
 
@@ -37,7 +45,15 @@
             (get ~resource-name))
        (catch Exception e
          (println e))))
-   :joyride (defn inline [resourece-name] (resources/inline resourece-name))
+
+   :joyride
+   (defn inline [resource-name] (resources/inline resource-name))
+
    :org.babashka/nbb (defn inline [resource-name]
                        (fs/readFileSync (resource resource-name) "utf8"))
-   :cljs    (defn inline [resourece-name] (get @resources resourece-name)))
+   :cljs    (defn inline [resource-name]
+              (if (exists? js/INLINE)
+                (js/INLINE resource-name)
+                (if (exists? js/process.version)
+                  (.readFileSync (js/require "fs") (str "resources/" resource-name) "utf8")
+                  (get @resources resource-name)))))

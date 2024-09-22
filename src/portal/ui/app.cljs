@@ -145,8 +145,9 @@
 (defn- use-runtime-info []
   (let [opts       (opts/use-options)
         theme      (theme/use-theme)
-        header     (if (= :dev (:mode opts))
-                     (::c/diff-add theme)
+        header     (case (:mode opts)
+                     :dev (::c/diff-add theme)
+                     :boot  (::c/tag theme)
                      (::c/background2 theme))]
     (use-effect
      #js [header]

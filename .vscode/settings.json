@@ -40,10 +40,8 @@
       "projectRootPath": [
         "."
       ],
-      "customJackInCommandLine": "bb dev",
-      "nReplPortFile": [
-        ".shadow-cljs",
-        "nrepl.port"
+      "extraNReplMiddleware": [
+        "portal.nrepl/middleware"
       ],
       "shouldOpenUrl": false,
       "cljsType": {
@@ -56,8 +54,7 @@
         "cljAliases": [
           ":dev",
           ":cider",
-          ":cljs",
-          ":shadow"
+          ":cljs"
         ]
       }
     }
