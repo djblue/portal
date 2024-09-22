@@ -9,7 +9,7 @@
   #?(:bb   (json/generate-string value)
      :clj  (json/write-str value)
      :cljr (json/write-str value)
-     :cljs (.stringify js/JSON value)))
+     :cljs (.stringify js/JSON (clj->js value))))
 
 (defn read
   ([string]
