@@ -48,6 +48,7 @@
 (defn main! []
   (cljs/init)
   (reset! state/sender rpc/request)
+  (reset! state/render #'render-app)
   (render-app))
 
 (defn reload! [] (render-app))

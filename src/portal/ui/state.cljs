@@ -6,6 +6,7 @@
             [reagent.core :as r]))
 
 (defonce sender (atom nil))
+(defonce render (atom nil))
 (defonce state  (r/atom {}))
 (defonce ^:no-doc log (atom (list)))
 

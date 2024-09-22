@@ -130,6 +130,8 @@
              (return {:error e :message (.-message e)}))]
        (a/try
          (a/let [{:keys [value] :as response} (cljs/eval-string message)]
+           (when-let [render (and (:re-render message) @state/render)]
+             (render))
            (if-not (:await message)
              (return response)
              (-> (.resolve js/Promise value)

@@ -154,10 +154,12 @@
                     portal
                     code
                     (-> {:ns (get @session #'*portal-ns*)}
-                        (merge  msg)
+                        (merge msg)
                         (select-keys  [:ns :line :column])
-                        (assoc :file file)
-                        (assoc  :verbose true)))]
+                        (assoc :file file
+                               :verbose true
+                               :context (case op "eval" :expr "load-file" :statement)
+                               :re-render (= op "load-file"))))]
                (when-let [namespace (:ns response)]
                  (swap! session assoc #'*portal-ns* namespace))
                (when (= value :cljs/quit)
