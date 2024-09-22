@@ -128,8 +128,8 @@
            error
            (fn [e]
              (return {:error e :message (.-message e)}))]
-       (try
-         (let [{:keys [value] :as response} (cljs/eval-string message)]
+       (a/try
+         (a/let [{:keys [value] :as response} (cljs/eval-string message)]
            (if-not (:await message)
              (return response)
              (-> (.resolve js/Promise value)
