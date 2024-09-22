@@ -1,5 +1,6 @@
 (ns ^:no-doc portal.ui.core
   (:require ["react" :as react]
+            [portal.async :as a]
             [portal.extensions.vs-code-notebook :as notebook]
             [portal.ui.api :as api]
             [portal.ui.app :as app]
@@ -18,11 +19,9 @@
   (let [[app set-app!] (react/useState nil)]
     (use-effect
      :once
-     (let [component
-           (-> {:code (str "(require '" (namespace (:main opts)) ")" (:main opts))}
-               (cljs/eval-string)
-               :value)]
-       (set-app! (fn [] component))))
+     (a/let [_   (cljs/eval-string {:code (str "(require '" (namespace (:main opts)) ")")})
+             res (cljs/eval-string {:code (str (:main opts)) :context :expr})]
+       (set-app! (fn [] (:value res)))))
     (when app
       [app/root [app]])))
 
