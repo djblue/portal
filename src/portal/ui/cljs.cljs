@@ -2,7 +2,11 @@
 
 (def eval-fn (atom nil))
 
-(defn eval-string [input] (@eval-fn input))
+(defn eval-string [input]
+  (let [f @eval-fn]
+    (if (fn? f)
+      (f input)
+      (throw (ex-info "No eval-fn setup." {:input input})))))
 
 (def init-fn (atom nil))
 
