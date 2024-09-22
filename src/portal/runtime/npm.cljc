@@ -11,9 +11,11 @@
       module
       (let [json    (json/read (fs/slurp package) {})
             umd     (get-in json ["exports" "umd"])
+            unpkg   (get json "unpkg")
             browser (get json "browser")
             main    (get json "main")]
         (or umd
+            unpkg
             (when (string? browser)
               browser)
             (get browser main)
