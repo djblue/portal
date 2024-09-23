@@ -10,7 +10,6 @@
             [portal.runtime.index :as index]
             [portal.runtime.json :as json]
             [portal.runtime.npm :as npm]
-            [portal.runtime.remote.socket :as socket]
             [portal.runtime.rpc :as rpc])
   (:import [java.io File PushbackReader]
            [java.util UUID]))
@@ -25,23 +24,6 @@
 
 (defmulti route (juxt :request-method :uri))
 
-(defn- rpc-handler-remote [request]
-  (let [conn (socket/open (:session request))]
-    (server/as-channel
-     request
-     {:on-receive
-      (fn [_ch message]
-        (socket/handler conn message))
-      :on-open
-      (fn [ch]
-        (try
-          (doseq [message (socket/responses conn)]
-            (server/send! ch message))
-          (catch Exception _e)))
-      :on-close
-      (fn [_ch _status]
-        (socket/close conn))})))
-
 (defn- open-debug [{:keys [options] :as session}]
   (try
     (when (= :server (:debug options))
@@ -54,7 +36,7 @@
       ((requiring-resolve 'portal.runtime.debug/close) instance))
     (catch Exception e (tap> e) nil)))
 
-(defn- rpc-handler-local [request]
+(defmethod route [:get "/rpc"] [request]
   (let [session (rt/open-session (:session request))
         debug   (open-debug session)]
     (server/as-channel
@@ -64,11 +46,6 @@
       :on-close   (fn [_ch _status]
                     (close-debug debug)
                     (rpc/on-close session))})))
-
-(defmethod route [:get "/rpc"] [request]
-  (if (get-in request [:session :options :runtime])
-    (rpc-handler-remote request)
-    (rpc-handler-local request)))
 
 (defn- send-resource [content-type resource]
   {:status  200
