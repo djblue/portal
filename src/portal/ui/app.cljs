@@ -51,6 +51,45 @@
             [portal.ui.viewer.vega-lite :as vega-lite]
             [reagent.core :as r]))
 
+(defn- select-viewer []
+  (let [state            (state/use-state)
+        theme            (theme/use-theme)
+        selected-context (state/get-all-selected-context @state)
+        viewer           (ins/get-viewer state (first selected-context))]
+    [s/div
+     {:title "Select a different viewer."
+      :on-click #(commands/select-viewer state)
+      :style
+      {:display :flex
+       :align-items :center
+       :cursor :pointer
+       :padding-left (:padding theme)
+       :padding-right (:padding theme)
+       :border-left [1 :solid (::c/border theme)]
+       :border-right [1 :solid (::c/border theme)]}
+      :style/hover {:background (::c/border theme)}}
+     [s/div
+      {:style {:opacity (if (seq selected-context) 1 0.5)}}
+      [ins/with-readonly [ins/inspector (:name viewer)]]]]))
+
+(defn- open-command-palette []
+  (let [state (state/use-state)
+        theme (theme/use-theme)]
+    [s/div
+     {:title    "Open command palette."
+      :on-click #(commands/open-command-palette state)
+      :style
+      {:padding-left (* 2 (:padding theme))
+       :padding-right (* 2 (:padding theme))
+       :color (::c/tag theme)
+       :display :flex
+       :align-items :center
+       :cursor :pointer
+       :border-left [1 :solid (::c/border theme)]
+       :border-right [1 :solid (::c/border theme)]}
+      :style/hover {:background (::c/border theme)}}
+     [icons/terminal]]))
+
 (defn- selected-context-view []
   (let [theme (theme/use-theme)
         state (state/use-state)
@@ -59,8 +98,11 @@
     [s/div
      {:style
       {:max-width "100vw"
+       :padding-left (:padding theme)
+       :padding-right (:padding theme)
+       :gap (:padding theme)
        :display :flex
-       :align-items :center
+       :align-items :stretch
        :justify-content :space-between
        :background (::c/background2 theme)
        :color (::c/text theme)
@@ -73,9 +115,9 @@
        {:color (::c/border theme)
         :cursor :pointer
         :box-sizing :border-box
-        :padding (:padding theme)
-        :border-right [1 :solid (::c/border theme)]}}
+        :padding (:padding theme)}}
       [icons/copy]]
+     [select-viewer]
      [s/div
       {:style
        {:flex "1"
@@ -92,13 +134,13 @@
          [s/div {:style {:grid-row "1"}} [ins/preview k]])
        path)
       [s/div {:style {:grid-row "1"}} "]"]]
+     [open-command-palette]
      [s/div {:style
              {:display :flex
               :height "100%"
               :align-items :center
               :box-sizing :border-box
-              :padding (* 0.5 (:padding theme))
-              :border-left [1 :solid (::c/border theme)]}}
+              :padding (* 0.5 (:padding theme))}}
       [log/icon (:runtime opts :portal)]]]))
 
 (defn- use-runtime-info []
@@ -121,51 +163,21 @@
 
 (defn inspect-footer []
   (let [theme (theme/use-theme)
-        state (state/use-state)
-        connected?       (status/use-status)
-        selected-context (state/get-all-selected-context @state)
-        viewer           (ins/get-viewer state (first selected-context))
-        compatible-viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
+        connected?       (status/use-status)]
     (use-runtime-info)
-    [s/div
-     {:style
-      {:display :flex
-       :padding-top (:padding theme)
-       :padding-bottom (:padding theme)
-       :padding-right (* 1.5 (:padding theme))
-       :padding-left (* 1.5 (:padding theme))
-       :align-items :center
-       :justify-content :space-between
-       :background (if-not connected?
-                     (::c/exception theme)
-                     (::c/background2 theme))
-       :box-sizing :border-box
-       :border-top [1 :solid (::c/border theme)]}}
-     [s/div
-      {:style {:flex "1"}}
-      [s/select
-       {:title "Select a different viewer."
-        :value (pr-str (:name viewer))
-        :on-change
-        (fn [e]
-          (ins/set-viewer!
-           state
-           selected-context
-           (keyword (.substr (.. e -target -value) 1))))
-        :style
-        {:background (::c/background theme)
-         :padding (:padding theme)
+    (when-not connected?
+      [s/div
+       {:style
+        {:display :flex
+         :padding-top (:padding theme)
+         :padding-bottom (:padding theme)
+         :align-items :center
+         :justify-content :space-between
+         :background (if-not connected?
+                       (::c/exception theme)
+                       (::c/background2 theme))
          :box-sizing :border-box
-         :font-family (:font-family theme)
-         :font-size (:font-size theme)
-         :color (::c/text theme)
-         :border-radius (:border-radius theme)
-         :border [1 :solid (::c/border theme)]}}
-       (for [{:keys [name]} compatible-viewers]
-         ^{:key name}
-         [s/option {:value (pr-str name)} (pr-str name)])]]
-
-     (when-not connected?
+         :border-top [1 :solid (::c/border theme)]}}
        [s/div
         {:style {:text-align :center :flex "1" :color (::c/text theme)}}
         [s/div
@@ -175,28 +187,7 @@
         [s/div
          "(portal.api/start "
          (pr-str (select-keys (rpc/resolve-connection) [:port]))
-         ")"]])
-
-     [s/div
-      {:style {:flex "1" :text-align :right}}
-      [s/button
-       {:title    "Open command palette."
-        :on-click #(commands/open-command-palette state)
-        :style
-        {:font-family (:font-family theme)
-         :background (::c/background theme)
-         :border-radius (:border-radius theme)
-         :border [1 :solid (::c/border theme)]
-         :box-sizing :border-box
-         :padding-top (:padding theme)
-         :padding-bottom (:padding theme)
-         :padding-left (* 3 (:padding theme))
-         :padding-right (* 3 (:padding theme))
-         :color (::c/tag theme)
-         :font-size (:font-size theme)
-         :font-weight :bold
-         :cursor :pointer}}
-       [icons/terminal]]]]))
+         ")"]]])))
 
 (defn- search-input []
   (let [ref      (react/useRef nil)
