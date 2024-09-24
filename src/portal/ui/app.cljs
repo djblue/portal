@@ -231,7 +231,7 @@
        :style
        {:flex "1"
         :background (::c/background theme)
-        :padding (:padding theme)
+        :padding (* 0.75 (:padding theme))
         :box-sizing :border-box
         :font-family (:font-family theme)
         :font-size (:font-size theme)
@@ -282,11 +282,11 @@
       {:display :grid
        :grid-template-columns "auto auto 1fr auto"
        :box-sizing :border-box
-       :padding-top (:padding theme)
-       :padding-bottom (:padding theme)
-       :padding-right (* 1.5 (:padding theme))
-       :padding-left (* 1.5 (:padding theme))
-       :grid-gap (* 1.5 (:padding theme))
+       :padding-top (* 0.5 (:padding theme))
+       :padding-bottom (* 0.5 (:padding theme))
+       :padding-right (:padding theme)
+       :padding-left (:padding theme)
+       :grid-gap (* 0.5 (:padding theme))
        :background (::c/background2 theme)
        :align-items :center
        :justify-content :center
