@@ -76,16 +76,26 @@
 (defn- get-windows-user []
   (str/trim (:out (shell/sh "cmd.exe" "/C" "echo %USERNAME%"))))
 
+(defn- windows-chrome-web-applications []
+  (tree-seq
+   (fn [f]
+     (and (not (fs/is-file f))
+          (or
+           (str/includes? f "_crx_")
+           (str/ends-with? f "Web Applications"))))
+   (fn [d] (fs/list d))
+   (fs/join
+    "/mnt/c/Users"
+    (get-windows-user)
+    "AppData/Local/Google/Chrome/User Data/Default/Web Applications")))
+
 (defn- get-app-id-profile-windows [app-name]
   (try
     (some
      (fn [file]
        (when (str/ends-with? file (str app-name ".lnk"))
          {:app-id (str/replace (fs/basename (fs/dirname file)) "_crx_" "")}))
-     (fs/file-seq
-      (fs/join "/mnt/c/Users"
-               (get-windows-user)
-               "AppData/Local/Google/Chrome/User Data/Default/Web Applications")))
+     (windows-chrome-web-applications))
     (catch #?(:cljs :default :default Exception) _)))
 
 (defn- get-app-id-profile
