@@ -386,14 +386,14 @@
         [selected-context-view]])]))
 
 (defn scrollbars []
-  (when-not (theme/is-vs-code?)
-    (let [thumb "rgba(0,0,0,0.3)"]
+  (let [theme (theme/use-theme)]
+    (when-not (theme/is-vs-code?)
       [:style
-       (str "*::-webkit-scrollbar { width: 10px; height: 10px; }"
+       (str "*::-webkit-scrollbar { width: " (* 2 (:padding theme)) "px }"
             "*::-webkit-scrollbar-corner { opacity: 0 }"
             "*::-webkit-scrollbar-track  { opacity: 0 }"
-            "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
-            "*::-webkit-scrollbar-thumb  { border-radius: 10px; }")])))
+            "*::-webkit-scrollbar-thumb  { background-color: " (::c/border theme) "; }"
+            "*::-webkit-scrollbar-thumb  { border-radius: " (* 4 (:border-radius theme)) "px }")])))
 
 (defn text-selection []
   (let [style "background: rgba(0,0,0,0.5)"]
