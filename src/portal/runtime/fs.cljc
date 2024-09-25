@@ -98,7 +98,7 @@
              (.getAbsolutePath f))
      :cljs (for [f (fs/readdirSync path)]
              (join path f))
-     :cljr (Directory/GetFiles path)))
+     :cljr (Directory/GetFileSystemEntries  path)))
 
 (defn rm [path]
   #?(:clj  (let [children (list path)]
