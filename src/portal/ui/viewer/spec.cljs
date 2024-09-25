@@ -27,7 +27,7 @@
 ;;;
 
 (defn- missing-key [{:keys [pred]}]
-  (and (doto (seq? pred) tap>)
+  (and (seq? pred)
        (seq? (nth pred 2))
        (= 'clojure.core/contains? (first (nth pred 2)))))
 
