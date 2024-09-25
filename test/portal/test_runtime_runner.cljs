@@ -10,6 +10,7 @@
             [portal.runtime.fs-test]
             [portal.runtime.json-buffer-test]
             [portal.runtime.npm-test]
+            [portal.runtime.shell-test]
             [portal.test-runner :as runner]))
 
 (defn -main []
@@ -21,7 +22,8 @@
                  'portal.runtime.edn-test
                  'portal.runtime.fs-test
                  'portal.runtime.json-buffer-test
-                 'portal.runtime.npm-test))
+                 'portal.runtime.npm-test
+                 'portal.runtime.shell-test))
   (runner/table (bench/run)))
 
 (when-not (str/ends-with? (second js/process.argv) "nbb")

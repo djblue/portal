@@ -22,3 +22,11 @@
          (when-not (zero? exit)
            (prn (into [bin] args))
            (println err out))))))
+
+(defn sh [bin & args]
+  #?(:clj  (apply shell/sh bin args)
+     :cljs (let [result (cp/spawnSync bin (clj->js args))]
+             {:exit (.-status result)
+              :out  (str (.-stdout result))
+              :err  (str (.-stderr result))})
+     :cljr (apply shell/sh bin args)))

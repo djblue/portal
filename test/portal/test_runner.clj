@@ -11,7 +11,8 @@
             [portal.runtime.fs-test]
             [portal.runtime.json-buffer-test]
             [portal.runtime.jvm.editor-test]
-            [portal.runtime.npm-test]))
+            [portal.runtime.npm-test]
+            [portal.runtime.shell-test]))
 
 (def port (System/getenv "PORTAL_PORT"))
 
@@ -44,7 +45,8 @@
                    'portal.runtime.fs-test
                    'portal.runtime.json-buffer-test
                    'portal.runtime.jvm.editor-test
-                   'portal.runtime.npm-test)]
+                   'portal.runtime.npm-test
+                   'portal.runtime.shell-test)]
     (table (bench/run))
     (shutdown-agents)
     (System/exit (+ fail error))))

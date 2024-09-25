@@ -10,7 +10,8 @@
             [portal.runtime.edn-test]
             [portal.runtime.fs-test]
             [portal.runtime.json-buffer-test]
-            [portal.runtime.npm-test])
+            [portal.runtime.npm-test]
+            [portal.runtime.shell-test])
   (:import (System Environment)))
 
 (def port (Environment/GetEnvironmentVariable "PORTAL_PORT"))
@@ -44,6 +45,7 @@
          'portal.runtime.edn-test
          'portal.runtime.fs-test
          'portal.runtime.json-buffer-test
-         'portal.runtime.npm-test)]
+         'portal.runtime.npm-test
+         'portal.runtime.shell-test)]
     (table (bench/run))
     (Environment/Exit (+ fail error))))
