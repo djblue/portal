@@ -1164,7 +1164,7 @@
                 (not= (.. js/document -activeElement -tagName) "INPUT"))
        (when-let [el (.-current ref)]
          (when-not (and (.hasFocus js/document) (l/element-visible? el))
-           (.scrollIntoView el #js {:inline "nearest" :behavior "smooth"})))))
+           (.scrollIntoView el #js {:inline "nearest" :block "nearest" :behavior "smooth"})))))
     [:> error-boundary
      [with-options options
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
