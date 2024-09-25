@@ -339,7 +339,15 @@
      (when-let [el (.-current ref)]
        (state/dispatch! state assoc :scroll-element el)))
     [s/div
-     {:style
+     {:on-mouse-up
+      (fn [e]
+        (let [button (.-button e)]
+          (cond
+            (= 3 button)
+            (commands/history-back state)
+            (= 4 button)
+            (commands/history-forward state))))
+      :style
       {:height "100vh"
        :display :flex
        :flex-direction :column}}
