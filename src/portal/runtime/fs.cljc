@@ -1,5 +1,5 @@
 (ns ^:no-doc portal.runtime.fs
-  (:refer-clojure :exclude [slurp spit list])
+  (:refer-clojure :exclude [slurp spit list file-seq])
   #?(:clj  (:require [clojure.java.io :as io]
                      [clojure.string :as s])
      :cljs (:require ["fs" :as fs]
@@ -124,3 +124,9 @@
   #?(:clj  (.getName (io/file path))
      :cljs (path/basename path)
      :cljr (Path/GetFileName path)))
+
+(defn file-seq [dir]
+  (tree-seq
+   (fn [f] (not (is-file f)))
+   (fn [d] (seq (list d)))
+   (join dir)))
