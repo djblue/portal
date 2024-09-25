@@ -1,22 +1,25 @@
 (ns ^:no-doc portal.runtime.browser
   #?(:clj  (:refer-clojure :exclude [random-uuid]))
   #?(:clj  (:require [clojure.java.browse :refer [browse-url]]
+                     [clojure.string :as str]
                      [portal.runtime :as rt]
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
                      [portal.runtime.jvm.client :as c]
                      [portal.runtime.shell :as shell])
-     :cljs (:require [portal.runtime :as rt]
+     :cljs (:require [clojure.string :as str]
+                     [portal.runtime :as rt]
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
                      [portal.runtime.node.client :as c]
                      [portal.runtime.shell :as shell])
-     :cljr (:require [portal.runtime :as rt]
+     :cljr (:require [clojure.string :as str]
+                     [portal.runtime :as rt]
                      [portal.runtime.clr.client :as c]
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
                      [portal.runtime.shell :as shell]))
-  #?(:cljr (:import [System.Runtime.InteropServices RuntimeInformation OSPlatform])))
+  #?(:cljr (:import [System.Runtime.InteropServices OSPlatform RuntimeInformation])))
 
 (defmulti -open (comp :launcher :options))
 
@@ -70,10 +73,27 @@
            :when (and profile app-id)]
        {:app-id app-id :profile profile}))))
 
+(defn- get-windows-user []
+  (str/trim (:out (shell/sh "cmd.exe" "/C" "echo %USERNAME%"))))
+
+(defn- get-app-id-profile-windows [app-name]
+  (try
+    (some
+     (fn [file]
+       (when (str/ends-with? file (str app-name ".lnk"))
+         {:app-id (str/replace (fs/basename (fs/dirname file)) "_crx_" "")}))
+     (fs/file-seq
+      (fs/join "/mnt/c/Users"
+               (get-windows-user)
+               "AppData/Local/Google/Chrome/User Data/Default/Web Applications")))
+    (catch #?(:cljs :default :default Exception) _)))
+
 (defn- get-app-id-profile
   "Returns app-id and profile if portal is installed as `app-name` under any of the browser profiles"
   [app-name]
-  (or (get-app-id-profile-osx app-name) (get-app-id-profile-linux app-name)))
+  (or (get-app-id-profile-osx app-name)
+      (get-app-id-profile-linux app-name)
+      (get-app-id-profile-windows app-name)))
 
 (def pwa
   {:name "portal"
