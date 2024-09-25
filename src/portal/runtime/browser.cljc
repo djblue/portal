@@ -95,16 +95,16 @@
 
 (defn- browse [url]
   (or
-   (some-> (get-browser) (shell/sh url))
+   (some-> (get-browser) (shell/spawn url))
    #?(:clj
       (try (browse-url url)
            (catch Exception _e
              (println "Goto" url "to view portal ui.")))
       :cljs
       (case (.-platform js/process)
-        ("android" "linux") (shell/sh "xdg-open" url)
-        "darwin"            (shell/sh "open" url)
-        "win32"             (shell/sh "cmd" "/c" "start" url)
+        ("android" "linux") (shell/spawn "xdg-open" url)
+        "darwin"            (shell/spawn "open" url)
+        "win32"             (shell/spawn "cmd" "/c" "start" url)
         (println "Goto" url "to view portal ui."))
       :cljr
       (condp identical? (.Platform Environment/OSVersion)
@@ -125,7 +125,7 @@
         chrome-flags (::flags options flags)]
     (if (and (some? chrome-bin)
              (:app options true))
-      (apply shell/sh chrome-bin (chrome-flags (url args)))
+      (apply shell/spawn chrome-bin (chrome-flags (url args)))
       (browse (url args)))))
 
 (defmethod -open false [_args])

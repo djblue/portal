@@ -7,7 +7,7 @@
             [portal.runtime :as rt]
             [portal.runtime.fs :as fs]
             [portal.runtime.jvm.launcher :as launcher]
-            [portal.runtime.shell :refer [sh]])
+            [portal.runtime.shell :refer [spawn]])
   (:import (java.io File)
            (java.net URL URI)))
 
@@ -106,8 +106,8 @@
 
 (defmethod -open-editor :emacs [{:keys [line column file]}]
   (if-not line
-    (sh "emacsclient" file)
-    (sh "emacsclient" "-n" (str "+" line ":" column) file)))
+    (spawn "emacsclient" file)
+    (spawn "emacsclient" "-n" (str "+" line ":" column) file)))
 
 (defn- get-vs-code []
   (or (fs/can-execute "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code")
@@ -133,7 +133,7 @@
   (try
     (extension-open-editor info (launcher/get-config {:config-file "vs-code.edn"}))
     (catch Exception _
-      (sh (get-vs-code) "--goto" (str file ":" line ":" column)))))
+      (spawn (get-vs-code) "--goto" (str file ":" line ":" column)))))
 
 (defmethod -open-editor :intellij [info]
   (extension-open-editor info (launcher/get-config {:config-file "intellij.edn"})))

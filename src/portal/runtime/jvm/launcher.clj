@@ -7,7 +7,7 @@
             [portal.runtime.fs :as fs]
             [portal.runtime.jvm.client :as c]
             [portal.runtime.jvm.server :as server]
-            [portal.runtime.shell :refer [sh]]))
+            [portal.runtime.shell :refer [spawn]]))
 
 (defn- get-search-paths []
   (->> (fs/cwd) (iterate fs/dirname) (take-while some?)))
@@ -62,8 +62,8 @@
 
 (defmethod browser/-open :emacs [{:keys [portal server]}]
   (let [url (str "http://" (:host server) ":" (:port server) "?" (:session-id portal))]
-    (sh "emacsclient" "--no-wait" "--eval"
-        (str "(xwidget-webkit-browse-url " (pr-str url) ")"))))
+    (spawn "emacsclient" "--no-wait" "--eval"
+           (str "(xwidget-webkit-browse-url " (pr-str url) ")"))))
 
 (defmethod browser/-open :electron [args] (remote-open (assoc args :config-file "electron.edn")))
 

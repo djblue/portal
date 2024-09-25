@@ -3,7 +3,7 @@
      :cljs (:require ["child_process" :as cp])
      :cljr (:require [clojure.clr.shell :as shell])))
 
-(defn sh [bin & args]
+(defn spawn [bin & args]
   #?(:clj
      (future
        (let [{:keys [exit err out]} (apply shell/sh bin args)]
