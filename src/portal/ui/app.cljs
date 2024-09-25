@@ -389,8 +389,7 @@
   (when-not (theme/is-vs-code?)
     (let [thumb "rgba(0,0,0,0.3)"]
       [:style
-       (str "* { scrollbar-color: " thumb " rgba(0,0,0,0); } "
-            "*::-webkit-scrollbar { width: 10px; height: 10px; }"
+       (str "*::-webkit-scrollbar { width: 10px; height: 10px; }"
             "*::-webkit-scrollbar-corner { opacity: 0 }"
             "*::-webkit-scrollbar-track  { opacity: 0 }"
             "*::-webkit-scrollbar-thumb  { background-color: " thumb "; }"
