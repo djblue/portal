@@ -330,3 +330,13 @@
    (reverse
     (take-while some? (rest (iterate :portal/previous-state state))))
    (take-while some? (iterate :portal/next-state state))))
+
+(defn notify [state notification]
+  (if (some #{notification} (:portal.ui.app/notifications state))
+    state
+    (update state :portal.ui.app/notifications (fnil conj []) notification)))
+
+(defn dismiss [state notification]
+  (update state :portal.ui.app/notifications
+          (fn [notifications]
+            (filterv (complement #{notification}) notifications))))

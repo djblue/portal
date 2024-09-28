@@ -39,3 +39,5 @@
                  (.resolve js/Promise ~form)))))
    `(.resolve js/Promise nil)
    body))
+
+#?(:cljs (defn race [& args] (.race js/Promise args)))

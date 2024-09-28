@@ -1,15 +1,7 @@
 (ns ^:no-doc portal.ui.connection-status
-  (:require [portal.ui.react :refer [use-effect]]
-            [portal.ui.rpc.runtime :as rt]
-            [portal.ui.state :as state]
-            [reagent.core :as r]))
-
-(defn- use-interval [f milliseconds]
-  (use-effect
-   #js [f]
-   (when (fn? f)
-     (let [interval (js/setInterval f milliseconds)]
-       (fn [] (js/clearInterval interval))))))
+  (:require [portal.async :as a]
+            [portal.ui.react :refer [use-effect]]
+            [portal.ui.state :as state]))
 
 (defn- timeout [ms]
   (js/Promise.
@@ -19,24 +11,29 @@
 
 (def ^:private poll-interval-ms 5000)
 
+(def ^:private disconnect-notification
+  {:type :error
+   :icon :exclamation-triangle
+   :message "Runtime disconnected"})
+
 (defn- use-conn-poll []
-  (let [state (state/use-state)]
-    (use-interval
-     (fn []
-       (-> (.race js/Promise
-                  [(state/invoke 'portal.runtime/ping)
-                   (timeout poll-interval-ms)])
-           (.then  (fn [_]
-                     ;; reconnecting to runtime
-                     (let [connected (::connected @state)]
-                       (when-not connected
-                         (when (false? connected) (rt/reset-cache!))
-                         (state/dispatch! state assoc ::connected true)))))
-           (.catch (fn [_]
-                     (when (::connected @state)
-                       (state/dispatch! state assoc ::connected false))))))
-     poll-interval-ms)))
+  (let [state  (state/use-state)]
+    (use-effect
+     #js [state]
+     (let [last-poller (atom nil)
+           poller (fn poller []
+                    (a/try
+                      (a/race (state/invoke 'portal.runtime/ping)
+                              (timeout poll-interval-ms))
+                      (state/dispatch! state state/dismiss disconnect-notification)
+                      (catch :default _
+                        (state/dispatch! state state/notify disconnect-notification))
+                      (finally
+                        (when @last-poller
+                          (reset! last-poller (js/setTimeout poller poll-interval-ms))))))]
+       (reset! last-poller (js/setTimeout poller 0))
+       (fn []
+         (js/clearTimeout @last-poller)
+         (reset! last-poller nil))))))
 
 (defn poller [] (use-conn-poll) nil)
-
-(defn use-status [] (not (false? @(r/cursor (state/use-state) [::connected]))))

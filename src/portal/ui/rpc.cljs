@@ -222,7 +222,7 @@
                                       (doseq [[_ [_ reject]] @pending-requests]
                                         (reject e))))
            (set! (.-onclose chan)   #(reset!  ws-promise nil))
-           (set! (.-onopen chan)    #(resolve chan)))))))))
+           (set! (.-onopen chan)    #(do (rt/reset-cache!) (resolve chan))))))))))
 
 (defn- send! [message]
   (.then (connect) #(.send % (write message))))

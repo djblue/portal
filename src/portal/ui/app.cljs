@@ -10,7 +10,6 @@
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
             [portal.ui.react :refer [use-effect]]
-            [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
@@ -161,33 +160,57 @@
          " - "
          [(:window-title opts name) platform version]))))))
 
+(defn display-notification [notification]
+  (let [state (state/use-state)
+        theme (theme/use-theme)
+        timeout (:timeout notification)]
+    (react/useEffect
+     (fn []
+       (when timeout
+         (js/setTimeout #(state/dispatch! state state/dismiss notification) timeout)))
+     #js [])
+    [s/div
+     {:style
+      {:display :flex
+       :padding (:padding theme)
+       :align-items :center
+       :justify-content :space-between
+       :background
+       (case (:type notification)
+         :error (::c/exception theme)
+         :info (::c/boolean theme)
+         (::c/background2 theme))
+       :box-sizing :border-box
+       :border-top [1 :solid (::c/border theme)]
+       :animation [:fade-in-out (str (:timeout notification) "ms")]}}
+     [s/div
+      (when-let [icon (:icon notification)]
+        (case icon
+          :file-code [icons/file-code]
+          :exclamation-triangle [icons/exclamation-triangle]
+          nil))]
+     [s/div
+      {:style {:text-align :center :flex "1" :color (::c/text theme)}}
+      [s/div (:title notification)]
+      [s/div (:message notification)]]
+     [s/div
+      {:title "Dismiss notification."
+       :style {:cursor :pointer}
+       :on-click #(state/dispatch! state state/dismiss notification)}
+      [icons/times]]]))
+
 (defn inspect-footer []
-  (let [theme (theme/use-theme)
-        connected?       (status/use-status)]
+  (let [state (state/use-state)]
     (use-runtime-info)
-    (when-not connected?
-      [s/div
-       {:style
-        {:display :flex
-         :padding-top (:padding theme)
-         :padding-bottom (:padding theme)
-         :align-items :center
-         :justify-content :space-between
-         :background (if-not connected?
-                       (::c/exception theme)
-                       (::c/background2 theme))
-         :box-sizing :border-box
-         :border-top [1 :solid (::c/border theme)]}}
-       [s/div
-        {:style {:text-align :center :flex "1" :color (::c/text theme)}}
-        [s/div
-         #_{:style {:display :flex :gap (:padding theme)}}
-         [s/span {:style {:font-weight :bold}} "Error: "]
-         "Connection lost"]
-        [s/div
-         "(portal.api/start "
-         (pr-str (select-keys (rpc/resolve-connection) [:port]))
-         ")"]]])))
+    (into
+     [:<>
+      [:style
+       "@keyframes fade-in-out {"
+       "0%, 100% { opacity: 0 }"
+       "20%, 80% { opacity: 100 }"
+       "}"]]
+     (for [notification (::notifications @state)]
+       [display-notification notification]))))
 
 (defn- search-input []
   (let [ref      (react/useRef nil)

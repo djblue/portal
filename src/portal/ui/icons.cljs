@@ -18,6 +18,7 @@
             ["@fortawesome/free-solid-svg-icons/faExchangeAlt" :refer [faExchangeAlt]]
             ["@fortawesome/free-solid-svg-icons/faExclamationTriangle" :refer [faExclamationTriangle]]
             ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt" :refer [faExternalLinkAlt]]
+            ["@fortawesome/free-solid-svg-icons/faFileCode" :refer [faFileCode]]
             ["@fortawesome/free-solid-svg-icons/faInfoCircle" :refer [faInfoCircle]]
             ["@fortawesome/free-solid-svg-icons/faMinusCircle" :refer [faMinusCircle]]
             ["@fortawesome/free-solid-svg-icons/faPause" :refer [faPause]]
@@ -27,6 +28,7 @@
             ["@fortawesome/free-solid-svg-icons/faSignOutAlt" :refer [faSignOutAlt]]
             ["@fortawesome/free-solid-svg-icons/faStopCircle" :refer [faStopCircle]]
             ["@fortawesome/free-solid-svg-icons/faTerminal" :refer [faTerminal]]
+            ["@fortawesome/free-solid-svg-icons/faTimes" :refer [faTimes]]
             ["@fortawesome/free-solid-svg-icons/faTimesCircle" :refer [faTimesCircle]]
             ["@fortawesome/react-fontawesome" :refer [FontAwesomeIcon]]
             [portal.ui.styled :as d]))
@@ -53,13 +55,15 @@
 (def exchange-alt (partial icon faExchangeAlt))
 (def exclamation-triangle (partial icon faExclamationTriangle))
 (def external-link (partial icon faExternalLinkAlt))
+(def file-code (partial icon faFileCode))
 (def info-circle (partial icon faInfoCircle))
 (def minus-circle (partial icon faMinusCircle))
 (def pause (partial icon faPause))
-(def play (partial icon faPlay))
 (def play-circle (partial icon faPlayCircle))
+(def play (partial icon faPlay))
 (def plus-circle (partial icon faPlusCircle))
 (def sign-out-alt (partial icon faSignOutAlt))
 (def stop-circle (partial icon faStopCircle))
 (def terminal (partial icon faTerminal))
 (def times-circle (partial icon faTimesCircle))
+(def times (partial icon faTimes))
