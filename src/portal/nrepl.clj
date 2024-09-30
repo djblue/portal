@@ -1,4 +1,4 @@
-(ns ^:no-doc portal.nrepl
+(ns portal.nrepl
   (:require [clojure.datafy :as d]
             [clojure.main :as main]
             [clojure.test :as test]
@@ -13,10 +13,10 @@
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
 
-(def ^:dynamic *portal-ns* nil)
-(def ^:dynamic *portal-session* nil)
+(def ^:no-doc ^:dynamic *portal-ns* nil)
+(def ^:no-doc ^:dynamic *portal-session* nil)
 
-(deftype Print [string] Object (toString [_] string))
+(deftype ^:no-doc Print [string] Object (toString [_] string))
 
 (defmethod print-method Print [v ^java.io.Writer w]
   (.write w ^String (str v)))
@@ -54,7 +54,7 @@
        'shadow.cljs.devtools.server.nrepl-impl/*repl-state*)))
     (catch Exception _ false)))
 
-(defrecord PortalTransport [transport handler-msg]
+(defrecord ^:no-doc PortalTransport [transport handler-msg]
   Transport
   (recv [_this timeout]
     (transport/recv transport timeout))
@@ -114,7 +114,25 @@
                             #'test/report portal-report)
                      session)))))))
 
-(defn wrap-portal [handler] (partial #'wrap-portal* handler))
+(defn wrap-portal
+  "nREPL middleware for inspecting `eval` and `load-file` ops for the following to `tap>`:
+
+   - evaluation result / exceptions
+   - stdout / stderr
+   - clojure.test/report output
+
+  Data produced via this middleware will contain `{:portal.nrepl/eval true}` as
+  metadata and leverages the following viewers:
+
+  - :portal.viewer/code
+  - :portal.viewer/duration-ms
+  - :portal.viewer/ex
+  - :portal.viewer/log
+  - :portal.viewer/prepl
+  - :portal.viewer/relative-time
+  - :portal.viewer/test-report"
+  [handler]
+  (partial #'wrap-portal* handler))
 
 (defn- get-shadow-middleware []
   (try
@@ -178,7 +196,13 @@
          (transport/send transport))
     (handler msg)))
 
-(defn wrap-repl [handler] (partial #'wrap-repl* handler))
+(defn wrap-repl
+  "nREPL middleware for exposing `portal.api/eval-str` directly to editors.
+  This enabled sending code directly from your editor to the portal runtime for
+  evaluation."
+  {:see-also ["portal.api/repl"]}
+  [handler]
+  (partial #'wrap-repl* handler))
 
 (set-descriptor! #'wrap-repl
                  {:requires #{"clone"
@@ -227,7 +251,7 @@
     (contains? message :value)
     (update :value link-value)))
 
-(defrecord NotebookTransport [transport]
+(defrecord ^:no-doc NotebookTransport [transport]
   Transport
   (recv [_this timeout]
     (transport/recv transport timeout))
@@ -242,7 +266,12 @@
           (get-in message [:nrepl.middleware.eval/env :calva-notebook]))
      (update :transport ->NotebookTransport))))
 
-(defn wrap-notebook [handler] (partial #'wrap-notebook* handler))
+(defn wrap-notebook
+  "nREPL middleware for use with [Calva Notebooks](https://calva.io/notebooks/)
+  to support first class values for datafy / nav and all other features that
+  require a runtime connected portal."
+  [handler]
+  (partial #'wrap-notebook* handler))
 
 (set-descriptor! #'wrap-notebook
                  {:requires #{"clone"
@@ -250,3 +279,9 @@
                               #'caught/wrap-caught}
                   :expects #{"eval"}
                   :handles {}})
+
+(def middleware
+  "All of portal's nREPL middleware."
+  [`wrap-notebook
+   `wrap-repl
+   `wrap-portal])
