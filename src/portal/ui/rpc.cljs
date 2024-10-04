@@ -148,11 +148,7 @@
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/close
    (fn [message send!]
-     (js/setTimeout
-      (fn []
-        (state/notify-parent {:type :close})
-        (js/window.close))
-      100)
+     (js/setTimeout state/close 100)
      (send! {:op :portal.rpc/response
              :portal.rpc/id (:portal.rpc/id message)}))
    :portal.rpc/clear

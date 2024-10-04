@@ -909,6 +909,8 @@
   (let [name (var->name var)]
     (register! var (make-command (merge (meta var) {:f var :name name} opts)))))
 
+(register! #'state/close {:name 'portal.api/close})
+
 (defn- nav
   "Returns (possibly transformed) v in the context of coll and k (a
   key/index or nil). Callers should attempt to provide the key/index

@@ -340,3 +340,9 @@
   (update state :portal.ui.app/notifications
           (fn [notifications]
             (filterv (complement #{notification}) notifications))))
+
+(defn close
+  "Close this inspector windows."
+  []
+  (notify-parent {:type :close})
+  (.close js/window))
