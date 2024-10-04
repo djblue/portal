@@ -227,8 +227,7 @@
                                 :use-cache (= :boot (-> request :session :options :mode))))]
     {:status 200
      :headers
-     {"content-type" "application/transit+json"
-      "Access-Control-Allow-Origin" "*"}
+     {"content-type" "application/transit+json"}
      :body (let [out (ByteArrayOutputStream. 1024)]
              (transit/write
               (transit/writer out :json {:transform transit/write-meta})
@@ -239,8 +238,7 @@
 (defmethod route [:options "/submit"] [_] enable-cors)
 (defmethod route [:post "/submit"] [request]
   (rt/update-value (body request))
-  {:status  204
-   :headers {"Access-Control-Allow-Origin" "*"}})
+  {:status  204})
 
 (defmethod route [:get "/"] [request]
   (if-let [session (:session request)]
@@ -249,4 +247,7 @@
       (swap! rt/sessions assoc session-id {})
       {:status 307 :headers {"Location" (str "?" session-id)}})))
 
-(defn handler [request] (route (with-session request)))
+(defn handler [request]
+  (-> (with-session request)
+      (route)
+      (update :headers assoc "Access-Control-Allow-Origin" "*")))
