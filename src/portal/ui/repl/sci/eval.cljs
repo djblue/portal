@@ -1,4 +1,5 @@
 (ns ^:no-doc portal.ui.repl.sci.eval
+  (:refer-clojure :exclude [Throwable->map])
   (:require [clojure.string :as str]
             [portal.ui.cljs :as cljs]
             [portal.ui.load :as load]
@@ -12,6 +13,43 @@
   (sci/eval-form ctx (list 'clojure.core/the-ns (list 'quote ns-sym))))
 
 (defonce ctx (atom nil))
+
+(defn- ex-trace [ex]
+  (when-let [stacktrace (sci/stacktrace ex)]
+    (into
+     []
+     (for [{:keys [_column file line ns] name* :name} stacktrace]
+       [(symbol (str ns)
+                (name (or name* (gensym "eval"))))
+        'invoke
+        file
+        line]))))
+
+(def ^:private ex-type cljs.core/ExceptionInfo)
+
+(defn- ->class [ex]
+  (if (= ex-type (type ex))
+    'cljs.core/ExceptionInfo
+    (symbol (.-name (type ex)))))
+
+(defn- ex-chain [ex]
+  (reverse (take-while some? (iterate ex-cause ex))))
+
+(defn- Throwable->map [ex]
+  (let [[ex :as chain] (ex-chain ex)]
+    {:runtime :portal
+     :cause   (ex-message ex)
+     :data    (ex-data ex)
+     :via     (mapv
+               (fn [ex]
+                 (merge
+                  {:type    (->class ex)
+                   :data    (ex-data ex)
+                   :message (ex-message ex)}
+                  (when-let [at (first (ex-trace ex))]
+                    {:at at})))
+               chain)
+     :trace   (vec (mapcat ex-trace chain))}))
 
 (defn eval-string [msg]
   (try
@@ -52,10 +90,7 @@
 
           (seq @stdio) (assoc :stdio @stdio))))
     (catch :default e
-      (let [sci-error? (isa? (:type (ex-data e)) :sci/error)]
-        (throw (if sci-error?
-                 (or (ex-cause e) e)
-                 e))))))
+      (throw (ex-info "eval-error" (Throwable->map e))))))
 
 (defn- ns->path [ns]
   (-> (name ns)

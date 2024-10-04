@@ -28,7 +28,10 @@
      :line   1
      :column 1
      :ns (:ns response)
-     :result (d/datafy (::caught/throwable response))}
+     :result (let [error (:error (ex-data (::caught/throwable response)))]
+               (if (contains? error :via)
+                 error
+                 (d/datafy (::caught/throwable response))))}
 
     (and (contains? response :value)
          (not= (:value response) ::p/ignore))
@@ -189,9 +192,18 @@
              (catch Exception e
                (swap! session assoc #'*e e)
                {::caught/throwable e
-                :status            :eval-error
+                :status            [:done :eval-error]
                 :ex                (str (class e))
-                :root-ex           (str (class (main/root-cause e)))})))
+                :root-ex           (str (class (main/root-cause e)))
+                :causes            (if-let [via (get-in (ex-data e) [:error :via])]
+                                     (for [{:keys [type message at]} via]
+                                       {:class      type
+                                        :message    message
+                                        :stacktrace at})
+                                     (for [ex (take-while some? (iterate ex-cause e))]
+                                       {:class      (str (class ex))
+                                        :message    (ex-message ex)
+                                        :stacktrace []}))})))
          (response-for msg)
          (transport/send transport))
     (handler msg)))

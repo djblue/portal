@@ -127,7 +127,7 @@
                      :portal.rpc/id (:portal.rpc/id message))))
            error
            (fn [e]
-             (return {:error e :message (.-message e)}))]
+             (return {:error (ex-data e) :message (.-message e)}))]
        (a/try
          (a/let [{:keys [value] :as response} (cljs/eval-string message)]
            (when-let [render (and (:re-render message) @state/render)]

@@ -141,7 +141,9 @@
         class (cond-> class (string? class) symbol)
         clj-name (demunge class)
         clj? (or (and (string? file)
-                      (str/ends-with? file ".clj"))
+                      (or (str/ends-with? file ".clj")
+                          (str/ends-with? file ".cljs")
+                          (str/ends-with? file ".cljc")))
                  (not= clj-name class))]
     (with-meta
       trace
