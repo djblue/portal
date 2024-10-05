@@ -226,7 +226,7 @@
      [d/div
       {:style
        {:font-weight :bold
-        :white-space :pre-bold
+        :white-space :pre-wrap
         :color (::c/exception theme)
         :padding [(:padding theme) (* 2 (:padding theme))]}}
       [ins/highlight-words
