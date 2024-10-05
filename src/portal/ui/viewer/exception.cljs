@@ -150,10 +150,11 @@
       (merge
        {:class  class
         :method method
-        :file   file
         :line   line
         :column 1
         :index  index}
+       (when file
+         {:file file})
        (when-let [ns (and clj? (some-> clj-name namespace symbol))]
          {:clj? true :ns ns :sym clj-name})))))
 
