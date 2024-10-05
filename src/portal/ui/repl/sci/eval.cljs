@@ -14,16 +14,24 @@
 
 (defonce ctx (atom nil))
 
+(defn- ns->file [ns]
+  (str (str/join "/" (str/split (munge (name ns)) #"\.")) ".cljs"))
+
+(def ^:private ->aliases
+  '{clojure.core cljs.core})
+
 (defn- ex-trace [ex]
   (when-let [stacktrace (sci/stacktrace ex)]
     (into
      []
-     (for [{:keys [_column file line ns] name* :name} stacktrace]
+     (for [{:keys [_column file line ns] name* :name} stacktrace
+           :let [ns (->aliases ns ns)]]
        [(symbol (str ns)
                 (name (or name* (gensym "eval"))))
         'invoke
-        file
-        line]))))
+        (or file
+            (ns->file ns))
+        (or line 1)]))))
 
 (def ^:private ex-type cljs.core/ExceptionInfo)
 
