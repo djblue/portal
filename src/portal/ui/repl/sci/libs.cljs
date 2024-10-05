@@ -44,6 +44,7 @@
             portal.ui.viewer.tree
             portal.ui.viewer.vega
             portal.ui.viewer.vega-lite
+            portal.viewer
             [reagent.core :as r]
             [sci.configs.reagent.reagent :as reagent]
             [sci.core :as sci])
@@ -97,7 +98,8 @@
     portal.ui.viewer.transit
     portal.ui.viewer.tree
     portal.ui.viewer.vega
-    portal.ui.viewer.vega-lite)
+    portal.ui.viewer.vega-lite
+    portal.viewer)
    (sci-import/import
     cljs.core/random-uuid
     cljs.core/tap>
