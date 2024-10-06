@@ -15,12 +15,12 @@
             browser (get json "browser")
             main    (get json "main")]
         (or umd
-            unpkg
             (when (string? browser)
               browser)
             (get browser main)
             (get browser (str "./" main))
             main
+            unpkg
             "index.js"))))))
 
 #_{:clj-kondo/ignore #?(:clj [] :default [:unused-binding])}
