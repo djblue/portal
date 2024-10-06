@@ -91,7 +91,7 @@ the equivalent:
     (p :get-y (get-y))))
 ```
 
-> **Note**
+> [!NOTE]
 > goto-definition will only work if `taoensso.tufte/p` calls are eval'd
 > via a repl that properly provide file/line/column info. This includes nrepl
 > or using load-file to load your code.

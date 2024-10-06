@@ -11,7 +11,7 @@ The bottom-left dropdown displays the viewer for the currently
 [selected](./selection.md) value and contains all supported viewers for that
 value.
 
-> **Note**
+> [!NOTE]
 > You can also switch viewers via the `portal.ui.commands/select-viewer`
 > [command](./commands.md).
 

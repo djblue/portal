@@ -22,7 +22,7 @@ enabled, you can launch a sub repl with the following:
 Now all subsequent eval invocations will run in the Portal UI ClojureScript
 runtime.
 
-> **Note**
+> [!NOTE]
 > To quit the Portal repl, eval `:cljs/quit`. This will automatically
 > occur if the portal session is no longer available.
 
@@ -87,7 +87,7 @@ When you are satisfied with your component, you can register it with Portal via
   :component view-presentation})
 ```
 
-> **Note**
+> [!NOTE]
 > Anytime a viewer is registered, it will cause the UI to re-render. This
 > is very handy for interactive development.
 
@@ -115,7 +115,7 @@ from a file via slurp. For example:
 (p/eval-str (slurp (io/resource "portal_present/viewer.cljs")))
 ```
 
-> **Note**
+> [!NOTE]
 > you can specify which Portal instance you want this code evaluated in
 > to prevent evaluating it in every available Portal UI runtime.
 

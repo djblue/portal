@@ -27,7 +27,7 @@ To run the e2e tests in the jvm, node and web environments, do:
 bb e2e
 ```
 
-> **Note**
+> [!NOTE]
 > these aren't fully automated tests. They depend on a human for verification
 > and synchronization but it beats having to type everything out manually into
 > a repl.
