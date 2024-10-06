@@ -57,6 +57,8 @@
        {:margin 0
         :background bg
         :padding-left (* 2 (:padding theme))
+        :padding-bottom (:padding theme)
+        :padding-top (:padding theme)
         :font-style :normal
         :border-left [(:padding theme) :solid (::c/border theme)]}
 

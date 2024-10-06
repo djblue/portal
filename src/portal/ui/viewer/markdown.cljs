@@ -50,26 +50,8 @@
             title (assoc :title title)
             alt (assoc :alt alt))]))
 
-(def ^:private callouts
-  {"Note"
-   {:icon icons/info-circle
-    :color ::c/boolean}
-   "Warning"
-   {:icon icons/exclamation-triangle
-    :color ::c/tag}})
-
 (defn- ->strong [^js token]
-  (let [theme  (:theme *context*)
-        tokens (->inline [] (.-tokens token))]
-    (into
-     (if-let [{:keys [icon color]}
-              (and (= :blockquote (:parent *context*))
-                   (get callouts (first tokens)))]
-       [:strong
-        {:style {:color (get theme color)}}
-        [icon {:size "1x"}] " "]
-       [:strong {}])
-     tokens)))
+  (into [:strong {}] (->inline [] (.-tokens token))))
 
 (defn- ->header [^js token]
   [:thead
@@ -136,9 +118,42 @@
 (defn- ->paragraph [^js token]
   (->inline [:p {}] (.-tokens token)))
 
+(def ^:private callouts
+  {"NOTE"
+   {:icon icons/info-circle
+    :color ::c/boolean
+    :label "Note"}
+   "WARNING"
+   {:icon icons/exclamation-triangle
+    :color ::c/tag
+    :label "Warning"}})
+
 (defn- ->blockquote [^js token]
-  (binding [*context* (assoc *context* :parent :blockquote)]
-    (->hiccup [:blockquote {}] (.-tokens token))))
+  (let [theme (:theme *context*)
+        tokens (.-tokens token)
+        text-node (some-> tokens first .-tokens first)]
+    (if-let [[_ callout remaining-text]
+             (when-let [text (some-> text-node .-text)]
+               (re-matches #".*\[!(NOTE|WARNING)\]([\S\s]*)" text))]
+      (let [{:keys [icon color label]} (get callouts callout)
+            color (get theme color)]
+        (set! (.-text text-node) remaining-text)
+        (->hiccup
+         [:blockquote
+          {:style
+           {:border-color color}}
+          [:div
+           {:style
+            {:display :flex
+             :align-items :center
+             :gap (:padding theme)
+             :font-size "1.35rem"
+             :font-weight :bold
+             :color color
+             :margin-bottom (:padding theme)}}
+           [icon {:size "1x"}]  " " label]]
+         tokens))
+      (->hiccup [:blockquote {}] tokens))))
 
 (defn- ->inline [out tokens]
   (reduce
