@@ -39,7 +39,7 @@ In the client process, do:
 (add-tap #'submit)
 ```
 
-> **Note**
+> [!NOTE]
 > `tap>`'d values must be serializable as edn, transit or json.
 
 ## Tips

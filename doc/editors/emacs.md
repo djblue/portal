@@ -42,7 +42,7 @@ the following section may be of interest to you.
 If you would like to run the Portal UI in emacs itself, you can do so with the
 following code.
 
-> **Note**
+> [!NOTE]
 > You need a build of emacs with [Embedded-WebKit-Widgets][1]
 > Also, this method only works if you're using [emacs server](https://www.gnu.org/software/emacs/manual/html_node/emacs/Emacs-Server.html) functionality as it relies on `emacsclient` command
 
@@ -50,7 +50,7 @@ following code.
 (portal.api/open {:launcher :emacs})
 ```
 
-> **Warning**
+> [!WARNING] 
 > I haven't tested this extensively so you might run into some weird
 > issues
 
@@ -103,7 +103,7 @@ Add the following to your Emacs config:
 
 Then in the Monroe REPL or Clojure buffer with an active Monroe session run `M-x monroe-launch-portal`.
 
-> **Note**
+> [!NOTE]
 >
 > This is just a jump-off point, you might want to customize this function to your
 > liking, e.g. run the code in your `user` namespace, set a different theme and so on.

@@ -5,5 +5,5 @@ commands shortcut. They will be listed in the command palette next to the
 command. When multiple shortcuts are available, they are separated by a vertical
 bar.
 
-> **Note**
+> [!NOTE]
 > Shortcuts aren't currently user definable.

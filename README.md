@@ -78,7 +78,7 @@ or as a global profile, add to `~/.lein/profiles.clj`:
 {:portal {:dependencies [[djblue/portal "0.57.3"]]}}
 ```
 
-> **Note**
+> [!NOTE]
 > If you add Portal to a profile other than `:dev`, when starting a REPL
 > start it with `with-profiles +portal`. The `+` is important.
 
@@ -87,7 +87,7 @@ or for [**Clojure CLR**][clojure-clr], checkout this [example project](./example
 or for examples on how to integrate portal into an existing project, look
 through the [examples](./examples) directory.
 
-> **Note**
+> [!NOTE]
 > Portal can also be used without a runtime via the [standalone version](./doc/guides/standalone.md).
 
 ### API
@@ -127,7 +127,7 @@ Try the [portal api](./src/portal/api.cljc) with the following commands:
 (p/docs) ; View docs locally via Portal - jvm / node only
 ```
 
-> **Warning**
+> [!WARNING] 
 > Portal will keep objects from being garbage collected until they are cleared
 > from the UI.
 
