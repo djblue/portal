@@ -104,8 +104,14 @@
        :portal.viewer/code {:language (:class attrs)}}
       code]]))
 
+(defn- inspect-inline-code [& args]
+  (into [:code {:class "hiccup"
+                :style {:background (ins/get-background2)}}]
+        (rest args)))
+
 (def tag->viewer
-  {:pre inspect-code})
+  {:pre inspect-code
+   :code inspect-inline-code})
 
 (defn- process-hiccup [context hiccup]
   (if-not (vector? hiccup)
