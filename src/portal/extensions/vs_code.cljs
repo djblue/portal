@@ -128,9 +128,14 @@
     (.revealRange editor range)))
 
 (defmethod server/route [:post "/open-file"] [req ^js res]
-  (a/let [body (server/get-body req)]
-    (open-file (edn/read-string body))
-    (.end res)))
+  (a/try
+    (a/let [body (server/get-body req)]
+      (open-file (edn/read-string body))
+      (.end res))
+    (catch :default _e
+      (doto res
+        (.writeHead 400 #js {})
+        (.end)))))
 
 (defn- set-status [workspace]
   (when (fs/exists (fs/join workspace "resources/portal-dev/main.js"))
