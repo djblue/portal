@@ -30,15 +30,17 @@
      (js/setTimeout resolve ms))))
 
 (defn- wait-for [p ms]
-  (-> (.race js/Promise #js [p (sleep ms)])
-      (.catch (fn [e] (.error js/console e)))))
+  (.race js/Promise
+         #js
+          [(sleep ms)
+           (.catch p (fn [e] (.error js/console e)))]))
 
 (defn dispatch! [state f & args]
   (swap!
    sync-promise
    (fn [last-promise]
      (a/do
-       (wait-for last-promise 10000)
+       (wait-for last-promise 1000)
        (a/let [next-state (apply f @state args)]
          (when next-state (reset! state next-state)))))))
 
