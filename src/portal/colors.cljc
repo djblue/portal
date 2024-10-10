@@ -158,4 +158,21 @@
     ::package     "#8cd0d3"
     ::exception   "#cc9393"
     ::diff-add    "#9fc59f"
-    ::diff-remove "#cc9393"}})
+    ::diff-remove "#cc9393"}
+   ::catppuccin
+   {::text        "#cdd6f4"
+    ::background  "#1e1e2e"
+    ::background2 "#181825"
+    ::boolean     "#a6e3a1"
+    ::string      "#f38ba8"
+    ::keyword     "#a6e3a1"
+    ::namespace   "#74c7ec"
+    ::tag         "#f9e2af"
+    ::symbol      "#cdd6f4"
+    ::number      "#89dceb"
+    ::uri         "#fab387"
+    ::border      "#313244"
+    ::package     "#89dceb"
+    ::exception   "#f38ba8"
+    ::diff-add    "#a6e3a1"
+    ::diff-remove "#f38ba8"}})
