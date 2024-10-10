@@ -117,7 +117,7 @@
     (-open (edn/read-string body))
     (.end res)))
 
-(defn- open-file [{:keys [file line column]}]
+(defn- open-file* [{:keys [file line column]}]
   (a/let [document     (.openTextDocument
                         vscode/workspace
                         (.parse vscode/Uri file))
@@ -126,6 +126,12 @@
           ^js range    (vscode/Range. position position)]
     (set! (.-selection editor) (vscode/Selection. (.-start range) (.-end range)))
     (.revealRange editor range)))
+
+(defn- open-file [{:keys [file] :as opts}]
+  (a/try
+    (open-file* opts)
+    (catch :default _
+      (open-file* (assoc opts :file (fs/join (get-workspace-folder) file))))))
 
 (defmethod server/route [:post "/open-file"] [req ^js res]
   (a/try
