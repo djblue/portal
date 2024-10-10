@@ -58,7 +58,7 @@
 (defn- resolve-map [m]
   (let [m (set/rename-keys m mapping)]
     (if (fs/is-file (:file m))
-      m
+      (some->> m :file resolve (merge m))
       (or
        (some->> m :ns   resolve (merge m))
        (some->> m :file resolve (merge m))))))
