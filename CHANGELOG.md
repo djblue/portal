@@ -1,3 +1,44 @@
+## 0.58.0 - 2024-10-11
+
+### New Features
+
+- Add catppuccin color theme (#242) 4df60229
+  - Thanks @lanjoni!
+- Add `portal.api/close` as command 7b6b5873
+- Add PWA launcher for Windows WSL 0c54c547
+- Link mouse 3 / 4 to history stack 961bd058
+- Add support for broadcast repl 55fde5d1
+- Add `load-file` support for `portal.nrepl/wrap-repl` de73ef5f
+- First cut of `diff-text` viewer 95536f2b
+- Add support for `load-file` in nrepl middleware 9db2d4fa
+
+### UX Tweaks
+
+- Improve `:portal.viewer/hiccup` styles 1c0ce9ac
+- Switch to new github block quote highlight syntax 6b0b4405
+- Only include file for source-location when available in ex viewer b798af70
+- Fix `:portal.viewer/ex` css f02554cc
+- Make search-bar more compact a6e00a5a
+- Make footer more compact cd1cf936
+
+### Documentation
+
+- Improve nREPL middleware documentation c9133a9e
+- Add docs for `diff-text` 85167a06
+- Add example data for `diff-text` e2509d39
+
+### Bug Fixes
+
+- Fix z-index on multi-select-counter 45323c8e
+- Try relative path for vs-code open-file 9f00e2b5
+- Improve error handling for vs-code file-open endpoint 1575e027
+- Prevent over scroll issue in vscode extension edda21f4
+- Fix bug in `portal.runtime.json` 783394db
+- Fix `portal.console` for self hosted cljs eed30d62
+- Correctly sort `wrap-repl` with `wrap-portal` 8acecad1
+- Fix `portal.nrepl/wrap-repl` middleware ordering 17f01327
+- Fix joyride runtime support 9d357b5d
+
 ## 0.57.3 - 2024-08-27
 
 - Prefer default viewer meta on history push d0dc39d

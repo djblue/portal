@@ -41,13 +41,13 @@ More video presentations on Portal can be found [here](./doc/videos.md).
 To start a repl with portal, run the **clojure >= 1.10.0** cli with:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.57.3"}}}'
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.58.0"}}}'
 ```
 
 or for a **web** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.57.3"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.58.0"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main
 ```
@@ -55,7 +55,7 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.57.3"}
 or for a **node** **clojurescript >= 1.10.773** repl, do:
 
 ```bash
-clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.57.3"}
+clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.58.0"}
                     org.clojure/clojurescript {:mvn/version "1.10.844"}}}' \
     -m cljs.main -re node
 ```
@@ -63,19 +63,19 @@ clj -Sdeps '{:deps {djblue/portal {:mvn/version "0.57.3"}
 or for a **babashka >=0.2.4** repl, do:
 
 ```bash
-bb -Sdeps '{:deps {djblue/portal {:mvn/version "0.57.3"}}}'
+bb -Sdeps '{:deps {djblue/portal {:mvn/version "0.58.0"}}}'
 ```
 
 or for a lein `project.clj`, add:
 
 ```clojure
-{:profiles {:dev {:dependencies [[djblue/portal "0.57.3"]]}}}
+{:profiles {:dev {:dependencies [[djblue/portal "0.58.0"]]}}}
 ```
 
 or as a global profile, add to `~/.lein/profiles.clj`:
 
 ```clojure
-{:portal {:dependencies [[djblue/portal "0.57.3"]]}}
+{:portal {:dependencies [[djblue/portal "0.58.0"]]}}
 ```
 
 > [!NOTE]
@@ -163,8 +163,8 @@ For more documentation, take a look through the [docs][docs].
 
 [live-demo]: https://www.youtube.com/watch?v=Tj-iyDo3bq0
 [london-clojurians]: https://www.youtube.com/channel/UC-pYfofTyvVDMwM4ttfFGqw
-[docs]: https://cljdoc.org/d/djblue/portal/0.57.3/doc/ui-concepts
-[ui-concepts]: https://cljdoc.org/d/djblue/portal/0.57.3/doc/ui-concepts
+[docs]: https://cljdoc.org/d/djblue/portal/0.58.0/doc/ui-concepts
+[ui-concepts]: https://cljdoc.org/d/djblue/portal/0.58.0/doc/ui-concepts
 
 [vs-code-docs]: ./doc/editors/vs-code.md
 [intellij-docs]: ./doc/editors/intellij.md
