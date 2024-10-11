@@ -1,4 +1,4 @@
-(ns portal.ui.viewer.diff-text
+(ns ^:no-doc portal.ui.viewer.diff-text
   (:require ["diff" :as df]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
