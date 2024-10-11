@@ -1047,6 +1047,7 @@
                :right "-0.5rem"
                :min-width "1rem"
                :height "1rem"
+               :z-index 3
                :display :flex
                :align-items :center
                :justify-content :center
