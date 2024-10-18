@@ -105,6 +105,14 @@
         :reagent-render
         (fn [] [:div {:ref #(reset! el %)}])}))))
 
+(defn- try-sort
+  "Attempts to sort the given selection"
+  [coll]
+  (try
+    (sort coll)
+    (catch js/Error _
+      coll)))
+
 (defn- selector-component []
   (let [selected (r/atom #{})
         active   (r/atom 0)]
@@ -113,7 +121,7 @@
             selected? @selected
             on-close  (partial close (state/use-state))
             on-done   (:run input)
-            options   (:options input)
+            options   (try-sort (:options input))
             n         (count (:options input))
             on-select #(swap! selected (if (selected? %) disj conj) %)
             on-toggle (fn toggle-all []
@@ -328,7 +336,7 @@
           :or   {component ins/inspector}
           :as options}]
       (let [theme (theme/use-theme)
-            options (filter-options options @filter-text)
+            options (try-sort (filter-options options @filter-text))
             n (count options)
             on-close (partial close (state/use-state))
             on-select
