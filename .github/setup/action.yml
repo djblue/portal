@@ -19,6 +19,9 @@ runs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
     - name: Node Cache
       uses: actions/cache@v3
       with:
