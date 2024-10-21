@@ -1,3 +1,8 @@
+## 0.58.1 - 2024-10-21
+
+- Attempt to sort sub-command windows in Portal UI (#243)
+  - Thanks @fancygits!
+
 ## 0.58.0 - 2024-10-11
 
 ### New Features
