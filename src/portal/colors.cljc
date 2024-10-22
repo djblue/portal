@@ -175,4 +175,21 @@
     ::package     "#89dceb"
     ::exception   "#f38ba8"
     ::diff-add    "#a6e3a1"
-    ::diff-remove "#f38ba8"}})
+    ::diff-remove "#f38ba8"}
+   ::hacker-news
+   {::text        "#000000"
+    ::background  "#ffffff"
+    ::background2 "#f6f6ef"
+    ::boolean     "#000000"
+    ::string      "#000000"
+    ::keyword     "#ff6600"
+    ::namespace   "#000000"
+    ::tag         "#ff6600"
+    ::symbol      "#ff6600"
+    ::number      "#000000"
+    ::uri         "#ff6600"
+    ::border      "#999999"
+    ::package     "#ff6600"
+    ::exception   "#bf616a"
+    ::diff-add    "#000000"
+    ::diff-remove "#000000"}})
