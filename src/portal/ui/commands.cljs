@@ -1034,7 +1034,7 @@
        :right 0
        :bottom 0
        :z-index 100
-       :padding [200 "10%"]
+       :padding "10%"
        :box-sizing :border-box
        :height "100%"
        :overflow :hidden}}
