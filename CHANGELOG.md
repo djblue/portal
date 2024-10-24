@@ -1,3 +1,10 @@
+## 0.58.2 - 2024-10-24
+
+### Bug Fixes
+
+- Improve command palette css 70ba219
+- Revert "Process each rpc request independently" df2f03d
+
 ## 0.58.1 - 2024-10-21
 
 - Attempt to sort sub-command windows in Portal UI (#243)
