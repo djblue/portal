@@ -1,0 +1,33 @@
+(ns portal.client.py
+  (:require [basilisp.json :as json])
+  (:import [urllib.request :as request]))
+
+(defn- serialize [encoding value]
+  (.encode
+   (try
+     (case encoding
+       :json    (json/write-str  value)
+       :edn     (binding [*print-meta* true]
+                  (pr-str value)))
+     (catch Exception ex
+       (serialize encoding (pr-str ex))))
+   "utf-8"))
+
+(defn submit
+  ([value] (submit nil value))
+  ([{:keys [encoding port host]
+     :or   {encoding :edn
+            host     "localhost"
+            port     53755}}
+    value]
+   (let [req (request/Request
+              (str "http://" host ":" port "/submit")
+              ** :data (serialize encoding value))]
+     (.add_header
+      req "content-type"
+      (case encoding
+        :json    "application/json"
+        :cson    "application/cson"
+        :transit "application/transit+json"
+        :edn     "application/edn"))
+     (request/urlopen req))))
