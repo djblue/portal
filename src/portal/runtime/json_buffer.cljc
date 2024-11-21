@@ -12,12 +12,13 @@
                      JsonNode
                      JsonArray
                      JsonValue
-                     JsonNodeOptions))))
+                     JsonNodeOptions))
+     :lpy  (:import [json :as json])))
 
 (defn -shift [this] (this))
 
 #?(:cljs (defn shifter [source]
-           (let [this #js {:n 0}]
+           (let [this (clj->js {:n 0})]
              (fn []
                (let [n      (.-n this)
                      result (aget source n)]
@@ -37,37 +38,44 @@
      (doto (JsonReader. (StringReader. data))
        (.beginArray))
      :cljs
-     (shifter (.parse js/JSON data))))
+     (shifter (.parse js/JSON data))
+     :lpy
+     (iter (json/loads data))))
 
 (defn push-null   [buffer]
   #?(:bb   (conj! buffer nil)
      :clj  (doto ^JsonWriter buffer (.nullValue))
      :cljr (doto ^JsonArray buffer (.Add nil))
-     :cljs (doto ^js buffer (.push nil))))
+     :cljs (doto ^js buffer (.push nil))
+     :lpy  (doto buffer (.append nil))))
 
 (defn push-bool   [buffer value]
   #?(:bb   (conj! buffer value)
      :clj  (doto ^JsonWriter buffer (.value ^Boolean value))
      :cljr (doto ^JsonArray buffer (.Add value))
-     :cljs (doto ^js buffer (.push value))))
+     :cljs (doto ^js buffer (.push value))
+     :lpy  (doto buffer (.append value))))
 
 (defn push-long   [buffer value]
   #?(:bb   (conj! buffer value)
      :clj  (doto ^JsonWriter buffer (.value ^Long value))
      :cljr (doto ^JsonArray buffer (.Add value))
-     :cljs (doto ^js buffer (.push value))))
+     :cljs (doto ^js buffer (.push value))
+     :lpy  (doto buffer (.append value))))
 
 (defn push-double [buffer value]
   #?(:bb   (conj! buffer value)
      :clj  (doto ^JsonWriter buffer (.value ^Double value))
      :cljr (doto ^JsonArray buffer (.Add value))
-     :cljs (doto ^js buffer (.push value))))
+     :cljs (doto ^js buffer (.push value))
+     :lpy  (doto buffer (.append value))))
 
 (defn push-string [buffer value]
   #?(:bb   (conj! buffer value)
      :clj  (doto ^JsonWriter buffer (.value ^String value))
      :cljr (doto ^JsonArray buffer (.Add value))
-     :cljs (doto ^js buffer (.push value))))
+     :cljs (doto ^js buffer (.push value))
+     :lpy  (doto buffer (.append value))))
 
 (defn push-value [buffer value]
   (cond
@@ -81,7 +89,8 @@
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
      :clj  (.nextNull ^JsonReader buffer)
      :cljr (do (vswap! buffer rest) nil)
-     :cljs (-shift buffer)))
+     :cljs (-shift buffer)
+     :lpy  (python/next buffer)))
 
 (defn next-bool [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
@@ -89,7 +98,8 @@
              (vswap! buffer rest)
              (.GetValue v (type-args System.Boolean)))
      :clj  (.nextBoolean ^JsonReader buffer)
-     :cljs (-shift buffer)))
+     :cljs (-shift buffer)
+     :lpy  (python/next buffer)))
 
 (defn next-long ^long [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
@@ -97,7 +107,8 @@
              (vswap! buffer rest)
              (.GetValue v (type-args System.Int64)))
      :clj  (.nextLong ^JsonReader buffer)
-     :cljs (-shift buffer)))
+     :cljs (-shift buffer)
+     :lpy  (python/next buffer)))
 
 (defn next-double ^double [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
@@ -105,15 +116,17 @@
              (vswap! buffer rest)
              (.GetValue v (type-args System.Double)))
      :clj  (.nextDouble ^JsonReader buffer)
-     :cljs (-shift buffer)))
+     :cljs (-shift buffer)
+     :lpy  (python/next buffer)))
 
-(defn next-string ^String [buffer]
+(defn next-string [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
      :cljr (let [v ^JsonValue (first @buffer)]
              (vswap! buffer rest)
              (.GetValue v (type-args System.String)))
      :clj  (.nextString ^JsonReader buffer)
-     :cljs (-shift buffer)))
+     :cljs (-shift buffer)
+     :lpy  (python/next buffer)))
 
 (defn next-value [buffer]
   #?(:bb (let [v (first @buffer)] (vswap! buffer rest) v)
@@ -142,7 +155,8 @@
                            (if (== (.indexOf n 46) -1)
                              (Long/parseLong n)
                              (Double/parseDouble n))))
-     :cljs (-shift buffer)))
+     :cljs (-shift buffer)
+     :lpy  (python/next buffer)))
 
 (defn with-buffer [f value]
   #?(:bb   (json/write (persistent! (f (transient []) value)))
@@ -156,4 +170,5 @@
              (f json value)
              (.endArray json)
              (.close json)
-             (.toString out))))
+             (.toString out))
+     :lpy  (json/dumps (f (python/list) value))))

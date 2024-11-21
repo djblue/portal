@@ -2,7 +2,8 @@
   (:require #?(:clj [clojure.java.io :as io])
             #?(:org.babashka/nbb [clojure.core]
                :default [examples.hacker-news :as hn])
-            [clojure.pprint :as pp]
+            #?(:lpy [portal.runtime]
+               :default [clojure.pprint :as pp])
             [examples.macros :refer [read-file]]
             [portal.colors :as c]
             [portal.viewer :as v])
@@ -13,7 +14,9 @@
      :org.babashka/nbb (:import)
      :cljs (:import [goog.math Long])
      :cljr (:import [System DateTime Guid Uri]
-                    [System.IO File])))
+                    [System.IO File])
+     :lpy  (:import [math :as Math]
+                    [datetime :as datetime])))
 
 #?(:clj
    (defn slurp-bytes [x]
@@ -56,8 +59,8 @@
       ::uuid (random-uuid)
       ::date (js/Date.)
       ::bigint (js/BigInt "42")
-      ::js-array #js [0 1 2 3 4]
-      ::js-object #js {:hello "world"}}
+      ::js-array (clj->js [0 1 2 3 4])
+      ::js-object (clj->js {:hello "world"})}
      :cljs
      {::long (.fromString Long "4611681620380904123")
       ::promise (js/Promise.resolve 123)
@@ -65,8 +68,15 @@
       ::uuid (random-uuid)
       ::date (js/Date.)
       ::bigint (js/BigInt "42")
-      ::js-array #js [0 1 2 3 4]
-      ::js-object #js {:hello "world"}}))
+      ::js-array (clj->js [0 1 2 3 4])
+      ::js-object (clj->js {:hello "world"})}
+     :lpy
+     {::fractions 22/7
+      ::promise (promise)
+      ::uuid (random-uuid)
+      ::date (datetime.datetime/now)
+      ::py-list (python/list [0 1 2 3 4])
+      ::py-dict (python/dict {"hello" "world"})}))
 
 (def platform-collections
   #?(:bb nil
@@ -107,11 +117,15 @@
 
 (def clojure-data
   {::regex #"hello-world"
-   ::sorted-map (sorted-map-by gt 3 "c" 2 "b" 1 "a")
-   ::sorted-set (sorted-set-by gt 3 2 1)
+   ::sorted-map #?(:lpy nil
+                   :default (sorted-map-by gt 3 "c" 2 "b" 1 "a"))
+   ::sorted-set #?(:lpy nil
+                   :default
+                   (sorted-set-by gt 3 2 1))
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
-   ::tagged (tagged-literal 'my/tag ["hello, world"])
+   ::tagged #?(:lpy nil
+               :default (tagged-literal 'my/tag ["hello, world"]))
    {:example/settings 'complex-key} :hello-world
    ::atom (atom ::hello)
    ::function println
@@ -244,9 +258,11 @@
      ::different-value ::new-key}]))
 
 (def diff-text-data
-  (v/diff-text
-   [(with-out-str (pp/pprint (first diff-data)))
-    (with-out-str (pp/pprint (second diff-data)))]))
+  #?(:lpy nil
+     :default
+     (v/diff-text
+      [(with-out-str (pp/pprint (first diff-data)))
+       (with-out-str (pp/pprint (second diff-data)))])))
 
 (def string-data
   (v/for

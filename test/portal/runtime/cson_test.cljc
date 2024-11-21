@@ -104,25 +104,27 @@
     #{0}
     {0 0}))
 
-(deftest sorted-collections
-  (let [a (sorted-map :a 1 :c 3 :b 2)
-        b (pass a)]
-    (is (= a b))
-    (is (= (keys a) (keys b)))
-    (is (= (type a) (type b))))
-  (let [a (sorted-map-by > 1 "a" 2 "b" 3 "c")
-        b (pass a)]
-    (is (= a b))
-    (is (= (keys a) (keys b)))
-    (is (= (type a) (type b))))
-  (let [a (sorted-set 1 2 3)
-        b (pass a)]
-    (is (= a b))
-    (is (= (seq a) (seq b))))
-  (let [a (sorted-set-by > 1 2 3)
-        b (pass a)]
-    (is (= a b))
-    (is (= (seq a) (seq b)))))
+#?(:lpy nil
+   :default
+   (deftest sorted-collections
+     (let [a (sorted-map :a 1 :c 3 :b 2)
+           b (pass a)]
+       (is (= a b))
+       (is (= (keys a) (keys b)))
+       (is (= (type a) (type b))))
+     (let [a (sorted-map-by > 1 "a" 2 "b" 3 "c")
+           b (pass a)]
+       (is (= a b))
+       (is (= (keys a) (keys b)))
+       (is (= (type a) (type b))))
+     (let [a (sorted-set 1 2 3)
+           b (pass a)]
+       (is (= a b))
+       (is (= (seq a) (seq b))))
+     (let [a (sorted-set-by > 1 2 3)
+           b (pass a)]
+       (is (= a b))
+       (is (= (seq a) (seq b))))))
 
 (def tagged
   [#?(:clj  (Date.)
@@ -131,7 +133,8 @@
    #?(:clj  (UUID/randomUUID)
       :cljr (Guid/NewGuid)
       :cljs (random-uuid))
-   (tagged-literal 'tag :value)])
+   #?(:lpy nil
+      :default (tagged-literal 'tag :value))])
 
 (deftest tagged-objects
   (doseq [value tagged]
@@ -197,5 +200,7 @@
 (deftest binary
   (let [bin #?(:clj  (.getBytes "hi")
                :cljr (.GetBytes Encoding/UTF8 "hi")
-               :cljs (.encode (js/TextEncoder.) "hi"))]
-    (is (= "[\"bin\",\"aGk=\"]" (cson/write bin)))))
+               :cljs (.encode (js/TextEncoder.) "hi")
+               :default nil)]
+    (when bin
+      (is (= "[\"bin\",\"aGk=\"]" (cson/write bin))))))

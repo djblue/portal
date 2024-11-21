@@ -2,9 +2,11 @@
   (:refer-clojure :exclude [read])
   (:require #?(:clj  [portal.sync  :as a]
                :cljr [portal.sync  :as a]
-               :cljs [portal.async :as a])
+               :cljs [portal.async :as a]
+               :lpy  [portal.sync  :as a])
             #?(:joyride [portal.runtime.datafy :refer [datafy nav]]
                :org.babashka/nbb [portal.runtime.datafy :refer [datafy nav]]
+               :lpy     [portal.runtime.datafy :refer [datafy nav]]
                :default [clojure.datafy :refer [datafy nav]])
             #?(:joyride [cljs.pprint :as pprint]
                :default [clojure.pprint :as pprint])
@@ -15,6 +17,7 @@
 
 #?(:joyride nil
    :org.babashka/nbb nil
+   :lpy nil
    :default
    (defmethod pprint/simple-dispatch tagged-type [value]
      (if (not= (:tag value) "remote")
@@ -74,7 +77,7 @@
 (defn- hashable? [value]
   (try
     (and (hash value) true)
-    (catch #?(:clj Exception :cljr Exception :cljs :default) _
+    (catch #?(:clj Exception :cljr Exception :cljs :default :lpy Exception) _
       false)))
 
 #?(:bb (def clojure.lang.Range (type (range 1.0))))
@@ -96,7 +99,13 @@
           (try (with-meta value {}) true
                (catch :default _e false)))
 
-     :cljs (implements? IMeta value)))
+     :cljs (implements? IMeta value)
+
+     :lpy
+     (try (with-meta value {}) true
+          (catch Exception _e false))))
+
+#?(:lpy (defn- sorted? [_] false))
 
 (defn- hash+ [x]
   (cond
@@ -138,7 +147,8 @@
      :cljr (instance? clojure.lang.Atom o)
      :joyride (= Atom (type o))
      :org.babashka/nbb (= Atom (type o))
-     :cljs (satisfies? cljs.core/IAtom o)))
+     :cljs (satisfies? cljs.core/IAtom o)
+     :lpy (instance? basilisp.lang.atom/Atom o)))
 
 (defn- notify [session-id a]
   (when-let [request @request]
@@ -212,7 +222,7 @@
 
 (defn- to-object [buffer value tag rep]
   (if-not *session*
-    (cson/-to-json
+    (cson/to-json*
      (with-meta
        (cson/tagged-value "remote" (pr-str value))
        (meta value))
@@ -235,9 +245,9 @@
    :clj
    (extend-type java.util.Collection
      cson/ToJson
-     (-to-json [value buffer]
+     (to-json* [value buffer]
        (if-let [id (value->id? value)]
-         (cson/-to-json (cson/tagged-value "ref" id) buffer)
+         (cson/to-json* (cson/tagged-value "ref" id) buffer)
          (cson/tagged-coll
           buffer
           (cond
@@ -251,9 +261,9 @@
    :clj
    (extend-type java.util.Map
      cson/ToJson
-     (-to-json [value buffer]
+     (to-json* [value buffer]
        (if-let [id (value->id? value)]
-         (cson/-to-json (cson/tagged-value "ref" id) buffer)
+         (cson/to-json* (cson/tagged-value "ref" id) buffer)
          (cson/tagged-map
           buffer
           "{"
@@ -264,15 +274,16 @@
 
 (extend-type #?(:clj  Object
                 :cljr Object
-                :cljs default)
+                :cljs default
+                :lpy  python/object)
   cson/ToJson
-  (-to-json [value buffer]
+  (to-json* [value buffer]
     (to-object buffer value :object nil)))
 
 (defn- has? [m k]
   (try
     (k m)
-    (catch #?(:clj Exception :cljr Exception :cljs :default) _e)))
+    (catch #?(:clj Exception :cljr Exception :lpy Exception :cljs :default) _e nil)))
 
 (defn- no-cache [value]
   (or (not (coll? value))
@@ -341,21 +352,24 @@
 
 #_{:clj-kondo/ignore [:unused-private-var]}
 (defn- runtime []
-  #?(:portal :portal :bb :bb :clj :clj :joyride :joyride :org.babashka/nbb :nbb :cljs :cljs :cljr :cljr))
+  #?(:portal :portal :bb :bb :clj :clj :joyride :joyride :org.babashka/nbb :nbb :cljs :cljs :cljr :cljr :lpy :py))
 
 (defn- error->data [e]
   #?(:clj  (assoc (Throwable->map e) :runtime (runtime))
      :cljr (assoc (Throwable->map e) :runtime (runtime))
-     :cljs e))
+     :default e))
 
 (defn update-value [new-value]
   (try
     (realize-value! new-value)
     (swap! tap-list conj new-value)
-    (catch #?(:clj Exception :cljr Exception :cljs :default) e
+    (catch #?(:clj Exception :cljr Exception :lpy Exception :cljs :default) e
       (swap! tap-list conj
              (error->data
-              (ex-info "Failed to receive value." {:value-type (type new-value)} e))))))
+              #?(:lpy
+                 (ex-info "Failed to receive value." {:value-type (type new-value)})
+                 :default
+                 (ex-info "Failed to receive value." {:value-type (type new-value)} e)))))))
 
 (def ^:private runtime-keymap (atom ^::no-cache {}))
 
@@ -372,6 +386,7 @@
         #?(:bb   "bb"
            :clj  "jvm"
            :cljr "clr"
+           :lpy  "py"
            :joyride "joyride"
            :org.babashka/nbb "nbb"
            :cljs (cond
@@ -431,7 +446,7 @@
                  (cond-> out
                    (predicate v)
                    (assoc name result))
-                 (catch #?(:clj Exception :cljr Exception :cljs :default) _ex out))
+                 (catch #?(:cljs :default :default Exception) _ex out))
                (assoc out name result)))))
        {}
        @registry)
@@ -453,7 +468,7 @@
     (a/try
       (a/let [return (binding [*session* session] (apply f args))]
         (done (assoc (source-info f) :return return)))
-      (catch #?(:clj Exception :cljr Exception :cljs js/Error) e
+      (catch #?(:clj Exception :cljr Exception :cljs js/Error :default Exception) e
         (done (assoc
                (source-info f)
                :error
@@ -462,8 +477,7 @@
                     {::function f
                      ::args     args
                      ::found?   (some? f)
-                     ::data     (ex-data e)}
-                    e)
+                     ::data     (ex-data e)})
                    datafy
                    (assoc :runtime (runtime)))))))))
 

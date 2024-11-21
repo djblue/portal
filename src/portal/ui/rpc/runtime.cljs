@@ -22,7 +22,7 @@
       (to-object buffer this :runtime-object nil)
       (if-let [id (->id this)]
         (cson/tag buffer "ref" id)
-        (cson/-to-json
+        (cson/to-json*
          (cson/tagged-value "remote" (:pr-str object))
          buffer)))))
 
@@ -30,7 +30,7 @@
 
 (deftype RuntimeObject [runtime object]
   Runtime
-  cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
+  cson/ToJson (to-json* [this buffer] (runtime-to-json buffer this))
   IMeta       (-meta    [_] (:meta object))
   IHash       (-hash    [_] (:id object))
   IEquiv
@@ -59,7 +59,7 @@
 
 (deftype RuntimeAtom [runtime object a]
   Runtime
-  cson/ToJson (-to-json [this buffer] (runtime-to-json buffer this))
+  cson/ToJson (to-json* [this buffer] (runtime-to-json buffer this))
 
   IAtom
   IDeref

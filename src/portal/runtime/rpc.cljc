@@ -1,7 +1,8 @@
 (ns ^:no-doc portal.runtime.rpc
   (:require #?(:clj  [portal.runtime.jvm.client :as c]
                :cljs [portal.runtime.node.client :as c]
-               :cljr [portal.runtime.clr.client :as c])
+               :cljr [portal.runtime.clr.client :as c]
+               :lpy  [portal.runtime.py.client :as c])
             [portal.runtime :as rt]))
 
 (defn on-open [session send!]

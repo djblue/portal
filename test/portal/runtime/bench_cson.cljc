@@ -19,10 +19,15 @@
    :http-requests d/http-requests
    :http-responses d/http-responses})
 
-(defn- pr-meta [v] (binding [*print-meta* true] (pr-str v)))
+(defn- pr-meta [v]
+  #?(:lpy (pr-str v)
+     :default (binding [*print-meta* true]
+                (pr-str v))))
 
 (def ^:private formats
-  #?(:org.babashka/nbb [:edn :cson] :default [:transit :edn :cson]))
+  #?(:org.babashka/nbb [:edn :cson]
+     :lpy [:cson]
+     :default [:transit :edn :cson]))
 
 (defn run-benchmark []
   (doall

@@ -1,0 +1,47 @@
+(ns ^:no-doc portal.runtime.py.launcher
+  (:require [portal.runtime :as rt]
+            [portal.runtime.browser :as browser]
+            [portal.runtime.py.client :as c]))
+
+(defonce ^:private server (atom nil))
+
+(defn start [options])
+
+(defn stop [])
+
+(defn open
+  ([options]
+   (open nil options))
+  ([portal options]
+   (let [server (start options)]
+     (browser/open {:portal portal :options options :server server}))))
+
+(defn clear [portal]
+  (if (= portal :all)
+    (c/request {:op :portal.rpc/clear})
+    (c/request (:session-id portal) {:op :portal.rpc/clear}))
+  (rt/cleanup-sessions))
+
+(defn close [portal]
+  (if (= portal :all)
+    (c/request {:op :portal.rpc/close})
+    (c/request (:session-id portal) {:op :portal.rpc/close}))
+  (rt/close-session (:session-id portal))
+  (rt/cleanup-sessions))
+
+(defn eval-str [portal msg]
+  (let [response (if (= portal :all)
+                   (c/request (assoc msg :op :portal.rpc/eval-str))
+                   (c/request (:session-id portal)
+                              (assoc msg :op :portal.rpc/eval-str)))]
+    (if-not (:error response)
+      response
+      (throw (ex-info (:message response) response)))))
+
+(defn sessions []
+  (for [session-id (rt/active-sessions)] (c/make-atom session-id)))
+
+(defn url [portal]
+  (browser/url {:portal portal :server @server}))
+
+(reset! rt/request c/request)

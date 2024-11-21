@@ -3,10 +3,12 @@
                [portal.runtime.jvm.commands])
             #?(:clj  [portal.runtime.jvm.launcher :as l]
                :cljs [portal.runtime.node.launcher :as l]
-               :cljr [portal.runtime.clr.launcher :as l])
+               :cljr [portal.runtime.clr.launcher :as l]
+               :lpy  [portal.runtime.py.launcher :as l])
             #?(:clj  [portal.sync :as a]
                :cljs [portal.async :as a]
-               :cljr [portal.sync :as a])
+               :cljr [portal.sync :as a]
+               :lpy  [portal.sync :as a])
             #?(:clj  [clojure.java.io :as io]
                :cljs [portal.resources :as io])
             [clojure.set :as set]

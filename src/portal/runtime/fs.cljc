@@ -6,33 +6,42 @@
                      ["os" :as os]
                      ["path" :as path]
                      [clojure.string :as s])
-     :cljr (:require [clojure.string :as s]))
-  #?(:cljr (:import (System.IO Directory File Path))))
+     :cljr (:require [clojure.string :as s])
+     :lpy  (:require [clojure.string :as s]))
+  #?(:cljr (:import (System.IO Directory File Path))
+     :lpy  (:import [pathlib :as p]
+                    [os :as os]
+                    [shutil :as shutil])))
 
 (defn cwd []
   #?(:clj  (System/getProperty "user.dir")
      :cljs (.cwd js/process)
-     :cljr (Directory/GetCurrentDirectory)))
+     :cljr (Directory/GetCurrentDirectory)
+     :lpy  (os/getcwd)))
 
 (defn slurp [path]
   #?(:clj  (clojure.core/slurp path)
      :cljs (fs/readFileSync path "utf8")
-     :cljr (clojure.core/slurp path :enc "utf8")))
+     :cljr (clojure.core/slurp path :enc "utf8")
+     :lpy  (basilisp.core/slurp path)))
 
 (defn spit [path content]
   #?(:clj  (clojure.core/spit path content)
      :cljs (fs/writeFileSync path content)
-     :cljr (clojure.core/spit path content)))
+     :cljr (clojure.core/spit path content)
+     :lpy  (basilisp.core/spit path content)))
 
 (defn mkdir [path]
   #?(:clj  (.mkdirs (io/file path))
-     :cljs (fs/mkdirSync path #js {:recursive true})
-     :cljr (Directory/CreateDirectory path)))
+     :cljs (fs/mkdirSync path (clj->js {:recursive true}))
+     :cljr (Directory/CreateDirectory path)
+     :lpy  (os/makedirs path)))
 
 (defn path []
   #?(:clj  (System/getenv "PATH")
      :cljs (.-PATH js/process.env)
-     :cljr (Environment/GetEnvironmentVariable "PATH")))
+     :cljr (Environment/GetEnvironmentVariable "PATH")
+     :lpy  (.get os/environ "PATH")))
 
 (defn separator []
   (or #?(:clj  (System/getProperty "path.separator")
@@ -43,14 +52,16 @@
 (defn join [& paths]
   #?(:clj  (.getCanonicalPath ^java.io.File (apply io/file paths))
      :cljs (apply path/join paths)
-     :cljr (Path/Join (into-array String paths))))
+     :cljr (Path/Join (into-array String paths))
+     :lpy  (apply os.path/join paths)))
 
 (defn exists [f]
   (when (and (string? f)
              #?(:clj  (.exists (io/file f))
                 :cljs (fs/existsSync f)
                 :cljr (or (File/Exists f)
-                          (Directory/Exists f))))
+                          (Directory/Exists f))
+                :lpy  (.is_file (p/Path f))))
     f))
 
 (defn is-file [f]
@@ -58,7 +69,8 @@
              #?(:clj  (.isFile (io/file f))
                 :cljs (and (exists f)
                            (.isFile (fs/lstatSync f)))
-                :cljr (File/Exists f)))
+                :cljr (File/Exists f)
+                :lpy  (.exists (p/Path f))))
     f))
 
 (defn modified [f]
@@ -66,7 +78,8 @@
     #?(:clj  (.lastModified (io/file f))
        :cljs (.getTime ^js/Date (.-mtime (fs/lstatSync f)))
        :cljr (.ToUnixTimeMilliseconds
-              (DateTimeOffset. (File/GetLastWriteTime f))))))
+              (DateTimeOffset. (File/GetLastWriteTime f)))
+       :lpy  (os.path/getmtime f))))
 
 (defn can-execute [f]
   #?(:clj  (let [file (io/file f)]
@@ -75,7 +88,8 @@
                   (try (fs/accessSync f fs/constants.X_OK)
                        (catch :default _e true)))
              f)
-     :cljr (exists f)))
+     :cljr (exists f)
+     :lpy  (os/access f os/X_OK)))
 
 (defn paths []
   (s/split (or (path) "") (re-pattern (separator))))
@@ -91,21 +105,26 @@
 (defn home []
   #?(:clj  (System/getProperty "user.home")
      :cljs (os/homedir)
-     :cljr (Environment/GetFolderPath System.Environment+SpecialFolder/UserProfile)))
+     :cljr (Environment/GetFolderPath System.Environment+SpecialFolder/UserProfile)
+     :lpy  (p.Path/home)))
 
 (defn list [path]
   #?(:clj  (for [^java.io.File f (.listFiles (io/file path))]
              (.getAbsolutePath f))
      :cljs (for [f (fs/readdirSync path)]
              (join path f))
-     :cljr (Directory/GetFileSystemEntries  path)))
+     :cljr (Directory/GetFileSystemEntries path)
+     :lpy  (let [p (cwd)]
+             (for [path (os/listdir path)]
+               (join p path)))))
 
 (defn rm [path]
   #?(:clj  (let [children (list path)]
              (doseq [child children] (rm child))
              (io/delete-file path))
-     :cljs (fs/rmSync path #js {:recursive true})
-     :cljr (Directory/Delete path true)))
+     :cljs (fs/rmSync path (clj->js {:recursive true}))
+     :cljr (Directory/Delete path true)
+     :lpy  (shutil/rmtree path)))
 
 (defn rm-exit [path]
   #?(:clj  (.deleteOnExit (io/file path))
@@ -118,12 +137,15 @@
   #?(:clj  (.getParent (io/file path))
      :cljs (let [root (.-root (path/parse path))]
              (when-not (= path root) (path/dirname path)))
-     :cljr (some-> (Directory/GetParent path) str)))
+     :cljr (some-> (Directory/GetParent path) str)
+     :lpy  (when-not (= "/" path)
+             (os.path/dirname path))))
 
 (defn basename [path]
   #?(:clj  (.getName (io/file path))
      :cljs (path/basename path)
-     :cljr (Path/GetFileName path)))
+     :cljr (Path/GetFileName path)
+     :lpy  (os.path/basename path)))
 
 (defn file-seq [dir]
   (tree-seq

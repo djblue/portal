@@ -15,7 +15,10 @@
      :org.babashka/nbb
      (try (with-meta value {}) true
           (catch :default _e false))
-     :cljs (implements? IMeta value)))
+     :cljs (implements? IMeta value)
+     :lpy
+     (try (with-meta value {}) true
+          (catch Exception _e false))))
 
 (defn default
   "Set the default viewer for a value.

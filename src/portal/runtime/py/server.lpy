@@ -1,0 +1,3 @@
+(ns ^:no-doc portal.runtime.py.server)
+
+(defmulti route (juxt :request-method :uri))

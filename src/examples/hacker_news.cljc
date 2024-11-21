@@ -1,11 +1,12 @@
 (ns examples.hacker-news
   (:require #?(:clj  [portal.sync  :as a]
                :cljs [portal.async :as a]
-               :cljr [portal.sync :as a])
+               :cljr [portal.sync :as a]
+               :lpy  [portal.sync :as a])
             #?(:cljs [examples.fetch :refer [fetch]])
-            [clojure.core.protocols :refer [nav]]
             #?(:clj  [portal.runtime.json :as json]
-               :cljr [portal.runtime.json :as json])))
+               :cljr [portal.runtime.json :as json]
+               :lpy  [portal.runtime.json :as json])))
 
 (def root "https://hacker-news.firebaseio.com/v0")
 
@@ -38,19 +39,22 @@
   #?(:clj  (-> url slurp json/read)
      :cljs (-> (fetch url)
                (.then #(js->clj (.parse js/JSON %) :keywordize-keys true)))
-     :cljr (-> url (slurp :enc "utf8") json/read)))
+     :cljr (-> url (slurp :enc "utf8") json/read)
+     :lpy  (-> url slurp json/read)))
 
 (defn as-url [s]
   #?(:clj  (java.net.URL. s)
      :cljs (js/URL. s)
-     :cljr (System.Uri. s)))
+     :cljr (System.Uri. s)
+     :lpy  s))
 
 (defn as-date [^long timestamp]
   #?(:clj  (java.util.Date. timestamp)
      :cljs (js/Date. timestamp)
      :cljr (.DateTime
             (System.DateTimeOffset/FromUnixTimeMilliseconds
-             timestamp))))
+             timestamp))
+     :lpy  timestamp))
 
 (declare nav-hn)
 (declare nav-item)
@@ -82,32 +86,32 @@
 
         (contains? item :kids)
         (update :kids vary-meta assoc
-                `nav #'nav-item
+                'clojure.core.protocols/nav #'nav-item
                 :portal.viewer/default :portal.viewer/inspector)
 
         (contains? item :submitted)
         (update :submitted vary-meta assoc
-                `nav #'nav-item
+                'clojure.core.protocols/nav #'nav-item
                 :portal.viewer/default :portal.viewer/inspector)))))
 
 (defn fetch-user [user]
   (a/let [res (fetch-hn (str "/user/" user ".json"))]
-    (vary-meta res assoc `nav #'nav-hn)))
+    (vary-meta res assoc 'clojure.core.protocols/nav #'nav-hn)))
 
 (defn nav-item [_coll _k v]
   (a/let [res (fetch-hn (str "/item/" v ".json"))]
-    (vary-meta res assoc `nav #'nav-hn)))
+    (vary-meta res assoc 'clojure.core.protocols/nav #'nav-hn)))
 
 (def stories
   (with-meta
     #{:topstories :newstories :beststories
       :askstories :showstories :jobstories}
-    {`nav #'nav-hn
+    {'clojure.core.protocols/nav #'nav-hn
      :portal.viewer/default :portal.viewer/inspector}))
 
 (defn fetch-stories [type]
   (a/let [res (fetch-hn (str "/" (name type) ".json"))]
-    (with-meta (take 15 res) (merge (meta res) {`nav #'nav-item}))))
+    (with-meta (take 15 res) (merge (meta res) {'clojure.core.protocols/nav #'nav-item}))))
 
 (defn nav-hn [coll k v]
   (cond

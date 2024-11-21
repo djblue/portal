@@ -18,6 +18,12 @@
                      [portal.runtime.clr.client :as c]
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
+                     [portal.runtime.shell :as shell])
+     :lpy  (:require [clojure.string :as str]
+                     [portal.runtime :as rt]
+                     [portal.runtime.py.client :as c]
+                     [portal.runtime.fs :as fs]
+                     [portal.runtime.json :as json]
                      [portal.runtime.shell :as shell]))
   #?(:cljr (:import [System.Runtime.InteropServices OSPlatform RuntimeInformation])))
 
@@ -96,7 +102,7 @@
        (when (str/ends-with? file (str app-name ".lnk"))
          {:app-id (str/replace (fs/basename (fs/dirname file)) "_crx_" "")}))
      (windows-chrome-web-applications))
-    (catch #?(:cljs :default :default Exception) _)))
+    (catch #?(:cljs :default :default Exception) _ nil)))
 
 (defn- get-app-id-profile
   "Returns app-id and profile if portal is installed as `app-name` under any of the browser profiles"

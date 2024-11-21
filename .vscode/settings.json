@@ -60,6 +60,26 @@
           ":shadow"
         ]
       }
-    }
+    },
+    {
+      "name": "basilisp",
+      "projectType": "deps.edn",
+      "projectRootPath": [
+        "."
+      ],
+      "customJackInCommandLine": "./py/bin/basilisp nrepl-server",
+      "jackInEnv": {
+        "PYTHONPATH": "dev:src:test"
+      },
+      "nReplPortFile": [
+        ".nrepl-port",
+      ],
+      "menuSelections": {
+        "cljAliases": [
+          ":dev",
+          ":cider"
+        ]
+      }
+    },
   ]
 }
