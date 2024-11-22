@@ -77,17 +77,20 @@
   (str/trim (:out (shell/sh "cmd.exe" "/C" "echo %USERNAME%"))))
 
 (defn- windows-chrome-web-applications []
-  (tree-seq
-   (fn [f]
-     (and (not (fs/is-file f))
-          (or
-           (str/includes? f "_crx_")
-           (str/ends-with? f "Web Applications"))))
-   (fn [d] (fs/list d))
-   (fs/join
-    "/mnt/c/Users"
-    (get-windows-user)
-    "AppData/Local/Google/Chrome/User Data/Default/Web Applications")))
+  (some
+   (fn [root]
+     (tree-seq
+      (fn [f]
+        (and (not (fs/is-file f))
+             (or
+              (str/includes? f "_crx_")
+              (str/ends-with? f "Web Applications"))))
+      (fn [d] (fs/list d))
+      (fs/join
+       root
+       (get-windows-user)
+       "AppData/Local/Google/Chrome/User Data/Default/Web Applications")))
+   ["/Users" "/mnt/c/Users"]))
 
 (defn- get-app-id-profile-windows [app-name]
   (try
