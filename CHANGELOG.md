@@ -1,3 +1,9 @@
+## 0.58.3 - 2024-11-22
+
+- Updates IJ plugin for 2024.3 (#247) 04bf786a
+  - Thanks @coyotesqrl!
+- Add  `portal.client.py` 681fb64d
+
 ## 0.58.2 - 2024-10-24
 
 ### Bug Fixes
