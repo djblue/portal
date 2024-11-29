@@ -26,17 +26,18 @@
     (pr-str v)))
 
 (def ^:private formats
-  #?(:org.babashka/nbb [:edn :cson]
-     :cljr [:edn :cson]
-     :lpy [:cson]
-     :default [:transit :edn :cson]))
+  #?(:org.babashka/nbb [:edn :cson :cson-simple]
+     :cljr [:edn :cson :cson-simple]
+     :lpy [:cson :cson-simple]
+     :default [:transit :edn :cson :cson-simple]))
 
 (defn run-benchmark []
   (doall
    (let [n 10 bench-data (assoc bench-data :all bench-data)]
      (concat
       (for [[data value] bench-data
-            encoding formats]
+            encoding formats
+            :when (not= encoding :cson-simple)]
         (merge
          (case encoding
            :transit (let [value (transit/write value)]
@@ -60,19 +61,18 @@
          (case encoding
            :transit (b/run (transit/write value) n)
            :edn     (b/run (pr-meta value) n)
-           :cson    (b/run (cson/write value) n))
+           :cson    (b/run (cson/write value) n)
+           :cson-simple (b/run (cson/write value {::cson/dispatch :cond}) n))
          {:test :write
-          :encoding encoding
+          :encoding (if (= :cson-simple encoding) :cson encoding)
           :data data
           :runtime (console/runtime)
           :benchmark (pr-str (keyword (name encoding) "write"))}))))))
 
 (defn charts [data]
   (->> data
-       (map (fn [{:keys [encoding runtime test] :as x}]
-              (assoc x
-                     :benchmark
-                     (str (name runtime) "/" (name encoding) "/" (name test)))))
+       (map (fn [{:keys [benchmark runtime] :as x}]
+              (assoc x :benchmark (str (name runtime) "/" benchmark))))
        (group-by :data)
        (sort-by
         (fn [[_ values]]
