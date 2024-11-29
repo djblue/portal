@@ -6,7 +6,10 @@
                     [System.Text Encoding])))
 
 (defn pass [v]
-  (cson/read (cson/write v)))
+  (let [proto  (cson/write v {::cson/dispatch :prototype})
+        simple (cson/write v {::cson/dispatch :cond})]
+    (is (= proto simple))
+    (cson/read simple)))
 
 (deftest simple-values
   (are [value]
