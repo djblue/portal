@@ -10,15 +10,6 @@ runs:
         key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
         restore-keys: |
           ${{ runner.os }}-deps-
-    - name: Gradle Cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
     - uses: actions/setup-node@v4
       with:
         node-version: 20

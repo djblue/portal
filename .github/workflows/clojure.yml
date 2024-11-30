@@ -19,6 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
+    - uses: ./.github/setup-gradle
     - run: bb check
   build:
     needs: [ setup ]
@@ -89,6 +90,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
+    - uses: ./.github/setup-gradle
     - run: bb pkg
     - uses: actions/upload-artifact@v4
       with:
@@ -184,6 +186,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
+    - uses: ./.github/setup-gradle
     - uses: actions/download-artifact@v4
       with:
         name: extension-intellij
