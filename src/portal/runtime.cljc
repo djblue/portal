@@ -279,6 +279,7 @@
       (empty? value)
       (cson/tagged-value? value)
       (not (can-meta? value))
+      (has? value ::id)
       (has? value :portal.rpc/id)
       (::no-cache (meta value))))
 

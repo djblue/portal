@@ -205,7 +205,7 @@
 
 (defn- push-meta [buffer m]
   (if (map? m)
-    (-to-json m (json/push-string buffer "^"))
+    (to-json (json/push-string buffer "^") m)
     buffer))
 
 (defn- tagged-meta [buffer value]
