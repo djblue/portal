@@ -14,4 +14,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/setup
+      - uses: ./.github/setup-gradle
       - run: bb -m tasks.ijverify/verify
