@@ -24,7 +24,6 @@
     (t/node out)))
 
 (defn cljs-runtime [version]
-  (install)
   (build)
   (cljs* {'org.clojure/clojurescript {:mvn/version version}} :portal.test-runtime-runner))
 
@@ -60,7 +59,7 @@
   (t/bb "-m" :portal.test-runner))
 
 (defn cljr []
-  (install)
+  (build)
   (binding [t/*opts* (assoc-in t/*opts* [:extra-env "CLOJURE_LOAD_PATH"]
                                (str/join (System/getProperty "path.separator")
                                          ["src" "resources" "test"]))]
