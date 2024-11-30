@@ -24,7 +24,6 @@
     (t/node out)))
 
 (defn cljs-runtime [version]
-  (build)
   (cljs* {'org.clojure/clojurescript {:mvn/version version}} :portal.test-runtime-runner))
 
 (defn- get-cljs-deps []
@@ -47,6 +46,7 @@
   (setup* "1.10.844"))
 
 (defn cljs []
+  (build)
   (cljs-runtime "1.10.773")
   (cljs-runtime "1.10.844")
   (cljs-nbb)
