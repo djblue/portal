@@ -12,7 +12,6 @@
     (npm :ci)))
 
 (defn main-js []
-  (install)
   (when (seq
          (fs/modified-since
           "resources/portal/main.js"
@@ -22,18 +21,19 @@
             "package-lock.json"
             "shadow-cljs.edn"]
            (fs/glob "src/portal/ui" "**.cljs"))))
+    (install)
     (shadow :release :client))
   (fs/copy "resources/icon.svg"
            "resources/portal/icon.svg"
            {:replace-existing true}))
 
 (defn ws-js []
-  (install)
   (let [out "resources/portal/ws.js"]
     (when (seq
            (fs/modified-since
             out
             ["package.json" "package-lock.json"]))
+      (install)
       (npx :browserify
            "--node"
            "--exclude" :bufferutil
