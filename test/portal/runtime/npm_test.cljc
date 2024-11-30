@@ -1,10 +1,12 @@
 (ns portal.runtime.npm-test
-  (:require [clojure.test :refer [deftest are]]
-            [portal.runtime.shell :refer [sh]]
-            [portal.runtime.npm :refer [node-resolve]]))
+  (:require [clojure.test :refer [are deftest]]
+            [portal.runtime.fs :as fs]
+            [portal.runtime.npm :refer [node-resolve]]
+            [portal.runtime.shell :refer [sh]]))
 
 (deftest valid-modules
-  (sh "npm" "install" "react@^17.0.2")
+  (when-not (fs/exists "node_modules")
+    (sh "npm" "install" "react@^17.0.2"))
   (are [module]
        (some? (node-resolve module))
     "react/jsx-runtime.js"
