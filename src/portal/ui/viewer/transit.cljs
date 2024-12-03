@@ -1,7 +1,9 @@
-(ns ^:no-doc portal.ui.viewer.transit
-  (:require [cognitect.transit :as t]
-            [portal.ui.inspector :as ins]
-            [portal.ui.parsers :as p]))
+(ns portal.ui.viewer.transit
+  {:no-doc true}
+  (:require
+   [cognitect.transit :as t]
+   [portal.ui.inspector :as ins]
+   [portal.ui.parsers :as p]))
 
 (defn- parse-transit [transit-string]
   (try (t/read (t/reader :json) transit-string)

@@ -1,57 +1,58 @@
 (ns portal.runtime.jvm.editor-test
-  (:require [clojure.java.io :as io]
-            [clojure.test :refer [are deftest]]
-            [portal.runtime]
-            [portal.runtime.fs :as fs]
-            [portal.runtime.jvm.editor :as editor]))
+  (:require
+   [clojure.java.io :as io]
+   [clojure.test :refer [are deftest]]
+   [portal.runtime]
+   [portal.runtime.fs :as fs]
+   [portal.runtime.jvm.editor :as editor]))
 
 (deftest can-goto-test
   (are [value]
        (fs/exists (:file (editor/can-goto value)))
-    ;; maps
-    {:file "deps.edn"}
-    {:ns 'portal.runtime}
+       ;; maps
+       {:file "deps.edn"}
+       {:ns 'portal.runtime}
 
-    ;; vars
-    #'portal.runtime/ops
+       ;; vars
+       #'portal.runtime/ops
 
-    ;; namespace symbols
-    'portal.runtime
-    'portal.runtime/ops
+       ;; namespace symbols
+       'portal.runtime
+       'portal.runtime/ops
 
-      ;; urls
-    (io/resource "portal/runtime.cljc")
+       ;; urls
+       (io/resource "portal/runtime.cljc")
 
-    ;; files
-    (io/file "deps.edn")
+       ;; files
+       (io/file "deps.edn")
 
-    ;; strings
-    "deps.edn"
-    "src/portal/runtime.cljc"
+       ;; strings
+       "deps.edn"
+       "src/portal/runtime.cljc"
 
-    ;; string on classpath
-    "portal/runtime.cljc")
+       ;; string on classpath
+       "portal/runtime.cljc")
 
   (are [value]
        (not (fs/exists (:file (editor/can-goto value))))
-    ;; maps
-    {:file "missing.edn"}
-    {:ns 'ns.missing}
-    {}
+       ;; maps
+       {:file "missing.edn"}
+       {:ns 'ns.missing}
+       {}
 
-    ;; namespace symbols
-    'ns.missing
-    'ns.missing/conj
+       ;; namespace symbols
+       'ns.missing
+       'ns.missing/conj
 
-      ;; urls
-    (io/resource "portal/missing.cljc")
+       ;; urls
+       (io/resource "portal/missing.cljc")
 
-    ;; files
-    (io/file "missing.edn")
+       ;; files
+       (io/file "missing.edn")
 
-    ;; strings
-    "missing.edn"
-    "src/portal/missing.cljc"
+       ;; strings
+       "missing.edn"
+       "src/portal/missing.cljc"
 
-    ;; string on classpath
-    "portal/missing.cljc"))
+       ;; string on classpath
+       "portal/missing.cljc"))

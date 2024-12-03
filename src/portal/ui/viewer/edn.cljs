@@ -1,7 +1,9 @@
-(ns ^:no-doc portal.ui.viewer.edn
-  (:require [portal.runtime.edn :as edn]
-            [portal.ui.inspector :as ins]
-            [portal.ui.parsers :as p]))
+(ns portal.ui.viewer.edn
+  {:no-doc true}
+  (:require
+   [portal.runtime.edn :as edn]
+   [portal.ui.inspector :as ins]
+   [portal.ui.parsers :as p]))
 
 (defn read-string [edn-string]
   (try (edn/read-string edn-string)

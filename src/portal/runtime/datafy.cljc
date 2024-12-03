@@ -1,4 +1,5 @@
-(ns ^:no-doc portal.runtime.datafy)
+(ns portal.runtime.datafy
+  {:no-doc true})
 
 (defn datafy
   "Attempts to return x as data.

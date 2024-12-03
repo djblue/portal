@@ -1,8 +1,9 @@
 (ns tasks.check
-  (:require [portal.runtime.json :as json]
-            [portal.viewer :as v]
-            [tasks.format :as fmt]
-            [tasks.tools :refer [*cwd* clj gradle sh]]))
+  (:require
+   [portal.runtime.json :as json]
+   [portal.viewer :as v]
+   [tasks.format :as fmt]
+   [tasks.tools :refer [*cwd* clj gradle sh]]))
 
 (defn cloc []
   (-> (sh :cloc "--json" :src :dev :test)

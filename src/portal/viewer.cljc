@@ -2,7 +2,7 @@
   "Namespace for easily setting default viewers for provided values.
 
    Note: Support for input validation may come in the future."
-  (:refer-clojure :exclude [pr-str for]))
+  (:refer-clojure :exclude [for pr-str]))
 
 (declare hiccup)
 

@@ -1,12 +1,14 @@
-(ns ^:no-doc portal.ui.viewer.http
-  (:require [clojure.spec.alpha :as s]
-            [clojure.string :as str]
-            [portal.colors :as c]
-            [portal.ui.filter :as-alias f]
-            [portal.ui.inspector :as ins]
-            [portal.ui.select :as select]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.http
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [portal.colors :as c]
+   [portal.ui.filter :as-alias f]
+   [portal.ui.inspector :as ins]
+   [portal.ui.select :as select]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 ;;; :spec
 (s/def ::uri string?)

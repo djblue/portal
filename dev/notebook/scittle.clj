@@ -1,9 +1,10 @@
 (ns notebook.scittle
-  (:require [clojure.java.browse :as browse]
-            [clojure.string :as str]
-            [hiccup.page :as page]
-            [portal.api :as p]
-            [portal.viewer :as v]))
+  (:require
+   [clojure.java.browse :as browse]
+   [clojure.string :as str]
+   [hiccup.page :as page]
+   [portal.api :as p]
+   [portal.viewer :as v]))
 
 (def portal-dev (p/open {:mode :dev :launcher false}))
 
@@ -21,8 +22,8 @@
 (defn div-and-script [id widget]
   [[:div {:id id}]
    (scittle-script
-    (list 'dom/render (list 'fn [] widget)
-          (list '.getElementById 'js/document id)))])
+     (list 'dom/render (list 'fn [] widget)
+           (list '.getElementById 'js/document id)))])
 
 (defn pr-str-with-meta [value]
   (binding [*print-meta* true]
@@ -33,51 +34,51 @@
 
 (defn page [widgets]
   (page/html5
-   [:head]
-   (into
-    [:body
-     (page/include-js "https://unpkg.com/react@18/umd/react.production.min.js"
-                      "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
-                      "https://scicloj.github.io/scittle/js/scittle.js"
-                      "https://scicloj.github.io/scittle/js/scittle.reagent.js"
-                      (portal-main-url portal-dev))
-     (scittle-script '(ns main
-                        (:require [reagent.core :as r]
-                                  [reagent.dom :as dom]))
-                     '(defn portal-viewer [{:keys [edn-str]}]
-                        (let [embed (js/portal_api.embed)]
-                          [:div
-                           [:div
-                            {:ref (fn [el]
-                                    (.renderOutputItem embed
-                                                       (clj->js {:mime "x-application/edn"
-                                                                 :theme "portal.colors/nord-light"
-                                                                 :text (fn [] edn-str)})
-                                                       el))}]])))]
-    (->> widgets
-         (map-indexed (fn [i widget]
-                        (div-and-script (str "widget" i)
-                                        widget)))
-         (apply concat)))))
+    [:head]
+    (into
+      [:body
+       (page/include-js "https://unpkg.com/react@18/umd/react.production.min.js"
+                        "https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+                        "https://scicloj.github.io/scittle/js/scittle.js"
+                        "https://scicloj.github.io/scittle/js/scittle.reagent.js"
+                        (portal-main-url portal-dev))
+       (scittle-script '(ns main
+                          (:require [reagent.core :as r]
+                                    [reagent.dom :as dom]))
+                       '(defn portal-viewer [{:keys [edn-str]}]
+                          (let [embed (js/portal_api.embed)]
+                            [:div
+                             [:div
+                              {:ref (fn [el]
+                                      (.renderOutputItem embed
+                                                         (clj->js {:mime "x-application/edn"
+                                                                   :theme "portal.colors/nord-light"
+                                                                   :text (fn [] edn-str)})
+                                                         el))}]])))]
+      (->> widgets
+           (map-indexed (fn [i widget]
+                          (div-and-script (str "widget" i)
+                                          widget)))
+           (apply concat)))))
 
 (defn img [url]
   (v/hiccup
-   [:img {:height 50 :width 50
-          :src url}]))
+    [:img {:height 50 :width 50
+           :src url}]))
 
 (defn md [text]
   (v/hiccup [:portal.viewer/markdown text]))
 
 (defn vega-lite-point-plot [data]
   (v/hiccup
-   [:portal.viewer/vega-lite
-    (-> {:data {:values data},
-         :mark "point"
-         :encoding
-         {:size {:field "w" :type "quantitative"}
-          :x {:field "x", :type "quantitative"},
-          :y {:field "y", :type "quantitative"},
-          :fill {:field "z", :type "nominal"}}})]))
+    [:portal.viewer/vega-lite
+     (-> {:data {:values data}
+          :mark "point"
+          :encoding
+          {:size {:field "w" :type "quantitative"}
+           :x {:field "x", :type "quantitative"}
+           :y {:field "y", :type "quantitative"}
+           :fill {:field "z", :type "nominal"}}})]))
 
 (defn random-data [n]
   (->> (repeatedly n #(- (rand) 0.5))

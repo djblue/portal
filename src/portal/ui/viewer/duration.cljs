@@ -1,4 +1,5 @@
-(ns ^:no-doc portal.ui.viewer.duration
+(ns portal.ui.viewer.duration
+  {:no-doc true}
   (:require
    [portal.colors :as-alias c]
    [portal.ui.inspector :as ins]

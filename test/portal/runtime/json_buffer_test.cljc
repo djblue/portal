@@ -1,6 +1,7 @@
 (ns portal.runtime.json-buffer-test
-  (:require [clojure.test :refer [deftest is]]
-            [portal.runtime.json-buffer :as b]))
+  (:require
+   [clojure.test :refer [deftest is]]
+   [portal.runtime.json-buffer :as b]))
 
 (defn- write-json [buffer _]
   (-> buffer

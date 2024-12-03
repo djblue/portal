@@ -1,6 +1,7 @@
 (ns tasks.ide
-  (:require [clojure.string :as str]
-            [tasks.tools :refer [*cwd* gradle]]))
+  (:require
+   [clojure.string :as str]
+   [tasks.tools :refer [*cwd* gradle]]))
 
 (def plugins
   {"2021.3" ["com.cursiveclojure.cursive:1.12.2-2021.3" "com.intellij.java"]

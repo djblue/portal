@@ -1,7 +1,8 @@
 (ns tasks.clean
-  (:require [babashka.fs :as fs]
-            [io.aviso.ansi :as a]
-            [tasks.info :refer [version]]))
+  (:require
+   [babashka.fs :as fs]
+   [io.aviso.ansi :as a]
+   [tasks.info :refer [version]]))
 
 (defn rm [path]
   (when (fs/exists? path)

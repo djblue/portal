@@ -1,18 +1,21 @@
-(ns ^:no-doc ^:no-check portal.runtime.clr.server
-  (:require [clojure.edn :as edn]
-            [clojure.string :as str]
-            [portal.runtime :as rt]
-            [portal.runtime.fs :as fs]
-            [portal.runtime.index :as index]
-            [portal.runtime.json :as json]
-            [portal.runtime.rpc :as rpc])
-  (:import (clojure.lang RT)
-           (System Environment Guid)
-           (System.IO Path)
-           (System.Net HttpListenerContext)
-           (System.Net.WebSockets WebSocket WebSocketMessageType WebSocketState)
-           (System.Text Encoding)
-           (System.Threading CancellationToken Thread)))
+(ns :no-check
+  {:no-doc true}
+  (:require
+   [clojure.edn :as edn]
+   [clojure.string :as str]
+   [portal.runtime :as rt]
+   [portal.runtime.fs :as fs]
+   [portal.runtime.index :as index]
+   [portal.runtime.json :as json]
+   [portal.runtime.rpc :as rpc])
+  (:import
+   (System Environment Guid)
+   (System.IO Path)
+   (System.Net HttpListenerContext)
+   (System.Net.WebSockets WebSocket WebSocketMessageType WebSocketState)
+   (System.Text Encoding)
+   (System.Threading CancellationToken Thread)
+   (clojure.lang RT)))
 
 (defmulti route (juxt :request-method :uri))
 
@@ -22,20 +25,20 @@
 (defn- send-message [^WebSocket ws ^String message]
   (let [bytes (.GetBytes Encoding/UTF8 message)]
     (.SendAsync
-     ws
-     (array-segment bytes)
-     WebSocketMessageType/Text
-     true
-     CancellationToken/None)))
+      ws
+      (array-segment bytes)
+      WebSocketMessageType/Text
+      true
+      CancellationToken/None)))
 
 (defn- receive-message [^WebSocket ws]
   (let [max-size (* 50 1024 1024)
         buffer   (byte-array max-size)]
     (loop [receive-count 0]
       (let [task   (.ReceiveAsync
-                    ws
-                    (array-segment buffer receive-count (- max-size receive-count))
-                    CancellationToken/None)
+                     ws
+                     (array-segment buffer receive-count (- max-size receive-count))
+                     CancellationToken/None)
             _      (.Wait task)
             result (.Result task)]
         (if-not (.EndOfMessage result)
@@ -84,22 +87,22 @@
 
 (defn- resource [path]
   (some
-   (fn [dir]
-     (fs/exists (fs/join (fs/cwd) dir path)))
-   (str/split
-    (Environment/GetEnvironmentVariable "CLOJURE_LOAD_PATH")
-    (re-pattern (str Path/PathSeparator)))))
+    (fn [dir]
+      (fs/exists (fs/join (fs/cwd) dir path)))
+    (str/split
+      (Environment/GetEnvironmentVariable "CLOJURE_LOAD_PATH")
+      (re-pattern (str Path/PathSeparator)))))
 
 (defmethod route :default [request]
   (if-not (str/ends-with? (:uri request) ".map")
     {:status 404}
     (let [uri (subs (:uri request) 1)]
       (some
-       (fn [file]
-         (when file
-           (send-resource "application/json" (fs/slurp file))))
-       [(resource (str "portal-dev/" uri))
-        (resource uri)]))))
+        (fn [file]
+          (when file
+            (send-resource "application/json" (fs/slurp file))))
+        [(resource (str "portal-dev/" uri))
+         (resource uri)]))))
 
 (defmethod route [:get "/icon.svg"] [_]
   {:status  200
@@ -111,20 +114,20 @@
    :headers {"Content-Type" "text/javascript"}
    :body
    (fs/slurp
-    (resource
-     (case (-> request :session :options :mode)
-       :dev "portal-dev/main.js"
-       "portal/main.js")))})
+     (resource
+       (case (-> request :session :options :mode)
+         :dev "portal-dev/main.js"
+         "portal/main.js")))})
 
 (defn- get-session-id [request]
   ;; There might be a referrer which is not a UUID in standalone mode.
   (try
     (some->
-     (or (:query-string request)
-         (when-let [referer (get-in request [:headers "referer"])]
-           (last (str/split referer #"\?"))))
-     str
-     Guid/Parse)
+      (or (:query-string request)
+          (when-let [referer (get-in request [:headers "referer"])]
+            (last (str/split referer #"\?"))))
+      str
+      Guid/Parse)
     (catch Exception _ nil)))
 
 (defn- with-session [request]
@@ -140,9 +143,9 @@
 (defmethod route [:post "/submit"] [request]
   (let [body (slurp (:body request) :encoding "utf8")]
     (rt/update-value
-     (case (content-type request)
-       "application/json" (json/read body)
-       "application/edn"  (edn/read-string {:default tagged-literal} body)))
+      (case (content-type request)
+        "application/json" (json/read body)
+        "application/edn"  (edn/read-string {:default tagged-literal} body)))
     {:status  204
      :headers {"Access-Control-Allow-Origin" "*"}}))
 

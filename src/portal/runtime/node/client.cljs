@@ -1,6 +1,8 @@
-(ns ^:no-doc portal.runtime.node.client
-  (:require [portal.async :as a]
-            [portal.runtime :as rt]))
+(ns portal.runtime.node.client
+  {:no-doc true}
+  (:require
+   [portal.async :as a]
+   [portal.runtime :as rt]))
 
 (def ops
   {:portal.rpc/response
@@ -14,24 +16,24 @@
 (defn- get-connection [session-id]
   (let [done (atom nil)]
     (.race
-     js/Promise
-     [(js/Promise.
-       (fn [resolve _reject]
-         (let [handle (js/setTimeout #(resolve nil) timeout)]
-           (reset! done #(js/clearTimeout handle)))))
-      (js/Promise.
-       (fn [resolve _reject]
-         (if-let [send! (get @rt/connections session-id)]
-           (do (@done) (resolve send!))
-           (let [watch-key (keyword (gensym))]
-             (add-watch
-              rt/connections
-              watch-key
-              (fn [_ _ _old new]
-                (when-let [send! (get new session-id)]
-                  (@done)
-                  (remove-watch rt/connections watch-key)
-                  (resolve send!))))))))])))
+      js/Promise
+      [(js/Promise.
+         (fn [resolve _reject]
+           (let [handle (js/setTimeout #(resolve nil) timeout)]
+             (reset! done #(js/clearTimeout handle)))))
+       (js/Promise.
+         (fn [resolve _reject]
+           (if-let [send! (get @rt/connections session-id)]
+             (do (@done) (resolve send!))
+             (let [watch-key (keyword (gensym))]
+               (add-watch
+                 rt/connections
+                 watch-key
+                 (fn [_ _ _old new]
+                   (when-let [send! (get new session-id)]
+                     (@done)
+                     (remove-watch rt/connections watch-key)
+                     (resolve send!))))))))])))
 
 (defn request
   ([message]
@@ -46,11 +48,11 @@
        (let [id      (rt/next-id)
              message (assoc message :portal.rpc/id id)]
          (.then
-          (js/Promise.
-           (fn [resolve reject]
-             (swap! rt/pending-requests assoc id [resolve reject])
-             (send! message)))
-          #(do (swap! rt/pending-requests dissoc id) %)))
+           (js/Promise.
+             (fn [resolve reject]
+               (swap! rt/pending-requests assoc id [resolve reject])
+               (send! message)))
+           #(do (swap! rt/pending-requests dissoc id) %)))
        (throw (ex-info "No such portal session"
                        {:session-id session-id :message message}))))))
 

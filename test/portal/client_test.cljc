@@ -1,22 +1,25 @@
 (ns portal.client-test
-  #?(:clj
-     (:require [clojure.test :refer [deftest is]]
-               [portal.api :as p]
-               [portal.client.jvm :as c]
-               [portal.runtime :as rt]
-               [portal.sync :as a])
-     :cljr
-     (:require [clojure.test :refer [deftest is]]
-               [portal.api :as p]
-               [portal.client.clr :as c]
-               [portal.runtime :as rt]
-               [portal.sync :as a])
-     :cljs
-     (:require [clojure.test :refer [async deftest is]]
-               [portal.api :as p]
-               [portal.async :as a]
-               [portal.client.node :as c]
-               [portal.runtime :as rt])))
+  (:require
+   #?@(:clj
+       [[clojure.test :refer [deftest is]]
+        [portal.api :as p]
+        [portal.client.jvm :as c]
+        [portal.runtime :as rt]
+        [portal.sync :as a]]
+
+       :cljr
+       [[clojure.test :refer [deftest is]]
+        [portal.api :as p]
+        [portal.client.clr :as c]
+        [portal.runtime :as rt]
+        [portal.sync :as a]]
+
+       :cljs
+       [[clojure.test :refer [async deftest is]]
+        [portal.api :as p]
+        [portal.async :as a]
+        [portal.client.node :as c]
+        [portal.runtime :as rt]])))
 
 (def ^:private bad-seq (map (fn [_] (throw (ex-info "Error" {}))) (range 10)))
 

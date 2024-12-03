@@ -1,9 +1,10 @@
 (ns tasks.dev
-  (:require [clojure.core.server :as server]
-            [clojure.java.io :as io]
-            [org.httpkit.server :as http]
-            [tasks.build :refer [build]]
-            [tasks.tools :refer [*opts* clj]]))
+  (:require
+   [clojure.core.server :as server]
+   [clojure.java.io :as io]
+   [org.httpkit.server :as http]
+   [tasks.build :refer [build]]
+   [tasks.tools :refer [*opts* clj]]))
 
 (defrecord Edn [edn])
 
@@ -44,11 +45,11 @@
   (let [server (http/run-server #'proxy-tap> {:legacy-return-value? false})
         port   (http/server-port server)]
     (start-server
-     {:name          "bb"
-      :port          0
-      :server-daemon false
-      :args          [{:valf pr-str* ::port port}]
-      :accept        `io-prepl})))
+      {:name          "bb"
+       :port          0
+       :server-daemon false
+       :args          [{:valf pr-str* ::port port}]
+       :accept        `io-prepl})))
 
 (defn dev
   "Start dev server."

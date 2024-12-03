@@ -1,7 +1,9 @@
-(ns ^:no-doc portal.ui.viewer.csv
-  (:require ["papaparse" :refer [parse]]
-            [portal.ui.inspector :as ins]
-            [portal.ui.parsers :as p]))
+(ns portal.ui.viewer.csv
+  {:no-doc true}
+  (:require
+   ["papaparse" :refer [parse]]
+   [portal.ui.inspector :as ins]
+   [portal.ui.parsers :as p]))
 
 (defn parse-csv [csv-string]
   (try

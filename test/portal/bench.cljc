@@ -1,6 +1,9 @@
 (ns portal.bench
-  #?(:cljs (:refer-clojure :exclude [simple-benchmark]))
-  #?(:cljs (:require-macros portal.bench)))
+  #?(:cljs
+     (:refer-clojure :exclude [simple-benchmark]))
+  #?(:cljs
+     (:require-macros
+      [portal.bench])))
 
 (defn- now
   ([]
@@ -43,13 +46,13 @@
 (defn run* [f ^long n]
   (dotimes [_ n] (f))
   (simple-stats
-   (loop [i 0 results (transient [])]
-     (if (== i n)
-       (persistent! results)
-       (let [start (now)
-             _     (f)
-             end   (now start)]
-         (recur (unchecked-inc i)
-                (conj! results (trunc end))))))))
+    (loop [i 0 results (transient [])]
+      (if (== i n)
+        (persistent! results)
+        (let [start (now)
+              _     (f)
+              end   (now start)]
+          (recur (unchecked-inc i)
+                 (conj! results (trunc end))))))))
 
 (defmacro run [expr n] `(run* #(do ~expr) ~n))

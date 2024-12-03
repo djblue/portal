@@ -1,19 +1,28 @@
-(ns ^:no-doc portal.resources
-  #?(:cljs (:require-macros portal.resources))
-  #?(:clj (:require [clojure.java.io :as io]))
-  #?(:org.babashka/nbb (:require ["fs" :as fs]
-                                 ["path" :as path])
-     :joyride (:require ["vscode" :as vscode]
-                        ["ext://djblue.portal$resources" :as resources])))
+(ns portal.resources
+  {:no-doc true}
+  #?(:cljs
+     (:require-macros
+      [portal.resources]))
+  (:require
+   #?@(:clj
+       [[clojure.java.io :as io]]
+
+       :joyride
+       [["ext://djblue.portal$resources" :as resources]
+        ["vscode" :as vscode]]
+
+       :org.babashka/nbb
+       [["fs" :as fs]
+        ["path" :as path]])))
 
 #?(:org.babashka/nbb (def file *file*))
 
 (defn resource [_resource-name]
   #?(:org.babashka/nbb (some
-                        (fn [file]
-                          (when (fs/existsSync file) file))
-                        [(path/join file "../../" _resource-name)
-                         (path/join file "../../../resources" _resource-name)])
+                         (fn [file]
+                           (when (fs/existsSync file) file))
+                         [(path/join file "../../" _resource-name)
+                          (path/join file "../../../resources" _resource-name)])
      :joyride
      (let [vscode  (js/require "vscode")
            path    (js/require "path")

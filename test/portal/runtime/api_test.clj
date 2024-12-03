@@ -1,7 +1,8 @@
 (ns portal.runtime.api-test
-  (:require [clojure.test :refer [deftest is]]
-            [portal.api :as p]
-            [portal.runtime.browser :as browser]))
+  (:require
+   [clojure.test :refer [deftest is]]
+   [portal.api :as p]
+   [portal.runtime.browser :as browser]))
 
 (defn- headless-chrome-flags [url]
   ["--headless=new" "--disable-gpu" url])
@@ -21,8 +22,8 @@
     (is (= 6 (p/eval-str portal "*1")))
     (is (= :world (:hello (p/eval-str portal "{:hello :world}"))))
     (is (thrown?
-         clojure.lang.ExceptionInfo
-         (p/eval-str portal "(throw (ex-info \"error\" {:hello :world}))")))
+          clojure.lang.ExceptionInfo
+          (p/eval-str portal "(throw (ex-info \"error\" {:hello :world}))")))
     (is (= :hi (p/eval-str portal "(.resolve js/Promise :hi)" {:await true})))
     (is (some? (some #{portal} (p/sessions))))
     (p/close portal)))

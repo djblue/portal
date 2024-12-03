@@ -12,9 +12,9 @@
 
 (comment
   (tap>
-   (with-meta
-     {:a 1
-      :b 2
-      :c 3}
-     {`nav      #'nav-dep-anno-tree
-      :deps-map {:c #{:b :a}}})))
+    (with-meta
+      {:a 1
+       :b 2
+       :c 3}
+      {`nav      #'nav-dep-anno-tree
+       :deps-map {:c #{:b :a}}})))

@@ -1,18 +1,21 @@
-(ns ^:no-doc portal.runtime.jvm.server
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [clojure.string :as str]
-            [cognitect.transit :as transit]
-            [org.httpkit.server :as server]
-            [portal.runtime :as rt]
-            [portal.runtime.cson :as cson]
-            [portal.runtime.fs :as fs]
-            [portal.runtime.index :as index]
-            [portal.runtime.json :as json]
-            [portal.runtime.npm :as npm]
-            [portal.runtime.rpc :as rpc])
-  (:import [java.io File PushbackReader]
-           [java.util UUID]))
+(ns portal.runtime.jvm.server
+  {:no-doc true}
+  (:require
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [cognitect.transit :as transit]
+   [org.httpkit.server :as server]
+   [portal.runtime :as rt]
+   [portal.runtime.cson :as cson]
+   [portal.runtime.fs :as fs]
+   [portal.runtime.index :as index]
+   [portal.runtime.json :as json]
+   [portal.runtime.npm :as npm]
+   [portal.runtime.rpc :as rpc])
+  (:import
+   (java.io File PushbackReader)
+   (java.util UUID)))
 
 (def ^:private enable-cors
   {:status 204
@@ -40,12 +43,12 @@
   (let [session (rt/open-session (:session request))
         debug   (open-debug session)]
     (server/as-channel
-     request
-     {:on-receive (fn [_ch message] (rpc/on-receive session message))
-      :on-open    (fn [ch] (rpc/on-open session #(server/send! ch %)))
-      :on-close   (fn [_ch _status]
-                    (close-debug debug)
-                    (rpc/on-close session))})))
+      request
+      {:on-receive (fn [_ch message] (rpc/on-receive session message))
+       :on-open    (fn [ch] (rpc/on-open session #(server/send! ch %)))
+       :on-close   (fn [_ch _status]
+                     (close-debug debug)
+                     (rpc/on-close session))})))
 
 (defn- send-resource [content-type resource]
   {:status  200
@@ -61,11 +64,11 @@
     {:status 404}
     (let [uri (subs (:uri request) 1)]
       (some
-       (fn [^File file]
-         (when (and file (.exists file))
-           (send-resource "application/json" (slurp file))))
-       [(io/file (io/resource (str "portal-dev/" uri)))
-        (io/file (io/resource uri))]))))
+        (fn [^File file]
+          (when (and file (.exists file))
+            (send-resource "application/json" (slurp file))))
+        [(io/file (io/resource (str "portal-dev/" uri)))
+         (io/file (io/resource uri))]))))
 
 (defmethod route [:get "/icon.svg"] [_]
   {:status  200
@@ -77,19 +80,19 @@
    :headers {"Content-Type" "text/javascript"}
    :body
    (slurp
-    (io/resource
-     (case (-> request :session :options :mode)
-       :dev "portal-dev/main.js"
-       "portal/main.js")))})
+     (io/resource
+       (case (-> request :session :options :mode)
+         :dev "portal-dev/main.js"
+         "portal/main.js")))})
 
 (defn- get-session-id [request]
   ;; There might be a referrer which is not a UUID in standalone mode.
   (try
     (some->
-     (or (:query-string request)
-         (when-let [referer (get-in request [:headers "referer"])]
-           (last (str/split referer #"\?"))))
-     UUID/fromString)
+      (or (:query-string request)
+          (when-let [referer (get-in request [:headers "referer"])]
+            (last (str/split referer #"\?"))))
+      UUID/fromString)
     (catch Exception _ nil)))
 
 (defn- with-session [request]
@@ -108,8 +111,8 @@
     "application/json"         (json/read-stream (io/reader body))
     "application/cson"         (cson/read (slurp body))
     "application/edn"          (edn/read
-                                {:default tagged-literal}
-                                (PushbackReader. (io/reader body)))))
+                                 {:default tagged-literal}
+                                 (PushbackReader. (io/reader body)))))
 
 (defn- ->js [file]
   (let [source (fs/slurp file)]
@@ -127,18 +130,18 @@
     "Access-Control-Allow-Origin" "*"}
    :body
    (json/write
-    (let [{:keys [name path macros] :as m} (body request)]
-      (if (or (= name 'react) (string? name) (:npm name))
-        (node-resolve m)
-        (some
-         (fn [ext]
-           (when-let [resource (io/resource (str path ext))]
-             {:lang (if (= ext ".js") :js :clj)
-              :file (str resource)
-              :source (slurp resource)}))
-         (if macros
-           [".clj"  ".cljc"]
-           [".cljs" ".cljc" ".js"])))))})
+     (let [{:keys [name path macros] :as m} (body request)]
+       (if (or (= name 'react) (string? name) (:npm name))
+         (node-resolve m)
+         (some
+           (fn [ext]
+             (when-let [resource (io/resource (str path ext))]
+               {:lang (if (= ext ".js") :js :clj)
+                :file (str resource)
+                :source (slurp resource)}))
+           (if macros
+             [".clj"  ".cljc"]
+             [".cljs" ".cljc" ".js"])))))})
 
 (defmethod route [:options "/submit"] [_] enable-cors)
 (defmethod route [:post "/submit"] [request]

@@ -1,10 +1,12 @@
-(ns ^:no-doc portal.ui.repl.sci.eval
+(ns portal.ui.repl.sci.eval
+  {:no-doc true}
   (:refer-clojure :exclude [Throwable->map])
-  (:require [clojure.string :as str]
-            [portal.ui.cljs :as cljs]
-            [portal.ui.load :as load]
-            [portal.ui.repl.sci.libs :as libs]
-            [sci.core :as sci]))
+  (:require
+   [clojure.string :as str]
+   [portal.ui.cljs :as cljs]
+   [portal.ui.load :as load]
+   [portal.ui.repl.sci.libs :as libs]
+   [sci.core :as sci]))
 
 (sci/alter-var-root sci/print-fn (constantly *print-fn*))
 (sci/alter-var-root sci/print-err-fn (constantly *print-err-fn*))
@@ -23,15 +25,15 @@
 (defn- ex-trace [ex]
   (when-let [stacktrace (sci/stacktrace ex)]
     (into
-     []
-     (for [{:keys [_column file line ns] name* :name} stacktrace
-           :let [ns (->aliases ns ns)]]
-       [(symbol (str ns)
-                (name (or name* (gensym "eval"))))
-        'invoke
-        (or file
-            (ns->file ns))
-        (or line 1)]))))
+      []
+      (for [{:keys [_column file line ns] name* :name} stacktrace
+            :let [ns (->aliases ns ns)]]
+        [(symbol (str ns)
+                 (name (or name* (gensym "eval"))))
+         'invoke
+         (or file
+             (ns->file ns))
+         (or line 1)]))))
 
 (def ^:private ex-type cljs.core/ExceptionInfo)
 
@@ -49,14 +51,14 @@
      :cause   (ex-message ex)
      :data    (ex-data ex)
      :via     (mapv
-               (fn [ex]
-                 (merge
-                  {:type    (->class ex)
-                   :data    (ex-data ex)
-                   :message (ex-message ex)}
-                  (when-let [at (first (ex-trace ex))]
-                    {:at at})))
-               chain)
+                (fn [ex]
+                  (merge
+                    {:type    (->class ex)
+                     :data    (ex-data ex)
+                     :message (ex-message ex)}
+                    (when-let [at (first (ex-trace ex))]
+                      {:at at})))
+                chain)
      :trace   (vec (mapcat ex-trace chain))}))
 
 (defn eval-string [msg]
@@ -83,18 +85,18 @@
          sci/print-err-fn  #(out-fn {:tag :err :val %})
          sci/file (:file msg)}
         (cond->
-         {:value (loop [last-val nil]
-                   (let [[form _s] (sci/parse-next+string
-                                    ctx reader
-                                    {:read-cond :allow})]
-                     (if (= ::sci/eof form)
-                       last-val
-                       (let [value (sci/eval-form ctx form)]
-                         (set! *3 *2)
-                         (set! *2 *1)
-                         (set! *1 value)
-                         (recur value)))))
-          :ns    (str @sci/ns)}
+          {:value (loop [last-val nil]
+                    (let [[form _s] (sci/parse-next+string
+                                      ctx reader
+                                      {:read-cond :allow})]
+                      (if (= ::sci/eof form)
+                        last-val
+                        (let [value (sci/eval-form ctx form)]
+                          (set! *3 *2)
+                          (set! *2 *1)
+                          (set! *1 value)
+                          (recur value)))))
+           :ns    (str @sci/ns)}
 
           (seq @stdio) (assoc :stdio @stdio))))
     (catch :default e

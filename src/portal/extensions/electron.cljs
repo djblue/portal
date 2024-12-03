@@ -1,25 +1,26 @@
 (ns portal.extensions.electron
-  (:require ["electron" :refer [BrowserWindow app]]
-            [clojure.edn :as edn]
-            [portal.api :as p]
-            [portal.async :as a]
-            [portal.runtime.fs :as fs]
-            [portal.runtime.node.server :as server]))
+  (:require
+   ["electron" :refer [BrowserWindow app]]
+   [clojure.edn :as edn]
+   [portal.api :as p]
+   [portal.async :as a]
+   [portal.runtime.fs :as fs]
+   [portal.runtime.node.server :as server]))
 
 (defonce ^:private window (atom nil))
 
 (defn- create-window []
   (BrowserWindow.
-   #js {:title          "portal"
-        :width          1200
-        :height         600
-        ;; :titleBarStyle "hiddenInset"
-        :transparent    true
-        :alwaysOnTop    true
-        :frame          false
-        :opacity        0.75
-        :webPreferences #js {:zoomFactor 1.5}
-        :show           false}))
+    #js {:title          "portal"
+         :width          1200
+         :height         600
+         ;; :titleBarStyle "hiddenInset"
+         :transparent    true
+         :alwaysOnTop    true
+         :frame          false
+         :opacity        0.75
+         :webPreferences #js {:zoomFactor 1.5}
+         :show           false}))
 
 (def ^:private close-timeout (* 60 60 1000))
 
@@ -37,10 +38,10 @@
              (.preventDefault e)
              (.hide window)
              (let [timeout (js/setTimeout
-                            (fn []
-                              (js/console.log "destroying")
-                              (.destroy window))
-                            close-timeout)]
+                             (fn []
+                               (js/console.log "destroying")
+                               (.destroy window))
+                             close-timeout)]
                (.once window "show"
                       (fn []
                         (js/console.log "prevent destroy")

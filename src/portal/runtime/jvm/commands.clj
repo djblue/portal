@@ -1,8 +1,11 @@
-(ns ^:no-doc portal.runtime.jvm.commands
-  (:require [portal.runtime :as rt]
-            [portal.runtime.jvm.editor :as editor])
-  (:import [java.io File]
-           [java.net URI URL]))
+(ns portal.runtime.jvm.commands
+  {:no-doc true}
+  (:require
+   [portal.runtime :as rt]
+   [portal.runtime.jvm.editor :as editor])
+  (:import
+   (java.io File)
+   (java.net URI URL)))
 
 (defn- can-slurp? [value]
   (or (string? value)

@@ -1,17 +1,22 @@
 (ns portal.api
-  (:require #?(:clj
-               [portal.runtime.jvm.commands])
-            #?(:clj  [portal.runtime.jvm.launcher :as l]
-               :cljs [portal.runtime.node.launcher :as l]
-               :cljr [portal.runtime.clr.launcher :as l])
-            #?(:clj  [portal.sync :as a]
-               :cljs [portal.async :as a]
-               :cljr [portal.sync :as a])
-            #?(:clj  [clojure.java.io :as io]
-               :cljs [portal.resources :as io])
-            [clojure.set :as set]
-            [portal.runtime :as rt]
-            [portal.runtime.cson :as cson]))
+  (:require
+   [clojure.set :as set]
+   [portal.runtime :as rt]
+   [portal.runtime.cson :as cson]
+   #?@(:clj
+       [[clojure.java.io :as io]
+        [portal.runtime.jvm.commands]
+        [portal.runtime.jvm.launcher :as l]
+        [portal.sync :as a]]
+
+       :cljr
+       [[portal.runtime.clr.launcher :as l]
+        [portal.sync :as a]]
+
+       :cljs
+       [[portal.async :as a]
+        [portal.resources :as io]
+        [portal.runtime.node.launcher :as l]])))
 
 (defn submit
   "Tap target function.
@@ -97,8 +102,8 @@
   ([portal options]
    (l/open portal
            (merge
-            (dissoc (:options rt/*session*) :value)
-            (rename options)))))
+             (dissoc (:options rt/*session*) :value)
+             (rename options)))))
 
 (defn close
   "Close all current inspector windows.
@@ -206,17 +211,17 @@
    (if *nrepl-init*
      (*nrepl-init* portal)
      (throw
-      (ex-info
-       "Please start nREPL with `portal.nrepl/wrap-repl` middleware to enable the portal subrepl."
-       {:portal-instance    portal
-        :missing-middleware 'portal.nrepl/wrap-repl})))))
+       (ex-info
+         "Please start nREPL with `portal.nrepl/wrap-repl` middleware to enable the portal subrepl."
+         {:portal-instance    portal
+          :missing-middleware 'portal.nrepl/wrap-repl})))))
 
 #?(:cljs (def ^:private docs-json (io/inline "portal/docs.json")))
 
 (defn- get-docs []
   (cson/read
-   #?(:clj  (slurp (io/resource "portal/docs.json"))
-      :cljs docs-json)))
+    #?(:clj  (slurp (io/resource "portal/docs.json"))
+       :cljs docs-json)))
 
 (defn docs
   "Open portal docs.

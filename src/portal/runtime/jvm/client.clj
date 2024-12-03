@@ -1,7 +1,10 @@
-(ns ^:no-doc portal.runtime.jvm.client
-  (:require [clojure.pprint :as pprint]
-            [portal.runtime :as rt])
-  (:import [clojure.lang IAtom IDeref]))
+(ns portal.runtime.jvm.client
+  {:no-doc true}
+  (:require
+   [clojure.pprint :as pprint]
+   [portal.runtime :as rt])
+  (:import
+   (clojure.lang IAtom IDeref)))
 
 (def ops
   {:portal.rpc/response
@@ -18,11 +21,11 @@
     (if-let [send! (get @rt/connections session-id)]
       (deliver p send!)
       (add-watch
-       rt/connections
-       watch-key
-       (fn [_ _ _old new]
-         (when-let [send! (get new session-id)]
-           (deliver p send!)))))
+        rt/connections
+        watch-key
+        (fn [_ _ _old new]
+          (when-let [send! (get new session-id)]
+            (deliver p send!)))))
     (let [result (deref p timeout nil)]
       (remove-watch rt/connections watch-key)
       result)))
@@ -39,10 +42,10 @@
         (if-not (= response ::timeout)
           response
           (throw (ex-info
-                  "Portal request timeout"
-                  {::timeout true
-                   :session-id session-id
-                   :message message})))))
+                   "Portal request timeout"
+                   {::timeout true
+                    :session-id session-id
+                    :message message})))))
     (throw (ex-info "No such portal session"
                     {:session-id session-id :message message}))))
 
@@ -65,10 +68,10 @@
           response
           :else
           (throw (ex-info
-                  "Portal request timeout"
-                  {::timeout true
-                   :session-id :all
-                   :message message})))))))
+                   "Portal request timeout"
+                   {::timeout true
+                    :session-id :all
+                    :message message})))))))
 
 (defn request
   ([message]

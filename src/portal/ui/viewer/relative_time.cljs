@@ -1,10 +1,12 @@
-(ns ^:no-doc portal.ui.viewer.relative-time
+(ns portal.ui.viewer.relative-time
+  {:no-doc true}
   (:refer-clojure :exclude [second])
-  (:require ["react" :as react]
-            [clojure.spec.alpha :as s]
-            [portal.ui.react :refer [use-effect]]
-            [portal.ui.styled :as d]
-            [portal.ui.viewer.date-time :as date-time]))
+  (:require
+   ["react" :as react]
+   [clojure.spec.alpha :as s]
+   [portal.ui.react :refer [use-effect]]
+   [portal.ui.styled :as d]
+   [portal.ui.viewer.date-time :as date-time]))
 
 ;;; :spec
 (s/def ::relative-time
@@ -39,16 +41,16 @@
    (let [diff (- (.getTime b) (.getTime a))
          ms   (Math/abs diff)]
      (some
-      (fn [[unit scale]]
-        (when (> ms scale)
-          {:scale (Math/floor (/ ms scale))
-           :unit  unit
-           :direction
-           (cond
-             (neg? diff) :past
-             (pos? diff) :future
-             :else       :now)}))
-      (partition 2 time-scales)))))
+       (fn [[unit scale]]
+         (when (> ms scale)
+           {:scale (Math/floor (/ ms scale))
+            :unit  unit
+            :direction
+            (cond
+              (neg? diff) :past
+              (pos? diff) :future
+              :else       :now)}))
+       (partition 2 time-scales)))))
 
 (defn- format-relative-time [{:keys [scale unit direction]}]
   (if (= direction :now)
@@ -66,13 +68,13 @@
   (let [value          (date-time/parse value)
         [now set-now!] (react/useState (js/Date.))]
     (use-effect
-     :once
-     (let [i (js/setInterval
-              (fn []
-                (set-now! (js/Date.)))
-              1000)]
-       (fn []
-         (js/clearInterval i))))
+      :once
+      (let [i (js/setInterval
+                (fn []
+                  (set-now! (js/Date.)))
+                1000)]
+        (fn []
+          (js/clearInterval i))))
     [d/div (format-relative-time (relative-time now value))]))
 
 (def viewer

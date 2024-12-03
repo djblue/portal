@@ -1,9 +1,11 @@
-(ns ^:no-doc portal.ui.viewer.color
-  (:require [clojure.spec.alpha :as s]
-            [portal.colors :as c]
-            [portal.ui.inspector :as ins]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.color
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [portal.colors :as c]
+   [portal.ui.inspector :as ins]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 ;;; :spec
 (defn- hex-short? [string]

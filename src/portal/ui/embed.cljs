@@ -1,15 +1,17 @@
-(ns ^:no-doc portal.ui.embed
-  (:require [portal.colors :as c]
-            [portal.ui.app :as app]
-            [portal.ui.commands :as commands]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.options :as opts]
-            [portal.ui.select :as select]
-            [portal.ui.state :as state]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r]))
+(ns portal.ui.embed
+  {:no-doc true}
+  (:require
+   [portal.colors :as c]
+   [portal.ui.app :as app]
+   [portal.ui.commands :as commands]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.options :as opts]
+   [portal.ui.select :as select]
+   [portal.ui.state :as state]
+   [portal.ui.styled :as s]
+   [portal.ui.theme :as theme]
+   [reagent.core :as r]))
 
 (defn- open-external [{:keys [value on-click]}]
   (let [theme (theme/use-theme)
@@ -25,11 +27,11 @@
         (fn open-editor [e]
           (.stopPropagation e)
           (on-click
-           (let [values (state/selected-values @state)]
-             (case (count values)
-               0 value
-               1 (first values)
-               values))))}])))
+            (let [values (state/selected-values @state)]
+              (case (count values)
+                0 value
+                1 (first values)
+                values))))}])))
 
 (defn- history-arrow [{:keys [icon title on-click enabled]}]
   (let [state (state/use-state)
@@ -41,13 +43,13 @@
       :size "1x"
       :on-click #(state/dispatch! state on-click)
       :style    (merge
-                 {:cursor :pointer
-                  :padding (:padding theme)
-                  :color   (::c/text theme)
-                  :box-sizing :content-box}
-                 (when disabled?
-                   {:opacity 0.45
-                    :cursor  :default}))}]))
+                  {:cursor :pointer
+                   :padding (:padding theme)
+                   :color   (::c/text theme)
+                   :box-sizing :content-box}
+                  (when disabled?
+                    {:opacity 0.45
+                     :cursor  :default}))}]))
 
 (defn command-button []
   (let [state (state/use-state)
@@ -70,14 +72,14 @@
        :position :relative
        :min-height (* 2 (:padding theme))}}
      (into
-      [s/div
-       {:style
-        {:right      (* 2 (:padding theme))
-         :width      :fit-content
-         :position   :absolute
-         :border     [1 :solid (::c/border theme)]
-         :background (::c/background theme)}}]
-      children)]))
+       [s/div
+        {:style
+         {:right      (* 2 (:padding theme))
+          :width      :fit-content
+          :position   :absolute
+          :border     [1 :solid (::c/border theme)]
+          :background (::c/background theme)}}]
+       children)]))
 
 (defn command-container [child]
   (let [state (state/use-state)]
@@ -116,9 +118,9 @@
        :on-change
        (fn [e]
          (ins/set-viewer!
-          state
-          selected-context
-          (keyword (subs (.. e -target -value) 1))))}
+           state
+           selected-context
+           (keyword (subs (.. e -target -value) 1))))}
       (for [{:keys [name]} compatible-viewers]
         ^{:key name}
         [s/option {:value (pr-str name)} (pr-str name)])]

@@ -1,5 +1,6 @@
 (ns portal.ui.styled
-  (:require [clojure.string :as str]))
+  (:require
+   [clojure.string :as str]))
 
 (def selectors
   {:style             #(str "." %)
@@ -24,14 +25,14 @@
 
 (defn style->css [style]
   (reduce-kv
-   (fn [css k v]
-     (str
-      css
-      (when (and k v)
-        (str (value->css k) ":"
-             (if (exclude? k)
-               v
-               (value->css v)) ";")))) "" style))
+    (fn [css k v]
+      (str
+        css
+        (when (and k v)
+          (str (value->css k) ":"
+               (if (exclude? k)
+                 v
+                 (value->css v)) ";")))) "" style))
 
 (defn- generate-class [selector style]
   (let [css (style->css style)]
@@ -51,16 +52,16 @@
 
 (defn attrs->css [attrs]
   (reduce
-   (fn [attrs selector]
-     (if-not (contains? attrs selector)
-       attrs
-       (let [style (get attrs selector)
-             class (get-class selector style)]
-         (-> attrs
-             (dissoc selector)
-             (update :class str " " class)))))
-   attrs
-   (keys selectors)))
+    (fn [attrs selector]
+      (if-not (contains? attrs selector)
+        attrs
+        (let [style (get attrs selector)
+              class (get-class selector style)]
+          (-> attrs
+              (dissoc selector)
+              (update :class str " " class)))))
+    attrs
+    (keys selectors)))
 
 (defn styled [component attrs & children]
   (into [component
@@ -95,9 +96,9 @@
 
 (defn map->css [m]
   (reduce-kv
-   (fn [css k v]
-     (str css
-          (str/join " " (map name k))
-          "{" (style->css v) "}\n"))
-   ""
-   m))
+    (fn [css k v]
+      (str css
+           (str/join " " (map name k))
+           "{" (style->css v) "}\n"))
+    ""
+    m))

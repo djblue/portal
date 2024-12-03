@@ -1,9 +1,11 @@
 (ns tasks.tools
-  (:require [babashka.process :as p]
-            [clojure.java.io :as io]
-            [clojure.string :as str]
-            [io.aviso.ansi :as a])
-  (:import [java.time Duration]))
+  (:require
+   [babashka.process :as p]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [io.aviso.ansi :as a])
+  (:import
+   (java.time Duration)))
 
 (def ^:dynamic *cwd* nil)
 (def ^:dynamic *opts* nil)
@@ -17,15 +19,15 @@
         s        (mod (.toSeconds duration) 60)
         ms       (mod ms 1000)]
     (str
-     (a/bold-blue "->")
-     " "
-     (a/bold-yellow
-      (str
-       (when (> h 0)
-         (str h " hours, "))
-       (when (> m 0)
-         (str m " minutes, "))
-       s "." ms " seconds")))))
+      (a/bold-blue "->")
+      " "
+      (a/bold-yellow
+        (str
+          (when (> h 0)
+            (str h " hours, "))
+          (when (> m 0)
+            (str m " minutes, "))
+          s "." ms " seconds")))))
 
 (def ^:private in-bb? (some? (System/getProperty "babashka.version")))
 
@@ -52,9 +54,9 @@
       (.flush *err*))
     (binding [*out* *err*]
       (println
-       (str (format-millis (- (now) start))
-            (when-not (zero? exit)
-              (str " " (a/bold-red (str "(exit: " exit ")")))))))
+        (str (format-millis (- (now) start))
+             (when-not (zero? exit)
+               (str " " (a/bold-red (str "(exit: " exit ")")))))))
     (when-not (zero? exit)
       (throw (ex-info (str "Non-zero exit code: "
                            (str/join " " (map name args)))

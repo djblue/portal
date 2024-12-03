@@ -1,12 +1,11 @@
-(ns ^:no-doc ^:no-check portal.client.clr
-  (:require [portal.runtime]
-            [portal.runtime.cson :as cson])
-  (:import (System.Net.Http
-            HttpClient
-            HttpMethod
-            HttpRequestMessage
-            StringContent)
-           (System.Text Encoding)))
+(ns :no-check
+  {:no-doc true}
+  (:require
+   [portal.runtime]
+   [portal.runtime.cson :as cson])
+  (:import
+   (System.Net.Http HttpClient HttpMethod HttpRequestMessage StringContent)
+   (System.Text Encoding)))
 
 (defn- serialize [encoding value]
   (try
@@ -28,13 +27,13 @@
             port     53755}}
     value]
    (let [request (HttpRequestMessage.
-                  HttpMethod/Post
-                  (str "http://" host ":" port "/submit"))]
+                   HttpMethod/Post
+                   (str "http://" host ":" port "/submit"))]
      (set! (.-Content request)
            (StringContent.
-            (serialize encoding value)
-            Encoding/UTF8
-            (case encoding
-              :edn     "application/edn"
-              :cson    "application/cson")))
+             (serialize encoding value)
+             Encoding/UTF8
+             (case encoding
+               :edn     "application/edn"
+               :cson    "application/cson")))
      (.EnsureSuccessStatusCode (.Send ^HttpClient client request)))))

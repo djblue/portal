@@ -1,26 +1,27 @@
 (ns tasks.build
-  (:require [babashka.fs :as fs]
-            [tasks.docs :refer [docs]]
-            [tasks.info :refer [version]]
-            [tasks.tools :refer [*cwd* gradle npm npx shadow]]))
+  (:require
+   [babashka.fs :as fs]
+   [tasks.docs :refer [docs]]
+   [tasks.info :refer [version]]
+   [tasks.tools :refer [*cwd* gradle npm npx shadow]]))
 
 (defn install []
   (when (seq
-         (fs/modified-since
-          "node_modules"
-          ["package.json" "package-lock.json"]))
+          (fs/modified-since
+            "node_modules"
+            ["package.json" "package-lock.json"]))
     (npm :ci)))
 
 (defn main-js []
   (when (seq
-         (fs/modified-since
-          "resources/portal/main.js"
-          (concat
-           ["deps.edn"
-            "package.json"
-            "package-lock.json"
-            "shadow-cljs.edn"]
-           (fs/glob "src/portal/ui" "**.cljs"))))
+          (fs/modified-since
+            "resources/portal/main.js"
+            (concat
+              ["deps.edn"
+               "package.json"
+               "package-lock.json"
+               "shadow-cljs.edn"]
+              (fs/glob "src/portal/ui" "**.cljs"))))
     (install)
     (shadow :release :client))
   (fs/copy "resources/icon.svg"
@@ -30,9 +31,9 @@
 (defn ws-js []
   (let [out "resources/portal/ws.js"]
     (when (seq
-           (fs/modified-since
-            out
-            ["package.json" "package-lock.json"]))
+            (fs/modified-since
+              out
+              ["package.json" "package-lock.json"]))
       (install)
       (npx :browserify
            "--node"

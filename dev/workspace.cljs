@@ -1,13 +1,14 @@
 (ns workspace
-  (:require ["./hello" :as hello]
-            ["@fortawesome/free-solid-svg-icons/faArrowDown" :refer [faArrowDown]]
-            ["react" :as react]
-            [portal.colors :as c]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r]))
+  (:require
+   ["./hello" :as hello]
+   ["@fortawesome/free-solid-svg-icons/faArrowDown" :refer [faArrowDown]]
+   ["react" :as react]
+   [portal.colors :as c]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.styled :as s]
+   [portal.ui.theme :as theme]
+   [reagent.core :as r]))
 
 (.log js/console hello/world)
 
@@ -16,19 +17,19 @@
 (defn button [props & children]
   (let [theme (theme/use-theme)]
     (into
-     [s/button
-      (merge
-       {:style
-        {:border :none
-         :cursor :pointer
-         :padding (:padding theme)
-         :font-size (:font-size theme)
-         :border-radius (:border-radius theme)
-         :background (::c/boolean theme)
-         :font-family (:font-family theme)
-         :color (::c/text theme)}}
-       props)]
-     children)))
+      [s/button
+       (merge
+         {:style
+          {:border :none
+           :cursor :pointer
+           :padding (:padding theme)
+           :font-size (:font-size theme)
+           :border-radius (:border-radius theme)
+           :background (::c/boolean theme)
+           :font-family (:font-family theme)
+           :color (::c/text theme)}}
+         props)]
+      children)))
 
 (defn app []
   (let [theme              (theme/use-theme)

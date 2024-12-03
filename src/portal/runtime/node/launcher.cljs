@@ -1,13 +1,15 @@
-(ns ^:no-doc portal.runtime.node.launcher
-  (:require ["http" :as http]
-            [clojure.edn :as edn]
-            [portal.async :as a]
-            [portal.client.node :as client]
-            [portal.runtime :as rt]
-            [portal.runtime.browser :as browser]
-            [portal.runtime.fs :as fs]
-            [portal.runtime.node.client :as c]
-            [portal.runtime.node.server :as server]))
+(ns portal.runtime.node.launcher
+  {:no-doc true}
+  (:require
+   ["http" :as http]
+   [clojure.edn :as edn]
+   [portal.async :as a]
+   [portal.client.node :as client]
+   [portal.runtime :as rt]
+   [portal.runtime.browser :as browser]
+   [portal.runtime.fs :as fs]
+   [portal.runtime.node.client :as c]
+   [portal.runtime.node.server :as server]))
 
 (defn- get-workspace-folder []
   (try
@@ -24,19 +26,19 @@
   (let [search-paths (concat (get-search-paths (fs/cwd))
                              (some-> (get-workspace-folder) get-search-paths))]
     (or (some
-         (fn [parent]
-           (some-> parent
-                   (fs/join ".portal" config-file)
-                   fs/exists
-                   fs/slurp
-                   edn/read-string))
-         search-paths)
+          (fn [parent]
+            (some-> parent
+                    (fs/join ".portal" config-file)
+                    fs/exists
+                    fs/slurp
+                    edn/read-string))
+          search-paths)
         (throw
-         (ex-info
-          (str "No config file found: " config-file)
-          {:options      options
-           :config-file  config-file
-           :search-paths search-paths})))))
+          (ex-info
+            (str "No config file found: " config-file)
+            {:options      options
+             :config-file  config-file
+             :search-paths search-paths})))))
 
 (defn- localhost
   "https://github.com/nodejs/node/issues/40537"
@@ -47,12 +49,12 @@
   (a/let [config (get-config args)
           {:keys [status error] :as response}
           (client/fetch
-           (str "http://" (localhost (:host config)) ":" (:port config) "/open")
-           {:method  "POST"
-            :headers {"content-type" "application/edn"}
-            :body    (pr-str {:portal  (into {} portal)
-                              :options (select-keys options [:window-title])
-                              :server  (select-keys server [:host :port])})})]
+            (str "http://" (localhost (:host config)) ":" (:port config) "/open")
+            {:method  "POST"
+             :headers {"content-type" "application/edn"}
+             :body    (pr-str {:portal  (into {} portal)
+                               :options (select-keys options [:window-title])
+                               :server  (select-keys server [:host :port])})})]
     (when (or error (not= status 200))
       (throw (ex-info "Unable to open extension"
                       {:options  options
@@ -69,23 +71,23 @@
 
 (defn- create-server [handler port host]
   (js/Promise.
-   (fn [resolve _reject]
-     (let [^js server (http/createServer #(handler %1 %2))]
-       (set! (.-requestTimeout server) 0)
-       (set! (.-headersTimeout server) 0)
-       (.on server
-            "connection"
-            (fn [^js socket]
-              (swap! sockets conj socket)
-              (.on socket
-                   "close"
-                   (fn []
-                     (.destroy socket)
-                     (swap! sockets disj socket)))))
-       (.listen server #js {:port port :host (localhost host)}
-                #(resolve {:http-server server
-                           :port (.-port (.address server))
-                           :host host}))))))
+    (fn [resolve _reject]
+      (let [^js server (http/createServer #(handler %1 %2))]
+        (set! (.-requestTimeout server) 0)
+        (set! (.-headersTimeout server) 0)
+        (.on server
+             "connection"
+             (fn [^js socket]
+               (swap! sockets conj socket)
+               (.on socket
+                    "close"
+                    (fn []
+                      (.destroy socket)
+                      (swap! sockets disj socket)))))
+        (.listen server #js {:port port :host (localhost host)}
+                 #(resolve {:http-server server
+                            :port (.-port (.address server))
+                            :host host}))))))
 
 (defn start [options]
   (let [options (merge @rt/default-options options)]

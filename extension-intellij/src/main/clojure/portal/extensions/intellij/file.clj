@@ -8,19 +8,19 @@
 (defn- ->descriptor ^OpenFileDescriptor
   [^Project project {:keys [file line column]}]
   (OpenFileDescriptor.
-   project
-   (.findFileByUrl
-    (VirtualFileManager/getInstance)
-    (str "file://" file))
-   (if line (dec line) 0)
-   (if column (dec column) 0)))
+    project
+    (.findFileByUrl
+      (VirtualFileManager/getInstance)
+      (str "file://" file))
+    (if line (dec line) 0)
+    (if column (dec column) 0)))
 
 (defn open [^Project project info]
   (.invokeLater
-   (ApplicationManager/getApplication)
-   (fn []
-     (.runReadAction
-      (ApplicationManager/getApplication)
-      ^Runnable
-      (fn []
-        (.navigate (->descriptor project info) true))))))
+    (ApplicationManager/getApplication)
+    (fn []
+      (.runReadAction
+        (ApplicationManager/getApplication)
+        ^Runnable
+        (fn []
+          (.navigate (->descriptor project info) true))))))

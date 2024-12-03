@@ -1,25 +1,26 @@
 (ns portal.extensions.pwa
-  (:require [clojure.string :as str]
-            [examples.data :as demo]
-            [portal.async :as a]
-            [portal.colors :as c]
-            [portal.extensions.vs-code-notebook :as notebook]
-            [portal.resources :as io]
-            [portal.runtime :as rt]
-            [portal.runtime.edn :as edn]
-            [portal.runtime.json :as json]
-            [portal.runtime.transit :as transit]
-            [portal.shortcuts :as shortcuts]
-            [portal.ui.api :as api]
-            [portal.ui.app :as app]
-            [portal.ui.commands :as commands]
-            [portal.ui.drag-and-drop :as dnd]
-            [portal.ui.inspector :as ins]
-            [portal.ui.state :as state]
-            [portal.ui.styled :refer [div]]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r]
-            [reagent.dom :as dom]))
+  (:require
+   [clojure.string :as str]
+   [examples.data :as demo]
+   [portal.async :as a]
+   [portal.colors :as c]
+   [portal.extensions.vs-code-notebook :as notebook]
+   [portal.resources :as io]
+   [portal.runtime :as rt]
+   [portal.runtime.edn :as edn]
+   [portal.runtime.json :as json]
+   [portal.runtime.transit :as transit]
+   [portal.shortcuts :as shortcuts]
+   [portal.ui.api :as api]
+   [portal.ui.app :as app]
+   [portal.ui.commands :as commands]
+   [portal.ui.drag-and-drop :as dnd]
+   [portal.ui.inspector :as ins]
+   [portal.ui.state :as state]
+   [portal.ui.styled :refer [div]]
+   [portal.ui.theme :as theme]
+   [reagent.core :as r]
+   [reagent.dom :as dom]))
 
 (defn open-demo
   "Load demo data"
@@ -39,8 +40,8 @@
 (defn send! [msg]
   (when-let [f (get rt/ops (:op msg))]
     (js/Promise.
-     (fn [resolve]
-       (f msg resolve)))))
+      (fn [resolve]
+        (f msg resolve)))))
 
 (defn launch-queue-consumer [item]
   (a/let [files (js/Promise.all (map #(.getFile %) (.-files item)))
@@ -61,10 +62,10 @@
   (let [theme (theme/use-theme)
         state (state/use-state)
         mapping (reduce-kv
-                 (fn [mapping k v]
-                   (assoc mapping v (get theme k)))
-                 {}
-                 (::c/nord c/themes))
+                  (fn [mapping k v]
+                    (assoc mapping v (get theme k)))
+                  {}
+                  (::c/nord c/themes))
         svg (str/replace (io/inline "splash.svg") hex-color mapping)]
     [:<>
      [commands/palette]
@@ -129,11 +130,11 @@
 
 (defn ->map [entries]
   (persistent!
-   (reduce
-    (fn [m entry]
-      (assoc! m (keyword (aget entry 0)) (aget entry 1)))
-    (transient {})
-    entries)))
+    (reduce
+      (fn [m entry]
+        (assoc! m (keyword (aget entry 0)) (aget entry 1)))
+      (transient {})
+      entries)))
 
 (defn- qs->map [qs] (->map (.entries (js/URLSearchParams. qs))))
 
@@ -162,14 +163,14 @@
 (defn- parse-data [params response]
   (let [{:keys [status body]} response
         content-type          (some->
-                               (or (:content-type params)
-                                   (get-in response [:headers :content-type]))
-                               (str/split #";")
-                               first)
+                                (or (:content-type params)
+                                    (get-in response [:headers :content-type]))
+                                (str/split #";")
+                                first)
         metadata              {:query-params params :http-response response}]
     (if-not (= status 200)
       (ins/error->data
-       (ex-info (str "Error fetching data: " status) metadata))
+        (ex-info (str "Error fetching data: " status) metadata))
       (try
         (with-meta*
           (case content-type
@@ -178,11 +179,11 @@
             "application/edn"          (edn/read-string body)
             "text/plain"               body
             (ins/error->data
-             (ex-info (str "Unsupported :content-type " content-type) metadata)))
+              (ex-info (str "Unsupported :content-type " content-type) metadata)))
           metadata)
         (catch :default e
           (ins/error->data
-           (ex-info (str "Error parsing :content-type " content-type) metadata e)))))))
+            (ex-info (str "Error parsing :content-type " content-type) metadata e)))))))
 
 (defn ->response [^js response]
   (a/let [body (.text response)]
@@ -203,7 +204,7 @@
     (js/navigator.serviceWorker.register "sw.js"))
   (when js/window.launchQueue
     (js/window.launchQueue.setConsumer
-     #(launch-queue-consumer %)))
+      #(launch-queue-consumer %)))
   (reset! state/sender send!)
   (render-app))
 

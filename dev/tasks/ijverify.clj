@@ -1,5 +1,4 @@
-(ns tasks.ijverify
-  #_(:require [tasks.tools :refer [gradle *cwd*]]))
+(ns tasks.ijverify)
 
 (defn verify
   "Run Intellij Plugin Verification."

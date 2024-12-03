@@ -1,11 +1,13 @@
-(ns ^:no-doc portal.ui.viewer.spec
-  (:require [clojure.spec.alpha :as s]
-            [portal.colors :as c]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.select :as select]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.spec
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [portal.colors :as c]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.select :as select]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 ;;; :spec
 (s/def ::path vector?)
@@ -58,10 +60,10 @@
 
 (defn with-keys [ks & children]
   (reduce
-   (fn [out k]
-     [ins/inc-depth [ins/with-key k out]])
-   (into [:<>] children)
-   (reverse ks)))
+    (fn [out k]
+      [ins/inc-depth [ins/with-key k out]])
+    (into [:<>] children)
+    (reverse ks)))
 
 (defn inspect-spec [spec]
   (let [theme (theme/use-theme)]
@@ -103,49 +105,49 @@
          :border-right [1 :solid (::c/border theme)]}}
        [ins/inspector :val]]
       (map-indexed
-       (fn [idx problem]
-         ^{:key idx}
-         [:<>
-          [d/div
-           {:style
-            {:grid-column "1"
-             :padding (:padding theme)
-             :border-right [1 :solid (::c/border theme)]
-             :border-top [1 :solid (::c/border theme)]}}
-           [select/with-position
-            {:row idx :column 0}
-            [ins/with-key
-             :clojure.spec.alpha/problems
-             [ins/with-key idx
-              [ins/with-key
-               :via
-               [ins/with-key
-                (dec (count (:via problem)))
-                [ins/inspector (last (:via problem))]]]]]]]
-          [d/div
-           {:style
-            {:grid-column "2"
-             :padding (:padding theme)
-             :border-right [1 :solid (::c/border theme)]
-             :border-top [1 :solid (::c/border theme)]}}
-           [select/with-position
-            {:row idx :column 2}
-            [ins/with-key
-             :clojure.spec.alpha/problems
-             [ins/with-key idx
-              [inspect-problem problem]]]]]
-          [select/with-position
-           {:row idx :column 3}
+        (fn [idx problem]
+          ^{:key idx}
+          [:<>
            [d/div
             {:style
-             {:grid-column "3"
+             {:grid-column "1"
               :padding (:padding theme)
               :border-right [1 :solid (::c/border theme)]
               :border-top [1 :solid (::c/border theme)]}}
-            [with-keys
-             (:in problem)
-             [ins/inspector (:val problem)]]]]])
-       (:clojure.spec.alpha/problems spec))
+            [select/with-position
+             {:row idx :column 0}
+             [ins/with-key
+              :clojure.spec.alpha/problems
+              [ins/with-key idx
+               [ins/with-key
+                :via
+                [ins/with-key
+                 (dec (count (:via problem)))
+                 [ins/inspector (last (:via problem))]]]]]]]
+           [d/div
+            {:style
+             {:grid-column "2"
+              :padding (:padding theme)
+              :border-right [1 :solid (::c/border theme)]
+              :border-top [1 :solid (::c/border theme)]}}
+            [select/with-position
+             {:row idx :column 2}
+             [ins/with-key
+              :clojure.spec.alpha/problems
+              [ins/with-key idx
+               [inspect-problem problem]]]]]
+           [select/with-position
+            {:row idx :column 3}
+            [d/div
+             {:style
+              {:grid-column "3"
+               :padding (:padding theme)
+               :border-right [1 :solid (::c/border theme)]
+               :border-top [1 :solid (::c/border theme)]}}
+             [with-keys
+              (:in problem)
+              [ins/inspector (:val problem)]]]]])
+        (:clojure.spec.alpha/problems spec))
       [d/div
        {:style {:grid-column "4"
                 :grid-row (str "1 / span " (inc (count (:clojure.spec.alpha/problems spec))))

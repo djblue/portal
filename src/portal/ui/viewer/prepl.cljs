@@ -1,16 +1,18 @@
-(ns ^:no-doc portal.ui.viewer.prepl
-  (:require ["anser" :as anser]
-            [clojure.spec.alpha :as s]
-            [portal.colors :as c]
-            [portal.runtime.edn :as edn]
-            [portal.ui.filter :as f]
-            [portal.ui.html :as h]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.select :as select]
-            [portal.ui.state :as state]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.prepl
+  {:no-doc true}
+  (:require
+   ["anser" :as anser]
+   [clojure.spec.alpha :as s]
+   [portal.colors :as c]
+   [portal.runtime.edn :as edn]
+   [portal.ui.filter :as f]
+   [portal.ui.html :as h]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.select :as select]
+   [portal.ui.state :as state]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 ;;; :spec
 (s/def ::tag #{:out :err :tap :ret})
@@ -26,23 +28,23 @@
   (let [theme (theme/use-theme)]
     [:style
      (d/map->css
-      {[:.ansi-black-fg]   {:color (::c/border theme)}
-       [:.ansi-black-bg]   {:background (::c/border theme)}
-       [:.ansi-red-fg]     {:color (::c/exception theme)}
-       [:.ansi-red-bg]     {:background (::c/exception theme)}
-       [:.ansi-green-fg]   {:color (::c/string theme)}
-       [:.ansi-green-bg]   {:background (::c/string theme)}
-       [:.ansi-yellow-fg]  {:color (::c/tag theme)}
-       [:.ansi-yellow-bg]  {:background (::c/tag theme)}
-       [:.ansi-blue-fg]    {:color (::c/boolean theme)}
-       [:.ansi-blue-bg]    {:background (::c/boolean theme)}
-       [:.ansi-magenta-fg] {:color (::c/number theme)}
-       [:.ansi-magenta-bg] {:background (::c/number theme)}
-       [:.ansi-cyan-fg]    {:color (::c/package theme)}
-       [:.ansi-cyan-bg]    {:background (::c/package theme)}
-       [:.ansi-white-fg]   {:color (::c/text theme)}
-       [:.ansi-white-bg]   {:background (::c/text theme)}
-       [:.ansi-bold]       {:font-weight :bold}})]))
+       {[:.ansi-black-fg]   {:color (::c/border theme)}
+        [:.ansi-black-bg]   {:background (::c/border theme)}
+        [:.ansi-red-fg]     {:color (::c/exception theme)}
+        [:.ansi-red-bg]     {:background (::c/exception theme)}
+        [:.ansi-green-fg]   {:color (::c/string theme)}
+        [:.ansi-green-bg]   {:background (::c/string theme)}
+        [:.ansi-yellow-fg]  {:color (::c/tag theme)}
+        [:.ansi-yellow-bg]  {:background (::c/tag theme)}
+        [:.ansi-blue-fg]    {:color (::c/boolean theme)}
+        [:.ansi-blue-bg]    {:background (::c/boolean theme)}
+        [:.ansi-magenta-fg] {:color (::c/number theme)}
+        [:.ansi-magenta-bg] {:background (::c/number theme)}
+        [:.ansi-cyan-fg]    {:color (::c/package theme)}
+        [:.ansi-cyan-bg]    {:background (::c/package theme)}
+        [:.ansi-white-fg]   {:color (::c/text theme)}
+        [:.ansi-white-bg]   {:background (::c/text theme)}
+        [:.ansi-bold]       {:font-weight :bold}})]))
 
 (defn- inspect-prepl-ret [value index]
   (let [theme (theme/use-theme)
@@ -204,25 +206,25 @@
        [ins/with-collection
         value
         (reverse
-         (keep-indexed
-          (fn [index value]
-            (when (matcher value)
-              (with-meta
-                (if (#{:tap :ret} (:tag value))
-                  [ins/with-key
-                   index
-                   [inspect-prepl-ret value index]]
-                  [d/span
-                   {:style
-                    {:color
-                     (if (= (:tag value) :err)
-                       (::c/exception theme)
-                       (::c/text theme))}}
-                   [h/html+ (anser/ansiToHtml
-                             (escape-html (:val value))
-                             #js {:use_classes true})]])
-                {:key index})))
-          value))]]]]))
+          (keep-indexed
+            (fn [index value]
+              (when (matcher value)
+                (with-meta
+                  (if (#{:tap :ret} (:tag value))
+                    [ins/with-key
+                     index
+                     [inspect-prepl-ret value index]]
+                    [d/span
+                     {:style
+                      {:color
+                       (if (= (:tag value) :err)
+                         (::c/exception theme)
+                         (::c/text theme))}}
+                     [h/html+ (anser/ansiToHtml
+                                (escape-html (:val value))
+                                #js {:use_classes true})]])
+                  {:key index})))
+            value))]]]]))
 
 (defn io? [value]
   (s/valid? ::prepl value))

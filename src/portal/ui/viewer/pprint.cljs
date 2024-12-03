@@ -1,10 +1,12 @@
-(ns ^:no-doc portal.ui.viewer.pprint
-  (:require [clojure.pprint :as pp]
-            [clojure.string :as str]
-            [portal.runtime.cson :as cson]
-            [portal.ui.filter :as f]
-            [portal.ui.inspector :as ins]
-            [portal.ui.viewer.code :as code]))
+(ns portal.ui.viewer.pprint
+  {:no-doc true}
+  (:require
+   [clojure.pprint :as pp]
+   [clojure.string :as str]
+   [portal.runtime.cson :as cson]
+   [portal.ui.filter :as f]
+   [portal.ui.inspector :as ins]
+   [portal.ui.viewer.code :as code]))
 
 (defn- queue? [obj]
   (instance? PersistentQueue obj))
@@ -71,9 +73,9 @@
               *elide-binary* true]
       [code/highlight-clj
        (str/trim
-        (with-out-str
-          (pp/with-pprint-dispatch (if (code? value) pp/code-dispatch pprint-dispatch)
-            (pp/pprint (f/filter-value value search-text)))))])))
+         (with-out-str
+           (pp/with-pprint-dispatch (if (code? value) pp/code-dispatch pprint-dispatch)
+             (pp/pprint (f/filter-value value search-text)))))])))
 
 (def viewer
   {:predicate (constantly true)

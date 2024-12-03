@@ -1,15 +1,17 @@
-(ns ^:no-doc portal.ui.viewer.exception
-  (:require [clojure.spec.alpha :as s]
-            [clojure.string :as str]
-            [portal.colors :as c]
-            [portal.ui.filter :as f]
-            [portal.ui.icons :as icon]
-            [portal.ui.inspector :as ins]
-            [portal.ui.select :as select]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]
-            [portal.ui.viewer.log :as log]
-            [portal.viewer :as v]))
+(ns portal.ui.viewer.exception
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [portal.colors :as c]
+   [portal.ui.filter :as f]
+   [portal.ui.icons :as icon]
+   [portal.ui.inspector :as ins]
+   [portal.ui.select :as select]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]
+   [portal.ui.viewer.log :as log]
+   [portal.viewer :as v]))
 
 ;;; :spec
 (s/def ::cause string?)
@@ -28,8 +30,8 @@
 
 (s/def ::via
   (s/coll-of
-   (s/keys :req-un [::type]
-           :opt-un [::message ::at])))
+    (s/keys :req-un [::type]
+            :opt-un [::message ::at])))
 
 (s/def ::exception
   (s/keys :req-un [::via]
@@ -111,22 +113,22 @@
       [d/div
        {:style {:flex "1" :display :flex :flex-direction :column}}
        (keep-indexed
-        (fn [idx {:keys [clj? sym method index] :as source}]
-          (when (matcher method)
-            ^{:key index}
-            [ins/with-key
-             index
-             [d/div
-              {:key idx
-               :style {:display :flex
-                       :flex "1"
-                       :justify-content :space-between}}
+         (fn [idx {:keys [clj? sym method index] :as source}]
+           (when (matcher method)
+             ^{:key index}
+             [ins/with-key
+              index
               [d/div
-               [select/with-position
-                {:row idx :column 1}
-                [ins/inspector {:portal.viewer/default :portal.viewer/source-location}
-                 (assoc source :label (if clj?  (symbol nil (name sym)) method))]]]]]))
-        (if expanded? trace (take 1 trace)))]
+               {:key idx
+                :style {:display :flex
+                        :flex "1"
+                        :justify-content :space-between}}
+               [d/div
+                [select/with-position
+                 {:row idx :column 1}
+                 [ins/inspector {:portal.viewer/default :portal.viewer/source-location}
+                  (assoc source :label (if clj?  (symbol nil (name sym)) method))]]]]]))
+         (if expanded? trace (take 1 trace)))]
       [d/div
        {:style
         {:min-width "3em" :text-align :right}}
@@ -148,15 +150,15 @@
     (with-meta
       trace
       (merge
-       {:class  class
-        :method method
-        :line   line
-        :column 1
-        :index  index}
-       (when file
-         {:file file})
-       (when-let [ns (and clj? (some-> clj-name namespace symbol))]
-         {:clj? true :ns ns :sym clj-name})))))
+        {:class  class
+         :method method
+         :line   line
+         :column 1
+         :index  index}
+        (when file
+          {:file file})
+        (when-let [ns (and clj? (some-> clj-name namespace symbol))]
+          {:clj? true :ns ns :sym clj-name})))))
 
 (defn- wrapper [context & children]
   (let [opts   (ins/use-options)
@@ -192,27 +194,27 @@
         :border-bottom        [1 :solid (::c/border theme)]}}
       (->> trace
            (map-indexed
-            analyze-trace-item)
+             analyze-trace-item)
            (filter
-            (fn [line]
-              (when (matcher line)
-                (let [{:keys [clj? ns]} (meta line)]
-                  (if (:expanded? options) true
-                      (and clj? (not (or
-                                      (str/starts-with? (str ns) "nrepl.middleware")
-                                      (str/starts-with? (str ns) "clojure.lang.Compiler")))))))))
+             (fn [line]
+               (when (matcher line)
+                 (let [{:keys [clj? ns]} (meta line)]
+                   (if (:expanded? options) true
+                       (and clj? (not (or
+                                        (str/starts-with? (str ns) "nrepl.middleware")
+                                        (str/starts-with? (str ns) "clojure.lang.Compiler")))))))))
            (partition-by (comp :file meta))
            (map-indexed
-            (fn [index trace]
-              ^{:key index}
-              [select/with-position
-               {:column 0 :row index}
-               [ins/with-key
-                index
-                [ins/inspector
-                 {:portal.viewer/inspector {:wrapper wrapper}
-                  :portal.viewer/default :portal.viewer/sub-trace}
-                 (with-meta trace (meta (first trace)))]]])))]]))
+             (fn [index trace]
+               ^{:key index}
+               [select/with-position
+                {:column 0 :row index}
+                [ins/with-key
+                 index
+                 [ins/inspector
+                  {:portal.viewer/inspector {:wrapper wrapper}
+                   :portal.viewer/default :portal.viewer/sub-trace}
+                  (with-meta trace (meta (first trace)))]]])))]]))
 
 (defn- inspect-via [value]
   (let [theme                  (theme/use-theme)
@@ -298,7 +300,7 @@
          value
          [ins/inspect-map-k-v
           (v/for
-           (dissoc value :cause :phase :runtime)
+            (dissoc value :cause :phase :runtime)
             {:trace :portal.viewer/stack-trace})]])]]))
 
 (def viewer

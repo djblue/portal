@@ -1,9 +1,11 @@
-(ns ^:no-doc portal.ui.rpc.runtime
+(ns portal.ui.rpc.runtime
+  {:no-doc true}
   (:refer-clojure :exclude [deref pr-str])
-  (:require [clojure.pprint :as pprint]
-            [portal.runtime.cson :as cson]
-            [portal.ui.state :as state]
-            [reagent.core :as r]))
+  (:require
+   [clojure.pprint :as pprint]
+   [portal.runtime.cson :as cson]
+   [portal.ui.state :as state]
+   [reagent.core :as r]))
 
 (defn call [f & args]
   (apply state/invoke f args))
@@ -23,8 +25,8 @@
       (if-let [id (->id this)]
         (cson/tag buffer "ref" id)
         (cson/-to-json
-         (cson/tagged-value "remote" (:pr-str object))
-         buffer)))))
+          (cson/tagged-value "remote" (:pr-str object))
+          buffer)))))
 
 (defprotocol Runtime)
 
@@ -40,8 +42,8 @@
   IWithMeta
   (-with-meta [_this m]
     (RuntimeObject.
-     runtime
-     (assoc object :meta m)))
+      runtime
+      (assoc object :meta m)))
   IPrintWithWriter
   (-pr-writer [_this writer _opts]
     (-write writer (:pr-str object))))
@@ -71,9 +73,9 @@
   IWatchable
   (-add-watch [this key f]
     (-add-watch
-     a key
-     (fn [key _a old new]
-       (f key this old new))))
+      a key
+      (fn [key _a old new]
+        (f key this old new))))
   (-remove-watch [_this key]
     (-remove-watch a key))
   (-notify-watches [_this oldval newval]
@@ -99,8 +101,8 @@
 
 (defn ->runtime [call object]
   (if (and
-       (not= (:tag object) :var)
-       (contains? (:protocols object) :IDeref))
+        (not= (:tag object) :var)
+        (contains? (:protocols object) :IDeref))
     (->RuntimeAtom call object (r/atom ::loading))
     (->RuntimeObject call object)))
 
@@ -154,12 +156,12 @@
 
 (defn reset-cache! []
   (swap!
-   state/value-cache
-   (fn [cache]
-     (when registry
-       (doseq [weak-ref (vals cache)
-               :let [object (weak-ref-value weak-ref)]
-               :when object]
-         (.unregister ^js registry object)))
-     {}))
+    state/value-cache
+    (fn [cache]
+      (when registry
+        (doseq [weak-ref (vals cache)
+                :let [object (weak-ref-value weak-ref)]
+                :when object]
+          (.unregister ^js registry object)))
+      {}))
   (state/reset-value-cache!))

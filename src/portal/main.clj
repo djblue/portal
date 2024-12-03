@@ -1,8 +1,10 @@
 (ns portal.main
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [portal.api :as p])
-  (:import [java.io PushbackReader]))
+  (:require
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [portal.api :as p])
+  (:import
+   (java.io PushbackReader)))
 
 (defn- lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
@@ -27,7 +29,7 @@
              "transit"  (-> System/in read-transit))]
     (reset! (p/open) in)
     (.addShutdownHook
-     (Runtime/getRuntime)
-     (Thread. #(p/close)))
+      (Runtime/getRuntime)
+      (Thread. #(p/close)))
     (println "Press CTRL+C to exit")
     @(promise)))

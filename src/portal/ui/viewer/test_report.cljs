@@ -1,13 +1,15 @@
-(ns ^:no-doc portal.ui.viewer.test-report
-  (:require [clojure.spec.alpha :as s]
-            [portal.colors :as c]
-            [portal.ui.filter :as-alias f]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.select :as select]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]
-            [portal.ui.viewer.source-location :as src]))
+(ns portal.ui.viewer.test-report
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [portal.colors :as c]
+   [portal.ui.filter :as-alias f]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.select :as select]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]
+   [portal.ui.viewer.source-location :as src]))
 
 ;;; :spec
 (s/def :test-run/type #{:end-run-tests})
@@ -174,10 +176,10 @@
         (update :vars
                 (fnil conj empty-vec)
                 (merge
-                 (summary (:asserts state))
-                 {:ns      test-ns
-                  :var     test-var
-                  :asserts (:asserts state 0)})))))
+                  (summary (:asserts state))
+                  {:ns      test-ns
+                   :var     test-var
+                   :asserts (:asserts state 0)})))))
 
 (defn- end-test-ns [{:keys [test-ns vars] :as state}]
   (-> state
@@ -185,41 +187,41 @@
       (update :results
               (fnil conj empty-vec)
               (merge
-               (summary vars)
-               {:ns   test-ns
-                :vars vars}))))
+                (summary vars)
+                {:ns   test-ns
+                 :vars vars}))))
 
 (defn- get-results [value]
   (let [include? (when value (into #{} value))]
     (:results
-     (reduce
-      (fn [{:keys [test-ns test-var] :as state} row]
-        (case (:type row)
-          :summary        state
-          :begin-test-ns  (assoc state :test-ns (:ns row))
-          :end-test-ns    (-> state end-test-var end-test-ns)
-          :begin-test-var (assoc state :test-var (:var row))
-          :end-test-var   (end-test-var state)
-          (if (and value (not (include? row)))
-            state
-            (update
-             state
-             :asserts
-             (fnil conj empty-vec)
-             (cond-> row
-               test-ns  (assoc :ns test-ns)
-               test-var (assoc :var test-var))))))
-      {:results empty-vec}
-      value))))
+      (reduce
+        (fn [{:keys [test-ns test-var] :as state} row]
+          (case (:type row)
+            :summary        state
+            :begin-test-ns  (assoc state :test-ns (:ns row))
+            :end-test-ns    (-> state end-test-var end-test-ns)
+            :begin-test-var (assoc state :test-var (:var row))
+            :end-test-var   (end-test-var state)
+            (if (and value (not (include? row)))
+              state
+              (update
+                state
+                :asserts
+                (fnil conj empty-vec)
+                (cond-> row
+                  test-ns  (assoc :ns test-ns)
+                  test-var (assoc :var test-var))))))
+        {:results empty-vec}
+        value))))
 
 (defn- group-assertions [value]
   (let [results (get-results value)]
     (if (= 1 (count results))
       (first results)
       (merge
-       (summary results)
-       {:message :test-report
-        :results results}))))
+        (summary results)
+        {:message :test-report
+         :results results}))))
 
 (defn- inspect-test-report [value]
   [inspect-assertion (group-assertions value)])

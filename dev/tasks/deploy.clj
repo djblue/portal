@@ -1,8 +1,9 @@
 (ns tasks.deploy
-  (:require [tasks.ci :refer [ci]]
-            [tasks.info :refer [options]]
-            [tasks.package :as pkg]
-            [tasks.tools :refer [*cwd* clj gradle npx]]))
+  (:require
+   [tasks.ci :refer [ci]]
+   [tasks.info :refer [options]]
+   [tasks.package :as pkg]
+   [tasks.tools :refer [*cwd* clj gradle npx]]))
 
 (defn- deploy-vscode []
   (binding [*cwd* "extension-vscode"]

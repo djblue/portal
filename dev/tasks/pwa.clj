@@ -1,52 +1,53 @@
 (ns tasks.pwa
-  (:require [babashka.fs :as fs]
-            [clojure.java.browse :refer [browse-url]]
-            [clojure.java.io :as io]
-            [hiccup.core :refer [html]]
-            [portal.colors :as c]
-            [portal.runtime.cson :as cson]
-            [portal.runtime.json :as json]
-            [tasks.build :refer [install]]
-            [tasks.docs :as docs]
-            [tasks.tools :refer [shadow]]))
+  (:require
+   [babashka.fs :as fs]
+   [clojure.java.browse :refer [browse-url]]
+   [clojure.java.io :as io]
+   [hiccup.core :refer [html]]
+   [portal.colors :as c]
+   [portal.runtime.cson :as cson]
+   [portal.runtime.json :as json]
+   [tasks.build :refer [install]]
+   [tasks.docs :as docs]
+   [tasks.tools :refer [shadow]]))
 
 (defn- manifest-json [settings]
   (json/write
-   {:short_name "Portal"
-    :name (:name settings)
-    :description "A clojure tool to navigate through your data."
-    :icons
-    [{:type "image/svg+xml"
-      :sizes "512x512"
-      :src "icon.svg"}]
-    :handle_links "preferred"
-    :scope (:host settings)
-    :start_url (:host settings)
-    :display "standalone"
-    :display_override ["minimal-ui"]}))
+    {:short_name "Portal"
+     :name (:name settings)
+     :description "A clojure tool to navigate through your data."
+     :icons
+     [{:type "image/svg+xml"
+       :sizes "512x512"
+       :src "icon.svg"}]
+     :handle_links "preferred"
+     :scope (:host settings)
+     :start_url (:host settings)
+     :display "standalone"
+     :display_override ["minimal-ui"]}))
 
 (defn- index-html [settings]
   (str
-   "<!DOCTYPE html>"
-   (html
-    [:html
-     {:lang "en"}
-     [:head
-      [:title "portal"]
-      [:meta {:charset "UTF-8"}]
-      [:meta {:name "viewport"
-              :content "width=device-width, initial-scale=1"}]
-      [:link {:rel :manifest :href "manifest.json"}]
-      [:meta {:name "theme-color" :content (::c/background2 settings)}]]
-     [:body
-      {:style
-       (identity ;; because hiccup is a macro
-        {:margin 0
-         :overflow "hidden"
-         :min-height "100vh"
-         :background (::c/background settings)})}
-      [:div {:id "root"}]
-      [:script {:src "main.js"}]]])))
+    "<!DOCTYPE html>"
+    (html
+      [:html
+       {:lang "en"}
+       [:head
+        [:title "portal"]
+        [:meta {:charset "UTF-8"}]
+        [:meta {:name "viewport"
+                :content "width=device-width, initial-scale=1"}]
+        [:link {:rel :manifest :href "manifest.json"}]
+        [:meta {:name "theme-color" :content (::c/background2 settings)}]]
+       [:body
+        {:style
+         (identity ;; because hiccup is a macro
+           {:margin 0
+            :overflow "hidden"
+            :min-height "100vh"
+            :background (::c/background settings)})}
+        [:div {:id "root"}]
+        [:script {:src "main.js"}]]])))
 
 (defmethod print-method (Class/forName "[B") [v ^java.io.Writer w]
   (.write w "#portal/bin \"")

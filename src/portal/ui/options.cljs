@@ -1,9 +1,10 @@
 (ns portal.ui.options
-  (:require ["react" :as react]
-            [clojure.edn :as edn]
-            [portal.ui.react :refer [use-effect]]
-            [portal.ui.state :as state]
-            [reagent.core :as r]))
+  (:require
+   ["react" :as react]
+   [clojure.edn :as edn]
+   [portal.ui.react :refer [use-effect]]
+   [portal.ui.state :as state]
+   [reagent.core :as r]))
 
 (defn- get-extension-options []
   (when-let [options (.getItem js/sessionStorage "PORTAL_EXTENSION_OPTIONS")]
@@ -28,9 +29,9 @@
 (defn with-options [& children]
   (let [[options set-options!] (react/useState ::loading)]
     (use-effect
-     :once
-     (-> (state/invoke `portal.runtime/get-options)
-         (.then set-options!)))
+      :once
+      (-> (state/invoke `portal.runtime/get-options)
+          (.then set-options!)))
     (into [with-options* options] children)))
 
 (defn use-options [] (react/useContext options-context))

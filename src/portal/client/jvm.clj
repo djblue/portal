@@ -1,9 +1,10 @@
 (ns portal.client.jvm
-  (:require [org.httpkit.client :as http]
-            [portal.runtime]
-            [portal.runtime.cson :as cson]
-            [portal.runtime.json :as json]
-            [portal.runtime.transit :as transit]))
+  (:require
+   [org.httpkit.client :as http]
+   [portal.runtime]
+   [portal.runtime.cson :as cson]
+   [portal.runtime.json :as json]
+   [portal.runtime.transit :as transit]))
 
 (defn- serialize [encoding value]
   (try
@@ -41,15 +42,15 @@
             port     53755}}
     value]
    @(http/post
-     (str "http://" host ":" port "/submit")
-     {:headers
-      {"content-type"
-       (case encoding
-         :json    "application/json"
-         :cson    "application/cson"
-         :transit "application/transit+json"
-         :edn     "application/edn")}
-      :body (serialize encoding value)})))
+      (str "http://" host ":" port "/submit")
+      {:headers
+       {"content-type"
+        (case encoding
+          :json    "application/json"
+          :cson    "application/cson"
+          :transit "application/transit+json"
+          :edn     "application/edn")}
+       :body (serialize encoding value)})))
 
 (comment
   (submit {:runtime :jvm :value "hello jvm"})

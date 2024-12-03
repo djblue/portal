@@ -1,46 +1,56 @@
-(ns ^:no-doc portal.runtime.browser
-  #?(:clj  (:refer-clojure :exclude [random-uuid]))
-  #?(:clj  (:require [clojure.java.browse :refer [browse-url]]
-                     [clojure.string :as str]
-                     [portal.runtime :as rt]
-                     [portal.runtime.fs :as fs]
-                     [portal.runtime.json :as json]
-                     [portal.runtime.jvm.client :as c]
-                     [portal.runtime.shell :as shell])
-     :cljs (:require [clojure.string :as str]
-                     [portal.runtime :as rt]
-                     [portal.runtime.fs :as fs]
-                     [portal.runtime.json :as json]
-                     [portal.runtime.node.client :as c]
-                     [portal.runtime.shell :as shell])
-     :cljr (:require [clojure.string :as str]
-                     [portal.runtime :as rt]
-                     [portal.runtime.clr.client :as c]
-                     [portal.runtime.fs :as fs]
-                     [portal.runtime.json :as json]
-                     [portal.runtime.shell :as shell]))
-  #?(:cljr (:import [System.Runtime.InteropServices OSPlatform RuntimeInformation])))
+(ns portal.runtime.browser
+  {:no-doc true}
+  #?(:clj
+     (:refer-clojure :exclude [random-uuid]))
+  (:require
+   #?@(:clj
+       [[clojure.java.browse :refer [browse-url]]
+        [clojure.string :as str]
+        [portal.runtime :as rt]
+        [portal.runtime.fs :as fs]
+        [portal.runtime.json :as json]
+        [portal.runtime.jvm.client :as c]
+        [portal.runtime.shell :as shell]]
+
+       :cljr
+       [[clojure.string :as str]
+        [portal.runtime :as rt]
+        [portal.runtime.clr.client :as c]
+        [portal.runtime.fs :as fs]
+        [portal.runtime.json :as json]
+        [portal.runtime.shell :as shell]]
+
+       :cljs
+       [[clojure.string :as str]
+        [portal.runtime :as rt]
+        [portal.runtime.fs :as fs]
+        [portal.runtime.json :as json]
+        [portal.runtime.node.client :as c]
+        [portal.runtime.shell :as shell]]))
+  #?(:cljr
+     (:import
+      (System.Runtime.InteropServices OSPlatform RuntimeInformation))))
 
 (defmulti -open (comp :launcher :options))
 
 (defn- get-chrome-bin [{::keys [chrome-bin]}]
   (fs/find-bin
-   (concat
-    ["/Applications/Google Chrome.app/Contents/MacOS"
-     "/Program Files/Google/Chrome/Application"
-     "/Program Files (x86)/Google/Chrome/Application"
-     "/mnt/c/Program Files/Google/Chrome/Application"
-     "/mnt/c/Program Files (x86)/Google/Chrome/Application"]
-    (fs/paths))
-   (concat chrome-bin
-           ["chrome" "chrome.exe" "google-chrome-stable" "chromium-browser" "Google Chrome"])))
+    (concat
+      ["/Applications/Google Chrome.app/Contents/MacOS"
+       "/Program Files/Google/Chrome/Application"
+       "/Program Files (x86)/Google/Chrome/Application"
+       "/mnt/c/Program Files/Google/Chrome/Application"
+       "/mnt/c/Program Files (x86)/Google/Chrome/Application"]
+      (fs/paths))
+    (concat chrome-bin
+            ["chrome" "chrome.exe" "google-chrome-stable" "chromium-browser" "Google Chrome"])))
 
 (defn- get-app-id-profile-osx [app-name]
   (let [info (fs/join
-              (fs/home)
-              "Applications/Chrome Apps.localized/"
-              (str app-name ".app")
-              "Contents/Info.plist")]
+               (fs/home)
+               "Applications/Chrome Apps.localized/"
+               (str app-name ".app")
+               "Contents/Info.plist")]
     (when-let [app-id (some->> info
                                fs/exists
                                fs/slurp
@@ -51,12 +61,12 @@
 (defn- get-app-id-from-pref-file [path app-name]
   (when (fs/exists path)
     (some
-     (fn [[id extension]]
-       (let [name (get-in extension ["manifest" "name"] "")]
-         (when (= app-name name) id)))
-     (get-in
-      (json/read (fs/slurp path))
-      ["extensions" "settings"]))))
+      (fn [[id extension]]
+        (let [name (get-in extension ["manifest" "name"] "")]
+          (when (= app-name name) id)))
+      (get-in
+        (json/read (fs/slurp path))
+        ["extensions" "settings"]))))
 
 (defn- chrome-profile [path]
   (re-find #"Default|Profile\s\d+$" path))
@@ -66,36 +76,36 @@
                                    (fs/join ".config" "google-chrome")
                                    fs/exists)]
     (first
-     (for [file  (fs/list chrome-config-dir)
-           :let  [profile     (chrome-profile file)
-                  preferences (fs/join file "Preferences")
-                  app-id      (get-app-id-from-pref-file preferences app-name)]
-           :when (and profile app-id)]
-       {:app-id app-id :profile profile}))))
+      (for [file  (fs/list chrome-config-dir)
+            :let  [profile     (chrome-profile file)
+                   preferences (fs/join file "Preferences")
+                   app-id      (get-app-id-from-pref-file preferences app-name)]
+            :when (and profile app-id)]
+        {:app-id app-id :profile profile}))))
 
 (defn- get-windows-user []
   (str/trim (:out (shell/sh "cmd.exe" "/C" "echo %USERNAME%"))))
 
 (defn- windows-chrome-web-applications []
   (tree-seq
-   (fn [f]
-     (and (not (fs/is-file f))
-          (or
-           (str/includes? f "_crx_")
-           (str/ends-with? f "Web Applications"))))
-   (fn [d] (fs/list d))
-   (fs/join
-    "/mnt/c/Users"
-    (get-windows-user)
-    "AppData/Local/Google/Chrome/User Data/Default/Web Applications")))
+    (fn [f]
+      (and (not (fs/is-file f))
+           (or
+             (str/includes? f "_crx_")
+             (str/ends-with? f "Web Applications"))))
+    (fn [d] (fs/list d))
+    (fs/join
+      "/mnt/c/Users"
+      (get-windows-user)
+      "AppData/Local/Google/Chrome/User Data/Default/Web Applications")))
 
 (defn- get-app-id-profile-windows [app-name]
   (try
     (some
-     (fn [file]
-       (when (str/ends-with? file (str app-name ".lnk"))
-         {:app-id (str/replace (fs/basename (fs/dirname file)) "_crx_" "")}))
-     (windows-chrome-web-applications))
+      (fn [file]
+        (when (str/ends-with? file (str app-name ".lnk"))
+          {:app-id (str/replace (fs/basename (fs/dirname file)) "_crx_" "")}))
+      (windows-chrome-web-applications))
     (catch #?(:cljs :default :default Exception) _)))
 
 (defn- get-app-id-profile
@@ -125,25 +135,25 @@
 
 (defn- browse [url]
   (or
-   (some-> (get-browser) (shell/spawn url))
-   #?(:clj
-      (try (browse-url url)
-           (catch Exception _e
-             (println "Goto" url "to view portal ui.")))
-      :cljs
-      (case (.-platform js/process)
-        ("android" "linux") (shell/spawn "xdg-open" url)
-        "darwin"            (shell/spawn "open" url)
-        "win32"             (shell/spawn "cmd" "/c" "start" url)
-        (println "Goto" url "to view portal ui."))
-      :cljr
-      (condp identical? (.Platform Environment/OSVersion)
-        PlatformID/Win32NT      (shell/sh "cmd" "/c" "start" url)
-        PlatformID/Win32Windows (shell/sh "cmd" "/c" "start" url)
-        PlatformID/Unix         (if (RuntimeInformation/IsOSPlatform OSPlatform/OSX)
-                                  (shell/sh "open" url)
-                                  (shell/sh "xdg-open" url))
-        (println "Goto" url "to view portal ui.")))))
+    (some-> (get-browser) (shell/spawn url))
+    #?(:clj
+       (try (browse-url url)
+            (catch Exception _e
+              (println "Goto" url "to view portal ui.")))
+       :cljs
+       (case (.-platform js/process)
+         ("android" "linux") (shell/spawn "xdg-open" url)
+         "darwin"            (shell/spawn "open" url)
+         "win32"             (shell/spawn "cmd" "/c" "start" url)
+         (println "Goto" url "to view portal ui."))
+       :cljr
+       (condp identical? (.Platform Environment/OSVersion)
+         PlatformID/Win32NT      (shell/sh "cmd" "/c" "start" url)
+         PlatformID/Win32Windows (shell/sh "cmd" "/c" "start" url)
+         PlatformID/Unix         (if (RuntimeInformation/IsOSPlatform OSPlatform/OSX)
+                                   (shell/sh "open" url)
+                                   (shell/sh "xdg-open" url))
+         (println "Goto" url "to view portal ui.")))))
 
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
 

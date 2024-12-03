@@ -1,6 +1,11 @@
-(ns ^:no-doc portal.ui.react
-  #?(:cljs (:require ["react" :as react]))
-  #?(:cljs (:require-macros portal.ui.react)))
+(ns portal.ui.react
+  {:no-doc true}
+  #?(:cljs
+     (:require-macros
+      [portal.ui.react]))
+  #?(:cljs
+     (:require
+      ["react" :as react])))
 
 #?(:cljs
    (defn use-effect* [f deps]
@@ -11,7 +16,7 @@
 
 (defmacro use-effect [deps & body]
   `(use-effect*
-    (fn []
-      (let [result# (do ~@body)]
-        (if (fn? result#) result# js/undefined)))
-    ~deps))
+     (fn []
+       (let [result# (do ~@body)]
+         (if (fn? result#) result# js/undefined)))
+     ~deps))

@@ -1,26 +1,33 @@
-(ns ^:no-doc portal.runtime.cson
+(ns portal.runtime.cson
   "Clojure/Script Object Notation"
+  {:no-doc true}
   (:refer-clojure :exclude [read])
-  #?(:clj  (:require [portal.runtime.json-buffer :as json])
-     :cljr (:require [portal.runtime.json-buffer :as json])
-     :joyride
-     (:require
-      [portal.runtime.json-buffer :as json]
-      [portal.runtime.macros :as m])
-     :org.babashka/nbb
-     (:require
-      [portal.runtime.json-buffer :as json]
-      [portal.runtime.macros :as m])
-     :cljs
-     (:require
-      [goog.crypt.base64 :as Base64]
-      [portal.runtime.json-buffer :as json]
-      [portal.runtime.macros :as m]))
-  #?(:clj  (:import [java.net URL]
-                    [java.util Base64 Date UUID])
-     :joyride (:import)
-     :org.babashka/nbb (:import)
-     :cljs (:import [goog.math Long])))
+  (:require
+   #?@(:clj
+       [[portal.runtime.json-buffer :as json]]
+
+       :cljr
+       [[portal.runtime.json-buffer :as json]]
+
+       :cljs
+       [[goog.crypt.base64 :as Base64]
+        [portal.runtime.json-buffer :as json]
+        [portal.runtime.macros :as m]]
+
+       :joyride
+       [[portal.runtime.json-buffer :as json]
+        [portal.runtime.macros :as m]]
+
+       :org.babashka/nbb
+       [[portal.runtime.json-buffer :as json]
+        [portal.runtime.macros :as m]]))
+  (:import
+   #?@(:clj
+       [(java.net URL)
+        (java.util Base64 Date UUID)]
+
+       :cljs
+       [(goog.math Long)])))
 
 (defprotocol ToJson (-to-json [value buffer]))
 
@@ -286,12 +293,12 @@
 
 #?(:cljs
    (m/extend-type?
-    js/BigInt
-    ToJson
-    (-to-json [value buffer]
-              (-> buffer
-                  (json/push-string "N")
-                  (json/push-string (str value))))))
+     js/BigInt
+     ToJson
+     (-to-json [value buffer]
+               (-> buffer
+                   (json/push-string "N")
+                   (json/push-string (str value))))))
 
 (defn- ->bigint [buffer]
   #?(:clj  (bigint    (json/next-string buffer))
@@ -352,14 +359,14 @@
     (-> buffer
         (json/push-string "inst")
         (json/push-long
-         (inst-ms
-          #?(:cljr (.UtcDateTime (System.DateTimeOffset. value)) :default value))))))
+          (inst-ms
+            #?(:cljr (.UtcDateTime (System.DateTimeOffset. value)) :default value))))))
 
 (defn- ->inst [buffer]
   #?(:clj  (Date. ^long (json/next-long buffer))
      :cljr (.DateTime
-            (System.DateTimeOffset/FromUnixTimeMilliseconds
-             (json/next-long buffer)))
+             (System.DateTimeOffset/FromUnixTimeMilliseconds
+               (json/next-long buffer)))
      :cljs (js/Date. (json/next-long buffer))))
 
 #?(:joyride (def UUID (type (random-uuid))))
@@ -395,12 +402,12 @@
 
 #?(:cljs
    (m/extend-type?
-    js/URL
-    ToJson
-    (-to-json [value buffer]
-              (-> buffer
-                  (json/push-string "url")
-                  (json/push-string (str value))))))
+     js/URL
+     ToJson
+     (-to-json [value buffer]
+               (-> buffer
+                   (json/push-string "url")
+                   (json/push-string (str value))))))
 
 (defn- ->url [buffer]
   #?(:clj  (URL. (json/next-string buffer))
@@ -458,12 +465,12 @@
    (tagged-coll buffer tag (meta value) value))
   ([buffer tag meta-map  value]
    (reduce
-    to-json
-    (-> buffer
-        (push-meta meta-map)
-        (json/push-string tag)
-        (json/push-long (count value)))
-    value)))
+     to-json
+     (-> buffer
+         (push-meta meta-map)
+         (json/push-string tag)
+         (json/push-long (count value)))
+     value)))
 
 #?(:bb (def clojure.lang.APersistentMap$KeySeq (type (keys {0 0}))))
 #?(:bb (def clojure.lang.APersistentMap$ValSeq (type (vals {0 0}))))
@@ -583,10 +590,10 @@
 #?(:org.babashka/nbb nil
    :cljs
    (m/extend-type?
-    ^:cljs.analyzer/no-resolve
-    cljs.core/IntegerRange
-    ToJson
-    (-to-json [value buffer] (tagged-coll buffer "(" value))))
+     ^:cljs.analyzer/no-resolve
+     cljs.core/IntegerRange
+     ToJson
+     (-to-json [value buffer] (tagged-coll buffer "(" value))))
 
 #?(:joyride (def Range (type (range))))
 #?(:org.babashka/nbb (def Range (type (range))))
@@ -639,8 +646,8 @@
       (if (== i n)
         (persistent! out)
         (recur
-         (unchecked-inc i)
-         (conj! out (->value buffer)))))))
+          (unchecked-inc i)
+          (conj! out (->value buffer)))))))
 
 #?(:joyride (def PersistentHashSet (type #{1})))
 #?(:org.babashka/nbb (def PersistentHashSet (type #{1})))
@@ -665,10 +672,10 @@
         values (for [_ (range n)] (->value buffer))
         order  (zipmap values (range))]
     (into
-     (sorted-set-by
-      (fn [a b]
-        (compare (get order a) (get order b))))
-     values)))
+      (sorted-set-by
+        (fn [a b]
+          (compare (get order a) (get order b))))
+      values)))
 
 (defn tagged-map
   ([buffer value]
@@ -677,15 +684,15 @@
    (tagged-map buffer tag (meta value) value))
   ([buffer tag meta-map  value]
    (reduce-kv
-    (fn [buffer k v]
-      (-> buffer
-          (to-json k)
-          (to-json v)))
-    (-> buffer
-        (push-meta meta-map)
-        (json/push-string tag)
-        (json/push-long (count value)))
-    value)))
+     (fn [buffer k v]
+       (-> buffer
+           (to-json k)
+           (to-json v)))
+     (-> buffer
+         (push-meta meta-map)
+         (json/push-string tag)
+         (json/push-long (count value)))
+     value)))
 
 #?(:joyride (def PersistentHashMap (type (hash-map))))
 #?(:org.babashka/nbb (def PersistentHashMap (type (hash-map))))
@@ -731,8 +738,8 @@
       (if (== i n)
         (persistent! m)
         (recur
-         (unchecked-inc i)
-         (assoc! m (->value buffer) (->value buffer)))))))
+          (unchecked-inc i)
+          (assoc! m (->value buffer) (->value buffer)))))))
 
 (defn- ->sorted-map [buffer]
   (let [n      (json/next-long buffer)
@@ -740,10 +747,10 @@
                  [(->value buffer) (->value buffer)])
         order  (zipmap (map first pairs) (range))]
     (into
-     (sorted-map-by
-      (fn [a b]
-        (compare (get order a) (get order b))))
-     pairs)))
+      (sorted-map-by
+        (fn [a b]
+          (compare (get order a) (get order b))))
+      pairs)))
 
 #?(:bb (def clojure.lang.TaggedLiteral (type (tagged-literal 'a :a))))
 
@@ -770,35 +777,35 @@
     (if-not (string? op)
       op
       (transform
-       (#?@(:bb [case] :cljr [case] :clj [condp eq] :cljs [case])
-        op
-        "s"    (json/next-string buffer)
-        ":"    (->keyword buffer)
-        "{"    (->map buffer)
-        "$"    (->symbol buffer)
-        "["    (->into [] buffer)
-        "("    (or (list* (->into [] buffer)) '())
-        ";"    (->keyword-2 buffer)
-        "%"    (->symbol-2 buffer)
-        "#"    (->into #{} buffer)
-        "^"    (->meta buffer)
-        "D"    (->double buffer)
-        "N"    (->bigint buffer)
-        "C"    (->char buffer)
-        "R"    (->ratio buffer)
-        "bin"  (->bin buffer)
-        "inst" (->inst buffer)
-        "smap" (->sorted-map buffer)
-        "sset" (->sset buffer)
-        "url"  (->url buffer)
-        "uuid" (->uuid buffer)
-        "tag"  (->tagged-literal buffer)
-        "long" (->long buffer)
-        "nan"  ##NaN
-        "inf"  ##Inf
-        "-inf" ##-Inf
-        (let [handler (:default-handler *options* tagged-value)]
-          (handler op (->value buffer))))))))
+        (#?@(:bb [case] :cljr [case] :clj [condp eq] :cljs [case])
+         op
+         "s"    (json/next-string buffer)
+         ":"    (->keyword buffer)
+         "{"    (->map buffer)
+         "$"    (->symbol buffer)
+         "["    (->into [] buffer)
+         "("    (or (list* (->into [] buffer)) '())
+         ";"    (->keyword-2 buffer)
+         "%"    (->symbol-2 buffer)
+         "#"    (->into #{} buffer)
+         "^"    (->meta buffer)
+         "D"    (->double buffer)
+         "N"    (->bigint buffer)
+         "C"    (->char buffer)
+         "R"    (->ratio buffer)
+         "bin"  (->bin buffer)
+         "inst" (->inst buffer)
+         "smap" (->sorted-map buffer)
+         "sset" (->sset buffer)
+         "url"  (->url buffer)
+         "uuid" (->uuid buffer)
+         "tag"  (->tagged-literal buffer)
+         "long" (->long buffer)
+         "nan"  ##NaN
+         "inf"  ##Inf
+         "-inf" ##-Inf
+         (let [handler (:default-handler *options* tagged-value)]
+           (handler op (->value buffer))))))))
 
 (defn write
   ([value] (write value nil))

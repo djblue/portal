@@ -1,27 +1,30 @@
-(ns ^:no-doc portal.runtime.jvm.editor
+(ns portal.runtime.jvm.editor
+  {:no-doc true}
   (:refer-clojure :exclude [resolve])
-  (:require [clojure.java.io :as io]
-            [clojure.set :as set]
-            [clojure.string :as str]
-            [org.httpkit.client :as http]
-            [portal.runtime :as rt]
-            [portal.runtime.fs :as fs]
-            [portal.runtime.jvm.launcher :as launcher]
-            [portal.runtime.shell :refer [spawn]])
-  (:import (java.io File)
-           (java.net URL URI)))
+  (:require
+   [clojure.java.io :as io]
+   [clojure.set :as set]
+   [clojure.string :as str]
+   [org.httpkit.client :as http]
+   [portal.runtime :as rt]
+   [portal.runtime.fs :as fs]
+   [portal.runtime.jvm.launcher :as launcher]
+   [portal.runtime.shell :refer [spawn]])
+  (:import
+   (java.io File)
+   (java.net URI URL)))
 
 (defprotocol IResolve (resolve [this]))
 
 (defn- find-file [file-name]
   (some
-   (fn [^File file]
-     (when (and (.isFile file)
-                (= (.getName file) file-name))
-       file))
-   (concat
-    (file-seq (io/file "src"))
-    (file-seq (io/file "test")))))
+    (fn [^File file]
+      (when (and (.isFile file)
+                 (= (.getName file) file-name))
+        file))
+    (concat
+      (file-seq (io/file "src"))
+      (file-seq (io/file "test")))))
 
 (defn- exists [path]
   (when-let [file (or (fs/exists path) (find-file path))]
@@ -60,8 +63,8 @@
     (if (fs/is-file (:file m))
       (some->> m :file resolve (merge m))
       (or
-       (some->> m :ns   resolve (merge m))
-       (some->> m :file resolve (merge m))))))
+        (some->> m :ns   resolve (merge m))
+        (some->> m :file resolve (merge m))))))
 
 (extend-protocol IResolve
   nil
@@ -85,8 +88,8 @@
   clojure.lang.Symbol
   (resolve [^clojure.lang.Symbol s]
     (or
-     (when (namespace s) (some-> s find-var* resolve))
-     (some->> s ns->paths (some io/resource) resolve)))
+      (when (namespace s) (some-> s find-var* resolve))
+      (some->> s ns->paths (some io/resource) resolve)))
   URL
   (resolve [^URL url]
     (or (exists (.getPath url))
@@ -117,17 +120,17 @@
   (let [file-info (select-keys info [:file :line :column])
         {:keys [error status] :as response}
         @(http/request
-          {:url     (str "http://" (:host config) ":" (:port config) "/open-file")
-           :method  :post
-           :headers {"content-type" "application/edn"}
-           :body    (pr-str file-info)})]
+           {:url     (str "http://" (:host config) ":" (:port config) "/open-file")
+            :method  :post
+            :headers {"content-type" "application/edn"}
+            :body    (pr-str file-info)})]
     (when (or error (not= status 200))
       (throw
-       (ex-info "Unable to open file in intellij editor"
-                {:file-info file-info
-                 :config    config
-                 :response  (select-keys response [:body :headers :status])}
-                error)))))
+        (ex-info "Unable to open file in intellij editor"
+                 {:file-info file-info
+                  :config    config
+                  :response  (select-keys response [:body :headers :status])}
+                 error)))))
 
 (defmethod -open-editor :vs-code [{:keys [file line column] :as info}]
   (try
@@ -140,11 +143,11 @@
 
 (defmethod -open-editor :auto [info]
   (-open-editor
-   (assoc info :editor
-          (cond
-            (fs/exists ".portal/vs-code.edn")  :vs-code
-            (fs/exists ".portal/intellij.edn") :intellij
-            :else                              :emacs))))
+    (assoc info :editor
+           (cond
+             (fs/exists ".portal/vs-code.edn")  :vs-code
+             (fs/exists ".portal/intellij.edn") :intellij
+             :else                              :emacs))))
 
 (defn can-goto [input]
   (or (and (satisfies? IResolve input) (resolve input))
@@ -159,9 +162,9 @@
   (when-let [location (can-goto input)]
     (let [{:keys [options]} rt/*session*]
       (-open-editor
-       (assoc location
-              :editor
-              (or (:editor options)
-                  (:launcher options)
-                  :auto)))
+        (assoc location
+               :editor
+               (or (:editor options)
+                   (:launcher options)
+                   :auto)))
       true)))

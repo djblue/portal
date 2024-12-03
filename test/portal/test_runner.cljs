@@ -1,8 +1,9 @@
 (ns portal.test-runner
-  (:require [clojure.pprint :as pp]
-            [clojure.test :as t]
-            [portal.async :as a]
-            [portal.client.node :as p]))
+  (:require
+   [clojure.pprint :as pp]
+   [clojure.test :as t]
+   [portal.async :as a]
+   [portal.client.node :as p]))
 
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
   (when-not (cljs.test/successful? m)
@@ -16,8 +17,8 @@
   (if port
     (submit value)
     (pp/print-table
-     (get-in (meta value) [:portal.viewer/table :columns])
-     value)))
+      (get-in (meta value) [:portal.viewer/table :columns])
+      value)))
 
 (defn run-tests [f]
   (if-not port

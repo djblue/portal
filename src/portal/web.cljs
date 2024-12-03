@@ -1,10 +1,11 @@
 (ns portal.web
-  (:require [clojure.set :as set]
-            [portal.runtime :as rt]
-            [portal.runtime.web.client :as c]
-            [portal.runtime.web.launcher :as l]
-            [portal.shortcuts :as shortcuts]
-            [portal.spec :as s]))
+  (:require
+   [clojure.set :as set]
+   [portal.runtime :as rt]
+   [portal.runtime.web.client :as c]
+   [portal.runtime.web.launcher :as l]
+   [portal.shortcuts :as shortcuts]
+   [portal.spec :as s]))
 
 (def ^:export send! l/send!)
 
@@ -103,12 +104,12 @@
     (reset! init? true)
     (l/init @rt/default-options)
     (shortcuts/add!
-     ::init
-     (fn [log]
-       (when (shortcuts/match?
-              {::shortcuts/osx     #{"meta" "shift" "o"}
-               ::shortcuts/default #{"control" "shift" "o"}}
-              log)
-         (open))))))
+      ::init
+      (fn [log]
+        (when (shortcuts/match?
+                {::shortcuts/osx     #{"meta" "shift" "o"}
+                 ::shortcuts/default #{"control" "shift" "o"}}
+                log)
+          (open))))))
 
 (js/setTimeout init 0)

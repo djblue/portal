@@ -1,9 +1,11 @@
-(ns ^:no-doc portal.ui.viewer.bin
-  (:require [portal.colors :as c]
-            [portal.ui.inspector :as ins]
-            [portal.ui.lazy :as l]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.bin
+  {:no-doc true}
+  (:require
+   [portal.colors :as c]
+   [portal.ui.inspector :as ins]
+   [portal.ui.lazy :as l]
+   [portal.ui.styled :as s]
+   [portal.ui.theme :as theme]))
 
 (def ^:private indexed (partial map-indexed vector))
 
@@ -53,16 +55,16 @@
                :grid-template-columns
                (str "repeat(" (+ 1 1 8 1 16) ", auto)")}}
       (l/use-lazy
-       value
-       (for [[idx [hex ascii]] (indexed (map vector hex ascii))]
-         [:<> {:key idx}
-          [s/div
-           {:style {:color (::c/border theme)}}
-           (.padStart (.toString idx 16) 8 "0") ":"]
-          [s/div]
-          [:<> hex]
-          [s/div]
-          [:<> ascii]]))]]))
+        value
+        (for [[idx [hex ascii]] (indexed (map vector hex ascii))]
+          [:<> {:key idx}
+           [s/div
+            {:style {:color (::c/border theme)}}
+            (.padStart (.toString idx 16) 8 "0") ":"]
+           [s/div]
+           [:<> hex]
+           [s/div]
+           [:<> ascii]]))]]))
 
 (def viewer
   {:predicate ins/bin?

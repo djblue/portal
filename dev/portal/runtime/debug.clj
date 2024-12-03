@@ -1,6 +1,7 @@
 (ns portal.runtime.debug
-  (:require [portal.api :as p]
-            [portal.runtime :as rt]))
+  (:require
+   [portal.api :as p]
+   [portal.runtime :as rt]))
 
 (defn- section [title value]
   [(name title)
@@ -28,10 +29,10 @@
 
 (defn open [session]
   (p/inspect
-   (dashboard session)
-   (-> (:options session)
-       (dissoc :debug)
-       (assoc :window-title "portal-debug-server"))))
+    (dashboard session)
+    (-> (:options session)
+        (dissoc :debug)
+        (assoc :window-title "portal-debug-server"))))
 
 (defn close [instance]
   (when instance (p/close instance)))

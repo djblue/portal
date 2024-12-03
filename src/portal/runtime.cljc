@@ -1,15 +1,28 @@
-(ns ^:no-doc portal.runtime
+(ns portal.runtime
+  {:no-doc true}
   (:refer-clojure :exclude [read])
-  (:require #?(:clj  [portal.sync  :as a]
-               :cljr [portal.sync  :as a]
-               :cljs [portal.async :as a])
-            #?(:joyride [portal.runtime.datafy :refer [datafy nav]]
-               :org.babashka/nbb [portal.runtime.datafy :refer [datafy nav]]
-               :default [clojure.datafy :refer [datafy nav]])
-            #?(:joyride [cljs.pprint :as pprint]
-               :default [clojure.pprint :as pprint])
-            [portal.runtime.cson :as cson]
-            [portal.viewer :as v]))
+  (:require
+   [portal.runtime.cson :as cson]
+   [portal.viewer :as v]
+   #?@(:clj
+       [[portal.sync :as a]]
+
+       :cljr
+       [[portal.sync :as a]]
+
+       :cljs
+       [[portal.async :as a]]
+
+       :joyride
+       [[cljs.pprint :as pprint]
+        [portal.runtime.datafy :refer [datafy nav]]]
+
+       :org.babashka/nbb
+       [[portal.runtime.datafy :refer [datafy nav]]]
+
+       :default
+       [[clojure.datafy :refer [datafy nav]]
+        [clojure.pprint :as pprint]])))
 
 (def ^:private tagged-type (type (cson/->Tagged "tag" [])))
 
@@ -48,11 +61,11 @@
 
 (defn open-session [{:keys [session-id] :as session}]
   (merge
-   (get-session session-id)
-   {:id             (atom 0)
-    :value-cache    (atom {})
-    :watch-registry (atom #{})}
-   session))
+    (get-session session-id)
+    {:id             (atom 0)
+     :value-cache    (atom {})
+     :watch-registry (atom #{})}
+    session))
 
 (defn close-session [session-id]
   (swap! sessions dissoc session-id))
@@ -81,9 +94,9 @@
 
 (defn- can-meta? [value]
   #?(:clj  (and
-            (not (instance? clojure.lang.Range value))
-            (or (instance? clojure.lang.IObj value)
-                (var? value)))
+             (not (instance? clojure.lang.Range value))
+             (or (instance? clojure.lang.IObj value)
+                 (var? value)))
      :cljr (or (instance? clojure.lang.IObj value)
                (var? value))
      :joyride
@@ -102,22 +115,22 @@
   (cond
     (map? x)
     (reduce-kv
-     (fn [out k v]
-       (+ out (hash+ k) (hash+ v)))
-     (+ 1 (if (sorted? x) 1 0) (hash+ (meta x)))
-     x)
+      (fn [out k v]
+        (+ out (hash+ k) (hash+ v)))
+      (+ 1 (if (sorted? x) 1 0) (hash+ (meta x)))
+      x)
 
     (coll? x)
     (reduce
-     (fn [out v]
-       (+ out (hash+ v)))
-     (+ (cond
-          (list? x)   3
-          (set? x)    (if (sorted? x) 4 5)
-          (vector? x) 6
-          :else       7)
-        (hash+ (meta x)))
-     x)
+      (fn [out v]
+        (+ out (hash+ v)))
+      (+ (cond
+           (list? x)   3
+           (set? x)    (if (sorted? x) 4 5)
+           (vector? x) 6
+           :else       7)
+         (hash+ (meta x)))
+      x)
 
     :else
     (cond-> (+ (hash x) (hash (type x)))
@@ -147,20 +160,20 @@
 (defn- invalidate [session-id a old new]
   (when-not (= (value->key old) (value->key new))
     (set-timeout
-     #(when (= @a new) (notify session-id a))
-     100)))
+      #(when (= @a new) (notify session-id a))
+      100)))
 
 (defn- watch-atom [a]
   (let [{:keys [session-id watch-registry]} *session*]
     (when-not (contains? @watch-registry a)
       (swap!
-       watch-registry
-       (fn [atoms]
-         (if (contains? atoms a)
-           atoms
-           (do
-             (add-watch a session-id #'invalidate)
-             (conj atoms a))))))))
+        watch-registry
+        (fn [atoms]
+          (if (contains? atoms a)
+            atoms
+            (do
+              (add-watch a session-id #'invalidate)
+              (conj atoms a))))))))
 
 (defn- toggle-watch
   "Toggle watching an atom for a given Portal session."
@@ -168,30 +181,30 @@
   [a]
   (let [{:keys [session-id watch-registry]} *session*]
     (when
-     (contains?
-      (swap!
-       watch-registry
-       (fn [atoms]
-         (if (contains? atoms a)
-           (do
-             (remove-watch a session-id)
-             (disj atoms a))
-           (do
-             (add-watch a session-id #'invalidate)
-             (conj atoms a))))) a)
+      (contains?
+        (swap!
+          watch-registry
+          (fn [atoms]
+            (if (contains? atoms a)
+              (do
+                (remove-watch a session-id)
+                (disj atoms a))
+              (do
+                (add-watch a session-id #'invalidate)
+                (conj atoms a))))) a)
       (set-timeout #(notify session-id a) 0))))
 
 (defn- value->id [value]
   (let [k   (value->key value)
         out (atom nil)]
     (swap!
-     (:value-cache *session*)
-     (fn [cache]
-       (if-let [id (and k (get cache k))]
-         (do (reset! out id) cache)
-         (let [id (next-id *session*)]
-           (reset! out id)
-           (cond-> (assoc cache [:id id] value) k (assoc k id))))))
+      (:value-cache *session*)
+      (fn [cache]
+        (if-let [id (and k (get cache k))]
+          (do (reset! out id) cache)
+          (let [id (next-id *session*)]
+            (reset! out id)
+            (cond-> (assoc cache [:id id] value) k (assoc k id))))))
     @out))
 
 (defn- value->id? [value]
@@ -213,23 +226,23 @@
 (defn- to-object [buffer value tag rep]
   (if-not *session*
     (cson/-to-json
-     (with-meta
-       (cson/tagged-value "remote" (pr-str value))
-       (meta value))
-     buffer)
+      (with-meta
+        (cson/tagged-value "remote" (pr-str value))
+        (meta value))
+      buffer)
     (let [m (meta value)]
       (when (atom? value) (watch-atom value))
       (cson/tag
-       buffer
-       "object"
-       (cond-> {:tag       tag
-                :id        (value->id value)
-                :type      (pr-str (type value))
-                :pr-str    (pr-str' value)
-                :protocols (cond-> #{}
-                             (deref? value) (conj :IDeref))}
-         m   (assoc :meta m)
-         rep (assoc :rep rep))))))
+        buffer
+        "object"
+        (cond-> {:tag       tag
+                 :id        (value->id value)
+                 :type      (pr-str (type value))
+                 :pr-str    (pr-str' value)
+                 :protocols (cond-> #{}
+                              (deref? value) (conj :IDeref))}
+          m   (assoc :meta m)
+          rep (assoc :rep rep))))))
 
 #?(:bb nil
    :clj
@@ -239,13 +252,13 @@
        (if-let [id (value->id? value)]
          (cson/-to-json (cson/tagged-value "ref" id) buffer)
          (cson/tagged-coll
-          buffer
-          (cond
-            (instance? java.util.Set value)          "#"
-            (instance? java.util.RandomAccess value) "["
-            :else                                    "(")
-          {::id (value->id value) ::type (type value)}
-          value)))))
+           buffer
+           (cond
+             (instance? java.util.Set value)          "#"
+             (instance? java.util.RandomAccess value) "["
+             :else                                    "(")
+           {::id (value->id value) ::type (type value)}
+           value)))))
 
 #?(:bb nil
    :clj
@@ -255,12 +268,12 @@
        (if-let [id (value->id? value)]
          (cson/-to-json (cson/tagged-value "ref" id) buffer)
          (cson/tagged-map
-          buffer
-          "{"
-          (if (record? value)
-            (meta value)
-            {::id (value->id value) ::type (type value)})
-          value)))))
+           buffer
+           "{"
+           (if (record? value)
+             (meta value)
+             {::id (value->id value) ::type (type value)})
+           value)))))
 
 (extend-type #?(:clj  Object
                 :cljr Object
@@ -308,23 +321,23 @@
 (defn write [value session]
   (binding [*session* session]
     (cson/write
-     value
-     (merge
-      session
-      {:transform (comp id-var id-coll)
-       :to-object to-object}))))
+      value
+      (merge
+        session
+        {:transform (comp id-var id-coll)
+         :to-object to-object}))))
 
 (defn read [string session]
   (binding [*session* session]
     (cson/read
-     string
-     (merge
-      session
-      {:default-handler
-       (fn [op value]
-         (case op
-           "ref" (id->value value)
-           (cson/tagged-value op value)))}))))
+      string
+      (merge
+        session
+        {:default-handler
+         (fn [op value]
+           (case op
+             "ref" (id->value value)
+             (cson/tagged-value op value)))}))))
 
 (defonce ^:private tap-list
   (atom (with-meta (list)
@@ -356,7 +369,7 @@
     (catch #?(:clj Exception :cljr Exception :cljs :default) e
       (swap! tap-list conj
              (error->data
-              (ex-info "Failed to receive value." {:value-type (type new-value)} e))))))
+               (ex-info "Failed to receive value." {:value-type (type new-value)} e))))))
 
 (def ^:private runtime-keymap (atom ^::no-cache {}))
 
@@ -364,26 +377,26 @@
   (let [{:keys [options watch-registry]} *session*]
     (with-meta
       (merge
-       {:name (if (= :dev (:mode options))
-                "portal-dev"
-                "portal")
-        :version "0.58.3"
-        :runtime (runtime)
-        :platform
-        #?(:bb   "bb"
-           :clj  "jvm"
-           :cljr "clr"
-           :joyride "joyride"
-           :org.babashka/nbb "nbb"
-           :cljs (cond
-                   (exists? js/window)         "web"
-                   (exists? js/process)        "node"
-                   (exists? js/PLANCK_VERSION) "planck"
-                   :else                        "web"))
-        :value tap-list
-        :keymap runtime-keymap
-        :watch-registry watch-registry}
-       options)
+        {:name (if (= :dev (:mode options))
+                 "portal-dev"
+                 "portal")
+         :version "0.58.3"
+         :runtime (runtime)
+         :platform
+         #?(:bb   "bb"
+            :clj  "jvm"
+            :cljr "clr"
+            :joyride "joyride"
+            :org.babashka/nbb "nbb"
+            :cljs (cond
+                    (exists? js/window)         "web"
+                    (exists? js/process)        "node"
+                    (exists? js/PLANCK_VERSION) "planck"
+                    :else                        "web"))
+         :value tap-list
+         :keymap runtime-keymap
+         :watch-registry watch-registry}
+        options)
       {::no-cache true})))
 
 (defn clear-values
@@ -420,22 +433,22 @@
 
 (defn- get-functions [v]
   (-> (reduce-kv
-       (fn [out name opts]
-         (let [m      (merge (meta (:var opts)) opts)
-               result (-> (select-keys m [:doc :command])
-                          (assoc :name name)
-                          (vary-meta assoc ::no-cache true))]
-           (if (:private m)
-             out
-             (if-let [predicate (:predicate m)]
-               (try
-                 (cond-> out
-                   (predicate v)
-                   (assoc name result))
-                 (catch #?(:clj Exception :cljr Exception :cljs :default) _ex out))
-               (assoc out name result)))))
-       {}
-       @registry)
+        (fn [out name opts]
+          (let [m      (merge (meta (:var opts)) opts)
+                result (-> (select-keys m [:doc :command])
+                           (assoc :name name)
+                           (vary-meta assoc ::no-cache true))]
+            (if (:private m)
+              out
+              (if-let [predicate (:predicate m)]
+                (try
+                  (cond-> out
+                    (predicate v)
+                    (assoc name result))
+                  (catch #?(:clj Exception :cljr Exception :cljs :default) _ex out))
+                (assoc out name result)))))
+        {}
+        @registry)
       (v/table {:columns [:doc :command]})
       (vary-meta assoc ::no-cache true)))
 
@@ -456,17 +469,17 @@
         (done (assoc (source-info f) :return return)))
       (catch #?(:clj Exception :cljr Exception :cljs js/Error) e
         (done (assoc
-               (source-info f)
-               :error
-               (-> (ex-info
-                    (ex-message e)
-                    {::function f
-                     ::args     args
-                     ::found?   (some? f)
-                     ::data     (ex-data e)}
-                    e)
-                   datafy
-                   (assoc :runtime (runtime)))))))))
+                (source-info f)
+                :error
+                (-> (ex-info
+                      (ex-message e)
+                      {::function f
+                       ::args     args
+                       ::found?   (some? f)
+                       ::data     (ex-data e)}
+                      e)
+                    datafy
+                    (assoc :runtime (runtime)))))))))
 
 (def ops {:portal.rpc/invoke #'invoke})
 

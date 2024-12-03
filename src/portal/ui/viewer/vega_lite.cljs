@@ -1,8 +1,10 @@
-(ns ^:no-doc portal.ui.viewer.vega-lite
+(ns portal.ui.viewer.vega-lite
   "Viewer for the Vega-Lite specification
   https://vega.github.io/vega-lite/docs/spec.html"
-  (:require [clojure.spec.alpha :as s]
-            [portal.ui.viewer.vega :as vega]))
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [portal.ui.viewer.vega :as vega]))
 
 ;;; :spec
 (def vega-lite-url #"https://vega\.github\.io/schema/vega-lite/v\d\.json")

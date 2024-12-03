@@ -1,13 +1,14 @@
 (ns tasks.prepl
-  (:require [clojure.core.server :as server]
-            [portal.runtime.fs :as fs])
-  #?(:clj
-     (:import
-      (java.net Socket))
-     :cljr
-     (:import
-      (System.Net.Sockets TcpListener)
-      (System.Threading Thread))))
+  (:require
+   [clojure.core.server :as server]
+   [portal.runtime.fs :as fs])
+  (:import
+   #?@(:clj
+       [(java.net Socket)]
+
+       :cljr
+       [(System.Net.Sockets TcpListener)
+        (System.Threading Thread)])))
 
 (defn- get-runtime []
   #?(:bb :bb :clj :clj :cljr :cljr))
@@ -38,8 +39,8 @@
 
 (defn prepl []
   (start-server
-   {:name          (name (get-runtime))
-    :port          0
-    :server-daemon false
-    :args          [{:valf -pr-str}]
-    :accept        `server/io-prepl}))
+    {:name          (name (get-runtime))
+     :port          0
+     :server-daemon false
+     :args          [{:valf -pr-str}]
+     :accept        `server/io-prepl}))

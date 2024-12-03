@@ -1,4 +1,5 @@
-(ns ^:no-doc portal.ui.load)
+(ns portal.ui.load
+  {:no-doc true})
 
 (defn- module-wrapper
   "https://nodejs.org/api/modules.html#the-module-wrapper"
@@ -22,10 +23,10 @@
     (.send xhr (pr-str m))
     #_(.timeEnd js/console _label)
     (some->
-     (.parse js/JSON (.-responseText xhr))
-     (js->clj :keywordize-keys true)
-     (update :lang keyword)
-     (assoc :name (:name m)))))
+      (.parse js/JSON (.-responseText xhr))
+      (js->clj :keywordize-keys true)
+      (update :lang keyword)
+      (assoc :name (:name m)))))
 
 (def ^:private require-cache (atom {}))
 
@@ -33,33 +34,33 @@
 
 (defn load-require-cache [modules]
   (swap!
-   require-cache
-   (fn [cache]
-     (reduce-kv
-      (fn [cache module-name export]
-        (assoc cache module-name (Module. export)))
-      cache
-      modules))))
+    require-cache
+    (fn [cache]
+      (reduce-kv
+        (fn [cache module-name export]
+          (assoc cache module-name (Module. export)))
+        cache
+        modules))))
 
 (defn node-require
   ([module]
    (node-require nil module))
   ([parent module-name]
    (or
-    (some-> ^Module (get @require-cache module-name) .-exports)
-    (try
-      (let [{:keys [file] :as value} (load-fn-sync {:npm true :name module-name :parent parent})]
-        (if-let [^Module module (get @require-cache file)]
-          (.-exports module)
-          (let [exports    #js {}
-                module-obj (Module. exports)]
-            (swap! require-cache assoc file module-obj)
-            ((js/eval (module-wrapper value))
-             exports #(node-require (:dir value) %) module-obj (:file value) (:dir value))
-            (.-exports module-obj))))
-      (catch :default e
-        (.error js/console e)
-        (throw e))))))
+     (some-> ^Module (get @require-cache module-name) .-exports)
+     (try
+       (let [{:keys [file] :as value} (load-fn-sync {:npm true :name module-name :parent parent})]
+         (if-let [^Module module (get @require-cache file)]
+           (.-exports module)
+           (let [exports    #js {}
+                 module-obj (Module. exports)]
+             (swap! require-cache assoc file module-obj)
+             ((js/eval (module-wrapper value))
+              exports #(node-require (:dir value) %) module-obj (:file value) (:dir value))
+             (.-exports module-obj))))
+       (catch :default e
+         (.error js/console e)
+         (throw e))))))
 
 (set! (.-require js/window) node-require)
 (set! (.-process js/window)
