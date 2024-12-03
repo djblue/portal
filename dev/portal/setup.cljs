@@ -1,18 +1,19 @@
 (ns portal.setup
-  (:require [clojure.datafy :refer [datafy]]
-            [examples.data :refer [data]]
-            [portal.client.web :as remote]
-            [portal.console :as log]
-            [portal.runtime :as rt]
-            #_[portal.shadow.remote :as remote]
-            [portal.shortcuts :as shortcuts]
-            [portal.ui.api :as api]
-            [portal.ui.commands :as commands]
-            [portal.ui.inspector :as ins]
-            [portal.ui.rpc :as rpc]
-            [portal.ui.select :as select]
-            [portal.ui.state :as state]
-            [portal.web :as p]))
+  (:require
+   [clojure.datafy :refer [datafy]]
+   [examples.data :refer [data]]
+   [portal.client.web :as remote]
+   [portal.console :as log]
+   [portal.runtime :as rt]
+   #_[portal.shadow.remote :as remote]
+   [portal.shortcuts :as shortcuts]
+   [portal.ui.api :as api]
+   [portal.ui.commands :as commands]
+   [portal.ui.inspector :as ins]
+   [portal.ui.rpc :as rpc]
+   [portal.ui.select :as select]
+   [portal.ui.state :as state]
+   [portal.web :as p]))
 
 (defonce tap-list
   (atom (with-meta (list)
@@ -89,9 +90,9 @@
      (section "Selection Index" select/selection-index)]]})
 
 (p/set-defaults!
- {:mode :dev
-  :value (dashboard)
-  :window-title "portal-ui-runtime"})
+  {:mode :dev
+   :value (dashboard)
+   :window-title "portal-ui-runtime"})
 
 (defn- error-handler [event]
   #_(tap> (or (.-error event) (.-reason event)))

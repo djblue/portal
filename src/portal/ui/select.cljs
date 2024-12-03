@@ -1,6 +1,8 @@
-(ns ^:no-doc portal.ui.select
-  (:require ["react" :as react]
-            [portal.ui.react :refer [use-effect]]))
+(ns portal.ui.select
+  {:no-doc true}
+  (:require
+   ["react" :as react]
+   [portal.ui.react :refer [use-effect]]))
 
 (defonce ^:no-doc selection-index (atom {}))
 (defonce ^:private index-context (react/createContext []))
@@ -77,8 +79,8 @@
 (defn use-register-context [context viewer]
   (let [index (react/useContext index-context)]
     (use-effect
-     #js [(hash index) (hash context) (hash viewer)]
-     (let [updates (compute-relative-index @selection-index index context)]
-       (swap! selection-index merge updates)
-       (fn []
-         (apply swap! selection-index dissoc (keys updates)))))))
+      #js [(hash index) (hash context) (hash viewer)]
+      (let [updates (compute-relative-index @selection-index index context)]
+        (swap! selection-index merge updates)
+        (fn []
+          (apply swap! selection-index dissoc (keys updates)))))))

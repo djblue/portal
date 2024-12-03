@@ -1,12 +1,17 @@
-(ns ^:no-doc portal.runtime.edn
+(ns portal.runtime.edn
+  {:no-doc true}
   (:refer-clojure :exclude [read-string])
-  (:require #?(:org.babashka/nbb [clojure.core]
-               :cljs [cljs.tools.reader.impl.commons :as commons])
-            #?(:org.babashka/nbb [clojure.core]
-               :cljs [cljs.tools.reader.impl.utils :refer [numeric?]])
-            [clojure.edn :as edn]
-            [clojure.string :as str]
-            [portal.runtime.cson :as cson]))
+  (:require
+   [clojure.edn :as edn]
+   [clojure.string :as str]
+   [portal.runtime.cson :as cson]
+   #?@(:cljs
+       [[cljs.tools.reader.impl.commons :as commons]
+        [cljs.tools.reader.impl.utils :refer [numeric?]]]
+
+       :org.babashka/nbb
+       [[clojure.core]
+        [clojure.core]])))
 
 ;; Discard metadata on tagged-literals to improve success rate of read-string.
 ;; Consider using a different type in the future.
@@ -63,10 +68,10 @@
   ([{:keys [readers]} edn-string]
    (with-redefs  #?(:org.babashka/nbb [] :cljs [commons/parse-symbol parse-symbol] :default [])
      (edn/read-string
-      {:readers (merge
-                 {'portal/var ->var
-                  'portal/re ->regex
-                  'portal/bin cson/base64-decode}
-                 readers)
-       :default tagged-literal}
-      (-> edn-string escape-var escape-regex)))))
+       {:readers (merge
+                   {'portal/var ->var
+                    'portal/re ->regex
+                    'portal/bin cson/base64-decode}
+                   readers)
+        :default tagged-literal}
+       (-> edn-string escape-var escape-regex)))))

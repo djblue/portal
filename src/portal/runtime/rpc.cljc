@@ -1,8 +1,10 @@
-(ns ^:no-doc portal.runtime.rpc
-  (:require #?(:clj  [portal.runtime.jvm.client :as c]
-               :cljs [portal.runtime.node.client :as c]
-               :cljr [portal.runtime.clr.client :as c])
-            [portal.runtime :as rt]))
+(ns portal.runtime.rpc
+  {:no-doc true}
+  (:require
+   [portal.runtime :as rt]
+   #?(:clj [portal.runtime.jvm.client :as c]
+      :cljr [portal.runtime.clr.client :as c]
+      :cljs [portal.runtime.node.client :as c])))
 
 (defn on-open [session send!]
   (swap! rt/connections
@@ -32,9 +34,9 @@
         op    (get ops (:op body) not-found)
         done  (fn on-done [response]
                 (send!
-                 (assoc response
-                        :portal.rpc/id id
-                        :op :portal.rpc/response)))]
+                  (assoc response
+                         :portal.rpc/id id
+                         :op :portal.rpc/response)))]
     (binding [rt/*session* session]
       (op body done))))
 

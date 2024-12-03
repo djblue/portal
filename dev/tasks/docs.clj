@@ -1,13 +1,14 @@
 (ns tasks.docs
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [clojure.pprint :refer [pprint]]
-            [clojure.walk :as walk]
-            [examples.data :as d]
-            [portal.api :as p]
-            [portal.colors :as c]
-            [portal.runtime.cson :as cson]
-            [portal.viewer :as v]))
+  (:require
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [clojure.pprint :refer [pprint]]
+   [clojure.walk :as walk]
+   [examples.data :as d]
+   [portal.api :as p]
+   [portal.colors :as c]
+   [portal.runtime.cson :as cson]
+   [portal.viewer :as v]))
 
 (def ^:private flex
   {:gap 9
@@ -21,24 +22,24 @@
   (->> (ns-publics namespace)
        (sort-by first)
        (keep
-        (fn [[symbol-name v]]
-          (let [m (meta v)]
-            (when-not (:no-doc m)
-              [(name symbol-name)
-               {:hiccup
-                (v/hiccup
-                 [:div
-                  {:style flex}
-                  [:h2 [:portal.viewer/inspector v]]
-                  (into
-                   [:<>]
-                   (map-indexed
-                    (fn [idx itm]
-                      ^{:key idx}
-                      [:portal.viewer/pr-str (concat [symbol-name] itm)])
-                    (:arglists m)))
-                  (when-let [doc (:doc m)]
-                    [:portal.viewer/markdown doc])])}]))))
+         (fn [[symbol-name v]]
+           (let [m (meta v)]
+             (when-not (:no-doc m)
+               [(name symbol-name)
+                {:hiccup
+                 (v/hiccup
+                   [:div
+                    {:style flex}
+                    [:h2 [:portal.viewer/inspector v]]
+                    (into
+                      [:<>]
+                      (map-indexed
+                        (fn [idx itm]
+                          ^{:key idx}
+                          [:portal.viewer/pr-str (concat [symbol-name] itm)])
+                        (:arglists m)))
+                    (when-let [doc (:doc m)]
+                      [:portal.viewer/markdown doc])])}]))))
        (into [(name namespace)])))
 
 (defn- ->loc [v]
@@ -127,9 +128,9 @@
    ::v/source-location
    {:examples '[{:file "clojure/core.clj", :line 75, :column 1, :ns clojure.core}
                 {:file "clojure/core.clj", :line 183, :column 1, :ns clojure.core}
-                {:file "clojure/java/io.clj",
-                 :line 418,
-                 :column 1,
+                {:file "clojure/java/io.clj"
+                 :line 418
+                 :column 1
                  :ns clojure.java.io}
                 {:file "portal/api.cljc", :line 72, :column 1, :ns portal.api}
                 {:file "portal/api.cljc", :line 196, :column 1, :ns portal.api}]
@@ -150,11 +151,11 @@
         [:pre {} [:code {:class "clojure"} spec]]])
      (when examples
        (into
-        [:div {:style (dissoc flex :padding :width)}
-         [:h2 "Examples"]]
-        (map-indexed
-         (fn [idx itm] ^{:key idx} [(:name entry) itm])
-         examples)))]}])
+         [:div {:style (dissoc flex :padding :width)}
+          [:h2 "Examples"]]
+         (map-indexed
+           (fn [idx itm] ^{:key idx} [(:name entry) itm])
+           examples)))]}])
 
 (defn- save-viewers []
   (spit "resources/viewers.edn"
@@ -174,27 +175,27 @@
                 info (cond-> (merge viewer info)
                        file
                        (into
-                        (->> (slurp (io/resource file))
-                             (re-seq #"(?s);;;([^\n]+)\n(.*);;;")
-                             (map
-                              (fn [[_ k v]] [(edn/read-string k) v])))))]
+                         (->> (slurp (io/resource file))
+                              (re-seq #"(?s);;;([^\n]+)\n(.*);;;")
+                              (map
+                                (fn [[_ k v]] [(edn/read-string k) v])))))]
           :when (or (:doc info) (:examples info) (:spec info))]
       (->render info))))
 
 (defn gen-docs []
   (update
-   (walk/postwalk
-    (fn [v]
-      (let [file (:file v)]
-        (cond-> v
-          file (assoc :markdown (slurp file))
-          (and (vector? v) (= (first v) "Viewers"))
-          (concat (gen-viewer-docs)))))
-    (edn/read-string (slurp "doc/cljdoc.edn")))
-   :cljdoc.doc/tree
-   into
-   [(->docs 'portal.api)
-    #_(->docs 'portal.client.jvm)]))
+    (walk/postwalk
+      (fn [v]
+        (let [file (:file v)]
+          (cond-> v
+            file (assoc :markdown (slurp file))
+            (and (vector? v) (= (first v) "Viewers"))
+            (concat (gen-viewer-docs)))))
+      (edn/read-string (slurp "doc/cljdoc.edn")))
+    :cljdoc.doc/tree
+    into
+    [(->docs 'portal.api)
+     #_(->docs 'portal.client.jvm)]))
 
 (defn docs []
   (println "=> Generating docs")

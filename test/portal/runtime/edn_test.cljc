@@ -1,6 +1,7 @@
 (ns portal.runtime.edn-test
-  (:require [clojure.test :refer [deftest is]]
-            [portal.runtime.edn :as edn]))
+  (:require
+   [clojure.test :refer [deftest is]]
+   [portal.runtime.edn :as edn]))
 
 (deftest read-string-test
   (let [tagged (edn/read-string "^{:my :meta} #'hi")]

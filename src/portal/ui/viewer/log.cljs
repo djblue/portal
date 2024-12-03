@@ -1,15 +1,17 @@
-(ns ^:no-doc portal.ui.viewer.log
-  (:require [clojure.spec.alpha :as s]
-            [portal.colors :as c]
-            [portal.resources :refer [inline]]
-            [portal.ui.filter :as-alias f]
-            #_[shadow.resource :refer [inline]] ;; for hot reloading
-            [portal.ui.inspector :as ins]
-            [portal.ui.select :as select]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]
-            [portal.ui.viewer.date-time :as date-time]
-            [portal.ui.viewer.source-location :as src]))
+(ns portal.ui.viewer.log
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [portal.colors :as c]
+   [portal.resources :refer [inline]]
+   [portal.ui.filter :as-alias f]
+   #_[shadow.resource :refer [inline]]
+   [portal.ui.inspector :as ins]
+   [portal.ui.select :as select]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]
+   [portal.ui.viewer.date-time :as date-time]
+   [portal.ui.viewer.source-location :as src]))
 
 (defn- parse [xml-string]
   (let [parser (js/DOMParser.)
@@ -72,8 +74,8 @@
          :style
          {:height 22 :width 22}
          :src (str
-               "data:image/svg+xml;base64,"
-               (-> icon parse (theme-svg color) stringify js/btoa))}]))))
+                "data:image/svg+xml;base64,"
+                (-> icon parse (theme-svg color) stringify js/btoa))}]))))
 
 ;;; :spec
 (def ^:private levels
@@ -119,7 +121,7 @@
         border     (cond-> {:border-top [1 :solid (::c/border theme)]}
                      (not expanded?)
                      (assoc
-                      :border-bottom [1 :solid (::c/border theme)]))
+                       :border-bottom [1 :solid (::c/border theme)]))
         flex       {:box-sizing  :border-box
                     :padding     (:padding theme)
                     :display     :flex
@@ -155,29 +157,29 @@
       [d/div
        {:style
         (merge
-         flex
-         {:border-top      [1 :solid (::c/border theme)]
-          :justify-content :flex-end}
-         border
-         (when-not runtime?
-           {:border-right               [1 :solid (::c/border theme)]
-            :border-top-right-radius    (:border-radius theme)
-            :border-bottom-right-radius (:border-radius theme)}))}
+          flex
+          {:border-top      [1 :solid (::c/border theme)]
+           :justify-content :flex-end}
+          border
+          (when-not runtime?
+            {:border-right               [1 :solid (::c/border theme)]
+             :border-top-right-radius    (:border-radius theme)
+             :border-bottom-right-radius (:border-radius theme)}))}
        [src/inspect-source log]]
       (when runtime?
         [d/div
          {:style
           (merge
-           {:padding                    (* 0.5 (:padding theme))
-            :display                    :flex
-            :align-items                :center
-            :color                      (::c/uri theme)
-            :border-top                 [1 :solid (::c/border theme)]
-            :border-left                [1 :solid (::c/border theme)]
-            :border-right               [1 :solid (::c/border theme)]
-            :border-top-right-radius    (:border-radius theme)
-            :border-bottom-right-radius (when-not expanded? (:border-radius theme))}
-           border)}
+            {:padding                    (* 0.5 (:padding theme))
+             :display                    :flex
+             :align-items                :center
+             :color                      (::c/uri theme)
+             :border-top                 [1 :solid (::c/border theme)]
+             :border-left                [1 :solid (::c/border theme)]
+             :border-right               [1 :solid (::c/border theme)]
+             :border-top-right-radius    (:border-radius theme)
+             :border-bottom-right-radius (when-not expanded? (:border-radius theme))}
+            border)}
          [icon runtime]])]
 
      (when (:expanded? options)

@@ -1,5 +1,8 @@
-(ns ^:no-doc portal.runtime.macros
-  #?(:cljs (:require-macros portal.runtime.macros)))
+(ns portal.runtime.macros
+  {:no-doc true}
+  #?(:cljs
+     (:require-macros
+      [portal.runtime.macros])))
 
 #?(:clj
    (defn- resolve-var [& args]

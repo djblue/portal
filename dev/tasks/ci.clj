@@ -1,7 +1,8 @@
 (ns tasks.ci
-  (:require [tasks.check :refer [check check*]]
-            [tasks.test :refer [test test*] :as test]
-            [tasks.tools :refer [clj]]))
+  (:require
+   [tasks.check :refer [check check*]]
+   [tasks.test :as test :refer [test test*]]
+   [tasks.tools :refer [clj]]))
 
 (def ^:private commands
   ["-M:cljfmt"

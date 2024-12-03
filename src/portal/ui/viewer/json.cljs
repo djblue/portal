@@ -1,6 +1,8 @@
-(ns ^:no-doc portal.ui.viewer.json
-  (:require [portal.ui.inspector :as ins]
-            [portal.ui.parsers :as p]))
+(ns portal.ui.viewer.json
+  {:no-doc true}
+  (:require
+   [portal.ui.inspector :as ins]
+   [portal.ui.parsers :as p]))
 
 (defn- parse-json [json-string]
   (try (js->clj (js/JSON.parse json-string) :keywordize-keys true)

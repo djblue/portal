@@ -1,18 +1,20 @@
 (ns portal.test-clr
-  (:require [clojure.pprint :as pp]
-            [clojure.test :as t]
-            [portal.client-test]
-            [portal.client.clr :as p]
-            [portal.runtime-test]
-            [portal.runtime.api-test]
-            [portal.runtime.bench-cson :as bench]
-            [portal.runtime.cson-test]
-            [portal.runtime.edn-test]
-            [portal.runtime.fs-test]
-            [portal.runtime.json-buffer-test]
-            [portal.runtime.npm-test]
-            [portal.runtime.shell-test])
-  (:import (System Environment)))
+  (:require
+   [clojure.pprint :as pp]
+   [clojure.test :as t]
+   [portal.client-test]
+   [portal.client.clr :as p]
+   [portal.runtime-test]
+   [portal.runtime.api-test]
+   [portal.runtime.bench-cson :as bench]
+   [portal.runtime.cson-test]
+   [portal.runtime.edn-test]
+   [portal.runtime.fs-test]
+   [portal.runtime.json-buffer-test]
+   [portal.runtime.npm-test]
+   [portal.runtime.shell-test])
+  (:import
+   (System Environment)))
 
 (def port (Environment/GetEnvironmentVariable "PORTAL_PORT"))
 
@@ -22,8 +24,8 @@
   (if port
     (submit value)
     (pp/print-table
-     (get-in (meta value) [:portal.viewer/table :columns])
-     value)))
+      (get-in (meta value) [:portal.viewer/table :columns])
+      value)))
 
 (defn run-tests [& tests]
   (if-not port
@@ -38,14 +40,14 @@
 (defn -main []
   (let [{:keys [fail error]}
         (run-tests
-         'portal.client-test
-         'portal.runtime-test
-         'portal.runtime.api-test
-         'portal.runtime.cson-test
-         'portal.runtime.edn-test
-         'portal.runtime.fs-test
-         'portal.runtime.json-buffer-test
-         'portal.runtime.npm-test
-         'portal.runtime.shell-test)]
+          'portal.client-test
+          'portal.runtime-test
+          'portal.runtime.api-test
+          'portal.runtime.cson-test
+          'portal.runtime.edn-test
+          'portal.runtime.fs-test
+          'portal.runtime.json-buffer-test
+          'portal.runtime.npm-test
+          'portal.runtime.shell-test)]
     (table (bench/run))
     (Environment/Exit (+ fail error))))

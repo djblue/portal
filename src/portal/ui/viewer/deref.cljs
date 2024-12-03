@@ -1,13 +1,15 @@
-(ns ^:no-doc portal.ui.viewer.deref
-  (:require ["react" :as react]
-            [portal.colors :as c]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.options :as options]
-            [portal.ui.rpc :as rpc]
-            [portal.ui.select :as select]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.deref
+  {:no-doc true}
+  (:require
+   ["react" :as react]
+   [portal.colors :as c]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.options :as options]
+   [portal.ui.rpc :as rpc]
+   [portal.ui.select :as select]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 (defn atom? [value]
   (and (satisfies? cljs.core/IDeref value)

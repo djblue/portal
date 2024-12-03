@@ -1,6 +1,7 @@
 (ns tasks.jar
-  (:require [clojure.tools.build.api :as b]
-            [tasks.info :refer [options]]))
+  (:require
+   [clojure.tools.build.api :as b]
+   [tasks.info :refer [options]]))
 
 (defn -main []
   (let [{:keys [class-dir jar-file]} options]

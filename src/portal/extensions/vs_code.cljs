@@ -1,14 +1,15 @@
 (ns portal.extensions.vs-code
-  (:require ["vscode" :as vscode :refer [notebooks]]
-            [clojure.edn :as edn]
-            [clojure.string :as str]
-            [portal.api :as p]
-            [portal.async :as a]
-            [portal.resources :as io]
-            [portal.runtime.browser :as browser]
-            [portal.runtime.fs :as fs]
-            [portal.runtime.index :as index]
-            [portal.runtime.node.server :as server]))
+  (:require
+   ["vscode" :as vscode :refer [notebooks]]
+   [clojure.edn :as edn]
+   [clojure.string :as str]
+   [portal.api :as p]
+   [portal.async :as a]
+   [portal.resources :as io]
+   [portal.runtime.browser :as browser]
+   [portal.runtime.fs :as fs]
+   [portal.runtime.index :as index]
+   [portal.runtime.node.server :as server]))
 
 (defonce ^:private !app-db (atom {:context nil
                                   :disposables []}))
@@ -40,20 +41,20 @@
   (let [{:keys [host port]} server
         session-id          (:session-id portal)
         ^js panel           (.createWebviewPanel
-                             vscode/window
-                             "portal"
-                             (str/join
-                              " - "
-                              ["portal"
-                               (get options :window-title "vs-code")
-                               "0.58.3"])
-                             (view-column)
-                             (clj->js
-                              {:enableScripts           true
-                               :retainContextWhenHidden true
-                               :portMapping
-                               [{:webviewPort port
-                                 :extensionHostPort port}]}))
+                              vscode/window
+                              "portal"
+                              (str/join
+                                " - "
+                                ["portal"
+                                 (get options :window-title "vs-code")
+                                 "0.58.3"])
+                              (view-column)
+                              (clj->js
+                                {:enableScripts           true
+                                 :retainContextWhenHidden true
+                                 :portMapping
+                                 [{:webviewPort port
+                                   :extensionHostPort port}]}))
         ^js web-view        (.-webview panel)]
     (set! (.-iconPath panel)
           (.file vscode/Uri (.asAbsolutePath ^js (:context @!app-db) "icon.png")))
@@ -63,19 +64,19 @@
                        :port       port
                        :session-id (str session-id)}))
     (.onDidReceiveMessage
-     web-view
-     (fn handle-message [^js message]
-       (when-let [^js event (and (string? message) (js/JSON.parse message))]
-         (case (.-type event)
-           "close"     (.dispose panel)
-           "set-title" (set! (.-title panel) (.-title event))
-           "set-theme" :unsupported)))
-     js/undefined
-     (.-subscriptions ^js (:context @!app-db)))
+      web-view
+      (fn handle-message [^js message]
+        (when-let [^js event (and (string? message) (js/JSON.parse message))]
+          (case (.-type event)
+            "close"     (.dispose panel)
+            "set-title" (set! (.-title panel) (.-title event))
+            "set-theme" :unsupported)))
+      js/undefined
+      (.-subscriptions ^js (:context @!app-db)))
     (.onDidChangeViewState
-     panel
-     (fn [_event]
-       (save-view-column (.-viewColumn panel))))))
+      panel
+      (fn [_event]
+        (save-view-column (.-viewColumn panel))))))
 
 (defmethod browser/-open :vs-code [args] (-open args))
 
@@ -92,25 +93,25 @@
    (fn []
      (let [path (fs/exists (fs/join (get-workspace-folder) "resources/portal-dev/main.js"))]
        (p/open
-        {:mode         :dev
-         :window-title "vs-code-dev"
-         :resource     {"main.js" path}
-         :launcher     :vs-code})))})
+         {:mode         :dev
+          :window-title "vs-code-dev"
+          :resource     {"main.js" path}
+          :launcher     :vs-code})))})
 
 (defn- setup-notebook-handler []
   (let [message-channel (.createRendererMessaging notebooks "portal-edn-renderer")]
     (.onDidReceiveMessage
-     message-channel
-     (fn handle-message [^js event]
-       (let [message (.-message event)]
-         (case (.-type message)
-           "open-editor"
-           (p/open
-            {:launcher     :vs-code
-             :window-title "notebook"
-             :value        (edn/read-string
-                            {:default tagged-literal}
-                            (.-data message))})))))))
+      message-channel
+      (fn handle-message [^js event]
+        (let [message (.-message event)]
+          (case (.-type message)
+            "open-editor"
+            (p/open
+              {:launcher     :vs-code
+               :window-title "notebook"
+               :value        (edn/read-string
+                               {:default tagged-literal}
+                               (.-data message))})))))))
 
 (defmethod server/route [:post "/open"] [req ^js res]
   (a/let [body (server/get-body req)]
@@ -119,8 +120,8 @@
 
 (defn- open-file* [{:keys [file line column]}]
   (a/let [document     (.openTextDocument
-                        vscode/workspace
-                        (.parse vscode/Uri file))
+                         vscode/workspace
+                         (.parse vscode/Uri file))
           ^js editor   (.showTextDocument vscode/window document 1 false)
           ^js position (vscode/Position. (dec line) (dec column))
           ^js range    (vscode/Range. position position)]
@@ -173,29 +174,29 @@
 
 (defn- get-extension ^js/Promise [extension-name]
   (js/Promise.
-   (fn [resolve reject]
-     (let [n (atom 16) delay 250]
-       (js/setTimeout
-        (fn work []
-          (try
-            (resolve (.-exports (.getExtension vscode/extensions extension-name)))
-            (catch :default e
-              (if (zero? (swap! n dec))
-                (reject (ex-info "Max attempts reached" {} e))
-                (js/setTimeout work delay)))))
-        delay)))))
+    (fn [resolve reject]
+      (let [n (atom 16) delay 250]
+        (js/setTimeout
+          (fn work []
+            (try
+              (resolve (.-exports (.getExtension vscode/extensions extension-name)))
+              (catch :default e
+                (if (zero? (swap! n dec))
+                  (reject (ex-info "Max attempts reached" {} e))
+                  (js/setTimeout work delay)))))
+          delay)))))
 
 (defn- setup-joyride! []
   (a/try
     (a/let [^js joyride (get-extension "betterthantomorrow.joyride")]
       (reduce
-       (fn [^js/Promise chain source]
-         (-> chain
-             (.then
-              (fn [_]
-                (.runCode joyride source)))))
-       (.resolve js/Promise 0)
-       portal-source))
+        (fn [^js/Promise chain source]
+          (-> chain
+              (.then
+                (fn [_]
+                  (.runCode joyride source)))))
+        (.resolve js/Promise 0)
+        portal-source))
     (catch :default e
       (.error js/console e)))
   (clj->js {:resources {:inline io/inline}}))

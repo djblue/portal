@@ -1,11 +1,14 @@
-(ns ^:no-doc ^:no-check portal.runtime.clr.launcher
-  (:require [clojure.string :as str]
-            [portal.runtime :as rt]
-            [portal.runtime.browser :as browser]
-            [portal.runtime.clr.client :as c]
-            [portal.runtime.clr.server :as server])
-  (:import (System.Net HttpListener HttpListenerContext)
-           (System.Text Encoding)))
+(ns :no-check
+  {:no-doc true}
+  (:require
+   [clojure.string :as str]
+   [portal.runtime :as rt]
+   [portal.runtime.browser :as browser]
+   [portal.runtime.clr.client :as c]
+   [portal.runtime.clr.server :as server])
+  (:import
+   (System.Net HttpListener HttpListenerContext)
+   (System.Text Encoding)))
 
 (defn- read-request [^HttpListenerContext context]
   (let [request            (.Request context)
@@ -17,13 +20,13 @@
      :uri            uri
      :query-string   query-string
      :headers        (reduce
-                      (fn [out ^String header]
-                        (let [values (.GetValues headers header)]
-                          (assoc out
-                                 (str/lower-case header)
-                                 (str/join ", " values))))
-                      {}
-                      (.AllKeys headers))
+                       (fn [out ^String header]
+                         (let [values (.GetValues headers header)]
+                           (assoc out
+                                  (str/lower-case header)
+                                  (str/join ", " values))))
+                       {}
+                       (.AllKeys headers))
      :websocket?     (.IsWebSocketRequest request)
      :body           (.InputStream request)
      :context        context}))
@@ -53,22 +56,22 @@
                 (str "http://" host ":" port "/"))
           (.Start http-server)
           (reset!
-           server
-           {:http-server http-server
-            :future
-            (future
-              (while (.IsListening http-server)
-                (let [context (.GetContext http-server)]
-                  (future
-                    (try
-                      (let [request-map  (read-request context)
-                            response-map (server/handler request-map)]
-                        (when-not (:websocket? request-map)
-                          (write-response context response-map)))
-                      (catch Exception e
-                        (write-response context {:status 500 :body (pr-str e)})))))))
-            :port port
-            :host host})))))
+            server
+            {:http-server http-server
+             :future
+             (future
+               (while (.IsListening http-server)
+                 (let [context (.GetContext http-server)]
+                   (future
+                     (try
+                       (let [request-map  (read-request context)
+                             response-map (server/handler request-map)]
+                         (when-not (:websocket? request-map)
+                           (write-response context response-map)))
+                       (catch Exception e
+                         (write-response context {:status 500 :body (pr-str e)})))))))
+             :port port
+             :host host})))))
 
 (defn stop []
   (when-let [server @server]

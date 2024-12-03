@@ -1,17 +1,18 @@
 (ns portal.extensions.vs-code-notebook
-  (:require [clojure.string :as str]
-            [portal.async :as a]
-            [portal.runtime :as rt]
-            [portal.runtime.edn :as edn]
-            [portal.ui.cljs :as cljs]
-            [portal.ui.embed :as embed]
-            [portal.ui.inspector :as ins]
-            [portal.ui.load :as load]
-            [portal.ui.options :as opts]
-            [portal.ui.rpc :as rpc]
-            [portal.ui.state :as state]
-            [reagent.core :as r]
-            [reagent.dom :as dom]))
+  (:require
+   [clojure.string :as str]
+   [portal.async :as a]
+   [portal.runtime :as rt]
+   [portal.runtime.edn :as edn]
+   [portal.ui.cljs :as cljs]
+   [portal.ui.embed :as embed]
+   [portal.ui.inspector :as ins]
+   [portal.ui.load :as load]
+   [portal.ui.options :as opts]
+   [portal.ui.rpc :as rpc]
+   [portal.ui.state :as state]
+   [reagent.core :as r]
+   [reagent.dom :as dom]))
 
 (defonce context (atom nil))
 (defonce component (r/atom embed/app))
@@ -23,10 +24,10 @@
    (inspect value))
   ([value _]
    (.postMessage
-    ^js @context
-    #js {:type "open-editor"
-         :data (binding [*print-meta* true]
-                 (pr-str value))})))
+     ^js @context
+     #js {:type "open-editor"
+          :data (binding [*print-meta* true]
+                  (pr-str value))})))
 
 (rt/register! #'inspect {:name `portal.api/inspect})
 
@@ -43,8 +44,8 @@
 (defn send! [msg]
   (when-let [f (get rt/ops (:op msg))]
     (js/Promise.
-     (fn [resolve]
-       (f msg resolve)))))
+      (fn [resolve]
+        (f msg resolve)))))
 
 (defonce ^:private session (random-uuid))
 
@@ -55,8 +56,8 @@
       (if (str/starts-with? message "\"^{")
         (edn/read-string message)
         (throw (ex-info
-                message
-                (js->clj data :keywordize-keys true)))))
+                 message
+                 (js->clj data :keywordize-keys true)))))
     "x-application/edn"
     (.text data)))
 

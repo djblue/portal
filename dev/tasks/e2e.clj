@@ -1,24 +1,25 @@
 (ns tasks.e2e
-  (:require [babashka.process :as p]
-            [clojure.java.io :as io]
-            [portal.e2e :as e2e]
-            [tasks.build :refer [build]]))
+  (:require
+   [babashka.process :as p]
+   [clojure.java.io :as io]
+   [portal.e2e :as e2e]
+   [tasks.build :refer [build]]))
 
 (def e2e-envs
   {:jvm  [:clojure "-M" "-e" "(set! *warn-on-reflection* true)" "-r"]
    :node [:clojure
           "-Sdeps"
           (pr-str
-           {:deps
-            {'org.clojure/clojurescript
-             {:mvn/version "1.10.844"}}})
+            {:deps
+             {'org.clojure/clojurescript
+              {:mvn/version "1.10.844"}}})
           "-M" "-m" :cljs.main "-re" :node]
    :web  [:clojure
           "-Sdeps"
           (pr-str
-           {:deps
-            {'org.clojure/clojurescript
-             {:mvn/version "1.10.844"}}})
+            {:deps
+             {'org.clojure/clojurescript
+              {:mvn/version "1.10.844"}}})
           "-M" "-m" :cljs.main]
    :bb   [:bb]
    :nbb  [:npx :nbb]

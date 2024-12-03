@@ -1,6 +1,7 @@
 (ns portal.ui.state-test
-  (:require [clojure.test :refer [deftest is]]
-            [portal.ui.state :as state]))
+  (:require
+   [clojure.test :refer [deftest is]]
+   [portal.ui.state :as state]))
 
 (deftest expanded-test
   (let [state nil

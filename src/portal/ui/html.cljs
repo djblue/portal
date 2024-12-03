@@ -1,15 +1,17 @@
-(ns ^:no-doc portal.ui.html
-  (:require [clojure.string :as str]
-            [portal.ui.inspector :as ins]))
+(ns portal.ui.html
+  {:no-doc true}
+  (:require
+   [clojure.string :as str]
+   [portal.ui.inspector :as ins]))
 
 (defn- ->style [string]
   (persistent!
-   (reduce
-    (fn [style rule]
-      (let [[k v] (str/split rule #":")]
-        (assoc! style (keyword (str/trim k)) (str/trim v))))
-    (transient {})
-    (str/split string #";"))))
+    (reduce
+      (fn [style rule]
+        (let [[k v] (str/split rule #":")]
+          (assoc! style (keyword (str/trim k)) (str/trim v))))
+      (transient {})
+      (str/split string #";"))))
 
 (defn- dom->hiccup [opts ^js el]
   (let [{:keys [text-handler]} opts]
@@ -19,19 +21,19 @@
           text-handler)
       1 (let [attrs (.-attributes el)]
           (into
-           [(keyword (str/lower-case (.-tagName el)))
-            (persistent!
-             (reduce
-              (fn [attrs ^js attr]
-                (let [k (keyword (.-name attr))]
-                  (assoc! attrs k
-                          (case k
-                            :style (->style (.-value attr))
-                            (.-value attr)))))
-              (transient {})
-              attrs))]
-           (map (partial dom->hiccup opts))
-           (.-childNodes el))))))
+            [(keyword (str/lower-case (.-tagName el)))
+             (persistent!
+               (reduce
+                 (fn [attrs ^js attr]
+                   (let [k (keyword (.-name attr))]
+                     (assoc! attrs k
+                             (case k
+                               :style (->style (.-value attr))
+                               (.-value attr)))))
+                 (transient {})
+                 attrs))]
+            (map (partial dom->hiccup opts))
+            (.-childNodes el))))))
 
 (defn- parse-dom [string]
   (-> (js/DOMParser.)

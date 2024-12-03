@@ -1,6 +1,8 @@
-(ns ^:no-doc portal.ui.filter
-  (:require [clojure.string :as str]
-            #?(:cljs [portal.ui.rpc.runtime :as rt])))
+(ns portal.ui.filter
+  {:no-doc true}
+  (:require
+   [clojure.string :as str]
+   #?(:cljs [portal.ui.rpc.runtime :as rt])))
 
 #?(:clj (defn regexp? [value] (instance? java.util.regex.Pattern value)))
 
@@ -20,15 +22,15 @@
 
     (map? value)
     (some
-     (fn [[k v]]
-       (or (match* k pattern) (match* v pattern)))
-     value)
+      (fn [[k v]]
+        (or (match* k pattern) (match* v pattern)))
+      value)
 
     (coll? value)
     (some
-     (fn [v]
-       (match* v pattern))
-     value)
+      (fn [v]
+        (match* v pattern))
+      value)
 
     :else false))
 
@@ -57,14 +59,14 @@
       (cond
         (map? value)
         (persistent!
-         (reduce-kv
-          (fn [result k v]
-            (if-not (or (matcher k)
-                        (matcher v))
-              result
-              (assoc! result k v)))
-          (transient {})
-          value))
+          (reduce-kv
+            (fn [result k v]
+              (if-not (or (matcher k)
+                          (matcher v))
+                result
+                (assoc! result k v)))
+            (transient {})
+            value))
 
         (or (seq? value) (list? value))
         (filter matcher value)
@@ -94,20 +96,20 @@
         (seq (persistent! out))
         (let [search-words
               (keep
-               (fn [{:keys [substring] :as search-word}]
-                 (when-let [start (re-index (->pattern substring) s i)]
-                   (let [end (+ start (count substring))]
-                     (assoc search-word :start start :end end))))
-               search-words)]
+                (fn [{:keys [substring] :as search-word}]
+                  (when-let [start (re-index (->pattern substring) s i)]
+                    (let [end (+ start (count substring))]
+                      (assoc search-word :start start :end end))))
+                search-words)]
           (if-let [{:keys [start end] :as entry}
                    (first (sort-by :start search-words))]
             (recur
-             (long end)
-             search-words
-             (cond-> out
-               (not= start i) (conj! {:start i :end start})
-               :always        (conj! entry)))
+              (long end)
+              search-words
+              (cond-> out
+                (not= start i) (conj! {:start i :end start})
+                :always        (conj! entry)))
             (recur
-             string-length
-             search-words
-             (conj! out {:start i :end string-length}))))))))
+              string-length
+              search-words
+              (conj! out {:start i :end string-length}))))))))

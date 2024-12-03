@@ -1,4 +1,5 @@
-(ns ^:no-doc portal.ui.cljs)
+(ns portal.ui.cljs
+  {:no-doc true})
 
 (def eval-fn (atom nil))
 

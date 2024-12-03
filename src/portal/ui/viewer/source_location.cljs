@@ -1,10 +1,12 @@
-(ns ^:no-doc portal.ui.viewer.source-location
-  (:require [clojure.spec.alpha :as s]
-            [portal.colors :as c]
-            [portal.ui.inspector :as ins]
-            [portal.ui.rpc :as rpc]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.source-location
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [portal.colors :as c]
+   [portal.ui.inspector :as ins]
+   [portal.ui.rpc :as rpc]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 ;;; :spec
 (s/def ::ns symbol?)
@@ -43,11 +45,11 @@
        :color   (::c/uri theme)}}
      [ins/highlight-words
       (str
-       (or (:label value)
-           (:ns value)
-           (:file value))
-       ":"
-       (:line value))]]))
+        (or (:label value)
+            (:ns value)
+            (:file value))
+        ":"
+        (:line value))]]))
 
 (def viewer
   {:predicate source-location?

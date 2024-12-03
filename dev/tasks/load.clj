@@ -1,6 +1,8 @@
 (ns tasks.load
-  (:require [clojure.java.io :as io])
-  (:import [java.io File PushbackReader]))
+  (:require
+   [clojure.java.io :as io])
+  (:import
+   (java.io File PushbackReader)))
 
 (defn- read-ns-form [file]
   (binding [*read-eval*              false
@@ -24,12 +26,12 @@
 
 (defn- get-failures [source-paths]
   (sequence
-   (comp
-    (mapcat (comp file-seq io/file))
-    (map #(.getAbsolutePath ^File %))
-    (filter #(re-matches #".*\.cljc?$" %))
-    (keep check-ns))
-   source-paths))
+    (comp
+      (mapcat (comp file-seq io/file))
+      (map #(.getAbsolutePath ^File %))
+      (filter #(re-matches #".*\.cljc?$" %))
+      (keep check-ns))
+    source-paths))
 
 (defn check [source-paths]
   (let [failures (count (get-failures source-paths))]

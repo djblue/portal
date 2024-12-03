@@ -1,8 +1,10 @@
 (ns portal.console
-  #?(:joyride (:import)
-     :clj     (:require [clojure.java.io :as io])
-     :portal  (:import)
-     :cljs    (:require-macros portal.console)))
+  #?(:cljs
+     (:require-macros
+      [portal.console]))
+  #?(:clj
+     (:require
+      [clojure.java.io :as io])))
 
 (defn ^:no-doc now []
   #?(:clj (java.util.Date.) :cljs (js/Date.) :cljr (DateTime/Now)))
@@ -35,25 +37,25 @@
   (let [{:keys [line column file]} (meta form)]
     `(let [[flow# result#] (run (fn [] ~expr))]
        (tap>
-        (with-meta
-          {:form     (quote ~expr)
-           :level    (if (= flow# :throw) :fatal ~level)
-           :result   result#
-           :ns       (quote ~(symbol (str *ns*)))
-           :file     ~#?(:clj (get-file env file)
-                         :portal *file*
-                         :joyride '*file*
-                         :org.babashka/nbb *file*
-                         :cljs file
-                         :cljr *file*)
-           :line     ~line
-           :column   ~column
-           :time     (now)
-           :runtime  (runtime)}
-          {:portal.viewer/default :portal.viewer/log
-           :portal.viewer/for
-           {:form :portal.viewer/pprint
-            :time :portal.viewer/relative-time}}))
+         (with-meta
+           {:form     (quote ~expr)
+            :level    (if (= flow# :throw) :fatal ~level)
+            :result   result#
+            :ns       (quote ~(symbol (str *ns*)))
+            :file     ~#?(:clj (get-file env file)
+                          :portal *file*
+                          :joyride '*file*
+                          :org.babashka/nbb *file*
+                          :cljs file
+                          :cljr *file*)
+            :line     ~line
+            :column   ~column
+            :time     (now)
+            :runtime  (runtime)}
+           {:portal.viewer/default :portal.viewer/log
+            :portal.viewer/for
+            {:form :portal.viewer/pprint
+             :time :portal.viewer/relative-time}}))
        (if (= flow# :throw) (throw result#) result#))))
 
 (defmacro log   [expr] (capture :info &form expr &env))

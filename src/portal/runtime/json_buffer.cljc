@@ -1,18 +1,16 @@
-(ns ^:no-doc portal.runtime.json-buffer
-  #?(:cljr (:require [portal.runtime.clr.assembly]))
-  #?(:bb  (:require [portal.runtime.json :as json])
-     :clj (:import (com.google.gson.stream JsonReader JsonToken JsonWriter)
-                   (java.io StringReader StringWriter))
-     :cljr (:import (System.Text.Json
-                     JsonElement
-                     JsonValueKind
-                     JsonDocumentOptions
-                     JsonSerializerOptions)
-                    (System.Text.Json.Nodes
-                     JsonNode
-                     JsonArray
-                     JsonValue
-                     JsonNodeOptions))))
+(ns portal.runtime.json-buffer
+  {:no-doc true}
+  (:require
+   #?(:bb [portal.runtime.json :as json]
+      :cljr [portal.runtime.clr.assembly]))
+  (:import
+   #?@(:clj
+       [(com.google.gson.stream JsonReader JsonToken JsonWriter)
+        (java.io StringReader StringWriter)]
+
+       :cljr
+       [(System.Text.Json JsonDocumentOptions JsonElement JsonSerializerOptions JsonValueKind)
+        (System.Text.Json.Nodes JsonArray JsonNode JsonNodeOptions JsonValue)])))
 
 (defn -shift [this] (this))
 
@@ -29,10 +27,10 @@
      (volatile! (json/read data))
      :cljr
      (volatile!
-      (seq
-       (JsonNode/Parse ^String data
-                       (JsonNodeOptions.)
-                       (JsonDocumentOptions.))))
+       (seq
+         (JsonNode/Parse ^String data
+                         (JsonNodeOptions.)
+                         (JsonDocumentOptions.))))
      :clj
      (doto (JsonReader. (StringReader. data))
        (.beginArray))

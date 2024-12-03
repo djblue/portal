@@ -1,6 +1,7 @@
 (ns portal.runtime.fs-test
-  (:require [clojure.test :refer [deftest is]]
-            [portal.runtime.fs :as fs]))
+  (:require
+   [clojure.test :refer [deftest is]]
+   [portal.runtime.fs :as fs]))
 
 (deftest fs-test
   (is (some? (fs/slurp "deps.edn")))
@@ -11,8 +12,8 @@
   (is (some? (fs/is-file "deps.edn")))
   (is (nil? (fs/is-file "deps.end")))
   (is (contains?
-       (into #{} (fs/list (fs/cwd)))
-       (fs/join (fs/cwd) "deps.edn")))
+        (into #{} (fs/list (fs/cwd)))
+        (fs/join (fs/cwd) "deps.edn")))
   (let [dir  (str "target/" (gensym))
         file (str dir "/" (gensym))]
     (fs/mkdir dir)

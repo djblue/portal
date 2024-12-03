@@ -1,25 +1,27 @@
 (ns portal.ui.inspector
-  (:refer-clojure :exclude [coll? map? char?])
-  (:require ["anser" :as anser]
-            ["react" :as react]
-            [clojure.set :as set]
-            [clojure.string :as str]
-            [portal.async :as a]
-            [portal.colors :as c]
-            [portal.runtime.cson :as cson]
-            [portal.runtime.edn :as edn]
-            [portal.ui.api :as api]
-            [portal.ui.filter :as f]
-            [portal.ui.icons :as icons]
-            [portal.ui.lazy :as l]
-            [portal.ui.react :refer [use-effect]]
-            [portal.ui.rpc.runtime :as rt]
-            [portal.ui.select :as select]
-            [portal.ui.state :as state]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r])
-  (:import [goog.math Long]))
+  (:refer-clojure :exclude [char? coll? map?])
+  (:require
+   ["anser" :as anser]
+   ["react" :as react]
+   [clojure.set :as set]
+   [clojure.string :as str]
+   [portal.async :as a]
+   [portal.colors :as c]
+   [portal.runtime.cson :as cson]
+   [portal.runtime.edn :as edn]
+   [portal.ui.api :as api]
+   [portal.ui.filter :as f]
+   [portal.ui.icons :as icons]
+   [portal.ui.lazy :as l]
+   [portal.ui.react :refer [use-effect]]
+   [portal.ui.rpc.runtime :as rt]
+   [portal.ui.select :as select]
+   [portal.ui.state :as state]
+   [portal.ui.styled :as s]
+   [portal.ui.theme :as theme]
+   [reagent.core :as r])
+  (:import
+   (goog.math Long)))
 
 (declare inspector*)
 (declare inspector)
@@ -44,13 +46,13 @@
 
 (defn error->data [ex]
   (merge
-   (when-let [data (.-data ex)]
-     {:data data})
-   {:runtime :portal
-    :cause   (.-message ex)
-    :via     [{:type    (symbol (.-name (type ex)))
-               :message (.-message ex)}]
-    :stack   (.-stack ex)}))
+    (when-let [data (.-data ex)]
+      {:data data})
+    {:runtime :portal
+     :cause   (.-message ex)
+     :via     [{:type    (symbol (.-name (type ex)))
+                :message (.-message ex)}]
+     :stack   (.-stack ex)}))
 
 (defn- inspect-error [error]
   (let [theme (theme/use-theme)]
@@ -76,19 +78,19 @@
 
 (def error-boundary
   (r/create-class
-   {:display-name "ErrorBoundary"
-    :constructor
-    (fn [this _props]
-      (set! (.-state this) #js {:error nil}))
-    :component-did-catch
-    (fn [_this _e _info])
-    :get-derived-state-from-error
-    (fn [error] #js {:error error})
-    :render
-    (fn [this]
-      (if-let [error (.. this -state -error)]
-        (r/as-element [inspect-error* error])
-        (.. this -props -children)))}))
+    {:display-name "ErrorBoundary"
+     :constructor
+     (fn [this _props]
+       (set! (.-state this) #js {:error nil}))
+     :component-did-catch
+     (fn [_this _e _info])
+     :get-derived-state-from-error
+     (fn [error] #js {:error error})
+     :render
+     (fn [this]
+       (if-let [error (.. this -state -error)]
+         (r/as-element [inspect-error* error])
+         (.. this -props -children)))}))
 
 (defonce viewers api/viewers)
 
@@ -186,8 +188,8 @@
 (defn with-context [value & children]
   (let [context (use-context)]
     (into
-     [:r> (.-Provider inspector-context)
-      #js {:value (merge context value)}] children)))
+      [:r> (.-Provider inspector-context)
+       #js {:value (merge context value)}] children)))
 
 (defn with-default-viewer [viewer & children]
   (into [with-context {:portal.viewer/default viewer}] children))
@@ -274,20 +276,20 @@
 (defn- all-locations [state context]
   (let [search-text (:search-text @state)]
     (seq
-     (reduce-kv
-      (fn [out location search-text]
-        (if-not (child? location context)
-          out
-          (into
-           out
-           (keep
-            (fn [substring]
-              (when-not (str/blank? substring)
-                {:substring substring
-                 :context (-> location meta :context)}))
-            (str/split search-text #"\s+")))))
-      []
-      search-text))))
+      (reduce-kv
+        (fn [out location search-text]
+          (if-not (child? location context)
+            out
+            (into
+              out
+              (keep
+                (fn [substring]
+                  (when-not (str/blank? substring)
+                    {:substring substring
+                     :context (-> location meta :context)}))
+                (str/split search-text #"\s+")))))
+        []
+        search-text))))
 
 (defn- use-search-words []
   (let [state   (state/use-state)
@@ -430,23 +432,23 @@
     (when-not (:readonly? context)
       [s/div
        (merge
-        {:title
-         (if expanded?
-           "Click to collapse value. - SPACE | E"
-           "Click to expand value. - SPACE | E")
-         :style
-         (merge
-          {:cursor :pointer
-           :display :flex
-           :align-items :center
-           :color (::c/border theme)}
-          style)
-         :style/hover {:color color}
-         :on-click (fn [e]
-                     (.stopPropagation e)
-                     (if (.-shiftKey e)
-                       (state/dispatch! state state/expand-inc-1 context)
-                       (state/dispatch! state state/toggle-expand-1 context)))})
+         {:title
+          (if expanded?
+            "Click to collapse value. - SPACE | E"
+            "Click to expand value. - SPACE | E")
+          :style
+          (merge
+            {:cursor :pointer
+             :display :flex
+             :align-items :center
+             :color (::c/border theme)}
+            style)
+          :style/hover {:color color}
+          :on-click (fn [e]
+                      (.stopPropagation e)
+                      (if (.-shiftKey e)
+                        (state/dispatch! state state/expand-inc-1 context)
+                        (state/dispatch! state state/toggle-expand-1 context)))})
        (if expanded?
          [icons/caret-down]
          [icons/caret-right])])))
@@ -487,9 +489,9 @@
   (let [[show-meta? set-show-meta!] (react/useState false)
         theme    (theme/use-theme)
         metadata (dissoc
-                  (meta values)
-                  :portal.runtime/id
-                  :portal.runtime/type)]
+                   (meta values)
+                   :portal.runtime/id
+                   :portal.runtime/type)]
     [s/div
      {:style
       {:border [1 :solid (::c/border theme)]
@@ -609,8 +611,8 @@
   (let [m (meta value)]
     (when-let [viewer (get-in m [:portal.viewer/for k])]
       (merge
-       (select-keys m [viewer])
-       {:portal.viewer/default viewer}))))
+        (select-keys m [viewer])
+        {:portal.viewer/default viewer}))))
 
 (defn use-search-text []
   (let [state       (state/use-state)
@@ -625,24 +627,24 @@
     [container-map
      [l/lazy-seq
       (keep-indexed
-       (fn [index [k v]]
-         (when (or (matcher k) (matcher v))
-           ^{:key (str (->id k) (->id v))}
-           [:<>
-            [select/with-position
-             {:row index :column 0}
-             [with-context
-              {:key? true}
-              [container-map-k
-               [inspector
-                {:map-ns map-ns}
-                k]]]]
-            [select/with-position
-             {:row index :column 1}
-             [with-key k
-              [container-map-v
-               [inspector (get-props values k) v]]]]]))
-       sorted-values)]]))
+        (fn [index [k v]]
+          (when (or (matcher k) (matcher v))
+            ^{:key (str (->id k) (->id v))}
+            [:<>
+             [select/with-position
+              {:row index :column 0}
+              [with-context
+               {:key? true}
+               [container-map-k
+                [inspector
+                 {:map-ns map-ns}
+                 k]]]]
+             [select/with-position
+              {:row index :column 1}
+              [with-key k
+               [container-map-v
+                [inspector (get-props values k) v]]]]]))
+        sorted-values)]]))
 
 (defn inspect-map-k-v [values]
   (let [map-ns (:map-ns (use-options))]
@@ -701,17 +703,17 @@
      values
      [l/lazy-seq
       (keep-indexed
-       (fn [index value]
-         (when (matcher value)
-           (let [key (str (if (vector? values)
-                            index
-                            (- n index 1))
-                          (->id value))]
-             ^{:key key}
-             [select/with-position
-              {:row index :column 0}
-              [with-key index [inspector value]]])))
-       values)]]))
+        (fn [index value]
+          (when (matcher value)
+            (let [key (str (if (vector? values)
+                             index
+                             (- n index 1))
+                           (->id value))]
+              ^{:key key}
+              [select/with-position
+               {:row index :column 0}
+               [with-key index [inspector value]]])))
+        values)]]))
 
 (defn- inspect-coll [values]
   (let [search-text (use-search-text)]
@@ -723,14 +725,14 @@
 
 (defn- ->map [entries]
   (persistent!
-   (reduce
-    (fn [m entry]
-      (let [k (aget entry 0)]
-        (if (str/starts-with? k "closure_uid")
-          m
-          (assoc! m (keyword k) (aget entry 1)))))
-    (transient {})
-    entries)))
+    (reduce
+      (fn [m entry]
+        (let [k (aget entry 0)]
+          (if (str/starts-with? k "closure_uid")
+            m
+            (assoc! m (keyword k) (aget entry 1)))))
+      (transient {})
+      entries)))
 
 (defn- inspect-js-object [value]
   (let [v (->map (.entries js/Object value))]
@@ -918,7 +920,7 @@
 
           (= inspect-object
              (get-inspect-component
-              (get-value-type v)))
+               (get-value-type v)))
           [inspect-unreadable string]
 
           :else [inspector* context v]))
@@ -1015,12 +1017,12 @@
          (a/do
            (set-viewer! state [context] (:name viewer))
            (state/dispatch!
-            state
-            (if selected
-              state/deselect-context
-              state/select-context)
-            context
-            (or (.-metaKey e) (.-altKey e)))))
+             state
+             (if selected
+               state/deselect-context
+               state/select-context)
+             context
+             (or (.-metaKey e) (.-altKey e)))))
        :on-double-click
        (fn [e]
          (.stopPropagation e)
@@ -1065,49 +1067,49 @@
      [s/div
       {:style
        (merge
-        {:position :absolute
-         :pointer-events :none
-         :top 0
-         :left 0
-         :right 0
-         :bottom 0
-         :z-index 2
-         :transition transition}
-        (when (and selected (not hover))
-          {:box-shadow [0 0 3 color]})
-        (cond
-          (and selected hover)
-          {:border-top-right-radius (:border-radius theme)
-           :border-bottom-right-radius (:border-radius theme)
-           :border [1 :solid color]}
-          selected
-          {:border-radius (:border-radius theme)
-           :border [1 :solid color]}
-          :else
-          {:border-radius (:border-radius theme)
-           :border [1 :solid "rgba(0,0,0,0)"]}))}]
+         {:position :absolute
+          :pointer-events :none
+          :top 0
+          :left 0
+          :right 0
+          :bottom 0
+          :z-index 2
+          :transition transition}
+         (when (and selected (not hover))
+           {:box-shadow [0 0 3 color]})
+         (cond
+           (and selected hover)
+           {:border-top-right-radius (:border-radius theme)
+            :border-bottom-right-radius (:border-radius theme)
+            :border [1 :solid color]}
+           selected
+           {:border-radius (:border-radius theme)
+            :border [1 :solid color]}
+           :else
+           {:border-radius (:border-radius theme)
+            :border [1 :solid "rgba(0,0,0,0)"]}))}]
      [s/div
       {:style
        (merge
-        {:position :absolute
-         :pointer-events :none
-         :z-index 2
-         :left (- (dec (:padding theme)))
-         :top 0
-         :bottom 0
-         :border-radius (:border-radius theme)
-         :transition transition}
-        (when selected
-          {:right 0
-           :top 0
-           :bottom 0})
-        (when-not selected
-          {:opacity 0.85})
-        (when (and selected hover)
-          {:box-shadow [0 0 3 (get theme (nth theme/order (:depth context)))]})
-        (if-not hover
-          {:border-left [(- (:padding theme) 1) :solid "rgba(0,0,0,0)"]}
-          {:border-left [(- (:padding theme) 1) :solid  color]}))}]]))
+         {:position :absolute
+          :pointer-events :none
+          :z-index 2
+          :left (- (dec (:padding theme)))
+          :top 0
+          :bottom 0
+          :border-radius (:border-radius theme)
+          :transition transition}
+         (when selected
+           {:right 0
+            :top 0
+            :bottom 0})
+         (when-not selected
+           {:opacity 0.85})
+         (when (and selected hover)
+           {:box-shadow [0 0 3 (get theme (nth theme/order (:depth context)))]})
+         (if-not hover
+           {:border-left [(- (:padding theme) 1) :solid "rgba(0,0,0,0)"]}
+           {:border-left [(- (:padding theme) 1) :solid  color]}))}]]))
 
 (defn wrapper [context & children]
   (let [theme          (theme/use-theme)
@@ -1115,25 +1117,25 @@
         wrapper-options (use-wrapper-options context)
         background (get-background context)]
     (into
-     [s/div
-      (merge
-       wrapper-options
-       {:ref   ref
-        :title (-> value meta :doc)
-        :on-mouse-over
-        (fn [e]
-          (.stopPropagation e)
-          (reset! hover? context))
-        :style
-        {:position      :relative
-         :z-index       0
-         :flex          "1"
-         :font-family   (:font-family theme)
-         :border        [1 :solid "rgba(0,0,0,0)"]
-         :background    (when selected background)}})
-      ^{:key "inspector-border"} [inspector-border context]
-      ^{:key "multi-select-counter"} [multi-select-counter context]]
-     children)))
+      [s/div
+       (merge
+         wrapper-options
+         {:ref   ref
+          :title (-> value meta :doc)
+          :on-mouse-over
+          (fn [e]
+            (.stopPropagation e)
+            (reset! hover? context))
+          :style
+          {:position      :relative
+           :z-index       0
+           :flex          "1"
+           :font-family   (:font-family theme)
+           :border        [1 :solid "rgba(0,0,0,0)"]
+           :background    (when selected background)}})
+       ^{:key "inspector-border"} [inspector-border context]
+       ^{:key "multi-select-counter"} [multi-select-counter context]]
+      children)))
 
 (defn- inspector* [context value]
   (let [ref            (react/useRef nil)
@@ -1146,26 +1148,26 @@
         options        (assoc options :ref ref :props props)
         type           (get-value-type value)
         component      (or
-                        (when-not (= (:name viewer) :portal.viewer/inspector)
-                          (:component viewer))
-                        (if expanded?
-                          (get-inspect-component type)
-                          (get-preview-component type)))]
+                         (when-not (= (:name viewer) :portal.viewer/inspector)
+                           (:component viewer))
+                         (if expanded?
+                           (get-inspect-component type)
+                           (get-preview-component type)))]
     (select/use-register-context context viewer)
     (use-effect
-     #js [(hash location) (some? expanded?)]
-     (when (and (nil? expanded?)
-                (default-expand? state theme context value))
-       (state/dispatch!
-        state assoc-in [:expanded? location]
-        (get-in (meta value) [:portal.viewer/inspector :expanded] 1))))
+      #js [(hash location) (some? expanded?)]
+      (when (and (nil? expanded?)
+                 (default-expand? state theme context value))
+        (state/dispatch!
+          state assoc-in [:expanded? location]
+          (get-in (meta value) [:portal.viewer/inspector :expanded] 1))))
     (use-effect
-     #js [selected (.-current ref)]
-     (when (and selected
-                (not= (.. js/document -activeElement -tagName) "INPUT"))
-       (when-let [el (.-current ref)]
-         (when-not (and (.hasFocus js/document) (l/element-visible? el))
-           (.scrollIntoView el #js {:inline "nearest" :block "nearest" :behavior "smooth"})))))
+      #js [selected (.-current ref)]
+      (when (and selected
+                 (not= (.. js/document -activeElement -tagName) "INPUT"))
+        (when-let [el (.-current ref)]
+          (when-not (and (.hasFocus js/document) (l/element-visible? el))
+            (.scrollIntoView el #js {:inline "nearest" :block "nearest" :behavior "smooth"})))))
     [:> error-boundary
      [with-options options
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
@@ -1179,9 +1181,9 @@
         state    (state/use-state)
         selected @(r/track is-selected? state context)]
     (use-effect
-     #js [selected (.-current ref)]
-     (when (and selected (.hasFocus js/document))
-       (some-> ref .-current (.focus #js {:preventScroll true}))))
+      #js [selected (.-current ref)]
+      (when (and selected (.hasFocus js/document))
+        (some-> ref .-current (.focus #js {:preventScroll true}))))
     (when-not (:readonly? context)
       [s/div
        {:ref         ref
@@ -1200,10 +1202,10 @@
   ([props value]
    (let [context
          (cond->
-          (-> (use-context)
-              (assoc :value value)
-              (update :depth inc)
-              (assoc :parent (use-parent)))
+           (-> (use-context)
+               (assoc :value value)
+               (update :depth inc)
+               (assoc :parent (use-parent)))
            (get-in props [:portal.viewer/inspector :toggle-bg] true)
            (update :alt-bg not)
            props

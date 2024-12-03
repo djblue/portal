@@ -1,15 +1,17 @@
 (ns portal.nrepl
-  (:require [clojure.datafy :as d]
-            [clojure.main :as main]
-            [clojure.test :as test]
-            [nrepl.middleware :refer [set-descriptor!]]
-            [nrepl.middleware.caught :as caught]
-            [nrepl.middleware.print :as print]
-            [nrepl.misc :refer (response-for)]
-            [nrepl.transport :as transport]
-            [portal.api :as p])
-  (:import [java.util Date]
-           [nrepl.transport Transport]))
+  (:require
+   [clojure.datafy :as d]
+   [clojure.main :as main]
+   [clojure.test :as test]
+   [nrepl.middleware :refer [set-descriptor!]]
+   [nrepl.middleware.caught :as caught]
+   [nrepl.middleware.print :as print]
+   [nrepl.misc :refer [response-for]]
+   [nrepl.transport :as transport]
+   [portal.api :as p])
+  (:import
+   (java.util Date)
+   (nrepl.transport Transport)))
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
 
@@ -51,10 +53,10 @@
   [msg]
   (try
     (some?
-     (get
-      @(:session msg)
-      (requiring-resolve
-       'shadow.cljs.devtools.server.nrepl-impl/*repl-state*)))
+      (get
+        @(:session msg)
+        (requiring-resolve
+          'shadow.cljs.devtools.server.nrepl-impl/*repl-state*)))
     (catch Exception _ false)))
 
 (defrecord ^:no-doc PortalTransport [transport handler-msg]
@@ -71,14 +73,14 @@
       (when-let [result (get-result msg)]
         (-> result
             (merge
-             (select-keys handler-msg [:ns :file :column :line :code])
-             (when (= "load-file" (:op handler-msg))
-               {:code (:file handler-msg)
-                :file (:file-path handler-msg)})
-             (when-let [report (-> handler-msg :report deref not-empty)]
-               {:report report})
-             (when-let [stdio (-> handler-msg :stdio deref not-empty)]
-               {:stdio stdio}))
+              (select-keys handler-msg [:ns :file :column :line :code])
+              (when (= "load-file" (:op handler-msg))
+                {:code (:file handler-msg)
+                 :file (:file-path handler-msg)})
+              (when-let [report (-> handler-msg :report deref not-empty)]
+                {:report report})
+              (when-let [stdio (-> handler-msg :stdio deref not-empty)]
+                {:stdio stdio}))
             (update :ns (fnil symbol 'user))
             (assoc :time     (:time handler-msg)
                    :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
@@ -102,20 +104,20 @@
                          (swap! report conj value)
                          (test-report value))]
     (handler
-     (cond-> msg
-       (#{"eval" "load-file"} (:op msg))
-       (-> (update :transport
-                   ->PortalTransport
-                   (assoc msg
-                          :report report
-                          :stdio  (atom [])
-                          :start  (System/nanoTime)
-                          :time   (Date.)))
-           (update :session
-                   (fn [session]
-                     (swap! session assoc
-                            #'test/report portal-report)
-                     session)))))))
+      (cond-> msg
+        (#{"eval" "load-file"} (:op msg))
+        (-> (update :transport
+                    ->PortalTransport
+                    (assoc msg
+                           :report report
+                           :stdio  (atom [])
+                           :start  (System/nanoTime)
+                           :time   (Date.)))
+            (update :session
+                    (fn [session]
+                      (swap! session assoc
+                             #'test/report portal-report)
+                      session)))))))
 
 (defn wrap-portal
   "nREPL middleware for inspecting `eval` and `load-file` ops for the following to `tap>`:
@@ -172,23 +174,23 @@
                      [(:code msg) (:file msg)])
                    {:keys [value] :as response}
                    (p/eval-str
-                    portal
-                    code
-                    (-> {:ns (get @session #'*portal-ns*)}
-                        (merge msg)
-                        (select-keys  [:ns :line :column])
-                        (assoc :file file
-                               :verbose true
-                               :context (case op "eval" :expr "load-file" :statement)
-                               :re-render (= op "load-file"))))]
+                     portal
+                     code
+                     (-> {:ns (get @session #'*portal-ns*)}
+                         (merge msg)
+                         (select-keys  [:ns :line :column])
+                         (assoc :file file
+                                :verbose true
+                                :context (case op "eval" :expr "load-file" :statement)
+                                :re-render (= op "load-file"))))]
                (when-let [namespace (:ns response)]
                  (swap! session assoc #'*portal-ns* namespace))
                (when (= value :cljs/quit)
                  (swap! session dissoc #'*portal-session* #'*portal-ns*))
                (merge
-                response
-                {:status      :done
-                 ::print/keys #{:value}}))
+                 response
+                 {:status      :done
+                  ::print/keys #{:value}}))
              (catch Exception e
                (swap! session assoc #'*e e)
                {::caught/throwable e
@@ -238,10 +240,10 @@
 (defn- ->id [value]
   (let [id (next-id)]
     (swap!
-     values
-     #(cond-> %
-        (> (count %) 32) (dissoc (ffirst %))
-        :always          (assoc id value)))
+      values
+      #(cond-> %
+         (> (count %) 32) (dissoc (ffirst %))
+         :always          (assoc id value)))
     id))
 
 (defn- link-value [value]
@@ -257,8 +259,8 @@
     (assoc :ex
            (binding [*print-meta* true]
              (pr-str
-              (link-value
-               (d/datafy (::caught/throwable message))))))
+               (link-value
+                 (d/datafy (::caught/throwable message))))))
 
     (contains? message :value)
     (update :value link-value)))
@@ -273,10 +275,10 @@
 
 (defn- wrap-notebook* [handler {:keys [op] :as message}]
   (handler
-   (cond-> message
-     (and (= op "eval")
-          (get-in message [:nrepl.middleware.eval/env :calva-notebook]))
-     (update :transport ->NotebookTransport))))
+    (cond-> message
+      (and (= op "eval")
+           (get-in message [:nrepl.middleware.eval/env :calva-notebook]))
+      (update :transport ->NotebookTransport))))
 
 (defn wrap-notebook
   "nREPL middleware for use with [Calva Notebooks](https://calva.io/notebooks/)

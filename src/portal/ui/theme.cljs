@@ -1,9 +1,10 @@
 (ns portal.ui.theme
-  (:require ["react" :as react]
-            [clojure.string :as str]
-            [portal.colors :as c]
-            [portal.ui.options :as opts]
-            [portal.ui.react :refer [use-effect]]))
+  (:require
+   ["react" :as react]
+   [clojure.string :as str]
+   [portal.colors :as c]
+   [portal.ui.options :as opts]
+   [portal.ui.react :refer [use-effect]]))
 
 (defn ^:no-doc is-vs-code? []
   (-> js/document
@@ -22,52 +23,52 @@
 (defn ^:no-doc get-vs-code-css-vars []
   (when-let [style (get-style)]
     (persistent!
-     (reduce
-      (fn [vars rule]
-        (if-let [[attr value] (str/split rule #"\s*:\s*")]
-          (assoc! vars (str "var(" attr ")") value)
-          vars))
-      (transient {})
-      (str/split style #"\s*;\s*")))))
+      (reduce
+        (fn [vars rule]
+          (if-let [[attr value] (str/split rule #"\s*:\s*")]
+            (assoc! vars (str "var(" attr ")") value)
+            vars))
+        (transient {})
+        (str/split style #"\s*;\s*")))))
 
 (defn- get-theme [theme-name]
   (let [opts (opts/use-options)
         vars (get-vs-code-css-vars)]
     (merge
-     {:font-family   "monospace"
-      :font-size     "12pt"
-      :string-length 100
-      :max-depth     2
-      :padding       6
-      :border-radius 2}
-     (update-vals
-      (or (get c/themes theme-name)
-          (get (:themes opts) theme-name))
-      #(get vars % %)))))
+      {:font-family   "monospace"
+       :font-size     "12pt"
+       :string-length 100
+       :max-depth     2
+       :padding       6
+       :border-radius 2}
+      (update-vals
+        (or (get c/themes theme-name)
+            (get (:themes opts) theme-name))
+        #(get vars % %)))))
 
 (defn- use-theme-detector []
   (let [media-query (.matchMedia js/window "(prefers-color-scheme: dark)")
         [dark-theme set-dark-theme!] (react/useState (.-matches media-query))]
     (use-effect
-     :once
-     (let [listener (fn [e] (set-dark-theme! (.-matches e)))]
-       (.addListener media-query listener)
-       (fn []
-         (.removeListener media-query listener))))
+      :once
+      (let [listener (fn [e] (set-dark-theme! (.-matches e)))]
+        (.addListener media-query listener)
+        (fn []
+          (.removeListener media-query listener))))
     dark-theme))
 
 (defn- use-vscode-theme-detector []
   (let [[change-id set-change-id!] (react/useState 0)]
     (when (is-vs-code?)
       (react/useEffect
-       (fn []
-         (let [observer (js/MutationObserver. #(set-change-id! inc))]
-           (.observe observer
-                     js/document.documentElement
-                     #js {:attributes true
-                          :attributeFilter #js ["style"]})
-           #(.disconnect observer)))
-       #js []))
+        (fn []
+          (let [observer (js/MutationObserver. #(set-change-id! inc))]
+            (.observe observer
+                      js/document.documentElement
+                      #js {:attributes true
+                           :attributeFilter #js ["style"]})
+            #(.disconnect observer)))
+        #js []))
     change-id))
 
 (defn- default-theme [dark-theme]
@@ -87,8 +88,8 @@
 (defn ^:no-doc with-background []
   (let [background (::c/background (use-theme))]
     (use-effect
-     #js [background]
-     (set! (.. js/document -body -style -backgroundColor) background))
+      #js [background]
+      (set! (.. js/document -body -style -backgroundColor) background))
     nil))
 
 (defn with-theme [theme-name & children]

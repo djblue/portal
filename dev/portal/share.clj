@@ -1,10 +1,12 @@
 (ns portal.share
-  (:require [clojure.pprint :as pp]
-            [clojure.string :as str]
-            [org.httpkit.client :as http]
-            [portal.api :as p]
-            [portal.runtime.json :as json])
-  (:import [java.net URL]))
+  (:require
+   [clojure.pprint :as pp]
+   [clojure.string :as str]
+   [org.httpkit.client :as http]
+   [portal.api :as p]
+   [portal.runtime.json :as json])
+  (:import
+   (java.net URL)))
 
 (defn- pprint [value]
   (binding [*print-meta* true]
@@ -12,14 +14,14 @@
 
 (defn- create-gist [content]
   (-> @(http/post
-        "https://api.github.com/gists"
-        {:basic-auth [(System/getenv "GIT_USERNAME")
-                      (System/getenv "GIT_PASSWORD")]
-         :headers    {"Accept" "application/vnd.github.v3+json"}
-         :body       (json/write
-                      {:public      false
-                       :description "Portal Share"
-                       :files       {"data.clj" {:content content}}})})
+         "https://api.github.com/gists"
+         {:basic-auth [(System/getenv "GIT_USERNAME")
+                       (System/getenv "GIT_PASSWORD")]
+          :headers    {"Accept" "application/vnd.github.v3+json"}
+          :body       (json/write
+                        {:public      false
+                         :description "Portal Share"
+                         :files       {"data.clj" {:content content}}})})
       :body
       json/read
       (get-in [:files :data.clj :raw_url])))
@@ -34,9 +36,9 @@
 
 (defn- shorten-url [url]
   (-> @(http/post
-        "https://url.api.stdlib.com/temporary@0.3.0/create/"
-        {:headers {"Content-Type" "application/json"}
-         :body    (json/write {:url url :ttl 86400})})
+         "https://url.api.stdlib.com/temporary@0.3.0/create/"
+         {:headers {"Content-Type" "application/json"}
+          :body    (json/write {:url url :ttl 86400})})
       :body
       json/read
       :link_url))

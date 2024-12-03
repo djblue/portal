@@ -1,5 +1,7 @@
-(ns ^:no-doc portal.runtime.web.client
-  (:require [portal.runtime :as rt]))
+(ns portal.runtime.web.client
+  {:no-doc true}
+  (:require
+   [portal.runtime :as rt]))
 
 (defonce connection (atom nil))
 
@@ -11,8 +13,8 @@
   ([_session-id message]
    (if-let [child-window @connection]
      (rt/read
-      (.portal.ui.rpc.handler ^js child-window (rt/write message @session))
-      @session)
+       (.portal.ui.rpc.handler ^js child-window (rt/write message @session))
+       @session)
      (throw (ex-info "Portal not open" message)))))
 
 (defn- push-state [session-id new-value]

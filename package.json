@@ -18,6 +18,7 @@
     "vega-lite": "^5.1.1"
   },
   "devDependencies": {
+    "@chrisoakman/standard-clojure-style": "^0.18.0",
     "browserify": "^16.5.2",
     "nbb": "^1.2.187",
     "source-map-support": "^0.5.20",

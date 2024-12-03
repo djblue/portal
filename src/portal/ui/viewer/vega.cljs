@@ -1,14 +1,16 @@
-(ns ^:no-doc portal.ui.viewer.vega
+(ns portal.ui.viewer.vega
   "Viewer for the Vega-Lite specification
   https://vega.github.io/vega/docs/specification/"
-  (:require ["react" :as react]
-            ["vega-embed" :as vegaEmbed]
-            [clojure.spec.alpha :as s]
-            [portal.colors :as c]
-            [portal.ui.inspector :as ins]
-            [portal.ui.react :refer [use-effect]]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+  {:no-doc true}
+  (:require
+   ["react" :as react]
+   ["vega-embed" :as vegaEmbed]
+   [clojure.spec.alpha :as s]
+   [portal.colors :as c]
+   [portal.ui.inspector :as ins]
+   [portal.ui.react :refer [use-effect]]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 ;;; :spec
 (def vega-url #"https://vega\.github\.io/schema/vega/v\d\.json")
@@ -26,19 +28,19 @@
   (let [theme (theme/use-theme)]
     [:style
      (d/map->css
-      {[:.vega-embed :.chart-wrapper]
-       {:width "fit-content"
-        :height "fit-content"}
-       [:.vega-embed]
-       {:width "100%"}
-       [:.vega-embed :summary]
-       {:opacity 1
-        :cursor :default
-        :position :absolute
-        :right (* 0.5 (:padding theme))
-        :top (* 0.5 (:padding theme))
-        :z-index 0
-        :transform "scale(0.6)"}})]))
+       {[:.vega-embed :.chart-wrapper]
+        {:width "fit-content"
+         :height "fit-content"}
+        [:.vega-embed]
+        {:width "100%"}
+        [:.vega-embed :summary]
+        {:opacity 1
+         :cursor :default
+         :position :absolute
+         :right (* 0.5 (:padding theme))
+         :top (* 0.5 (:padding theme))
+         :z-index 0
+         :transform "scale(0.6)"}})]))
 
 (defn- default-config
   "Specifies a nicer set of vega-lite specification styles.
@@ -85,15 +87,15 @@
   (let [ref              (react/useRef nil)
         [rect set-rect!] (react/useState #js {:height 200 :width 200})]
     (use-effect
-     #js [(.-current ref)]
-     (when-let [el (.-current ref)]
-       (let [resize-observer
-             (js/ResizeObserver.
-              (fn []
-                (set-rect! (.getBoundingClientRect el))))]
-         (.observe resize-observer el)
-         (fn []
-           (.disconnect resize-observer)))))
+      #js [(.-current ref)]
+      (when-let [el (.-current ref)]
+        (let [resize-observer
+              (js/ResizeObserver.
+                (fn []
+                  (set-rect! (.getBoundingClientRect el))))]
+          (.observe resize-observer el)
+          (fn []
+            (.disconnect resize-observer)))))
     [ref rect]))
 
 (defn vega-embed [opts value]
@@ -110,24 +112,24 @@
         width (.-width relative-rect)]
 
     (use-effect
-     #js [(hash theme)]
-     (when-let [el (.-current absolute)]
-       (-> (vegaEmbed el (clj->js (assoc doc :width width)) (clj->js opts))
-           (.then (fn [value]
-                    (set! (.-current view) (.-view value))
-                    (set-init! true)))
-           (.catch (fn [err] (js/console.error err)))))
-     #(when-let [view (.-current view)]
-        (.finalize view)
-        (set! (.-current view) nil)))
+      #js [(hash theme)]
+      (when-let [el (.-current absolute)]
+        (-> (vegaEmbed el (clj->js (assoc doc :width width)) (clj->js opts))
+            (.then (fn [value]
+                     (set! (.-current view) (.-view value))
+                     (set-init! true)))
+            (.catch (fn [err] (js/console.error err)))))
+      #(when-let [view (.-current view)]
+         (.finalize view)
+         (set! (.-current view) nil)))
 
     (use-effect
-     #js [init (.-current view) width]
-     (when-let [view (.-current view)]
-       (let [width (- width 2
-                      (* 2 (:padding theme)))]
-         (.width view width)
-         (.run view))))
+      #js [init (.-current view) width]
+      (when-let [view (.-current view)]
+        (let [width (- width 2
+                       (* 2 (:padding theme)))]
+          (.width view width)
+          (.run view))))
 
     [d/div
      (when-let [title (:title value)]

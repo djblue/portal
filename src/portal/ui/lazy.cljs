@@ -1,32 +1,35 @@
-(ns ^:no-doc portal.ui.lazy
+(ns portal.ui.lazy
+  {:no-doc true}
   (:refer-clojure :exclude [lazy-seq])
-  (:require ["react" :as react]
-            [portal.ui.react :refer [use-effect]]
-            [portal.ui.state :as state]
-            [reagent.core :as r])
-  (:require-macros portal.ui.lazy))
+  (:require-macros
+   [portal.ui.lazy])
+  (:require
+   ["react" :as react]
+   [portal.ui.react :refer [use-effect]]
+   [portal.ui.state :as state]
+   [reagent.core :as r]))
 
 (defn- observer-visible? [entries]
   (< 0.5 (reduce
-          (fn [sum entry]
-            (if-not (.-isIntersecting entry)
-              sum
-              (+ sum (.-intersectionRatio entry)))) 0 entries)))
+           (fn [sum entry]
+             (if-not (.-isIntersecting entry)
+               sum
+               (+ sum (.-intersectionRatio entry)))) 0 entries)))
 
 (defn- observer-visible-sensor [f]
   (let [ref (react/useRef nil)]
     (use-effect
-     #js [(.-current ref) f]
-     (when (.-current ref)
-       (let [observer
-             (js/IntersectionObserver.
-              (fn [entries]
-                (when (observer-visible? entries) (f)))
-              #js {:root nil :rootMargin "0px" :threshold 0.5})]
-         (.observe observer (.-current ref))
-         (fn []
-           (when (.-current ref)
-             (.unobserve observer (.-current ref)))))))
+      #js [(.-current ref) f]
+      (when (.-current ref)
+        (let [observer
+              (js/IntersectionObserver.
+                (fn [entries]
+                  (when (observer-visible? entries) (f)))
+                #js {:root nil :rootMargin "0px" :threshold 0.5})]
+          (.observe observer (.-current ref))
+          (fn []
+            (when (.-current ref)
+              (.unobserve observer (.-current ref)))))))
     [:div {:ref ref :style {:height "0.5em" :width "0.5em"}}]))
 
 (defn element-visible? [element]
@@ -45,16 +48,16 @@
   (let [ref       (react/useRef nil)
         container (:scroll-element @(state/use-state))]
     (use-effect
-     #js [(.-current ref) f container]
-     (when (some-> ref .-current element-visible?)
-       (f))
-     (when container
-       (let [on-scroll
-             (fn []
-               (when (some-> ref .-current element-visible?)
-                 (f)))]
-         (.addEventListener ^js container "scroll" on-scroll)
-         #(.removeEventListener ^js container "scroll" on-scroll))))
+      #js [(.-current ref) f container]
+      (when (some-> ref .-current element-visible?)
+        (f))
+      (when container
+        (let [on-scroll
+              (fn []
+                (when (some-> ref .-current element-visible?)
+                  (f)))]
+          (.addEventListener ^js container "scroll" on-scroll)
+          #(.removeEventListener ^js container "scroll" on-scroll))))
     [:div {:ref ref :style {:height "0.5em" :width "0.5em"}}]))
 
 (defn- visible-sensor [f]

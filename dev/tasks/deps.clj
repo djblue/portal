@@ -1,5 +1,6 @@
 (ns tasks.deps
-  (:require [tasks.tools :refer [*cwd* clj git npm]]))
+  (:require
+   [tasks.tools :refer [*cwd* clj git npm]]))
 
 (defn check-deps []
   (npm :outdated)

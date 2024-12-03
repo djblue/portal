@@ -1,6 +1,7 @@
 (ns portal.client.planck
-  (:require [planck.http :as http]
-            [portal.client.common :refer (->submit)]))
+  (:require
+   [planck.http :as http]
+   [portal.client.common :refer [->submit]]))
 
 (def ^:private http-methods
   {"GET"   http/get

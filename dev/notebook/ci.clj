@@ -1,10 +1,11 @@
 (ns notebook.ci
-  (:require [tasks.build :refer [build install]]
-            [tasks.check :as check]
-            [tasks.format :as fmt]
-            [tasks.parallel :refer [with-out-data]]
-            [tasks.test :as test]
-            [tasks.tools :as tool]))
+  (:require
+   [tasks.build :refer [build install]]
+   [tasks.check :as check]
+   [tasks.format :as fmt]
+   [tasks.parallel :refer [with-out-data]]
+   [tasks.test :as test]
+   [tasks.tools :as tool]))
 (check/cloc)
 (with-out-data (fmt/check))
 (with-out-data (check/clj-kondo))

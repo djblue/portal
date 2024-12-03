@@ -1,9 +1,10 @@
 (ns tasks.package
-  (:require [babashka.fs :as fs]
-            [hiccup.core :refer [html]]
-            [tasks.build :refer [build extensions]]
-            [tasks.info :refer [options version]]
-            [tasks.tools :refer [clj]]))
+  (:require
+   [babashka.fs :as fs]
+   [hiccup.core :refer [html]]
+   [tasks.build :refer [build extensions]]
+   [tasks.info :refer [options version]]
+   [tasks.tools :refer [clj]]))
 
 (defn- options->licenses [{:keys [license]}]
   [:licenses
@@ -77,8 +78,8 @@
 
 (defn- xml-str [hiccup]
   (str
-   "<?xml version= \"1.0\" encoding= \"UTF-8\" ?>"
-   (html {:mode :xml} hiccup)))
+    "<?xml version= \"1.0\" encoding= \"UTF-8\" ?>"
+    (html {:mode :xml} hiccup)))
 
 (defn generate [options]
   (-> options options->hiccup xml-str))
@@ -91,9 +92,9 @@
 (defn pom []
   (let [target (pom-file options)]
     (when (seq
-           (fs/modified-since
-            target
-            ["deps.edn"]))
+            (fs/modified-since
+              target
+              ["deps.edn"]))
       (println "=>" "writing" (str target))
       (fs/create-dirs (fs/parent target))
       (spit (str target) (generate options)))))
@@ -104,12 +105,12 @@
   (build)
   (pom)
   (when (seq
-         (fs/modified-since
-          (str "target/portal-" version ".jar")
-          (concat
-           ["pom.xml"]
-           (fs/glob "src" "**")
-           (fs/glob "resources" "**"))))
+          (fs/modified-since
+            (str "target/portal-" version ".jar")
+            (concat
+              ["pom.xml"]
+              (fs/glob "src" "**")
+              (fs/glob "resources" "**"))))
     (clj "-M:dev" "-m" :tasks.jar)))
 
 (defn all

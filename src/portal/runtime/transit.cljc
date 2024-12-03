@@ -1,10 +1,13 @@
-(ns ^:no-doc portal.runtime.transit
+(ns portal.runtime.transit
+  {:no-doc true}
   (:refer-clojure :exclude [read])
-  #?(:org.babashka/nbb (:require)
-     :joyride          (:require [cljs.core])
-     :clj              (:require [cognitect.transit :as transit])
-     :cljs             (:require [cognitect.transit :as transit]))
-  #?(:clj (:import [java.io ByteArrayOutputStream ByteArrayInputStream])))
+  (:require
+   #?(:clj [cognitect.transit :as transit]
+      :cljs [cognitect.transit :as transit]
+      :joyride [cljs.core]))
+  #?(:clj
+     (:import
+      (java.io ByteArrayInputStream ByteArrayOutputStream))))
 
 (defn read [string]
   #?(:org.babashka/nbb
@@ -27,9 +30,9 @@
 
      :clj (let [out (ByteArrayOutputStream. 1024)]
             (transit/write
-             (transit/writer out :json {:transform transit/write-meta})
-             value)
+              (transit/writer out :json {:transform transit/write-meta})
+              value)
             (.toString out))
      :cljs (transit/write
-            (transit/writer :json {:transform transit/write-meta})
-            value)))
+             (transit/writer :json {:transform transit/write-meta})
+             value)))

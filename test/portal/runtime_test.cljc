@@ -1,6 +1,7 @@
 (ns portal.runtime-test
-  (:require [clojure.test :refer [are deftest is]]
-            [portal.runtime :as rt]))
+  (:require
+   [clojure.test :refer [are deftest is]]
+   [portal.runtime :as rt]))
 
 (deftest un-hashable-values
   (let [value   #?(:bb   :skip
@@ -22,23 +23,23 @@
   (are [a b]
        (= (#'rt/value->key a) (#'rt/value->key b))
 
-    [] []
+       [] []
 
-    [1] [1]
+       [1] [1]
 
-    ^:one [1] ^:one [1]
+       ^:one [1] ^:one [1]
 
-    {:a ^:one [1]}
-    {:a ^:one [1]})
+       {:a ^:one [1]}
+       {:a ^:one [1]})
 
   (are [a b]
        (not= (#'rt/value->key a) (#'rt/value->key b))
 
-    [1] '(1)
+       [1] '(1)
 
-    #{1 2 3} (sorted-set 1 2 3)
+       #{1 2 3} (sorted-set 1 2 3)
 
-    ^{:one 1} [] ^{:two 2} []
+       ^{:one 1} [] ^{:two 2} []
 
-    {:a ^{:one 2} [1]}
-    {:a ^{:two 2} [1]}))
+       {:a ^{:one 2} [1]}
+       {:a ^{:two 2} [1]}))

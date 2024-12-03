@@ -1,8 +1,10 @@
-(ns ^:no-doc portal.ui.viewer.charts
-  (:require [clojure.spec.alpha :as sp]
-            [portal.colors :as c]
-            [portal.ui.theme :as theme]
-            [portal.ui.viewer.vega-lite :as v]))
+(ns portal.ui.viewer.charts
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as sp]
+   [portal.colors :as c]
+   [portal.ui.theme :as theme]
+   [portal.ui.viewer.vega-lite :as v]))
 
 ;; collection of maps of [{:x 0 :y 0} ...] maps
 (sp/def :tabular/x number?)

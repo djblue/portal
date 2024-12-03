@@ -1,6 +1,6 @@
 (ns portal.client.web
   (:require
-   [portal.client.common :refer (->submit)]))
+   [portal.client.common :refer [->submit]]))
 
 (defn- fetch [url options]
   (js/fetch url (clj->js options)))

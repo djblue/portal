@@ -1,11 +1,17 @@
 (ns examples.hacker-news
-  (:require #?(:clj  [portal.sync  :as a]
-               :cljs [portal.async :as a]
-               :cljr [portal.sync :as a])
-            #?(:cljs [examples.fetch :refer [fetch]])
-            [clojure.core.protocols :refer [nav]]
-            #?(:clj  [portal.runtime.json :as json]
-               :cljr [portal.runtime.json :as json])))
+  (:require
+   [clojure.core.protocols :refer [nav]]
+   #?@(:clj
+       [[portal.runtime.json :as json]
+        [portal.sync :as a]]
+
+       :cljr
+       [[portal.runtime.json :as json]
+        [portal.sync :as a]]
+
+       :cljs
+       [[examples.fetch :refer [fetch]]
+        [portal.async :as a]])))
 
 (def root "https://hacker-news.firebaseio.com/v0")
 
@@ -49,8 +55,8 @@
   #?(:clj  (java.util.Date. timestamp)
      :cljs (js/Date. timestamp)
      :cljr (.DateTime
-            (System.DateTimeOffset/FromUnixTimeMilliseconds
-             timestamp))))
+             (System.DateTimeOffset/FromUnixTimeMilliseconds
+               timestamp))))
 
 (declare nav-hn)
 (declare nav-item)

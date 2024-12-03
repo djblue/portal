@@ -1,8 +1,9 @@
 (ns tasks.kondo
-  (:require [clj-kondo.core :as core]
-            [clj-kondo.main :as kondo]
-            [clojure.string :as str]
-            [portal.client.jvm :as p]))
+  (:require
+   [clj-kondo.core :as core]
+   [clj-kondo.main :as kondo]
+   [clojure.string :as str]
+   [portal.client.jvm :as p]))
 
 (defn- file->ns [file]
   (some-> file
@@ -15,14 +16,14 @@
     (let [submit (partial p/submit {:port port :encoding :cson})]
       (doseq [{:keys [col row filename level message type]} findings]
         (submit
-         {:level  (get {:warning :warn :fail :fatal} level level)
-          :type   type
-          :column col
-          :ns     (file->ns filename)
-          :line   row
-          :file   filename
-          :result message
-          :time   (java.util.Date.)})))
+          {:level  (get {:warning :warn :fail :fatal} level level)
+           :type   type
+           :column col
+           :ns     (file->ns filename)
+           :line   row
+           :file   filename
+           :result message
+           :time   (java.util.Date.)})))
     (f data)))
 
 (def ^:private config

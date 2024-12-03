@@ -1,5 +1,6 @@
 (ns portal.shadow.remote
-  (:require [portal.client.web :as client]))
+  (:require
+   [portal.client.web :as client]))
 
 (goog-define port 0)
 
@@ -10,9 +11,9 @@
   (if-not (zero? port)
     port
     (let [error (js/Error.
-                 (str "Portal server port is missing. "
-                      "Did you add the portal.shadow.remote/hook to :build-hooks in shadow-cljs.edn? \n"
-                      "See https://shadow-cljs.github.io/docs/UsersGuide.html#build-hooks for more info."))]
+                  (str "Portal server port is missing. "
+                       "Did you add the portal.shadow.remote/hook to :build-hooks in shadow-cljs.edn? \n"
+                       "See https://shadow-cljs.github.io/docs/UsersGuide.html#build-hooks for more info."))]
       (.error js/console error)
       (throw error))))
 

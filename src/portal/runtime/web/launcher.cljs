@@ -1,8 +1,10 @@
-(ns ^:no-doc portal.runtime.web.launcher
-  (:require [portal.resources :as io]
-            [portal.runtime :as rt]
-            [portal.runtime.index :as index]
-            [portal.runtime.web.client :as c]))
+(ns portal.runtime.web.launcher
+  {:no-doc true}
+  (:require
+   [portal.resources :as io]
+   [portal.runtime :as rt]
+   [portal.runtime.index :as index]
+   [portal.runtime.web.client :as c]))
 
 (defn- str->src [value content-type]
   (let [blob (js/Blob. #js [value] #js {:type content-type})
@@ -26,15 +28,15 @@
 
 (defn send! [message]
   (js/Promise.
-   (fn [resolve _reject]
-     (let [session (merge (rt/get-session (:session-id @c/session)) @c/session)
-           body    (rt/read message session)
-           id      (:portal.rpc/id body)
-           f       (get rt/ops (:op body) not-found)]
-       (when (== id 1)
-         (swap! c/session rt/reset-session))
-       (binding [rt/*session* session]
-         (f body #(resolve (rt/write (assoc % :portal.rpc/id id) session))))))))
+    (fn [resolve _reject]
+      (let [session (merge (rt/get-session (:session-id @c/session)) @c/session)
+            body    (rt/read message session)
+            id      (:portal.rpc/id body)
+            f       (get rt/ops (:op body) not-found)]
+        (when (== id 1)
+          (swap! c/session rt/reset-session))
+        (binding [rt/*session* session]
+          (f body #(resolve (rt/write (assoc % :portal.rpc/id id) session))))))))
 
 (defn- get-session []
   (if (exists? js/PORTAL_SESSION)

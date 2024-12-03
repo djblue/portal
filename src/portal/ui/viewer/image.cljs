@@ -1,8 +1,10 @@
-(ns ^:no-doc portal.ui.viewer.image
-  (:require [portal.colors :as c]
-            [portal.ui.inspector :as ins]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.image
+  {:no-doc true}
+  (:require
+   [portal.colors :as c]
+   [portal.ui.inspector :as ins]
+   [portal.ui.styled :as s]
+   [portal.ui.theme :as theme]))
 
 (defn inspect-image [value]
   (let [theme (theme/use-theme)

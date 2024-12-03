@@ -1,10 +1,14 @@
 (ns portal.runtime.cson-test
-  (:require [clojure.test :refer [deftest are is]]
-            [portal.runtime.cson :as cson])
-  #?(:clj  (:import [java.util Date]
-                    [java.util UUID])
-     :cljr (:import [System DateTime Guid]
-                    [System.Text Encoding])))
+  (:require
+   [clojure.test :refer [are deftest is]]
+   [portal.runtime.cson :as cson])
+  (:import
+   #?@(:clj
+       [(java.util Date UUID)]
+
+       :cljr
+       [(System DateTime Guid)
+        (System.Text Encoding)])))
 
 (defn pass [v]
   (cson/read (cson/write v)))
@@ -12,44 +16,44 @@
 (deftest simple-values
   (are [value]
        (= value (pass value))
-    nil
-    0
-    1.0
-    1.5
-    #?(:clj  42N
-       :cljr 42N
-       :joyride (js/BigInt "42")
-       :cljs (when (exists? js/BigInt)
-               (js/BigInt "42")))
-    \newline
-    true
-    false
-    'hello
-    'hello/world
-    :hello
-    :hello/world
-    ""
-    "hello"
-    "hello/world"))
+       nil
+       0
+       1.0
+       1.5
+       #?(:clj  42N
+          :cljr 42N
+          :joyride (js/BigInt "42")
+          :cljs (when (exists? js/BigInt)
+                  (js/BigInt "42")))
+       \newline
+       true
+       false
+       'hello
+       'hello/world
+       :hello
+       :hello/world
+       ""
+       "hello"
+       "hello/world"))
 
 (deftest escape-strings
   (are [value]
        (= value (pass value))
-    "\n"
-    "\""
-    " \"hello\" "))
+       "\n"
+       "\""
+       " \"hello\" "))
 
 (deftest basic-collections
   (are [value]
        (= value (pass value))
-    []
-    [1 2 3]
-    {}
-    {:a :b}
-    #{}
-    #{1 2 3}
-    '()
-    (list 1 2 3)))
+       []
+       [1 2 3]
+       {}
+       {:a :b}
+       #{}
+       #{1 2 3}
+       '()
+       (list 1 2 3)))
 
 (def composite-value
   ['hello
@@ -71,20 +75,20 @@
 (deftest composite-collections
   (are [value]
        (= value (pass value))
-    [[[]]]
-    #{#{#{}}}
-    {{} {}}
-    {[] []}
-    {#{} #{}}
-    {(list) (list)}
-    (list [] #{} {})
-    composite-value))
+       [[[]]]
+       #{#{#{}}}
+       {{} {}}
+       {[] []}
+       {#{} #{}}
+       {(list) (list)}
+       (list [] #{} {})
+       composite-value))
 
 (deftest special-collections
   (are [value]
        (= value (pass value))
-    (range 10)
-    (first {:a 1})))
+       (range 10)
+       (first {:a 1})))
 
 (deftest range-with-meta
   (let [v (with-meta (range 0 5 1.0) {:my :meta})]
@@ -99,10 +103,10 @@
 (deftest seq-collections
   (are [value]
        (= (seq value) (pass (seq value)))
-    '(0)
-    [0]
-    #{0}
-    {0 0}))
+       '(0)
+       [0]
+       #{0}
+       {0 0}))
 
 (deftest sorted-collections
   (let [a (sorted-map :a 1 :c 3 :b 2)
@@ -146,8 +150,8 @@
     (are [v] (= v (pass v)) v1 v2)
     (are [v] (= (meta* v) (meta* (pass v))) v1 v2))
   (is (thrown?
-       #?(:clj AssertionError :cljr Exception :cljs js/Error)
-       (cson/tagged-value :my/tag {:hello :world}))
+        #?(:clj AssertionError :cljr Exception :cljs js/Error)
+        (cson/tagged-value :my/tag {:hello :world}))
       "only allow string tags"))
 
 (deftest metadata

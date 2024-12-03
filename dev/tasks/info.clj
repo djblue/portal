@@ -1,6 +1,7 @@
 (ns tasks.info
-  (:require [clojure.java.shell :refer [sh]]
-            [clojure.string :as str]))
+  (:require
+   [clojure.java.shell :refer [sh]]
+   [clojure.string :as str]))
 
 (def version "0.58.3")
 
@@ -9,18 +10,18 @@
 
 (defn- provided [deps]
   (reduce-kv
-   (fn [m k v]
-     (assoc m k (assoc v :scope "provided")))
-   {}
-   deps))
+    (fn [m k v]
+      (assoc m k (assoc v :scope "provided")))
+    {}
+    deps))
 
 (defn- get-deps []
   (let [deps (read-string (slurp "deps.edn"))]
     (merge
-     (:deps deps)
-     (provided (get-in deps [:aliases :cider :extra-deps]))
-     (provided (get-in deps [:aliases :cljs :extra-deps]))
-     (provided (get-in deps [:aliases :plk :extra-deps])))))
+      (:deps deps)
+      (provided (get-in deps [:aliases :cider :extra-deps]))
+      (provided (get-in deps [:aliases :cljs :extra-deps]))
+      (provided (get-in deps [:aliases :plk :extra-deps])))))
 
 (def options
   {:lib           'djblue/portal

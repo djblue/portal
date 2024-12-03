@@ -1,28 +1,30 @@
-(ns ^:no-doc portal.ui.drag-and-drop
-  (:require ["react" :as react]
-            [clojure.string :as string]
-            [portal.async :as a]
-            [portal.ui.parsers :as p]
-            [portal.ui.state :as state]
-            [portal.ui.styled :as s]
-            [portal.viewer :as v]))
+(ns portal.ui.drag-and-drop
+  {:no-doc true}
+  (:require
+   ["react" :as react]
+   [clojure.string :as string]
+   [portal.async :as a]
+   [portal.ui.parsers :as p]
+   [portal.ui.state :as state]
+   [portal.ui.styled :as s]
+   [portal.viewer :as v]))
 
 (defn read-file
   ([file]
    (read-file file :text))
   ([file type]
    (js/Promise.
-    (fn [resolve reject]
-      (let [reader (js/window.FileReader.)]
-        (.addEventListener
-         reader
-         "load"
-         (fn [e]
-           (resolve (.-result (.-target e)))))
-        (.addEventListener reader "error" reject)
-        (case type
-          :text (.readAsText reader file)
-          :bin  (.readAsArrayBuffer reader file)))))))
+     (fn [resolve reject]
+       (let [reader (js/window.FileReader.)]
+         (.addEventListener
+           reader
+           "load"
+           (fn [e]
+             (resolve (.-result (.-target e)))))
+         (.addEventListener reader "error" reject)
+         (case type
+           :text (.readAsText reader file)
+           :bin  (.readAsArrayBuffer reader file)))))))
 
 (defn- read-binary
   [file]
@@ -84,9 +86,9 @@
       (fn [e]
         (.preventDefault e)
         (a/let [value (handle-files
-                       (for [item (.items (.-dataTransfer e))
-                             :when (= (.-kind item) "file")]
-                         (.getAsFile item)))]
+                        (for [item (.items (.-dataTransfer e))
+                              :when (= (.-kind item) "file")]
+                          (.getAsFile item)))]
           (state/dispatch! state state/history-push {:portal/value value}))
         (set-active! false))
       :style {:position :relative}}

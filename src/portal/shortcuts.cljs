@@ -1,5 +1,7 @@
-(ns ^:no-doc portal.shortcuts
-  (:require [clojure.string :as str]))
+(ns portal.shortcuts
+  {:no-doc true}
+  (:require
+   [clojure.string :as str]))
 
 (defn- get-platform []
   (let [platform js/window.navigator.platform]
@@ -79,10 +81,9 @@
 (defn add! [k f]
   (init)
   (add-watch
-   log k
-   (fn [_ _ _ log]
-     (when-not (empty? log)
-       (f log)))))
+    log k
+    (fn [_ _ _ log]
+      (when-not (empty? log)
+        (f log)))))
 
 (defn remove! [k] (remove-watch log k))
-

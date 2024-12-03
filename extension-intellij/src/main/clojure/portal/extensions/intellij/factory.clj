@@ -1,9 +1,10 @@
 (ns portal.extensions.intellij.factory
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
-            [org.httpkit.server :as http]
-            [portal.extensions.intellij.file :as file]
-            [portal.extensions.intellij.theme :as theme])
+  (:require
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [org.httpkit.server :as http]
+   [portal.extensions.intellij.file :as file]
+   [portal.extensions.intellij.theme :as theme])
   (:import
    (com.intellij.openapi.diagnostic Logger)
    (com.intellij.openapi.project Project)
@@ -17,13 +18,8 @@
    (org.cef.handler CefLoadHandler)
    (portal.extensions.intellij WithLoader))
   (:gen-class
-   :main false
    :extends portal.extensions.intellij.WithLoader
-   :implements [com.intellij.ide.ui.UISettingsListener
-                com.intellij.openapi.editor.colors.EditorColorsListener
-                com.intellij.openapi.wm.ToolWindowFactory
-                com.intellij.openapi.project.DumbAware]
-   :name portal.extensions.intellij.Factory))
+   :implements undefined))
 
 (deftype PortalLogger [])
 
@@ -41,10 +37,10 @@
 
 (defn- get-options []
   (pr-str
-   (pr-str
-    {:theme ::theme
-     :themes
-     {::theme (theme/get-theme)}})))
+    (pr-str
+      {:theme ::theme
+       :themes
+       {::theme (theme/get-theme)}})))
 
 (defn- patch-options
   ([]
@@ -86,9 +82,9 @@
              (not (:server m))
              (assoc :server (http/run-server #(handler % project) {:port 0 :legacy-return-value? false})))))
   (write-config
-   project
-   {:host "localhost"
-    :port (http/server-port (get-in @instances [project :server]))}))
+    project
+    {:host "localhost"
+     :port (http/server-port (get-in @instances [project :server]))}))
 
 (defn as-function ^Function [f]
   (reify Function
@@ -115,20 +111,20 @@
 
 (defn- setup-load-handler [^JBCefBrowser browser js-query]
   (.addLoadHandler
-   (.getJBCefClient browser)
-   (reify CefLoadHandler
-     (onLoadingStateChange [_this _browser _isLoading _canGoBack _canGoForward])
-     (onLoadStart [_this _browser _frame _transitionType]
-       (info "Starting loading")
-       (inject-js-error-handler browser js-query))
-     (onLoadEnd [_this browser _frame _httpStatusCode]
-       (info "Patching options")
-       (patch-options browser))
-     (onLoadError [_this _browser _frame errorCode errorText failedUrl]
-       (throw (ex-info errorText {:errorCode errorCode
-                                  :errorText errorText
-                                  :failedUrl failedUrl}))))
-   (.getCefBrowser browser)))
+    (.getJBCefClient browser)
+    (reify CefLoadHandler
+      (onLoadingStateChange [_this _browser _isLoading _canGoBack _canGoForward])
+      (onLoadStart [_this _browser _frame _transitionType]
+        (info "Starting loading")
+        (inject-js-error-handler browser js-query))
+      (onLoadEnd [_this browser _frame _httpStatusCode]
+        (info "Patching options")
+        (patch-options browser))
+      (onLoadError [_this _browser _frame errorCode errorText failedUrl]
+        (throw (ex-info errorText {:errorCode errorCode
+                                   :errorText errorText
+                                   :failedUrl failedUrl}))))
+    (.getCefBrowser browser)))
 
 (defn- init-browser [^JBCefBrowser browser]
   (info "Initializing browser")

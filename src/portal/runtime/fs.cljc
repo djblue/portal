@@ -1,13 +1,22 @@
-(ns ^:no-doc portal.runtime.fs
-  (:refer-clojure :exclude [slurp spit list file-seq])
-  #?(:clj  (:require [clojure.java.io :as io]
-                     [clojure.string :as s])
-     :cljs (:require ["fs" :as fs]
-                     ["os" :as os]
-                     ["path" :as path]
-                     [clojure.string :as s])
-     :cljr (:require [clojure.string :as s]))
-  #?(:cljr (:import (System.IO Directory File Path))))
+(ns portal.runtime.fs
+  {:no-doc true}
+  (:refer-clojure :exclude [file-seq list slurp spit])
+  (:require
+   #?@(:clj
+       [[clojure.java.io :as io]
+        [clojure.string :as s]]
+
+       :cljr
+       [[clojure.string :as s]]
+
+       :cljs
+       [["fs" :as fs]
+        ["os" :as os]
+        ["path" :as path]
+        [clojure.string :as s]]))
+  #?(:cljr
+     (:import
+      (System.IO Directory File Path))))
 
 (defn cwd []
   #?(:clj  (System/getProperty "user.dir")
@@ -66,14 +75,14 @@
     #?(:clj  (.lastModified (io/file f))
        :cljs (.getTime ^js/Date (.-mtime (fs/lstatSync f)))
        :cljr (.ToUnixTimeMilliseconds
-              (DateTimeOffset. (File/GetLastWriteTime f))))))
+               (DateTimeOffset. (File/GetLastWriteTime f))))))
 
 (defn can-execute [f]
   #?(:clj  (let [file (io/file f)]
              (and (.exists file) (.canExecute file) f))
      :cljs (when (not
-                  (try (fs/accessSync f fs/constants.X_OK)
-                       (catch :default _e true)))
+                   (try (fs/accessSync f fs/constants.X_OK)
+                        (catch :default _e true)))
              f)
      :cljr (exists f)))
 
@@ -82,11 +91,11 @@
 
 (defn find-bin [paths files]
   (first
-   (for [file files
-         path paths
-         :let [f (join path file)]
-         :when (can-execute f)]
-     f)))
+    (for [file files
+          path paths
+          :let [f (join path file)]
+          :when (can-execute f)]
+      f)))
 
 (defn home []
   #?(:clj  (System/getProperty "user.home")
@@ -127,6 +136,6 @@
 
 (defn file-seq [dir]
   (tree-seq
-   (fn [f] (not (is-file f)))
-   (fn [d] (seq (list d)))
-   (join dir)))
+    (fn [f] (not (is-file f)))
+    (fn [d] (seq (list d)))
+    (join dir)))

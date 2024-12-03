@@ -1,5 +1,6 @@
 (ns portal.e2e
-  (:require [portal.colors :as c]))
+  (:require
+   [portal.colors :as c]))
 
 (defn step [code]
   (binding [*out* *err*]

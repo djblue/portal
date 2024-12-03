@@ -1,15 +1,17 @@
-(ns ^:no-doc portal.ui.viewer.diff
-  (:require [clojure.spec.alpha :as s]
-            [lambdaisland.deep-diff2.diff-impl :as diff]
-            [portal.colors :as c]
-            [portal.runtime.cson :as cson]
-            [portal.ui.commands :as commands]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.rpc :as rpc]
-            [portal.ui.select :as select]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.diff
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [lambdaisland.deep-diff2.diff-impl :as diff]
+   [portal.colors :as c]
+   [portal.runtime.cson :as cson]
+   [portal.ui.commands :as commands]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.rpc :as rpc]
+   [portal.ui.select :as select]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 (extend-protocol cson/ToJson
   diff/Deletion
@@ -27,9 +29,9 @@
 
 (defn diff? [value]
   (or
-   (instance? diff/Deletion value)
-   (instance? diff/Insertion value)
-   (instance? diff/Mismatch value)))
+    (instance? diff/Deletion value)
+    (instance? diff/Insertion value)
+    (instance? diff/Mismatch value)))
 
 ;;; :spec
 (s/def ::diffable (s/coll-of any? :min-count 2))
@@ -154,15 +156,15 @@
        (->> (test-actual value)
             (partition 2 1)
             (map-indexed
-             (fn [idx [a b]]
-               ^{:key idx}
-               [ins/with-key
-                idx
-                [ins/with-collection
-                 [a b]
-                 [select/with-position
-                  {:row idx :column 0}
-                  [ins/inspector (diff/diff a b)]]]])))]]]))
+              (fn [idx [a b]]
+                ^{:key idx}
+                [ins/with-key
+                 idx
+                 [ins/with-collection
+                  [a b]
+                  [select/with-position
+                   {:row idx :column 0}
+                   [ins/inspector (diff/diff a b)]]]])))]]]))
 
 (def ^:no-doc deep-diff2
   {:predicate diff?
@@ -179,7 +181,7 @@
       name (#'commands/var->name var)]
   (swap! commands/registry
          assoc name (commands/make-command
-                     (merge (meta var)
-                            {:predicate (fn [& args] (= 2 (count args)))
-                             :f var
-                             :name name}))))
+                      (merge (meta var)
+                             {:predicate (fn [& args] (= 2 (count args)))
+                              :f var
+                              :name name}))))

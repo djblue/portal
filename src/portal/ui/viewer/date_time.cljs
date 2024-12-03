@@ -1,9 +1,11 @@
-(ns ^:no-doc portal.ui.viewer.date-time
-  (:require [clojure.spec.alpha :as s]
-            [portal.colors :as c]
-            [portal.ui.inspector :as ins]
-            [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.date-time
+  {:no-doc true}
+  (:require
+   [clojure.spec.alpha :as s]
+   [portal.colors :as c]
+   [portal.ui.inspector :as ins]
+   [portal.ui.styled :as d]
+   [portal.ui.theme :as theme]))
 
 ;;; :spec
 (s/def ::date-time
@@ -67,8 +69,8 @@
         {:title "Hour" :style style}
         [ins/highlight-words
          (str
-          (let [hour (mod hour 12)]
-            (if (= hour 0) 12 hour)))]]
+           (let [hour (mod hour 12)]
+             (if (= hour 0) 12 hour)))]]
        [d/span {:style border} ":"]
        [d/span
         {:title "Minute" :style style}

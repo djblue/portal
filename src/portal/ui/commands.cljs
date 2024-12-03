@@ -1,22 +1,23 @@
 (ns portal.ui.commands
-  (:require ["react" :as react]
-            [clojure.pprint :as pp]
-            [clojure.set :as set]
-            [clojure.string :as str]
-            [clojure.walk :as walk]
-            [portal.async :as a]
-            [portal.colors :as c]
-            [portal.shortcuts :as shortcuts]
-            [portal.ui.drag-and-drop :as dnd]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.options :as options]
-            [portal.ui.parsers :as p]
-            [portal.ui.react :refer [use-effect]]
-            [portal.ui.state :as state]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r]))
+  (:require
+   ["react" :as react]
+   [clojure.pprint :as pp]
+   [clojure.set :as set]
+   [clojure.string :as str]
+   [clojure.walk :as walk]
+   [portal.async :as a]
+   [portal.colors :as c]
+   [portal.shortcuts :as shortcuts]
+   [portal.ui.drag-and-drop :as dnd]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.options :as options]
+   [portal.ui.parsers :as p]
+   [portal.ui.react :refer [use-effect]]
+   [portal.ui.state :as state]
+   [portal.ui.styled :as s]
+   [portal.ui.theme :as theme]
+   [reagent.core :as r]))
 
 (def ^:dynamic *state* nil)
 (defonce ^:private input (r/atom nil))
@@ -32,21 +33,21 @@
 (defn- palette-container [& children]
   (let [theme (theme/use-theme)]
     (into
-     [s/div
-      {:on-click #(.stopPropagation %)
-       :style
-       {:font-family (:font-family theme)
-        :max-height "100%"
-        :height :fit-content
-        :margin "0 auto"
-        :overflow :hidden
-        :display :flex
-        :flex-direction :column
-        :background (::c/background2 theme)
-        :box-shadow "0 0 10px #0007"
-        :border [1 :solid (::c/border theme)]
-        :border-radius (:border-radius theme)}}]
-     children)))
+      [s/div
+       {:on-click #(.stopPropagation %)
+        :style
+        {:font-family (:font-family theme)
+         :max-height "100%"
+         :height :fit-content
+         :margin "0 auto"
+         :overflow :hidden
+         :display :flex
+         :flex-direction :column
+         :background (::c/background2 theme)
+         :box-shadow "0 0 10px #0007"
+         :border [1 :solid (::c/border theme)]
+         :border-radius (:border-radius theme)}}]
+      children)))
 
 (defonce ^:private handlers (atom {}))
 (def ^:private shortcut-context (react/createContext 0))
@@ -58,15 +59,15 @@
 (defn- with-shortcuts [f & children]
   (let [i (react/useContext shortcut-context)]
     (use-effect
-     #js [f]
-     (swap! handlers assoc i f)
-     (fn []
-       (swap! handlers dissoc i)))
+      #js [f]
+      (swap! handlers assoc i f)
+      (fn []
+        (swap! handlers dissoc i)))
     (use-effect
-     :always
-     (shortcuts/add! ::with-shortcuts dispatch)
-     (fn []
-       (shortcuts/remove! ::with-shortcuts)))
+      :always
+      (shortcuts/add! ::with-shortcuts dispatch)
+      (fn []
+        (shortcuts/remove! ::with-shortcuts)))
     (into [:r> (.-Provider shortcut-context) #js {:value (inc i)}] children)))
 
 (defn- checkbox [checked?]
@@ -99,11 +100,11 @@
   (let [el (atom nil)]
     (fn []
       (r/create-class
-       {:component-did-mount
-        (fn []
-          (when-let [el @el] (.scrollIntoView el #js {:block "center"})))
-        :reagent-render
-        (fn [] [:div {:ref #(reset! el %)}])}))))
+        {:component-did-mount
+         (fn []
+           (when-let [el @el] (.scrollIntoView el #js {:block "center"})))
+         :reagent-render
+         (fn [] [:div {:ref #(reset! el %)}])}))))
 
 (defn- try-sort
   "Attempts to sort the given selection"
@@ -136,20 +137,20 @@
         [with-shortcuts
          (fn [log]
            (when
-            (condp shortcuts/match? log
-              "arrowup"        (swap! active #(mod (dec %) n))
-              "k"              (swap! active #(mod (dec %) n))
-              #{"shift" "tab"} (swap! active #(mod (dec %) n))
-              "arrowdown"      (swap! active #(mod (inc %) n))
-              "j"              (swap! active #(mod (inc %) n))
-              "tab"            (swap! active #(mod (inc %) n))
-              "a"       (on-toggle)
-              "i"       (on-invert)
-              " "       (on-select (nth options @active))
-              "enter"   (on-done @selected)
-              "escape"  (on-close)
+             (condp shortcuts/match? log
+               "arrowup"        (swap! active #(mod (dec %) n))
+               "k"              (swap! active #(mod (dec %) n))
+               #{"shift" "tab"} (swap! active #(mod (dec %) n))
+               "arrowdown"      (swap! active #(mod (inc %) n))
+               "j"              (swap! active #(mod (inc %) n))
+               "tab"            (swap! active #(mod (inc %) n))
+               "a"       (on-toggle)
+               "i"       (on-invert)
+               " "       (on-select (nth options @active))
+               "enter"   (on-done @selected)
+               "escape"  (on-close)
 
-              nil)
+               nil)
              (shortcuts/matched! log)))
 
          [palette-container
@@ -183,34 +184,34 @@
            {:style {:overflow :auto}}
            (->> options
                 (map-indexed
-                 (fn [index option]
-                   (let [active? (= index @active)]
-                     [s/div
-                      {:key (hash option)
-                       :on-click (fn [e]
-                                   (.stopPropagation e)
-                                   (on-select option))
-                       :style
-                       (merge
-                        {:border-left [5 :solid "#0000"]
-                         :box-sizing     :border-box
-                         :padding-left   (:padding theme)
-                         :padding-top    (* 0.5 (:padding theme))
-                         :padding-bottom (* 0.5 (:padding theme))
-                         :cursor :pointer
-                         :color (if (selected? option)
-                                  (::c/boolean theme)
-                                  (::c/text theme))
-                         :display :flex
-                         :align-items :center
-                         :height :fit-content}
-                        (when active?
-                          {:border-left [5 :solid (::c/boolean theme)]
-                           :background (::c/background theme)}))}
-                      (when active? [scroll-into-view])
-                      [checkbox (some? (selected? option))]
-                      [s/div {:style {:width (:padding theme)}}]
-                      [ins/inspector option]])))
+                  (fn [index option]
+                    (let [active? (= index @active)]
+                      [s/div
+                       {:key (hash option)
+                        :on-click (fn [e]
+                                    (.stopPropagation e)
+                                    (on-select option))
+                        :style
+                        (merge
+                          {:border-left [5 :solid "#0000"]
+                           :box-sizing     :border-box
+                           :padding-left   (:padding theme)
+                           :padding-top    (* 0.5 (:padding theme))
+                           :padding-bottom (* 0.5 (:padding theme))
+                           :cursor :pointer
+                           :color (if (selected? option)
+                                    (::c/boolean theme)
+                                    (::c/text theme))
+                           :display :flex
+                           :align-items :center
+                           :height :fit-content}
+                          (when active?
+                            {:border-left [5 :solid (::c/boolean theme)]
+                             :background (::c/background theme)}))}
+                       (when active? [scroll-into-view])
+                       [checkbox (some? (selected? option))]
+                       [s/div {:style {:width (:padding theme)}}]
+                       [ins/inspector option]])))
                 doall)]]]))))
 
 (def ^:private client-keymap (r/atom {}))
@@ -225,11 +226,11 @@
 (defn- find-combos [keymap command]
   (let [command-name (:name command)]
     (keep
-     (fn [[combo f]]
-       (when (and (= f command-name)
-                  (shortcuts/platform-supported? combo))
-         combo))
-     keymap)))
+      (fn [[combo f]]
+        (when (and (= f command-name)
+                   (shortcuts/platform-supported? combo))
+          combo))
+      keymap)))
 
 (def ^:private shortcut->symbol
   {"arrowright" [icons/arrow-right {:size "xs"}]
@@ -247,16 +248,16 @@
   (let [theme (theme/use-theme)]
     [:<>
      (drop-last
-      (interleave
-       coll
-       (for [i (-> coll count range)]
-         ^{:key i}
-         [s/div
-          {:style {:box-sizing :border-box
-                   :padding-left (:padding theme)
-                   :padding-right (:padding theme)}}
-          [s/div {:style {:height "100%"
-                          :border-right [1 :solid (::c/border theme)]}}]])))]))
+       (interleave
+         coll
+         (for [i (-> coll count range)]
+           ^{:key i}
+           [s/div
+            {:style {:box-sizing :border-box
+                     :padding-left (:padding theme)
+                     :padding-right (:padding theme)}}
+            [s/div {:style {:height "100%"
+                            :border-right [1 :solid (::c/border theme)]}}]])))]))
 
 (defn shortcut [command]
   (let [theme (theme/use-theme)
@@ -271,54 +272,54 @@
         [:<>
          {:key (hash combo)}
          (map-indexed
-          (fn [index k]
-            [s/div
-             {:key index
-              :style
-              {:display :flex
-               :align-items :center
-               :background "#0002"
-               :border-radius (:border-radius theme)
-               :box-sizing :border-box
-               :padding-top (* 0.25 (:padding theme))
-               :padding-bottom (* 0.25 (:padding theme))
-               :padding-left (:padding theme)
-               :padding-right (:padding theme)
-               :margin-right  (* 0.5 (:padding theme))
-               :margin-left  (* 0.5 (:padding theme))}}
-             (get shortcut->symbol k (.toUpperCase k))])
-          (sort-by combo-order combo))])]]))
+           (fn [index k]
+             [s/div
+              {:key index
+               :style
+               {:display :flex
+                :align-items :center
+                :background "#0002"
+                :border-radius (:border-radius theme)
+                :box-sizing :border-box
+                :padding-top (* 0.25 (:padding theme))
+                :padding-bottom (* 0.25 (:padding theme))
+                :padding-left (:padding theme)
+                :padding-right (:padding theme)
+                :margin-right  (* 0.5 (:padding theme))
+                :margin-left  (* 0.5 (:padding theme))}}
+              (get shortcut->symbol k (.toUpperCase k))])
+           (sort-by combo-order combo))])]]))
 
 (defn- palette-component-item [props & children]
   (let [theme (theme/use-theme)
         {:keys [active? on-click]} props]
     (into
-     [s/div
-      {:on-click on-click
-       :style
-       (merge
-        {:border-left [5 :solid "#0000"]
-         :cursor :pointer
-         :display :flex
-         :justify-content :space-between
-         :align-items :center
-         :height :fit-content
-         :box-sizing     :border-box
-         :padding-left   (:padding theme)
-         :padding-top    (* 0.5 (:padding theme))
-         :padding-bottom (* 0.5 (:padding theme))}
-        (when active?
-          {:border-left [5 :solid (::c/boolean theme)]
-           :background (::c/background theme)}))
-       :style/hover
-       {:background (::c/background theme)}}]
-     children)))
+      [s/div
+       {:on-click on-click
+        :style
+        (merge
+          {:border-left [5 :solid "#0000"]
+           :cursor :pointer
+           :display :flex
+           :justify-content :space-between
+           :align-items :center
+           :height :fit-content
+           :box-sizing     :border-box
+           :padding-left   (:padding theme)
+           :padding-top    (* 0.5 (:padding theme))
+           :padding-bottom (* 0.5 (:padding theme))}
+          (when active?
+            {:border-left [5 :solid (::c/boolean theme)]
+             :background (::c/background theme)}))
+        :style/hover
+        {:background (::c/background theme)}}]
+      children)))
 
 (defn- stringify [props option]
   (pr-str
-   (if-let [filter-by (:filter-by props)]
-     (filter-by option)
-     option)))
+    (if-let [filter-by (:filter-by props)]
+      (filter-by option)
+      option)))
 
 (defn- filter-options [props text]
   (if (str/blank? text)
@@ -349,14 +350,14 @@
         [with-shortcuts
          (fn [log]
            (when
-            (condp shortcuts/match? log
-              "arrowup"        (swap! active #(mod (dec %) n))
-              #{"shift" "tab"} (swap! active #(mod (dec %) n))
-              "arrowdown"      (swap! active #(mod (inc %) n))
-              "tab"            (swap! active #(mod (inc %) n))
-              "enter"          (on-select)
-              "escape"         (on-close)
-              nil)
+             (condp shortcuts/match? log
+               "arrowup"        (swap! active #(mod (dec %) n))
+               #{"shift" "tab"} (swap! active #(mod (dec %) n))
+               "arrowdown"      (swap! active #(mod (inc %) n))
+               "tab"            (swap! active #(mod (inc %) n))
+               "enter"          (on-select)
+               "escape"         (on-close)
+               nil)
              (shortcuts/matched! log)))
          [palette-container
           [s/div
@@ -386,22 +387,22 @@
              :overflow :auto}}
            (->> options
                 (map-indexed
-                 (fn [index option]
-                   (let [active? (= index @active)
-                         on-click (fn [e]
-                                    (.stopPropagation e)
-                                    (reset! active index)
-                                    (on-select))]
-                     ^{:key index}
-                     [:<>
-                      (when active? [scroll-into-view])
-                      [palette-component-item
-                       {:active? active?
-                        :on-click on-click}
-                       [component
+                  (fn [index option]
+                    (let [active? (= index @active)
+                          on-click (fn [e]
+                                     (.stopPropagation e)
+                                     (reset! active index)
+                                     (on-select))]
+                      ^{:key index}
+                      [:<>
+                       (when active? [scroll-into-view])
+                       [palette-component-item
                         {:active? active?
                          :on-click on-click}
-                        option]]])))
+                        [component
+                         {:active? active?
+                          :on-click on-click}
+                         option]]])))
                 doall)]]]))))
 
 (defn- can-meta? [value] (implements? IWithMeta value))
@@ -427,12 +428,12 @@
                                         (catch :default e (ex-data e)))]
                   (when-not command
                     (state/dispatch!
-                     state
-                     state/history-push
-                     {:portal/key   name
-                      :portal/f     f
-                      :portal/args  args
-                      :portal/value result}))))))
+                      state
+                      state/history-push
+                      {:portal/key   name
+                       :portal/f     f
+                       :portal/args  args
+                       :portal/value result}))))))
 
 (defn- command-item [{:keys [active?]} command]
   (let [theme (theme/use-theme)]
@@ -476,25 +477,25 @@
                #{"meta" "shift" "p"}]}
   [state]
   (a/let [commands (sort-by
-                    :name
-                    (remove
-                     (fn [option]
-                       (or
-                        (#{`open-command-palette}
-                         (:name option))
-                        (when-let [predicate (:predicate option)]
-                          (not (predicate @state)))))
-                     (vals (get-commands))))]
+                     :name
+                     (remove
+                       (fn [option]
+                         (or
+                           (#{`open-command-palette}
+                            (:name option))
+                           (when-let [predicate (:predicate option)]
+                             (not (predicate @state)))))
+                       (vals (get-commands))))]
     (open
-     state
-     (fn [state]
-       [palette-component
-        {:filter-by :name
-         :options commands
-         :component command-item
-         :on-select
-         (fn [command]
-           ((:run command) state))}]))))
+      state
+      (fn [state]
+        [palette-component
+         {:filter-by :name
+          :options commands
+          :component command-item
+          :on-select
+          (fn [command]
+            ((:run command) state))}]))))
 
 ;; pick args
 
@@ -502,58 +503,58 @@
   ([options] (pick-one *state* options))
   ([state options]
    (js/Promise.
-    (fn [resolve]
-      (open
-       state
-       (fn [_state]
-         [palette-component
-          {:on-select #(resolve [%])
-           :options options}]))))))
+     (fn [resolve]
+       (open
+         state
+         (fn [_state]
+           [palette-component
+            {:on-select #(resolve [%])
+             :options options}]))))))
 
 (defn pick-many
   ([options]
    (pick-many *state* options))
   ([state options]
    (js/Promise.
-    (fn [resolve]
-      (open
-       state
-       (fn []
-         (let [state (state/use-state)]
-           [selector-component
-            {:options options
-             :run
-             (fn [options]
-               (close state)
-               (resolve [options]))}])))))))
+     (fn [resolve]
+       (open
+         state
+         (fn []
+           (let [state (state/use-state)]
+             [selector-component
+              {:options options
+               :run
+               (fn [options]
+                 (close state)
+                 (resolve [options]))}])))))))
 
 (defn pick-in
   ([v]
    (pick-in *state* v))
   ([state v]
    (js/Promise.
-    (fn [resolve]
-      (let [get-key
-            (fn get-key [path v]
-              (open
-               state
-               (fn [_state]
-                 [palette-component
-                  {:options (concat [::done] (keys v))
-                   :on-select
-                   (fn [k]
-                     (let [path (conj path k)
-                           next-value (get v k)]
-                       (cond
-                         (= k ::done)
-                         (resolve [(drop-last path)])
+     (fn [resolve]
+       (let [get-key
+             (fn get-key [path v]
+               (open
+                 state
+                 (fn [_state]
+                   [palette-component
+                    {:options (concat [::done] (keys v))
+                     :on-select
+                     (fn [k]
+                       (let [path (conj path k)
+                             next-value (get v k)]
+                         (cond
+                           (= k ::done)
+                           (resolve [(drop-last path)])
 
-                         (not (map? next-value))
-                         (resolve [path])
+                           (not (map? next-value))
+                           (resolve [path])
 
-                         :else
-                         (get-key path next-value))))}])))]
-        (get-key [] v))))))
+                           :else
+                           (get-key path next-value))))}])))]
+         (get-key [] v))))))
 
 ;; portal data commands
 
@@ -581,13 +582,13 @@
   [value]
   (with-meta
     (reduce
-     (fn [m path]
-       (assoc-in m (reverse path) (get-in value path)))
-     {}
-     (for [row (keys value)
-           column (map-keys value)
-           :when (contains? (get value row) column)]
-       [row column]))
+      (fn [m path]
+        (assoc-in m (reverse path) (get-in value path)))
+      {}
+      (for [row (keys value)
+            column (map-keys value)
+            :when (contains? (get value row) column)]
+        [row column]))
     (meta value)))
 
 (defn select-columns
@@ -597,10 +598,10 @@
     (cond
       (map? value)
       (reduce-kv
-       (fn [v k m]
-         (assoc v k (select-keys m ks)))
-       value
-       value)
+        (fn [v k m]
+          (assoc v k (select-keys m ks)))
+        value
+        value)
       :else (map #(select-keys % ks) value))
     (meta value)))
 
@@ -619,12 +620,12 @@
 
 (defn- copy-edn! [value]
   (copy-to-clipboard!
-   (str/trim
-    (with-out-str
-      (binding [*print-meta* true
-                *print-length* 1000
-                *print-level* 100]
-        (pp/pprint value))))))
+    (str/trim
+      (with-out-str
+        (binding [*print-meta* true
+                  *print-length* 1000
+                  *print-level* 100]
+          (pp/pprint value))))))
 
 (defn- selected-values [state-val]
   (let [values (state/selected-values state-val)]
@@ -681,11 +682,11 @@
         current (:name (ins/get-viewer state (first context)))]
     (when (> (count viewers) 1)
       (some
-       (fn [[prev next]]
-         (case direction
-           :prev (when (= next current) prev)
-           :next (when (= prev current) next)))
-       (partition 2 1 (conj viewers (last viewers)))))))
+        (fn [[prev next]]
+          (case direction
+            :prev (when (= next current) prev)
+            :next (when (= prev current) next)))
+        (partition 2 1 (conj viewers (last viewers)))))))
 
 (defn ^:command select-prev-viewer
   {:shortcuts [#{"shift" "k"} #{"shift" "arrowup"}]}
@@ -787,36 +788,36 @@
   (a/let [commands (::state/previous-commands @state)]
     (when (seq commands)
       (open
-       (fn [_state]
-         [palette-component
-          {:options commands
-           :filter-by :portal/key
-           :on-select
-           (fn [command]
-             (a/let [k (:portal/key command)
-                     f (or (:portal/f command)
-                           (if (keyword? k)
-                             k
-                             (partial state/invoke (:portal/key command))))
-                     args (:portal/args command)
-                     value (apply f (state/get-selected-value @state) args)]
-               (state/dispatch!
-                state
-                state/history-push
-                (assoc command :portal/value value))))
-           :component
-           (fn [command]
-             [s/div
-              {:style {:display :flex
-                       :justify-content :space-between
-                       :overflow :hidden
-                       :align-items :center
-                       :text-overflow :ellipsis
-                       :white-space :nowrap}}
-              [ins/inspector (:portal/key command)]
+        (fn [_state]
+          [palette-component
+           {:options commands
+            :filter-by :portal/key
+            :on-select
+            (fn [command]
+              (a/let [k (:portal/key command)
+                      f (or (:portal/f command)
+                            (if (keyword? k)
+                              k
+                              (partial state/invoke (:portal/key command))))
+                      args (:portal/args command)
+                      value (apply f (state/get-selected-value @state) args)]
+                (state/dispatch!
+                  state
+                  state/history-push
+                  (assoc command :portal/value value))))
+            :component
+            (fn [command]
               [s/div
-               {:style {:opacity 0.5}}
-               (for [a (:portal/args command)] (pr-str a))]])}])))))
+               {:style {:display :flex
+                        :justify-content :space-between
+                        :overflow :hidden
+                        :align-items :center
+                        :text-overflow :ellipsis
+                        :white-space :nowrap}}
+               [ins/inspector (:portal/key command)]
+               [s/div
+                {:style {:opacity 0.5}}
+                (for [a (:portal/args command)] (pr-str a))]])}])))))
 
 (defn ^:command set-theme [state]
   (a/let [[theme] (pick-one state (keys c/themes))]
@@ -927,9 +928,9 @@
   value of clojure.core.protocols/nav."
   [state]
   (state/dispatch!
-   state
-   state/nav
-   (state/get-selected-context @state)))
+    state
+    state/nav
+    (state/get-selected-context @state)))
 
 (register! #'nav {:name      'clojure.datafy/nav
                   :predicate (comp :collection state/get-selected-context)})
@@ -938,9 +939,9 @@
   "List all available css variable provided by vs-code."
   [state]
   (state/dispatch!
-   state
-   state/history-push
-   {:portal/value (theme/get-vs-code-css-vars)}))
+    state
+    state/history-push
+    {:portal/value (theme/get-vs-code-css-vars)}))
 
 (register! #'vs-code-vars {:predicate theme/is-vs-code?})
 
@@ -962,24 +963,24 @@
 
 (defn- prompt-file []
   (js/Promise.
-   (fn [resolve _reject]
-     (let [id      "open-file-dialog"
-           input   (or
-                    (js/document.getElementById id)
-                    (js/document.createElement "input"))]
-       (set! (.-id input) id)
-       (set! (.-type input) "file")
-       (set! (.-multiple input) "true")
-       (set! (.-style input) "visibility:hidden")
-       (.addEventListener
-        input
-        "change"
-        (fn [event]
-          (a/let [value (dnd/handle-files (-> event .-target .-files))]
-            (resolve value)))
-        false)
-       (js/document.body.appendChild input)
-       (.click input)))))
+    (fn [resolve _reject]
+      (let [id      "open-file-dialog"
+            input   (or
+                      (js/document.getElementById id)
+                      (js/document.createElement "input"))]
+        (set! (.-id input) id)
+        (set! (.-type input) "file")
+        (set! (.-multiple input) "true")
+        (set! (.-style input) "visibility:hidden")
+        (.addEventListener
+          input
+          "change"
+          (fn [event]
+            (a/let [value (dnd/handle-files (-> event .-target .-files))]
+              (resolve value)))
+          false)
+        (js/document.body.appendChild input)
+        (.click input)))))
 
 (defn open-file
   "Open a File"
@@ -1045,15 +1046,15 @@
         value (state/get-selected-value @state)
         opts  (options/use-options)]
     (use-effect
-     #js [(hash value)]
-     (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
-       (reset!
-        runtime-registry
-        (update-vals
-         fns
-         (fn [opts]
-           (make-command
-            (assoc opts :f (partial state/invoke (:name opts)))))))))
+      #js [(hash value)]
+      (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
+        (reset!
+          runtime-registry
+          (update-vals
+            fns
+            (fn [opts]
+              (make-command
+                (assoc opts :f (partial state/invoke (:name opts)))))))))
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)

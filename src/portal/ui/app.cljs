@@ -1,54 +1,56 @@
-(ns ^:no-doc portal.ui.app
-  (:require ["react" :as react]
-            [clojure.string :as str]
-            [portal.colors :as c]
-            [portal.ui.api :as api]
-            [portal.ui.commands :as commands]
-            [portal.ui.connection-status :as status]
-            [portal.ui.drag-and-drop :as dnd]
-            [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.options :as opts]
-            [portal.ui.react :refer [use-effect]]
-            [portal.ui.select :as select]
-            [portal.ui.state :as state]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]
-            [portal.ui.viewer.bin :as bin]
-            [portal.ui.viewer.bytes :as bytes]
-            [portal.ui.viewer.charts :as charts]
-            [portal.ui.viewer.cljdoc :as cljdoc]
-            [portal.ui.viewer.code :as code]
-            [portal.ui.viewer.color :as color]
-            [portal.ui.viewer.csv :as csv]
-            [portal.ui.viewer.date-time :as date-time]
-            [portal.ui.viewer.deref :as deref]
-            [portal.ui.viewer.diff :as diff]
-            [portal.ui.viewer.diff-text :as diff-text]
-            [portal.ui.viewer.duration :as duration]
-            [portal.ui.viewer.edn :as edn]
-            [portal.ui.viewer.exception :as ex]
-            [portal.ui.viewer.hiccup :as hiccup]
-            [portal.ui.viewer.html :as html]
-            [portal.ui.viewer.http :as http]
-            [portal.ui.viewer.image :as image]
-            [portal.ui.viewer.json :as json]
-            [portal.ui.viewer.jwt :as jwt]
-            [portal.ui.viewer.log :as log]
-            [portal.ui.viewer.markdown :as md]
-            [portal.ui.viewer.pprint :as pprint]
-            [portal.ui.viewer.prepl :as prepl]
-            [portal.ui.viewer.relative-time :as relative-time]
-            [portal.ui.viewer.source-location :as source-location]
-            [portal.ui.viewer.spec :as spec]
-            [portal.ui.viewer.table :as table]
-            [portal.ui.viewer.test-report :as test-report]
-            [portal.ui.viewer.text :as text]
-            [portal.ui.viewer.transit :as transit]
-            [portal.ui.viewer.tree :as tree]
-            [portal.ui.viewer.vega :as vega]
-            [portal.ui.viewer.vega-lite :as vega-lite]
-            [reagent.core :as r]))
+(ns portal.ui.app
+  {:no-doc true}
+  (:require
+   ["react" :as react]
+   [clojure.string :as str]
+   [portal.colors :as c]
+   [portal.ui.api :as api]
+   [portal.ui.commands :as commands]
+   [portal.ui.connection-status :as status]
+   [portal.ui.drag-and-drop :as dnd]
+   [portal.ui.icons :as icons]
+   [portal.ui.inspector :as ins]
+   [portal.ui.options :as opts]
+   [portal.ui.react :refer [use-effect]]
+   [portal.ui.select :as select]
+   [portal.ui.state :as state]
+   [portal.ui.styled :as s]
+   [portal.ui.theme :as theme]
+   [portal.ui.viewer.bin :as bin]
+   [portal.ui.viewer.bytes :as bytes]
+   [portal.ui.viewer.charts :as charts]
+   [portal.ui.viewer.cljdoc :as cljdoc]
+   [portal.ui.viewer.code :as code]
+   [portal.ui.viewer.color :as color]
+   [portal.ui.viewer.csv :as csv]
+   [portal.ui.viewer.date-time :as date-time]
+   [portal.ui.viewer.deref :as deref]
+   [portal.ui.viewer.diff :as diff]
+   [portal.ui.viewer.diff-text :as diff-text]
+   [portal.ui.viewer.duration :as duration]
+   [portal.ui.viewer.edn :as edn]
+   [portal.ui.viewer.exception :as ex]
+   [portal.ui.viewer.hiccup :as hiccup]
+   [portal.ui.viewer.html :as html]
+   [portal.ui.viewer.http :as http]
+   [portal.ui.viewer.image :as image]
+   [portal.ui.viewer.json :as json]
+   [portal.ui.viewer.jwt :as jwt]
+   [portal.ui.viewer.log :as log]
+   [portal.ui.viewer.markdown :as md]
+   [portal.ui.viewer.pprint :as pprint]
+   [portal.ui.viewer.prepl :as prepl]
+   [portal.ui.viewer.relative-time :as relative-time]
+   [portal.ui.viewer.source-location :as source-location]
+   [portal.ui.viewer.spec :as spec]
+   [portal.ui.viewer.table :as table]
+   [portal.ui.viewer.test-report :as test-report]
+   [portal.ui.viewer.text :as text]
+   [portal.ui.viewer.transit :as transit]
+   [portal.ui.viewer.tree :as tree]
+   [portal.ui.viewer.vega :as vega]
+   [portal.ui.viewer.vega-lite :as vega-lite]
+   [reagent.core :as r]))
 
 (defn- select-viewer []
   (let [state            (state/use-state)
@@ -128,10 +130,10 @@
         :gap (:padding theme)}}
       [s/div {:style {:grid-row "1"}} "["]
       (map-indexed
-       (fn [idx k]
-         ^{:key idx}
-         [s/div {:style {:grid-row "1"}} [ins/preview k]])
-       path)
+        (fn [idx k]
+          ^{:key idx}
+          [s/div {:style {:grid-row "1"}} [ins/preview k]])
+        path)
       [s/div {:style {:grid-row "1"}} "]"]]
      [open-command-palette]
      [s/div {:style
@@ -149,26 +151,26 @@
                      (::c/diff-add theme)
                      (::c/background2 theme))]
     (use-effect
-     #js [header]
-     (state/set-theme header)
-     (state/notify-parent {:type :set-theme :color header}))
+      #js [header]
+      (state/set-theme header)
+      (state/notify-parent {:type :set-theme :color header}))
     (use-effect
-     #js [opts]
-     (when-let [{:keys [name platform version]} opts]
-       (state/set-title!
-        (str/join
-         " - "
-         [(:window-title opts name) platform version]))))))
+      #js [opts]
+      (when-let [{:keys [name platform version]} opts]
+        (state/set-title!
+          (str/join
+            " - "
+            [(:window-title opts name) platform version]))))))
 
 (defn display-notification [notification]
   (let [state (state/use-state)
         theme (theme/use-theme)
         timeout (:timeout notification)]
     (react/useEffect
-     (fn []
-       (when timeout
-         (js/setTimeout #(state/dispatch! state state/dismiss notification) timeout)))
-     #js [])
+      (fn []
+        (when timeout
+          (js/setTimeout #(state/dispatch! state state/dismiss notification) timeout)))
+      #js [])
     [s/div
      {:style
       {:display :flex
@@ -203,14 +205,14 @@
   (let [state (state/use-state)]
     (use-runtime-info)
     (into
-     [:<>
-      [:style
-       "@keyframes fade-in-out {"
-       "0%, 100% { opacity: 0 }"
-       "20%, 80% { opacity: 100 }"
-       "}"]]
-     (for [notification (::notifications @state)]
-       [display-notification notification]))))
+      [:<>
+       [:style
+        "@keyframes fade-in-out {"
+        "0%, 100% { opacity: 0 }"
+        "20%, 80% { opacity: 100 }"
+        "}"]]
+      (for [notification (::notifications @state)]
+        [display-notification notification]))))
 
 (defn- search-input []
   (let [ref      (react/useRef nil)
@@ -222,9 +224,9 @@
                    (nth theme/order depth)
                    ::c/border)]
     (use-effect
-     :always
-     (swap! commands/search-refs conj ref)
-     #(swap! commands/search-refs disj ref))
+      :always
+      (swap! commands/search-refs conj ref)
+      #(swap! commands/search-refs disj ref))
 
     [s/div
      {:style
@@ -237,13 +239,13 @@
        :on-change #(let [value (.-value (.-target %))]
                      (when context
                        (state/dispatch!
-                        state
-                        update
-                        :search-text
-                        (fn [filters]
-                          (if (str/blank? value)
-                            (dissoc filters location)
-                            (assoc filters location value))))))
+                         state
+                         update
+                         :search-text
+                         (fn [filters]
+                           (if (str/blank? value)
+                             (dissoc filters location)
+                             (assoc filters location value))))))
        :on-key-down (fn [e]
                       (when (= (.-key e) "Enter")
                         (.blur (.-current ref))))
@@ -282,19 +284,19 @@
   (let [theme (theme/use-theme)]
     [s/div
      (merge
-      {:style {:display         :flex
-               :width           "2rem"
-               :height          "2rem"
-               :border-radius   "100%"
-               :align-items     :center
-               :justify-content :center
-               :cursor          :pointer
-               :border          [1 :solid "rgba(0,0,0,0)"]}}
-      props
-      (when-not (:disabled props)
-        {:style/hover
-         {:background (::c/background theme)
-          :border     [1 :solid (::c/border theme)]}}))
+       {:style {:display         :flex
+                :width           "2rem"
+                :height          "2rem"
+                :border-radius   "100%"
+                :align-items     :center
+                :justify-content :center
+                :cursor          :pointer
+                :border          [1 :solid "rgba(0,0,0,0)"]}}
+       props
+       (when-not (:disabled props)
+         {:style/hover
+          {:background (::c/background theme)
+           :border     [1 :solid (::c/border theme)]}}))
      child]))
 
 (defn- toolbar []
@@ -324,11 +326,11 @@
           :title    "Go back in portal history."
           :size     "2x"
           :style    (merge
-                     {:transform     "scale(0.75)"
-                      :color         (::c/text theme)}
-                     (when disabled?
-                       {:opacity 0.45
-                        :cursor  :default}))}]])
+                      {:transform     "scale(0.75)"
+                       :color         (::c/text theme)}
+                      (when disabled?
+                        {:opacity 0.45
+                         :cursor  :default}))}]])
      (let [disabled? (nil? @(r/cursor state [:portal/next-state]))]
        [button-hover
         {:disabled disabled?
@@ -338,11 +340,11 @@
           :title    "Go forward in portal history."
           :size     "2x"
           :style    (merge
-                     {:transform     "scale(0.75)"
-                      :color         (::c/text theme)}
-                     (when disabled?
-                       {:opacity 0.45
-                        :cursor  :default}))}]])
+                      {:transform     "scale(0.75)"
+                       :color         (::c/text theme)}
+                      (when disabled?
+                        {:opacity 0.45
+                         :cursor  :default}))}]])
      [search-input]
      [button-hover
       {:on-click #(state/dispatch! state state/clear)}
@@ -350,17 +352,17 @@
        {:title    "Clear all values from portal. - CTRL L"
         :size     "2x"
         :style    (merge
-                   {:transform     "scale(0.75)"
-                    :color         (::c/text theme)})}]]]))
+                    {:transform     "scale(0.75)"
+                     :color         (::c/text theme)})}]]]))
 
 (defn inspect-1 [value]
   (let [theme (theme/use-theme)
         state (state/use-state)
         ref   (react/useRef)]
     (use-effect
-     #js [(.-current ref)]
-     (when-let [el (.-current ref)]
-       (state/dispatch! state assoc :scroll-element el)))
+      #js [(.-current ref)]
+      (when-let [el (.-current ref)]
+        (state/dispatch! state assoc :scroll-element el)))
     [s/div
      {:on-mouse-up
       (fn [e]
@@ -435,43 +437,43 @@
 (defn- container [children]
   (let [theme (theme/use-theme)]
     (into
-     [s/div
-      {:on-mouse-over
-       (fn [_e]
-         (reset! ins/hover? nil))
-       :style
-       {:-webkit-app-region (when-not (theme/is-vs-code?) :drag)
-        :display :flex
-        :flex-direction :column
-        :background (::c/background theme)
-        :color (::c/text theme)
-        :font-family (:font-family theme)
-        :font-size (:font-size theme)
-        :height "100vh"
-        :width "100vw"}}
-      [styles]
-      [scrollbars]]
-     children)))
+      [s/div
+       {:on-mouse-over
+        (fn [_e]
+          (reset! ins/hover? nil))
+        :style
+        {:-webkit-app-region (when-not (theme/is-vs-code?) :drag)
+         :display :flex
+         :flex-direction :column
+         :background (::c/background theme)
+         :color (::c/text theme)
+         :font-family (:font-family theme)
+         :font-size (:font-size theme)
+         :height "100vh"
+         :width "100vw"}}
+       [styles]
+       [scrollbars]]
+      children)))
 
 (defn- inspect-1-history [default-value]
   (let [current-state @(state/use-state)]
     [:<>
      [commands/palette]
      (doall
-      (map-indexed
-       (fn [index state]
-         ^{:key index}
-         [s/div
-          {:style
-           {:flex "1"
-            :display
-            (if (= state current-state)
-              :block
-              :none)}}
-          [select/with-position
-           {:row 0 :column index}
-           [inspect-1 (state/get-value state default-value)]]])
-       (state/get-history current-state)))]))
+       (map-indexed
+         (fn [index state]
+           ^{:key index}
+           [s/div
+            {:style
+             {:flex "1"
+              :display
+              (if (= state current-state)
+                :block
+                :none)}}
+            [select/with-position
+             {:row 0 :column index}
+             [inspect-1 (state/get-value state default-value)]]])
+         (state/get-history current-state)))]))
 
 (def viewers
   ^{:portal.viewer/default :portal.viewer/table

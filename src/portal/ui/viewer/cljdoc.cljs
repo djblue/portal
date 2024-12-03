@@ -1,33 +1,35 @@
-(ns ^:no-doc portal.ui.viewer.cljdoc
-  (:require ["react" :as react]
-            [portal.colors :as c]
-            [portal.ui.inspector :as ins]
-            [portal.ui.react :refer [use-effect]]
-            [portal.ui.select :as select]
-            [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+(ns portal.ui.viewer.cljdoc
+  {:no-doc true}
+  (:require
+   ["react" :as react]
+   [portal.colors :as c]
+   [portal.ui.inspector :as ins]
+   [portal.ui.react :refer [use-effect]]
+   [portal.ui.select :as select]
+   [portal.ui.styled :as s]
+   [portal.ui.theme :as theme]))
 
 (def ^:private observer-context (react/createContext nil))
 
 (defn- with-observer [f & children]
   (let [[observer set-observer!] (react/useState nil)]
     (use-effect
-     #js [f]
-     (set-observer!
-      (js/IntersectionObserver.
-       (fn [entries]
-         (f
-          (reduce
-           (fn [result entry]
-             (let [element (.-target entry)
-                   id      (.getAttribute element "data-observer")]
-               (assoc result
-                      id
-                      {:element element
-                       :ratio   (.-intersectionRatio entry)})))
-           {}
-           entries)))
-       #js {:root nil :rootMargin "0px" :threshold 0})))
+      #js [f]
+      (set-observer!
+        (js/IntersectionObserver.
+          (fn [entries]
+            (f
+              (reduce
+                (fn [result entry]
+                  (let [element (.-target entry)
+                        id      (.getAttribute element "data-observer")]
+                    (assoc result
+                           id
+                           {:element element
+                            :ratio   (.-intersectionRatio entry)})))
+                {}
+                entries)))
+          #js {:root nil :rootMargin "0px" :threshold 0})))
     (when observer
       (into [:r>
              (.-Provider observer-context)
@@ -39,11 +41,11 @@
         observer (react/useContext observer-context)
         id       (str id)]
     (use-effect
-     #js [id ref observer]
-     (when-let [el (.-current ref)]
-       (.setAttribute el "data-observer" id)
-       (.observe observer el)
-       #(.unobserve observer el)))
+      #js [id ref observer]
+      (when-let [el (.-current ref)]
+        (.setAttribute el "data-observer" id)
+        (.observe observer el)
+        #(.unobserve observer el)))
     ref))
 
 (def ^:private index-context (react/createContext 0))
@@ -56,21 +58,21 @@
 (defn- first-visible [visible index]
   (->> visible
        (keep
-        (fn [[label {:keys [ratio]}]]
-          (when-not (zero? ratio) label)))
+         (fn [[label {:keys [ratio]}]]
+           (when-not (zero? ratio) label)))
        (select-keys (:order index))
        (sort-by second)
        ffirst))
 
 (defn- selected-path [index selected]
   (zipmap
-   (->> selected
-        (iterate
-         (fn [label]
-           (get-in index [:parents label])))
-        (take-while some?)
-        reverse)
-   (range)))
+    (->> selected
+         (iterate
+           (fn [label]
+             (get-in index [:parents label])))
+         (take-while some?)
+         reverse)
+    (range)))
 
 (defn- docs-nav [value visible]
   (let [index      (use-index)
@@ -132,31 +134,31 @@
          [select/with-position
           {:row (get-in index [:order label]) :column 0}
           (or
-           (when-let [markdown (:markdown entry)]
-             [ins/inspector
-              {:style {:padding 40}
-               :portal.viewer/default :portal.viewer/markdown}
-              markdown])
-           (when-let [hiccup (:hiccup entry)]
-             [ins/inspector
-              {:portal.viewer/default :portal.viewer/hiccup}
-              hiccup])
-           [s/h1
-            {:style
-             {:margin 0
-              :padding 40
-              :font-size "2em"
-              :color  (::c/namespace theme)}}
-            [s/span
-             {:on-click
-              (fn [e]
-                (.stopPropagation e)
-                (when-let [el (.-current ref)]
-                  (.scrollIntoView ^js el)))
-              :style
-              {:cursor :pointer
-               :color  (::c/tag theme)}} "# "]
-            label])]]]]]]))
+            (when-let [markdown (:markdown entry)]
+              [ins/inspector
+               {:style {:padding 40}
+                :portal.viewer/default :portal.viewer/markdown}
+               markdown])
+            (when-let [hiccup (:hiccup entry)]
+              [ins/inspector
+               {:portal.viewer/default :portal.viewer/hiccup}
+               hiccup])
+            [s/h1
+             {:style
+              {:margin 0
+               :padding 40
+               :font-size "2em"
+               :color  (::c/namespace theme)}}
+             [s/span
+              {:on-click
+               (fn [e]
+                 (.stopPropagation e)
+                 (when-let [el (.-current ref)]
+                   (.scrollIntoView ^js el)))
+               :style
+               {:cursor :pointer
+                :color  (::c/tag theme)}} "# "]
+             label])]]]]]]))
 
 (defn render-docs [value]
   (let [has-label?  (string? (first value))
@@ -166,12 +168,12 @@
      (when has-label?
        [ins/toggle-bg [render-article value]])
      (map-indexed
-      (fn [index value]
-        ^{:key index}
-        [render-docs value])
-      (cond-> value
-        has-label?   rest
-        has-article? rest))]))
+       (fn [index value]
+         ^{:key index}
+         [render-docs value])
+       (cond-> value
+         has-label?   rest
+         has-article? rest))]))
 
 (defn get-docs-order
   ([value]

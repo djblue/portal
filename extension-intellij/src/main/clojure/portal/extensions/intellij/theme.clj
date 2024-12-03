@@ -68,32 +68,32 @@
   ([^EditorColorsScheme theme key]
    (let [defaults (.getScheme (EditorColorsManager/getInstance) EditorColorsManager/DEFAULT_SCHEME_NAME)]
      (some->
-      (if-let [attrs (language-colors key)]
-        (cond
-          (instance? ColorKey attrs)
-          (.getColor theme ^ColorKey attrs)
+       (if-let [attrs (language-colors key)]
+         (cond
+           (instance? ColorKey attrs)
+           (.getColor theme ^ColorKey attrs)
 
-          (instance? TextAttributesKey attrs)
-          (or
-           (some-> theme (.getAttributes ^TextAttributesKey attrs) .getForegroundColor)
-           (some-> defaults (.getAttributes ^TextAttributesKey attrs) .getForegroundColor)))
-        (.getColor theme (ColorKey/createColorKey (name key))))
-      format-color))))
+           (instance? TextAttributesKey attrs)
+           (or
+             (some-> theme (.getAttributes ^TextAttributesKey attrs) .getForegroundColor)
+             (some-> defaults (.getAttributes ^TextAttributesKey attrs) .getForegroundColor)))
+         (.getColor theme (ColorKey/createColorKey (name key))))
+       format-color))))
 
 (defn- get-font
   ([]
    (get-font
-    (.getGlobalScheme (EditorColorsManager/getInstance))))
+     (.getGlobalScheme (EditorColorsManager/getInstance))))
   ([^EditorColorsScheme theme]
    {:font-size   (.getConsoleFontSize theme)
     :font-family (str (pr-str (.getConsoleFontName theme)) ", monospace")}))
 
 (defn resolve-theme [m]
   (reduce-kv
-   (fn [out k v]
-     (assoc out k (get-color v)))
-   {}
-   m))
+    (fn [out k v]
+      (assoc out k (get-color v)))
+    {}
+    m))
 
 (def theme-mapping
   {:portal.colors/background  :CONSOLE_BACKGROUND_KEY
@@ -120,9 +120,9 @@
    (get-keys (.getGlobalScheme (EditorColorsManager/getInstance))))
   ([^AbstractColorsScheme theme]
    (concat
-    (keys language-colors)
-    (for [^ColorKey key (.getColorKeys theme)]
-      (keyword (.getExternalName key))))))
+     (keys language-colors)
+     (for [^ColorKey key (.getColorKeys theme)]
+       (keyword (.getExternalName key))))))
 
 (comment
   (tap> (get-theme))

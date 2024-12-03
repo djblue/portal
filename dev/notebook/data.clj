@@ -1,7 +1,8 @@
 (ns notebook.data
-  (:require [examples.data :as d]
-            [portal.colors :as c]
-            [portal.viewer :as v]))
+  (:require
+   [examples.data :as d]
+   [portal.colors :as c]
+   [portal.viewer :as v]))
 
 (::d/hacker-news d/data)
 
@@ -24,7 +25,7 @@
 (v/tree d/hiccup)
 
 (v/hiccup
- [:portal.viewer/markdown (::d/markdown d/string-data)])
+  [:portal.viewer/markdown (::d/markdown d/string-data)])
 
 (-> d/exception-data)
 

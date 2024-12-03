@@ -1,9 +1,11 @@
-(ns ^:no-doc portal.ui.state
-  (:require ["react" :as react]
-            [portal.async :as a]
-            [portal.colors :as c]
-            [portal.ui.select :as select]
-            [reagent.core :as r]))
+(ns portal.ui.state
+  {:no-doc true}
+  (:require
+   ["react" :as react]
+   [portal.async :as a]
+   [portal.colors :as c]
+   [portal.ui.select :as select]
+   [reagent.core :as r]))
 
 (defonce sender (atom nil))
 (defonce render (atom nil))
@@ -26,23 +28,23 @@
 
 (defn- sleep [ms]
   (js/Promise.
-   (fn [resolve _reject]
-     (js/setTimeout resolve ms))))
+    (fn [resolve _reject]
+      (js/setTimeout resolve ms))))
 
 (defn- wait-for [p ms]
   (.race js/Promise
          #js
-          [(sleep ms)
-           (.catch p (fn [e] (.error js/console e)))]))
+         [(sleep ms)
+          (.catch p (fn [e] (.error js/console e)))]))
 
 (defn dispatch! [state f & args]
   (swap!
-   sync-promise
-   (fn [last-promise]
-     (a/do
-       (wait-for last-promise 1000)
-       (a/let [next-state (apply f @state args)]
-         (when next-state (reset! state next-state)))))))
+    sync-promise
+    (fn [last-promise]
+      (a/do
+        (wait-for last-promise 1000)
+        (a/let [next-state (apply f @state args)]
+          (when next-state (reset! state next-state)))))))
 
 (def ^:private state-context (react/createContext nil))
 
@@ -158,19 +160,19 @@
 (defn history-push [state {:portal/keys [key value f] :as entry}]
   (-> (push-command state entry)
       (assoc
-       :portal/previous-state state
-       :portal/key   key
-       :portal/f     f
-       :portal/value value
-       :selected     (mapv
-                      (fn [context]
-                        (-> context
-                            (dissoc :props :collection :key)
-                            (assoc :depth       1
-                                   :path        []
-                                   :stable-path []
-                                   :alt-bg      true)))
-                      (:selected state)))
+        :portal/previous-state state
+        :portal/key   key
+        :portal/f     f
+        :portal/value value
+        :selected     (mapv
+                        (fn [context]
+                          (-> context
+                              (dissoc :props :collection :key)
+                              (assoc :depth       1
+                                     :path        []
+                                     :stable-path []
+                                     :alt-bg      true)))
+                        (:selected state)))
       (dissoc :portal/next-state)
       (push-search-text entry)
       (push-viewer entry)
@@ -257,7 +259,7 @@
 (defn set-title! [title]
   (set-title title)
   (notify-parent
-   {:type :set-title :title title}))
+    {:type :set-title :title title}))
 
 (defn- log-message [message]
   (when-not (= 'portal.runtime/ping (:f message))
@@ -272,19 +274,19 @@
         (.then (fn [{:keys [return error] :as response}]
                  (when js/goog.DEBUG
                    (log-message
-                    {:runtime :portal
-                     :level   (if error :error :info)
-                     :ns      (if-not (symbol? f)
-                                'unknown
-                                (-> f namespace symbol))
-                     :f       f
-                     :args    args
-                     :line    (:line response 1)
-                     :column  (:column response 1)
-                     :file    (:file response)
-                     :result  (or return error)
-                     :time    time
-                     :ms      (- (.now js/Date) start)}))
+                     {:runtime :portal
+                      :level   (if error :error :info)
+                      :ns      (if-not (symbol? f)
+                                 'unknown
+                                 (-> f namespace symbol))
+                      :f       f
+                      :args    args
+                      :line    (:line response 1)
+                      :column  (:column response 1)
+                      :file    (:file response)
+                      :result  (or return error)
+                      :time    time
+                      :ms      (- (.now js/Date) start)}))
                  (if-not error
                    return
                    (throw (ex-info (pr-str error) error))))))))
@@ -307,8 +309,8 @@
                 :selected-viewers
                 :lazy-take)
         (assoc
-         :portal/previous-state nil
-         :portal/next-state nil))))
+          :portal/previous-state nil
+          :portal/next-state nil))))
 
 (defn- send-selected-values [_ _ state state']
   (when (not= (selected-values state)
@@ -329,9 +331,9 @@
 
 (defn get-history [state]
   (concat
-   (reverse
-    (take-while some? (rest (iterate :portal/previous-state state))))
-   (take-while some? (iterate :portal/next-state state))))
+    (reverse
+      (take-while some? (rest (iterate :portal/previous-state state))))
+    (take-while some? (iterate :portal/next-state state))))
 
 (defn notify [state notification]
   (if (some #{notification} (:portal.ui.app/notifications state))

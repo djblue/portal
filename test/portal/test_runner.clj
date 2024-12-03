@@ -1,18 +1,19 @@
 (ns portal.test-runner
-  (:require [clojure.pprint :as pp]
-            [clojure.test :as t]
-            [portal.client-test]
-            [portal.client.jvm :as p]
-            [portal.runtime-test]
-            [portal.runtime.api-test]
-            [portal.runtime.bench-cson :as bench]
-            [portal.runtime.cson-test]
-            [portal.runtime.edn-test]
-            [portal.runtime.fs-test]
-            [portal.runtime.json-buffer-test]
-            [portal.runtime.jvm.editor-test]
-            [portal.runtime.npm-test]
-            [portal.runtime.shell-test]))
+  (:require
+   [clojure.pprint :as pp]
+   [clojure.test :as t]
+   [portal.client-test]
+   [portal.client.jvm :as p]
+   [portal.runtime-test]
+   [portal.runtime.api-test]
+   [portal.runtime.bench-cson :as bench]
+   [portal.runtime.cson-test]
+   [portal.runtime.edn-test]
+   [portal.runtime.fs-test]
+   [portal.runtime.json-buffer-test]
+   [portal.runtime.jvm.editor-test]
+   [portal.runtime.npm-test]
+   [portal.runtime.shell-test]))
 
 (def port (System/getenv "PORTAL_PORT"))
 
@@ -22,8 +23,8 @@
   (if port
     (submit value)
     (pp/print-table
-     (get-in (meta value) [:portal.viewer/table :columns])
-     value)))
+      (get-in (meta value) [:portal.viewer/table :columns])
+      value)))
 
 (defn run-tests [& tests]
   (if-not port

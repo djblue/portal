@@ -1,19 +1,20 @@
 (ns tasks.test
   (:refer-clojure :exclude [test])
-  (:require [babashka.fs :as fs]
-            [clojure.string :as str]
-            [tasks.build :refer [build install]]
-            [tasks.tools :as t]))
+  (:require
+   [babashka.fs :as fs]
+   [clojure.string :as str]
+   [tasks.build :refer [build install]]
+   [tasks.tools :as t]))
 
 (defn cljs* [deps main]
   (let [version (get-in deps ['org.clojure/clojurescript :mvn/version])
         out     (str "target/" (name main) "." version ".js")]
     (when (seq
-           (fs/modified-since
-            out
-            (concat
-             (fs/glob "src" "**")
-             (fs/glob "test" "**"))))
+            (fs/modified-since
+              out
+              (concat
+                (fs/glob "src" "**")
+                (fs/glob "test" "**"))))
       (t/clj "-Sdeps" (pr-str {:deps deps})
              "-M:test"
              "-m" :cljs.main
@@ -38,8 +39,8 @@
 
 (defn- setup* [version]
   (t/clj
-   "-Sforce" "-Spath" "-Sdeps"
-   (pr-str {:deps {'org.clojure/clojurescript {:mvn/version version}}})))
+    "-Sforce" "-Spath" "-Sdeps"
+    (pr-str {:deps {'org.clojure/clojurescript {:mvn/version version}}})))
 
 (defn setup []
   (setup* "1.10.773")

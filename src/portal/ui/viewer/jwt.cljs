@@ -1,8 +1,10 @@
-(ns ^:no-doc portal.ui.viewer.jwt
-  (:require [clojure.string :as str]
-            [goog.crypt.base64 :as Base64]
-            [portal.ui.inspector :as ins]
-            [portal.ui.parsers :as p]))
+(ns portal.ui.viewer.jwt
+  {:no-doc true}
+  (:require
+   [clojure.string :as str]
+   [goog.crypt.base64 :as Base64]
+   [portal.ui.inspector :as ins]
+   [portal.ui.parsers :as p]))
 
 (defn- parse-json [value]
   (js->clj (.parse js/JSON (js/atob value)) :keywordize-keys true))

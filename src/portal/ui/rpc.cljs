@@ -1,25 +1,28 @@
-(ns ^:no-doc portal.ui.rpc
+(ns portal.ui.rpc
+  {:no-doc true}
   (:refer-clojure :exclude [read type])
-  (:require [clojure.string :as str]
-            [portal.async :as a]
-            [portal.runtime.cson :as cson]
-            [portal.runtime.macros :as m]
-            [portal.ui.cljs :as cljs]
-            [portal.ui.rpc.runtime :as rt]
-            [portal.ui.state :as state])
-  (:import [goog.math Long]))
+  (:require
+   [clojure.string :as str]
+   [portal.async :as a]
+   [portal.runtime.cson :as cson]
+   [portal.runtime.macros :as m]
+   [portal.ui.cljs :as cljs]
+   [portal.ui.rpc.runtime :as rt]
+   [portal.ui.state :as state])
+  (:import
+   (goog.math Long)))
 
 (defn call [f & args]
   (apply state/invoke f args))
 
 (m/extend-type?
- js/BigInt
- IHash
- (-hash [this]
-        (hash (.toString this)))
- IPrintWithWriter
- (-pr-writer [this writer _opts]
-             (-write writer (str this "N"))))
+  js/BigInt
+  IHash
+  (-hash [this]
+         (hash (.toString this)))
+  IPrintWithWriter
+  (-pr-writer [this writer _opts]
+              (-write writer (str this "N"))))
 
 (extend-type array
   IHash
@@ -56,10 +59,10 @@
     cson/ToJson
     (-to-json [value buffer]
       (cson/-to-json
-       (with-meta
-         (cson/tagged-value "remote" (pr-str value))
-         (meta value))
-       buffer))))
+        (with-meta
+          (cson/tagged-value "remote" (pr-str value))
+          (meta value))
+        buffer))))
 
 (defmulti ^:no-doc -read (fn [tag _] tag))
 
@@ -69,18 +72,18 @@
 
 (defn- read [string]
   (cson/read
-   string
-   {:transform rt/transform
-    :default-handler -read}))
+    string
+    {:transform rt/transform
+     :default-handler -read}))
 
 (defn- write [value]
   (cson/write
-   value
-   {:transform
-    (fn [value]
-      (if-let [id (rt/->id value)]
-        (cson/tagged-value "ref" id)
-        value))}))
+    value
+    {:transform
+     (fn [value]
+       (if-let [id (rt/->id value)]
+         (cson/tagged-value "ref" id)
+         value))}))
 
 (defonce ^:private id (atom 0))
 (defonce ^:private pending-requests (atom {}))
@@ -91,20 +94,20 @@
 
 (defn- ws-request [message]
   (js/Promise.
-   (fn [resolve reject]
-     (let [id (:portal.rpc/id message)]
-       (swap! pending-requests assoc id [resolve reject])
-       (send! (assoc message :portal.rpc/id id))))))
+    (fn [resolve reject]
+      (let [id (:portal.rpc/id message)]
+        (swap! pending-requests assoc id [resolve reject])
+        (send! (assoc message :portal.rpc/id id))))))
 
 (defn- web-request [message]
   (js/Promise.
-   (fn [resolve reject]
-     (try
-       (-> (write message)
-           js/window.opener.portal.web.send_BANG_
-           (.then read)
-           resolve)
-       (catch :default e (reject e))))))
+    (fn [resolve reject]
+      (try
+        (-> (write message)
+            js/window.opener.portal.web.send_BANG_
+            (.then read)
+            resolve)
+        (catch :default e (reject e))))))
 
 (defn request [message]
   ((if js/window.opener web-request ws-request)
@@ -122,9 +125,9 @@
      (let [return
            (fn [msg]
              (send!
-              (assoc msg
-                     :op            :portal.rpc/response
-                     :portal.rpc/id (:portal.rpc/id message))))
+               (assoc msg
+                      :op            :portal.rpc/response
+                      :portal.rpc/id (:portal.rpc/id message))))
            error
            (fn [e]
              (return {:error (ex-data e) :message (.-message e)}))]
@@ -161,8 +164,8 @@
    (fn [message send!]
      (state/dispatch! state/state state/history-push {:portal/value (:state message)})
      (send!
-      {:op :portal.rpc/response
-       :portal.rpc/id (:portal.rpc/id message)}))})
+       {:op :portal.rpc/response
+        :portal.rpc/id (:portal.rpc/id message)}))})
 
 (defn- dispatch [message send!]
   ;; (tap> (assoc message :type :response))
@@ -205,20 +208,20 @@
    (if-let [ws @ws-promise]
      ws
      (reset!
-      ws-promise
-      (js/Promise.
-       (fn [resolve reject]
-         (when-let [chan (js/WebSocket.
-                          (str protocol "//" host (when port (str ":" port)) "/rpc?" session))]
-           (set! (.-onmessage chan) #(dispatch (read (.-data %))
-                                               (fn [message]
-                                                 (send! message))))
-           (set! (.-onerror chan)   (fn [e]
-                                      (reject e)
-                                      (doseq [[_ [_ reject]] @pending-requests]
-                                        (reject e))))
-           (set! (.-onclose chan)   #(reset!  ws-promise nil))
-           (set! (.-onopen chan)    #(do (rt/reset-cache!) (resolve chan))))))))))
+       ws-promise
+       (js/Promise.
+         (fn [resolve reject]
+           (when-let [chan (js/WebSocket.
+                             (str protocol "//" host (when port (str ":" port)) "/rpc?" session))]
+             (set! (.-onmessage chan) #(dispatch (read (.-data %))
+                                                 (fn [message]
+                                                   (send! message))))
+             (set! (.-onerror chan)   (fn [e]
+                                        (reject e)
+                                        (doseq [[_ [_ reject]] @pending-requests]
+                                          (reject e))))
+             (set! (.-onclose chan)   #(reset!  ws-promise nil))
+             (set! (.-onopen chan)    #(do (rt/reset-cache!) (resolve chan))))))))))
 
 (defn- send! [message]
   (.then (connect) #(.send % (write message))))
