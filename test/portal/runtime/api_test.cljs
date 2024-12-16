@@ -5,7 +5,7 @@
             [portal.runtime.browser :as browser]))
 
 (defn- headless-chrome-flags [url]
-  ["--headless=new" "--disable-gpu" url])
+  ["--headless=new" "--disable-gpu" "--no-sandbox" url])
 
 (defn- open []
   (p/open {:mode :test
