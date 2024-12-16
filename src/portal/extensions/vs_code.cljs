@@ -120,7 +120,7 @@
 (defn- open-file* [{:keys [file line column]}]
   (a/let [document     (.openTextDocument
                         vscode/workspace
-                        (.parse vscode/Uri file))
+                        (.file vscode/Uri file))
           ^js editor   (.showTextDocument vscode/window document 1 false)
           ^js position (vscode/Position. (dec line) (dec column))
           ^js range    (vscode/Range. position position)]
