@@ -1,3 +1,8 @@
+## 0.58.4 - 2024-12-15
+
+- Fix vscode extension file open on windows 058f77f2
+- Improve launcher support on windows 73e00704
+
 ## 0.58.3 - 2024-11-22
 
 - Updates IJ plugin for 2024.3 (#247) 04bf786a
