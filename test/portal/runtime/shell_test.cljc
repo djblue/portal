@@ -3,5 +3,5 @@
             [portal.runtime.shell :as sh]))
 
 (deftest echo
-  (is (= {:exit 0, :out "hello\n", :err ""}
-         (sh/sh "echo" "hello"))))
+  (is (= {:exit 0, :out ":hi\n", :err ""}
+         (sh/sh "bb" "-e" ":hi"))))
