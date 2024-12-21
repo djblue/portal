@@ -149,7 +149,7 @@
      :cljs (.stringify js/JSON (f (js/Array.) value))
      :cljr (let [json (JsonArray. (JsonNodeOptions.))]
              (f json value)
-             (.ToJsonString json (JsonSerializerOptions.)))
+             (.ToJsonString json nil))
      :clj  (let [out  (StringWriter.)
                  json (JsonWriter. out)]
              (.beginArray json)
