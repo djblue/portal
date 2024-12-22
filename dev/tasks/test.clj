@@ -49,8 +49,7 @@
   (build)
   (cljs-runtime "1.10.773")
   (cljs-runtime "1.10.844")
-  (cljs-nbb)
-  (cljs-ui))
+  (cljs-nbb))
 
 (defn clj
   []
@@ -74,6 +73,6 @@
     (future (t/bb "-m" :portal.test-runner))
     (future (cljr))))
 
-(defn test "Run all clj/s tests." [] (cljs) (clj))
+(defn test "Run all clj/s tests." [] (cljs) (cljs-ui) (clj))
 
 (defn -main [] (test))
