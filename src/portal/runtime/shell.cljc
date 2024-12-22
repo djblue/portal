@@ -18,7 +18,7 @@
           (.on ps "close" resolve))))
      :cljr
      (future
-       (let [{:keys [exit err out]} (apply shell/sh bin args)]
+       (let [{:keys [exit err out] :as x} (apply shell/sh bin args)]
          (when-not (zero? exit)
            (prn (into [bin] args))
            (println err out))))))
