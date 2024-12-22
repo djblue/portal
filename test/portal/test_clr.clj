@@ -48,4 +48,5 @@
          'portal.runtime.npm-test
          'portal.runtime.shell-test)]
     (table (bench/run))
+    (shutdown-agents)
     (Environment/Exit (+ fail error))))
