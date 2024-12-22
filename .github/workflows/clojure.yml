@@ -38,6 +38,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
+    - run: rm package.json
+    - run: npm install "react@^17.0.2"
     - uses: actions/download-artifact@v4
       with:
         name: portal-client
@@ -49,6 +51,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
+    - run: rm package.json
+    - run: npm install "react@^17.0.2"
     - uses: actions/download-artifact@v4
       with:
         name: portal-client
@@ -60,6 +64,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/setup
+    - run: rm package.json
+    - run: npm install "react@^17.0.2"
     - uses: actions/download-artifact@v4
       with:
         name: portal-client
