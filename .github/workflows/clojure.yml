@@ -32,6 +32,13 @@ jobs:
       with:
         name: portal-client
         path: resources/portal
+  test-ui:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - run: bb -m tasks.test/cljs-ui
   test-clj:
     needs: [ setup, build ]
     strategy:
@@ -87,7 +94,7 @@ jobs:
     - run: bb -m tasks.test/cljr
   app:
     runs-on: ubuntu-latest
-    needs: [ test-clj, test-cljs, test-cljr, check ]
+    needs: [ test-ui, test-clj, test-cljs, test-cljr, check ]
     if: github.event_name == 'push'
     steps:
     - uses: actions/checkout@v3
@@ -100,7 +107,7 @@ jobs:
         force_orphan: true
   package:
     runs-on: ubuntu-latest
-    needs: [ test-clj, test-cljs, test-cljr, check ]
+    needs: [ test-ui, test-clj, test-cljs, test-cljr, check ]
     if: startsWith(github.event.head_commit.message, 'Release ')
     steps:
     - uses: actions/checkout@v3
