@@ -77,7 +77,7 @@
   (str/trim (:out (shell/sh "cmd.exe" "/C" "echo %USERNAME%"))))
 
 (defn- windows-chrome-web-applications []
-  (some
+  (mapcat
    (fn [root]
      (tree-seq
       (fn [f]
@@ -85,12 +85,15 @@
              (or
               (str/includes? f "_crx_")
               (str/ends-with? f "Web Applications"))))
-      (fn [d] (fs/list d))
+      (fn [d]
+        (try
+          (fs/list d)
+          (catch #?(:cljs :default :default Exception) _)))
       (fs/join
        root
        (get-windows-user)
        "AppData/Local/Google/Chrome/User Data/Default/Web Applications")))
-   ["/Users" "/mnt/c/Users"]))
+   ["/mnt/c/Users" "/Users"]))
 
 (defn- get-app-id-profile-windows [app-name]
   (try
