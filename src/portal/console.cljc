@@ -30,7 +30,7 @@
          file)
        *file*)))
 
-#_{:clj-kondo/ignore #?(:clj [] :cljs [:unused-binding])}
+#_{:clj-kondo/ignore #?(:cljs [:unused-binding] :default [])}
 (defn ^:no-doc capture [level form expr env]
   (let [{:keys [line column file]} (meta form)]
     `(let [[flow# result#] (run (fn [] ~expr))]
