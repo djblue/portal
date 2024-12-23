@@ -1,3 +1,12 @@
+## 0.58.5 - 2024-12-22
+
+- Improve `portal.nrepl/wrap-portal` support for cursive 6d2639f7
+
+### Bug Fixes
+
+- Fix WSL regression caused by 73e0070 cdabd7fd
+- Fix json-buffer for dotnet 8.0 2b149eea
+
 ## 0.58.4 - 2024-12-15
 
 - Fix vscode extension file open on windows 058f77f2
