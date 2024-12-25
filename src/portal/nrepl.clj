@@ -68,7 +68,7 @@
                  :line   (:line m 1)
                  :column (:column m 1)
                  :file   (:clojure.core/eval-file m)))))
-    (catch Exception _)))
+    (catch Exception _ msg)))
 
 (defrecord ^:no-doc PortalTransport [transport handler-msg]
   Transport
@@ -76,37 +76,39 @@
     (transport/recv transport timeout))
   (send [_this  msg]
     (transport/send transport msg)
-    (let [handler-msg (read-cursive-file-meta handler-msg)]
-      (when (and (seq (p/sessions)) (:file handler-msg))
-        (when-let [out (:out msg)]
-          (swap! (:stdio handler-msg) conj {:tag :out :val out}))
-        (when-let [err (:err msg)]
-          (swap! (:stdio handler-msg) conj {:tag :err :val err}))
-        (when-let [result (get-result msg)]
-          (-> result
-              (merge
-               (select-keys handler-msg [:ns :file :column :line :code])
-               (when (= "load-file" (:op handler-msg))
-                 {:code (:file handler-msg)
-                  :file (:file-path handler-msg)})
-               (when-let [report (-> handler-msg :report deref not-empty)]
-                 {:report report})
-               (when-let [stdio (-> handler-msg :stdio deref not-empty)]
-                 {:stdio stdio}))
-              (update :ns (fnil symbol 'user))
-              (assoc :time     (:time handler-msg)
-                     :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
-                     :runtime  (cond
-                                 (shadow-cljs? handler-msg) :cljs
-                                 (in-portal? handler-msg)   :portal
-                                 :else                      :clj))
-              (with-meta {::eval true
-                          :portal.viewer/for
-                          {:code :portal.viewer/code
-                           :time :portal.viewer/relative-time
-                           :ms   :portal.viewer/duration-ms}
-                          :portal.viewer/code {:language :clojure}})
-              tap>))))
+    (try
+      (let [handler-msg (read-cursive-file-meta handler-msg)]
+        (when (and (seq (p/sessions)) (:file handler-msg))
+          (when-let [out (:out msg)]
+            (swap! (:stdio handler-msg) conj {:tag :out :val out}))
+          (when-let [err (:err msg)]
+            (swap! (:stdio handler-msg) conj {:tag :err :val err}))
+          (when-let [result (get-result msg)]
+            (-> result
+                (merge
+                 (select-keys handler-msg [:ns :file :column :line :code])
+                 (when (= "load-file" (:op handler-msg))
+                   {:code (:file handler-msg)
+                    :file (:file-path handler-msg)})
+                 (when-let [report (-> handler-msg :report deref not-empty)]
+                   {:report report})
+                 (when-let [stdio (-> handler-msg :stdio deref not-empty)]
+                   {:stdio stdio}))
+                (update :ns (fnil symbol 'user))
+                (assoc :time     (:time handler-msg)
+                       :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
+                       :runtime  (cond
+                                   (shadow-cljs? handler-msg) :cljs
+                                   (in-portal? handler-msg)   :portal
+                                   :else                      :clj))
+                (with-meta {::eval true
+                            :portal.viewer/for
+                            {:code :portal.viewer/code
+                             :time :portal.viewer/relative-time
+                             :ms   :portal.viewer/duration-ms}
+                            :portal.viewer/code {:language :clojure}})
+                tap>))))
+      (catch Exception _))
     transport))
 
 (defn- wrap-portal* [handler msg]
