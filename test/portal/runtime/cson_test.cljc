@@ -131,7 +131,8 @@
    #?(:clj  (UUID/randomUUID)
       :cljr (Guid/NewGuid)
       :cljs (random-uuid))
-   (tagged-literal 'tag :value)])
+   (tagged-literal 'tag :value)
+   (tagged-literal 'ns/tag :value)])
 
 (deftest tagged-objects
   (doseq [value tagged]

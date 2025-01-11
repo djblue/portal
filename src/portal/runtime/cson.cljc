@@ -754,11 +754,14 @@
                 :cljr clojure.lang.TaggedLiteral
                 :cljs TaggedLiteral)
   ToJson
-  (-to-json [value buffer]
+  (-to-json [{:keys [tag form]} buffer]
     (-> buffer
         (json/push-string "tag")
-        (json/push-string (name (:tag value)))
-        (to-json (:form value)))))
+        (json/push-string
+         (if-let [ns (namespace tag)]
+           (str ns "/" (name tag))
+           (name tag)))
+        (to-json form))))
 
 (defn- ->tagged-literal [buffer]
   (tagged-literal (symbol (json/next-string buffer)) (->value buffer)))
