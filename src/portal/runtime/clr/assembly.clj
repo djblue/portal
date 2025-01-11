@@ -22,11 +22,22 @@
     #_{:clj-kondo/ignore [:unresolved-symbol]}
     (assembly-load-file dll)))
 
-(def ^:private deps
-  '{clojure.data.json {:nuget/version "2.4.0"}})
-
+#_{:clj-kondo/ignore [:unresolved-symbol]}
+(assembly-load "System.Text.Encoding")
 #_{:clj-kondo/ignore [:unresolved-symbol]}
 (assembly-load "System.Text.Json")
 #_{:clj-kondo/ignore [:unresolved-symbol]}
 (assembly-load "System.Net.WebSockets")
+#_{:clj-kondo/ignore [:unresolved-symbol]}
+(assembly-load "System.Net")
+#_{:clj-kondo/ignore [:unresolved-symbol]}
+(assembly-load "System.Net.HttpListener")
+#_{:clj-kondo/ignore [:unresolved-symbol]}
+(assembly-load "System.Net.Http")
+
+(def ^:private deps
+  '{clojure.data.json {:nuget/version "2.4.0"}})
+
 (load-deps deps)
+
+; (assembly-load-from (str clojure.lang.RT/SystemRuntimeDirectory "System.Diagnostics.Process.dll"))
