@@ -72,6 +72,24 @@
           ":cider"
         ]
       }
+    },
+    {
+      "name": "clojure-clr",
+      "projectType": "deps.edn",
+      "projectRootPath": [
+        "."
+      ],
+      "customJackInCommandLine": "cljr -M:dev:test:nrepl -m portal.nrepl",
+      "nReplPortFile": [
+        ".nrepl-port"
+      ],
+      "menuSelections": {
+        "cljAliases": [
+          ":dev",
+          ":test",
+          ":nrepl"
+        ]
+      }
     }
   ]
 }

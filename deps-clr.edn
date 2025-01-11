@@ -1,0 +1,11 @@
+{:paths ["src" "resources"]
+ :deps
+ {io.github.clojure/clr.data.json {:git/tag "v2.5.1" :git/sha "f84cb88"}}
+ :aliases
+ {:test
+  {:extra-paths ["test"]}
+  :dev
+  {:extra-paths ["dev"]}
+  :nrepl
+  {:extra-deps
+   {io.github.clojure/clr.tools.nrepl {:git/tag "v0.1.2-alpha2" :git/sha "a58009f"}}}}}

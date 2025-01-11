@@ -1,0 +1,130 @@
+(ns portal.nrepl
+  (:require [clojure.tools.nrepl :as nrepl]
+            [clojure.tools.nrepl.server.middleware :as middleware]
+            [portal.api :as p]))
+
+(defn- get-result [{response :response ex :ex :as x}]
+  (cond
+    (some? ex)
+    {:level  :error
+     :line   1
+     :column 1
+     :ns (:ns response)
+     :result (Throwable->map ex)}
+
+    (and (contains? response "value")
+         (not= (get response "value") ":portal.api/ignore"))
+    {:level  :info
+     :line   1
+     :column 1
+     :ns (:ns response)
+     :result *1}))
+
+(defn- portal-loaded? []
+  (some-> `p/sessions resolve (apply []) seq))
+
+(defn- wrap-portal* [{handler-msg :response-for :as response}]
+  (try
+    (when (and (portal-loaded?) (:file handler-msg))
+      (when-let [result (get-result response)]
+        (-> result
+            (merge
+             (select-keys handler-msg [:ns :file :column :line :code])
+             (when (= :load-file (:op handler-msg))
+               {:code (:file handler-msg)
+                :file (:file-path handler-msg)
+                :result (if (= :error (:level result))
+                          (:result result)
+                          [:load-file (:file-path handler-msg)])})
+             (when-let [report (some-> handler-msg :report deref not-empty)]
+               {:report report})
+             (when-let [stdio (some-> handler-msg :stdio deref not-empty)]
+               {:stdio stdio}))
+            (update :ns (fnil symbol 'user))
+            (assoc :time     (System.DateTime/Now)
+                    ;;   :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
+                   :runtime  (cond
+                            ;; (in-portal? handler-msg)   :portal
+                               :else                      :cljr))
+            (with-meta {::eval true
+                        :portal.viewer/for
+                        {:code :portal.viewer/code
+                         :time :portal.viewer/relative-time
+                         :ms   :portal.viewer/duration-ms}
+                        :portal.viewer/code {:language :clojure}})
+            tap>)))
+    (catch Exception e
+      (tap> (Throwable->map e))))
+  response)
+
+(def ^{::middleware/requires #{#'middleware/wrap-response-for}}
+  wrap-portal (map #'wrap-portal*))
+
+(def ^:private id-gen (atom 0))
+(def ^:private values (atom (sorted-map)))
+(defn- next-id [] (swap! id-gen inc))
+
+(defn- ->value [id]
+  (let [value (get @values id)]
+    (swap! values dissoc id)
+    value))
+
+(p/register! #'->value)
+
+(defn- ->id [value]
+  (let [id (next-id)]
+    (swap!
+     values
+     #(cond-> %
+        (> (count %) 32) (dissoc (ffirst %))
+        :always          (assoc id value)))
+    id))
+
+(defn- link-value [value]
+  (with-meta
+    (list `->value (->id value))
+    (-> (p/start {})
+        (select-keys  [:port :host])
+        (assoc :portal.nrepl/eval true :protocol "ws:"))))
+
+(defn- intercept-value [{response :response ex :ex handler-msg :response-for :as x}]
+  (cond
+    ;; (some? ex)
+    ;; (-> x
+    ;;     (assoc-in [:response "ns"] (:ns handler-msg))
+    ;;     ;; (assoc-in [:response "status"] #{"done"})
+    ;;     (assoc-in [:response "value"]
+    ;;               (binding [*print-meta* true]
+    ;;                 (pr-str (link-value ex)))))
+
+    (contains? response "value")
+    (assoc-in x [:response "value"]
+              (binding [*print-meta* true]
+                (pr-str (link-value *1))))
+
+    :else x))
+
+(defn- notebook? [{handler-msg :response-for}]
+  (and (= :eval (:op handler-msg))
+       (get-in handler-msg [:nrepl.middleware.eval/env "calva-notebook"])))
+
+(defn- wrap-notebook* [response]
+  (try
+    (if-not (notebook? response)
+      response
+      (intercept-value response))
+    (catch Exception e
+      (tap> (Throwable->map e))
+      response)))
+
+(def ^{::middleware/requires #{#'middleware/wrap-response-for}}
+  wrap-notebook (map #'wrap-notebook*))
+
+(def xform
+  (middleware/middleware->xform
+   (conj middleware/default-middleware #'wrap-portal #'wrap-notebook)))
+
+(defn -main [& _args]
+  (let [port 23456]
+    (nrepl/start-server! {:port port :xform xform})
+    (spit ".nrepl-port" port)))
