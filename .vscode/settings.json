@@ -7,6 +7,22 @@
   },
   "calva.replConnectSequences": [
     {
+      "name": "basic-clj",
+      "projectType": "deps.edn",
+      "projectRootPath": [
+        "."
+      ],
+      "extraNReplMiddleware": [
+        "portal.nrepl/middleware"
+      ],
+      "menuSelections": {
+        "cljAliases": [
+          ":dev",
+          ":cider"
+        ]
+      }
+    },
+    {
       "name": "shadow-cljs",
       "projectType": "deps.edn",
       "projectRootPath": [
