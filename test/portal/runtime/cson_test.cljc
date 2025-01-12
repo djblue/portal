@@ -1,9 +1,8 @@
 (ns portal.runtime.cson-test
   (:require [clojure.test :refer [deftest are is]]
             [portal.runtime.cson :as cson])
-  #?(:clj  (:import [java.util Date]
-                    [java.util UUID])
-     :cljr (:import [System DateTime Guid]
+  #?(:clj  (:import [java.util UUID])
+     :cljr (:import [System Guid]
                     [System.Text Encoding])))
 
 (defn pass [v]
@@ -125,9 +124,7 @@
     (is (= (seq a) (seq b)))))
 
 (def tagged
-  [#?(:clj  (Date.)
-      :cljr (DateTime/Now)
-      :cljs (js/Date.))
+  [#inst "2021-04-07T22:43:59.393-00:00"
    #?(:clj  (UUID/randomUUID)
       :cljr (Guid/NewGuid)
       :cljs (random-uuid))
@@ -136,7 +133,7 @@
 
 (deftest tagged-objects
   (doseq [value tagged]
-    (is (= (pass value) (pass value)))))
+    (is (= value (pass value)))))
 
 (defn meta* [v]
   #?(:bb (dissoc (meta v) :type) :cljr (meta v) :clj (meta v) :cljs (meta v)))
