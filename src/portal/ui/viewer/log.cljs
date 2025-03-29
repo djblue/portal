@@ -82,6 +82,7 @@
 (s/def ::level (set levels))
 
 (s/def ::ns symbol?)
+;; java.util.Date or js/Date
 (s/def ::time inst?)
 
 (s/def ::column int?)
@@ -89,7 +90,8 @@
 
 (s/def ::log
   (s/keys :req-un
-          [::level
+          [::result
+           ::level
            ::ns
            ::time
            ::line
