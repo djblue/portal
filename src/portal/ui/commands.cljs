@@ -771,7 +771,7 @@
 
 (defn ^:command toggle-expand
   "Expand or collapse currently selected values."
-  {:shortcuts [#{"e"} #{" "} ["z" "a"]]}
+  {:shortcuts [["e"] [" "] ["z" "a"]]}
   [state]
   (state/dispatch! state state/toggle-expand))
 
@@ -1057,8 +1057,7 @@
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)
-         (when-let [f (or (shortcuts/match @client-keymap log)
-                          (shortcuts/match (some-> opts :keymap deref) log))]
+         (when-let [f (shortcuts/match (merge @client-keymap (some-> opts :keymap deref)) log)]
            (when-let [{:keys [run]} (or (get @registry f)
                                         (get @runtime-registry f))]
              (shortcuts/matched! log)
