@@ -134,15 +134,26 @@
          (map set)
          (apply set/intersection))))
 
+(defn- get-selected-viewer
+  ([state context]
+   (get-selected-viewer state context (:value context)))
+  ([state context value]
+   (get-selected-viewer state context (state/get-location context) value))
+  ([state context location value]
+   (when-let [selected-viewer
+              (and (= (:value context) value)
+                   @(r/cursor state [:selected-viewers location]))]
+     (some #(when (= (:name %) selected-viewer) %) @api/viewers))))
+
+(defn- get-compatible-viewer [context value]
+  (first (get-compatible-viewers-1 @api/viewers (assoc context :value value))))
+
 (defn get-viewer
   ([state context]
    (get-viewer state context (:value context)))
   ([state context value]
-   (if-let [selected-viewer
-            (and (= (:value context) value)
-                 (get-in @state [:selected-viewers (state/get-location context)]))]
-     (some #(when (= (:name %) selected-viewer) %) @api/viewers)
-     (first (get-compatible-viewers-1 @api/viewers (assoc context :value value))))))
+   (or (get-selected-viewer state context value)
+       (get-compatible-viewer context value))))
 
 (defn set-viewer-1 [state context viewer-name]
   (let [location (state/get-location context)]
@@ -272,7 +283,7 @@
       :else   (= v (take a sub)))))
 
 (defn- all-locations [state context]
-  (let [search-text (:search-text @state)]
+  (let [search-text @(r/cursor state [:search-text])]
     (seq
      (reduce-kv
       (fn [out location search-text]
@@ -994,10 +1005,11 @@
              (= (:name viewer) :portal.viewer/inspector)
              (<= depth (:max-depth theme))))))
 
-(defn- get-info [state context value]
-  {:selected  (state/selected @state context)
-   :expanded? (state/expanded? @state context)
-   :viewer    (get-viewer state context value)})
+(defn- get-info [state context location value]
+  {:expanded? @(r/track state/expanded? state context)
+   :selected  @(r/track state/selected state context)
+   :viewer    (or @(r/track get-selected-viewer state context location value)
+                  (get-compatible-viewer context value))})
 
 (defn use-wrapper-options [context]
   (let [state          (state/use-state)
@@ -1036,8 +1048,9 @@
         selected   (:selected (use-options))
         state      (state/use-state)
         background (get-background)
-        multi?     @(r/track #(> (count (:selected @state)) 1))]
-    (when (and multi? selected)
+        multi?     (when selected
+                     @(r/track #(> (count @(r/cursor state [:selected])) 1)))]
+    (when multi?
       [s/div {:style
               {:position :absolute
                :font-size "0.8rem"
@@ -1142,7 +1155,7 @@
         location       (state/get-location context)
         theme          (theme/use-theme)
         {:keys [viewer selected expanded?] :as options}
-        @(r/track get-info state context value)
+        (get-info state context location value)
         options        (assoc options :ref ref :props props)
         type           (get-value-type value)
         component      (or
@@ -1171,13 +1184,10 @@
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
        context [component value]]]]))
 
-(defn- is-selected? [state context]
-  (some? (state/selected @state context)))
-
 (defn- tab-index [context]
   (let [ref      (react/useRef nil)
         state    (state/use-state)
-        selected @(r/track is-selected? state context)]
+        selected @(r/track state/selected state context)]
     (use-effect
      #js [selected (.-current ref)]
      (when (and selected (.hasFocus js/document))

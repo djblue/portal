@@ -70,7 +70,7 @@
 (defn deselect-context
   [state context multi?]
   (if-not multi?
-    (dissoc state :selected)
+    (assoc state :selected [])
     (update state :selected #(into [] (remove #{context}) %))))
 
 (defn get-location
@@ -80,11 +80,26 @@
     (select-keys context [:value :stable-path])
     {:context context}))
 
+(defn- =location [a b]
+  (and (= (:stable-path a) (:stable-path b))
+       (= (:value a) (:value b))))
+
+(defn- some-indexed
+  "(first (keep-indexed f coll))"
+  [f coll]
+  (let [n (count coll)]
+    (loop [i 0]
+      (if (== n i)
+        nil
+        (or (f i (get coll i))
+            (recur (inc i)))))))
+
 (defn selected [state context]
-  (some (fn [[index context']]
-          (when (= (get-location context') (get-location context))
-            index))
-        (map-indexed vector (:selected state))))
+  (some-indexed
+   (fn [index context']
+     (when (=location context' context)
+       index))
+   @(r/cursor state [:selected])))
 
 (defn clear-selected [state] (dissoc state :selected))
 
@@ -129,7 +144,9 @@
 
 (defn- expanded [state context]
   (let [depth     (:depth context)
-        expanded? (:expanded? state)
+        expanded? (if (or (nil? state) (map? state))
+                    (:expanded? state)
+                    @(r/cursor state [:expanded?]))
         location  (get-location context)]
     (or (get expanded? location)
         (some (fn [parent-context]
