@@ -111,26 +111,39 @@
       (catch Exception _))
     transport))
 
+(def ^:private ^:dynamic *test-report* nil)
+
+(defmulti ^:dynamic report (constantly :default))
+
+(defmethod report :default [message]
+  (when *test-report*
+    (swap! *test-report* conj message))
+  (when-let [f (get-method report (:type message))]
+    (f message)))
+
+(defn- add-method [^clojure.lang.MultiFn multifn dispatch-val f]
+  (.addMethod multifn dispatch-val f))
+
+(doseq [[dispatch-value f] (methods test/report)]
+  (add-method report dispatch-value f))
+
 (defn- wrap-portal* [handler msg]
-  (let [report         (atom [])
-        test-report    test/report
-        portal-report  (fn [value]
-                         (swap! report conj value)
-                         (test-report value))]
+  (let [test-report (atom [])]
     (handler
      (cond-> msg
        (#{"eval" "load-file"} (:op msg))
        (-> (update :transport
                    ->PortalTransport
                    (assoc msg
-                          :report report
+                          :report test-report
                           :stdio  (atom [])
                           :start  (System/nanoTime)
                           :time   (Date.)))
            (update :session
                    (fn [session]
                      (swap! session assoc
-                            #'test/report portal-report)
+                            #'test/report report
+                            #'*test-report* test-report)
                      session)))))))
 
 (defn wrap-portal
