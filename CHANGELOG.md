@@ -1,3 +1,16 @@
+## 0.59.0 - 2025-04-16
+
+- Upgrades Intellij plugin for 2025.1 cda2fa27
+  - Thanks @coyotesqrl!
+- Improve nrepl test reporting (#257) a642f1d2
+- Improve `:portal.viewer/log` spec 500352b8
+- Improve inspector performance 434538cc
+- Initial `portal.nrepl` implementation for CLR 0e632575
+- Improve CLR assembly loading 83905378
+- Update CLR to support editor extensions 2c53ff74
+- Fix cson serialization for fully qualified tagged literals f80c3839
+- Improve `portal.nrepl` error handling a42b2c74
+
 ## 0.58.5 - 2024-12-22
 
 - Improve `portal.nrepl/wrap-portal` support for cursive 6d2639f7

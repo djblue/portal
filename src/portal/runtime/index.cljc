@@ -2,7 +2,7 @@
 
 (defn html [{:keys [name version host port session-id code-url platform mode]
              :or   {name       "portal"
-                    version    "0.58.5"
+                    version    "0.59.0"
                     code-url   "main.js"
                     platform   #?(:bb "bb" :clj "jvm" :cljs "node" :cljr "clr")}}]
   (str
