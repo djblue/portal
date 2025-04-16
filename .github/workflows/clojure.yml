@@ -89,7 +89,7 @@ jobs:
     - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '6.x'
-    - run: dotnet tool install --global Clojure.Main
+    - run: dotnet tool install --global Clojure.Main --version 1.11.0
     - run: dotnet restore
     - run: bb -m tasks.test/cljr
   app:
