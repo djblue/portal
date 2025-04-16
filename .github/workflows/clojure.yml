@@ -46,6 +46,9 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
+    - uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: 135
     - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: rm package.json
@@ -62,6 +65,9 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
+    - uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: 135
     - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: rm package.json
@@ -78,6 +84,9 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+    - uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: 135
     - uses: actions/checkout@v3
     - uses: ./.github/setup
     - run: rm package.json
