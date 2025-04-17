@@ -4,7 +4,6 @@
             [planck.core :refer [exit]]
             [planck.environ :refer [env]]
             [portal.client.planck :as p]
-            [portal.runtime.bench-cson :as bench]
             [portal.runtime.cson-test]))
 
 (defmethod cljs.test/report [:cljs.test/default :end-run-tests] [m]
@@ -23,5 +22,4 @@
      value)))
 
 (defn -main []
-  (run-tests 'portal.runtime.cson-test)
-  (table (bench/run)))
+  (run-tests 'portal.runtime.cson-test))
