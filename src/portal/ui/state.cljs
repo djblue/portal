@@ -1,7 +1,7 @@
 (ns ^:no-doc portal.ui.state
-  (:require ["react" :as react]
-            [portal.async :as a]
+  (:require [portal.async :as a]
             [portal.colors :as c]
+            [portal.ui.react :as react]
             [portal.ui.select :as select]
             [reagent.core :as r]))
 
@@ -44,9 +44,9 @@
        (a/let [next-state (apply f @state args)]
          (when next-state (reset! state next-state)))))))
 
-(def ^:private state-context (react/createContext nil))
+(def ^:private state-context (react/create-context (r/atom {})))
 
-(defn use-state [] (react/useContext state-context))
+(defn use-state [] (react/use-context state-context))
 
 (defn with-state [state & children]
   (into [:r> (.-Provider state-context) #js {:value state}] children))

@@ -1,6 +1,5 @@
 (ns portal.ui.commands
-  (:require ["react" :as react]
-            [clojure.pprint :as pp]
+  (:require [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.walk :as walk]
@@ -12,7 +11,7 @@
             [portal.ui.inspector :as ins]
             [portal.ui.options :as options]
             [portal.ui.parsers :as p]
-            [portal.ui.react :refer [use-effect]]
+            [portal.ui.react :as react]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
@@ -49,20 +48,20 @@
      children)))
 
 (defonce ^:private handlers (atom {}))
-(def ^:private shortcut-context (react/createContext 0))
+(def ^:private shortcut-context (react/create-context 0))
 
 (defn- dispatch [log]
   (when-let [[_ f] (last (sort-by first < @handlers))]
     (f log)))
 
 (defn- with-shortcuts [f & children]
-  (let [i (react/useContext shortcut-context)]
-    (use-effect
+  (let [i (react/use-context shortcut-context)]
+    (react/use-effect
      #js [f]
      (swap! handlers assoc i f)
      (fn []
        (swap! handlers dissoc i)))
-    (use-effect
+    (react/use-effect
      :always
      (shortcuts/add! ::with-shortcuts dispatch)
      (fn []
@@ -1044,7 +1043,7 @@
   (let [state (state/use-state)
         value (state/get-selected-value @state)
         opts  (options/use-options)]
-    (use-effect
+    (react/use-effect
      #js [(hash value)]
      (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
        (reset!

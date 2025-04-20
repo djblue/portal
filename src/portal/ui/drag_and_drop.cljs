@@ -1,8 +1,8 @@
 (ns ^:no-doc portal.ui.drag-and-drop
-  (:require ["react" :as react]
-            [clojure.string :as string]
+  (:require [clojure.string :as string]
             [portal.async :as a]
             [portal.ui.parsers :as p]
+            [portal.ui.react :as react]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.viewer :as v]))
@@ -73,7 +73,7 @@
 
 (defn area [children]
   (let [state                 (state/use-state)
-        [active? set-active!] (react/useState false)]
+        [active? set-active!] (react/use-state false)]
     [s/div
      {:on-click #(set-active! false)
       :on-drag-over

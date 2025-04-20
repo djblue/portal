@@ -1,9 +1,8 @@
 (ns portal.ui.theme
-  (:require ["react" :as react]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.options :as opts]
-            [portal.ui.react :refer [use-effect]]))
+            [portal.ui.react :as react]))
 
 (defn ^:no-doc is-vs-code? []
   (-> js/document
@@ -47,8 +46,8 @@
 
 (defn- use-theme-detector []
   (let [media-query (.matchMedia js/window "(prefers-color-scheme: dark)")
-        [dark-theme set-dark-theme!] (react/useState (.-matches media-query))]
-    (use-effect
+        [dark-theme set-dark-theme!] (react/use-state (.-matches media-query))]
+    (react/use-effect
      :once
      (let [listener (fn [e] (set-dark-theme! (.-matches e)))]
        (.addListener media-query listener)
@@ -57,17 +56,16 @@
     dark-theme))
 
 (defn- use-vscode-theme-detector []
-  (let [[change-id set-change-id!] (react/useState 0)]
+  (let [[change-id set-change-id!] (react/use-state 0)]
     (when (is-vs-code?)
-      (react/useEffect
-       (fn []
-         (let [observer (js/MutationObserver. #(set-change-id! inc))]
-           (.observe observer
-                     js/document.documentElement
-                     #js {:attributes true
-                          :attributeFilter #js ["style"]})
-           #(.disconnect observer)))
-       #js []))
+      (react/use-effect
+       :once
+       (let [observer (js/MutationObserver. #(set-change-id! inc))]
+         (.observe observer
+                   js/document.documentElement
+                   #js {:attributes true
+                        :attributeFilter #js ["style"]})
+         #(.disconnect observer))))
     change-id))
 
 (defn- default-theme [dark-theme]
@@ -76,9 +74,9 @@
     dark-theme    ::c/nord
     :else         ::c/nord-light))
 
-(defonce ^:private theme-context (react/createContext nil))
+(defonce ^:private theme-context (react/create-context nil))
 
-(defn use-theme [] (react/useContext theme-context))
+(defn use-theme [] (react/use-context theme-context))
 
 (defn with-theme+ [theme & children]
   (let [theme (merge (use-theme) theme)]
@@ -86,7 +84,7 @@
 
 (defn ^:no-doc with-background []
   (let [background (::c/background (use-theme))]
-    (use-effect
+    (react/use-effect
      #js [background]
      (set! (.. js/document -body -style -backgroundColor) background))
     nil))
@@ -101,15 +99,15 @@
   (cycle [::c/diff-remove ::c/diff-add ::c/keyword ::c/tag ::c/number ::c/uri]))
 
 (defonce ^:private rainbow
-  (react/createContext order))
+  (react/create-context order))
 
 (defn cycle-rainbow [& children]
-  (let [order (react/useContext rainbow)]
+  (let [order (react/use-context rainbow)]
     (into [:r> (.-Provider rainbow)
            #js {:value (rest order)}]
           children)))
 
 (defn use-rainbow []
   (let [theme (use-theme)
-        order (react/useContext rainbow)]
+        order (react/use-context rainbow)]
     (get theme (first order))))

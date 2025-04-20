@@ -1,22 +1,22 @@
 (ns ^:no-doc portal.ui.viewer.table
-  (:require ["react" :as react]
-            [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.filter :as f]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
+            [portal.ui.react :as react]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [reagent.core :as r]))
 
-(defonce ^:private hover (react/createContext nil))
+(defonce ^:private hover (react/create-context nil))
 
 (defn- with-hover [& children]
   (r/with-let [value (r/atom nil)]
     (into [:r> (.-Provider hover) #js {:value value}] children)))
 
-(defn- use-hover [] (react/useContext hover))
+(defn- use-hover [] (react/use-context hover))
 
 (defn- hover? [hover selector value] (= (selector @hover) value))
 

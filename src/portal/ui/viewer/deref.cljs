@@ -1,9 +1,9 @@
 (ns ^:no-doc portal.ui.viewer.deref
-  (:require ["react" :as react]
-            [portal.colors :as c]
+  (:require [portal.colors :as c]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as options]
+            [portal.ui.react :as react]
             [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
@@ -18,7 +18,7 @@
         opts   (options/use-options)
         value' @value
         deref? (some-> opts :watch-registry deref (contains? value))
-        [hover set-hover!] (react/useState false)]
+        [hover set-hover!] (react/use-state false)]
     [d/div
      {:style
       {:top        0

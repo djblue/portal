@@ -1,12 +1,11 @@
 (ns ^:no-doc portal.ui.viewer.vega
   "Viewer for the Vega-Lite specification
   https://vega.github.io/vega/docs/specification/"
-  (:require ["react" :as react]
-            ["vega-embed" :as vegaEmbed]
+  (:require ["vega-embed" :as vegaEmbed]
             [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.inspector :as ins]
-            [portal.ui.react :refer [use-effect]]
+            [portal.ui.react :as react]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
@@ -82,9 +81,9 @@
     (reduce m maps)))
 
 (defn- use-resize []
-  (let [ref              (react/useRef nil)
-        [rect set-rect!] (react/useState #js {:height 200 :width 200})]
-    (use-effect
+  (let [ref              (react/use-ref)
+        [rect set-rect!] (react/use-state #js {:height 200 :width 200})]
+    (react/use-effect
      #js [(.-current ref)]
      (when-let [el (.-current ref)]
        (let [resize-observer
@@ -100,8 +99,8 @@
   (let [theme (theme/use-theme)
         doc (deep-merge (default-config theme) value {:title ""})
 
-        view             (react/useRef nil)
-        [init set-init!] (react/useState false)
+        view             (react/use-ref)
+        [init set-init!] (react/use-state false)
 
         [absolute absolute-rect] (use-resize)
         height (.-height absolute-rect)
@@ -109,7 +108,7 @@
         [relative relative-rect] (use-resize)
         width (.-width relative-rect)]
 
-    (use-effect
+    (react/use-effect
      #js [(hash theme)]
      (when-let [el (.-current absolute)]
        (-> (vegaEmbed el (clj->js (assoc doc :width width)) (clj->js opts))
@@ -121,7 +120,7 @@
         (.finalize view)
         (set! (.-current view) nil)))
 
-    (use-effect
+    (react/use-effect
      #js [init (.-current view) width]
      (when-let [view (.-current view)]
        (let [width (- width 2

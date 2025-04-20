@@ -1,6 +1,5 @@
 (ns ^:no-doc portal.ui.app
-  (:require ["react" :as react]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.api :as api]
             [portal.ui.commands :as commands]
@@ -9,7 +8,7 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
-            [portal.ui.react :refer [use-effect]]
+            [portal.ui.react :as react]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
@@ -148,11 +147,11 @@
         header     (if (= :dev (:mode opts))
                      (::c/diff-add theme)
                      (::c/background2 theme))]
-    (use-effect
+    (react/use-effect
      #js [header]
      (state/set-theme header)
      (state/notify-parent {:type :set-theme :color header}))
-    (use-effect
+    (react/use-effect
      #js [opts]
      (when-let [{:keys [name platform version]} opts]
        (state/set-title!
@@ -164,11 +163,10 @@
   (let [state (state/use-state)
         theme (theme/use-theme)
         timeout (:timeout notification)]
-    (react/useEffect
-     (fn []
-       (when timeout
-         (js/setTimeout #(state/dispatch! state state/dismiss notification) timeout)))
-     #js [])
+    (react/use-effect
+     :once
+     (when timeout
+       (js/setTimeout #(state/dispatch! state state/dismiss notification) timeout)))
     [s/div
      {:style
       {:display :flex
@@ -213,7 +211,7 @@
        [display-notification notification]))))
 
 (defn- search-input []
-  (let [ref      (react/useRef nil)
+  (let [ref      (react/use-ref nil)
         theme    (theme/use-theme)
         state    (state/use-state)
         context  (state/get-selected-context @state)
@@ -221,7 +219,7 @@
         color    (if-let [depth (:depth context)]
                    (nth theme/order depth)
                    ::c/border)]
-    (use-effect
+    (react/use-effect
      :always
      (swap! commands/search-refs conj ref)
      #(swap! commands/search-refs disj ref))
@@ -356,8 +354,8 @@
 (defn inspect-1 [value]
   (let [theme (theme/use-theme)
         state (state/use-state)
-        ref   (react/useRef)]
-    (use-effect
+        ref   (react/use-ref)]
+    (react/use-effect
      #js [(.-current ref)]
      (when-let [el (.-current ref)]
        (state/dispatch! state assoc :scroll-element el)))

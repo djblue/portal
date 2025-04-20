@@ -1,13 +1,12 @@
 (ns ^:no-doc portal.ui.core
-  (:require ["react" :as react]
-            [portal.async :as a]
+  (:require [portal.async :as a]
             [portal.extensions.vs-code-notebook :as notebook]
             [portal.ui.api :as api]
             [portal.ui.app :as app]
             [portal.ui.cljs :as cljs]
             [portal.ui.inspector :as ins]
             [portal.ui.options :as opts]
-            [portal.ui.react :refer [use-effect]]
+            [portal.ui.react :as react]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [reagent.core :as r]
@@ -16,8 +15,8 @@
 (def functional-compiler (r/create-compiler {:function-components true}))
 
 (defn- custom-app [opts]
-  (let [[app set-app!] (react/useState nil)]
-    (use-effect
+  (let [[app set-app!] (react/use-state nil)]
+    (react/use-effect
      :once
      (a/let [_   (cljs/eval-string {:code (str "(require '" (namespace (:main opts)) ")")})
              res (cljs/eval-string {:code (str (:main opts)) :context :expr})]

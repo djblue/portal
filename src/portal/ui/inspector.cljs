@@ -1,7 +1,6 @@
 (ns portal.ui.inspector
   (:refer-clojure :exclude [coll? map? char?])
   (:require ["anser" :as anser]
-            ["react" :as react]
             [clojure.set :as set]
             [clojure.string :as str]
             [portal.async :as a]
@@ -12,7 +11,7 @@
             [portal.ui.filter :as f]
             [portal.ui.icons :as icons]
             [portal.ui.lazy :as l]
-            [portal.ui.react :refer [use-effect]]
+            [portal.ui.react :as react]
             [portal.ui.rpc.runtime :as rt]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
@@ -165,17 +164,17 @@
 (defn set-viewer! [state contexts viewer-name]
   (state/dispatch! state set-viewer contexts viewer-name))
 
-(def ^:private parent-context (react/createContext nil))
+(def ^:private parent-context (react/create-context nil))
 
-(defn- use-parent [] (react/useContext parent-context))
+(defn- use-parent [] (react/use-context parent-context))
 
 (defn- with-parent [context & children]
   (into [:r> (.-Provider parent-context) #js {:value context}] children))
 
 (def ^:private inspector-context
-  (react/createContext {:depth 0 :path [] :stable-path [] :alt-bg false}))
+  (react/create-context {:depth 0 :path [] :stable-path [] :alt-bg false}))
 
-(defn use-context [] (react/useContext inspector-context))
+(defn use-context [] (react/use-context inspector-context))
 
 (defn with-depth [& children]
   (let [context (use-context)]
@@ -230,9 +229,9 @@
 (defn with-readonly [& children]
   (into [with-context {:readonly? true}] children))
 
-(defonce ^:private options-context (react/createContext nil))
+(defonce ^:private options-context (react/create-context nil))
 
-(defn use-options [] (react/useContext options-context))
+(defn use-options [] (react/use-context options-context))
 
 (defn- with-options [options & children]
   (into [:r> (.-Provider options-context) #js {:value options}] children))
@@ -366,7 +365,7 @@
 (defn tabs [value]
   (let [theme   (theme/use-theme)
         options (keys value)
-        [option set-option!] (react/useState (first options))
+        [option set-option!] (react/use-state (first options))
         background (get-background)]
     [s/div
      {:style
@@ -495,7 +494,7 @@
       (:title props)]]))
 
 (defn- collection-header [values]
-  (let [[show-meta? set-show-meta!] (react/useState false)
+  (let [[show-meta? set-show-meta!] (react/use-state false)
         theme    (theme/use-theme)
         metadata (dissoc
                   (meta values)
@@ -594,7 +593,7 @@
          (catch :default _e values))))
 
 (defn use-sort-map [values]
-  (react/useMemo #(try-sort-map values) #js [values]))
+  (react/use-memo #js [values] (try-sort-map values)))
 
 (defn- container-map [child]
   (let [theme (theme/use-theme)]
@@ -1149,7 +1148,7 @@
      children)))
 
 (defn- inspector* [context value]
-  (let [ref            (react/useRef nil)
+  (let [ref            (react/use-ref)
         props          (:props (meta context))
         state          (state/use-state)
         location       (state/get-location context)
@@ -1165,14 +1164,14 @@
                           (get-inspect-component type)
                           (get-preview-component type)))]
     (select/use-register-context context viewer)
-    (use-effect
+    (react/use-effect
      #js [(hash location) (some? expanded?)]
      (when (and (nil? expanded?)
                 (default-expand? state theme context value))
        (state/dispatch!
         state assoc-in [:expanded? location]
         (get-in (meta value) [:portal.viewer/inspector :expanded] 1))))
-    (use-effect
+    (react/use-effect
      #js [selected (.-current ref)]
      (when (and selected
                 (not= (.. js/document -activeElement -tagName) "INPUT"))
@@ -1185,10 +1184,10 @@
        context [component value]]]]))
 
 (defn- tab-index [context]
-  (let [ref      (react/useRef nil)
+  (let [ref      (react/use-ref)
         state    (state/use-state)
         selected @(r/track state/selected state context)]
-    (use-effect
+    (react/use-effect
      #js [selected (.-current ref)]
      (when (and selected (.hasFocus js/document))
        (some-> ref .-current (.focus #js {:preventScroll true}))))

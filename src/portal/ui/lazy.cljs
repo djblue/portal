@@ -1,7 +1,6 @@
 (ns ^:no-doc portal.ui.lazy
   (:refer-clojure :exclude [lazy-seq])
-  (:require ["react" :as react]
-            [portal.ui.react :refer [use-effect]]
+  (:require [portal.ui.react :as react]
             [portal.ui.state :as state]
             [reagent.core :as r])
   (:require-macros portal.ui.lazy))
@@ -14,8 +13,8 @@
               (+ sum (.-intersectionRatio entry)))) 0 entries)))
 
 (defn- observer-visible-sensor [f]
-  (let [ref (react/useRef nil)]
-    (use-effect
+  (let [ref (react/use-ref)]
+    (react/use-effect
      #js [(.-current ref) f]
      (when (.-current ref)
        (let [observer
@@ -42,9 +41,9 @@
          (< (.-left rect) (- width buffer)))))
 
 (defn- fallback-visible-sensor [f]
-  (let [ref       (react/useRef nil)
+  (let [ref       (react/use-ref)
         container (:scroll-element @(state/use-state))]
-    (use-effect
+    (react/use-effect
      #js [(.-current ref) f container]
      (when (some-> ref .-current element-visible?)
        (f))
@@ -63,7 +62,7 @@
     [fallback-visible-sensor f]))
 
 (defn use-visible []
-  (let [[visible? set-visible!] (react/useState false)]
+  (let [[visible? set-visible!] (react/use-state false)]
     [(when-not visible?
        [visible-sensor #(set-visible! true)])
      visible?]))
@@ -80,10 +79,10 @@
            [visible-sensor
             (fn [] (swap! n (fnil + default-take) step))])]))))
 
-(defn use-lazy* [k f] (react/useMemo (fn [] [lazy-seq (f)]) #js [k]))
+(defn use-lazy* [k f] (react/use-memo #js [k] [lazy-seq (f)]))
 
 (defn lazy-render [child]
-  (let [[show set-show!] (react/useState false)]
+  (let [[show set-show!] (react/use-state false)]
     (if show
       child
       [:<>

@@ -1,17 +1,16 @@
 (ns ^:no-doc portal.ui.viewer.cljdoc
-  (:require ["react" :as react]
-            [portal.colors :as c]
+  (:require [portal.colors :as c]
             [portal.ui.inspector :as ins]
-            [portal.ui.react :refer [use-effect]]
+            [portal.ui.react :as react]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(def ^:private observer-context (react/createContext nil))
+(def ^:private observer-context (react/create-context nil))
 
 (defn- with-observer [f & children]
-  (let [[observer set-observer!] (react/useState nil)]
-    (use-effect
+  (let [[observer set-observer!] (react/use-state nil)]
+    (react/use-effect
      #js [f]
      (set-observer!
       (js/IntersectionObserver.
@@ -35,10 +34,10 @@
             children))))
 
 (defn- use-observer ^js [id]
-  (let [ref      (react/useRef nil)
-        observer (react/useContext observer-context)
+  (let [ref      (react/use-ref)
+        observer (react/use-context observer-context)
         id       (str id)]
-    (use-effect
+    (react/use-effect
      #js [id ref observer]
      (when-let [el (.-current ref)]
        (.setAttribute el "data-observer" id)
@@ -46,9 +45,9 @@
        #(.unobserve observer el)))
     ref))
 
-(def ^:private index-context (react/createContext 0))
+(def ^:private index-context (react/create-context 0))
 
-(defn- use-index [] (react/useContext index-context))
+(defn- use-index [] (react/use-context index-context))
 
 (defn- with-index [index & children]
   (into [:r> (.-Provider index-context) #js {:value index}] children))
@@ -214,7 +213,7 @@
         padding                (* 3 (:padding theme))
         background             (ins/get-background)
         tree                   (:cljdoc.doc/tree value)
-        [visible set-visible!] (react/useState nil)]
+        [visible set-visible!] (react/use-state nil)]
     [with-observer
      #(set-visible! (merge visible %))
      [s/div

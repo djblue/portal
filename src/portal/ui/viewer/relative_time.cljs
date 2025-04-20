@@ -1,8 +1,7 @@
 (ns ^:no-doc portal.ui.viewer.relative-time
   (:refer-clojure :exclude [second])
-  (:require ["react" :as react]
-            [clojure.spec.alpha :as s]
-            [portal.ui.react :refer [use-effect]]
+  (:require [clojure.spec.alpha :as s]
+            [portal.ui.react :as react]
             [portal.ui.styled :as d]
             [portal.ui.viewer.date-time :as date-time]))
 
@@ -64,8 +63,8 @@
 
 (defn inspect-relative [value]
   (let [value          (date-time/parse value)
-        [now set-now!] (react/useState (js/Date.))]
-    (use-effect
+        [now set-now!] (react/use-state (js/Date.))]
+    (react/use-effect
      :once
      (let [i (js/setInterval
               (fn []

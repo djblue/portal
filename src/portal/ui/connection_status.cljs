@@ -1,6 +1,6 @@
 (ns ^:no-doc portal.ui.connection-status
   (:require [portal.async :as a]
-            [portal.ui.react :refer [use-effect]]
+            [portal.ui.react :as react]
             [portal.ui.state :as state]))
 
 (defn- timeout [ms]
@@ -17,8 +17,8 @@
    :message "Runtime disconnected"})
 
 (defn- use-conn-poll []
-  (let [state  (state/use-state)]
-    (use-effect
+  (let [state (state/use-state)]
+    (react/use-effect
      #js [state]
      (let [last-poller (atom nil)
            poller (fn poller []
