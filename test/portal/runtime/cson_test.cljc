@@ -87,7 +87,9 @@
 
 (deftest range-with-meta
   (let [v (with-meta (range 0 5 1.0) {:my :meta})]
-    #?(:clj  (is (= '() (pass v)) "Range with meta doesn't work in clj")
+    #?(:clj  (if (< 11 (:minor *clojure-version*))
+               (is (= v (pass v)) "Range with meta works in clj 11 and after")
+               (is (= '() (pass v)) "Range with meta doesn't work in clj 10 or before"))
        :cljr (is (= v (pass v))  "Range with meta works in cljr")
        :cljs (is (= v (pass v))  "Range with meta works in cljs")))
   (let [v (range 0 5 1.0)]
