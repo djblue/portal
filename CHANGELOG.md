@@ -1,3 +1,8 @@
+## 0.59.1 - 2025-05-07
+
+- Fix recent regression in `portal.nrepl` for test output capturing cd3fa66c
+- Fix precedence for runtime shortcuts 8ce3879a
+
 ## 0.59.0 - 2025-04-16
 
 - Upgrades Intellij plugin for 2025.1 cda2fa27
