@@ -2,15 +2,22 @@
   #?(:joyride (:import)
      :clj     (:require [clojure.java.io :as io])
      :portal  (:import)
-     :cljs    (:require-macros portal.console)))
+     :cljs    (:require-macros portal.console)
+     :lpy     (:import [datetime :as datetime])))
 
 (defn ^:no-doc now []
-  #?(:clj (java.util.Date.) :cljs (js/Date.) :cljr (DateTime/Now)))
+  #?(:clj  (java.util.Date.)
+     :cljs (js/Date.)
+     :cljr (DateTime/Now)
+     :lpy  (.now datetime/datetime)))
 
 (defn ^:no-doc run [f]
   (try
     [nil (f)]
-    (catch #?(:clj Exception :cljs :default :cljr Exception) ex
+    (catch #?(:clj Exception
+              :cljs :default
+              :cljr Exception
+              :lpy Exception) ex
       [:throw ex])))
 
 (defn ^:no-doc runtime []
@@ -20,7 +27,8 @@
      :bb :bb
      :clj :clj
      :cljs :cljs
-     :cljr :cljr))
+     :cljr :cljr
+     :lpy :py))
 
 #?(:clj
    (defn ^:no-doc get-file [env file]
@@ -32,7 +40,10 @@
 
 #_{:clj-kondo/ignore #?(:cljs [:unused-binding] :default [])}
 (defn ^:no-doc capture [level form expr env]
-  (let [{:keys [line column file]} (meta form)]
+  (let [#?(:lpy     {line   :basilisp.lang.reader/line
+                     column :basilisp.lang.reader/col}
+           :default {:keys [line column file]})
+        (meta form)]
     `(let [[flow# result#] (run (fn [] ~expr))]
        (tap>
         (with-meta
@@ -45,7 +56,8 @@
                          :joyride '*file*
                          :org.babashka/nbb *file*
                          :cljs file
-                         :cljr *file*)
+                         :cljr *file*
+                         :lpy  "unknown")
            :line     ~line
            :column   ~column
            :time     (now)

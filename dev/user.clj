@@ -22,6 +22,7 @@
 
   (p/clear)
   (p/close)
+  (p/stop)
   (p/docs {:mode :dev})
 
   (def portal (p/open {:launcher :auto}))

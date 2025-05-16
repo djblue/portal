@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [test])
   (:require [babashka.fs :as fs]
             [tasks.build :refer [build install]]
+            [tasks.py :as py]
             [tasks.tools :as t]))
 
 (defn cljs* [deps main]
@@ -59,6 +60,10 @@
 (defn cljr []
   (build)
   (t/cljr "-m" :portal.test-clr))
+
+(defn lpy []
+  (py/install)
+  (t/lpy :run "-n" :portal.test-runner))
 
 (defn test* []
   (future (cljs-runtime "1.10.773"))

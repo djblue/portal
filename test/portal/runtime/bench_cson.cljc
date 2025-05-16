@@ -155,3 +155,5 @@
 (defn run [] (table (run-benchmark)))
 
 (defn -main [] (p/submit (run-benchmark)))
+
+#?(:lpy (-main))

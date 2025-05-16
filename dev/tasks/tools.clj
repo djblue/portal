@@ -89,3 +89,14 @@
                     (str/join (System/getProperty "path.separator")
                               ["src" "resources" "dev" "test"]))]
     (apply sh :Clojure.Main args)))
+
+(def py     (partial #'sh :python3))
+(def pip    (partial #'sh "./target/py/bin/pip"))
+
+(defn lpy [& args]
+  (binding [*opts*
+            (assoc *opts*
+                   :inherit true
+                   :extra-env
+                   {"PYTHONPATH" "src:test"})]
+    (apply sh "./target/py/bin/basilisp" args)))

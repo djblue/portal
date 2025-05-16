@@ -56,7 +56,10 @@
              :icon (inline "runtime/portal.svg")}
    :joyride {:color ::c/exception
              :title "Joyride"
-             :icon (inline "runtime/joyride.svg")}})
+             :icon (inline "runtime/joyride.svg")}
+   :py      {:color ::c/tag
+             :title "Python"
+             :icon (inline "runtime/python.svg")}})
 
 (defn icon
   ([value]

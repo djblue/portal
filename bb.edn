@@ -17,4 +17,5 @@
          ide    tasks.ide/open
          pkg    tasks.package/all
          deploy tasks.deploy/all
+         py     tasks.py/-main
          bench  tasks.bench/-main}}

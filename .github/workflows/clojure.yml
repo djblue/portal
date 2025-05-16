@@ -102,9 +102,32 @@ jobs:
     - run: dotnet tool install --global Clojure.Main --version ${{ matrix.version }}
     - run: dotnet restore
     - run: bb -m tasks.test/cljr
+  test-py:
+    needs: [ setup, build ]
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: 135
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - run: rm package.json
+    - run: npm install "react@^17.0.2"
+    - uses: actions/download-artifact@v4
+      with:
+        name: portal-client
+        path: resources/portal
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - run: pip install virtualenv
+    - run: bb -m tasks.test/lpy
   app:
     runs-on: ubuntu-latest
-    needs: [ test-ui, test-clj, test-cljs, test-cljr, check ]
+    needs: [ test-ui, test-clj, test-cljs, test-cljr, test-py, check ]
     if: github.event_name == 'push'
     steps:
     - uses: actions/checkout@v3
@@ -117,7 +140,7 @@ jobs:
         force_orphan: true
   package:
     runs-on: ubuntu-latest
-    needs: [ test-ui, test-clj, test-cljs, test-cljr, check ]
+    needs: [ test-ui, test-clj, test-cljs, test-cljr, test-py, check ]
     if: startsWith(github.event.head_commit.message, 'Release ')
     steps:
     - uses: actions/checkout@v3

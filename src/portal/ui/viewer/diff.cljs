@@ -13,13 +13,13 @@
 
 (extend-protocol cson/ToJson
   diff/Deletion
-  (-to-json [this buffer] (cson/tag buffer "diff/Deletion" (:- this)))
+  (to-json* [this buffer] (cson/tag buffer "diff/Deletion" (:- this)))
 
   diff/Insertion
-  (-to-json [this buffer] (cson/tag buffer "diff/Insertion" (:+ this)))
+  (to-json* [this buffer] (cson/tag buffer "diff/Insertion" (:+ this)))
 
   diff/Mismatch
-  (-to-json [this buffer] (cson/tag buffer "diff/Mismatch" ((juxt :- :+) this))))
+  (to-json* [this buffer] (cson/tag buffer "diff/Mismatch" ((juxt :- :+) this))))
 
 (defmethod rpc/-read "diff/Deletion"  [_ value] (diff/Deletion. value))
 (defmethod rpc/-read "diff/Insertion" [_ value] (diff/Insertion. value))

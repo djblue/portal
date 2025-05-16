@@ -15,7 +15,8 @@
    (for [f [#(t/clj "-M:test" "-m" :portal.runtime.bench-cson)
             #(t/bb "-m" :portal.runtime.bench-cson)
             #(t/cljr "-m" :portal.runtime.bench-cson)
-            #(t/nbb "-m" :portal.runtime.bench-cson)]]
+            #(t/nbb "-m" :portal.runtime.bench-cson)
+            #_#(t/lpy :run "-n" :portal.runtime.bench-cson)]]
      (future (with-out-data (f))))))
 
 (def windows

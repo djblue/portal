@@ -11,6 +11,8 @@
      (throw (ex-info "transit/read not supported in nbb" {:string string}))
      :joyride
      (throw (ex-info "transit/read not supported in joyride" {:string string}))
+     :lpy
+     (throw (ex-info "transit/read not supported in basilisp" {:string string}))
 
      :clj  (-> ^String string
                .getBytes
@@ -24,6 +26,8 @@
      (throw (ex-info "transit/write not supported in nbb" {:value value}))
      :joyride
      (throw (ex-info "transit/write not supported in joyride" {:value value}))
+     :lpy
+     (throw (ex-info "transit/read not supported in basilisp" {:string string}))
 
      :clj (let [out (ByteArrayOutputStream. 1024)]
             (transit/write

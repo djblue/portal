@@ -23,3 +23,5 @@ clojure.data.json*
 *.iml
 
 obj/
+
+**__pycache__**

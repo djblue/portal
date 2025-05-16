@@ -1,0 +1,91 @@
+(ns ^:no-doc portal.runtime.python.server
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]
+            [portal.runtime :as rt]
+            [portal.runtime.cson :as cson]
+            [portal.runtime.fs :as fs]
+            [portal.runtime.index :as index]
+            [portal.runtime.json :as json]
+            [portal.runtime.npm :as npm]
+            [portal.runtime.rpc :as rpc])
+  (:import [uuid :as uuid]))
+
+(defmulti route (juxt :request-method :uri))
+
+(defmethod route :default [_request]
+  {:status 400})
+
+(defmethod route [:get "/rpc"] [request]
+  (let [session (rt/open-session (:session request))]
+    {:ring.websocket/listener (rpc/listener session)}))
+
+(defn- send-resource [content-type resource]
+  {:status  200
+   :headers {"Content-Type" content-type}
+   :body    resource})
+
+(defmethod route [:get "/icon.svg"] [_]
+  {:status  200
+   :headers {"Content-Type" "image/svg+xml"}
+   :body (slurp "resources/portal/icon.svg")})
+
+(defmethod route [:get "/main.js"] [request]
+  {:status  200
+   :headers {"Content-Type" "text/javascript"}
+   :body
+   (slurp
+    (case (-> request :session :options :mode)
+      :dev "resources/portal-dev/main.js"
+      "resources/portal/main.js"))})
+
+(defn- get-session-id [request]
+  ;; There might be a referrer which is not a UUID in standalone mode.
+  (try
+    (some->
+     (or (:query-string request)
+         (when-let [referer (get-in request [:headers "referer"])]
+           (last (str/split referer #"\?"))))
+     uuid/UUID)
+    (catch Exception _ nil)))
+
+(defn- with-session [request]
+  (if-let [session-id (get-session-id request)]
+    (assoc request :session (rt/get-session session-id))
+    request))
+
+(defn- body [{:keys [body headers]}]
+  (case (get headers "content-type")
+    "application/json" (json/read body)
+    "application/cson" (cson/read body)
+    "application/edn"  (edn/read-string body)))
+
+(defmethod route [:post "/submit"] [request]
+  (rt/update-value (body request))
+  {:status  204
+   :headers {"Access-Control-Allow-Origin" "*"}})
+
+(defmethod route [:get "/"] [request]
+  (if-let [session (:session request)]
+    (send-resource "text/html" (index/html (:options session)))
+    (let [session-id (random-uuid)]
+      (swap! rt/sessions assoc session-id {})
+      {:status 307 :headers {"Location" (str "?" session-id)}})))
+
+(defn- ->headers [request]
+  (let [headers (.-headers request)]
+    (persistent!
+     (reduce
+      (fn [out header]
+        (assoc! out (str/lower-case header) (.get headers header)))
+      (transient {})
+      headers))))
+
+(defn ^:async handler [request]
+  (-> {:request-method (keyword (str/lower-case (.-method request)))
+       :uri (.-path request)
+       :query-string (not-empty (.-query_string request))
+       :headers (->headers request)
+       :body (when (.-body_exists request)
+               (await (.text request)))}
+      with-session
+      route))
