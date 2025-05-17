@@ -2,6 +2,8 @@
   (:require [clojure.edn :as edn]
             [examples.data :as d]
             [portal.bench :as b]
+            [portal.client :as p]
+            [portal.console :as console]
             [portal.runtime.cson :as cson]
             [portal.runtime.transit :as transit]
             [portal.viewer :as v]))
@@ -13,16 +15,20 @@
    :data-visualization d/data-visualization
    :string-data d/string-data
    :log-data d/log-data
-   :profile-data d/log-data
+   :profile-data d/profile-data
    :prepl-data d/prepl-data
    :exception-data d/exception-data
    :http-requests d/http-requests
    :http-responses d/http-responses})
 
-(defn- pr-meta [v] (binding [*print-meta* true] (pr-str v)))
+(defn- pr-meta [v]
+  (binding [*print-meta* true]
+    (pr-str v)))
 
 (def ^:private formats
-  #?(:org.babashka/nbb [:edn :cson] :default [:transit :edn :cson]))
+  #?(:org.babashka/nbb [:edn :cson]
+     :cljr [:edn :cson]
+     :default [:transit :edn :cson]))
 
 (defn run-benchmark []
   (doall
@@ -35,27 +41,40 @@
            :transit (let [value (transit/write value)]
                       (b/run (transit/read value) n))
            :edn     (let [value (pr-meta value)]
-                      (b/run (edn/read-string value) n))
+                      (try
+                        (b/run (edn/read-string value) n)
+                        (catch #?(:cljs :default :default Exception) e
+                          (tap> e)
+                          (throw e))))
            :cson    (let [value (cson/write value)]
                       (b/run (cson/read value) n)))
          {:test :read
           :encoding encoding
           :data data
+          :runtime (console/runtime)
           :benchmark (pr-str (keyword (name encoding) "read"))}))
       (for [[data value] bench-data
-            encoding formats]
+            encoding (conj formats :cson-cond)]
         (merge
          (case encoding
            :transit (b/run (transit/write value) n)
            :edn     (b/run (pr-meta value) n)
-           :cson    (b/run (cson/write value) n))
+           :cson    (b/run (cson/write value) n)
+           :cson-cond
+           (b/run (cson/write value {::cson/dispatch :cond}) n))
          {:test :write
           :encoding encoding
           :data data
+          :runtime (console/runtime)
           :benchmark (pr-str (keyword (name encoding) "write"))}))))))
 
 (defn charts [data]
-  (->> (group-by :data data)
+  (->> data
+       (map (fn [{:keys [encoding runtime test] :as x}]
+              (assoc x
+                     :benchmark
+                     (str (name runtime) "/" (name encoding) "/" (name test)))))
+       (group-by :data)
        (sort-by
         (fn [[_ values]]
           (reduce
@@ -80,7 +99,7 @@
                     :y {:field :benchmark
                         :type :ordinal
                         :sort {:op :sum :field :total :order :descending}}
-                    :color {:field :encoding}}}
+                    :color {:field :runtime}}}
                   (v/vega-lite)
                   (vary-meta assoc :value (get bench-data label bench-data)))]]
             {:key (str label)})))
@@ -133,11 +152,6 @@
                :sort {:op :sum :field :total :order :descending}}
      :color {:field :benchmark}}}))
 
-(comment
-  (def data (run-benchmark))
-  (tap> [data (table data) (charts data) (combined-chart data)])
-
-  (def no-edn (remove (comp #{:edn} :encoding) data))
-  (tap> [no-edn (table no-edn) (charts no-edn) (combined-chart no-edn)]))
-
 (defn run [] (table (run-benchmark)))
+
+(defn -main [] (p/submit (run-benchmark)))

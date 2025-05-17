@@ -1,7 +1,6 @@
 (ns tasks.test
   (:refer-clojure :exclude [test])
   (:require [babashka.fs :as fs]
-            [clojure.string :as str]
             [tasks.build :refer [build install]]
             [tasks.tools :as t]))
 
@@ -59,10 +58,7 @@
 
 (defn cljr []
   (build)
-  (binding [t/*opts* (assoc-in t/*opts* [:extra-env "CLOJURE_LOAD_PATH"]
-                               (str/join (System/getProperty "path.separator")
-                                         ["src" "resources" "test"]))]
-    (t/cljr "-m" :portal.test-clr)))
+  (t/cljr "-m" :portal.test-clr))
 
 (defn test* []
   (future (cljs-runtime "1.10.773"))

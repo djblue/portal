@@ -75,10 +75,17 @@
 (def bb     (partial #'sh :bb))
 (def nbb    (partial #'sh :npx :nbb))
 (def clj    (partial #'sh :clojure))
-(def cljr   (partial #'sh :Clojure.Main))
 (def git    (partial #'sh :git))
 (def gradle (partial #'sh (local-bin "./extension-intellij/gradlew") "--warning-mode" "all"))
 (def node   (partial #'sh :node))
 (def npm    (partial #'sh :npm))
 (def npx    (partial #'sh :npx))
 (def shadow (partial #'clj "-M:cljs:shadow" "-m" "shadow.cljs.devtools.cli"))
+
+(defn cljr [& args]
+  (binding [*opts* (assoc-in
+                    *opts*
+                    [:extra-env "CLOJURE_LOAD_PATH"]
+                    (str/join (System/getProperty "path.separator")
+                              ["src" "resources" "dev" "test"]))]
+    (apply sh :Clojure.Main args)))

@@ -16,4 +16,5 @@
          ext    tasks.build/extensions
          ide    tasks.ide/open
          pkg    tasks.package/all
-         deploy tasks.deploy/all}}
+         deploy tasks.deploy/all
+         bench  tasks.bench/-main}}
