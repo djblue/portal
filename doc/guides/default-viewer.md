@@ -8,7 +8,7 @@ that does support metadata, such as vectors. However, instead of managing this
 manually, we can leverage the `portal.viewer` ns to help provide default viewers
 for values.
 
-Here is on such default viewer selector:
+Here is one such default viewer selector:
 
 ```clojure
 (require '[portal.viewer :as v])
