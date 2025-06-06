@@ -199,7 +199,8 @@
     (render-app)))
 
 (defn app-mode []
-  (when js/navigator.serviceWorker
+  (when (and js/navigator.serviceWorker
+             (= js/window.location.host "djblue.github.io"))
     (js/navigator.serviceWorker.register "sw.js"))
   (when js/window.launchQueue
     (js/window.launchQueue.setConsumer
