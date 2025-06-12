@@ -1,13 +1,12 @@
 (ns ^:no-doc portal.ui.select
-  (:require ["react" :as react]
-            [portal.ui.react :refer [use-effect]]))
+  (:require [portal.ui.react :as react]))
 
 (defonce ^:no-doc selection-index (atom {}))
-(defonce ^:private index-context (react/createContext []))
+(defonce ^:private position-context (react/create-context []))
 
 (defn with-position [position & children]
-  (let [index (conj (react/useContext index-context) position)]
-    (into [:r> (.-Provider index-context) #js {:value index}] children)))
+  (let [index (conj (react/use-context position-context) position)]
+    (into [:r> (.-Provider position-context) #js {:value index}] children)))
 
 (defn get-root [] (::root @selection-index))
 
@@ -74,11 +73,14 @@
                      (assoc (last index) :row :last))
                context)))))
 
+(defn use-position []
+  (react/use-context position-context))
+
 (defn use-register-context [context viewer]
-  (let [index (react/useContext index-context)]
-    (use-effect
-     #js [(hash index) (hash context) (hash viewer)]
-     (let [updates (compute-relative-index @selection-index index context)]
+  (let [position (use-position)]
+    (react/use-effect
+     #js [(hash position) (hash context) (hash viewer)]
+     (let [updates (compute-relative-index @selection-index position context)]
        (swap! selection-index merge updates)
        (fn []
          (apply swap! selection-index dissoc (keys updates)))))))

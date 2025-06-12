@@ -114,7 +114,7 @@
        (seq value)
        (every? scalar? value)))
 
-(defn get-compatible-viewers-1 [viewers {:keys [value] :as context}]
+(defn- get-compatible-viewers-1 [viewers {:keys [value] :as context}]
   (let [by-name        (viewers-by-name viewers)
         default-viewer (get by-name
                             (or (get-in (meta context) [:props :portal.viewer/default])
@@ -174,7 +174,10 @@
 (def ^:private inspector-context
   (react/create-context {:depth 0 :path [] :stable-path [] :alt-bg false}))
 
-(defn use-context [] (react/use-context inspector-context))
+(defn use-context []
+  (some->
+   (react/use-context inspector-context)
+   (vary-meta assoc ::select/position (select/use-position))))
 
 (defn with-depth [& children]
   (let [context (use-context)]
