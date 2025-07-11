@@ -644,12 +644,15 @@
 (defn- pprint-json [v]
   (.stringify js/JSON v nil 2))
 
+(defn- keyword-fn [k]
+  (str (when-let [n (namespace k)] (str n "/")) (name k)))
+
 (defn ^:command copy-json
   "Copy selected value as a json string to the clipboard."
   [state]
   (-> @state
       selected-values
-      clj->js
+      (clj->js :keyword-fn keyword-fn)
       pprint-json
       str/trim
       copy-to-clipboard!))
