@@ -1,3 +1,12 @@
+## 0.59.2 - 2025-07-14
+
+- Update `portal.runtime/pr-str'` to catch exceptions 2fa52bbf
+- Include namespace when copying value as json 46c18d22
+- Prevent loading service worker when not needed 03ed5667
+  - Thanks for the help @fancygits!
+- Fix minor typo in docs (#263) 82e070d4
+  - Thanks for the PR @samumbach!
+
 ## 0.59.1 - 2025-05-07
 
 - Fix recent regression in `portal.nrepl` for test output capturing cd3fa66c
