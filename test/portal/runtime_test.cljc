@@ -18,6 +18,17 @@
         (is (= 1 (count @(:value-cache session))) "un-hashable values only capture one-way mapping")
         (is (= 2 (#'rt/value->id value)) "future captures introduce a new mapping")))))
 
+(deftest un-printable-values
+  (let [value #?(:bb   :skip
+                 :org.babashka/nbb :skip
+                 :clj  (reify Object
+                         (toString [_] (throw (Exception. "test"))))
+                 :cljs (reify IPrintWithWriter
+                         (-pr-writer [_ _ _] (throw (js/Error. "test"))))
+                 :default :skip)]
+    (when-not (= :skip value)
+      (is (re-matches #"#object \[.* unprintable\]" (#'portal.runtime/pr-str' value))))))
+
 (deftest disambiguate-types
   (are [a b]
        (= (#'rt/value->key a) (#'rt/value->key b))
