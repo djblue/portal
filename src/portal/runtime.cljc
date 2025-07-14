@@ -206,9 +206,12 @@
      :cljs (satisfies? cljs.core/IDeref value)))
 
 (defn- pr-str' [value]
-  (if-not (deref? value)
-    (pr-str value)
-    (str "#object " (pr-str [(type value) {:val ::elided}]))))
+  (try
+    (if-not (deref? value)
+      (pr-str value)
+      (str "#object " (pr-str [(type value) {:val ::elided}])))
+    (catch #?(:clj Exception :cljr Exception :cljs :default) _
+      (str "#object [" (pr-str (type value)) " unprintable]"))))
 
 (defn- to-object [buffer value tag rep]
   (if-not *session*
