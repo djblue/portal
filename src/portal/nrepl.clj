@@ -29,7 +29,8 @@
      :column 1
      :ns (:ns response)
      :result (let [error (:error (ex-data (::caught/throwable response)))]
-               (if (contains? error :via)
+               (if (and (map? error)
+                        (contains? error :via))
                  error
                  (d/datafy (::caught/throwable response))))}
 
