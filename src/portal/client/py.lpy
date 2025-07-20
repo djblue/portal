@@ -1,5 +1,6 @@
 (ns portal.client.py
-  (:require [basilisp.json :as json])
+  (:require [basilisp.json :as json]
+            [portal.runtime.cson :as cson])
   (:import [urllib.request :as request]))
 
 (defn- serialize [encoding value]
@@ -8,7 +9,8 @@
      (case encoding
        :json    (json/write-str  value)
        :edn     (binding [*print-meta* true]
-                  (pr-str value)))
+                  (pr-str value))
+       :cson    (cson/write value))
      "utf-8")
     (catch Exception ex
       (serialize

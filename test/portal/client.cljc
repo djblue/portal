@@ -2,7 +2,7 @@
   #?(:clj  (:require [portal.client.jvm :as p])
      :cljr (:require [portal.client.clr :as p])
      :cljs (:require [portal.client.node :as p])
-     :lpy  (:require [portal.client.python :as p]))
+     :lpy  (:require [portal.client.py :as p]))
   #?(:cljr (:import (System Environment))
      :lpy  (:import [os :as os])))
 
