@@ -23,6 +23,8 @@
     (assembly-load-file dll)))
 
 #_{:clj-kondo/ignore [:unresolved-symbol]}
+(assembly-load "System.Diagnostics.Process")
+#_{:clj-kondo/ignore [:unresolved-symbol]}
 (assembly-load "System.Text.Encoding")
 #_{:clj-kondo/ignore [:unresolved-symbol]}
 (assembly-load "System.Text.Json")
