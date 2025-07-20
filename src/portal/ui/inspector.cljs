@@ -1,10 +1,12 @@
 (ns portal.ui.inspector
   (:refer-clojure :exclude [coll? map? char?])
-  (:require [clojure.set :as set]
+  (:require ["anser" :as anser]
+            [clojure.set :as set]
             [clojure.string :as str]
             [portal.async :as a]
             [portal.colors :as c]
             [portal.runtime.cson :as cson]
+            [portal.runtime.edn :as edn]
             [portal.ui.api :as api]
             [portal.ui.filter :as f]
             [portal.ui.icons :as icons]
@@ -898,9 +900,8 @@
          :white-space :pre-wrap
          :font-size   (:font-size theme)
          :font-family (:font-family theme)}
-        #_#_:dangerouslySetInnerHTML
-          {:__html (anser/ansiToHtml string)}}
-       string]
+        :dangerouslySetInnerHTML
+        {:__html (anser/ansiToHtml string)}}]
       (catch :default e
         (.error js/console e)
         string))))
@@ -922,9 +923,25 @@
         value
         (trim-string value limit))]]))
 
-(defn- inspect-object [value] [inspect-unreadable (pr-str value)])
+(defn- inspect-object* [string]
+  (let [context (use-context)]
+    (try
+      (let [v (edn/read-string string)]
+        (cond
+          (nil? v) [highlight-words "nil"]
 
-(defn- inspect-remote [value] [inspect-unreadable (:rep value)])
+          (= inspect-object
+             (get-inspect-component
+              (get-value-type v)))
+          [inspect-unreadable string]
+
+          :else [inspector* context v]))
+      (catch :default _
+        [inspect-unreadable string]))))
+
+(defn- inspect-object [value] [inspect-object* (pr-str value)])
+
+(defn- inspect-remote [value] [inspect-object* (:rep value)])
 
 (defn- get-preview-component [type]
   (case type
