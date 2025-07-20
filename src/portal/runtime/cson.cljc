@@ -1017,46 +1017,7 @@
       (binding [*to-json* to-json-proto]
         (to-json buffer value))
 
-      :else (throw (ex-info "Unknown value type" {:value value}))))
-  #_(cond
-      (tagged-value? value)
-      (push-tagged buffer value)
-
-      (nil? value)      (json/push-null buffer)
-      (boolean? value)  (json/push-bool buffer value)
-      (is-char? value)  (push-char buffer value)
-      (string? value)   (push-string buffer value)
-      (bigint? value)   (push-bigint buffer value)
-
-      (number? value)   (cond
-                          (float? value)  (push-double buffer value)
-                          :else           (box-long buffer value))
-
-      (keyword? value)  (push-keyword buffer value)
-      (symbol? value)   (push-symbol buffer value)
-
-      (map? value)      (cond
-                          (sorted? value) (tagged-map buffer "smap" value)
-                          :else           (tagged-map buffer value))
-
-      (vector? value)   (tagged-coll buffer "[" value)
-      (set? value)      (cond
-                          (sorted? value) (tagged-coll buffer "sset" value)
-                          :else           (tagged-coll buffer "#" value))
-      (coll? value)     (cond
-                          (range? value)  (tagged-coll buffer "(" (into [] value))
-                          :else           (tagged-coll buffer "(" value))
-      (uuid? value)     (push-uuid buffer value)
-      (inst? value)     (push-inst buffer value)
-
-      (tagged-literal? value)
-      (push-tagged-literal buffer value)
-
-      (nil? (::dispatch *options*))
-      (binding [*to-json* to-json-proto]
-        (to-json buffer value))
-
-      :else (throw (ex-info "Unknown value type" {:value value}))))
+      :else (throw (ex-info "Unknown value type" {:value value})))))
 
 (defn write
   ([value] (write value nil))
