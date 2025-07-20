@@ -16,10 +16,3 @@
 
 (defn submit [value]
   (p/submit {:port port :encoding :cson} value))
-
-;; (defn table [value]
-;;   (if (enabled?)
-;;     (submit value)
-;;     (pp/print-table
-;;      (get-in (meta value) [:portal.viewer/table :columns])
-;;      value)))

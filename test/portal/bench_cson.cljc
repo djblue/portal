@@ -1,4 +1,4 @@
-(ns portal.runtime.bench-cson
+(ns portal.bench-cson
   (:require [clojure.edn :as edn]
             [examples.data :as d]
             [portal.bench :as b]
@@ -28,6 +28,7 @@
 (def ^:private formats
   #?(:org.babashka/nbb [:edn :cson]
      :cljr [:edn :cson]
+     :lpy [:cson]
      :default [:transit :edn :cson]))
 
 (defn run-benchmark []

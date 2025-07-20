@@ -27,7 +27,7 @@
      :joyride
      (throw (ex-info "transit/write not supported in joyride" {:value value}))
      :lpy
-     (throw (ex-info "transit/read not supported in basilisp" {:string string}))
+     (throw (ex-info "transit/read not supported in basilisp" {:value value}))
 
      :clj (let [out (ByteArrayOutputStream. 1024)]
             (transit/write

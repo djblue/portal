@@ -1,16 +1,10 @@
 (ns portal.test-runner
   (:require [clojure.string :as str]
             [clojure.test :as t]
-            [portal.client.py :as p]
+            [portal.client :as p]
             [portal.runtime.fs :as fs])
   (:import [sys :as sys]
            [os :as os]))
-
-(defn- get-port [] (.get os/environ "PORTAL_PORT"))
-
-(defn- submit [value]
-  (when-let [port (get-port)]
-    (p/submit {:port port :encoding :cson} value)))
 
 (defn- load-test [ns]
   @(future
@@ -51,7 +45,7 @@
       (swap! report conj {:type :end-test-ns :ns test-ns}))
     (println "\nRan all tests.")
     (println (:fail @summary) "failures" (:error @summary) "errors.")
-    (submit @report)
+    (when (p/enabled?) (p/submit @report))
     @summary))
 
 (defn -main []

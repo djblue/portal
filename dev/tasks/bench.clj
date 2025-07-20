@@ -1,7 +1,7 @@
 (ns tasks.bench
   (:require
    [portal.api :as p]
-   [portal.runtime.bench-cson :as bc]
+   [portal.bench-cson :as bc]
    [tasks.parallel :refer [with-out-data]]
    [tasks.tools :as t]))
 
@@ -12,11 +12,11 @@
       #(let [{:keys [tag val]} %]
          (when (= :tap tag) val))
       @f))
-   (for [f [#(t/clj "-M:test" "-m" :portal.runtime.bench-cson)
-            #(t/bb "-m" :portal.runtime.bench-cson)
-            #(t/cljr "-m" :portal.runtime.bench-cson)
-            #(t/nbb "-m" :portal.runtime.bench-cson)
-            #_#(t/lpy :run "-n" :portal.runtime.bench-cson)]]
+   (for [f [#(t/clj "-M:test" "-m" :portal.bench-cson)
+            #(t/bb "-m" :portal.bench-cson)
+            #(t/cljr "-m" :portal.bench-cson)
+            #(t/nbb "-m" :portal.bench-cson)
+            #(t/lpy :run "-n" :portal.bench-cson)]]
      (future (with-out-data (f))))))
 
 (def windows
