@@ -157,4 +157,4 @@
 
 (defn -main [] (p/submit (run-benchmark)))
 
-#?(:lpy (-main))
+#?(:lpy (-main) :org.babashka/nbb :skip :cljs (-main))

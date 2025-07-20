@@ -34,19 +34,13 @@
 (declare ->value)
 
 (defonce ^:dynamic *options* nil)
-(defonce ^:private ^:dynamic *to-json* nil)
 
 (defn- transform [value]
   (if-let [f (:transform *options*)]
     (f value)
     value))
 
-(defn- to-json [buffer value] (*to-json* buffer (transform value)))
-
-(defn- get-to-json []
-  (let [to-json-capture *to-json*]
-    (fn [buffer value]
-      (to-json-capture buffer (transform value)))))
+(defn- to-json [buffer value] (to-json* (transform value) buffer))
 
 (defn tag [buffer tag value]
   (assert tag string?)
@@ -319,12 +313,6 @@
 
 (defn- ->bin [buffer] (base64-decode (json/next-string buffer)))
 
-(defn- bigint? [value]
-  #?(:clj  (instance? clojure.lang.BigInt value)
-     :cljr (instance? clojure.lang.BigInt value)
-     :cljs (identical? js/BigInt (some-> value .-constructor))
-     :else false))
-
 (defn push-bigint [buffer value]
   (-> buffer
       (json/push-string "N")
@@ -386,13 +374,6 @@
                  12 "formfeed"
                  13 "return"
                  (.fromCharCode js/String code))))))
-
-(defn- is-char? [value]
-  #?(:joyride false
-     :org.babashka/nbb false
-     :cljs    (instance? Character value)
-     :lpy     false
-     :default (char? value)))
 
 (defn- ->char [buffer]
   #?(:clj  (char (->value buffer))
@@ -536,7 +517,7 @@
    (tagged-coll buffer tag (meta value) value))
   ([buffer tag meta-map  value]
    (reduce
-    (get-to-json)
+    to-json
     (-> buffer
         (push-meta meta-map)
         (json/push-string tag)
@@ -775,17 +756,16 @@
   ([buffer tag value]
    (tagged-map buffer tag (meta value) value))
   ([buffer tag meta-map  value]
-   (let [f (get-to-json)]
-     (reduce-kv
-      (fn [buffer k v]
-        (-> buffer
-            (f k)
-            (f v)))
+   (reduce-kv
+    (fn [buffer k v]
       (-> buffer
-          (push-meta meta-map)
-          (json/push-string tag)
-          (json/push-long (count value)))
-      value))))
+          (to-json k)
+          (to-json v)))
+    (-> buffer
+        (push-meta meta-map)
+        (json/push-string tag)
+        (json/push-long (count value)))
+    value)))
 
 #?(:joyride (def PersistentHashMap (type (hash-map))))
 #?(:org.babashka/nbb (def PersistentHashMap (type (hash-map))))
@@ -953,79 +933,12 @@
         (let [handler (:default-handler *options* tagged-value)]
           (handler op (->value buffer))))))))
 
-(defn- to-json-proto [buffer value] (to-json* value buffer))
-
-(defn- range? [value]
-  #?(:clj  (instance? clojure.lang.Range value)
-     :cljr (instance? clojure.lang.Range value)
-     :org.babashka/nbb false
-     :cljs (instance? Range value)))
-
 #?(:lpy (def sorted? (constantly false)))
-
-(defn- to-json-cond [buffer value]
-  (if (coll? value)
-    (cond
-      (tagged-value? value)
-      (push-tagged buffer value)
-
-      (map? value)      #?(:lpy (tagged-map buffer value)
-                           :default
-                           (cond
-                             (sorted? value) (tagged-map buffer "smap" value)
-                             :else           (tagged-map buffer value)))
-
-      (vector? value)   (tagged-coll buffer "[" value)
-      (set? value)      #?(:lpy (tagged-coll buffer "#" value)
-                           :default
-                           (cond
-                             (sorted? value) (tagged-coll buffer "sset" value)
-                             :else           (tagged-coll buffer "#" value)))
-      (coll? value)     #?(:lpy (tagged-coll buffer "(" value)
-                           :default
-                           (cond
-                             (range? value)  (tagged-coll buffer "(" (into [] value))
-                             :else           (tagged-coll buffer "(" value)))
-
-      (nil? (::dispatch *options*))
-      (binding [*to-json* to-json-proto]
-        (to-json buffer value))
-
-      :else (throw (ex-info "Unknown value type" {:value value})))
-    (cond
-      (number? value)   (cond
-                          (float? value)  (push-double buffer value)
-                          :else           (box-long buffer value))
-
-      (string? value)   (push-string buffer value)
-      (boolean? value)  (json/push-bool buffer value)
-      (nil? value)      (json/push-null buffer)
-
-      (keyword? value)  (push-keyword buffer value)
-      (symbol? value)   (push-symbol buffer value)
-
-      (bigint? value)   (push-bigint buffer value)
-      (uuid? value)     (push-uuid buffer value)
-      (inst? value)     (push-inst buffer value)
-
-      (tagged-literal? value)
-      (push-tagged-literal buffer value)
-
-      (is-char? value)  (push-char buffer value)
-
-      (nil? (::dispatch *options*))
-      (binding [*to-json* to-json-proto]
-        (to-json buffer value))
-
-      :else (throw (ex-info "Unknown value type" {:value value})))))
 
 (defn write
   ([value] (write value nil))
   ([value options]
-   (binding [*options* options
-             *to-json* (case (::dispatch options :prototype)
-                         :prototype to-json-proto
-                         :cond      to-json-cond)]
+   (binding [*options* options]
      (json/with-buffer to-json value))))
 
 (defn read

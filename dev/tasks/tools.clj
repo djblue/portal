@@ -1,5 +1,6 @@
 (ns tasks.tools
-  (:require [babashka.process :as p]
+  (:require [babashka.fs :as fs]
+            [babashka.process :as p]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [io.aviso.ansi :as a])
@@ -100,3 +101,21 @@
                    :extra-env
                    {"PYTHONPATH" "src:test"})]
     (apply sh "./target/py/bin/basilisp" args)))
+
+(defn cljs [version main]
+  (let [deps {'org.clojure/clojurescript {:mvn/version version}}
+        out  (str "target/" (name main) "." version)]
+    (when (seq
+           (fs/modified-since
+            out
+            (concat
+             (fs/glob "src" "**")
+             (fs/glob "test" "**"))))
+      (clj "-Sdeps" (pr-str {:deps deps})
+           "-M:test"
+           "-m" :cljs.main
+           "--output-dir" out
+           "--target" :node
+           "--output-to" (str out ".js")
+           "--compile" main))
+    (node out)))
