@@ -1,4 +1,11 @@
-## 2023-10-25 - Portal Internals (by Chris Badahdah)
+## 2024-10-24 - Exploring new Workflows with Visual Tools (by Chris Badahdah)
+
+<a target="_blank" href="https://www.youtube.com/watch?v=MuLbsvzZKRM">
+<img src="https://img.youtube.com/vi/MuLbsvzZKRM/hqdefault.jpg"
+     alt="Portal - Exploring new Workflows with Visual Tools (by Chris Badahdah)" />
+</a>
+
+## 2023-10-24 - Portal Internals (by Chris Badahdah)
 
 <a target="_blank" href="https://www.youtube.com/watch?v=NO9D3LSS4WU">
 <img src="https://img.youtube.com/vi/NO9D3LSS4WU/hqdefault.jpg"
