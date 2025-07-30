@@ -511,7 +511,8 @@
        :border-top-right-radius (:border-radius theme)
        :border-bottom-right-radius 0
        :border-bottom-left-radius 0
-       :border-bottom :none}}
+       :border-bottom :none
+       :align-self :start}}
      [s/div
       {:style
        {:display :flex

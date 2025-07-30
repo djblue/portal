@@ -4,7 +4,7 @@
              :or   {name       "portal"
                     version    "0.59.2"
                     code-url   "main.js"
-                    platform   #?(:bb "bb" :clj "jvm" :cljs "node" :cljr "clr")}}]
+                    platform   #?(:bb "bb" :clj "jvm" :cljs "node" :cljr "clr" :lpy "py")}}]
   (str
    "<!DOCTYPE html>"
    "<html lang=\"en\">"

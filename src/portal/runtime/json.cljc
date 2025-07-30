@@ -3,13 +3,15 @@
   #?(:bb   (:require [cheshire.core :as json])
      :clj  (:require [clojure.data.json :as json])
      :cljr (:require [portal.runtime.clr.assembly]
-                     [clojure.data.json :as json])))
+                     [clojure.data.json :as json])
+     :lpy  (:require [basilisp.json :as json])))
 
 (defn write [value]
   #?(:bb   (json/generate-string value)
      :clj  (json/write-str value)
      :cljr (json/write-str value)
-     :cljs (.stringify js/JSON (clj->js value))))
+     :cljs (.stringify js/JSON (clj->js value))
+     :lpy  (json/write-str value)))
 
 (defn read
   ([string]
@@ -20,9 +22,10 @@
       :cljr (json/read-str string :key-fn (:key-fn opts))
       :cljs (js->clj (.parse js/JSON string)
                      :keywordize-keys
-                     (= keyword (:key-fn opts))))))
+                     (= keyword (:key-fn opts)))
+      :lpy  (json/read-str string :key-fn (:key-fn opts)))))
 
 (defn read-stream [stream]
   #?(:bb   (json/parse-stream stream keyword)
      :clj  (json/read stream :key-fn keyword)
-     :cljs (throw (ex-info "Unsupported in cljs" {:stream stream}))))
+     :default (throw (ex-info "Unsupported" {:stream stream}))))

@@ -1,0 +1,16 @@
+aiohappyeyeballs==2.4.4
+aiohttp==3.11.11
+aiosignal==1.3.2
+asyncio==3.4.3
+attrs==24.3.0
+basilisp==0.4.0
+frozenlist==1.5.0
+idna==3.10
+immutables==0.21
+multidict==6.1.0
+prompt_toolkit==3.0.48
+propcache==0.2.1
+pyrsistent==0.20.0
+typing_extensions==4.12.2
+wcwidth==0.2.13
+yarl==1.18.3

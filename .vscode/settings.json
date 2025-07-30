@@ -90,6 +90,23 @@
           ":nrepl"
         ]
       }
+    },
+    {
+      "name": "basilisp",
+      "projectType": "deps.edn",
+      "projectRootPath": [
+        "."
+      ],
+      "customJackInCommandLine": "bb py",
+      "nReplPortFile": [
+        ".nrepl-port"
+      ],
+      "menuSelections": {
+        "cljAliases": [
+          ":dev",
+          ":cider"
+        ]
+      }
     }
   ]
 }

@@ -2,7 +2,7 @@
   #?(:clj  (:require [portal.client.jvm :as p])
      :cljr (:require [portal.client.clr :as p])
      :cljs (:require [portal.client.node :as p])
-     :lpy  (:require [portal.client.python :as p]))
+     :lpy  (:require [portal.client.py :as p]))
   #?(:cljr (:import (System Environment))
      :lpy  (:import [os :as os])))
 
@@ -16,10 +16,3 @@
 
 (defn submit [value]
   (p/submit {:port port :encoding :cson} value))
-
-;; (defn table [value]
-;;   (if (enabled?)
-;;     (submit value)
-;;     (pp/print-table
-;;      (get-in (meta value) [:portal.viewer/table :columns])
-;;      value)))

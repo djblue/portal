@@ -47,7 +47,7 @@
 
     [1] '(1)
 
-    #{1 2 3} (sorted-set 1 2 3)
+    #{1 2 3} #?(:lpy :skip :default (sorted-set 1 2 3))
 
     ^{:one 1} [] ^{:two 2} []
 

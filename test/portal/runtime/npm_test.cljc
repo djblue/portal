@@ -12,6 +12,6 @@
 (deftest invalid-modules
   (are [module]
        (thrown?
-        #?(:clj Exception :cljr Exception :cljs js/Error)
+        #?(:clj Exception :cljr Exception :cljs js/Error :lpy Exception)
         (node-resolve module))
     "react/index.j"))
