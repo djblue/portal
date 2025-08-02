@@ -29,5 +29,4 @@
          (p/eval-str portal "(throw (ex-info \"error\" {:hello :world}))")))
     (is (= :hi (p/eval-str portal "(.resolve js/Promise :hi)" {:await true})))
     (is (some? (some #{portal} (p/sessions))))
-    (p/close portal)
-    (p/stop)))
+    (p/close portal)))

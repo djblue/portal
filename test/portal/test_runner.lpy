@@ -1,10 +1,10 @@
 (ns portal.test-runner
   (:require [clojure.string :as str]
             [clojure.test :as t]
+            [portal.api :as api]
             [portal.client :as p]
             [portal.runtime.fs :as fs])
-  (:import [sys :as sys]
-           [os :as os]))
+  (:import [sys :as sys]))
 
 (defn- load-test [ns]
   @(future
@@ -59,6 +59,7 @@
          'portal.client-test
          'portal.runtime-test
          'portal.runtime.api-test)]
+    (api/stop)
     (sys/exit (+ fail error))))
 
 (-main)

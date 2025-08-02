@@ -34,7 +34,6 @@
     (p/start opts)
     (c/submit opts ::value)
     (c/submit opts bad-seq)
-    (p/stop)
     (is (= "Error" (:cause (first @tap-list))))
     (is (= ::value (second @tap-list)))
     (done)))

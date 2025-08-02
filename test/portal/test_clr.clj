@@ -1,5 +1,6 @@
 (ns portal.test-clr
   (:require [clojure.test :as t]
+            [portal.api :as api]
             [portal.client :as p]
             [portal.client-test]
             [portal.runtime-test]
@@ -34,5 +35,6 @@
          'portal.runtime.json-buffer-test
          'portal.runtime.npm-test
          'portal.runtime.shell-test)]
+    (api/stop)
     (shutdown-agents)
     (Environment/Exit (+ fail error))))
