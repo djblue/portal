@@ -33,7 +33,7 @@
   {:status  200
    :headers {"Content-Type" "text/javascript"}
    :body
-   (slurp
+   (fs/slurp
     (case (-> request :session :options :mode)
       :dev "resources/portal-dev/main.js"
       "resources/portal/main.js"))})

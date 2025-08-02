@@ -23,7 +23,7 @@
   #?(:clj  (clojure.core/slurp path)
      :cljs (fs/readFileSync path "utf8")
      :cljr (clojure.core/slurp path :enc "utf8")
-     :lpy  (basilisp.core/slurp path)))
+     :lpy  (basilisp.core/slurp path :encoding "utf8")))
 
 (defn spit [path content]
   #?(:clj  (clojure.core/spit path content)
