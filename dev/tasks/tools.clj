@@ -91,8 +91,14 @@
                               ["src" "resources" "dev" "test"]))]
     (apply sh :Clojure.Main args)))
 
-(def py     (partial #'sh :python3))
-(def pip    (partial #'sh "./target/py/bin/pip"))
+(defn- py-script [bin]
+  (str (if windows?
+         "./target/py/Scripts/"
+         "./target/py/bin/")
+       (name bin)))
+
+(def py  (partial #'sh :python3))
+(def pip (partial #'sh (py-script :pip)))
 
 (defn lpy [& args]
   (binding [*opts*
@@ -100,7 +106,7 @@
                    :inherit true
                    :extra-env
                    {"PYTHONPATH" "src:test"})]
-    (apply sh "./target/py/bin/basilisp" args)))
+    (apply sh (py-script :basilisp) args)))
 
 (defn cljs [version main]
   (let [deps {'org.clojure/clojurescript {:mvn/version version}}

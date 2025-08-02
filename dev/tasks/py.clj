@@ -8,7 +8,7 @@
     (py "-m" :venv "target/py")
     (pip :install "-r" "requirements.txt")))
 
-(defn nrepl [] (lpy :nrepl-server))
+(defn nrepl [] (lpy :nrepl-server "--include-path" "src"))
 
 (defn -main
   "Start basilisp dev env / nrepl"
