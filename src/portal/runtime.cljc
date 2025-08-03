@@ -167,7 +167,7 @@
   (when (or (not= old new)
             (not= (value->key old) (value->key new)))
     (set-timeout
-     #(when (= @a new) (notify session-id a))
+     #(when (identical? @a new) (notify session-id a))
      100)))
 
 (defn- watch-atom [a]
