@@ -10,7 +10,8 @@
                :cljr [portal.sync :as a]
                :lpy  [portal.sync :as a])
             #?(:clj  [clojure.java.io :as io]
-               :cljs [portal.resources :as io])
+               :cljs [portal.resources :as io]
+               :lpy  [portal.resources :refer [resource]])
             [clojure.set :as set]
             [portal.runtime :as rt]
             [portal.runtime.cson :as cson]))
@@ -218,7 +219,8 @@
 (defn- get-docs []
   (cson/read
    #?(:clj  (slurp (io/resource "portal/docs.json"))
-      :cljs docs-json)))
+      :cljs docs-json
+      :lpy  (slurp (resource "portal/docs.json")))))
 
 (defn docs
   "Open portal docs.
