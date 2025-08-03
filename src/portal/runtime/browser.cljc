@@ -25,7 +25,9 @@
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
                      [portal.runtime.shell :as shell]))
-  #?(:cljr (:import [System.Runtime.InteropServices OSPlatform RuntimeInformation])))
+  #?(:cljr (:import [System.Runtime.InteropServices OSPlatform RuntimeInformation])
+     :lpy  (:import [os :as os]
+                    [webbrowser :as browser])))
 
 (defmulti -open (comp :launcher :options))
 
@@ -133,7 +135,8 @@
 (defn- get-browser []
   #?(:clj  (System/getenv "BROWSER")
      :cljs (.-BROWSER js/process.env)
-     :cljr (Environment/GetEnvironmentVariable "BROWSER")))
+     :cljr (Environment/GetEnvironmentVariable "BROWSER")
+     :lpy  (.get os/environ "BROWSER")))
 
 (defn- browse [url]
   (or
@@ -155,7 +158,9 @@
         PlatformID/Unix         (if (RuntimeInformation/IsOSPlatform OSPlatform/OSX)
                                   (shell/sh "open" url)
                                   (shell/sh "xdg-open" url))
-        (println "Goto" url "to view portal ui.")))))
+        (println "Goto" url "to view portal ui."))
+      :lpy
+      (browser/open url))))
 
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
 
