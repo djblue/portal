@@ -55,14 +55,12 @@
           :runtime (console/runtime)
           :benchmark (pr-str (keyword (name encoding) "read"))}))
       (for [[data value] bench-data
-            encoding (conj formats :cson-cond)]
+            encoding formats]
         (merge
          (case encoding
            :transit (b/run (transit/write value) n)
            :edn     (b/run (pr-meta value) n)
-           :cson    (b/run (cson/write value) n)
-           :cson-cond
-           (b/run (cson/write value {::cson/dispatch :cond}) n))
+           :cson    (b/run (cson/write value) n))
          {:test :write
           :encoding encoding
           :data data
