@@ -4,6 +4,7 @@ A clojure tool to navigate through your data.
 
 [![cljdoc][cljdoc-badge]][cljdoc]
 [![Clojars Project][clojars-badge]][clojars]
+[![PyPI][pypi-badge]][pypi]
 [![VS Code Extension][vscode-badge]][vscode]
 [![Version][intellij-badge]][intellij]
 [![Get help on Slack][clojurians-badge]][clojurians]
@@ -171,3 +172,6 @@ For more documentation, take a look through the [docs][docs].
 [emacs-docs]: ./doc/editors/emacs.md#xwidget-webkit-embed
 
 [clojure-clr]: https://github.com/clojure/clojure-clr
+
+[pypi-badge]: https://img.shields.io/pypi/v/djblue.portal?color=ffd343
+[pypi]: https://pypi.org/project/djblue.portal/

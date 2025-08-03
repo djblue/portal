@@ -2,6 +2,7 @@
   (:require [tasks.ci :refer [ci]]
             [tasks.info :refer [options]]
             [tasks.package :as pkg]
+            [tasks.py :as py]
             [tasks.tools :refer [*cwd* clj gradle npx]]))
 
 (defn- deploy-vscode []
@@ -28,7 +29,8 @@
   (deploy-clojars)
   (deploy-vscode)
   (deploy-open-vsx)
-  (deploy-intellij))
+  (deploy-intellij)
+  (py/deploy))
 
 (defn all
   "Deploy all artifacts."
