@@ -1,3 +1,11 @@
+## 0.60.0 - 2025-08-03
+
+- Optimize `portal.runtime/invalidate` 2511d505
+- Fix `portal.runtime/invalidate` for unhashable values f5cf6c1f
+- Initial basilisp runtime support (#245) 86751cbd
+- Add support for Clojrue CLR 1.12 (#264) 97e04216
+- Improve `portal.nrepl/wrap-portal`  middleware eb8960a2
+
 ## 0.59.2 - 2025-07-14
 
 - Update `portal.runtime/pr-str'` to catch exceptions 2fa52bbf
