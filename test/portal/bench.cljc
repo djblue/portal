@@ -1,6 +1,8 @@
 (ns portal.bench
   #?(:cljs (:refer-clojure :exclude [simple-benchmark]))
-  #?(:cljs (:require-macros portal.bench)))
+  #?(:cljs (:require-macros portal.bench))
+  #?(:lpy (:import [math :as Math]
+                   [time :as time])))
 
 (defn- now
   ([]
@@ -8,14 +10,17 @@
       :cljr (.Ticks (System.DateTime/Now))
       :cljs (if (exists? js/process)
               (.hrtime js/process)
-              (.now js/Date))))
+              (.now js/Date))
+      :lpy  (time/process_time_ns)))
   ([a]
    #?(:clj  (/ (- (now) a) 1000000.0)
       :cljr (/ (- (now) a) 10000.0)
       :cljs (if (exists? js/process)
               (let [[a b] (.hrtime js/process a)]
                 (+ (* a 1000.0) (/ b  1000000.0)))
-              (- (.now js/Date) a)))))
+              (- (.now js/Date) a))
+      :lpy (/ (- (now) a) 1000000.0))))
+
 (defn floor [v]
   #?(:cljr (Math/Floor v) :default (Math/floor v)))
 

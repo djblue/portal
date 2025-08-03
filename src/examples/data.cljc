@@ -1,7 +1,9 @@
 (ns examples.data
   (:require #?(:clj [clojure.java.io :as io])
             #?(:org.babashka/nbb [clojure.core]
-               :default [examples.hacker-news :as hn])
+               :clj  [examples.hacker-news :as hn]
+               :cljr [examples.hacker-news :as hn]
+               :cljs [examples.hacker-news :as hn])
             [clojure.pprint :as pp]
             [examples.macros :refer [read-file]]
             [portal.colors :as c]
@@ -13,7 +15,8 @@
      :org.babashka/nbb (:import)
      :cljs (:import [goog.math Long])
      :cljr (:import [System DateTime Guid Uri]
-                    [System.IO File])))
+                    [System.IO File])
+     :lpy (:import [math :as Math])))
 
 #?(:clj
    (defn slurp-bytes [x]
@@ -66,7 +69,14 @@
       ::date (js/Date.)
       ::bigint (js/BigInt "42")
       ::js-array #js [0 1 2 3 4]
-      ::js-object #js {:hello "world"}}))
+      ::js-object #js {:hello "world"}}
+     :lpy
+     {::class (type {})
+      ::ratio 22/7
+      ::uuid #uuid "844d415a-5288-4c2c-a163-0d104e899fa8"
+      ::date #inst "2021-04-07T22:43:59.393-00:00"
+      ::array #py [0 1 2 3 4]
+      ::hash #py {:hello "world"}}))
 
 (def platform-collections
   #?(:bb nil
@@ -107,8 +117,10 @@
 
 (def clojure-data
   {::regex #"hello-world"
-   ::sorted-map (sorted-map-by gt 3 "c" 2 "b" 1 "a")
-   ::sorted-set (sorted-set-by gt 3 2 1)
+   ::sorted-map #?(:lpy :not-implemented
+                   :default (sorted-map-by gt 3 "c" 2 "b" 1 "a"))
+   ::sorted-set #?(:lpy :not-implemented
+                   :default (sorted-set-by gt 3 2 1))
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
    ::tagged (tagged-literal 'my/tag ["hello, world"])
@@ -870,6 +882,8 @@
     {:columns [:a :b :c :d :e]})
    ::multi-map map-reflection-data})
 
+(declare test-report)
+
 (def test-report
   (v/test-report
    [{:type :begin-test-ns
@@ -1123,7 +1137,7 @@
 (def data
   (merge
    {::platform-data      platform-data
-    ::hacker-news        #?(:org.babashka/nbb nil :default hn/stories)
+    ::hacker-news        #?(:org.babashka/nbb nil :lpy :not-implemented :default hn/stories)
     ::spec-data          spec-data
     ::table-data         table-data
     ::diff               diff-data

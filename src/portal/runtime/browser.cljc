@@ -18,8 +18,16 @@
                      [portal.runtime.clr.client :as c]
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
+                     [portal.runtime.shell :as shell])
+     :lpy  (:require [clojure.string :as str]
+                     [portal.runtime :as rt]
+                     [portal.runtime.python.client :as c]
+                     [portal.runtime.fs :as fs]
+                     [portal.runtime.json :as json]
                      [portal.runtime.shell :as shell]))
-  #?(:cljr (:import [System.Runtime.InteropServices OSPlatform RuntimeInformation])))
+  #?(:cljr (:import [System.Runtime.InteropServices OSPlatform RuntimeInformation])
+     :lpy  (:import [os :as os]
+                    [webbrowser :as browser])))
 
 (defmulti -open (comp :launcher :options))
 
@@ -88,7 +96,7 @@
       (fn [d]
         (try
           (fs/list d)
-          (catch #?(:cljs :default :default Exception) _)))
+          (catch #?(:cljs :default :default Exception) _ nil)))
       (fs/join
        root
        (get-windows-user)
@@ -102,7 +110,7 @@
        (when (str/ends-with? file (str app-name ".lnk"))
          {:app-id (str/replace (fs/basename (fs/dirname file)) "_crx_" "")}))
      (windows-chrome-web-applications))
-    (catch #?(:cljs :default :default Exception) _)))
+    (catch #?(:cljs :default :default Exception) _ nil)))
 
 (defn- get-app-id-profile
   "Returns app-id and profile if portal is installed as `app-name` under any of the browser profiles"
@@ -127,7 +135,8 @@
 (defn- get-browser []
   #?(:clj  (System/getenv "BROWSER")
      :cljs (.-BROWSER js/process.env)
-     :cljr (Environment/GetEnvironmentVariable "BROWSER")))
+     :cljr (Environment/GetEnvironmentVariable "BROWSER")
+     :lpy  (.get os/environ "BROWSER")))
 
 (defn- browse [url]
   (or
@@ -149,7 +158,9 @@
         PlatformID/Unix         (if (RuntimeInformation/IsOSPlatform OSPlatform/OSX)
                                   (shell/sh "open" url)
                                   (shell/sh "xdg-open" url))
-        (println "Goto" url "to view portal ui.")))))
+        (println "Goto" url "to view portal ui."))
+      :lpy
+      (browser/open url))))
 
 #?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
 

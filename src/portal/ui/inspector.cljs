@@ -511,7 +511,8 @@
        :border-top-right-radius (:border-radius theme)
        :border-bottom-right-radius 0
        :border-bottom-left-radius 0
-       :border-bottom :none}}
+       :border-bottom :none
+       :align-self :start}}
      [s/div
       {:style
        {:display :flex
@@ -925,8 +926,11 @@
 (defn- inspect-object* [string]
   (let [context (use-context)]
     (try
-      (let [v (edn/read-string string)]
+      (let [[v & r] (edn/read-string (str "[" string "]"))]
         (cond
+          (some? r)
+          [s/div string]
+
           (nil? v) [highlight-words "nil"]
 
           (= inspect-object

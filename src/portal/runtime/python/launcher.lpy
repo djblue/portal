@@ -1,0 +1,152 @@
+(ns ^:no-doc portal.runtime.python.launcher
+  (:require [portal.runtime :as rt]
+            [portal.runtime.browser :as browser]
+            [portal.runtime.python.client :as c]
+            [portal.runtime.python.server :as server]
+            [portal.runtime.protocols :as p])
+  (:import [aiohttp.web :as web]
+           [asyncio :as asyncio]))
+
+(defn ws-send [ws message]
+  (try
+    (cond
+      (string? message)
+      (asyncio/run_coroutine_threadsafe (.send_str ws message) @rt/async-loop))
+    (catch Exception ex
+      (tap> [:ws-send (pr-str ex)]))))
+
+(defn ^:async ->ws-response [request listener]
+  (let [ws (web/WebSocketResponse)
+        socket (reify p/Socket
+                 (send [_ message]
+                   (ws-send ws message))
+                 (close [_ code reason]
+                   (.close ws)))]
+    (await (.prepare ws request))
+    (p/on-open listener socket)
+    (loop []
+      (let [msg (await (.receive ws))]
+        #_(tap> [:ws-receive (.-data msg)])
+        (cond
+          (= (.-type msg) (.-TEXT web/WSMsgType))
+          (p/on-message listener socket (.-data msg))
+
+          (= (.-type msg) (.-CLOSE web/WSMsgType))
+          (p/on-close listener socket (.-data msg) (.-extra msg)))
+        (when-not (= (.-type msg) (.-CLOSE web/WSMsgType))
+          (recur))))
+    ws))
+
+(defn- ^:async ->response [request {:keys [status body headers] :as response}]
+  (if-let [listener (:ring.websocket/listener response)]
+    (await (->ws-response request listener))
+    (web/Response
+     **
+     :status status
+     :body body
+     :headers headers)))
+
+(defn ^:async handler [request]
+  (try
+    (await (->response request (await (server/handler request))))
+    (catch Exception ex
+      (tap> [:handler (pr-str ex)])
+      (await (->response request {:status 500})))))
+
+(defonce ^:private server (atom nil))
+
+(comment
+  (start {:port 8080})
+  (stop)
+  (-> @server)
+  (reset! server nil))
+
+(defn- ^:async start-handler [options]
+  (try
+    (let [runner (web/ServerRunner (web/Server #(handler %)))]
+      (await (.setup runner))
+      (let [host  (:host options "localhost")
+            site  (web/TCPSite runner host (:port options 0))
+            _     (await (.start site))
+            event (asyncio/Event)
+            [_ port] (.getsockname (aget (.. site -_server -sockets) 0))]
+        (try
+          (swap! server merge
+                 {:port port
+                  :host host
+                  ::stop (fn []
+                           (let [p (promise)]
+                             (asyncio/run_coroutine_threadsafe
+                              (^:async
+                               (fn []
+                                 (.set event)
+                                 (.clear event)
+                                 (deliver p ::done)))
+                              @rt/async-loop)
+                             @p))})
+          (deliver (:done @server) ::started)
+          (await (.wait event))
+          (finally
+            (await (.cleanup runner))
+            (reset! server nil)))))
+    (catch Exception ex
+      (deliver (:done @server) ex))))
+
+(defn start [options]
+  (when-not @server
+    (swap! server assoc :done (promise))
+    (future
+      (try
+        (reset! rt/async-loop (asyncio/new_event_loop))
+        (.run_until_complete @rt/async-loop (start-handler options))
+        (finally
+          (.close @rt/async-loop)))))
+  (let [result (deref (:done @server) 5000 ::timeout)]
+    (cond
+      (= ::started result)
+      (select-keys @server [:host :port])
+      (= ::timeout result)
+      (throw (ex-info "Failed to start server." options))
+      :else
+      (throw result))))
+
+(defn stop []
+  (when-let [{::keys [stop]} @server]
+    (stop)))
+
+(defn open
+  ([options]
+   (open nil options))
+  ([portal options]
+   (let [server (start options)]
+     (browser/open {:portal portal :options options :server server}))))
+
+(defn clear [portal]
+  (if (= portal :all)
+    (c/request {:op :portal.rpc/clear})
+    (c/request (:session-id portal) {:op :portal.rpc/clear}))
+  (rt/cleanup-sessions))
+
+(defn close [portal]
+  (if (= portal :all)
+    (c/request {:op :portal.rpc/close})
+    (c/request (:session-id portal) {:op :portal.rpc/close}))
+  (rt/close-session (:session-id portal))
+  (rt/cleanup-sessions))
+
+(defn eval-str [portal msg]
+  (let [response (if (= portal :all)
+                   (c/request (assoc msg :op :portal.rpc/eval-str))
+                   (c/request (:session-id portal)
+                              (assoc msg :op :portal.rpc/eval-str)))]
+    (if-not (:error response)
+      response
+      (throw (ex-info (:message response) response)))))
+
+(defn sessions []
+  (for [session-id (rt/active-sessions)] (c/make-atom session-id)))
+
+(defn url [portal]
+  (browser/url {:portal portal :server @server}))
+
+(reset! rt/request c/request)
