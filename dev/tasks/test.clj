@@ -63,7 +63,7 @@
 
 (defn lpy []
   (py/install)
-  (t/lpy :run "-n" :portal.test-runner))
+  (t/lpy :run "--include-path" "test" "--include-path" "src" "-n" :portal.test-runner))
 
 (defn test* []
   (future (cljs-runtime "1.10.773"))
