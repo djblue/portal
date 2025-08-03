@@ -25,7 +25,8 @@
    "package.json"
    "src/portal/extensions/vs_code.cljs"
    "src/portal/runtime.cljc"
-   "src/portal/runtime/index.cljc"])
+   "src/portal/runtime/index.cljc"
+   "pyproject.toml"])
 
 (defn- version-updates [next-version]
   (let [current-version (find-version "src/portal/runtime/index.cljc")]
