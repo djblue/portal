@@ -1,3 +1,8 @@
+## 0.60.1 - 2025-08-03
+
+* Fix joyride runtime support 11778df8
+* Add basic basilisp guide 74ac4dfb
+
 ## 0.60.0 - 2025-08-03
 
 - Optimize `portal.runtime/invalidate` 2511d505
