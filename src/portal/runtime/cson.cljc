@@ -933,8 +933,6 @@
         (let [handler (:default-handler *options* tagged-value)]
           (handler op (->value buffer))))))))
 
-#?(:lpy (def sorted? (constantly false)))
-
 (defn write
   ([value] (write value nil))
   ([value options]
