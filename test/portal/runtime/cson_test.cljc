@@ -193,6 +193,9 @@
        (is (= a b))
        (is (= a (pass b))))))
 
+(deftest read-chars
+  (is (= (cson/char* 65) (cson/read "[\"C\",65]"))))
+
 (deftest special-numbers
   (doseq [n    [##NaN ##Inf ##-Inf]
           :let [cson (cson/write n)]]

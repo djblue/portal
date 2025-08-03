@@ -375,12 +375,13 @@
                  13 "return"
                  (.fromCharCode js/String code))))))
 
-(defn- ->char [buffer]
-  #?(:clj  (char (->value buffer))
-     :cljr (char (->value buffer))
-     :joyride nil
-     :org.babashka/nbb nil
-     :cljs (Character. (->value buffer))))
+(defn char* [code]
+  #?(:joyride (char code)
+     :org.babashka/nbb (char code)
+     :cljs (Character. code)
+     :default (char code)))
+
+(defn- ->char [buffer] (char* (->value buffer)))
 
 #?(:bb (defn inst-ms [inst] (.getTime inst)))
 
