@@ -164,7 +164,8 @@
     (request session-id {:op :portal.rpc/invalidate :atom a})))
 
 (defn- invalidate [session-id a old new]
-  (when-not (= (value->key old) (value->key new))
+  (when (or (not= old new)
+            (not= (value->key old) (value->key new)))
     (set-timeout
      #(when (= @a new) (notify session-id a))
      100)))
