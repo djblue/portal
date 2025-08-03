@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.runtime.python.server
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
+            [portal.resources :refer [resource]]
             [portal.runtime :as rt]
             [portal.runtime.cson :as cson]
             [portal.runtime.fs :as fs]
@@ -8,8 +9,7 @@
             [portal.runtime.json :as json]
             [portal.runtime.npm :as npm]
             [portal.runtime.rpc :as rpc])
-  (:import [importlib.resources :as resources]
-           [uuid :as uuid]))
+  (:import [uuid :as uuid]))
 
 (defmulti route (juxt :request-method :uri))
 
@@ -25,13 +25,10 @@
    :headers {"Content-Type" content-type}
    :body    resource})
 
-(defn- resource [& parts]
-  (apply / (resources/files "resources") parts))
-
 (defmethod route [:get "/icon.svg"] [_]
   {:status  200
    :headers {"Content-Type" "image/svg+xml"}
-   :body (fs/slurp (resource "portal" "icon.svg"))})
+   :body (fs/slurp (resource "portal/icon.svg"))})
 
 (defmethod route [:get "/main.js"] [request]
   {:status  200
@@ -39,8 +36,8 @@
    :body
    (fs/slurp
     (case (-> request :session :options :mode)
-      :dev (resource "portal-dev" "main.js")
-      (resource "portal" "main.js")))})
+      :dev (resource "portal-dev/main.js")
+      (resource "portal/main.js")))})
 
 (defn- get-session-id [request]
   ;; There might be a referrer which is not a UUID in standalone mode.

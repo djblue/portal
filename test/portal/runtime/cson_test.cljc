@@ -205,6 +205,8 @@
   (let [bin #?(:clj  (.getBytes "hi")
                :cljr (.GetBytes Encoding/UTF8 "hi")
                :cljs (.encode (js/TextEncoder.) "hi")
+               :lpy #b "hi"
                :default nil)]
     (when bin
-      (is (= "[\"bin\",\"aGk=\"]" (cson/write bin))))))
+      (is (or (= "[\"bin\",\"aGk=\"]" (cson/write bin))
+              (= "[\"bin\", \"aGk=\"]" (cson/write bin)))))))

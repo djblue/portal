@@ -23,7 +23,8 @@
      :joyride (:import)
      :org.babashka/nbb (:import)
      :cljs (:import [goog.math Long])
-     :lpy  (:import [basilisp.lang :as lang]
+     :lpy  (:import [base64 :as base64]
+                    [basilisp.lang :as lang]
                     [datetime :as datetime]
                     [fractions :as fractions]
                     [math :as math]
@@ -292,19 +293,21 @@
      :joyride (.toString (.from js/Buffer byte-array) "base64")
      :org.babashka/nbb (.toString (.from js/Buffer byte-array) "base64")
      :cljs (Base64/encodeByteArray byte-array)
-     :cljr (Convert/ToBase64String byte-array)))
+     :cljr (Convert/ToBase64String byte-array)
+     :lpy (.decode (base64/b64encode byte-array) "ascii")))
 
 (defn base64-decode [string]
   #?(:clj  (.decode (Base64/getDecoder) ^String string)
      :joyride (js/Uint8Array. (.from js/Buffer string "base64"))
      :org.babashka/nbb (js/Uint8Array. (.from js/Buffer string "base64"))
      :cljs (Base64/decodeStringToUint8Array string)
-     :cljr (Convert/FromBase64String string)))
+     :cljr (Convert/FromBase64String string)
+     :lpy (base64/b64decode string)))
 
 (extend-type #?(:clj  #_:clj-kondo/ignore (Class/forName "[B")
                 :cljr (Type/GetType "System.Byte[]")
                 :cljs js/Uint8Array
-                :lpy  python/bytearray)
+                :lpy  python/bytes)
   ToJson
   (to-json* [value buffer]
     (-> buffer

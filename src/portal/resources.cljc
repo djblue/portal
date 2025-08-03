@@ -4,7 +4,8 @@
   #?(:org.babashka/nbb (:require ["fs" :as fs]
                                  ["path" :as path])
      :joyride (:require ["vscode" :as vscode]
-                        ["ext://djblue.portal$resources" :as resources])))
+                        ["ext://djblue.portal$resources" :as resources]))
+  #?(:lpy (:import [importlib.resources :as resources])))
 
 #?(:org.babashka/nbb (def file *file*))
 
@@ -21,7 +22,8 @@
            fs-path (.-fsPath uri)]
        (.join path (if-not (undefined? fs-path) fs-path (.-path uri))
               "resources"
-              _resource-name))))
+              _resource-name))
+     :lpy (apply / (resources/files "resources") [_resource-name])))
 
 (defonce ^:no-doc resources (atom {}))
 

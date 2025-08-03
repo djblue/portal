@@ -1,5 +1,6 @@
 (ns examples.data
-  (:require #?(:clj [clojure.java.io :as io])
+  (:require #?(:clj [clojure.java.io :as io]
+               :lpy [portal.resources :refer [resource]])
             #?(:org.babashka/nbb [clojure.core]
                :clj  [examples.hacker-news :as hn]
                :cljr [examples.hacker-news :as hn]
@@ -22,7 +23,10 @@
    (defn slurp-bytes [x]
      (with-open [out (ByteArrayOutputStream.)]
        (io/copy (io/input-stream x) out)
-       (.toByteArray out))))
+       (.toByteArray out)))
+   :lpy
+   (defn slurp-bytes [x]
+     (slurp (resource x) :mode "rb")))
 
 (def platform-data
   #?(:clj
@@ -76,7 +80,8 @@
       ::uuid #uuid "844d415a-5288-4c2c-a163-0d104e899fa8"
       ::date #inst "2021-04-07T22:43:59.393-00:00"
       ::array #py [0 1 2 3 4]
-      ::hash #py {:hello "world"}}))
+      ::hash #py {:hello "world"}
+      ::binary (slurp-bytes (resource "screenshot.png"))}))
 
 (def platform-collections
   #?(:bb nil
