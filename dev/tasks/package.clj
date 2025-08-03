@@ -3,6 +3,7 @@
             [hiccup.core :refer [html]]
             [tasks.build :refer [build extensions]]
             [tasks.info :refer [options version]]
+            [tasks.py :as py]
             [tasks.tools :refer [clj]]))
 
 (defn- options->licenses [{:keys [license]}]
@@ -116,6 +117,7 @@
   "Package all release artifacts."
   []
   (jar)
-  (extensions))
+  (extensions)
+  (py/package))
 
 (defn -main [] (all))

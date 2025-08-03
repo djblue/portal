@@ -99,6 +99,7 @@
 
 (def py  (partial #'sh :python3))
 (def pip (partial #'sh (py-script :pip)))
+(def poetry (partial #'sh (py-script :poetry)))
 
 (defn lpy [& args]
   (binding [*opts*
