@@ -91,7 +91,7 @@
                               ["src" "resources" "dev" "test"]))]
     (apply sh :Clojure.Main args)))
 
-(defn- py-script [bin]
+(defn py-script [bin]
   (str (if windows?
          "./target/py/Scripts/"
          "./target/py/bin/")

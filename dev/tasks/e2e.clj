@@ -2,7 +2,8 @@
   (:require [babashka.process :as p]
             [clojure.java.io :as io]
             [portal.e2e :as e2e]
-            [tasks.build :refer [build]]))
+            [tasks.build :refer [build]]
+            [tasks.tools :as tools]))
 
 (def e2e-envs
   {:jvm  [:clojure "-M" "-e" "(set! *warn-on-reflection* true)" "-r"]
@@ -22,7 +23,8 @@
           "-M" "-m" :cljs.main]
    :bb   [:bb]
    :nbb  [:npx :nbb]
-   :clr  [:bb "-m" "tasks.cljr/repl"]})
+   :clr  [:bb "-m" "tasks.cljr/repl"]
+   :py   [(tools/py-script "basilisp") :repl "--include-path" "src"]})
 
 (defn e2e [env]
   (build)

@@ -19,7 +19,7 @@
   (if (= (first args) "web")
     (step '(require '[portal.web :as p]))
     (step '(require '[portal.api :as p])))
-  (step `(do (add-tap #'p/submit)
+  (step `(do (~'add-tap #'p/submit)
              (p/open ~(options))))
   (step '(p/clear))
   (step '(require '[examples.data :refer [data]]))
