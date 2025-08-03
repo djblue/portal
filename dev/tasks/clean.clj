@@ -18,6 +18,7 @@
    "resources/portal/"
    "resources/portal-dev/"
    "target/"
+   "dist/"
    (str "extension-vscode/portal-" version ".vsix")])
 
 (defn clean

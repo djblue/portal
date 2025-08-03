@@ -8,8 +8,8 @@
     (py "-m" :venv "target/py")
     (pip :install "-r" "requirements.txt")))
 
-(defn package [] (install) (poetry :build))
-(defn deploy  [] (install) (poetry :publish))
+(defn package [] (install) (build) (poetry :build))
+(defn deploy  [] (install) (build) (poetry :publish))
 
 (defn nrepl [] (lpy :nrepl-server "--include-path" "src"))
 
