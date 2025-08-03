@@ -161,6 +161,7 @@
    (io/inline "portal/client/node.cljs")
    (io/inline "portal/runtime/fs.cljc")
    (io/inline "portal/runtime/node/client.cljs")
+   (io/inline "portal/runtime/protocols.cljc")
    (io/inline "portal/runtime/rpc.cljc")
    (io/inline "portal/runtime/shell.cljc")
    (io/inline "portal/runtime/browser.cljc")
