@@ -65,10 +65,11 @@
   (try
     (let [runner (web/ServerRunner (web/Server #(handler %)))]
       (await (.setup runner))
-      (let [site  (web/TCPSite runner (:host options "localhost") (:port options 0))
+      (let [host  (:host options "localhost")
+            site  (web/TCPSite runner host (:port options 0))
             _     (await (.start site))
             event (asyncio/Event)
-            [host port] (.getsockname (aget (.. site -_server -sockets) 0))]
+            [_ port] (.getsockname (aget (.. site -_server -sockets) 0))]
         (try
           (swap! server merge
                  {:port port
