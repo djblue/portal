@@ -135,11 +135,15 @@
     (transient {})
     entries)))
 
-(defn- qs->map [qs] (->map (.entries (js/URLSearchParams. qs))))
+(defn- qs->map [qs]
+  (try
+    (->map (.entries (js/URLSearchParams. qs)))
+    (catch :default _)))
 
 (defn get-mode []
   (let [search (.. js/window -location -search (slice 1))
-        params (qs->map search)]
+        hash   (.. js/window -location -hash (slice 1))
+        params (merge (qs->map search) (qs->map hash))]
     (cond
       (empty? params)       [:app]
       (:content-url params) [:fetch params]
