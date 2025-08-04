@@ -641,6 +641,32 @@
     (copy-to-clipboard! selection)
     (copy-edn! (selected-values @state))))
 
+(defn- map->qs [m]
+  (let [qs (js/URLSearchParams.)]
+    (doseq [[k v] m]
+      (.append qs (name k) v))
+    (str qs)))
+
+(defn ^:no-doc create-data-url [value]
+  (let [edn (binding [*print-meta* true] (pr-str value))]
+    (str "https://djblue.github.io/portal/?"
+         (map->qs
+          {:content-url
+           (str "data:;base64," (js/btoa edn))
+           :content-type "application/edn"}))))
+
+(defn ^:command copy-link
+  "NOTE: Avoid using with sensitive data and value must fit in URL.
+   Copy link to the standalone Portal (https://djblue.github.io/portal/)."
+  [state]
+  (copy-to-clipboard! (create-data-url (selected-values @state))))
+
+(defn ^:command inspect-standalone
+  "NOTE: Avoid using with sensitive data and value must fit in URL.
+   Open value in standalone Portal (https://djblue.github.io/portal/)."
+  [state]
+  (js/open (create-data-url (selected-values @state))))
+
 (defn- pprint-json [v]
   (.stringify js/JSON v nil 2))
 

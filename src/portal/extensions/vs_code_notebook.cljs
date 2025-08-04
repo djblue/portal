@@ -4,12 +4,14 @@
             [portal.runtime :as rt]
             [portal.runtime.edn :as edn]
             [portal.ui.cljs :as cljs]
+            [portal.ui.commands :as commands]
             [portal.ui.embed :as embed]
             [portal.ui.inspector :as ins]
             [portal.ui.load :as load]
             [portal.ui.options :as opts]
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
+            [portal.ui.theme :as theme]
             [reagent.core :as r]
             [reagent.dom :as dom]))
 
@@ -20,13 +22,15 @@
   "Open a new portal window to inspect a particular value."
   {:command true}
   ([value]
-   (inspect value))
+   (inspect value nil))
   ([value _]
-   (.postMessage
-    ^js @context
-    #js {:type "open-editor"
-         :data (binding [*print-meta* true]
-                 (pr-str value))})))
+   (if-not (theme/is-vs-code?)
+     (js/open (commands/create-data-url value))
+     (.postMessage
+      ^js @context
+      #js {:type "open-editor"
+           :data (binding [*print-meta* true]
+                   (pr-str value))}))))
 
 (rt/register! #'inspect {:name `portal.api/inspect})
 
