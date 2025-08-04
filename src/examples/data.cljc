@@ -800,7 +800,15 @@
      :line    7
      :result  :hello/joyride
      :runtime :joyride
-     :form    :hello/joyride}]))
+     :form    :hello/joyride}
+    {:ns 'basilisp.user,
+     :time #inst "2017-06-06T18:07:54.000-04:00",
+     :level :warn,
+     :column 1,
+     :line 1,
+     :result :basilisp.user/py,
+     :runtime :py,
+     :form :basilisp.user/py}]))
 
 (defn- profile-ms [v]
   (v/for v
