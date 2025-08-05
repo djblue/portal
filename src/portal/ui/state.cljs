@@ -172,6 +172,14 @@
              {}
              {{:value value :stable-path []} search-text}))))
 
+(defn clear-search
+  ([state] (dissoc state :search-text))
+  ([state context]
+   (let [state (update state :search-text dissoc (get-location context))]
+     (cond-> state
+       (empty? (:search-text state))
+       (dissoc :search-text)))))
+
 (defn history-push [state {:portal/keys [key value f] :as entry}]
   (-> (push-command state entry)
       (assoc

@@ -743,7 +743,7 @@
 
 (defn ^:command clear-filter
   [state]
-  (state/dispatch! state dissoc :search-text))
+  (state/dispatch! state state/clear-search))
 
 (defn ^:command scroll-top
   {:shortcuts [["g" "g"]]}

@@ -1,4 +1,5 @@
 (ns portal.ui.icons
+  (:refer-clojure :exclude [filter])
   (:require ["@fortawesome/free-solid-svg-icons/faArrowDown" :refer [faArrowDown]]
             ["@fortawesome/free-solid-svg-icons/faArrowLeft" :refer [faArrowLeft]]
             ["@fortawesome/free-solid-svg-icons/faArrowRight" :refer [faArrowRight]]
@@ -19,6 +20,7 @@
             ["@fortawesome/free-solid-svg-icons/faExclamationTriangle" :refer [faExclamationTriangle]]
             ["@fortawesome/free-solid-svg-icons/faExternalLinkAlt" :refer [faExternalLinkAlt]]
             ["@fortawesome/free-solid-svg-icons/faFileCode" :refer [faFileCode]]
+            ["@fortawesome/free-solid-svg-icons/faFilter" :refer [faFilter]]
             ["@fortawesome/free-solid-svg-icons/faInfoCircle" :refer [faInfoCircle]]
             ["@fortawesome/free-solid-svg-icons/faMinusCircle" :refer [faMinusCircle]]
             ["@fortawesome/free-solid-svg-icons/faPause" :refer [faPause]]
@@ -56,6 +58,7 @@
 (def exclamation-triangle (partial icon faExclamationTriangle))
 (def external-link (partial icon faExternalLinkAlt))
 (def file-code (partial icon faFileCode))
+(def filter (partial icon faFilter))
 (def info-circle (partial icon faInfoCircle))
 (def minus-circle (partial icon faMinusCircle))
 (def pause (partial icon faPause))

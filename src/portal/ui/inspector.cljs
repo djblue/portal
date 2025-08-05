@@ -496,13 +496,22 @@
                :font-family (:font-family theme)}}
       (:title props)]]))
 
+(defn use-search-text []
+  (let [state       (state/use-state)
+        context     (use-context)
+        location    (state/get-location context)]
+    @(r/cursor state [:search-text location])))
+
 (defn- collection-header [values]
   (let [[show-meta? set-show-meta!] (react/use-state false)
         theme    (theme/use-theme)
+        state    (state/use-state)
+        context  (use-context)
         metadata (dissoc
                   (meta values)
                   :portal.runtime/id
-                  :portal.runtime/type)]
+                  :portal.runtime/type)
+        search-text (use-search-text)]
     [s/div
      {:style
       {:border [1 :solid (::c/border theme)]
@@ -552,7 +561,36 @@
                 {:box-sizing :border-box
                  :padding (:padding theme)
                  :border-right [1 :solid (::c/border theme)]}}
-         [select/with-position {:row -2 :column 1} [inspector type]]])]
+         [select/with-position {:row -2 :column 1} [inspector type]]])
+
+      (when search-text
+        (let [color (get theme (nth theme/order (:depth context)))]
+          [s/div {:style
+                  {:box-sizing :border-box
+                   :display :flex
+                   :align-items :center
+                   :padding (:padding theme)
+                   :gap  (:padding theme)
+                   :color color
+                   :width :fit-content
+                   :border-right [1 :solid (::c/border theme)]}}
+           [icons/filter {:size :sm}]
+           [s/div
+            {:title "Filter text"
+             :style {:background :none
+                     :color color
+                     :font-family (:font-family theme)}}
+            search-text]
+           [icons/times-circle
+            {:size :sm
+             :title "Clear filter text"
+             :style {:color (::c/border theme)
+                     :cursor :pointer}
+             :style/hover {:color (::c/diff-remove theme)}
+             :on-click (fn [e]
+                         (.stopPropagation e)
+                         (state/dispatch! state state/clear-search context))}]]))]
+
      (when show-meta?
        [s/div
         {:style
@@ -625,12 +663,6 @@
       (merge
        (select-keys m [viewer])
        {:portal.viewer/default viewer}))))
-
-(defn use-search-text []
-  (let [state       (state/use-state)
-        context     (use-context)
-        location    (state/get-location context)]
-    @(r/cursor state [:search-text location])))
 
 (defn- inspect-map-k-v* [map-ns search-text values]
   (let [matcher       (f/match search-text)
