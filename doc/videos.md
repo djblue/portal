@@ -27,6 +27,19 @@ In this talk I share some issues with my previous workflows and how the the
 visual tool Portal has improved them. This will demonstrate what's possible, but
 also hopefully spark more exploration and collaboration.
 
+## 2023-12-13 - Cooking up a workflow for data (by [Slutsky][daslu], Prately & McLean)
+
+<a target="_blank" href="https://www.youtube.com/watch?v=skMMvxWjmNM&t=3150s">
+<img src="https://img.youtube.com/vi/skMMvxWjmNM/hqdefault.jpg"
+     alt="Apropos 14" />
+</a>
+
+What does a typical data analysis workflow look like? .. and what is needed to
+make such workflows simple & easy for any person with a data question?
+
+In the talk, we will demonstrate some of the relevant workflows, libraries, and
+tools through a real-world data problem.
+
 ## 2023-10-24 - Portal Internals (by Chris Badahdah)
 
 <a target="_blank" href="https://www.youtube.com/watch?v=NO9D3LSS4WU">
@@ -144,3 +157,4 @@ It was streamed live on the [Apropos discord][apropos-discord] server which is o
 [practicalli]: https://github.com/practicalli-johnny
 [cyrik]: https://github.com/Cyrik
 [apropos-discord]: https://discord.com/invite/39DHbU8
+[daslu]: https://github.com/daslu
