@@ -19,16 +19,19 @@
     #?(:cljs (re-find pattern (pr-str value)))
 
     (map? value)
-    (some
-     (fn [[k v]]
-       (or (match* k pattern) (match* v pattern)))
-     value)
+    (or (some
+         (fn [[k v]]
+           (or (match* k pattern)
+               (match* v pattern)))
+         value)
+        (some-> (meta value) (match* pattern)))
 
     (coll? value)
-    (some
-     (fn [v]
-       (match* v pattern))
-     value)
+    (or (some
+         (fn [v]
+           (match* v pattern))
+         value)
+        (some-> (meta value) (match* pattern)))
 
     :else false))
 
