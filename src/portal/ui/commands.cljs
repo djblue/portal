@@ -685,7 +685,7 @@
   "Deselect all values."
   {:shortcuts [#{"shift" "escape"}]}
   [state]
-  (state/dispatch! state dissoc :selected))
+  (state/dispatch! state state/clear-selected))
 
 (defn ^:command select-pop
   {:shortcuts [#{"escape"}]}
