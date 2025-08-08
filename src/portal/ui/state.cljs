@@ -9,6 +9,7 @@
 (defonce render (atom nil))
 (defonce state  (r/atom {}))
 (defonce ^:no-doc log (atom (list)))
+(defonce ^:no-doc selected-el (atom nil))
 
 (defn- get-parent []
   (cond

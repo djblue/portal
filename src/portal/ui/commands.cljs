@@ -757,6 +757,12 @@
   (when-let [el (:scroll-element @state)]
     (.scroll el #js {:top (+ (.-scrollHeight el) 1000)})))
 
+(defn ^:command center-selected
+  {:shortcuts [["z" "z"]]}
+  [_state]
+  (when-let [el @state/selected-el]
+    (.scrollIntoView el #js {:inline "center" :block "center" :behavior "smooth"})))
+
 (defn ^:command toggle-shell
   "Toggle visibility of top / bottom helper UX. Allows for a value focused session."
   [state]

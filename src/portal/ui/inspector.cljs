@@ -1215,6 +1215,7 @@
      (when (and selected
                 (not= (.. js/document -activeElement -tagName) "INPUT"))
        (when-let [el (.-current ref)]
+         (reset! state/selected-el el)
          (when-not (and (.hasFocus js/document) (l/element-visible? el))
            (.scrollIntoView el #js {:inline "nearest" :block "nearest" :behavior "smooth"})))))
     [:> error-boundary
