@@ -32,17 +32,16 @@
 (defn- get-theme [theme-name]
   (let [opts (opts/use-options)
         vars (get-vs-code-css-vars)]
-    (merge
-     {:font-family   "monospace"
-      :font-size     "12pt"
-      :string-length 100
-      :max-depth     2
-      :padding       6
-      :border-radius 2}
-     (update-vals
-      (or (get c/themes theme-name)
-          (get (:themes opts) theme-name))
-      #(get vars % %)))))
+    (when-let [theme (or (get c/themes theme-name)
+                         (get (:themes opts) theme-name))]
+      (merge
+       {:font-family   "monospace"
+        :font-size     "12pt"
+        :string-length 100
+        :max-depth     2
+        :padding       6
+        :border-radius 2}
+       (update-vals theme #(get vars % %))))))
 
 (defn- use-theme-detector []
   (let [media-query (.matchMedia js/window "(prefers-color-scheme: dark)")
@@ -92,7 +91,8 @@
 (defn with-theme [theme-name & children]
   (let [dark-theme (use-theme-detector)
         theme-key  (use-vscode-theme-detector)
-        theme      (get-theme (or theme-name (default-theme dark-theme)))]
+        theme      (or (get-theme theme-name)
+                       (get-theme (default-theme dark-theme)))]
     (into [:r> (.-Provider theme-context) #js {:key theme-key :value theme}] children)))
 
 (defonce ^:no-doc order
