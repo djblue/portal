@@ -1,3 +1,14 @@
+## 0.60.2 - 2025-08-09
+
+- Prevent error when theme not found 417f3d05
+- Add `portal.ui.commands/center-selected` aka `zz` in vim b0307e1b
+- Consider metadata when filtering 1d49ba71
+- Update inspector to show when a value is being filtered 2a1b211d
+- Upgrades Intellij plugin for 2025.2 (#266) ddea22dd
+  - Thanks @coyotesqrl!
+- Update standalone app to take data via hash fragment 7dbfddf0
+- Add support for opening value in standalone portal instance 4aca4438
+
 ## 0.60.1 - 2025-08-03
 
 * Fix joyride runtime support 11778df8
