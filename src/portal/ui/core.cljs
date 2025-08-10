@@ -14,6 +14,14 @@
 
 (def functional-compiler (r/create-compiler {:function-components true}))
 
+(defn- use-portal-user []
+  (react/use-effect
+   :once
+   (try
+     (cljs/eval-string {:code "(require 'portal.user)"})
+     (catch :default e
+       (.error js/console e)))))
+
 (defn- custom-app [opts]
   (let [[app set-app!] (react/use-state nil)]
     (react/use-effect
@@ -26,6 +34,7 @@
 
 (defn connected-app []
   (let [opts (opts/use-options)]
+    (use-portal-user)
     (cond
       (= opts ::opts/loading) nil
       (contains? opts :main) [app/root
