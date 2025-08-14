@@ -103,6 +103,8 @@
    (sci-import/import
     cljs.core/random-uuid
     cljs.core/tap>
+    cljs.core/add-tap
+    cljs.core/remove-tap
     cljs.reader/read-string)
    {'reagent.core
     (assoc reagent/reagent-namespace
