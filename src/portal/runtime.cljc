@@ -221,7 +221,8 @@
   (get @(:value-cache *session*) [:id id]))
 
 (defn- deref? [value]
-  #?(:clj  (instance? clojure.lang.IRef value)
+  #?(:clj  (or (instance? clojure.lang.IRef value)
+               (instance? clojure.lang.IDeref value))
      :cljr (instance? clojure.lang.IRef value)
      :cljs (satisfies? cljs.core/IDeref value)
      :lpy  (atom? value)))
