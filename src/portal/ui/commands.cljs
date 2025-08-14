@@ -851,7 +851,7 @@
                (for [a (:portal/args command)] (pr-str a))]])}])))))
 
 (defn ^:command set-theme [state]
-  (a/let [[theme] (pick-one state (keys c/themes))]
+  (a/let [[theme] (pick-one state (keys @c/!themes))]
     (state/dispatch! state state/set-theme! theme)))
 
 (defn ^:command history-back

@@ -32,7 +32,7 @@
 (defn- get-theme [theme-name]
   (let [opts (opts/use-options)
         vars (get-vs-code-css-vars)]
-    (when-let [theme (or (get c/themes theme-name)
+    (when-let [theme (or (get @c/!themes theme-name)
                          (get (:themes opts) theme-name))]
       (merge
        {:font-family   "monospace"

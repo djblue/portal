@@ -176,3 +176,8 @@
     ::exception   "#f38ba8"
     ::diff-add    "#a6e3a1"
     ::diff-remove "#f38ba8"}})
+
+(def ^:no-doc !themes (atom themes))
+
+(defn register! [theme-name theme]
+  (swap! !themes assoc theme-name theme))
