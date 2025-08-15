@@ -1094,8 +1094,8 @@
                :font-size "0.8rem"
                :color background
                :border-radius 100
-               :top "-0.5rem"
-               :right "-0.5rem"
+               :top "-0.4rem"
+               :right "-0.4rem"
                :min-width "1rem"
                :height "1rem"
                :z-index 3
