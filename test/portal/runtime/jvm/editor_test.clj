@@ -28,6 +28,7 @@
     ;; strings
     "deps.edn"
     "src/portal/runtime.cljc"
+    (str "file:" (.getPath (.getAbsoluteFile (io/file "deps.edn"))))
 
     ;; string on classpath
     "portal/runtime.cljc")

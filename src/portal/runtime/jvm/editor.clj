@@ -100,7 +100,9 @@
   String
   (resolve [file]
     (or (exists file)
-        (some-> file io/resource resolve))))
+        (some-> file io/resource resolve)
+        (when (str/starts-with? file "file:")
+          (resolve (subs file 5))))))
 
 (defmulti -open-editor :editor)
 
