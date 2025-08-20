@@ -100,7 +100,7 @@
   ([portal options]
    (l/open portal
            (merge
-            (dissoc (:options rt/*session*) :value)
+            (dissoc (:options rt/*session*) :value :main)
             (rename options)))))
 
 (defn close
