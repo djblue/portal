@@ -98,6 +98,7 @@
 
           (seq @stdio) (assoc :stdio @stdio))))
     (catch :default e
+      (set! *e e)
       (throw (ex-info "eval-error" (Throwable->map e))))))
 
 (defn- ns->path [ns]
