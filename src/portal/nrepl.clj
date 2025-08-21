@@ -188,59 +188,61 @@
                                 (set! *portal-session* portal)
                                 (println "To quit, type:" :cljs/quit)
                                 [:repl portal])))
-  (if-let [portal (and (#{"eval" "load-file"} op)
-                       (get @session #'*portal-session*))]
-    (->> (if-not (contains? (into #{:all} (p/sessions)) portal)
-           (do (swap! session dissoc #'*portal-session* #'*portal-ns*)
-               {:value       :cljs/quit
-                :status      :done
-                ::print/keys #{:value}})
-           (try
-             (let [[code file]
-                   (if (= "load-file" (:op msg))
-                     [(:file msg) (:file-path msg)]
-                     [(:code msg) (:file msg)])
-                   {:keys [value stdio] :as response}
-                   (p/eval-str
-                    portal
-                    code
-                    (-> {:ns (get @session #'*portal-ns*)}
-                        (merge msg)
-                        (select-keys  [:ns :line :column])
-                        (assoc :file file
-                               :verbose true
-                               :context (case op "eval" :expr "load-file" :statement)
-                               :re-render (= op "load-file"))))]
-               (doseq [{:keys [tag val]} stdio]
-                 (case tag
-                   :out (transport/send transport (response-for msg :out val))
-                   :err (transport/send transport (response-for msg :err val))
-                   nil))
-               (when-let [namespace (:ns response)]
-                 (swap! session assoc #'*portal-ns* namespace))
-               (when (= value :cljs/quit)
-                 (swap! session dissoc #'*portal-session* #'*portal-ns*))
-               (merge
-                response
-                {:status      :done
-                 ::print/keys #{:value}}))
-             (catch Exception e
-               (swap! session assoc #'*e e)
-               {::caught/throwable e
-                :status            [:done :eval-error]
-                :ex                (str (class e))
-                :root-ex           (str (class (main/root-cause e)))
-                :causes            (if-let [via (get-in (ex-data e) [:error :via])]
-                                     (for [{:keys [type message at]} via]
-                                       {:class      type
-                                        :message    message
-                                        :stacktrace at})
-                                     (for [ex (take-while some? (iterate ex-cause e))]
-                                       {:class      (str (class ex))
-                                        :message    (ex-message ex)
-                                        :stacktrace []}))})))
-         (response-for msg)
-         (transport/send transport))
+  (if-let [portal (get @session #'*portal-session*)]
+    (case op
+      ("eval" "load-file")
+      (->> (if-not (contains? (into #{:all} (p/sessions)) portal)
+             (do (swap! session dissoc #'*portal-session* #'*portal-ns*)
+                 {:value       :cljs/quit
+                  :status      :done
+                  ::print/keys #{:value}})
+             (try
+               (let [[code file]
+                     (if (= "load-file" (:op msg))
+                       [(:file msg) (:file-path msg)]
+                       [(:code msg) (:file msg)])
+                     {:keys [value stdio] :as response}
+                     (p/eval-str
+                      portal
+                      code
+                      (-> {:ns (get @session #'*portal-ns*)}
+                          (merge msg)
+                          (select-keys  [:ns :line :column])
+                          (assoc :file file
+                                 :verbose true
+                                 :context (case op "eval" :expr "load-file" :statement)
+                                 :re-render (= op "load-file"))))]
+                 (doseq [{:keys [tag val]} stdio]
+                   (case tag
+                     :out (transport/send transport (response-for msg :out val))
+                     :err (transport/send transport (response-for msg :err val))
+                     nil))
+                 (when-let [namespace (:ns response)]
+                   (swap! session assoc #'*portal-ns* namespace))
+                 (when (= value :cljs/quit)
+                   (swap! session dissoc #'*portal-session* #'*portal-ns*))
+                 (merge
+                  response
+                  {:status      :done
+                   ::print/keys #{:value}}))
+               (catch Exception e
+                 (swap! session assoc #'*e e)
+                 {::caught/throwable e
+                  :status            [:done :eval-error]
+                  :ex                (str (class e))
+                  :root-ex           (str (class (main/root-cause e)))
+                  :causes            (if-let [via (get-in (ex-data e) [:error :via])]
+                                       (for [{:keys [type message at]} via]
+                                         {:class      type
+                                          :message    message
+                                          :stacktrace at})
+                                       (for [ex (take-while some? (iterate ex-cause e))]
+                                         {:class      (str (class ex))
+                                          :message    (ex-message ex)
+                                          :stacktrace []}))})))
+           (response-for msg)
+           (transport/send transport))
+      (transport/send transport (response-for msg :status :done)))
     (handler msg)))
 
 (defn wrap-repl
