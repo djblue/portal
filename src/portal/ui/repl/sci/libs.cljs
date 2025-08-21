@@ -5,8 +5,8 @@
             ["vega" :as vega]
             ["vega-embed" :as vega-embed]
             ["vega-lite" :as vega-lite]
+            cljs.pprint
             cljs.reader
-            clojure.pprint
             clojure.zip
             goog.crypt.base64
             portal.colors
@@ -59,10 +59,13 @@
    "vega-embed" vega-embed
    "vega-lite"  vega-lite})
 
+(def ^:private cljs-pprint-namespace
+  (sci-import/import-ns cljs.pprint))
+
 (def namespaces
   (merge
+   cljs-pprint-namespace
    (sci-import/import-ns
-    clojure.pprint
     clojure.zip
     goog.crypt.base64
     goog.math
@@ -108,7 +111,8 @@
     cljs.core/add-tap
     cljs.core/remove-tap
     cljs.reader/read-string)
-   {'reagent.core
+   {'clojure.pprint (cljs-pprint-namespace 'cljs.pprint)
+    'reagent.core
     (assoc reagent/reagent-namespace
            'adapt-react-class
            (sci/copy-var r/adapt-react-class reagent/rns)
