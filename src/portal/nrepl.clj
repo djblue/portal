@@ -200,7 +200,7 @@
                    (if (= "load-file" (:op msg))
                      [(:file msg) (:file-path msg)]
                      [(:code msg) (:file msg)])
-                   {:keys [value] :as response}
+                   {:keys [value stdio] :as response}
                    (p/eval-str
                     portal
                     code
@@ -211,6 +211,11 @@
                                :verbose true
                                :context (case op "eval" :expr "load-file" :statement)
                                :re-render (= op "load-file"))))]
+               (doseq [{:keys [tag val]} stdio]
+                 (case tag
+                   :out (transport/send transport (response-for msg :out val))
+                   :err (transport/send transport (response-for msg :err val))
+                   nil))
                (when-let [namespace (:ns response)]
                  (swap! session assoc #'*portal-ns* namespace))
                (when (= value :cljs/quit)
