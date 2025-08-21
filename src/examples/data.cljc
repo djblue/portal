@@ -14,7 +14,6 @@
                     [java.util Date]
                     [java.util UUID])
      :org.babashka/nbb (:import)
-     :cljs (:import [goog.math Long])
      :cljr (:import [System DateTime Guid Uri]
                     [System.IO File])
      :lpy (:import [math :as Math])))
@@ -66,8 +65,7 @@
       ::js-array #js [0 1 2 3 4]
       ::js-object #js {:hello "world"}}
      :cljs
-     {::long (.fromString Long "4611681620380904123")
-      ::promise (js/Promise.resolve 123)
+     {::promise (js/Promise.resolve 123)
       ::url (js/URL. "https://github.com/djblue/portal")
       ::uuid (random-uuid)
       ::date (js/Date.)
