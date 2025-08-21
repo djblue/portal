@@ -6,6 +6,7 @@
             ["vega-embed" :as vega-embed]
             ["vega-lite" :as vega-lite]
             cljs.reader
+            clojure.pprint
             clojure.zip
             goog.crypt.base64
             portal.colors
@@ -61,6 +62,7 @@
 (def namespaces
   (merge
    (sci-import/import-ns
+    clojure.pprint
     clojure.zip
     goog.crypt.base64
     goog.math
