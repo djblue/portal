@@ -69,34 +69,38 @@
                    (sci/create-ns 'cljs.user nil))
           reader (sci/source-reader (:code msg))
           stdio  (atom [])
-          out-fn (fn [val] (swap! stdio conj val))]
+          out-fn (fn [val] (swap! stdio conj val))
+          print-fn #(out-fn {:tag :out :val %})
+          print-err-fn #(out-fn {:tag :err :val %})]
       (when-let [n (:line msg)]   (set! (.-line reader) n))
       (when-let [n (:column msg)] (set! (.-column reader) n))
-      (sci/with-bindings
-        {sci/*1 *1
-         sci/*2 *2
-         sci/*3 *3
-         sci/*e *e
-         sci/ns sci-ns
-         sci/print-newline true
-         sci/print-fn      #(out-fn {:tag :out :val %})
-         sci/print-err-fn  #(out-fn {:tag :err :val %})
-         sci/file (:file msg)}
-        (cond->
-         {:value (loop [last-val nil]
-                   (let [[form _s] (sci/parse-next+string
-                                    ctx reader
-                                    {:read-cond :allow})]
-                     (if (= ::sci/eof form)
-                       last-val
-                       (let [value (sci/eval-form ctx form)]
-                         (set! *3 *2)
-                         (set! *2 *1)
-                         (set! *1 value)
-                         (recur value)))))
-          :ns    (str @sci/ns)}
+      (binding [*print-fn* print-fn
+                *print-err-fn* print-err-fn]
+        (sci/with-bindings
+          {sci/*1 *1
+           sci/*2 *2
+           sci/*3 *3
+           sci/*e *e
+           sci/ns sci-ns
+           sci/print-newline true
+           sci/print-fn print-fn
+           sci/print-err-fn print-err-fn
+           sci/file (:file msg)}
+          (cond->
+           {:value (loop [last-val nil]
+                     (let [[form _s] (sci/parse-next+string
+                                      ctx reader
+                                      {:read-cond :allow})]
+                       (if (= ::sci/eof form)
+                         last-val
+                         (let [value (sci/eval-form ctx form)]
+                           (set! *3 *2)
+                           (set! *2 *1)
+                           (set! *1 value)
+                           (recur value)))))
+            :ns    (str @sci/ns)}
 
-          (seq @stdio) (assoc :stdio @stdio))))
+            (seq @stdio) (assoc :stdio @stdio)))))
     (catch :default e
       (set! *e e)
       (throw (ex-info "eval-error" (Throwable->map e))))))
