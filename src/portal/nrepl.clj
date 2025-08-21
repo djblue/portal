@@ -176,7 +176,7 @@
                  {:requires #{"clone"
                               #'print/wrap-print
                               #'caught/wrap-caught}
-                  :expects (into #{"eval"} (get-shadow-middleware))
+                  :expects (into #{"eval" "load-file"} (get-shadow-middleware))
                   :handles {}})
 
 (defn- wrap-repl* [handler {:keys [op session transport] :as msg}]
@@ -256,7 +256,7 @@
                               #'wrap-portal
                               #'print/wrap-print
                               #'caught/wrap-caught}
-                  :expects (into #{"eval"} (get-shadow-middleware))
+                  :expects (into #{"eval" "load-file"} (get-shadow-middleware))
                   :handles {}})
 
 (def ^:private id-gen (atom 0))
