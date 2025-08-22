@@ -59,6 +59,10 @@
                chain)
      :trace   (vec (mapcat ex-trace chain))}))
 
+(when-not js/goog.DEBUG
+  (set! *print-fn* sci/print-fn)
+  (set! *print-err-fn* sci/print-err-fn))
+
 (defn eval-string [msg]
   (try
     (let [ctx    @ctx
@@ -74,18 +78,18 @@
           print-err-fn #(out-fn {:tag :err :val %})]
       (when-let [n (:line msg)]   (set! (.-line reader) n))
       (when-let [n (:column msg)] (set! (.-column reader) n))
-      (binding [*print-fn* print-fn
-                *print-err-fn* print-err-fn]
-        (sci/with-bindings
-          {sci/*1 *1
-           sci/*2 *2
-           sci/*3 *3
-           sci/*e *e
-           sci/ns sci-ns
-           sci/print-newline true
-           sci/print-fn print-fn
-           sci/print-err-fn print-err-fn
-           sci/file (:file msg)}
+      (sci/with-bindings
+        {sci/*1 *1
+         sci/*2 *2
+         sci/*3 *3
+         sci/*e *e
+         sci/ns sci-ns
+         sci/print-newline true
+         sci/print-fn print-fn
+         sci/print-err-fn print-err-fn
+         sci/file (:file msg)}
+        (binding [*print-fn* sci/print-fn
+                  *print-err-fn* sci/print-err-fn]
           (cond->
            {:value (loop [last-val nil]
                      (let [[form _s] (sci/parse-next+string
