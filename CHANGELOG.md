@@ -1,3 +1,21 @@
+## 0.61.0 - 2025-08-22
+
+- Ensure `portal.nrepl` expects `load-file` 67025efc
+- Improve `goto-definition` 15cc84fe
+- Add `portal.colors/register!` ad47017d
+
+## SCI Improvements
+
+- Fix `with-out-str` and `pprint` in sci 47f6bdeb
+- Silence nrepl tooling request errors dde722f6
+- Alias `clojure.pprint` -> `cljs.pprint` for sci 4b80237d
+- Forward stdio from `portal.nrepl/wrap-repl` 41cf1277
+- Improve printing in sci runtime d4927b4f
+- Add `clojure.pprint` to sci runtime fd19597f
+- Capture last error in `*e` for sci a056ec30
+- Include `add-tap`/`remove-tap` in Portal UI sci runtime 8b87e531
+- Require `portal.user` on-load d733a324
+
 ## 0.60.2 - 2025-08-09
 
 - Prevent error when theme not found 417f3d05
