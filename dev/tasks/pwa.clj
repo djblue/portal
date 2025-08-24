@@ -25,7 +25,7 @@
     :display "standalone"
     :display_override ["minimal-ui"]
     :file_handlers
-    [{:action "/"
+    [{:action "/portal/"
       :accept {"text/*" [".txt"]
                "text/csv" [".csv"]
                "text/markdown" [".md"]
