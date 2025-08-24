@@ -4,7 +4,7 @@
 - Improve `goto-definition` 15cc84fe
 - Add `portal.colors/register!` ad47017d
 
-## SCI Improvements
+### SCI Improvements
 
 - Fix `with-out-str` and `pprint` in sci 47f6bdeb
 - Silence nrepl tooling request errors dde722f6
