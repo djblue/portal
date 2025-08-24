@@ -43,7 +43,7 @@
               (p/parse-string :format/edn content)))
    "md"   (fn [file]
             (a/let [content (read-file file)]
-              (v/hiccup (p/parse-string :format/md content))))
+              (v/hiccup (p/parse-string :format/markdown content))))
    "csv"  (fn [file]
             (a/let [content (read-file file)]
               (v/table (p/parse-string :format/csv content))))

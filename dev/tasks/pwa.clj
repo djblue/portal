@@ -23,7 +23,16 @@
     :scope (:host settings)
     :start_url (:host settings)
     :display "standalone"
-    :display_override ["minimal-ui"]}))
+    :display_override ["minimal-ui"]
+    :file_handlers
+    [{:action "/"
+      :accept {"text/*" [".txt"]
+               "text/csv" [".csv"]
+               "text/markdown" [".md"]
+               "text/html" [".htm" ".html" ".svg"]
+               "application/edn" [".edn"]
+               "application/json" [".json"]
+               "application/transit+json" [".transit.json"]}}]}))
 
 (defn- index-html [settings]
   (str
