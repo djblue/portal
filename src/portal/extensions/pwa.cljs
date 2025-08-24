@@ -45,7 +45,8 @@
 (defn launch-queue-consumer [item]
   (a/let [files (js/Promise.all (map #(.getFile %) (.-files item)))
           value (dnd/handle-files files)]
-    (state/dispatch! state/state state/history-push {:portal/value value})))
+    (when (not-empty value)
+      (state/dispatch! state/state state/history-push {:portal/value value}))))
 
 (defn handle-message [message]
   (let [data (.-data message)]
