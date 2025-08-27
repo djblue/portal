@@ -74,16 +74,26 @@
     (assoc state :selected [])
     (update state :selected #(into [] (remove #{context}) %))))
 
+(defn atom? [value]
+  (and (satisfies? cljs.core/IDeref value)
+       (not (instance? cljs.core/Var value))))
+
+(defn- parent-atom? [context]
+  (some-> context :parent :value atom?))
+
 (defn get-location
   "Get a stable location for a given context."
   [context]
   (with-meta
-    (select-keys context [:value :stable-path])
+    (if (parent-atom? context)
+      {:value ::deref :stable-path (:stable-path context)}
+      (select-keys context [:value :stable-path]))
     {:context context}))
 
 (defn- =location [a b]
   (and (= (:stable-path a) (:stable-path b))
-       (= (:value a) (:value b))))
+       (or (parent-atom? a)
+           (= (:value a) (:value b)))))
 
 (defn- some-indexed
   "(first (keep-indexed f coll))"

@@ -6,12 +6,9 @@
             [portal.ui.react :as react]
             [portal.ui.rpc :as rpc]
             [portal.ui.select :as select]
+            [portal.ui.state :refer [atom?]]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
-
-(defn atom? [value]
-  (and (satisfies? cljs.core/IDeref value)
-       (not (instance? cljs.core/Var value))))
 
 (defn- toggle-watch [value]
   (let [theme  (theme/use-theme)
