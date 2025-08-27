@@ -281,6 +281,7 @@
           :right 0
           :left 0
           :opacity 0.15
+          :pointer-events :none
           :background (::c/exception theme)}}]
        [d/div
         {:style
