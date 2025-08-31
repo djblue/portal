@@ -373,7 +373,6 @@
     (doseq [v (take 100000 x)]
       (realize-value! v))))
 
-#_{:clj-kondo/ignore [:unused-private-var]}
 (defn- runtime []
   #?(:portal :portal :bb :bb :clj :clj :joyride :joyride :org.babashka/nbb :nbb :cljs :cljs :cljr :cljr :lpy :py))
 

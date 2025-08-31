@@ -9,7 +9,7 @@
    "<!DOCTYPE html>"
    "<html lang=\"en\">"
    "<head>"
-   "<title>" (str name " - " platform " - " version) "</title>"
+   "<title>" name " - " platform " - " version "</title>"
    "<meta charset='UTF-8' />"
    "<meta name='viewport' content='width=device-width, initial-scale=1' />"
    "<meta name='theme-color' content='' />"
