@@ -40,8 +40,9 @@
              (a/bold-white (str/join " " (map name (rest args))))))
   (let [opts   (merge {:dir      *cwd*
                        :shutdown p/destroy-tree}
-                      (merge *opts* (when-not (:inherit *opts*)
-                                      {:out *out* :err *err*})))
+                      *opts*
+                      (when-not (:inherit *opts*)
+                        {:out *out* :err *err*}))
         start  (now)
         result @(if-let [f (get fns (first args))]
                   (or (f (map name (rest args)) opts)
