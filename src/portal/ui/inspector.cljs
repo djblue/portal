@@ -933,7 +933,7 @@
          :font-size   (:font-size theme)
          :font-family (:font-family theme)}
         :dangerouslySetInnerHTML
-        {:__html (anser/ansiToHtml string)}}]
+        (r/unsafe-html (anser/ansiToHtml string))}]
       (catch :default e
         (.error js/console e)
         string))))

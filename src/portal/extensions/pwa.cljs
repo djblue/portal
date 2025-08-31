@@ -85,7 +85,7 @@
        [div
         {:style {:width :fit-content
                  :margin "0 auto"}
-         :dangerously-set-inner-HTML {:__html svg}}]
+         :dangerouslySetInnerHTML (r/unsafe-html svg)}]
        [div
         {:style
          {:margin-top "10vh"
