@@ -320,15 +320,11 @@
                    (record? value)
                    (assoc ::type (type value)))))))
 
-(defn- var->symbol [v]
-  (let [m (meta v)]
-    (symbol (str (:ns m)) (str (:name m)))))
-
 (defn- id-var [value]
   (if-not (var? value)
     value
     (with-meta
-      (cson/tagged-value "portal/var" (var->symbol value))
+      (cson/tagged-value "portal/var" (symbol value))
       (assoc (meta value) ::id (value->id value)))))
 
 (defn write [value session]
