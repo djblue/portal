@@ -34,19 +34,19 @@
 
 (defn request [{:keys [url method body headers]
                 :or   {method :get}}]
-  (let [request  (HttpRequestMessage.
-                  (case method
-                    :get HttpMethod/Get
-                    :post HttpMethod/Post
-                    :put HttpMethod/Put
-                    :delete HttpMethod/Delete)
-                  url)]
+  (let [request (HttpRequestMessage.
+                 (case method
+                   :get HttpMethod/Get
+                   :post HttpMethod/Post
+                   :put HttpMethod/Put
+                   :delete HttpMethod/Delete)
+                 url)]
     (when body
       (set! (.-Content request)
             (StringContent.
              body
              Encoding/UTF8
-             (get headers "content-type" "text/plain;charset=UTF-8"))))
+             (get headers "content-type" "text/plain"))))
     (->response (.Send ^HttpClient client request HttpCompletionOption/ResponseContentRead))))
 
 (defn- serialize [encoding value]

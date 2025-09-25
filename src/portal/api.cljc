@@ -14,7 +14,8 @@
                :lpy  [portal.resources :refer [resource]])
             [clojure.set :as set]
             [portal.runtime :as rt]
-            [portal.runtime.cson :as cson]))
+            [portal.runtime.cson :as cson]
+            [portal.runtime.launcher]))
 
 (defn submit
   "Tap target function.

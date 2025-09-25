@@ -169,6 +169,7 @@
    (io/inline "portal/runtime/index.cljc")
    (io/inline "portal/runtime/node/server.cljs")
    (io/inline "portal/runtime/node/launcher.cljs")
+   (io/inline "portal/runtime/launcher.cljc")
    (io/inline "portal/api.cljc")
    (io/inline "portal/console.cljc")])
 

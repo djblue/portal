@@ -6,7 +6,7 @@
             [org.httpkit.client :as http]
             [portal.runtime :as rt]
             [portal.runtime.fs :as fs]
-            [portal.runtime.jvm.launcher :as launcher]
+            [portal.runtime.launcher :as launcher]
             [portal.runtime.shell :refer [spawn]])
   (:import (java.io File)
            (java.net URL URI)))
