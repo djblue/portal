@@ -3,15 +3,17 @@
    [clojure.string :as str]
    [portal.client.common :refer (->submit)]))
 
-(defn fetch [url options]
+(defn request [{:keys [url method body headers]
+                :or   {method :get}}]
   (let [https? (str/starts-with? url "https")
         http   (js/require (str "http" (when https? "s")))]
     (js/Promise.
      (fn [resolve reject]
-       (let [req (.request
+       (let [method (some-> method name str/upper-case)
+             req (.request
                   http
                   url
-                  (clj->js options)
+                  (clj->js {:method method :headers headers})
                   (fn [^js res]
                     (let [body (atom "")]
                       (.on res "data" #(swap! body str %))
@@ -19,8 +21,11 @@
                       (.on res "end" #(resolve
                                        {:status (.-statusCode res)
                                         :body   @body})))))]
-         (.write req (:body options))
+         (.write req body)
          (.end req))))))
+
+(defn fetch [url options]
+  (request (assoc options :url url)))
 
 (def submit (->submit fetch))
 

@@ -5,6 +5,10 @@
             [portal.runtime.json :as json]
             [portal.runtime.transit :as transit]))
 
+(defn request [{:keys [url method body headers]
+                :or   {method :get}}]
+  @(http/request {:url url :method method :headers headers :body body}))
+
 (defn- serialize [encoding value]
   (try
     (case encoding
@@ -40,16 +44,17 @@
             host     "localhost"
             port     53755}}
     value]
-   @(http/post
-     (str "http://" host ":" port "/submit")
-     {:headers
-      {"content-type"
-       (case encoding
-         :json    "application/json"
-         :cson    "application/cson"
-         :transit "application/transit+json"
-         :edn     "application/edn")}
-      :body (serialize encoding value)})))
+   (request
+    {:url (str "http://" host ":" port "/submit")
+     :method :post
+     :headers
+     {"content-type"
+      (case encoding
+        :json    "application/json"
+        :cson    "application/cson"
+        :transit "application/transit+json"
+        :edn     "application/edn")}
+     :body (serialize encoding value)})))
 
 (comment
   (submit {:runtime :jvm :value "hello jvm"})
