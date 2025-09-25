@@ -3,15 +3,40 @@
             [portal.runtime.cson :as cson])
   (:import [urllib.request :as request]))
 
+(defn- ->headers [headers]
+  (persistent!
+   (reduce
+    (fn [out [k v]]
+      (assoc! out k v))
+    (transient {})
+    (.items headers))))
+
+(defn- ->response [response]
+  {:status  (.-status response)
+   :headers (->headers (.-headers response))
+   :body    (.. response (read) (decode "utf-8"))})
+
+(defn request [{:keys [url method body headers]
+                :or   {method :get}}]
+  (let [method (case method
+                 :get "GET"
+                 :post "POST"
+                 :put "PUT"
+                 :delete "DELETE")
+        req (request/Request
+             url **
+             :method method
+             :data (some-> body (.encode "utf-8")))]
+    (doseq [[k v] headers] (.add_header req k v))
+    (->response (request/urlopen req))))
+
 (defn- serialize [encoding value]
   (try
-    (.encode
-     (case encoding
-       :json    (json/write-str  value)
-       :edn     (binding [*print-meta* true]
-                  (pr-str value))
-       :cson    (cson/write value))
-     "utf-8")
+    (case encoding
+      :json (json/write-str  value)
+      :edn  (binding [*print-meta* true]
+              (pr-str value))
+      :cson (cson/write value))
     (catch Exception ex
       (serialize
        encoding
@@ -26,14 +51,14 @@
             host     "localhost"
             port     53755}}
     value]
-   (let [req (request/Request
-              (str "http://" host ":" port "/submit")
-              ** :data (serialize encoding value))]
-     (.add_header
-      req "content-type"
+   (request
+    {:url (str "http://" host ":" port "/submit")
+     :method :post
+     :headers
+     {"content-type"
       (case encoding
         :json    "application/json"
         :cson    "application/cson"
         :transit "application/transit+json"
-        :edn     "application/edn"))
-     (request/urlopen req))))
+        :edn     "application/edn")}
+     :body (serialize encoding value)})))
