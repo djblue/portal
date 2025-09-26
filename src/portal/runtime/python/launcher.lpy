@@ -5,7 +5,8 @@
             [portal.runtime.python.server :as server]
             [portal.runtime.protocols :as p])
   (:import [aiohttp.web :as web]
-           [asyncio :as asyncio]))
+           [asyncio]
+           [threading]))
 
 (defn ws-send [ws message]
   (try
@@ -95,12 +96,16 @@
 (defn start [options]
   (when-not @server
     (swap! server assoc :done (promise))
-    (future
-      (try
-        (reset! rt/async-loop (asyncio/new_event_loop))
-        (.run_until_complete @rt/async-loop (start-handler options))
-        (finally
-          (.close @rt/async-loop)))))
+    (.start
+     (threading/Thread
+      **
+      :daemon true
+      :target
+      #(try
+         (reset! rt/async-loop (asyncio/new_event_loop))
+         (.run_until_complete @rt/async-loop (start-handler options))
+         (finally
+           (.close @rt/async-loop))))))
   (let [result (deref (:done @server) 5000 ::timeout)]
     (cond
       (= ::started result)
