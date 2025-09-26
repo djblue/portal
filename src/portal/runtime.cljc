@@ -12,7 +12,8 @@
                :default [clojure.pprint :as pprint])
             [portal.runtime.cson :as cson]
             [portal.viewer :as v])
-  #?(:lpy (:import [asyncio :as asyncio])))
+  #?(:lpy (:import [asyncio]
+                   [threading])))
 
 (def ^:private tagged-type (type (cson/->Tagged "tag" [])))
 
@@ -80,7 +81,7 @@
             (^:async
              (fn []
                (await (asyncio/sleep (/ timeout 1000.0)))
-               (future (f))))
+               (.start (threading/Thread ** :daemon true :target f))))
             @async-loop)))
 
 (defn- hashable? [value]
