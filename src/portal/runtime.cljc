@@ -243,19 +243,21 @@
        (cson/tagged-value "remote" (pr-str value))
        (meta value))
      buffer)
-    (let [m (meta value)]
-      (when (atom? value) (watch-atom value))
-      (cson/tag
-       buffer
-       "object"
-       (cond-> {:tag       tag
-                :id        (value->id value)
-                :type      (pr-str (type value))
-                :pr-str    (pr-str' value)
-                :protocols (cond-> #{}
-                             (deref? value) (conj :IDeref))}
-         m   (assoc :meta m)
-         rep (assoc :rep rep))))))
+    (if-let [id (value->id? value)]
+      (cson/to-json* (cson/tagged-value "ref" id) buffer)
+      (let [m (meta value)]
+        (when (atom? value) (watch-atom value))
+        (cson/tag
+         buffer
+         "object"
+         (cond-> {:tag       tag
+                  :id        (value->id value)
+                  :type      (pr-str (type value))
+                  :pr-str    (pr-str' value)
+                  :protocols (cond-> #{}
+                               (deref? value) (conj :IDeref))}
+           m   (assoc :meta m)
+           rep (assoc :rep rep)))))))
 
 #?(:bb nil
    :clj

@@ -134,8 +134,9 @@
     (when-not (undefined? object) object)))
 
 (defn ->value [id]
-  (let [value (get @state/value-cache id)]
-    (if-not registry value (weak-ref-value value))))
+  (if-let [value (get @state/value-cache id)]
+    (if-not registry value (weak-ref-value value))
+    (cson/tagged-value "ref" id)))
 
 (defn ->id [value]
   (when-let [id (runtime-id value)]
@@ -149,8 +150,7 @@
       (swap! state/value-cache assoc id (->weak-ref value))))
   value)
 
-(defn ->object [call object]
-  (or (->value (:id object)) (->runtime call object)))
+(defn ->object [call object] (->runtime call object))
 
 (defn reset-cache! []
   (swap!
