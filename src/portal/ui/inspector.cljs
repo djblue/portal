@@ -1166,24 +1166,27 @@
         wrapper-options (use-wrapper-options context)
         background (get-background context)]
     (into
-     [s/div
-      (merge
-       wrapper-options
-       {:ref   ref
-        :title (-> value meta :doc)
-        :on-mouse-over
-        (fn [e]
-          (.stopPropagation e)
-          (reset! hover? context))
-        :style
-        {:position      :relative
-         :z-index       0
-         :flex          "1"
-         :font-family   (:font-family theme)
-         :border        [1 :solid "rgba(0,0,0,0)"]
-         :background    (when selected background)}})
-      ^{:key "inspector-border"} [inspector-border context]
-      ^{:key "multi-select-counter"} [multi-select-counter context]]
+     (if (:readonly? context)
+       [s/div
+        {:title (-> value meta :doc)}]
+       [s/div
+        (merge
+         wrapper-options
+         {:ref   ref
+          :title (-> value meta :doc)
+          :on-mouse-over
+          (fn [e]
+            (.stopPropagation e)
+            (reset! hover? context))
+          :style
+          {:position      :relative
+           :z-index       0
+           :flex          "1"
+           :font-family   (:font-family theme)
+           :border        [1 :solid "rgba(0,0,0,0)"]
+           :background    (when selected background)}})
+        ^{:key "inspector-border"} [inspector-border context]
+        ^{:key "multi-select-counter"} [multi-select-counter context]])
      children)))
 
 (defn- inspector* [context value]
