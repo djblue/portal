@@ -12,7 +12,8 @@
                :default [clojure.pprint :as pprint])
             [portal.runtime.cson :as cson]
             [portal.viewer :as v])
-  #?(:lpy (:import [asyncio]
+  #?(:clj (:import (java.util.concurrent Executors ScheduledExecutorService TimeUnit))
+     :lpy (:import [asyncio]
                    [threading])))
 
 (def ^:private tagged-type (type (cson/->Tagged "tag" [])))
@@ -71,10 +72,13 @@
 
 (defonce request (atom nil))
 
-#?(:lpy (defonce ^:no-doc async-loop (atom nil)))
+#?(:clj (defonce ^:private executor (Executors/newSingleThreadScheduledExecutor))
+   :lpy (defonce ^:no-doc async-loop (atom nil)))
 
 (defn- set-timeout [f ^long timeout]
-  #?(:clj  (future (Thread/sleep timeout) (f))
+  #?(:clj  (.schedule ^ScheduledExecutorService executor
+                      ^Runnable f
+                      timeout TimeUnit/MILLISECONDS)
      :cljr (future (System.Threading.Thread/Sleep timeout) (f))
      :cljs (js/setTimeout f timeout)
      :lpy  (asyncio/run_coroutine_threadsafe
