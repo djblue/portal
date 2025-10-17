@@ -6,33 +6,11 @@
             [portal.runtime :as rt]
             [portal.runtime.protocols :as p]))
 
-(defn- concurrent-safe-send!
-  "Concurrent writes can result in a ref getting to the client before it is
-  available. To fix this, the `:value-cache` is forked and merged transactionally."
-  [session send! message]
-  (let [prev @(:value-cache session)
-        fork (atom prev)
-        data (rt/write message (assoc session :value-cache fork))]
-    (send! data)
-    (swap! (:value-cache session)
-           (fn [value-cache]
-             (if (identical? prev value-cache)
-               @fork
-               (let [fork @fork]
-                 (persistent!
-                  (reduce-kv
-                   (fn [out k v]
-                     (cond-> out
-                       (and (not (contains? fork k))
-                            (not (contains? prev k)))
-                       (assoc! k v)))
-                   (transient fork)
-                   value-cache))))))))
-
 (defn on-open [session send!]
   (swap! rt/connections
          assoc (:session-id session)
-         (partial concurrent-safe-send! session send!))
+         (fn [message]
+           (send! (rt/write message session))))
   (when-let [f (get-in session [:options :on-load])]
     (try
       (f)
