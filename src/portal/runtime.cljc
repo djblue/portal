@@ -86,7 +86,8 @@
              (fn []
                (await (asyncio/sleep (/ timeout 1000.0)))
                (.start (threading/Thread ** :daemon true :target f))))
-            @async-loop)))
+            @async-loop))
+  nil)
 
 (defn- hashable? [value]
   (try
