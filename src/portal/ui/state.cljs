@@ -10,6 +10,7 @@
 (defonce state  (r/atom {}))
 (defonce ^:no-doc log (atom (list)))
 (defonce ^:no-doc selected-el (atom nil))
+(def ^:private ^:dynamic *state* "Holds current state atom." nil)
 
 (defn- get-parent []
   (cond
@@ -42,7 +43,7 @@
    (fn [last-promise]
      (a/do
        (wait-for last-promise 1000)
-       (a/let [next-state (apply f @state args)]
+       (a/let [next-state (binding [*state* state] (apply f @state args))]
          (when next-state (reset! state next-state)))))))
 
 (def ^:private state-context (react/create-context (r/atom {})))
@@ -271,11 +272,29 @@
     (select-context state parent)
     state))
 
+(defn- select-child-async [state context]
+  (js/window.requestAnimationFrame
+   (partial
+    (fn select-position-async [counter]
+      (when (< counter 120) ;; 2 second timeout assuming 60 FPS
+        (if-let [child (select/get-child context)]
+          (dispatch! state select-context child)
+          (js/window.requestAnimationFrame
+           (partial select-position-async (inc counter))))))
+    0)))
+
 (defn select-child [state context]
   (if-let [child (or (select/get-right context)
                      (select/get-child context))]
     (select-context state child)
-    state))
+    (if (expanded? state context)
+      state
+      (do
+        ;; Since the child context isn't known until after it's rendered, we need to
+        ;; wait until the current context is expanded before we can select the child
+        ;; context.
+        (select-child-async *state* context)
+        (expand-inc-1 state context)))))
 
 (defn get-path [state]
   (when-let [{:keys [key? path value]} (get-selected-context state)]

@@ -544,7 +544,7 @@
          [s/span {:style {:color (::c/tag theme)}} "#"]
          [theme/with-theme+
           {::c/keyword (::c/namespace theme)}
-          [select/with-position {:row -2 :column 0}
+          [select/with-position {:row -2 :column -1}
            [with-key 'ns [inspector ns]]]]])
 
       (when (seq metadata)
