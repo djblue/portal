@@ -1,3 +1,16 @@
+## 0.62.0 - 2025-10-28
+
+- Expand children when calling `select-child` on collapsed value f1c5c8d5
+  - Thanks @shaunlebron for the suggestion!
+- Switch to `Executors` for `portal.runtime/set-timeout` e376ac44
+- Basilisp `future` appears to prevents process exit (#270) af267325
+- Combine launcher extension code for all runtimes 3b8f972a
+  - Enables editor launchers for all runtimes.
+- Allow selecting exception message 11ddcf30
+- Ignore root value of atom when considering location 8ce8a8e5
+- Improve pwa file handling c9f9b978
+- Fix `launch-queue-consumer` when launched with no files 7cce47ef
+
 ## 0.61.0 - 2025-08-22
 
 - Ensure `portal.nrepl` expects `load-file` 67025efc

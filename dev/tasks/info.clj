@@ -2,7 +2,7 @@
   (:require [clojure.java.shell :refer [sh]]
             [clojure.string :as str]))
 
-(def version "0.61.0")
+(def version "0.62.0")
 
 (defn git-hash []
   (str/trim (:out (sh "git" "rev-parse" "HEAD"))))

@@ -1,6 +1,6 @@
 [project]
 name = "djblue.portal"
-version = "0.61.0"
+version = "0.62.0"
 license = { file = "LICENSE" }
 readme = "README.md"
 description = "A clojure tool to navigate through your data."
