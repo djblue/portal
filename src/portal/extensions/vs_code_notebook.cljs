@@ -13,7 +13,7 @@
             [portal.ui.state :as state]
             [portal.ui.theme :as theme]
             [reagent.core :as r]
-            [reagent.dom :as dom]))
+            [reagent.dom.client :as client]))
 
 (defonce context (atom nil))
 (defonce component (r/atom embed/app))
@@ -84,8 +84,9 @@
 
 (defn render-output-item [^js data element]
   (a/let [value (->value data)]
-    (dom/unmount-component-at-node element)
-    (dom/render [app (.-id data) (->options data) value] element functional-compiler)))
+    (client/render (client/create-root element)
+                   [app (.-id data) (->options data) value]
+                   functional-compiler)))
 
 (defn activate [ctx]
   (cljs/init)
@@ -93,6 +94,6 @@
   (reset! state/sender send!)
   #js {:renderOutputItem #(render-output-item %1 %2)
        :disposeOutputItem
-       #(dom/unmount-component-at-node (.getElementById js/document %))})
+       #(some-> (.getElementById js/document %) client/create-root client/unmount)})
 
 (defn reload [] (reset! component embed/app))
