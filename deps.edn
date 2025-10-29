@@ -29,7 +29,7 @@
    {org.clojure/clojurescript {:mvn/version "1.12.42"}
     lambdaisland/deep-diff2   {:mvn/version "2.12.219"}
     org.babashka/sci          {:mvn/version "0.10.49"}
-    reagent/reagent           {:mvn/version "1.3.0"}
+    reagent/reagent           {:mvn/version "2.0.0"}
     io.github.babashka/sci.configs
     {:git/url "https://github.com/babashka/sci.configs"
      :git/sha "aa84a1b4f1fe45735e5b748769309fc842f737c1"}}}

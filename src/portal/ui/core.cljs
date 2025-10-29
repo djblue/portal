@@ -10,7 +10,7 @@
             [portal.ui.rpc :as rpc]
             [portal.ui.state :as state]
             [reagent.core :as r]
-            [reagent.dom :as dom]))
+            [reagent.dom.client :as client]))
 
 (def functional-compiler (r/create-compiler {:function-components true}))
 
@@ -47,13 +47,13 @@
 
 (defn render-app []
   (when-let [el (.getElementById js/document "root")]
-    (dom/render [:<>
-                 [load-portal-user]
-                 [with-cache
-                  [opts/with-options
-                   [connected-app]]]]
-                el
-                functional-compiler)))
+    (client/render (client/create-root el)
+                   [:<>
+                    [load-portal-user]
+                    [with-cache
+                     [opts/with-options
+                      [connected-app]]]]
+                   functional-compiler)))
 
 (defn main! []
   (cljs/init)
