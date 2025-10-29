@@ -19,7 +19,7 @@
             [portal.ui.styled :refer [div]]
             [portal.ui.theme :as theme]
             [reagent.core :as r]
-            [reagent.dom :as dom]))
+            [reagent.dom.client :as client]))
 
 (defn open-demo
   "Load demo data"
@@ -126,7 +126,7 @@
 
 (defn render-app []
   (when-let [el (.getElementById js/document "root")]
-    (dom/render [pwa-app] el functional-compiler)))
+    (client/render (client/create-root el) [pwa-app] functional-compiler)))
 
 (defn ->map [entries]
   (persistent!
