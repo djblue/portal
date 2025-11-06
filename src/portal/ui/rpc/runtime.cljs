@@ -143,12 +143,14 @@
     (when (= value (->value id)) id)))
 
 (defn transform [value]
-  (when-let [id (runtime-id value)]
-    (when-not (contains? @state/value-cache id)
-      (when registry
-        (.register ^js registry value id))
-      (swap! state/value-cache assoc id (->weak-ref value))))
-  value)
+  (if-let [id (runtime-id value)]
+    (do
+      (when-not (contains? @state/value-cache id)
+        (when registry
+          (.register ^js registry value id))
+        (swap! state/value-cache assoc id (->weak-ref value)))
+      (->value id))
+    value))
 
 (defn ->object [call object] (->runtime call object))
 
