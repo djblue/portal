@@ -30,7 +30,7 @@
 (defonce default-options (atom nil))
 
 (defonce ^:dynamic *session* nil)
-(defonce ^:private ^:dynamic *visited* nil)
+(defonce ^:dynamic *sent-values* nil)
 
 (defonce sessions (atom (v/table {} {:columns [:options :selected]})))
 (defonce connections (atom {}))
@@ -58,6 +58,7 @@
    (get-session session-id)
    {:id             (atom 0)
     :value-cache    (atom {})
+    :sent-values    (atom #{})
     :watch-registry (atom #{})}
    session))
 
@@ -222,8 +223,8 @@
     @out))
 
 (defn- value->id? [value]
-  (if-not (contains? @*visited* value)
-    (do (swap! *visited* conj value) nil)
+  (if-not (contains? @*sent-values* value)
+    (do (swap! *sent-values* conj value) nil)
     (get @(:value-cache *session*) (value->key value))))
 
 (defn- id->value [id]
@@ -339,8 +340,7 @@
       (assoc (meta value) ::id (value->id value)))))
 
 (defn write [value session]
-  (binding [*session* session
-            *visited* (atom #{})]
+  (binding [*session* session]
     (cson/write
      value
      (merge
