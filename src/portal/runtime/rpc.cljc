@@ -10,7 +10,9 @@
   (swap! rt/connections
          assoc (:session-id session)
          (fn [message]
-           (send! (rt/write message session))))
+           (binding [rt/*sent-values* (atom @(:sent-values session))]
+             (send! (rt/write message session))
+             (swap! (:sent-values session) into @rt/*sent-values*))))
   (when-let [f (get-in session [:options :on-load])]
     (try
       (f)
