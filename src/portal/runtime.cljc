@@ -65,11 +65,12 @@
 (defn close-session [session-id]
   (swap! sessions dissoc session-id))
 
-(defn reset-session [{:keys [session-id value-cache watch-registry] :as session}]
-  (reset! value-cache {})
+(defn reset-session [{:keys [session-id value-cache sent-values watch-registry] :as session}]
+  (swap! value-cache empty)
+  (swap! sent-values empty)
   (doseq [a @watch-registry]
     (remove-watch a session-id))
-  (reset! watch-registry #{})
+  (swap! watch-registry empty)
   session)
 
 (defonce request (atom nil))
@@ -446,11 +447,12 @@
 
 (defn- cache-evict [id]
   (let [value (id->value id)
-        {:keys [session-id value-cache watch-registry]} *session*]
+        {:keys [session-id value-cache sent-values watch-registry]} *session*]
     (when (atom? value)
       (swap! watch-registry disj value)
       (remove-watch value session-id))
     (swap! value-cache dissoc [:id id] (value->key value))
+    (swap! sent-values disj value)
     nil))
 
 (defn update-selected
