@@ -34,7 +34,9 @@
        (when (== id 1)
          (swap! c/session rt/reset-session))
        (binding [rt/*session* session]
-         (f body #(resolve (rt/write (assoc % :portal.rpc/id id) session))))))))
+         (f body #(resolve
+                   (binding [rt/*sent-values* (:sent-values session)]
+                     (rt/write (assoc % :portal.rpc/id id) session)))))))))
 
 (defn- get-session []
   (if (exists? js/PORTAL_SESSION)
