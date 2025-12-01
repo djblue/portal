@@ -5,7 +5,7 @@
             [portal.ui.viewer.vega :as vega]))
 
 ;;; :spec
-(def vega-lite-url #"https://vega\.github\.io/schema/vega-lite/v\d\.json")
+(def vega-lite-url #"https://vega\.github\.io/schema/vega-lite/v[\d\.]+\.json")
 
 (s/def ::name string?)
 (s/def ::description string?)
