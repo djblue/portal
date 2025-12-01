@@ -10,7 +10,8 @@
               :style {:padding 8, :margin 8, :width "100%"}}
      "Test"]]
    [:div {:style {:flex-grow 1}
-          :ref (fn [el] (when el (pw/open {:iframe-parent el})))}]])
+          :ref (fn [el] (when el (pw/open {:launcher :iframe 
+                                           :iframe-parent el})))}]])
 
 (defn ^:dev/after-load init []
   (rdom/render [app] (js/document.getElementById "root")))
