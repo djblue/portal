@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [0.60.3]
+- Bumped to support Intellij 2025.3
+
 ## [0.60.2]
 - Bumped to support Intellij 2025.2
 
