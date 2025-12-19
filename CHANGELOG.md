@@ -1,3 +1,12 @@
+## 0.62.1 - 2025-12-19
+
+- Upgrades Intellij plugin for 2025.3 (#278) 7efb9168
+  - Thanks jasonmm!
+- Update vega_lite.cljs (#275) 229f5a35
+  - Thanks @davidpham87!
+- Concurrent requests (#273) c066d013
+- Bump `reagent` to 2.0.0 101f7fcb
+
 ## 0.62.0 - 2025-10-28
 
 - Expand children when calling `select-child` on collapsed value f1c5c8d5
