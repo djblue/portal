@@ -80,7 +80,7 @@
 (defmethod browser/-open :emacs [{:keys [portal server]}]
   (let [url (str "http://" (:host server) ":" (:port server) "?" (:session-id portal))]
     (spawn "emacsclient" "--no-wait" "--eval"
-           (str "(xwidget-webkit-browse-url " (pr-str url) ")"))))
+           (str "(xwidget-webkit-browse-url " (pr-str url) " t)"))))
 
 (defmethod browser/-open :auto [args]
   (browser/-open
