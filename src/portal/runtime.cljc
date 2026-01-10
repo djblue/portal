@@ -412,7 +412,7 @@
        {:name (if (= :dev (:mode options))
                 "portal-dev"
                 "portal")
-        :version "0.62.1"
+        :version "0.62.2"
         :runtime (runtime)
         :platform
         #?(:bb   "bb"

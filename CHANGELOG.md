@@ -1,3 +1,8 @@
+## 0.62.2 - 2026-01-10
+
+- Fix emacs launcher to use new xwidget sessions (#279)
+  - Thanks @ianchow!
+
 ## 0.62.1 - 2025-12-19
 
 - Upgrades Intellij plugin for 2025.3 (#278) 7efb9168
