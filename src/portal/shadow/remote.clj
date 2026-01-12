@@ -6,11 +6,10 @@
   ([build-state]
    (hook build-state nil))
   ([build-state options]
-   (let [{:keys [port host]} (p/start options)]
-     (cond-> build-state
-       (= (:shadow.build/mode build-state) :dev)
-       (update-in
-        [:compiler-options :closure-defines]
-        assoc
-        `port port
-        `host host)))))
+   (cond-> build-state
+     (= (:shadow.build/mode build-state) :dev)
+     (update-in
+      [:compiler-options :closure-defines]
+      merge
+      (let [{:keys [port host]} (p/start options)]
+        {`port port `host host})))))
