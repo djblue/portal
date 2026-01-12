@@ -2,6 +2,7 @@
   (:require [portal.client.web :as client]))
 
 (goog-define port 0)
+(goog-define host "localhost")
 
 (defn get-port
   "Get portal server port."
@@ -28,4 +29,4 @@
   ([value]
    (submit {:encoding :edn} value))
   ([option value]
-   (client/submit (assoc option :port (get-port)) value)))
+   (client/submit (assoc option :host host :port (get-port)) value)))
