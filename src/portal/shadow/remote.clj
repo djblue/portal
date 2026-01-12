@@ -11,6 +11,6 @@
        (= (:shadow.build/mode build-state) :dev)
        (update-in
         [:compiler-options :closure-defines]
-        assoc 
+        assoc
         `port port
         `host host)))))
