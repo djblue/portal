@@ -47,15 +47,14 @@
 (defn- in-portal? [msg]
   (some? (get @(:session msg) #'*portal-session*)))
 
-(defn- shadow-cljs?
+(defn- shadow-cljs-repl-state
   "Determine if the current message was handled by shadow-cljs."
   [msg]
   (try
-    (some?
-     (get
-      @(:session msg)
-      (requiring-resolve
-       'shadow.cljs.devtools.server.nrepl-impl/*repl-state*)))
+    (get
+     @(:session msg)
+     (requiring-resolve
+      'shadow.cljs.devtools.server.nrepl-impl/*repl-state*))
     (catch Exception _ false)))
 
 (defn- read-cursive-file-meta [{:keys [code] :as msg}]
@@ -99,9 +98,11 @@
                 (assoc :time     (:time handler-msg)
                        :ms       (quot (- (System/nanoTime) (:start handler-msg)) 1000000)
                        :runtime  (cond
-                                   (shadow-cljs? handler-msg) :cljs
                                    (in-portal? handler-msg)   :portal
                                    :else                      :clj))
+                (merge
+                 (when-let [{:keys [build-id]} (shadow-cljs-repl-state handler-msg)]
+                   {:runtime :cljs :build-id build-id}))
                 (with-meta {::eval true
                             :portal.viewer/for
                             {:code :portal.viewer/code
