@@ -334,11 +334,20 @@
                    (record? value)
                    (assoc ::type (type value)))))))
 
+(def ^:private aliases {"cljs.core" "clojure.core"})
+
+(defn- var->name [var]
+  (let [{:keys [name ns]} (meta var)
+        ns                (str ns)]
+    (if-not name
+      `var-unnamed
+      (symbol (aliases ns ns) (str name)))))
+
 (defn- id-var [value]
   (if-not (var? value)
     value
     (with-meta
-      (cson/tagged-value "portal/var" (symbol value))
+      (cson/tagged-value "portal/var" (var->name value))
       (assoc (meta value) ::id (value->id value)))))
 
 (defn write [value session]
@@ -515,13 +524,6 @@
                    (assoc :runtime (runtime)))))))))
 
 (def ops {:portal.rpc/invoke #'invoke})
-
-(def aliases {"cljs.core" "clojure.core"})
-
-(defn- var->name [var]
-  (let [{:keys [name ns]} (meta var)
-        ns                (str ns)]
-    (symbol (aliases ns ns) (str name))))
 
 (defn register!
   ([var] (register! var {}))
