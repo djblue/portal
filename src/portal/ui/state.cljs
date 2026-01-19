@@ -14,8 +14,8 @@
 
 (defn- get-parent []
   (cond
-    (exists? js/parent)           js/parent
-    (exists? js/acquireVsCodeApi) (js/acquireVsCodeApi)))
+    (exists? js/acquireVsCodeApi) (js/acquireVsCodeApi)
+    (exists? js/parent)           js/parent))
 
 (defonce ^:private parent (get-parent))
 
