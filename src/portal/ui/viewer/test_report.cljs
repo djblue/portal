@@ -7,6 +7,7 @@
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
+            [portal.ui.viewer.log :as log]
             [portal.ui.viewer.source-location :as src]))
 
 ;;; :spec
@@ -155,6 +156,8 @@
            [ins/with-key :ms
             [ins/inspector {:portal.viewer/default :portal.viewer/duration-ms}
              ms]]]])
+       (when-let [value (:runtime value)]
+         [log/icon value])
        (when-let [location (src/->source-location value)]
          [d/div
           [select/with-position
@@ -162,7 +165,7 @@
            [ins/with-key :loc [ins/inspector location]]]])]]
 
      (when (:expanded? options)
-       [ins/inspect-map-k-v (dissoc value :type :message :file :line :ns :var)])]))
+       [ins/inspect-map-k-v (dissoc value :type :message :file :line :ns :var :ms :runtime)])]))
 
 (def ^:private begin? #{:begin-test-ns :begin-test-var})
 
@@ -174,7 +177,7 @@
 
 (def ^:private empty-vec ^{:portal.viewer/default :portal.viewer/inspector} [])
 
-(defn- end-test-var [{:keys [test-ns test-var time-var] :as state} {:keys [time]}]
+(defn- end-test-var [{:keys [test-ns test-var time-var] :as state} {:keys [time runtime]}]
   (cond-> state
     test-var
     (-> (dissoc :test-var :time-var :asserts)
@@ -186,9 +189,10 @@
                   :var     test-var
                   :asserts (:asserts state 0)}
                  (when (and time-var (inst? time))
-                   {:ms (- (inst-ms time) (inst-ms time-var))}))))))
+                   {:ms (- (inst-ms time) (inst-ms time-var))})
+                 (when runtime {:runtime runtime}))))))
 
-(defn- end-test-ns [{:keys [test-ns time-ns vars] :as state} {:keys [time]}]
+(defn- end-test-ns [{:keys [test-ns time-ns vars] :as state} {:keys [time runtime]}]
   (-> state
       (dissoc :test-ns :time-ns :vars)
       (update :results
@@ -198,7 +202,8 @@
                {:ns   test-ns
                 :vars vars}
                (when (and time-ns (inst? time))
-                 {:ms (- (inst-ms time) (inst-ms time-ns))})))))
+                 {:ms (- (inst-ms time) (inst-ms time-ns))})
+               (when runtime {:runtime runtime})))))
 
 (defn- get-results [value]
   (let [include? (when value (into #{} value))]
