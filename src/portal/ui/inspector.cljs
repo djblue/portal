@@ -674,20 +674,20 @@
        (fn [index [k v]]
          (when (or (matcher k) (matcher v))
            ^{:key (str (->id k) (->id v))}
-           [:<>
+           [with-key k
             [select/with-position
              {:row index :column 0}
              [with-context
               {:key? true}
               [container-map-k
-               [inspector
-                {:map-ns map-ns}
-                k]]]]
+               [with-key ::key
+                [inspector
+                 {:map-ns map-ns}
+                 k]]]]]
             [select/with-position
              {:row index :column 1}
-             [with-key k
-              [container-map-v
-               [inspector (get-props values k) v]]]]]))
+             [container-map-v
+              [inspector (get-props values k) v]]]]))
        sorted-values)]]))
 
 (defn inspect-map-k-v [values]

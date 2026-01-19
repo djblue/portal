@@ -297,8 +297,8 @@
         (expand-inc-1 state context)))))
 
 (defn get-path [state]
-  (when-let [{:keys [key? path value]} (get-selected-context state)]
-    (if-not key? path (conj path value))))
+  (when-let [{:keys [key? path]} (get-selected-context state)]
+    (cond-> path key? pop)))
 
 (defn set-theme [color]
   (doseq [el (.querySelectorAll js/document "meta[name=theme-color]")]
