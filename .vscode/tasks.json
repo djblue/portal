@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "test",
+      "type": "shell",
+      "group": {
+        "kind": "test"
+      },
+      "icon": {
+        "id": "beaker",
+        "color": "terminal.ansiRed"
+      },
+      "command": "bb",
+      "args": [
+        "-m",
+        "tasks.test/all"
+      ],
+      "options": {
+        "env": {
+          "PORTAL_PORT": "53755"
+        },
+        "cwd": "${workspaceFolder}"
+      }
+    }
+  ]
+}
