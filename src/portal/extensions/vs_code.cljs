@@ -10,6 +10,20 @@
             [portal.runtime.index :as index]
             [portal.runtime.node.server :as server]))
 
+(defn- get-extension ^js/Promise [extension-name]
+  (js/Promise.
+   (fn [resolve reject]
+     (let [n (atom 16) delay 250]
+       (js/setTimeout
+        (fn work []
+          (try
+            (resolve (.-exports (.getExtension vscode/extensions extension-name)))
+            (catch :default e
+              (if (zero? (swap! n dec))
+                (reject (ex-info "Max attempts reached" {} e))
+                (js/setTimeout work delay)))))
+        delay)))))
+
 (defonce ^:private !app-db (atom {:context nil
                                   :disposables []}))
 
@@ -84,18 +98,19 @@
         fs-path (.-fsPath uri)]
     (if-not (undefined? fs-path) fs-path (.-path uri))))
 
+(defn- calva-eval [form]
+  (a/try
+    (a/let [extension    (get-extension "betterthantomorrow.calva")
+            evaluateCode (.. extension -v1 -repl -evaluateCode)]
+      (evaluateCode "clj" (pr-str form)))
+    (catch :default e
+      (.showErrorMessage vscode/window (ex-message e)))))
+
 (defn- get-commands []
-  {:extension.portalOpen
-   (fn []
-     (p/open {:launcher :vs-code}))
-   :extension.portalOpenDev
-   (fn []
-     (let [path (fs/exists (fs/join (get-workspace-folder) "resources/portal-dev/main.js"))]
-       (p/open
-        {:mode         :dev
-         :window-title "vs-code-dev"
-         :resource     {"main.js" path}
-         :launcher     :vs-code})))})
+  {::p/open  #(calva-eval `(p/open {:launcher :vs-code}))
+   ::p/close #(calva-eval `(p/close))
+   ::p/clear #(calva-eval `(p/clear))
+   ::p/docs  #(calva-eval `(p/docs {:launcher :vs-code}))})
 
 (defn- setup-notebook-handler []
   (let [message-channel (.createRendererMessaging notebooks "portal-edn-renderer")]
@@ -173,20 +188,6 @@
    (io/inline "portal/api.cljc")
    (io/inline "portal/console.cljc")])
 
-(defn- get-extension ^js/Promise [extension-name]
-  (js/Promise.
-   (fn [resolve reject]
-     (let [n (atom 16) delay 250]
-       (js/setTimeout
-        (fn work []
-          (try
-            (resolve (.-exports (.getExtension vscode/extensions extension-name)))
-            (catch :default e
-              (if (zero? (swap! n dec))
-                (reject (ex-info "Max attempts reached" {} e))
-                (js/setTimeout work delay)))))
-        delay)))))
-
 (defn- setup-joyride! []
   (a/try
     (a/let [^js joyride (get-extension "betterthantomorrow.joyride")]
@@ -216,7 +217,11 @@
     (setup-notebook-handler)
     (add-tap #'p/submit))
   (doseq [[command f] (get-commands)]
-    (register-disposable! (vscode/commands.registerCommand (name command) f)))
+    (register-disposable! (vscode/commands.registerCommand
+                           (str (when-let [n (namespace command)]
+                                  (str n "/"))
+                                (name command))
+                           f)))
   (setup-joyride!))
 
 (defn deactivate
