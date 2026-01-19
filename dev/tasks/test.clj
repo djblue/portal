@@ -65,14 +65,15 @@
   (py/install)
   (t/lpy :run "--include-path" "test" "--include-path" "src" "-n" :portal.test-runner))
 
-(defn test* []
-  (future (cljs-runtime "1.10.773"))
-  (future (cljs-runtime "1.10.844"))
-  (future
-    (build)
-    (future (t/clj "-M:test" "-m" :portal.test-runner))
-    (future (t/bb "-m" :portal.test-runner))
-    (future (cljr))))
+(defn all []
+  (build)
+  (cljs-runtime "1.10.773")
+  (cljs-runtime "1.10.844")
+  (cljs-nbb)
+  (t/clj "-M:test" "-m" :portal.test-runner)
+  (t/bb "-m" :portal.test-runner)
+  (cljr)
+  (lpy))
 
 (defn test "Run all clj/s tests." [] (cljs) (cljs-ui) (clj))
 

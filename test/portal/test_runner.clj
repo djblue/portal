@@ -24,7 +24,7 @@
                      (swap! report conj
                             (cond-> message
                               :always
-                              (assoc :time    (java.util.Date.)
+                              (assoc :time    (console/now)
                                      :runtime (console/runtime))
                               (:ns message)
                               (update :ns (comp symbol str))))

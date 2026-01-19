@@ -3,6 +3,7 @@
             [clojure.test :as t]
             [portal.api :as api]
             [portal.client :as p]
+            [portal.console :as console]
             [portal.runtime.fs :as fs])
   (:import [sys :as sys]))
 
@@ -21,31 +22,43 @@
 
 (defn- run-tests [& tests]
   (let [summary (atom {:error 0 :fail 0})
-        report (atom [])]
+        !report (atom [])
+        out-fn  (if (p/enabled?) (constantly nil) println)
+        report  (fn report [message]
+                  (when (p/enabled?)
+                    (swap! !report conj
+                           (cond-> message
+                             :always
+                             (assoc :time    (console/now)
+                                    :runtime (console/runtime))
+                             (:ns message)
+                             (update :ns (comp symbol str))))
+                    (when (= (:type message) :end-test-ns)
+                      (p/submit @!report)
+                      (reset! !report []))))]
     (doseq [test-ns tests]
-      (swap! report conj {:type :begin-test-ns :ns test-ns})
+      (report {:type :begin-test-ns :ns test-ns})
       (load-test test-ns)
-      (println "\nTesting" (name test-ns))
+      (out-fn "\nTesting" (name test-ns))
       (doseq [[_s v] (ns-publics test-ns)
               :when (::t/test (meta v))]
-        (swap! report conj {:type :begin-test-var :var v})
+        (report {:type :begin-test-var :var v})
         (try
           (let [failures (:failures (v))]
             (swap! summary update :fail + (count failures))
             (doseq [failure failures]
-              (println "\nFAIL in" (str "(" (name v) ")") (->source v))
-              (println "expected:" (:expected failure))
-              (println "  actual:" (:actual failure))
-              (swap! report conj (merge {:type :fail} (select-keys failure [:message :actual :expected])))))
+              (out-fn "\nFAIL in" (str "(" (name v) ")") (->source v))
+              (out-fn "expected:" (:expected failure))
+              (out-fn "  actual:" (:actual failure))
+              (report (merge {:type :fail} (select-keys failure [:message :actual :expected])))))
           (catch Exception e
-            (swap! report conj (merge {:type :error} {:message (ex-message e) :data (ex-data e)}))
+            (report (merge {:type :error} {:message (ex-message e) :data (ex-data e)}))
             (swap! summary update :error inc)
             e))
-        (swap! report conj {:type :end-test-var :var v}))
-      (swap! report conj {:type :end-test-ns :ns test-ns}))
-    (println "\nRan all tests.")
-    (println (:fail @summary) "failures" (:error @summary) "errors.")
-    (when (p/enabled?) (p/submit @report))
+        (report {:type :end-test-var :var v}))
+      (report {:type :end-test-ns :ns test-ns}))
+    (out-fn "\nRan all tests.")
+    (out-fn (:fail @summary) "failures" (:error @summary) "errors.")
     @summary))
 
 (defn -main []

@@ -1,6 +1,6 @@
 (ns tasks.ci
-  (:require [tasks.check :refer [check check*]]
-            [tasks.test :refer [test test*] :as test]
+  (:require [tasks.check :refer [check]]
+            [tasks.test :refer [test] :as test]
             [tasks.tools :refer [clj]]))
 
 (def ^:private commands
@@ -22,7 +22,3 @@
   (check) (test))
 
 (defn -main [] (ci))
-
-(comment
-  (require '[tasks.parallel :refer [with-out-data]])
-  (with-out-data (check*) (test*)))

@@ -3,6 +3,7 @@
             [portal.api :as api]
             [portal.client :as p]
             [portal.client-test]
+            [portal.console :as console]
             [portal.runtime-test]
             [portal.runtime.api-test]
             [portal.runtime.cson-test]
@@ -18,9 +19,20 @@
     (apply t/run-tests tests)
     (let [report (atom [])
           counts
-          (with-redefs [t/report #(swap! report conj %)]
+          (with-redefs [t/report (fn [message]
+                                   (swap! report conj
+                                          (cond-> message
+                                            :always
+                                            (assoc :time    (console/now)
+                                                   :runtime (console/runtime))
+                                            (:ns message)
+                                            (update :ns (comp symbol str))))
+                                   (when (= (:type message) :end-test-ns)
+                                     (p/submit @report)
+                                     (reset! report [])))]
+            (add-tap #'p/submit)
             (apply t/run-tests tests))]
-      (p/submit @report)
+      (remove-tap #'p/submit)
       counts)))
 
 (defn -main []
