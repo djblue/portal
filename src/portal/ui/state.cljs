@@ -199,15 +199,7 @@
        :portal/key   key
        :portal/f     f
        :portal/value value
-       :selected     (mapv
-                      (fn [context]
-                        (-> context
-                            (dissoc :props :collection :key)
-                            (assoc :depth       1
-                                   :path        []
-                                   :stable-path []
-                                   :alt-bg      true)))
-                      (:selected state)))
+       :selected     [])
       (dissoc :portal/next-state)
       (push-search-text entry)
       (push-viewer entry)
