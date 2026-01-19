@@ -28,10 +28,10 @@
 (def ^:private bad-seq (map (fn [_] (throw (ex-info "Error" {}))) (range 10)))
 
 (defn- client-test* [done]
-  (a/let [opts {:port 12345 :host "127.0.0.1"}
+  (a/let [server (p/start {})
+          opts (select-keys server [:port :host])
           tap-list @#'rt/tap-list]
     (swap! tap-list empty)
-    (p/start opts)
     (c/submit opts ::value)
     (c/submit opts bad-seq)
     (is (= "Error" (:cause (first @tap-list))))
