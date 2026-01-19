@@ -117,16 +117,13 @@
 
 (defmulti ^:dynamic report (constantly :default))
 
-(defn- add-method [^clojure.lang.MultiFn multifn dispatch-val f]
-  (.addMethod multifn dispatch-val f))
-
-(doseq [[dispatch-value f] (methods test/report)]
-  (add-method report dispatch-value f))
+(defonce ^:private report' test/report)
 
 (defmethod report :default [message]
   (when *test-report*
     (swap! *test-report* conj message))
-  (when-let [f (get-method report (:type message))]
+  (when-let [f (or (get-method report' (:type message))
+                   (get-method report (:type message)))]
     (f message)))
 
 (defn- wrap-portal* [handler msg]
