@@ -140,7 +140,8 @@
          :display       :flex
          :gap           (:padding theme)
          :align-items   :center
-         :padding       (* 0.5 (:padding theme))
+         :padding-left  (:padding theme)
+         :padding-right (:padding theme)
          :border-top    [1 :solid (::c/border theme)]
          :border-bottom (when-not expanded? [1 :solid (::c/border theme)])
          :border-right  [1 :solid (::c/border theme)]
@@ -156,13 +157,20 @@
            [ins/with-key :ms
             [ins/inspector {:portal.viewer/default :portal.viewer/duration-ms}
              ms]]]])
-       (when-let [value (:runtime value)]
-         [log/icon value])
        (when-let [location (src/->source-location value)]
          [d/div
           [select/with-position
            {:row 0 :column 2}
-           [ins/with-key :loc [ins/inspector location]]]])]]
+           [ins/with-key :loc [ins/inspector location]]]])
+       (when-let [value (:runtime value)]
+         [d/div
+          {:style
+           {:padding-left (:padding theme)
+            :height "100%"
+            :display :flex
+            :align-items   :center
+            :border-left [1 :solid (::c/border theme)]}}
+          [log/icon value]])]]
 
      (when (:expanded? options)
        [ins/inspect-map-k-v (dissoc value :type :message :file :line :ns :var :ms :runtime)])]))
