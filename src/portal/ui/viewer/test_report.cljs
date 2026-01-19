@@ -58,7 +58,7 @@
    [ins/with-collection
     value
     [select/with-position
-     {:row -1 :column 0}
+     {:row 0 :column 0}
      (cond
        (coll? message)
        [ins/with-key
@@ -148,10 +148,17 @@
          :border-bottom-right-radius (when-not expanded? (:border-radius theme))}}
        [ins/toggle-expand {:padding-left (:padding theme)}]
        [label value]
+       (when-let [ms (:ms value)]
+         [d/div
+          [select/with-position
+           {:row 0 :column 1}
+           [ins/with-key :ms
+            [ins/inspector {:portal.viewer/default :portal.viewer/duration-ms}
+             ms]]]])
        (when-let [location (src/->source-location value)]
          [d/div
           [select/with-position
-           {:row -1 :column 1}
+           {:row 0 :column 2}
            [ins/with-key :loc [ins/inspector location]]]])]]
 
      (when (:expanded? options)
@@ -167,39 +174,47 @@
 
 (def ^:private empty-vec ^{:portal.viewer/default :portal.viewer/inspector} [])
 
-(defn- end-test-var [{:keys [test-ns test-var] :as state}]
+(defn- end-test-var [{:keys [test-ns test-var time-var] :as state} {:keys [time]}]
   (cond-> state
     test-var
-    (-> (dissoc :test-var :asserts)
+    (-> (dissoc :test-var :time-var :asserts)
         (update :vars
                 (fnil conj empty-vec)
                 (merge
                  (summary (:asserts state))
                  {:ns      test-ns
                   :var     test-var
-                  :asserts (:asserts state 0)})))))
+                  :asserts (:asserts state 0)}
+                 (when (and time-var (inst? time))
+                   {:ms (- (inst-ms time) (inst-ms time-var))}))))))
 
-(defn- end-test-ns [{:keys [test-ns vars] :as state}]
+(defn- end-test-ns [{:keys [test-ns time-ns vars] :as state} {:keys [time]}]
   (-> state
-      (dissoc :test-ns :vars)
+      (dissoc :test-ns :time-ns :vars)
       (update :results
               (fnil conj empty-vec)
               (merge
                (summary vars)
                {:ns   test-ns
-                :vars vars}))))
+                :vars vars}
+               (when (and time-ns (inst? time))
+                 {:ms (- (inst-ms time) (inst-ms time-ns))})))))
 
 (defn- get-results [value]
   (let [include? (when value (into #{} value))]
     (:results
      (reduce
-      (fn [{:keys [test-ns test-var] :as state} row]
+      (fn [{:keys [test-ns test-var] :as state} {:keys [time] :as row}]
         (case (:type row)
           :summary        state
-          :begin-test-ns  (assoc state :test-ns (:ns row))
-          :end-test-ns    (-> state end-test-var end-test-ns)
-          :begin-test-var (assoc state :test-var (:var row))
-          :end-test-var   (end-test-var state)
+          :begin-test-ns  (cond-> state
+                            :always      (assoc :test-ns (:ns row))
+                            (inst? time) (assoc :time-ns time))
+          :end-test-ns    (-> state (end-test-ns row))
+          :begin-test-var (cond-> state
+                            :always      (assoc :test-var (:var row))
+                            (inst? time) (assoc :time-var time))
+          :end-test-var   (end-test-var state row)
           (if (and value (not (include? row)))
             state
             (update
