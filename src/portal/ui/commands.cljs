@@ -118,7 +118,11 @@
     (fn [input]
       (let [theme     (theme/use-theme)
             selected? @selected
-            on-close  (partial close (state/use-state))
+            state     (state/use-state)
+            on-close  (fn []
+                        (close state)
+                        (when (fn? (:on-dismiss input))
+                          ((:on-dismiss input))))
             on-done   (:run input)
             options   (try-sort (:options input))
             n         (count (:options input))
@@ -331,17 +335,22 @@
 (defn- palette-component []
   (let [active (r/atom 0)
         filter-text (r/atom "")]
-    (fn [{:keys [on-select component]
+    (fn [{:keys [on-select on-dismiss component]
           :or   {component ins/inspector}
           :as options}]
       (let [theme (theme/use-theme)
             options (try-sort (filter-options options @filter-text))
             n (count options)
-            on-close (partial close (state/use-state))
+            state (state/use-state)
+            on-close
+            (fn []
+              (close state)
+              (when (fn? on-dismiss)
+                (on-dismiss)))
             on-select
             (fn []
               (reset! filter-text "")
-              (on-close)
+              (close state)
               (when-let [option (nth options @active)]
                 ;; Give react time to close command palette
                 (js/setTimeout #(on-select option) 25)))]
@@ -422,9 +431,11 @@
                                      (:value context)
                                      {:portal.viewer/default (:name (ins/get-viewer state context))}))
                         args     (when args (binding [*state* state] (apply args selected)))
-                        result   (a/try (apply f (concat selected args))
-                                        (catch :default e (ex-data e)))]
-                  (when-not command
+                        result   (if (= ::dismiss args)
+                                   args
+                                   (a/try (apply f (concat selected args))
+                                          (catch :default e (ex-data e))))]
+                  (when-not (or command (= args ::dismiss))
                     (state/dispatch!
                      state
                      state/history-push
@@ -498,6 +509,9 @@
 ;; pick args
 
 (defn pick-one
+  "Prompt user to pick one value from a list of options.
+
+   NOTE: Will return `:portal.ui.commands/dismiss` if prompt is dimissed by the user."
   ([options] (pick-one *state* options))
   ([state options]
    (js/Promise.
@@ -506,10 +520,14 @@
        state
        (fn [_state]
          [palette-component
-          {:on-select #(resolve [%])
+          {:on-select #(resolve %)
+           :on-dismiss #(resolve ::dismiss)
            :options options}]))))))
 
 (defn pick-many
+  "Prompt user to pick many values from a list of options.
+
+   NOTE: Will return `:portal.ui.commands/dismiss` if prompt is dimissed by the user."
   ([options]
    (pick-many *state* options))
   ([state options]
@@ -521,10 +539,11 @@
          (let [state (state/use-state)]
            [selector-component
             {:options options
+             :on-dismiss #(resolve ::dismiss)
              :run
              (fn [options]
                (close state)
-               (resolve [options]))}])))))))
+               (resolve options))}])))))))
 
 (defn pick-in
   ([v]
@@ -539,16 +558,17 @@
                (fn [_state]
                  [palette-component
                   {:options (concat [::done] (keys v))
+                   :on-dismiss #(resolve ::dismiss)
                    :on-select
                    (fn [k]
                      (let [path (conj path k)
                            next-value (get v k)]
                        (cond
                          (= k ::done)
-                         (resolve [(drop-last path)])
+                         (resolve (drop-last path))
 
                          (not (map? next-value))
-                         (resolve [path])
+                         (resolve path)
 
                          :else
                          (get-key path next-value))))}])))]
@@ -699,8 +719,9 @@
   (when-let [selected-context (state/get-all-selected-context @state)]
     (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
       (when (> (count viewers) 1)
-        (a/let [[selected-viewer] (pick-one state (map :name viewers))]
-          (ins/set-viewer! state selected-context selected-viewer))))))
+        (a/let [selected-viewer (pick-one state (map :name viewers))]
+          (when-not (= ::dismiss selected-viewer)
+            (ins/set-viewer! state selected-context selected-viewer)))))))
 
 (defn- get-viewer [state context direction]
   (let [viewers (map :name (ins/get-compatible-viewers @ins/viewers context))
@@ -851,8 +872,9 @@
                (for [a (:portal/args command)] (pr-str a))]])}])))))
 
 (defn ^:command set-theme [state]
-  (a/let [[theme] (pick-one state (keys @c/!themes))]
-    (state/dispatch! state state/set-theme! theme)))
+  (a/let [theme (pick-one state (keys @c/!themes))]
+    (when-not (= ::dismiss theme)
+      (state/dispatch! state state/set-theme! theme))))
 
 (defn ^:command history-back
   {:shortcuts
@@ -894,12 +916,7 @@
   [state]
   (state/dispatch! state state/history-push {:portal/value @state/log}))
 
-(defn- then-first [value] (.then value first))
-
-(defn- when-one [f]
-  (fn [& args]
-    (when (= (count args) 1)
-      (f (first args)))))
+(defn- ->args [^js/Promise x] (.then x #(if (= ::dismiss %) % [%])))
 
 (def ^:private clojure-commands
   {#'clojure.core/vals        {:predicate map?}
@@ -907,11 +924,11 @@
    #'clojure.core/count       {:predicate #(or (coll? %) (string? %))}
    #'clojure.core/first       {:predicate coll?}
    #'clojure.core/rest        {:predicate coll?}
-   #'clojure.core/get         {:predicate map? :args (when-one (comp pick-one keys))}
-   #'clojure.core/get-in      {:predicate map? :args (when-one pick-in)}
-   #'clojure.core/select-keys {:predicate map? :args (when-one (comp pick-many keys))}
+   #'clojure.core/get         {:predicate map? :args (comp ->args pick-one keys)}
+   #'clojure.core/get-in      {:predicate map? :args (comp ->args pick-in)}
+   #'clojure.core/select-keys {:predicate map? :args (comp ->args pick-many keys)}
    #'walk/keywordize-keys     {}
-   #'clojure.core/dissoc      {:predicate map? :args (when-one (comp then-first pick-many keys))}
+   #'clojure.core/dissoc      {:predicate map? :args (comp pick-many keys)}
    #'clojure.core/vector      {}
    #'clojure.core/str         {}
    #'clojure.core/concat      {:predicate (fn [& args] (every? coll? args))}
@@ -925,7 +942,7 @@
    #'transpose-map  {:predicate map-of-maps
                      :name      'portal.data/transpose-map}
    #'select-columns {:predicate (some-fn coll-of-maps map-of-maps)
-                     :args      (comp pick-many columns)
+                     :args      (comp ->args pick-many columns)
                      :name      'portal.data/select-columns}})
 
 (defn register!
@@ -1030,11 +1047,12 @@
 (defn- parse-as
   "Paste value from clipboard"
   [state value]
-  (a/let [[format] (pick-one state (p/formats))]
-    (state/dispatch! state
-                     state/history-push
-                     {:portal/value
-                      (try (p/parse-string format value) (catch :default e e))})))
+  (a/let [format (pick-one state (p/formats))]
+    (when-not (= ::dismiss format)
+      (state/dispatch! state
+                       state/history-push
+                       {:portal/value
+                        (try (p/parse-string format value) (catch :default e e))}))))
 
 (defn paste
   "Paste value from clipboard"
