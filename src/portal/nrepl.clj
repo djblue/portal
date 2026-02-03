@@ -1,5 +1,7 @@
 (ns portal.nrepl
   (:require [clojure.datafy :as d]
+            [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.main :as main]
             [clojure.test :as test]
             [nrepl.middleware :refer [set-descriptor!]]
@@ -8,7 +10,8 @@
             [nrepl.misc :refer (response-for)]
             [nrepl.transport :as transport]
             [portal.api :as p])
-  (:import [java.util Date]
+  (:import [java.io PushbackReader]
+           [java.util Date]
            [nrepl.transport Transport]))
 
 ; fork of https://github.com/DaveWM/nrepl-rebl/blob/master/src/nrepl_rebl/core.clj
@@ -70,6 +73,29 @@
                  :file   (:clojure.core/eval-file m)))))
     (catch Exception _ msg)))
 
+(defn- resolve-namespace [file]
+  (try
+    (second (edn/read (PushbackReader. (io/reader (io/file file)))))
+    (catch Exception _ 'user)))
+
+(defn- parse-warn-on-reflection [err]
+  (try
+    (doall
+     (for [[_ file line column result unparsed]
+           (re-seq #"Reflection warning, ([^:]*):(\d+):(\d+) - (.*)\.|(.+)" err)]
+       (if unparsed
+         {:tag :err :val unparsed}
+         {:tag :tap
+          :val
+          {:level :warn
+           :ns (resolve-namespace file)
+           :file file
+           :line (parse-long line)
+           :column (parse-long column)
+           :result result
+           :time (Date.)}})))
+    (catch Exception _ [{:tag :err :val err}])))
+
 (defrecord ^:no-doc PortalTransport [transport handler-msg]
   Transport
   (recv [_this timeout]
@@ -82,7 +108,7 @@
           (when-let [out (:out msg)]
             (swap! (:stdio handler-msg) conj {:tag :out :val out}))
           (when-let [err (:err msg)]
-            (swap! (:stdio handler-msg) conj {:tag :err :val err}))
+            (swap! (:stdio handler-msg) into (parse-warn-on-reflection err)))
           (when-let [result (get-result msg)]
             (-> result
                 (merge
