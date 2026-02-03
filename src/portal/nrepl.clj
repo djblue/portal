@@ -88,7 +88,7 @@
   (try
     (doall
      (for [[_ file line column result unparsed]
-           (re-seq #"Reflection warning, ([^:]*):(\d+):(\d+) - (.*)\.|(.+)" err)]
+           (re-seq #"Reflection warning, ([^:]*):(\d+):(\d+) - (.*)\.|(.+\s*)" err)]
        (if unparsed
          {:tag :err :val unparsed}
          {:tag :tap
