@@ -272,6 +272,14 @@
 
 #?(:bb nil
    :clj
+   (defn- ->meta [value]
+     (let [m (meta value)]
+       (if (::id m)
+         m
+         (merge m {::id (value->id value) ::type (type value)})))))
+
+#?(:bb nil
+   :clj
    (extend-type java.util.Collection
      cson/ToJson
      (to-json* [value buffer]
@@ -283,7 +291,7 @@
             (instance? java.util.Set value)          "#"
             (instance? java.util.RandomAccess value) "["
             :else                                    "(")
-          {::id (value->id value) ::type (type value)}
+          (->meta value)
           value)))))
 
 #?(:bb nil
@@ -293,13 +301,7 @@
      (to-json* [value buffer]
        (if-let [id (value->id? value)]
          (cson/to-json* (cson/tagged-value "ref" id) buffer)
-         (cson/tagged-map
-          buffer
-          "{"
-          (if (record? value)
-            (meta value)
-            {::id (value->id value) ::type (type value)})
-          value)))))
+         (cson/tagged-map buffer "{" (->meta value) value)))))
 
 (extend-type #?(:clj  Object
                 :cljr Object
