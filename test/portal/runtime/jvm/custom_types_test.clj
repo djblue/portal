@@ -99,7 +99,7 @@
   (equals [_ o] (and (instance? TestColl o) (.equals v (.-v ^TestColl o)))))
 
 (defn- open-session []
-  (rt/open-session {:session-id (random-uuid)}))
+  (rt/open-session {:session-id (java.util.UUID/randomUUID)}))
 
 (defn- write [value session]
   (binding [rt/*sent-values* (:sent-values session)]

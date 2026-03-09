@@ -1,7 +1,7 @@
 (ns portal.runtime.api-test
   (:require [clojure.test :refer [deftest is]]
             [portal.api :as p]
-            [portal.runtime.browser :as-alias browser]))
+            [portal.runtime.browser :as browser]))
 
 (defn- headless-chrome-flags [url]
   ["--headless=new" "--disable-gpu" "--no-sandbox" url])

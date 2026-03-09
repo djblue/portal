@@ -1,4 +1,5 @@
 (ns portal.nrepl
+  (:refer-clojure :exclude [parse-long])
   (:require [clojure.datafy :as d]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
@@ -77,6 +78,11 @@
   (try
     (second (edn/read (PushbackReader. (io/reader (io/file file)))))
     (catch Exception _ 'user)))
+
+(defn- parse-long ^Long [^String s]
+  (try
+    (Long/parseLong s)
+    (catch NumberFormatException _ nil)))
 
 (defn- parse-warn-on-reflection [err]
   (try

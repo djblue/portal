@@ -66,13 +66,17 @@
     cider/cider-nrepl {:mvn/version "0.57.0"}}}
   :check
   {:extra-paths ["dev"]
-   :main-opts ["-m" "tasks.load"]}
+   :main-opts ["-m" "tasks.load"]
+   :override-deps
+   {org.clojure/clojure {:mvn/version "1.10.0"}}}
   :test
   {:extra-paths ["test"]
    :extra-deps
    {babashka/clj-http-lite
     {:git/url "https://github.com/babashka/clj-http-lite.git"
-     :sha     "6ad6d6333d2e9baf1644a870072c12f206a9b722"}}}
+     :sha     "6ad6d6333d2e9baf1644a870072c12f206a9b722"}}
+   :override-deps
+   {org.clojure/clojure {:mvn/version "1.10.0"}}}
   :antq
   {:replace-deps
    {com.github.liquidz/antq {:mvn/version "2.11.1276"}
