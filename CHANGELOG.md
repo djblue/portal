@@ -1,3 +1,19 @@
+## 0.63.0 - 2026-03-09
+
+- Fix serialization of custom coll types (#284) ecbdfbaf
+  - Thanks @Cyrik!
+- Update `portal.nrepl/wrap-portal` to parse `*warn-on-reflection*` output 2162ba35
+- Update test-report viewer to display runtime a23894fb
+- Update test-report viewer to display time 9579df9d
+- Fix basilisp issues caused by concurrent requests a89d7277
+- Fix `portal.ui.state/notify-parent` for `:vs-code` 1797b158
+- Fix `portal.nrepl` issues with `kaocha.repl` 69b986d7
+  - Thanks @Cyrik for bug report!
+- Include shadow-cljs `:build-id` in `portal.nrepl/wrap-portal` 3344d038
+- Fix serialization issue with unnamed vars 8bb2331c
+- Add configurable host (#280) 3f671a91
+  - Thanks @BrianChevalier!
+
 ## 0.62.2 - 2026-01-10
 
 - Fix emacs launcher to use new xwidget sessions (#279)
