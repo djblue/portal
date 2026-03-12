@@ -43,7 +43,8 @@
                      'portal.runtime.jvm.custom-types-test)
                    'portal.runtime.jvm.editor-test
                    'portal.runtime.npm-test
-                   'portal.runtime.shell-test)]
+                   'portal.runtime.shell-test
+                   'portal.ssr.ui.react-test)]
     (api/stop)
     (shutdown-agents)
     (System/exit (+ fail error))))

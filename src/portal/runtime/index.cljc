@@ -23,7 +23,12 @@
    (when session-id
      (str "window.PORTAL_SESSION = " (pr-str session-id) ";"))
    "</script>"
-   "<script src=\"" code-url "\"></script>"
+   (if (= mode :ssr)
+     (str "<script src=\"https://cdn.jsdelivr.net/npm/scittle@0.8.31/dist/scittle.js\"
+                   type=\"application/javascript\"></script>"
+          "<script src=\"https://unpkg.com/idiomorph@0.7.4\"></script>"
+          "<script type=\"application/x-scittle\" src=\"main.cljs\"></script>")
+     (str "<script src=\"" code-url "\"></script>"))
    ;; wait.js will ensure headless chrome doesn't exit early
    (when (= mode :test) "<script src=\"wait.js\"></script>")
    "</body>"

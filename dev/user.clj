@@ -25,6 +25,7 @@
   (p/stop)
   (p/docs {:mode :dev})
 
+  (def ssr    (p/open {:mode :ssr}))
   (def portal (p/open {:launcher :auto}))
   (def dev    (p/open {:mode :dev}))
   (def emacs  (p/open {:mode :dev :launcher :emacs}))

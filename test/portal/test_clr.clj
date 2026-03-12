@@ -11,7 +11,8 @@
             [portal.runtime.fs-test]
             [portal.runtime.json-buffer-test]
             [portal.runtime.npm-test]
-            [portal.runtime.shell-test])
+            [portal.runtime.shell-test]
+            [portal.ssr.ui.react-test])
   (:import (System Environment)))
 
 (defn run-tests [& tests]
@@ -46,7 +47,8 @@
          'portal.runtime.fs-test
          'portal.runtime.json-buffer-test
          'portal.runtime.npm-test
-         'portal.runtime.shell-test)]
+         'portal.runtime.shell-test
+         'portal.ssr.ui.react-test)]
     (api/stop)
     (shutdown-agents)
     (Environment/Exit (+ fail error))))

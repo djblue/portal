@@ -31,6 +31,7 @@
   ([options]
    (open nil options))
   ([portal options]
+   (when (= :ssr (:mode options)) (require 'portal.ssr.server))
    (let [server (start options)]
      (browser/open {:portal portal :options options :server server}))))
 
