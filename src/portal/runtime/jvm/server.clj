@@ -10,6 +10,7 @@
             [portal.runtime.index :as index]
             [portal.runtime.json :as json]
             [portal.runtime.npm :as npm]
+            [portal.ssr.ui.rpc :as ssr]
             [portal.runtime.rpc :as rpc])
   (:import [java.io File PushbackReader]
            [java.util UUID]))
@@ -47,6 +48,17 @@
                     (close-debug debug)
                     (rpc/on-close session))})))
 
+(defmethod route [:get "/ssr"] [request]
+  (let [session (:session request)]
+    (server/as-channel
+     request
+     {:on-receive (fn [_ch message] (future (ssr/on-receive session message)))
+      :on-open    (fn [ch] (ssr/on-open session
+                                        ;; TODO: remove when
+                                        #(when (string? %) (server/send! ch %))))
+      :on-close   (fn [_ch _status]
+                    (ssr/on-close session))})))
+
 (defn- send-resource [content-type resource]
   {:status  200
    :headers {"Content-Type" content-type}
@@ -80,6 +92,7 @@
     (io/resource
      (case (-> request :session :options :mode)
        :dev "portal-dev/main.js"
+       :ssr "portal-ssr-dev/main.js"
        "portal/main.js")))})
 
 (defn- get-session-id [request]

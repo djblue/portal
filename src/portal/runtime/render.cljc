@@ -181,7 +181,7 @@
    (render nil element))
   ([vdom element]
    (let [{:keys [output] :as vdom} (render* vdom element)]
-     (with-meta output vdom))))
+     (with-meta [:<> output] vdom))))
 
 ;; (defn- diff-list [ops a b])
 

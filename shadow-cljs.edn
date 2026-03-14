@@ -21,6 +21,21 @@
               :use-document-host false
               :preloads   [portal.setup]}}
 
+  :ssr
+  {:output-dir "resources/portal-ssr-dev/"
+   :asset-path "."
+   :target :browser
+   :compiler-options
+   {:infer-externs true
+    :warnings-as-errors true
+    :output-feature-set :es2018}
+   :build-hooks [(portal.shadow.remote/hook {:port 53755})]
+   :modules {:main {:init-fn portal.ssr.ui.core/main!}}
+   :release {:output-dir "resources/portal-ssr/"}
+   :devtools {:after-load portal.ssr.ui.core/reload!
+              :use-document-host false
+              :preloads   [portal.setup]}}
+
   :pwa
   {:output-dir "target/pwa/"
    :asset-path "."

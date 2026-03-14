@@ -192,33 +192,44 @@
     (when-not (= (.-port js/location) "")
       (js/parseInt (.-port js/location)))))
 
+(defn- on-message [data] (dispatch (read data) send!))
+(defn- on-error [e]
+  (doseq [[_ [_ reject]] @pending-requests]
+    (reject e)))
+(defn- on-open [] (rt/reset-cache!))
+
 (defn resolve-connection []
-  {:host     (get-host)
+  {:protocol (get-proto)
+   :host     (get-host)
    :port     (get-port)
-   :protocol (get-proto)
-   :session  (get-session)})
+   :path     "/rpc"
+   :session  (get-session)
+   :on-message on-message
+   :on-error   on-error
+   :on-open    on-open})
 
 (defn connect
   ([]
-   (connect (resolve-connection)))
-  ([{:keys [host port protocol session]}]
-   (if-let [ws @ws-promise]
-     ws
-     (reset!
-      ws-promise
-      (js/Promise.
-       (fn [resolve reject]
-         (when-let [chan (js/WebSocket.
-                          (str protocol "//" host (when port (str ":" port)) "/rpc?" session))]
-           (set! (.-onmessage chan) #(dispatch (read (.-data %))
-                                               (fn [message]
-                                                 (send! message))))
-           (set! (.-onerror chan)   (fn [e]
-                                      (reject e)
-                                      (doseq [[_ [_ reject]] @pending-requests]
-                                        (reject e))))
-           (set! (.-onclose chan)   #(reset!  ws-promise nil))
-           (set! (.-onopen chan)    #(do (rt/reset-cache!) (resolve chan))))))))))
+   (connect nil))
+  ([opts]
+   (let [{:keys [protocol host port
+                 path session
+                 on-message on-error on-open]}
+         (merge (resolve-connection) opts)]
+     (if-let [ws @ws-promise]
+       ws
+       (reset!
+        ws-promise
+        (js/Promise.
+         (fn [resolve reject]
+           (when-let [chan (js/WebSocket.
+                            (str protocol "//" host (when port (str ":" port)) path "?" session))]
+             (set! (.-onmessage chan) #(on-message (.-data %)))
+             (set! (.-onerror chan)   (fn [e]
+                                        (reject e)
+                                        (on-error e)))
+             (set! (.-onclose chan)   #(reset!  ws-promise nil))
+             (set! (.-onopen chan)    #(do (on-open) (resolve chan)))))))))))
 
 (defn- send! [message]
   (.then (connect) #(.send % (write message))))

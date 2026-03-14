@@ -6,6 +6,8 @@ node_modules/
 cljs-runtime/
 resources/portal/
 resources/portal-dev/
+resources/portal-ssr/
+resources/portal-ssr-dev/
 !.clj-kondo/config
 .clj-kondo/*
 .DS_Store
