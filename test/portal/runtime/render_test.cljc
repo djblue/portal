@@ -122,6 +122,17 @@
     (is (== 2 @mount))
     (is (== 2 @un-mount))))
 
+(defn atom-component [a]
+  [:span (pr-str (r/use-atom a))])
+
+(deftest atom-component-test
+  (let [a (atom 0)
+        output (r/render [atom-component a])
+        _ (swap! a inc)
+        vdom (meta output)]
+    (is (= [:span {} "1"]
+           (r/render vdom [atom-component a])))))
+
 (defn- list-component []
   [:<> (for [n (range 0 1)] [:span {:key n} (str n)])])
 

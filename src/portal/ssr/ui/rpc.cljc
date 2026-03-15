@@ -7,14 +7,19 @@
             [portal.runtime.protocols :as p]))
 
 (defn on-open [session send!]
-  (swap! rt/connections assoc (:session-id session) send!))
+  (swap! rt/connections assoc (:session-id session) send!)
+  (when-let [on-open (-> session :options :on-open)]
+    (on-open session)))
 
 (defn on-receive [session message]
   (binding [rt/*session* session]
-    (prn message)))
+    (when-let [on-message (-> session :options :on-message)]
+      (on-message message))))
 
 (defn on-close [session]
-  (swap! rt/connections dissoc (:session-id session)))
+  (swap! rt/connections dissoc (:session-id session))
+  (when-let [on-close (-> session :options :on-close)]
+    (on-close session)))
 
 (defn listener [session]
   (reify p/Listener

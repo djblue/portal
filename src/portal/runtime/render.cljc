@@ -44,6 +44,18 @@
          (swap! state assoc id value-or-fn)
          (swap! state assoc id (value-or-fn current-value))))]))
 
+(defn use-atom [a]
+  (let [[state set-state!] (use-state @a)]
+    (use-effect
+     (fn []
+       (add-watch a ::use-atom
+                  (fn watcher [_ _ state state']
+                    (when (not= state state')
+                      (set-state! state'))))
+       #(remove-watch a ::use-atom))
+     [a])
+    state))
+
 (defn- context-provider-component [id {:keys [value]} & children]
   (swap! *context* update id (fnil conj []) value)
   (if (= 1 (count children))
@@ -181,7 +193,7 @@
    (render nil element))
   ([vdom element]
    (let [{:keys [output] :as vdom} (render* vdom element)]
-     (with-meta [:<> output] vdom))))
+     (with-meta output vdom))))
 
 ;; (defn- diff-list [ops a b])
 
