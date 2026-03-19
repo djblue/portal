@@ -28,10 +28,7 @@
            entries)))
        #js {:root nil :rootMargin "0px" :threshold 0})))
     (when observer
-      (into [:r>
-             (.-Provider observer-context)
-             #js {:value observer}]
-            children))))
+      (apply react/provider observer-context observer children))))
 
 (defn- use-observer ^js [id]
   (let [ref      (react/use-ref)
@@ -50,7 +47,7 @@
 (defn- use-index [] (react/use-context index-context))
 
 (defn- with-index [index & children]
-  (into [:r> (.-Provider index-context) #js {:value index}] children))
+  (apply react/provider index-context index children))
 
 (defn- first-visible [visible index]
   (->> visible

@@ -51,7 +51,7 @@
 (defn use-state [] (react/use-context state-context))
 
 (defn with-state [state & children]
-  (into [:r> (.-Provider state-context) #js {:value state}] children))
+  (apply react/provider state-context state children))
 
 (defn get-selected-context [state] (first (:selected state)))
 

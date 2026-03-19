@@ -6,7 +6,7 @@
 
 (defn with-position [position & children]
   (let [index (conj (react/use-context position-context) position)]
-    (into [:r> (.-Provider position-context) #js {:value index}] children)))
+    (apply react/provider position-context index children)))
 
 (defn get-root [] (::root @selection-index))
 

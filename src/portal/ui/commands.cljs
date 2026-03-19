@@ -66,7 +66,7 @@
      (shortcuts/add! ::with-shortcuts dispatch)
      (fn []
        (shortcuts/remove! ::with-shortcuts)))
-    (into [:r> (.-Provider shortcut-context) #js {:value (inc i)}] children)))
+    (apply react/provider shortcut-context (inc i) children)))
 
 (defn- checkbox [checked?]
   (let [theme (theme/use-theme)]

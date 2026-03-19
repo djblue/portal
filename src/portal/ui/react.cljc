@@ -37,6 +37,10 @@
        (react/useContext context))))
 
 #?(:cljs
+   (defn provider [context value & children]
+     (into [:r> (.-Provider ^js context) #js {:value value}] children)))
+
+#?(:cljs
    (defn use-ref
      ([]
       (use-ref nil))

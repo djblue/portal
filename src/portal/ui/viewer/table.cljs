@@ -14,7 +14,7 @@
 
 (defn- with-hover [& children]
   (r/with-let [value (r/atom nil)]
-    (into [:r> (.-Provider hover) #js {:value value}] children)))
+    (apply react/provider hover value children)))
 
 (defn- use-hover [] (react/use-context hover))
 

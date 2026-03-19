@@ -18,11 +18,11 @@
 (defonce ^:private options-context (react/create-context nil))
 
 (defn ^:no-doc with-options* [options & children]
-  (into [:r> (.-Provider options-context)
-         #js {:value (if (= options ::loading)
-                       options
-                       (merge options @extension-options))}]
-        children))
+  (apply react/provider options-context
+         (if (= options ::loading)
+           options
+           (merge options @extension-options))
+         children))
 
 (defn with-options [& children]
   (let [[options set-options!] (react/use-state ::loading)]

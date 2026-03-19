@@ -79,7 +79,7 @@
 
 (defn with-theme+ [theme & children]
   (let [theme (merge (use-theme) theme)]
-    (into [:r> (.-Provider theme-context) #js {:value theme}] children)))
+    (apply react/provider theme-context theme children)))
 
 (defn ^:no-doc with-background []
   (let [background (::c/background (use-theme))]
@@ -93,21 +93,9 @@
         theme-key  (use-vscode-theme-detector)
         theme      (or (get-theme theme-name)
                        (get-theme (default-theme dark-theme)))]
-    (into [:r> (.-Provider theme-context) #js {:key theme-key :value theme}] children)))
+    (with-meta
+      (apply react/provider theme-context theme children)
+      {:key theme-key})))
 
 (defonce ^:no-doc order
   (cycle [::c/diff-remove ::c/diff-add ::c/keyword ::c/tag ::c/number ::c/uri]))
-
-(defonce ^:private rainbow
-  (react/create-context order))
-
-(defn cycle-rainbow [& children]
-  (let [order (react/use-context rainbow)]
-    (into [:r> (.-Provider rainbow)
-           #js {:value (rest order)}]
-          children)))
-
-(defn use-rainbow []
-  (let [theme (use-theme)
-        order (react/use-context rainbow)]
-    (get theme (first order))))

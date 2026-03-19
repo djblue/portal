@@ -169,7 +169,7 @@
 (defn- use-parent [] (react/use-context parent-context))
 
 (defn- with-parent [context & children]
-  (into [:r> (.-Provider parent-context) #js {:value context}] children))
+  (apply react/provider parent-context context children))
 
 (def ^:private inspector-context
   (react/create-context {:depth 0 :path [] :stable-path [] :alt-bg false}))
@@ -181,26 +181,19 @@
 
 (defn with-depth [& children]
   (let [context (use-context)]
-    (into [:r> (.-Provider inspector-context)
-           #js {:value (assoc context :depth 0)}] children)))
+    (apply react/provider inspector-context (assoc context :depth 0) children)))
 
 (defn inc-depth [& children]
   (let [context (use-context)]
-    (into [:r> (.-Provider inspector-context)
-           #js {:value (update context :depth inc)}]
-          children)))
+    (apply react/provider inspector-context (update context :depth inc) children)))
 
 (defn dec-depth [& children]
   (let [context (use-context)]
-    (into [:r> (.-Provider inspector-context)
-           #js {:value (update context :depth dec)}]
-          children)))
+    (apply react/provider inspector-context (update context :depth dec) children)))
 
 (defn with-context [value & children]
   (let [context (use-context)]
-    (into
-     [:r> (.-Provider inspector-context)
-      #js {:value (merge context value)}] children)))
+    (apply react/provider inspector-context (merge context value) children)))
 
 (defn with-default-viewer [viewer & children]
   (into [with-context {:portal.viewer/default viewer}] children))
@@ -237,7 +230,7 @@
 (defn use-options [] (react/use-context options-context))
 
 (defn- with-options [options & children]
-  (into [:r> (.-Provider options-context) #js {:value options}] children))
+  (apply react/provider options-context options children))
 
 (defn get-value-type [value]
   (cond
