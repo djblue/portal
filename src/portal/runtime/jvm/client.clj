@@ -47,7 +47,7 @@
                     {:session-id session-id :message message}))))
 
 (defn- broadcast! [message]
-  (when-let [sessions (keys @rt/connections)]
+  (when-let [sessions (rt/active-sessions)]
     (let [response (promise)]
       (doseq [session-id sessions]
         (future

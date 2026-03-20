@@ -35,7 +35,11 @@
 (defonce connections (atom {}))
 (defonce pending-requests (atom {}))
 
-(defn active-sessions [] (keys @connections))
+(defn active-sessions []
+  (seq
+   (for [session-id (keys @connections)
+         :when (not= :ssr (get-in @sessions [session-id :options :mode]))]
+     session-id)))
 
 (defn cleanup-sessions []
   (swap! sessions select-keys (keys @connections)))
