@@ -219,7 +219,10 @@
        :element element})))
 
 (defn- render-hiccup [vdom state context element]
-  (let [id (or (:id vdom) (random-uuid))
+  (let [id (or (when (map? (second element))
+                 (get-in element [1 :id]))
+               (:id vdom)
+               (random-uuid))
         [tag & args] element
         attrs (if-not (map? (first args))
                 {}

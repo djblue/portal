@@ -15,13 +15,13 @@
       head
       (when (seq tail)
         [:visible-sensor
-         {:id (str (random-uuid))
+         {:id (random-uuid)
           :on-visible (fn [_] (set-n! (+ n step)))}])])))
 
 (defn use-visible []
   (let [[visible? set-visible!] (react/use-state false)]
     [(when-not visible?
        [:visible-sensor
-        {:id (str (random-uuid))
+        {:id (random-uuid)
          :on-visible (fn [_] (set-visible! true))}])
      visible?]))
