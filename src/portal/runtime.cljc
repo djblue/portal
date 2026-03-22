@@ -30,7 +30,6 @@
 (defonce default-options (atom nil))
 
 (defonce ^:dynamic *session* nil)
-(defonce ^:dynamic *sent-values* nil)
 
 (defonce sessions (atom (v/table {} {:columns [:options :selected]})))
 (defonce connections (atom {}))
@@ -58,19 +57,17 @@
    (get-session session-id)
    {:id             (atom 0)
     :value-cache    (atom {})
-    :sent-values    (atom #{})
     :watch-registry (atom #{})}
    session))
 
 (defn close-session [session-id]
   (swap! sessions dissoc session-id))
 
-(defn reset-session [{:keys [session-id value-cache sent-values watch-registry] :as session}]
-  (swap! value-cache empty)
-  (swap! sent-values empty)
+(defn reset-session [{:keys [session-id value-cache watch-registry] :as session}]
+  (reset! value-cache {})
   (doseq [a @watch-registry]
     (remove-watch a session-id))
-  (swap! watch-registry empty)
+  (reset! watch-registry #{})
   session)
 
 (defonce request (atom nil))
@@ -224,9 +221,7 @@
     @out))
 
 (defn- value->id? [value]
-  (if-not (contains? @*sent-values* value)
-    (do (swap! *sent-values* conj value) nil)
-    (get @(:value-cache *session*) (value->key value))))
+  (get @(:value-cache *session*) (value->key value)))
 
 (defn- id->value [id]
   (get @(:value-cache *session*) [:id id]))
@@ -458,12 +453,11 @@
 
 (defn- cache-evict [id]
   (let [value (id->value id)
-        {:keys [session-id value-cache sent-values watch-registry]} *session*]
+        {:keys [session-id value-cache watch-registry]} *session*]
     (when (atom? value)
       (swap! watch-registry disj value)
       (remove-watch value session-id))
     (swap! value-cache dissoc [:id id] (value->key value))
-    (swap! sent-values disj value)
     nil))
 
 (defn update-selected

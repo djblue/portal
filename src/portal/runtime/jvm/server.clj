@@ -41,7 +41,7 @@
         debug   (open-debug session)]
     (server/as-channel
      request
-     {:on-receive (fn [_ch message] (future (rpc/on-receive session message)))
+     {:on-receive (fn [_ch message] (rpc/on-receive session message))
       :on-open    (fn [ch] (rpc/on-open session #(server/send! ch %)))
       :on-close   (fn [_ch _status]
                     (close-debug debug)
