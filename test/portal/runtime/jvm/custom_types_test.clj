@@ -102,8 +102,7 @@
   (rt/open-session {:session-id (java.util.UUID/randomUUID)}))
 
 (defn- write [value session]
-  (binding [rt/*sent-values* (:sent-values session)]
-    (rt/write value session)))
+  (rt/write value session))
 
 (defn- read [string session]
   (rt/read string session))
@@ -129,8 +128,7 @@
     (is (not (identical? a test-coll)))
     (is (some? id))
     (is (== id (:rep b)))
-    (is (contains? @(:value-cache session) [:id id]))
-    (is (contains? @(:sent-values session) test-coll))))
+    (is (contains? @(:value-cache session) [:id id]))))
 
 (deftest custom-map-type-serialization
   (let [test-map (TestMap. {:hello :world} {})
@@ -141,5 +139,4 @@
     (is (not (identical? a test-map)))
     (is (some? id))
     (is (== id (:rep b)))
-    (is (contains? @(:value-cache session) [:id id]))
-    (is (contains? @(:sent-values session) test-map))))
+    (is (contains? @(:value-cache session) [:id id]))))
