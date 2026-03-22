@@ -57,6 +57,6 @@
     (build)
     (clj "-M:dev:cider:cljs:shadow"
          "-m" "shadow.cljs.devtools.cli"
-         :watch #_:pwa :client :vs-code :vs-code-notebook #_:electron)))
+         :watch #_:pwa :client :vs-code :vs-code-notebook)))
 
 (defn -main "Start dev server." [] (prepl) (dev))

@@ -75,7 +75,6 @@
         (ex-data e))))))
 
 (defmethod browser/-open :vs-code  [args] (remote-open (assoc args :config-file "vs-code.edn")))
-(defmethod browser/-open :electron [args] (remote-open (assoc args :config-file "electron.edn")))
 
 (defmethod browser/-open :emacs [{:keys [portal server]}]
   (let [url (str "http://" (:host server) ":" (:port server) "?" (:session-id portal))]

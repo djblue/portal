@@ -16,8 +16,6 @@
   (clj "-M:antq" "-m" :antq.core "--upgrade" "--force")
   (binding [*cwd* "extension-vscode"]
     (npm :update))
-  (binding [*cwd* "extension-electron"]
-    (npm :update))
   (git :add "-u")
   (git :commit "-m" "Bump deps"))
 
