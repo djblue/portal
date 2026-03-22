@@ -5,10 +5,10 @@
   org.clojure/data.json      {:mvn/version "2.4.0"}
   http-kit/http-kit          {:mvn/version "2.7.0"}
   com.google.code.gson/gson  {:mvn/version "2.10.1"}}
- :deps/prep-lib
- {:ensure "resources/portal"
-  :alias  :build
-  :fn     prep}
+;;  :deps/prep-lib
+;;  {:ensure "resources/portal"
+;;   :alias  :build
+;;   :fn     prep}
  :aliases
  {:dev
   {:extra-paths ["dev" "test"]
