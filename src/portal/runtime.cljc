@@ -224,7 +224,7 @@
     @out))
 
 (defn- value->id? [value]
-  (when (and *sent-values* (hashable? value))
+  (when *sent-values*
     (if-not (contains? @*sent-values* value)
       (do (swap! *sent-values* conj value) nil)
       (get @(:value-cache *session*) (value->key value)))))
