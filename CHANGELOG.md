@@ -1,3 +1,9 @@
+## 0.63.1 - 2026-03-22
+
+- Revert "Concurrent requests (#273)" 2d7c68b8
+  - Users can sometimes see `#ref <id>` due to serialization race conditions
+- Fix runtime for clojure `1.10.0` fb239d3c
+
 ## 0.63.0 - 2026-03-09
 
 - Fix serialization of custom coll types (#284) ecbdfbaf
