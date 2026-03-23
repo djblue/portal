@@ -56,6 +56,16 @@
   (when-let [[_ f] (last (sort-by first < @handlers))]
     (f log)))
 
+(defn- use-shortcuts-setup []
+  (react/use-effect
+   (fn []
+     (prn ::add!)
+     (shortcuts/add! ::with-shortcuts dispatch)
+     (fn []
+       (prn ::remove!)
+       (shortcuts/remove! ::with-shortcuts)))
+   []))
+
 (defn- with-shortcuts [f & children]
   (let [i (react/use-context shortcut-context)]
     (react/use-effect
@@ -64,12 +74,6 @@
        (fn []
          (swap! handlers dissoc i)))
      [f])
-    (react/use-effect
-     (fn []
-       (shortcuts/add! ::with-shortcuts dispatch)
-       (fn []
-         (shortcuts/remove! ::with-shortcuts)))
-     [])
     (apply react/provider shortcut-context (inc i) children)))
 
 (defn- checkbox [checked?]
@@ -1106,6 +1110,7 @@
          value (react/use-atom state state/get-selected-value)
          ;; opts  (options/use-options)
          ]
+     (use-shortcuts-setup)
      (react/use-effect
       (fn []
         (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
