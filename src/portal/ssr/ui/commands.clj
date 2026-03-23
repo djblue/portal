@@ -666,7 +666,7 @@
   (->> m
        (map
         (fn [[k v]]
-          (str (name k) "=" (str v))))
+          (str (name k) "=" v)))
        (str/join "&")))
 
 (defn- btoa [^String s]

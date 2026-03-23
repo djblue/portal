@@ -32,7 +32,7 @@
   (let [theme (theme/use-theme)]
     [d/div
      {:on-click
-      (fn [e]
+      (fn [_]
         (state/invoke 'portal.runtime.jvm.editor/goto-definition value))
       :style/hover
       {:opacity 1
