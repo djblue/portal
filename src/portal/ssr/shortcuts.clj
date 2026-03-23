@@ -2,7 +2,7 @@
   (:require [clojure.string :as str]))
 
 (defn- get-platform []
-  (let [platform "Linux" #_js/window.navigator.platform]
+  (let [platform (System/getProperty "os.name")]
     (cond
       (#{"Macintosh" "MacIntel" "MacPPC" "Mac68K"} platform)  ::osx
       (#{"Win32" "Win64" "Windows" "WinCE"} platform)         ::windows
