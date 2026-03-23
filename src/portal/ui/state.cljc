@@ -216,20 +216,38 @@
       (push-viewer entry)
       (push-expanded entry)))
 
+(defn get-datafied [state context]
+  (get-in state [:datafied (get-location context)]))
+
+(defn- datafy-value [state context]
+  (let [location (get-location context)
+        value    (:value context)]
+    (if (get-in state [:datafied location])
+      state
+      (let [datafied ((requiring-resolve 'clojure.datafy/datafy) value)]
+        (cond-> state
+          (not= datafied value)
+          (assoc-in [:datafied location] datafied))))))
+
 (defn toggle-expand-1 [state context]
   (let [location (get-location context)]
-    (update state :expanded?
-            (fn [expanded]
-              (if (expanded? state context)
-                (assoc expanded location 0)
-                (assoc expanded location 1))))))
+    (-> state
+        (update :expanded?
+                (fn [expanded]
+                  (if (expanded? state context)
+                    (assoc expanded location 0)
+                    (assoc expanded location 1))))
+        (cond-> (not (expanded? state context))
+          (datafy-value context)))))
 
 (defn toggle-expand [state]
   (reduce toggle-expand-1 state (:selected state)))
 
 (defn expand-inc-1 [state context]
   (let [location (get-location context)]
-    (update-in state [:expanded? location] (fnil inc 0))))
+    (-> state
+        (update-in [:expanded? location] (fnil inc 0))
+        (datafy-value context))))
 
 (defn expand-inc [state]
   (reduce expand-inc-1 state (:selected state)))

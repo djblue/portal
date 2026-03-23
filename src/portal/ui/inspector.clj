@@ -1016,6 +1016,8 @@
         theme          (theme/use-theme)
         {:keys [viewer selected expanded?] :as options}
         (react/use-atom state #(get-info % ctx location value))
+
+        value            (or (react/use-atom state #(state/get-datafied % ctx)) value)
         resolved-viewer  (use-resolve-viewer ctx viewer (react/use-atom viewers))
         options          (assoc options :props props :viewer resolved-viewer)
         component        (cond
