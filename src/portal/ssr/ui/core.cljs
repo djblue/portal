@@ -165,6 +165,20 @@
                       :shift-key (.-shiftKey e)
                       :alt-key (.-altKey e)})))))
     (.addEventListener
+     root "mouseup"
+     (fn [^js e]
+       (when-let [id (find-handler (.-srcElement e) "data-on-mouse-up")]
+         (.send ^js ws
+                (.stringify
+                 js/JSON
+                 #js {:op "on-mouse-up"
+                      :id id
+                      :button (.-button e)
+                      :ctrl-key (.-ctrlKey e)
+                      :meta-key (.-metaKey e)
+                      :shift-key (.-shiftKey e)
+                      :alt-key (.-altKey e)})))))
+    (.addEventListener
      root "click"
      (fn [^js e]
        (when-let [id (find-handler (.-srcElement e) "data-on-click")]

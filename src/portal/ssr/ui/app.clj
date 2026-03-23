@@ -262,13 +262,13 @@
     ;;    (state/dispatch! state assoc :scroll-element el)))
     [d/div
      {:on-mouse-up
-      (fn [_]
-        #_(let [button (.-button e)]
-            (cond
-              (= 3 button)
-              (commands/history-back state)
-              (= 4 button)
-              (commands/history-forward state))))
+      (fn [e]
+        (let [button (:button e)]
+          (cond
+            (= 3 button)
+            (commands/history-back state)
+            (= 4 button)
+            (commands/history-forward state))))
       :style
       {:height "100vh"
        :display :flex
