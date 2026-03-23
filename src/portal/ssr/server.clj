@@ -163,8 +163,11 @@
         (on-message session event)
         (catch Exception e (tap> e))))))
 
-(defn send! [{:keys [channel]} message]
-  (server/send! channel (cond-> message (not (string? message)) (json/write-str))))
+(defn send!
+  ([message]
+   (send! *session* message))
+  ([{:keys [channel]} message]
+   (server/send! channel (cond-> message (not (string? message)) (json/write-str)))))
 
 (defn render-app [{:keys [handlers selection-index] :as session} {:keys [hiccup styles]}]
   (binding [*session* session

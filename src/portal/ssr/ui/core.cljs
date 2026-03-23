@@ -56,6 +56,17 @@
 (defmethod on-message "on-render" [{:keys [html]}]
   (render html))
 
+(defn- copy-to-clipboard! [s]
+  (let [el (js/document.createElement "textarea")]
+    (set! (.-value el) s)
+    (js/document.body.appendChild el)
+    (.select el)
+    (js/document.execCommand "copy")
+    (js/document.body.removeChild el)))
+
+(defmethod on-message "on-copy" [{:keys [text]}]
+  (copy-to-clipboard! text))
+
 (defn find-handler-1 [el handler]
   (when (.getAttribute el handler) (.getAttribute el "id")))
 

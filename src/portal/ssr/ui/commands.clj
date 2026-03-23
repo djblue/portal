@@ -631,13 +631,8 @@
   [value]
   (with-out-str (pp/pprint value)))
 
-(defn- copy-to-clipboard! [_s]
-  #_(let [el (js/document.createElement "textarea")]
-      (set! (.-value el) s)
-      (js/document.body.appendChild el)
-      (.select el)
-      (js/document.execCommand "copy")
-      (js/document.body.removeChild el)))
+(defn- copy-to-clipboard! [s]
+  ((requiring-resolve 'portal.ssr.server/send!) {:op "on-copy" :text s}))
 
 (defn- copy-edn! [value]
   (copy-to-clipboard!
@@ -659,10 +654,8 @@
   {:shortcuts [["y"]
                ^::shortcuts/osx #{"meta" "c"}
                ^::shortcuts/windows ^::shortcuts/linux #{"control" "c"}]}
-  [_state]
-  #_(if-let [selection (not-empty (.. js/window getSelection toString))]
-      (copy-to-clipboard! selection)
-      (copy-edn! (selected-values @state))))
+  [state]
+  (copy-edn! (selected-values @state)))
 
 ;; (defn- map->qs [m]
 ;;   (let [qs (js/URLSearchParams.)]
