@@ -139,7 +139,10 @@
 
 (defn- component-replaced? [vdom element]
   (and (some? vdom)
-       (not (identical? (first (:element vdom)) (first element)))))
+       (or (not (identical? (first (:element vdom)) (first element)))
+           (not= (:key vdom)
+                 (or (:key element)
+                     (:key (meta element)))))))
 
 (defn- render-component [vdom state context element]
   (if (component-replaced? vdom element)
@@ -185,6 +188,7 @@
                                  :previous-calls previous-calls
                                  :current-calls current-calls)))))
       {:id id
+       :key (or (:key element) (:key (meta element)))
        :context-set (if use-cached (:context-set vdom) @context-set)
        :context-used (if use-cached (:context-used vdom) @context-used)
        :resolved-context-values (if use-cached
