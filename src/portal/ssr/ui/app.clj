@@ -10,6 +10,7 @@
    [portal.ssr.ui.state :as state]
    [portal.ssr.ui.styled :as d]
    [portal.ssr.ui.theme :as theme]
+   [portal.ssr.ui.viewer.date-time :as date-time]
    [portal.ssr.ui.viewer.deref :as deref]))
 
 (defn- search-input []
@@ -388,4 +389,5 @@
 
 (reset! ins/viewers
         [deref/viewer
-         ins/viewer])
+         ins/viewer
+         date-time/viewer])
