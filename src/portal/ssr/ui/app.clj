@@ -252,7 +252,7 @@
   (let [theme (theme/use-theme)
         state (state/use-state)
         ;; ref   (react/use-ref)
-        ]
+        disable-shell? (react/use-atom state :disable-shell?)]
     ;; (react/use-effect
     ;;  #js [(.-current ref)]
     ;;  (when-let [el (.-current ref)]
@@ -270,7 +270,7 @@
       {:height "100vh"
        :display :flex
        :flex-direction :column}}
-     [toolbar]
+     (when-not disable-shell? [toolbar])
      [d/div
       {:style
        {:flex "1"
@@ -296,9 +296,10 @@
            :box-sizing :border-box
            :padding (* 2 (:padding theme))}}
          [ins/inspector value]]]]]
-     [:<>
-      #_[inspect-footer]
-      [selected-context-view]]]))
+     (when-not disable-shell?
+       [:<>
+        #_[inspect-footer]
+        [selected-context-view]])]))
 
 (defn scrollbars []
   (let [theme (theme/use-theme)
