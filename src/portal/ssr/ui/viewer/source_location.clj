@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ssr.ui.inspector :as ins]
+            [portal.ssr.ui.state :as state]
             ;; [portal.ui.rpc :as rpc]
             [portal.ssr.ui.styled :as d]
             [portal.ssr.ui.theme :as theme]))
@@ -32,8 +33,7 @@
     [d/div
      {:on-click
       (fn [e]
-        #_(.stopPropagation e)
-        #_(rpc/call 'portal.runtime.jvm.editor/goto-definition value))
+        (state/invoke 'portal.runtime.jvm.editor/goto-definition value))
       :style/hover
       {:opacity 1
        :text-decoration :underline}
