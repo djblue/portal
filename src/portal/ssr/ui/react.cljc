@@ -26,6 +26,7 @@
 (def ^:dynamic *context* nil)
 (def ^:dynamic *context-set* nil)
 (def ^:dynamic *context-used* nil)
+(def ^:dynamic *component-state* nil)
 
 (defn use-id [] *id*)
 
@@ -46,7 +47,7 @@
         hook-id (:state (swap! *hook* update :state (fnil inc 0)))
         state-id [component-id hook-id]
         state *state*]
-    [(get-in @state state-id init-value)
+    [(get *component-state* hook-id init-value)
      (fn set-state! [value-or-fn]
        (let [value  (get-in @state state-id init-value)
              value' (if-not (fn? value-or-fn)
@@ -163,6 +164,7 @@
                               *hook*    (atom {})
                               *state*   state
                               *effects* effects
+                              *component-state* component-state
                               *context* context
                               *context-set* context-set
                               *context-used* context-used]
