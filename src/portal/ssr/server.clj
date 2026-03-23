@@ -15,7 +15,6 @@
    [portal.ssr.ui.uuid :refer [parse-uuid]]))
 
 (def ^:dynamic *handler* nil)
-(def ^:dynamic *session* nil)
 
 (def ^:private handler-attributes
   #{:on-click
@@ -165,12 +164,12 @@
 
 (defn send!
   ([message]
-   (send! *session* message))
+   (send! rt/*session* message))
   ([{:keys [channel]} message]
    (server/send! channel (cond-> message (not (string? message)) (json/write-str)))))
 
 (defn render-app [{:keys [handlers selection-index] :as session} {:keys [hiccup styles]}]
-  (binding [*session* session
+  (binding [rt/*session* session
             select/*selection-index* selection-index]
     (process-event-queue! session)
     (let [cache (atom styles)
@@ -232,7 +231,7 @@
    (slurp (io/resource "portal/ssr/ui/core.cljs"))})
 
 (defn clear-values []
-  (let [value (get-in *session* [:options :value])]
+  (let [value (get-in rt/*session* [:options :value])]
     (when (instance? clojure.lang.Atom value)
       (swap! value empty))))
 
