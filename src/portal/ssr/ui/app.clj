@@ -249,7 +249,7 @@
               :align-items :center
               :box-sizing :border-box
               :padding (* 0.5 (:padding theme))}}
-      #_[log/icon (:runtime opts :portal)]]]))
+      [log/icon :clj]]]))
 
 (defn inspect-1 [value]
   (let [theme (theme/use-theme)

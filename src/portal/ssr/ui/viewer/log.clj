@@ -1,7 +1,8 @@
 (ns ^:no-doc portal.ssr.ui.viewer.log
   (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]
             [portal.colors :as c]
-            ;; [portal.resources :refer [inline]]
+            [portal.resources :refer [inline]]
             [portal.ui.filter :as-alias f]
             #_[shadow.resource :refer [inline]] ;; for hot reloading
             [portal.ssr.ui.inspector :as ins]
@@ -19,23 +20,22 @@
 
 (defn- stringify [dom]
   #_(.serializeToString (js/XMLSerializer.) dom)
-  (str dom))
+  dom)
 
-;; (defn- resolve-color [color]
-;;   (if-let [[_ var] (re-matches #"var\((.*)\)" color)]
-;;     (-> js/document
-;;         .-documentElement
-;;         js/getComputedStyle
-;;         (.getPropertyValue var))
-;;     color))
+(defn- resolve-color [color]
+  #_(if-let [[_ var] (re-matches #"var\((.*)\)" color)]
+      (-> js/document
+          .-documentElement
+          js/getComputedStyle
+          (.getPropertyValue var))
+      color)
+  color)
 
 (defn- theme-svg [svg color]
-  #_(let [color (resolve-color color)]
-      (doseq [el (.querySelectorAll svg "[fill]")]
-        (.setAttribute el "fill" color))
-      (doseq [el (.querySelectorAll svg "[stroke]")]
-        (.setAttribute el "stroke" color)))
-  svg)
+  (let [color (resolve-color color)]
+    (-> svg
+        (str/replace #"fill=\"[^\"]+\"" (str "fill=\"" color "\""))
+        (str/replace #"stroke=\"[^\"]+\"" (str "stroke=\"" color "\"")))))
 
 (def ^:private runtime->logo
   {:clj     {:color ::c/package
