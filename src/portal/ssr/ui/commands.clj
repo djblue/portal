@@ -16,7 +16,8 @@
             [portal.ssr.ui.styled :as s]
             [portal.ssr.ui.theme :as theme]
             ;; [reagent.core :as r]
-            ))
+            )
+  (:import [java.util Base64]))
 
 (def ^:dynamic *state* nil)
 (defonce ^:private input (atom nil))
@@ -657,19 +658,23 @@
   [state]
   (copy-edn! (selected-values @state)))
 
-;; (defn- map->qs [m]
-;;   (let [qs (js/URLSearchParams.)]
-;;     (doseq [[k v] m]
-;;       (.append qs (name k) v))
-;;     (str qs)))
+(defn- map->qs [m]
+  (->> m
+       (map
+        (fn [[k v]]
+          (str (name k) "=" (str v))))
+       (str/join "&")))
 
-(defn ^:no-doc create-data-url [_value]
-  #_(let [edn (binding [*print-meta* true] (pr-str value))]
-      (str "https://djblue.github.io/portal/#"
-           (map->qs
-            {:content-url
-             (str "data:;base64," (js/btoa edn))
-             :content-type "application/edn"}))))
+(defn- btoa [^String s]
+  (.encodeToString (Base64/getEncoder) (.getBytes s)))
+
+(defn ^:no-doc create-data-url [value]
+  (let [edn (binding [*print-meta* true] (pr-str value))]
+    (str "https://djblue.github.io/portal/#"
+         (map->qs
+          {:content-url
+           (str "data:;base64," (btoa edn))
+           :content-type "application/edn"}))))
 
 (defn ^:command copy-link
   "Copy link to the standalone Portal (https://djblue.github.io/portal/)."
