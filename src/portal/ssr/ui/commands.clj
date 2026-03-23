@@ -681,18 +681,20 @@
   [_state]
   #_(js/open (create-data-url (selected-values @state))))
 
-(defn- pprint-json [_v]
-  #_(.stringify js/JSON v nil 2))
+(defn- keyword-fn [k]
+  (str (when-let [n (namespace k)] (str n "/")) (name k)))
 
-;; (defn- keyword-fn [k]
-;;   (str (when-let [n (namespace k)] (str n "/")) (name k)))
+(defn- pprint-json [v]
+  (with-out-str
+    ((requiring-resolve 'clojure.data.json/pprint)
+     v
+     :key-fn keyword-fn :escape-slash false)))
 
 (defn ^:command copy-json
   "Copy selected value as a json string to the clipboard."
   [state]
   (-> @state
       selected-values
-      ;; (clj->js :keyword-fn keyword-fn)
       pprint-json
       str/trim
       copy-to-clipboard!))
