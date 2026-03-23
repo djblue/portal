@@ -76,7 +76,7 @@
   ([state context location value]
    (when-let [selected-viewer
               (and (= (:value context) value)
-                   (get @state [:selected-viewers location]))]
+                   (get-in @state [:selected-viewers location]))]
      (some #(when (= (:name %) selected-viewer) %) @viewers))))
 
 (defn- get-compatible-viewer [context value]
