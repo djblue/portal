@@ -19,7 +19,7 @@
        {:class (str "fas " (name icon)
                     (when-let [size (:size props)]
                       (str " fa-" size)))}
-       (dissoc props :dize))])
+       (dissoc props :size))])
 
 (def arrow-down (partial icon :fa-arrow-down))
 (def arrow-left (partial icon :fa-arrow-left))

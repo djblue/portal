@@ -24,7 +24,7 @@
        :color      (if active?
                      (::c/tag theme)
                      (::c/exception theme))
-       :font-size  (:font-size theme)
+       :font-size  "1.4rem"
        :box-sizing :border-box
        :padding    (if-not (coll? value')
                      0
