@@ -1027,6 +1027,10 @@
                            :else preview)]
     (select/use-register-context ctx resolved-viewer)
     (react/use-effect
+     [location]
+     (when (coll? (:value ctx))
+       (state/dispatch! state state/datafy-value ctx)))
+    (react/use-effect
      [location (some? expanded?)]
      (when (and (nil? expanded?)
                 (default-expand? state theme ctx value))
@@ -1047,6 +1051,7 @@
            :behavior "smooth"
            :when "not-visible"}])
        [component value]]]]))
+
 
 (defn- tab-index [context]
   (let [;; ref      (react/use-ref)

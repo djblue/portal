@@ -219,7 +219,7 @@
 (defn get-datafied [state context]
   (get-in state [:datafied (get-location context)]))
 
-(defn- datafy-value [state context]
+(defn datafy-value [state context]
   (let [location (get-location context)
         value    (:value context)]
     (if (get-in state [:datafied location])
@@ -231,23 +231,18 @@
 
 (defn toggle-expand-1 [state context]
   (let [location (get-location context)]
-    (-> state
-        (update :expanded?
-                (fn [expanded]
-                  (if (expanded? state context)
-                    (assoc expanded location 0)
-                    (assoc expanded location 1))))
-        (cond-> (not (expanded? state context))
-          (datafy-value context)))))
+    (update state :expanded?
+            (fn [expanded]
+              (if (expanded? state context)
+                (assoc expanded location 0)
+                (assoc expanded location 1))))))
 
 (defn toggle-expand [state]
   (reduce toggle-expand-1 state (:selected state)))
 
 (defn expand-inc-1 [state context]
   (let [location (get-location context)]
-    (-> state
-        (update-in [:expanded? location] (fnil inc 0))
-        (datafy-value context))))
+    (update-in state [:expanded? location] (fnil inc 0))))
 
 (defn expand-inc [state]
   (reduce expand-inc-1 state (:selected state)))
