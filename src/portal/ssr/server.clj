@@ -168,24 +168,28 @@
   ([{:keys [channel]} message]
    (server/send! channel (cond-> message (not (string? message)) (json/write-str)))))
 
-(defn render-app [{:keys [handlers selection-index] :as session} {:keys [hiccup styles]}]
+(defn render-app [{:keys [handlers selection-index] :as session}
+                  {:keys [hiccup styles app-state] :as render-state}]
   (binding [rt/*session* session
             select/*selection-index* selection-index]
     (process-event-queue! session)
-    (let [cache (atom styles)
-          hiccup'
-          (if-not hiccup
-            (react/render [app/app session])
-            (react/render (meta hiccup) [app/app session]))]
-      (when-not (= hiccup hiccup')
-        (reset! handlers {})
-        (let [html (binding [d/*cache* cache
-                             *handler* handlers]
-                     (html hiccup'))]
-          (when (not (identical? styles @cache))
-            (send! session {:op "on-styles" :append-styles (->style (apply dissoc @cache (keys styles)))}))
-          (send! session html)))
-      {:hiccup hiccup' :styles @cache})))
+    (let [app-state' (some-> hiccup meta :state deref)]
+      (if (and (some? app-state) (= app-state app-state'))
+        render-state
+        (let [cache (atom styles)
+              hiccup'
+              (if-not hiccup
+                (react/render [app/app session])
+                (react/render (meta hiccup) [app/app session]))]
+          (when-not (= hiccup hiccup')
+            (reset! handlers {})
+            (let [html (binding [d/*cache* cache
+                                 *handler* handlers]
+                         (html hiccup'))]
+              (when (not (identical? styles @cache))
+                (send! session {:op "on-styles" :append-styles (->style (apply dissoc @cache (keys styles)))}))
+              (send! session html)))
+          {:hiccup hiccup' :styles @cache :app-state app-state'})))))
 
 (defn on-open [session]
   (swap! rt/connections assoc (:session-id session) (partial send! session))
@@ -251,3 +255,5 @@
 ;; [ ] port more viewers
 ;; [ ] profile / optimize rendeing perf
 ;; [x] fix component with multiple handlers of the same type
+;; [ ] fix issue with ssr and remote vscode
+;;     - atom watching appears to be broken when using ssr on remote instance
