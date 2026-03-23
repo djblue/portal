@@ -67,15 +67,18 @@
       (fn []
         (when active?
           (let [id (random-uuid)
-                cache (atom state)]
-            (add-watch a id
-                       (fn watcher [_ _ state state']
-                         (when-not (= state state')
-                           (let [value (f state')]
-                             (when-not (= @cache value)
-                               (reset! cache value)
-                               (set-state! (cond-> value (fn? value) constantly)))))))
-            #(remove-watch a id))))
+                cache (atom state)
+                watcher
+                (fn watcher [_ _ state state']
+                  (when-not (= state state')
+                    (let [value (f state')]
+                      (when-not (= @cache value)
+                        (reset! cache value)
+                        (set-state! (cond-> value (fn? value) constantly))))))]
+            (watcher nil nil state @a)
+            (add-watch a id watcher)
+            (fn []
+              (remove-watch a id)))))
       [a active?])
      state)))
 
@@ -206,14 +209,16 @@
                      @effects)
                     (mapv
                      (fn [prev-effect current-effect]
-                       (when (or (nil? (:deps prev-effect))
-                                 (not= (:deps prev-effect)
-                                       (:deps current-effect)))
-                         (when-let [effect (:fn prev-effect)] (effect))
-                         (let [f ((:fn current-effect))]
-                           (if (fn? f)
-                             (assoc current-effect :fn f)
-                             (dissoc current-effect :fn)))))
+                       (if-not (or (nil? (:deps prev-effect))
+                                   (not= (:deps prev-effect)
+                                         (:deps current-effect)))
+                         prev-effect
+                         (do
+                           (when-let [effect (:fn prev-effect)] (effect))
+                           (let [f ((:fn current-effect))]
+                             (if (fn? f)
+                               (assoc current-effect :fn f)
+                               (dissoc current-effect :fn))))))
                      (:effects vdom)
                      @effects)))
        :component-output output
