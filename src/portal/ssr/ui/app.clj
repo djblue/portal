@@ -11,7 +11,9 @@
    [portal.ssr.ui.styled :as d]
    [portal.ssr.ui.theme :as theme]
    [portal.ssr.ui.viewer.date-time :as date-time]
-   [portal.ssr.ui.viewer.deref :as deref]))
+   [portal.ssr.ui.viewer.deref :as deref]
+   [portal.ssr.ui.viewer.log :as log]
+   [portal.ssr.ui.viewer.source-location :as source-location]))
 
 (defn- search-input []
   (let [;ref      (react/use-ref nil)
@@ -389,5 +391,7 @@
 
 (reset! ins/viewers
         [deref/viewer
+         log/viewer
          ins/viewer
+         source-location/viewer
          date-time/viewer])
