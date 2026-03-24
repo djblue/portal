@@ -2,7 +2,7 @@
   (:require
    [portal.colors :as c]
    [portal.ssr.ui.react :as react]
-   [portal.ssr.ui.select :as select]
+   [portal.ui.select :as select]
    #_[reagent.core :as r]))
 
 (defonce sender (atom nil))

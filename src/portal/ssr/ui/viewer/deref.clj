@@ -3,7 +3,7 @@
             [portal.ssr.ui.icons :as icons]
             [portal.ssr.ui.inspector :as ins]
             [portal.ssr.ui.react :as react]
-            [portal.ssr.ui.select :as select]
+            [portal.ui.select :as select]
             [portal.ssr.ui.state :refer [atom?]]
             [portal.ssr.ui.styled :as d]
             [portal.ssr.ui.theme :as theme]))

@@ -1,5 +1,5 @@
-(ns ^:no-doc portal.ssr.ui.select
-  (:require [portal.ssr.ui.react :as react]))
+(ns ^:no-doc portal.ui.select
+  (:require [portal.ui.react :as react]))
 
 (def ^:dynamic *selection-index* nil)
 (defonce ^:no-doc selection-index (atom {}))
@@ -80,12 +80,10 @@
   (react/use-context position-context))
 
 (defn use-register-context [context viewer]
-  (let [position (use-position)
-        selection-index (get-selection-index)]
+  (let [position (use-position)]
     (react/use-effect
-     (fn []
-       (let [updates (compute-relative-index @selection-index position context)]
-         (swap! selection-index merge updates)
-         (fn []
-           (apply swap! selection-index dissoc (keys updates)))))
-     [(hash position) (hash context) (hash viewer)])))
+     [(hash position) (hash context) (hash viewer)]
+     (let [updates (compute-relative-index @selection-index position context)]
+       (swap! selection-index merge updates)
+       (fn []
+         (apply swap! selection-index dissoc (keys updates)))))))

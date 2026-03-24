@@ -10,7 +10,7 @@
    [portal.shortcuts :as shortcuts]
    [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
-   [portal.ssr.ui.select :as select]
+   [portal.ui.select :as select]
    [portal.ssr.ui.styled :as d]
    [portal.ssr.ui.uuid :refer [parse-uuid]]))
 
@@ -262,7 +262,11 @@
 ;; [x] path tracking
 ;; [x] commands / command palette
 ;; [x] shortcuts
-;; [ ] port more viewers
-;; [ ] profile / optimize rendeing perf
+;; [x] port more viewers
 ;; [x] fix component with multiple handlers of the same type
+;; [ ] simplify viewer dispatch
+;; [ ] figure out how to collapse ssr module back into existing code
+;; [x] fix deref pause not working sometimes
+;; [ ] fix :launcher :vs-code dependency on portal.runtime.index
+;; [ ] profile / optimize rendeing perf
 ;; [ ] support portal apis for (deref, selected, ...) :ssr sessions

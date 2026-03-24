@@ -6,7 +6,7 @@
             [portal.ui.filter :as-alias f]
             #_[shadow.resource :refer [inline]] ;; for hot reloading
             [portal.ssr.ui.inspector :as ins]
-            [portal.ssr.ui.select :as select]
+            [portal.ui.select :as select]
             [portal.ssr.ui.styled :as d]
             [portal.ssr.ui.theme :as theme]
             [portal.ssr.ui.viewer.date-time :as date-time]

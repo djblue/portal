@@ -6,7 +6,7 @@
    [portal.ssr.ui.icons :as icons]
    [portal.ssr.ui.lazy :as l]
    [portal.ssr.ui.react :as react]
-   [portal.ssr.ui.select :as select]
+   [portal.ui.select :as select]
    [portal.ssr.ui.state :as state]
    [portal.ssr.ui.styled :as s]
    [portal.ssr.ui.theme :as theme]
