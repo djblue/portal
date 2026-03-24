@@ -15,6 +15,7 @@
    [portal.ui.viewer.date-time :as date-time]
    [portal.ui.viewer.deref :as deref]
    [portal.ui.viewer.duration :as duration]
+   [portal.ui.viewer.edn :as edn]
    [portal.ui.viewer.exception :as ex]
    [portal.ui.viewer.http :as http]
    [portal.ui.viewer.json :as json]
@@ -413,4 +414,5 @@
          duration/nano
          duration/ms
          bytes/viewer
-         json/viewer])
+         json/viewer
+         edn/viewer])
