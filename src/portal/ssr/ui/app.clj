@@ -21,6 +21,7 @@
    [portal.ui.viewer.json :as json]
    [portal.ui.viewer.log :as log]
    [portal.ui.viewer.prepl :as prepl]
+   [portal.ui.viewer.relative-time :as relative-time]
    [portal.ui.viewer.source-location :as source-location]
    [portal.ui.viewer.test-report :as test-report]
    [portal.ui.viewer.text :as text]
@@ -421,4 +422,5 @@
          json/viewer
          tree/viewer
          text/viewer
-         edn/viewer])
+         edn/viewer
+         relative-time/viewer])

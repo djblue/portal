@@ -89,7 +89,7 @@
    {:file "portal/ui/viewer/date_time.cljc"
     :examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
    ::v/relative-time
-   {:file "portal/ui/viewer/relative_time.cljs"
+   {:file "portal/ui/viewer/relative_time.cljc"
     :examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
    ::v/diff
    {:file "portal/ui/viewer/diff.cljs"
