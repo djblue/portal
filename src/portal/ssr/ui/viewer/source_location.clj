@@ -5,7 +5,7 @@
             [portal.ssr.ui.state :as state]
             ;; [portal.ui.rpc :as rpc]
             [portal.ui.styled :as d]
-            [portal.ssr.ui.theme :as theme]))
+            [portal.ui.theme :as theme]))
 
 ;;; :spec
 (s/def ::ns symbol?)

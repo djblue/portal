@@ -3,7 +3,7 @@
             [portal.colors :as c]
             [portal.ssr.ui.inspector :as ins]
             [portal.ui.styled :as d]
-            [portal.ssr.ui.theme :as theme]))
+            [portal.ui.theme :as theme]))
 
 ;;; :spec
 (s/def ::date-time

@@ -8,7 +8,7 @@
             [portal.ssr.ui.inspector :as ins]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
-            [portal.ssr.ui.theme :as theme]
+            [portal.ui.theme :as theme]
             [portal.ssr.ui.viewer.date-time :as date-time]
             [portal.ssr.ui.viewer.source-location :as src]))
 

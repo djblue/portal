@@ -9,7 +9,7 @@
    [portal.ui.select :as select]
    [portal.ssr.ui.state :as state]
    [portal.ui.styled :as s]
-   [portal.ssr.ui.theme :as theme]
+   [portal.ui.theme :as theme]
    [portal.ui.filter :as f]))
 
 (declare inspector*)
