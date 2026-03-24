@@ -68,7 +68,7 @@
    {:file "portal/ui/viewer/http.cljc"
     :examples (concat d/http-requests d/http-responses)}
    ::v/test-report
-   {:file "portal/ui/viewer/test_report.cljs"
+   {:file "portal/ui/viewer/test_report.cljc"
     :examples [d/test-report]}
    ::v/vega
    {:file "portal/ui/viewer/vega.cljs"

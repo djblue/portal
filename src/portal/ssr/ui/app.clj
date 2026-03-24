@@ -18,7 +18,8 @@
    [portal.ui.viewer.exception :as ex]
    [portal.ui.viewer.http :as http]
    [portal.ui.viewer.log :as log]
-   [portal.ui.viewer.source-location :as source-location]))
+   [portal.ui.viewer.source-location :as source-location]
+   [portal.ui.viewer.test-report :as test-report]))
 
 (defn- search-input []
   (let [;ref      (react/use-ref nil)
@@ -401,6 +402,7 @@
          log/viewer
          http/viewer
          deref/viewer
+         test-report/viewer
          color/viewer
          ins/viewer
          ex/trace-viewer
