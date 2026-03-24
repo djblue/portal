@@ -7,7 +7,7 @@
    [org.httpkit.server :as server]
    [portal.runtime :as rt]
    [portal.runtime.jvm.server :refer [enable-cors route]]
-   [portal.ssr.shortcuts :as shortcuts]
+   [portal.shortcuts :as shortcuts]
    [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
    [portal.ssr.ui.select :as select]

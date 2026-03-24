@@ -5,7 +5,7 @@
             [clojure.walk :as walk]
             [portal.sync :as a]
             [portal.colors :as c]
-            [portal.ssr.shortcuts :as shortcuts]
+            [portal.shortcuts :as shortcuts]
             ;; [portal.ui.drag-and-drop :as dnd]
             [portal.ssr.ui.icons :as icons]
             [portal.ssr.ui.inspector :as ins]
