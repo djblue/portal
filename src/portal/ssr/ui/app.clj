@@ -17,6 +17,7 @@
    [portal.ui.viewer.duration :as duration]
    [portal.ui.viewer.exception :as ex]
    [portal.ui.viewer.http :as http]
+   [portal.ui.viewer.json :as json]
    [portal.ui.viewer.log :as log]
    [portal.ui.viewer.source-location :as source-location]
    [portal.ui.viewer.test-report :as test-report]))
@@ -411,4 +412,5 @@
          date-time/viewer
          duration/nano
          duration/ms
-         bytes/viewer])
+         bytes/viewer
+         json/viewer])
