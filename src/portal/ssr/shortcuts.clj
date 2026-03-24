@@ -59,10 +59,10 @@
   (or (get mapping (log->combo log))
       (some #(get mapping %) (log->seq log))))
 
-(defn input? [_log]
-  #_(when-let [e (first log)]
-      (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"}
-       (.. e -target -tagName))))
+(defn input? [log]
+  (when-let [e (first log)]
+    (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"}
+     (get-in e [:target :tag-name]))))
 
 (defn keydown [e] (swap! log #(take 5 (conj % e))) nil)
 

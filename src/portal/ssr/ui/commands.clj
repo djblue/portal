@@ -59,10 +59,8 @@
 (defn- use-shortcuts-setup []
   (react/use-effect
    (fn []
-     (prn ::add!)
      (shortcuts/add! ::with-shortcuts dispatch)
      (fn []
-       (prn ::remove!)
        (shortcuts/remove! ::with-shortcuts)))
    []))
 
@@ -1125,10 +1123,11 @@
       [(hash value)])
      [with-shortcuts
       (fn [log]
-        (when-let [f (shortcuts/match (merge @client-keymap #_(some-> opts :keymap deref)) log)]
-          (when-let [{:keys [run]} (or (get @registry f)
-                                       (get @runtime-registry f))]
-            (shortcuts/matched! log)
-            (run state))))
+        (when-not (shortcuts/input? log)
+          (when-let [f (shortcuts/match (merge @client-keymap #_(some-> opts :keymap deref)) log)]
+            (when-let [{:keys [run]} (or (get @registry f)
+                                         (get @runtime-registry f))]
+              (shortcuts/matched! log)
+              (run state)))))
       (when-let [component (react/use-atom state ::input)]
         [ins/with-readonly [(or container pop-up) [component state]]])])))

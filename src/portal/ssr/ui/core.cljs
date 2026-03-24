@@ -157,13 +157,15 @@
                       :ctrl-key (.-ctrlKey e)
                       :meta-key (.-metaKey e)
                       :shift-key (.-shiftKey e)
-                      :alt-key (.-altKey e)}
+                      :alt-key (.-altKey e)
+                      :target #js {:tag-name (.. e -target -tagName)}}
                  #js {:op "on-key-down"
                       :key (.toLowerCase (.-key e))
                       :ctrl-key (.-ctrlKey e)
                       :meta-key (.-metaKey e)
                       :shift-key (.-shiftKey e)
-                      :alt-key (.-altKey e)})))))
+                      :alt-key (.-altKey e)
+                      :target #js {:tag-name (.. e -target -tagName)}})))))
     (.addEventListener
      root "mouseup"
      (fn [^js e]
