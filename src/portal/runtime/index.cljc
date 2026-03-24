@@ -22,7 +22,7 @@
      (when host
        (str "window.PORTAL_HOST    = " (pr-str (str host ":" port)) ";"))
      (when session-id
-       (str "window.PORTAL_SESSION = " (pr-str session-id) ";"))
+       (str "window.PORTAL_SESSION = " (pr-str (str session-id)) ";"))
      "</script>"
      (if (= mode :ssr)
        (str "<script src=\"https://cdn.jsdelivr.net/npm/scittle@0.8.31/dist/scittle.js\"
