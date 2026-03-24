@@ -6,7 +6,7 @@
    [clojure.string :as str]
    [org.httpkit.server :as server]
    [portal.runtime :as rt]
-   [portal.runtime.jvm.server :refer [route]]
+   [portal.runtime.jvm.server :refer [enable-cors route]]
    [portal.ssr.shortcuts :as shortcuts]
    [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
@@ -205,12 +205,21 @@
     (stop-render-loop)
     (swap! render-loops dissoc (:session-id session))))
 
-(defn- open-session [{:keys [session]}]
+(defn- vs-code? [request]
+  (some-> request
+          (get-in [:headers "origin"])
+          (str/starts-with? "vscode-webview://")))
+
+(defn- open-session [{:keys [session] :as request}]
   (-> session
-      (update :options (fn [options]
-                         (cond-> options
-                           (not (contains? options :value))
-                           (assoc :value @#'rt/tap-list))))
+      (update :options
+              (fn [options]
+                (cond-> options
+                  (not (contains? options :value))
+                  (assoc :value @#'rt/tap-list)
+                  (and (nil? (:theme options))
+                       (vs-code? request))
+                  (assoc :theme :portal.colors/vs-code-embedded))))
       (assoc :state (atom {})
              :handlers (atom {})
              :event-queue (atom [])
@@ -228,9 +237,10 @@
       :on-close   (fn [_ch _status]
                     (on-close @session))})))
 
-(defmethod route [:get "/main.cljs"] [_request]
+(defmethod route [:options "/main.cljs"] [_] enable-cors)
+(defmethod route [:get "/main.cljs"] [_]
   {:status  200
-   :headers {"Content-Type" "text/javascript"}
+   :headers {"Access-Control-Allow-Origin" "*"}
    :body
    (slurp (io/resource "portal/ssr/ui/core.cljs"))})
 
@@ -255,5 +265,4 @@
 ;; [ ] port more viewers
 ;; [ ] profile / optimize rendeing perf
 ;; [x] fix component with multiple handlers of the same type
-;; [ ] fix issue with ssr and remote vscode
-;;     - atom watching appears to be broken when using ssr on remote instance
+;; [ ] support portal apis for (deref, selected, ...) :ssr sessions

@@ -4,10 +4,10 @@
             [clojure.string :as str]
             [portal.api :as p]
             [portal.async :as a]
+            [portal.client.node :as client]
             [portal.resources :as io]
             [portal.runtime.browser :as browser]
             [portal.runtime.fs :as fs]
-            [portal.runtime.index :as index]
             [portal.runtime.node.server :as server]))
 
 (defonce ^:private !app-db (atom {:context nil
@@ -37,31 +37,27 @@
     (-> context .-workspaceState (.update view-column-key column))))
 
 (defn- -open [{:keys [portal options server]}]
-  (let [{:keys [host port]} server
-        session-id          (:session-id portal)
-        ^js panel           (.createWebviewPanel
-                             vscode/window
-                             "portal"
-                             (str/join
-                              " - "
-                              ["portal"
-                               (get options :window-title "vs-code")
-                               "0.63.1"])
-                             (view-column)
-                             (clj->js
-                              {:enableScripts           true
-                               :retainContextWhenHidden true
-                               :portMapping
-                               [{:webviewPort port
-                                 :extensionHostPort port}]}))
-        ^js web-view        (.-webview panel)]
+  (a/let [{:keys [host port]} server
+          {:keys [body]}      (client/fetch (str "http://" host ":" port "/?" (:session-id portal)))
+          ^js panel           (.createWebviewPanel
+                               vscode/window
+                               "portal"
+                               (str/join
+                                " - "
+                                ["portal"
+                                 (get options :window-title "vs-code")
+                                 "0.63.1"])
+                               (view-column)
+                               (clj->js
+                                {:enableScripts           true
+                                 :retainContextWhenHidden true
+                                 :portMapping
+                                 [{:webviewPort port
+                                   :extensionHostPort port}]}))
+          ^js web-view        (.-webview panel)]
     (set! (.-iconPath panel)
           (.file vscode/Uri (.asAbsolutePath ^js (:context @!app-db) "icon.png")))
-    (set! (.-html web-view)
-          (index/html {:code-url   (str "http://" host ":" port "/main.js?" session-id)
-                       :host       host
-                       :port       port
-                       :session-id (str session-id)}))
+    (set! (.-html web-view) body)
     (.onDidReceiveMessage
      web-view
      (fn handle-message [^js message]

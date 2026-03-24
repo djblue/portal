@@ -369,8 +369,10 @@
            [inspect-1 (state/get-value state default-value)]]])
        (state/get-history current-state)))]))
 
-(defn root [{:keys [state]} & children]
-  (let [theme (or (react/use-atom state :theme) ::c/nord)]
+(defn root [{:keys [options state]} & children]
+  (let [theme (or (:theme options)
+                  (react/use-atom state :theme)
+                  ::c/nord)]
     [state/with-state
      state
      [theme/with-theme

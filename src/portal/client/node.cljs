@@ -21,11 +21,14 @@
                       (.on res "end" #(resolve
                                        {:status (.-statusCode res)
                                         :body   @body})))))]
-         (.write req body)
+         (when body (.write req body))
          (.end req))))))
 
-(defn fetch [url options]
-  (request (assoc options :url url)))
+(defn fetch
+  ([url]
+   (fetch url {}))
+  ([url options]
+   (request (assoc options :url url))))
 
 (def submit (->submit fetch))
 

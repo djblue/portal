@@ -14,7 +14,7 @@
   (:import [java.io File PushbackReader]
            [java.util UUID]))
 
-(def ^:private enable-cors
+(def enable-cors
   {:status 204
    :headers
    {"Access-Control-Allow-Origin"  "*"
@@ -148,7 +148,13 @@
 
 (defmethod route [:get "/"] [request]
   (if-let [session (:session request)]
-    (send-resource "text/html" (index/html (:options session)))
+    (send-resource
+     "text/html"
+     (index/html
+      (merge
+       {:port (:server-port request)
+        :host (:server-name request)}
+       (:options session))))
     (let [session-id (UUID/randomUUID)]
       (swap! rt/sessions assoc session-id {})
       {:status 307 :headers {"Location" (str "?" session-id)}})))
