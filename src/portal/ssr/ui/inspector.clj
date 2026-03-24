@@ -632,13 +632,13 @@
             #_(.stopPropagation e))
           :title "metadata"}])
 
-      #_(when-let [type (-> values meta :portal.runtime/type)]
-          [s/div {:title "Value type."
-                  :style
-                  {:box-sizing :border-box
-                   :padding (:padding theme)
-                   :border-right [1 :solid (::c/border theme)]}}
-           [select/with-position {:row -2 :column 1} [inspector type]]])
+      (when-let [type (when (record? values) (type values))]
+        [s/div {:title "Value type."
+                :style
+                {:box-sizing :border-box
+                 :padding (:padding theme)
+                 :border-right [1 :solid (::c/border theme)]}}
+         [select/with-position {:row -2 :column 1} [inspector type]]])
 
       (when search-text
         (let [color (get theme (nth theme/order (:depth context)))]
