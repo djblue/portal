@@ -58,7 +58,10 @@
                                 (when (scalar-seq? value)
                                   :portal.viewer/pprint)))
         viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
-    (filter #(when-let [pred (:predicate %)] (pred value)) viewers)))
+    (filter #(when-let [pred (:predicate %)]
+               (try (pred value)
+                    (catch Exception _ nil)))
+            viewers)))
 
 (defn get-compatible-viewers [viewers contexts]
   (if (nil? contexts)
