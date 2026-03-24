@@ -9,7 +9,7 @@
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
-            [portal.ssr.ui.viewer.date-time :as date-time]
+            [portal.ui.viewer.date-time :as date-time]
             [portal.ssr.ui.viewer.source-location :as src]))
 
 (defn- parse [xml-string]

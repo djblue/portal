@@ -10,7 +10,7 @@
    [portal.ssr.ui.state :as state]
    [portal.ui.styled :as d]
    [portal.ui.theme :as theme]
-   [portal.ssr.ui.viewer.date-time :as date-time]
+   [portal.ui.viewer.date-time :as date-time]
    [portal.ssr.ui.viewer.deref :as deref]
    [portal.ssr.ui.viewer.log :as log]
    [portal.ssr.ui.viewer.source-location :as source-location]))

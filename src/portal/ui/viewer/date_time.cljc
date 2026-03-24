@@ -1,7 +1,8 @@
 (ns ^:no-doc portal.ui.viewer.date-time
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
-            [portal.ui.inspector :as ins]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
@@ -12,19 +13,31 @@
         :iso-8601 string?))
 ;;;
 
-(defn parse [date]
-  (cond
-    (inst? date) date
+(defn parse ^java.util.Date [date]
+  #?(:clj (cond
+            (inst? date) date
 
-    ;; unix timestamps
-    (number? date)
-    (let [d (js/Date. (* date 1000))]
-      ;; Assume timestamps after the years 10000 are actually encoded as ms
-      (if (< (.getFullYear d) 10000) d (js/Date. date)))
+            ;; unix timestamps
+            (number? date)
+            (let [d (java.util.Date. (long (* date 1000)))]
+              ;; Assume timestamps after the years 10000 are actually encoded as ms
+              (if (< (.getYear d) 10000) d (java.util.Date. (long date))))
+            #_(string? date)
+            #_(let [date (.parse js/Date date)]
+                (when-not (js/isNaN date) (js/Date. date))))
+     :cljs
+     (cond
+       (inst? date) date
 
-    (string? date)
-    (let [date (.parse js/Date date)]
-      (when-not (js/isNaN date) (js/Date. date)))))
+       ;; unix timestamps
+       (number? date)
+       (let [d (js/Date. (* date 1000))]
+         ;; Assume timestamps after the years 10000 are actually encoded as ms
+         (if (< (.getFullYear d) 10000) d (js/Date. date)))
+
+       (string? date)
+       (let [date (.parse js/Date date)]
+         (when-not (js/isNaN date) (js/Date. date))))))
 
 (def ^:private days
   ["Sunday"
@@ -89,7 +102,7 @@
         day     (.getDay value)
         date    (.getDate value)
         month   (.getMonth value)
-        year    (.getFullYear value)
+        year    #?(:clj (.getYear value) :cljs (.getFullYear value))
         theme   (theme/use-theme)
         style   {:color (::c/number theme)}
         border  {:color (::c/border theme)}]
