@@ -52,7 +52,7 @@
 
 (defn- info []
   {::v/log
-   {:file "portal/ui/viewer/log.cljs"
+   {:file "portal/ui/viewer/log.cljc"
     :examples d/log-data}
    ::v/prepl
    {:file "portal/ui/viewer/prepl.cljs"
