@@ -153,7 +153,8 @@
      (index/html
       (merge
        {:port (:server-port request)
-        :host (:server-name request)}
+        :host (:server-name request)
+        :session-id (:session-id session)}
        (:options session))))
     (let [session-id (UUID/randomUUID)]
       (swap! rt/sessions assoc session-id {})
