@@ -1,7 +1,8 @@
 (ns ^:no-doc portal.ui.viewer.color
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
-            [portal.ui.inspector :as ins]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 

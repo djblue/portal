@@ -11,6 +11,7 @@
    [portal.ui.styled :as d]
    [portal.ui.theme :as theme]
    [portal.ui.viewer.bytes :as bytes]
+   [portal.ui.viewer.color :as color]
    [portal.ui.viewer.date-time :as date-time]
    [portal.ui.viewer.deref :as deref]
    [portal.ui.viewer.exception :as ex]
@@ -396,9 +397,10 @@
 
 (reset! ins/viewers
         [ex/viewer
-         deref/viewer
          log/viewer
          http/viewer
+         deref/viewer
+         color/viewer
          ins/viewer
          ex/trace-viewer
          ex/sub-trace-viewer

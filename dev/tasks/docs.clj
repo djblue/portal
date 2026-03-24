@@ -123,7 +123,7 @@
    {:examples [1 1e3 6e4]}
    ::v/color
    {:examples (vals (first (vals c/themes)))
-    :file "portal/ui/viewer/color.cljs"}
+    :file "portal/ui/viewer/color.cljc"}
    ::v/source-location
    {:examples '[{:file "clojure/core.clj", :line 75, :column 1, :ns clojure.core}
                 {:file "clojure/core.clj", :line 183, :column 1, :ns clojure.core}
