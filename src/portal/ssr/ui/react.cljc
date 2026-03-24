@@ -175,7 +175,10 @@
                               *context* context
                               *context-set* context-set
                               *context-used* context-used]
-                      (render-component-post (apply component args) id)))
+                      (try
+                        (render-component-post (apply component args) id)
+                        (catch #?(:clj Exception :cljs :default) e
+                          [:pre (pr-str e)]))))
           child-context (if use-cached
                           (merge context (:context-set vdom))
                           (merge context @context-set))
