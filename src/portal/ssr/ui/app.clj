@@ -10,6 +10,7 @@
    [portal.ui.select :as select]
    [portal.ui.styled :as d]
    [portal.ui.theme :as theme]
+   [portal.ui.viewer.bytes :as bytes]
    [portal.ui.viewer.date-time :as date-time]
    [portal.ui.viewer.deref :as deref]
    [portal.ui.viewer.exception :as ex]
@@ -400,4 +401,5 @@
          ex/trace-viewer
          ex/sub-trace-viewer
          source-location/viewer
-         date-time/viewer])
+         date-time/viewer
+         bytes/viewer])
