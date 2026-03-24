@@ -18,9 +18,9 @@
 
     ;; unix timestamps
     (number? date)
-    (let [d (java.util.Date. (* date 1000))]
+    (let [d (java.util.Date. (long (* date 1000)))]
       ;; Assume timestamps after the years 10000 are actually encoded as ms
-      (if (< (.getYear d) 10000) d (java.util.Date. date)))
+      (if (< (.getYear d) 10000) d (java.util.Date. (long date))))
     #_(string? date)
     #_(let [date (.parse js/Date date)]
         (when-not (js/isNaN date) (js/Date. date)))))
