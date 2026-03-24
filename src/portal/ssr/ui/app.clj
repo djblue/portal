@@ -11,7 +11,7 @@
    [portal.ui.styled :as d]
    [portal.ui.theme :as theme]
    [portal.ui.viewer.date-time :as date-time]
-   [portal.ssr.ui.viewer.deref :as deref]
+   [portal.ui.viewer.deref :as deref]
    [portal.ui.viewer.log :as log]
    [portal.ui.viewer.source-location :as source-location]))
 

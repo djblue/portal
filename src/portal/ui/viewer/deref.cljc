@@ -1,10 +1,14 @@
-(ns ^:no-doc portal.ssr.ui.viewer.deref
+(ns ^:no-doc portal.ui.viewer.deref
   (:require [portal.colors :as c]
             [portal.ui.icons :as icons]
-            [portal.ssr.ui.inspector :as ins]
-            [portal.ssr.ui.react :as react]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
+            #?(:cljs [portal.ui.options :as options])
+            [portal.ui.react :as react]
+            #?(:cljs [portal.ui.rpc :as rpc])
             [portal.ui.select :as select]
-            [portal.ssr.ui.state :refer [atom?]]
+            #?(:clj  [portal.ssr.ui.state :refer [atom?]]
+               :cljs [portal.ui.state :refer [atom?]])
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
@@ -24,7 +28,8 @@
        :color      (if active?
                      (::c/tag theme)
                      (::c/exception theme))
-       :font-size  "1.4rem"
+       :font-size  #?(:clj "1.35rem"
+                      :cljs  (:font-size theme))
        :box-sizing :border-box
        :padding    (if-not (coll? value')
                      0
@@ -32,29 +37,40 @@
 
       :style/hover {:opacity 1}
 
-      :on-mouse-enter (fn [_] (set-hover! true))
-      :on-mouse-leave (fn [_] (set-hover! false))}
+      :on-mouse-enter (fn [_e] (set-hover! true))
+      :on-mouse-leave (fn [_e] (set-hover! false))}
      (if active?
        [icons/pause
         {:title "Pause watch."
          :style {:opacity (if hover 1 0)}
          :on-click
-         (fn [_]
-           (set-active! false))}]
+         (fn [_e]
+           (set-active! false)
+           #?(:cljs (.stopPropagation _e)))}]
        [icons/play
         {:title "Resume watch."
          :style {:opacity (if hover 1 0)}
          :on-click
-         (fn [_]
-           (set-active! true))}])
+         (fn [_e]
+           (set-active! true)
+           #?(:cljs (.stopPropagation _e)))}])
      [icons/at
       {:title (str "Click to select atom. "
                    (when-not active?
                      "(watch paused)"))}]]))
 
+(defn- use-watch [_value]
+  #?(:clj  (react/use-state true)
+     :cljs (let [opts    (options/use-options)
+                 active? (some-> opts :watch-registry deref (contains? _value))]
+             [active? (fn set-active! [_]
+                        (prn :set-active)
+                        (rpc/call 'portal.api/toggle-watch _value))])))
+
 (defn inspect-deref [value]
-  (let [[active? set-active!] (react/use-state true)
-        value' (react/use-atom value identity active?)]
+  (let [[active? set-active!] (use-watch value)
+        value' #?(:clj  (react/use-atom value identity active?)
+                  :cljs @value)]
     [d/div
      {:style {:position :relative}}
      [toggle-watch value' active? set-active!]
@@ -67,4 +83,3 @@
   {:predicate atom?
    :component #'inspect-deref
    :name :portal.viewer/deref})
-
