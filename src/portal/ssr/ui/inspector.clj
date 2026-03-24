@@ -4,7 +4,7 @@
    [portal.colors :as c]
    [portal.runtime.cson :as cson]
    [portal.ssr.ui.icons :as icons]
-   [portal.ssr.ui.lazy :as l]
+   [portal.ui.lazy :as l]
    [portal.ssr.ui.react :as react]
    [portal.ui.select :as select]
    [portal.ssr.ui.state :as state]
