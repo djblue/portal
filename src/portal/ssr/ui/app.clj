@@ -21,7 +21,8 @@
    [portal.ui.viewer.json :as json]
    [portal.ui.viewer.log :as log]
    [portal.ui.viewer.source-location :as source-location]
-   [portal.ui.viewer.test-report :as test-report]))
+   [portal.ui.viewer.test-report :as test-report]
+   [portal.ui.viewer.text :as text]))
 
 (defn- search-input []
   (let [;ref      (react/use-ref nil)
@@ -415,4 +416,5 @@
          duration/ms
          bytes/viewer
          json/viewer
+         text/viewer
          edn/viewer])
