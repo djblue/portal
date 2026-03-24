@@ -1,5 +1,5 @@
 (ns ^:no-doc portal.ui.viewer.exception
-  (:require [clojure.main :refer [demunge]]
+  (:require #?(:clj [clojure.main :refer [demunge]])
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]
