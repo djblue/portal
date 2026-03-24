@@ -133,7 +133,7 @@
                  :ns clojure.java.io}
                 {:file "portal/api.cljc", :line 72, :column 1, :ns portal.api}
                 {:file "portal/api.cljc", :line 196, :column 1, :ns portal.api}]
-    :file "portal/ui/viewer/source_location.cljs"}
+    :file "portal/ui/viewer/source_location.cljc"}
    ::v/spec
    {:file "portal/ui/viewer/spec.cljs"
     :examples [d/spec-data]}})

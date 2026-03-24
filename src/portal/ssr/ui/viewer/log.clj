@@ -10,7 +10,7 @@
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.date-time :as date-time]
-            [portal.ssr.ui.viewer.source-location :as src]))
+            [portal.ui.viewer.source-location :as src]))
 
 (defn- parse [xml-string]
   ;; (let [parser (js/DOMParser.)

@@ -13,7 +13,7 @@
    [portal.ui.viewer.date-time :as date-time]
    [portal.ssr.ui.viewer.deref :as deref]
    [portal.ssr.ui.viewer.log :as log]
-   [portal.ssr.ui.viewer.source-location :as source-location]))
+   [portal.ui.viewer.source-location :as source-location]))
 
 (defn- search-input []
   (let [;ref      (react/use-ref nil)
