@@ -1,6 +1,6 @@
 (ns ^:no-doc portal.ssr.ui.viewer.deref
   (:require [portal.colors :as c]
-            [portal.ssr.ui.icons :as icons]
+            [portal.ui.icons :as icons]
             [portal.ssr.ui.inspector :as ins]
             [portal.ssr.ui.react :as react]
             [portal.ui.select :as select]

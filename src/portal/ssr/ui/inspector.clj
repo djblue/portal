@@ -3,7 +3,7 @@
    [clojure.set :as set]
    [portal.colors :as c]
    [portal.runtime.cson :as cson]
-   [portal.ssr.ui.icons :as icons]
+   [portal.ui.icons :as icons]
    [portal.ui.lazy :as l]
    [portal.ssr.ui.react :as react]
    [portal.ui.select :as select]

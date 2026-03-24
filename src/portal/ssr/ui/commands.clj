@@ -7,7 +7,7 @@
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
             ;; [portal.ui.drag-and-drop :as dnd]
-            [portal.ssr.ui.icons :as icons]
+            [portal.ui.icons :as icons]
             [portal.ssr.ui.inspector :as ins]
             ;; [portal.ui.options :as options]
             ;; [portal.ui.parsers :as p]
