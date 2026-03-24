@@ -69,7 +69,6 @@
         [now set-now!] (react/use-state (date))]
     (react/use-effect
      :once
-     (prn :mount)
      (let [i #?(:clj  (future
                         (while true
                           (set-now! (date))
@@ -79,7 +78,6 @@
                          (set-now! (now)))
                        1000))]
        (fn []
-         (prn :unmount)
          #?(:clj  (future-cancel i)
             :cljs (js/clearInterval i)))))
     [d/div (format-relative-time (relative-time now value))]))
