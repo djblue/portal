@@ -55,7 +55,7 @@
    {:file "portal/ui/viewer/log.cljc"
     :examples d/log-data}
    ::v/prepl
-   {:file "portal/ui/viewer/prepl.cljs"
+   {:file "portal/ui/viewer/prepl.cljc"
     :examples [d/prepl-data]}
    ::v/ex
    {:file "portal/ui/viewer/exception.cljc"

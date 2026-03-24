@@ -20,6 +20,7 @@
    [portal.ui.viewer.http :as http]
    [portal.ui.viewer.json :as json]
    [portal.ui.viewer.log :as log]
+   [portal.ui.viewer.prepl :as prepl]
    [portal.ui.viewer.source-location :as source-location]
    [portal.ui.viewer.test-report :as test-report]
    [portal.ui.viewer.text :as text]
@@ -407,6 +408,7 @@
          http/viewer
          deref/viewer
          test-report/viewer
+         prepl/viewer
          color/viewer
          ins/viewer
          ex/trace-viewer
