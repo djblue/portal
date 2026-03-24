@@ -14,6 +14,7 @@
    [portal.ui.viewer.date-time :as date-time]
    [portal.ui.viewer.deref :as deref]
    [portal.ui.viewer.exception :as ex]
+   [portal.ui.viewer.http :as http]
    [portal.ui.viewer.log :as log]
    [portal.ui.viewer.source-location :as source-location]))
 
@@ -397,6 +398,7 @@
         [ex/viewer
          deref/viewer
          log/viewer
+         http/viewer
          ins/viewer
          ex/trace-viewer
          ex/sub-trace-viewer

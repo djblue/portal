@@ -65,7 +65,7 @@
                     (::d/io-exception d/platform-data)
                     (::d/ex-info d/platform-data)])}
    ::v/http
-   {:file "portal/ui/viewer/http.cljs"
+   {:file "portal/ui/viewer/http.cljc"
     :examples (concat d/http-requests d/http-responses)}
    ::v/test-report
    {:file "portal/ui/viewer/test_report.cljs"
