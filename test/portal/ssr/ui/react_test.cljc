@@ -126,6 +126,18 @@
     (is (== 2 @mount))
     (is (== 2 @un-mount))))
 
+(deftest preserve-effect-on-re-render-test
+  (let [un-mount (atom 0)
+        props {:on-mount (fn [])
+               :on-unmount #(swap! un-mount inc)
+               :deps [:foo]}
+        output (r/render [effect-component props])
+        vdom   (meta output)
+        output (r/render vdom [effect-component (assoc props :x :y)])
+        vdom   (meta output)]
+    (r/render vdom [effect-component (assoc props :deps [:bar])])
+    (is (== 1 @un-mount))))
+
 (defn atom-component [a]
   [:span (pr-str (r/use-atom a))])
 
@@ -195,4 +207,28 @@
         b (r/render (meta a) [stateless-component])]
     (is (= a b))))
 
-(deftest context-re-render)
+(defn unmount-component [{:keys [render unmount]}]
+  (swap! render inc)
+  (r/use-effect
+   (fn []
+     #(swap! unmount inc))
+   [])
+  nil)
+
+(deftest unmount-on-key-change []
+  (let [render  (atom 0)
+        unmount (atom 0)
+        props {:render  render
+               :unmount unmount}
+        output (r/render      ^{:key 0} [unmount-component props])
+        _ (is (== 1 @render))
+        _ (is (== 0 @unmount))
+        vdom (meta output)
+        output (r/render vdom ^{:key 0} [unmount-component props])
+        _ (is (== 1 @render))
+        _ (is (== 0 @unmount))
+        vdom (meta output)
+        output (r/render vdom ^{:key 0} [unmount-component (assoc props :key 1)])
+        _ (is (== 2 @render))
+        _ (is (== 1 @unmount))]
+    output))

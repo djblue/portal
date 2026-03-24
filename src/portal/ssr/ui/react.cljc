@@ -108,11 +108,14 @@
 
 (declare render*)
 
+(defn- element-key [element]
+  (or (when (map? (second element)) (:key (second element)))
+      (:key (meta element))))
+
 (defn- render-list [vdom state context elements]
   (let [vdom-children
         (for [element elements
-              :let [k (or (:key (meta element))
-                          (:key (second element)))
+              :let [k (element-key element)
                     vdom (some
                           (fn [vdom] (when (= k (:key vdom)) vdom))
                           (:vdom-children vdom))]]
@@ -143,9 +146,7 @@
 (defn- component-replaced? [vdom element]
   (and (some? vdom)
        (or (not (identical? (first (:element vdom)) (first element)))
-           (not= (:key vdom)
-                 (or (:key element)
-                     (:key (meta element)))))))
+           (not= (:key vdom) (element-key element)))))
 
 (defn- render-component [vdom state context element]
   (if (component-replaced? vdom element)
@@ -191,7 +192,7 @@
                                  :previous-calls previous-calls
                                  :current-calls current-calls)))))
       {:id id
-       :key (or (:key element) (:key (meta element)))
+       :key (element-key element)
        :context-set (if use-cached (:context-set vdom) @context-set)
        :context-used (if use-cached (:context-used vdom) @context-used)
        :resolved-context-values (if use-cached
