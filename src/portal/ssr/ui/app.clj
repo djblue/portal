@@ -14,6 +14,7 @@
    [portal.ui.viewer.color :as color]
    [portal.ui.viewer.date-time :as date-time]
    [portal.ui.viewer.deref :as deref]
+   [portal.ui.viewer.duration :as duration]
    [portal.ui.viewer.exception :as ex]
    [portal.ui.viewer.http :as http]
    [portal.ui.viewer.log :as log]
@@ -406,4 +407,6 @@
          ex/sub-trace-viewer
          source-location/viewer
          date-time/viewer
+         duration/nano
+         duration/ms
          bytes/viewer])
