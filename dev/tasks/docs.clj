@@ -58,7 +58,7 @@
    {:file "portal/ui/viewer/prepl.cljs"
     :examples [d/prepl-data]}
    ::v/ex
-   {:file "portal/ui/viewer/exception.cljs"
+   {:file "portal/ui/viewer/exception.cljc"
     :examples (map Throwable->map
                    [(::d/exception d/platform-data)
                     (::d/user-exception d/platform-data)

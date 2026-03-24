@@ -3,15 +3,16 @@
    [clojure.string :as str]
    [portal.colors :as c]
    [portal.ssr.ui.commands :as commands]
-   [portal.ui.icons :as icons]
    [portal.ssr.ui.inspector :as ins]
    [portal.ssr.ui.react :as react]
-   [portal.ui.select :as select]
    [portal.ssr.ui.state :as state]
+   [portal.ui.icons :as icons]
+   [portal.ui.select :as select]
    [portal.ui.styled :as d]
    [portal.ui.theme :as theme]
    [portal.ui.viewer.date-time :as date-time]
    [portal.ui.viewer.deref :as deref]
+   [portal.ui.viewer.exception :as ex]
    [portal.ui.viewer.log :as log]
    [portal.ui.viewer.source-location :as source-location]))
 
@@ -392,8 +393,11 @@
       [inspect-1-history value]]]))
 
 (reset! ins/viewers
-        [deref/viewer
+        [ex/viewer
+         deref/viewer
          log/viewer
          ins/viewer
+         ex/trace-viewer
+         ex/sub-trace-viewer
          source-location/viewer
          date-time/viewer])

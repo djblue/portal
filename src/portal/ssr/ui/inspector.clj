@@ -356,35 +356,37 @@
        [select/with-position {:row 0 :column 0}
         [toggle-bg [inspector value]]]]]]))
 
-(defn toggle-expand [{:keys [context style]}]
-  (let [state     (state/use-state)
-        context*  (use-context)
-        context   (or context context*)
-        theme     (theme/use-theme)
-        color     (get theme (nth theme/order (:depth context)))
-        {:keys [expanded?]} (use-options)]
-    [s/div
-     (merge
-      {:title
-       (if expanded?
-         "Click to collapse value. - SPACE | E"
-         "Click to expand value. - SPACE | E")
-       :style
-       (merge
-        {:cursor :pointer
-         :display :flex
-         :align-items :center
-         :color (::c/border theme)}
-        style)
-       :style/hover {:color color}
-       :on-click (fn [e]
-                   #_(set-expanded! not)
-                   (if (:shift-key e)
-                     (state/dispatch! state state/expand-inc-1 context)
-                     (state/dispatch! state state/toggle-expand-1 context)))})
-     (if expanded?
-       [icons/caret-down]
-       [icons/caret-right])]))
+(defn toggle-expand
+  ([]
+   (toggle-expand nil))
+  ([{:keys [context style]}]
+   (let [state     (state/use-state)
+         context*  (use-context)
+         context   (or context context*)
+         theme     (theme/use-theme)
+         color     (get theme (nth theme/order (:depth context)))
+         {:keys [expanded?]} (use-options)]
+     [s/div
+      (merge
+       {:title
+        (if expanded?
+          "Click to collapse value. - SPACE | E"
+          "Click to expand value. - SPACE | E")
+        :style
+        (merge
+         {:cursor :pointer
+          :display :flex
+          :align-items :center
+          :color (::c/border theme)}
+         style)
+        :style/hover {:color color}
+        :on-click (fn [e]
+                    (if (:shift-key e)
+                      (state/dispatch! state state/expand-inc-1 context)
+                      (state/dispatch! state state/toggle-expand-1 context)))})
+      (if expanded?
+        [icons/caret-down]
+        [icons/caret-right])])))
 
 (defmulti inspect* #'get-value-type)
 

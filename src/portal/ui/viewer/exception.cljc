@@ -1,10 +1,12 @@
 (ns ^:no-doc portal.ui.viewer.exception
-  (:require [clojure.spec.alpha :as s]
+  (:require [clojure.main :refer [demunge]]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [portal.colors :as c]
             [portal.ui.filter :as f]
             [portal.ui.icons :as icon]
-            [portal.ui.inspector :as ins]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
@@ -138,8 +140,8 @@
 
 (defn- analyze-trace-item [index trace]
   (let [[class method file line] trace
-        class (cond-> class (string? class) symbol)
-        clj-name (demunge class)
+        class (str class)
+        clj-name (symbol (demunge class))
         clj? (or (and (string? file)
                       (or (str/ends-with? file ".clj")
                           (str/ends-with? file ".cljs")
