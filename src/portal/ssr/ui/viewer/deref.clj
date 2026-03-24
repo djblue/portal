@@ -5,7 +5,7 @@
             [portal.ssr.ui.react :as react]
             [portal.ui.select :as select]
             [portal.ssr.ui.state :refer [atom?]]
-            [portal.ssr.ui.styled :as d]
+            [portal.ui.styled :as d]
             [portal.ssr.ui.theme :as theme]))
 
 (defn- toggle-watch [value' active? set-active!]

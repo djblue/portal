@@ -4,7 +4,7 @@
             [portal.ssr.ui.inspector :as ins]
             [portal.ssr.ui.state :as state]
             ;; [portal.ui.rpc :as rpc]
-            [portal.ssr.ui.styled :as d]
+            [portal.ui.styled :as d]
             [portal.ssr.ui.theme :as theme]))
 
 ;;; :spec

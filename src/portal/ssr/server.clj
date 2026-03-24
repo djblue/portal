@@ -11,7 +11,7 @@
    [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
    [portal.ui.select :as select]
-   [portal.ssr.ui.styled :as d]
+   [portal.ui.styled :as d]
    [portal.ssr.ui.uuid :refer [parse-uuid]]))
 
 (def ^:dynamic *handler* nil)

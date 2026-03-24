@@ -13,7 +13,7 @@
             ;; [portal.ui.parsers :as p]
             [portal.ssr.ui.react :as react]
             [portal.ssr.ui.state :as state]
-            [portal.ssr.ui.styled :as s]
+            [portal.ui.styled :as s]
             [portal.ssr.ui.theme :as theme]
             ;; [reagent.core :as r]
             )
