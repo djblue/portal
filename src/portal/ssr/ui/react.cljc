@@ -113,14 +113,19 @@
       (:key (meta element))))
 
 (defn- render-list [vdom state context elements]
-  (let [vdom-children
+  (let [prev-vdom-index (:vdom-index vdom)
+        next-vdom-index (volatile! {})
+        vdom-children
         (for [element elements
-              :let [k (element-key element)
-                    vdom (some
-                          (fn [vdom] (when (= k (:key vdom)) vdom))
-                          (:vdom-children vdom))]]
-          (assoc (render* vdom state context element) :key k))]
+              :let [k    (element-key element)
+                    vdom (-> (some-> prev-vdom-index deref (get k))
+                             (render* state context element)
+                             (assoc :key k))]]
+          (do
+            (vswap! next-vdom-index assoc k vdom)
+            vdom))]
     {:element elements
+     :vdom-index next-vdom-index
      :vdom-children vdom-children
      :output (map :output vdom-children)}))
 
