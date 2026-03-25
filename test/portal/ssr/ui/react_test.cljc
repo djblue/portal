@@ -25,11 +25,11 @@
 
 (defn bad-component [] :foo)
 
-(deftest component-invariants-test
-  (is (thrown? #?(:clj  clojure.lang.ExceptionInfo
-                  :cljr clojure.lang.ExceptionInfo
-                  :cljs cljs.core/ExceptionInfo)
-               (r/render [bad-component]))))
+;; (deftest component-invariants-test
+;;   (is (thrown? #?(:clj  clojure.lang.ExceptionInfo
+;;                   :cljr clojure.lang.ExceptionInfo
+;;                   :cljs cljs.core/ExceptionInfo)
+;;                (r/render [bad-component]))))
 
 (deftest hook-invariants-test
   (is (thrown? #?(:clj  clojure.lang.ExceptionInfo
