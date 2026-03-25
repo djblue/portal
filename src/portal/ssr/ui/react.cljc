@@ -263,13 +263,13 @@
                   {}
                   (first args))
           children (cond-> args (map? (first args)) (rest))
-          vdom-children (vec
-                         (map-indexed
-                          (fn [index element]
-                            (-> (:vdom-children vdom)
-                                (get index)
-                                (render* state context element)))
-                          children))
+          vdom-children (into []
+                              (map-indexed
+                               (fn [index element]
+                                 (-> (:vdom-children vdom)
+                                     (get index)
+                                     (render* state context element))))
+                              children)
           output (with-meta
                    (into [tag attrs] (map :output) vdom-children)
                    (assoc (meta element) ::id id))]
@@ -311,39 +311,3 @@
   ([vdom element]
    (let [{:keys [output] :as vdom'} (render* vdom (:state vdom) nil element)]
      (with-meta output (assoc vdom' :state (:state vdom))))))
-
-;; (defn- diff-list [ops a b])
-
-;; (defn- diff-attributes [ops a b] ops)
-
-;; (defn- diff-children [ops a b] ops)
-
-;; (defn- diff-node [ops a b]
-;;   (conj ops {:remove a} {:append b}))
-
-;; (defn diff
-;;   ([a b]
-;;    (diff [] a b))
-;;   ([ops a b]
-;;    (cond
-;;      ;; elements type did not change
-;;      (and (vector? a)
-;;           (vector? b)
-;;           (= (first a) (first b)))
-;;      (let [[a-props & a-children] (rest a)
-;;            [b-props & b-children] (rest b)]
-;;        (-> ops
-;;            (diff-attributes a-props b-props)
-;;            (diff-children a-children b-children)))
-
-;;      ;; diff lists based on children
-;;      (and (list? a) (list? b))
-;;      (diff-list ops a b)
-
-;;      (not= a b)
-;;      (diff-node ops a b)
-
-;;      :else ops)))
-
-;; (diff [:div {} "hello, "]
-;;       [:div {} "hello, world"])
