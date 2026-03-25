@@ -59,8 +59,8 @@
        (generate-class selector style)))
 
 (defn attrs->css [attrs]
-  (reduce
-   (fn [attrs selector]
+  (reduce-kv
+   (fn [attrs selector _]
      (if-not (contains? attrs selector)
        attrs
        (let [style (get attrs selector)
@@ -69,7 +69,7 @@
              (dissoc selector)
              (update :class str " " class)))))
    attrs
-   (keys selectors)))
+   selectors))
 
 (defn styled [component attrs & children]
   (into [component
