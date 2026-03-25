@@ -38,7 +38,7 @@
   ([b]
    (relative-time (date) b))
   ([a b]
-   (let [diff (- (inst-ms b) (inst-ms a))
+   (let [diff (long (- (inst-ms b) (inst-ms a)))
          ms   (Math/abs diff)]
      (some
       (fn [[unit scale]]
