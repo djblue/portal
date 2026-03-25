@@ -267,14 +267,13 @@
 
 (defn- render* [vdom state context element]
   (cond
-    ;;  (= (:element vdom) element)
-    ;;  vdom
-
     (nil? element)
     (render-unmount vdom state element)
 
     (string? element)
-    {:element element :output element}
+    (if (= (:element vdom) element)
+      vdom
+      {:element element :output element})
 
     (or (list? element) (seq? element))
     (render-list vdom state context element)
@@ -286,7 +285,9 @@
     (render-hiccup vdom state context element)
 
     :else
-    {:element element :output element}))
+    (if (= (:element vdom) element)
+      vdom
+      {:element element :output element})))
 
 (defn render
   ([element]
