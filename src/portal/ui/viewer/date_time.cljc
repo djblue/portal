@@ -15,7 +15,7 @@
 
 (defn parse ^java.util.Date [date]
   #?(:clj (cond
-            (inst? date) date
+            (instance? java.util.Date date) date
 
             ;; unix timestamps
             (number? date)
