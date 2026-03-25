@@ -214,6 +214,7 @@
    (fn [resolve reject]
      (when-let [chan (js/WebSocket.
                       (str protocol "//" host (when port (str ":" port)) path "?" session))]
+       (set! (.-binaryType chan) "arraybuffer")
        (set! (.-onmessage chan) #(on-message (.-data %)))
        (set! (.-onerror chan)   (fn [e]
                                   (reject e)))
@@ -248,11 +249,15 @@
         :session  (get-session)
         :on-message
         (fn [data]
-          (if-not (.startsWith ^js/String data "{")
-            (on-message {:op "on-render" :html data})
-            (-> (.parse js/JSON data)
-                (js->clj :keywordize-keys true)
-                (on-message))))})
+          (if (instance? js/ArrayBuffer data)
+            (on-message
+             {:op "on-render"
+              :html (.decode (js/TextDecoder.) data)})
+            (if-not (.startsWith ^js/String data "{")
+              (on-message {:op "on-render" :html data})
+              (-> (.parse js/JSON data)
+                  (js->clj :keywordize-keys true)
+                  (on-message)))))})
       (.then on-connect)))
 
 (main!)

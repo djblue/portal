@@ -124,8 +124,12 @@
       (.position buffer))
     (catch Exception e (tap> e))))
 
+(defn html-str [hiccup]
+  (with-out-str (html* print hiccup)))
+
 (comment
   (let [buffer (byte-array 1024)
         n (html! buffer [:div {:hello "world"}])]
     (->input-stream buffer n))
+  (html-str [:div {}])
   comment)

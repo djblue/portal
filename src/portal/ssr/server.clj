@@ -8,106 +8,13 @@
    [portal.runtime :as rt]
    [portal.runtime.jvm.server :refer [enable-cors route]]
    [portal.shortcuts :as shortcuts]
+   [portal.ssr.hiccup :as hiccup]
    [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
+   [portal.ssr.ui.uuid :refer [parse-uuid]]
    [portal.ui.select :as select]
-   [portal.ui.styled :as d]
-   [portal.ssr.ui.uuid :refer [parse-uuid]]))
-
-(def ^:dynamic *handler* nil)
-
-(def ^:private handler-attributes
-  #{:on-click
-    :on-double-click
-    :on-mouse-up
-    :on-mouse-down
-    :on-mouse-over
-    :on-mouse-enter
-    :on-mouse-leave
-    :on-focus
-    :on-change
-    :on-visible
-    :on-key-down})
-
-(defn- extract-handlers! [attrs]
-  (doseq [attr handler-attributes
-          :let [handler (get attrs attr)]
-          :when handler]
-    (swap! *handler* assoc-in [(:id attrs) attr] handler)))
-
-(defn ->attrs [m]
-  (reduce-kv
-   (fn [out k v]
-     (cond
-       (= :disabled k)
-       (if-not v
-         out
-         (str out " disabled"))
-
-       (= :auto-focus k)
-       (str out " autofocus")
-
-       (handler-attributes k)
-       (str out " data-" (name k))
-
-       :else
-       (cond-> out
-         (some? v)
-         (str " " (name k) "=" (pr-str (str v))))))
-   ""
-   m))
-
-(defn- display-none? [hiccup]
-  (and (vector? hiccup)
-       (map? (second hiccup))
-       (= :none (get-in hiccup [1 :style :display]))))
-
-(def ^:private select-closing?
-  #{:area
-    :base
-    :br
-    :col
-    :embed
-    :hr
-    :img
-    :input
-    :link
-    :meta
-    :param
-    :source
-    :track
-    :wbr})
-
-(defn html [hiccup]
-  (cond
-    (or (list? hiccup) (seq? hiccup))
-    (str/join "" (map html hiccup))
-
-    ;; Avoid sending html to client for invisible elements
-    (display-none? hiccup) ""
-
-    (and (vector? hiccup) (keyword? (first hiccup)))
-    (let [[tag & args] hiccup
-          attrs (when (map? (first args)) (first args))
-          children (cond-> args (map? (first args)) rest)
-          element-id (::react/id (meta hiccup))
-          attrs (cond-> attrs element-id (assoc :id element-id))]
-      (extract-handlers! attrs)
-      (if (= :<> tag)
-        (str/join "" (map html children))
-        (if (select-closing? tag)
-          (str "<"
-               (name tag)
-               (-> attrs d/attrs->css ->attrs)
-               " />")
-          (str "<"
-               (name tag)
-               (-> attrs d/attrs->css ->attrs)
-               ">"
-               (str/join "" (map html children))
-               "</" (name tag) ">"))))
-
-    :else hiccup))
+   [portal.ui.styled :as d])
+  (:import [java.io ByteArrayInputStream]))
 
 (defn on-message [{:keys [handlers]} {:keys [id] :as event}]
   (let [op (keyword (:op event))]
@@ -166,9 +73,12 @@
   ([message]
    (send! rt/*session* message))
   ([{:keys [channel]} message]
-   (server/send! channel (cond-> message (not (string? message)) (json/write-str)))))
+   (if (or (bytes? message)
+           (instance? ByteArrayInputStream message))
+     (server/send! channel message)
+     (server/send! channel (cond-> message (not (string? message)) (json/write-str))))))
 
-(defn render-app [{:keys [handlers selection-index] :as session}
+(defn render-app [{:keys [handlers selection-index output-buffer] :as session}
                   {:keys [hiccup styles app-state] :as render-state}]
   (binding [rt/*session* session
             select/*selection-index* selection-index]
@@ -182,13 +92,14 @@
                 (react/render [app/app session])
                 (react/render (meta hiccup) [app/app session]))]
           (when-not (= hiccup hiccup')
-            (reset! handlers {})
-            (let [html (binding [d/*cache* cache
-                                 *handler* handlers]
-                         (html hiccup'))]
+            (vreset! handlers {})
+            (let [written-bytes
+                  (binding [d/*cache* cache
+                            hiccup/*handlers* handlers]
+                    (hiccup/html! output-buffer hiccup'))]
               (when (not (identical? styles @cache))
                 (send! session {:op "on-styles" :append-styles (->style (apply dissoc @cache (keys styles)))}))
-              (send! session html)))
+              (send! session (hiccup/->input-stream output-buffer written-bytes))))
           {:hiccup hiccup' :styles @cache :app-state app-state'})))))
 
 (defn on-open [session]
@@ -221,9 +132,10 @@
                        (vs-code? request))
                   (assoc :theme :portal.colors/vs-code-embedded))))
       (assoc :state (atom {})
-             :handlers (atom {})
+             :handlers (volatile! {})
              :event-queue (atom [])
-             :selection-index (atom {}))))
+             :selection-index (atom {})
+             :output-buffer (byte-array (* 5 1024 1024)))))
 
 (defmethod route [:get "/ssr"] [request]
   (let [session (atom (open-session request))]
