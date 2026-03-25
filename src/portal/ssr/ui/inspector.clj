@@ -29,34 +29,12 @@
 (defn viewers-by-name [viewers]
   (into {} (map (juxt :name identity) viewers)))
 
-(defn- scalar? [value]
-  (or (nil? value)
-      (boolean? value)
-      (number? value)
-      (keyword? value)
-      (symbol? value)
-      (string? value)
-      ;; (long? value)
-      ;; (url? value)
-      (bigint? value)
-      (char? value)
-      (ratio? value)
-      (inst? value)
-      (uuid? value)))
-
-(defn- scalar-seq? [value]
-  (and (coll? value)
-       (seq value)
-       (every? scalar? value)))
-
 (defn- get-compatible-viewers-1 [viewers {:keys [value] :as context}]
   (let [by-name        (viewers-by-name viewers)
         default-viewer (get by-name
                             (or (get-in (meta context) [:props :portal.viewer/default])
                                 (:portal.viewer/default (meta value))
-                                (:portal.viewer/default context)
-                                (when (scalar-seq? value)
-                                  :portal.viewer/pprint)))
+                                (:portal.viewer/default context)))
         viewers        (cons default-viewer (remove #(= default-viewer %) viewers))]
     (filter #(when-let [pred (:predicate %)]
                (try (pred value)
