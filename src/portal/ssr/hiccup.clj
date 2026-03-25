@@ -51,8 +51,9 @@
        (when (some? v)
          (write! " ")
          (write! (name k))
-         (write! "=")
-         (write! (pr-str (str v))))))
+         (write! "=\"")
+         (write! (str v))
+         (write! "\""))))
    nil
    m))
 
