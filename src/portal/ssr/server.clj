@@ -16,7 +16,7 @@
    [portal.ui.styled :as d])
   (:import [java.io ByteArrayInputStream]))
 
-(defn on-message [{:keys [handlers]} {:keys [id] :as event}]
+(defn- on-message [{:keys [handlers]} {:keys [id] :as event}]
   (let [op (keyword (:op event))]
     (if-let [f (get-in @handlers [(some-> id parse-uuid) op])]
       (f event)
@@ -24,9 +24,25 @@
         (shortcuts/keydown event)
         (tap> [:missing-handler event])))))
 
-(defn start-render-loop [render]
+(defn- start-profile [session]
+  (when (get-in session [:options :profile?])
+    (try
+      (let [start (requiring-resolve 'clj-async-profiler.core/start)]
+        (start {:event :alloc}))
+      (catch Exception e (tap> (Throwable->map e))))))
+
+(defn- stop-profile [session]
+  (when (get-in session [:options :profile?])
+    (try
+      (let [browse-url (requiring-resolve 'clojure.java.browse/browse-url)
+            stop (requiring-resolve 'clj-async-profiler.core/stop)]
+        (browse-url (stop)))
+      (catch Exception e (tap> (Throwable->map e))))))
+
+(defn- start-render-loop [session render]
   (let [running (atom true)]
     (future
+      (start-profile session)
       (let [budget-time (/ 1000.0 30)]
         (loop [state nil]
           (when @running
@@ -44,11 +60,12 @@
                          (when (< sleep-time 10) (println sleep-time))
                          (Thread/sleep sleep-time))))))))))))
     (fn stop-render-loop []
-      (reset! running false))))
+      (reset! running false)
+      (stop-profile session))))
 
-(defonce render-loops (atom {}))
+(defonce ^:private render-loops (atom {}))
 
-(defn ->style [cache]
+(defn- ->style [cache]
   (persistent!
    (reduce-kv
     (fn [out [selector style] class]
@@ -78,8 +95,8 @@
      (server/send! channel message)
      (server/send! channel (cond-> message (not (string? message)) (json/write-str))))))
 
-(defn render-app [{:keys [handlers selection-index output-buffer] :as session}
-                  {:keys [hiccup styles app-state] :as render-state}]
+(defn- render-app [{:keys [handlers selection-index output-buffer] :as session}
+                   {:keys [hiccup styles app-state] :as render-state}]
   (binding [rt/*session* session
             select/*selection-index* selection-index]
     (process-event-queue! session)
@@ -102,15 +119,15 @@
               (send! session (hiccup/->input-stream output-buffer written-bytes))))
           {:hiccup hiccup' :styles @cache :app-state app-state'})))))
 
-(defn on-open [session]
+(defn- on-open [session]
   (swap! rt/connections assoc (:session-id session) (partial send! session))
   (swap! render-loops assoc (:session-id session)
-         (start-render-loop (partial #'render-app session))))
+         (start-render-loop session (partial #'render-app session))))
 
-(defn on-receive [session message]
+(defn- on-receive [session message]
   (swap! (:event-queue session) conj (json/read-str message :key-fn keyword)))
 
-(defn on-close [session]
+(defn- on-close [session]
   (swap! rt/connections dissoc (:session-id session))
   (when-let [stop-render-loop (get @render-loops (:session-id session))]
     (stop-render-loop)
