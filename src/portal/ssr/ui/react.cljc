@@ -128,7 +128,7 @@
   (when-not (or (nil? output)
                 (string? output)
                 (vector? output))
-    (throw (ex-info "Component must return vector or nil" *debug*)))
+    (throw (ex-info "Component must return vector, string or nil" (assoc *debug* :output output))))
   (cond-> output
     (vector? output)
     (vary-meta assoc ::id id)))
