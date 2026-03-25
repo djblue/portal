@@ -389,7 +389,6 @@
      state
      [theme/with-theme
       theme
-      [icons/mount-stylesheet]
       [container children]]]))
 
 (defn app [session]
