@@ -59,11 +59,10 @@
     :examples [d/prepl-data]}
    ::v/ex
    {:file "portal/ui/viewer/exception.cljc"
-    :examples (map Throwable->map
-                   [(::d/exception d/platform-data)
-                    (::d/user-exception d/platform-data)
-                    (::d/io-exception d/platform-data)
-                    (::d/ex-info d/platform-data)])}
+    :examples [(::d/exception d/platform-data)
+               (::d/user-exception d/platform-data)
+               (::d/io-exception d/platform-data)
+               (::d/ex-info d/platform-data)]}
    ::v/http
    {:file "portal/ui/viewer/http.cljc"
     :examples (concat d/http-requests d/http-responses)}
