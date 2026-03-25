@@ -24,12 +24,12 @@
     :on-visible
     :on-key-down})
 
-(defn- extract-handlers! [attrs]
+(defn- extract-handlers! [id attrs]
   (let [handlers *handlers*]
     (reduce-kv
      (fn [_ attr handler]
        (when (contains? handler-attributes attr)
-         (vswap! handlers assoc-in [(:id attrs) attr] handler)))
+         (vswap! handlers update id assoc attr handler)))
      nil
      attrs)))
 
@@ -87,9 +87,8 @@
       (let [[tag & args] hiccup
             attrs (when (map? (first args)) (first args))
             children (cond-> args (map? (first args)) rest)
-            element-id (::react/id (meta hiccup))
-            attrs (cond-> attrs element-id (assoc :id element-id))]
-        (extract-handlers! attrs)
+            element-id (::react/id (meta hiccup))]
+        (extract-handlers! element-id attrs)
         (if (= :<> tag)
           (doseq [h children] (html* write! h))
           (let [tag-name (name tag)]
@@ -97,12 +96,20 @@
               (do
                 (write! "<")
                 (write! tag-name)
+                (when element-id
+                  (write! " id=\"")
+                  (write! (str element-id))
+                  (write! "\""))
                 (when attrs
                   (attrs! write! (d/attrs->css attrs)))
                 (write! "/>"))
               (do
                 (write! "<")
                 (write! tag-name)
+                (when element-id
+                  (write! " id=\"")
+                  (write! (str element-id))
+                  (write! "\""))
                 (when attrs
                   (attrs! write! (d/attrs->css attrs)))
                 (write! ">")
