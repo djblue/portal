@@ -381,8 +381,8 @@
        (state/get-history current-state)))]))
 
 (defn root [{:keys [options state]} & children]
-  (let [theme (or (:theme options)
-                  (react/use-atom state :theme)
+  (let [theme (or (react/use-atom state :theme)
+                  (:theme options)
                   ::c/nord)]
     [state/with-state
      state
