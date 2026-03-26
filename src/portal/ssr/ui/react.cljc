@@ -24,6 +24,7 @@
 (def ^:private ^:dynamic *id* nil)
 (def ^:private ^:dynamic *state* nil)
 (def ^:private ^:dynamic *effects* nil)
+(def ^:private ^:dynamic *memos* nil)
 (def ^:private ^:dynamic *hook* nil)
 (def ^:private ^:dynamic *element* nil)
 (def ^:private ^:dynamic *context* nil)
@@ -41,13 +42,29 @@
      (throw (ex-info "Must be called during render." {:element *element*})))
    (when-not (fn? f)
      (throw (ex-info "Effect must be function." {:element *element*})))
-   (vswap! *effects* conj {:fn f :deps deps})))
+   (vswap! *effects* conj {:fn f :deps deps})
+   nil))
+
+(defn use-memo
+  [f deps]
+  (when-not *hook*
+    (throw (ex-info "Must be called during render." {:element *element*})))
+  (when-not (fn? f)
+    (throw (ex-info "Memo must be function." {:element *element*})))
+  (let [hook-id (:memo (vswap! *hook* update :memo (fnil inc -1)))
+        memo    (get @*memos* hook-id)]
+    (if (and (some? memo)
+             (= (:deps memo) deps))
+      (:value memo)
+      (let [value (f)]
+        (vswap! *memos* assoc hook-id {:value value :deps deps})
+        value))))
 
 (defn use-state [init-value]
   (when-not *hook*
     (throw (ex-info "Must be called during render." {:element *element*})))
   (let [component-id *id*
-        hook-id (:state (vswap! *hook* update :state (fnil inc 0)))
+        hook-id (:state (vswap! *hook* update :state (fnil inc -1)))
         state-id [component-id hook-id]
         state *state*]
     [(get *component-state* hook-id init-value)
@@ -205,10 +222,12 @@
               effects      (volatile! [])
               context-set  (atom {})
               context-used (volatile! [])
+              memos        (volatile! (:memos vdom []))
               output  (binding [*id*      id
                                 *element*   component
                                 *hook*    (volatile! {})
                                 *state*   state
+                                *memos*   memos
                                 *effects* effects
                                 *component-state* component-state
                                 *context* context
@@ -241,6 +260,7 @@
                              :current-calls current-calls})))
           {:id id
            :key (element-key element)
+           :memos @memos
            :context-set @context-set
            :context-used @context-used
            :resolved-context-values (mapv #(resolve-context-value context %) @context-used)

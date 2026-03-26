@@ -690,8 +690,8 @@
     (try (sort-by first values)
          (catch Exception _e values))))
 
-;; (defn use-sort-map [values]
-;;   (react/use-memo #js [values] (try-sort-map values)))
+(defn use-sort-map [values]
+  (react/use-memo #(try-sort-map values) [values]))
 
 (defn- container-map [child]
   (let [theme (theme/use-theme)]
@@ -722,8 +722,7 @@
 
 (defn- inspect-map-k-v* [map-ns search-text values]
   (let [matcher       (f/match search-text)
-        ;sorted-values (use-sort-map values)
-        sorted-values values]
+        sorted-values (use-sort-map values)]
     ^{:key search-text}
     [container-map
      [l/lazy-seq
