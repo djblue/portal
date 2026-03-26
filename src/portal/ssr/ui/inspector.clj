@@ -899,7 +899,7 @@
   (let [theme    (theme/use-theme)
         selected (:selected (use-options))
         color    (get theme (nth theme/order (:depth context)))
-        transition "all 0.35s ease-in-out"]
+        transition "all 0.35s"]
     [:<>
      [s/div
       {:style
