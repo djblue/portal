@@ -11,6 +11,7 @@
    [portal.ssr.hiccup :as hiccup]
    [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
+   [portal.ssr.ui.state :as state]
    [portal.ssr.ui.uuid :refer [parse-uuid]]
    [portal.ui.select :as select]
    [portal.ui.styled :as d])
@@ -120,6 +121,7 @@
           {:hiccup hiccup' :styles @cache :app-state app-state'})))))
 
 (defn- on-open [session]
+  (add-watch (:state session) :selected #'state/send-selected-values)
   (swap! rt/connections assoc (:session-id session) (partial send! session))
   (swap! render-loops assoc (:session-id session)
          (start-render-loop session (partial #'render-app session))))
@@ -128,6 +130,7 @@
   (swap! (:event-queue session) conj (json/read-str message :key-fn keyword)))
 
 (defn- on-close [session]
+  (remove-watch (:state session) :selected)
   (swap! rt/connections dissoc (:session-id session))
   (when-let [stop-render-loop (get @render-loops (:session-id session))]
     (stop-render-loop)

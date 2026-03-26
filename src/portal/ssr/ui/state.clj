@@ -350,12 +350,10 @@
        :portal/previous-state nil
        :portal/next-state nil)))
 
-(defn- send-selected-values [_ _ _state _state']
-  #_(when (not= (selected-values state)
-                (selected-values state'))
-      (invoke 'portal.runtime/update-selected (selected-values state'))))
-
-(add-watch state :selected #'send-selected-values)
+(defn send-selected-values [_ _ state state']
+  (when (not= (selected-values state)
+              (selected-values state'))
+    (invoke 'portal.runtime/update-selected (selected-values state'))))
 
 (defn nav [state context]
   (let [{:keys [collection key value]} context
