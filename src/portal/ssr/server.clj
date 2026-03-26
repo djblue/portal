@@ -49,7 +49,6 @@
   (let [total-time (- (System/currentTimeMillis) start)]
     (when (< total-time budget-ms)
       (let [sleep-time (long (- budget-ms total-time))]
-        (when (< sleep-time 10) (println sleep-time))
         (Thread/sleep sleep-time)))))
 
 (defn- start-render-loop [{:keys [last-ping channel] :as session} render]
