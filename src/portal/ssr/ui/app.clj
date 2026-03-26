@@ -414,14 +414,14 @@
          ins/viewer
          ex/trace-viewer
          ex/sub-trace-viewer
-         source-location/viewer
-         date-time/viewer
          duration/nano
          duration/ms
          bytes/viewer
          table/viewer
-         json/viewer
          tree/viewer
          text/viewer
+         json/viewer
          edn/viewer
-         relative-time/viewer])
+         date-time/viewer
+         relative-time/viewer
+         source-location/viewer])
