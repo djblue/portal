@@ -17,13 +17,15 @@
    [portal.ui.styled :as d])
   (:import [java.io ByteArrayInputStream]))
 
-(defn- on-message [{:keys [handlers]} {:keys [id] :as event}]
+(defn- on-message [{:keys [handlers last-ping]} {:keys [id] :as event}]
   (let [op (keyword (:op event))]
-    (if-let [f (get-in @handlers [(some-> id parse-uuid) op])]
-      (f event)
-      (if (= :on-key-down op)
-        (shortcuts/keydown event)
-        (tap> [:missing-handler event])))))
+    (case op
+      :ping (reset! last-ping (System/currentTimeMillis))
+      :on-key-down (shortcuts/keydown event)
+      (if-let [f (get-in @handlers [(some-> id parse-uuid) op])]
+        (f event)
+        (when-not (= :on-visible op)
+          (tap> [:missing-handler event]))))))
 
 (defn- start-profile [session]
   (when (get-in session [:options :profile?])
@@ -40,26 +42,33 @@
         (browse-url (stop)))
       (catch Exception e (tap> (Throwable->map e))))))
 
-(defn- start-render-loop [session render]
+(def ^:private timeout-ms 30000)
+(def ^:private budget-ms (/ 1000.0 30))
+
+(defn- sleep [start]
+  (let [total-time (- (System/currentTimeMillis) start)]
+    (when (< total-time budget-ms)
+      (let [sleep-time (long (- budget-ms total-time))]
+        (when (< sleep-time 10) (println sleep-time))
+        (Thread/sleep sleep-time)))))
+
+(defn- start-render-loop [{:keys [last-ping channel] :as session} render]
   (let [running (atom true)]
     (future
       (start-profile session)
-      (let [budget-time (/ 1000.0 30)]
-        (loop [state nil]
-          (when @running
-            (recur
-             (let [start (System/currentTimeMillis)]
+      (loop [state nil]
+        (when @running
+          (recur
+           (let [start (System/currentTimeMillis)]
+             (if (< timeout-ms (- start @last-ping))
+               (server/close channel)
                (try
                  (render state)
                  (catch Exception e
-                   (reset! running false)
-                   (tap> [state e]))
+                   (tap> [state e])
+                   (reset! running false))
                  (finally
-                   (let [total-time (- (System/currentTimeMillis) start)]
-                     (when (< total-time budget-time)
-                       (let [sleep-time (long (- budget-time total-time))]
-                         (when (< sleep-time 10) (println sleep-time))
-                         (Thread/sleep sleep-time))))))))))))
+                   (sleep start)))))))))
     (fn stop-render-loop []
       (reset! running false)
       (stop-profile session))))
@@ -104,21 +113,21 @@
     (let [app-state' (some-> hiccup meta :state deref)]
       (if (and (some? app-state) (= app-state app-state'))
         render-state
-        (let [cache (atom styles)
-              hiccup'
-              (if-not hiccup
-                (react/render [app/app session])
-                (react/render (meta hiccup) [app/app session]))]
-          (when-not (= hiccup hiccup')
-            (vreset! handlers {})
-            (let [written-bytes
-                  (binding [d/*cache* cache
-                            hiccup/*handlers* handlers]
-                    (hiccup/html! output-buffer hiccup'))]
+        (let [cache (atom styles)]
+          (binding [d/*cache* cache]
+            (let [hiccup'
+                  (if-not hiccup
+                    (react/render [app/app session])
+                    (react/render (meta hiccup) [app/app session]))]
               (when (not (identical? styles @cache))
                 (send! session {:op "on-styles" :append-styles (->style (apply dissoc @cache (keys styles)))}))
-              (send! session (hiccup/->input-stream output-buffer written-bytes))))
-          {:hiccup hiccup' :styles @cache :app-state app-state'})))))
+              (when-not (= hiccup hiccup')
+                (vreset! handlers {})
+                (let [written-bytes
+                      (binding [hiccup/*handlers* handlers]
+                        (hiccup/html! output-buffer hiccup'))]
+                  (send! session (hiccup/->input-stream output-buffer written-bytes))))
+              {:hiccup hiccup' :styles @cache :app-state app-state'})))))))
 
 (defn- on-open [session]
   (add-watch (:state session) :selected #'state/send-selected-values)
@@ -141,6 +150,16 @@
           (get-in [:headers "origin"])
           (str/starts-with? "vscode-webview://")))
 
+(defn close [session-id]
+  (when-let [send! (get @rt/connections session-id)]
+    (send! {:op "on-close"})))
+
+(defn clear [session-id]
+  (if-let [value (get-in @rt/sessions [session-id :options :value])]
+    (when (instance? clojure.lang.Atom value)
+      (swap! value empty))
+    (swap! @#'rt/tap-list empty)))
+
 (defn- open-session [{:keys [session] :as request}]
   (-> session
       (update :options
@@ -155,6 +174,7 @@
              :handlers (volatile! {})
              :event-queue (atom [])
              :selection-index (atom {})
+             :last-ping (atom (System/currentTimeMillis))
              :output-buffer (byte-array (* 5 1024 1024)))))
 
 (defmethod route [:get "/ssr"] [request]
@@ -197,8 +217,13 @@
 ;; [x] port more viewers
 ;; [x] fix component with multiple handlers of the same type
 ;; [ ] simplify viewer dispatch
-;; [ ] figure out how to collapse ssr module back into existing code
+;; [x] figure out how to collapse ssr module back into existing code
 ;; [x] fix deref pause not working sometimes
-;; [ ] fix :launcher :vs-code dependency on portal.runtime.index
-;; [ ] profile / optimize rendeing perf
-;; [ ] support portal apis for (deref, selected, ...) :ssr sessions
+;; [x] fix :launcher :vs-code dependency on portal.runtime.index
+;; [x] profile / optimize rendeing perf
+;; [x] portal.api/sessions
+;; [x] portal.api/clear
+;; [x] portal.api/close
+;; [x] portal.api/selected
+;; [ ] portal.api/eval-str
+;; [x] fix remote vs code websocket never disconnecting issue

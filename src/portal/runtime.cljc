@@ -35,11 +35,11 @@
 (defonce connections (atom {}))
 (defonce pending-requests (atom {}))
 
-(defn active-sessions []
-  (seq
-   (for [session-id (keys @connections)
-         :when (not= :ssr (get-in @sessions [session-id :options :mode]))]
-     session-id)))
+(defn active-sessions [] (seq (keys @connections)))
+
+(defn session-mode [session-id]
+  (let [mode (get-in @sessions [session-id :options :mode])]
+    (if (= :dev mode) :rpc mode)))
 
 (defn cleanup-sessions []
   (swap! sessions select-keys (keys @connections)))

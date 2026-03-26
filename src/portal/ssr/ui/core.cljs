@@ -4,7 +4,10 @@
 
 (require '["Idiomorph" :as i])
 
-(defn webcomponent! [name {:keys [on-connect on-disconnect]}]
+(defn webcomponent! [name {:keys [on-connect
+                                  on-disconnect
+                                  on-attribute-changed
+                                  observed-attributes]}]
   (let [component
         (fn component []
           (let [e (.construct js/Reflect js/HTMLElement #js [] component)]
@@ -15,11 +18,21 @@
                    #js {:connectedCallback
                         #js {:configurable true
                              :value        (fn []
-                                             (this-as this (on-connect this)))}
+                                             (when on-connect
+                                               (this-as this (on-connect this))))}
                         :disconnectedCallback
                         #js {:configurable true
                              :value        (fn []
-                                             (this-as this (on-disconnect this)))}}))
+                                             (when on-disconnect
+                                               (this-as this (on-disconnect this))))}
+                        :attributeChangedCallback
+                        #js {:configurable true
+                             :value        (fn [attr old-val new-val]
+                                             (when on-attribute-changed
+                                               (this-as this (on-attribute-changed this attr old-val new-val))))}}))
+    (when observed-attributes
+      (.defineProperty js/Object component "observedAttributes"
+                       #js {:get (fn [] (clj->js observed-attributes))}))
     (js/window.customElements.define name component)
     component))
 
@@ -76,8 +89,37 @@
      (find-handler-1 el handler))
    (parent-elements el)))
 
+(defonce ^:private vs-code-api
+  (when (exists? js/acquireVsCodeApi)
+    (js/acquireVsCodeApi)))
+
+(defn- post-message! [event]
+  (let [message (.stringify js/JSON (clj->js event))]
+    (if vs-code-api
+      (.postMessage vs-code-api message "*")
+      (.postMessage js/window.parent message "*"))))
+
+(defmethod on-message "on-close" [_]
+  (post-message! {:type :close})
+  (.close js/window))
+
+(defn set-header [header]
+  (doseq [el (.querySelectorAll js/document "meta[name=theme-color]")]
+    (.setAttribute el "content" header))
+  (doseq [timeout (range 0 1000 250)]
+    (js/setTimeout
+     (fn []
+       (post-message! {:type :set-theme :color ""})
+       (post-message! {:type :set-theme :color header}))
+     timeout)))
+
 (defn on-connect [ws]
+  (js/setInterval #(.send ^js ws (.stringify js/JSON #js {:op "ping"})) 15000)
   (let [root (.getElementById js/document "root")]
+    (webcomponent!
+     "set-theme"
+     {:observed-attributes [:header]
+      :on-attribute-changed (fn [_ _ _ header] (set-header header))})
     (webcomponent!
      "visible-sensor"
      {:on-connect

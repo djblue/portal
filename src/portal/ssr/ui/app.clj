@@ -357,7 +357,8 @@
         :height "100vh"
         :width "100vw"}}
       [styles]
-      [scrollbars]]
+      [scrollbars]
+      [:set-theme {:header (::c/background2 theme)}]]
      children)))
 
 (defn- inspect-1-history [default-value]
