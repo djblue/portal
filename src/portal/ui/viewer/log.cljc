@@ -1,6 +1,5 @@
 (ns ^:no-doc portal.ui.viewer.log
   (:require [clojure.spec.alpha :as s]
-            #?(:clj [clojure.string :as str])
             [portal.colors :as c]
             [portal.resources :refer [inline]]
             [portal.ui.filter :as-alias f]
@@ -12,38 +11,6 @@
             [portal.ui.theme :as theme]
             [portal.ui.viewer.date-time :as date-time]
             [portal.ui.viewer.source-location :as src]))
-
-(defn- parse [xml-string]
-  #?(:clj  xml-string
-     :cljs (let [parser (js/DOMParser.)
-                 dom    (.parseFromString parser xml-string "text/xml")]
-             (aget (.getElementsByTagName dom "svg") 0))))
-
-(defn- stringify [dom]
-  #?(:clj  dom
-     :cljs (.serializeToString (js/XMLSerializer.) dom)))
-
-(defn- resolve-color [color]
-  #?(:clj  color
-     :cljs (if-let [[_ var] (re-matches #"var\((.*)\)" color)]
-             (-> js/document
-                 .-documentElement
-                 js/getComputedStyle
-                 (.getPropertyValue var))
-             color)))
-
-(defn- theme-svg [svg color]
-  #?(:clj (let [color (resolve-color color)]
-            (-> svg
-                (str/replace #"fill=\"[^\"]+\"" (str "fill=\"" color "\""))
-                (str/replace #"stroke=\"[^\"]+\"" (str "stroke=\"" color "\""))))
-     :cljs (do
-             (let [color (resolve-color color)]
-               (doseq [el (.querySelectorAll svg "[fill]")]
-                 (.setAttribute el "fill" color))
-               (doseq [el (.querySelectorAll svg "[stroke]")]
-                 (.setAttribute el "stroke" color)))
-             svg)))
 
 (def ^:private runtime->logo
   {:clj     {:color ::c/package
@@ -82,15 +49,19 @@
       value
       (get theme (get-in runtime->logo [value :color] ::c/text))]))
   ([value color]
-   (let [{:keys [icon title]} (runtime->logo value)]
+   (let [{:keys [icon title]} (runtime->logo value)
+         mask (str "url(\"data:image/svg+xml;base64," (btoa icon) "\")")]
      (when icon
-       [d/img
+       [d/div
         {:title title
          :style
-         {:height 22 :width 22}
-         :src (str
-               "data:image/svg+xml;base64,"
-               (-> icon parse (theme-svg color) stringify btoa))}]))))
+         {:height 22
+          :width 22
+          :background-color color
+          :mask-image mask
+          :mask-size "contain"
+          :mask-repeat "no-repeat"
+          :mask-position "center"}}]))))
 
 ;;; :spec
 (def ^:private levels
