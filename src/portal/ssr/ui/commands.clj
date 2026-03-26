@@ -156,7 +156,7 @@
           "tab"            (set-active! #(mod (inc %) n))
           "a"       (on-toggle)
           "i"       (on-invert)
-          " "       (on-select (nth options active))
+          " "       (on-select (nth options active nil))
           "enter"   (on-done selected)
           "escape"  (on-close)
 
@@ -172,7 +172,7 @@
        "Press "
        [:span
         {:style    style
-         :on-click (fn [_] (on-select (nth options active)))}
+         :on-click (fn [_] (on-select (nth options active nil)))}
         "space"]
        " to select, "
        [:span
@@ -366,7 +366,7 @@
             #{"shift" "tab"} (set-active! #(mod (dec %) n))
             "arrowdown"      (set-active! #(mod (inc %) n))
             "tab"            (set-active! #(mod (inc %) n))
-            "enter"          (on-select (nth options active))
+            "enter"          (on-select (nth options active nil))
             "escape"         (on-close)
             nil)
            (shortcuts/matched! log))
