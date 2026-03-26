@@ -281,6 +281,15 @@
        :vdom-children vdom-children
        :hiccup-only-tree? (hiccup-only-tree? element)})))
 
+(def ^:private re-escape #"[&<>\"]")
+
+(defn- needs-escape? [^String s] (re-find re-escape s))
+
+(defn- escape-html [s]
+  (cond-> s
+    (needs-escape? s)
+    (str/escape {\& "&amp;" \< "&lt;" \> "&gt;" \" "&quot;"})))
+
 (defn- render* [vdom state context element]
   (cond
     (nil? element)
@@ -289,7 +298,10 @@
     (string? element)
     (if (= (:element vdom) element)
       vdom
-      {:element element :output element})
+      {:element element
+       :output (cond-> element
+                 (needs-escape?  element)
+                 (escape-html))})
 
     (or (list? element) (seq? element))
     (render-list vdom state context element)
@@ -303,7 +315,7 @@
     :else
     (if (= (:element vdom) element)
       vdom
-      {:element element :output element})))
+      {:element element :output (str element)})))
 
 (defn render
   ([element]
