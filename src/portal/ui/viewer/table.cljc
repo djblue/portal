@@ -2,23 +2,24 @@
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.filter :as f]
-            [portal.ui.inspector :as ins]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.lazy :as l]
             [portal.ui.react :as react]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]
-            [reagent.core :as r]))
+            [portal.ui.theme :as theme]))
 
 (defonce ^:private hover (react/create-context nil))
 
 (defn- with-hover [& children]
-  (r/with-let [value (r/atom nil)]
+  (let [value (atom nil)]
     (apply react/provider hover value children)))
 
 (defn- use-hover [] (react/use-context hover))
 
-(defn- hover? [hover selector value] (= (selector @hover) value))
+(defn- use-hover? [hover selector value]
+  (react/use-atom hover #(= (selector %) value)))
 
 (defn- table [& children]
   (let [theme   (theme/use-theme)
@@ -38,77 +39,89 @@
          (assoc :overflow :auto))}]
      children)))
 
-(defn- cell [row column child]
-  (let [background (ins/get-background)
-        theme      (theme/use-theme)
-        width      2
-        border     (ins/get-background2)
-        hover      (use-hover)]
-    [d/div
-     {:on-mouse-over
-      (fn []
-        (reset! hover [row column]))
-      :style
-      {:background  background
-       :grid-row    (str (inc row))
-       :grid-column (str (inc column))}}
+(defn- cell
+  ([row]
+   (cell row nil nil))
+  ([row column]
+   (cell row column nil))
+  ([row column child]
+   (let [background (ins/get-background)
+         theme      (theme/use-theme)
+         width      2
+         border     (ins/get-background2)
+         hover      (use-hover)]
      [d/div
-      {:style (cond->
-               {:height     "100%"
-                :width      "100%"
-                :box-sizing :border-box
-                :padding    (:padding theme)}
-                (nil? child)
-                (assoc
-                 :background
-                 (list
-                  'repeating-linear-gradient
-                  "45deg"
-                  [border 0]
-                  [border width]
-                  [background width]
-                  [background (* 3 width)])))
-       :style/hover
-       {:background (when child (str (::c/border theme) "55"))}}
-      [select/with-position {:row row :column column} child]]]))
+      {:on-mouse-over
+       (fn [_]
+         (reset! hover [row column]))
+       :style
+       {:background  background
+        :grid-row    (str (inc row))
+        :grid-column (str (inc column))}}
+      [d/div
+       {:style (cond->
+                {:height     "100%"
+                 :width      "100%"
+                 :box-sizing :border-box
+                 :padding    (:padding theme)}
+                 (nil? child)
+                 (assoc
+                  :background
+                  (list
+                   'repeating-linear-gradient
+                   "45deg"
+                   [border 0]
+                   [border width]
+                   [background width]
+                   [background (* 3 width)])))
+        :style/hover
+        {:background (when child (str (::c/border theme) "55"))}}
+       [select/with-position {:row row :column column} child]]])))
 
-(defn- special [row column child span]
-  (let [background (ins/get-background)
-        theme      (theme/use-theme)
-        hover      (use-hover)]
-    [d/div
-     {:style
-      (merge
-       (cond
-         (= 0 row column)
-         {:z-index 3
-          :top 0
-          :left 0
-          :border-bottom [3 :solid (::c/border theme)]
-          :border-right [3 :solid (::c/border theme)]}
-         (zero? row)
-         {:z-index 2
-          :top 0
-          :text-align :center
-          :border-bottom [3 :solid (::c/border theme)]}
-         (zero? column)
-         {:z-index 1
-          :left 0
-          :text-align :right
-          :border-right [3 :solid (::c/border theme)]})
-       (cond
-         @(r/track hover? hover first row)
-         {:border-right [3 :solid (::c/boolean theme)]}
-         @(r/track hover? hover second column)
-         {:border-bottom [3 :solid (::c/boolean theme)]})
-       {:position :sticky
-        :background background
-        :box-sizing :border-box
-        :padding (:padding theme)
-        :grid-row (str (inc row)
-                       (when span (str " / span " span)))
-        :grid-column (str (inc column))})}
-     [select/with-position {:row row :column column} child]]))
+(defn- special
+  ([row column]
+   (special row column nil nil))
+  ([row column child]
+   (special row column child nil))
+  ([row column child span]
+   (let [background (ins/get-background)
+         theme      (theme/use-theme)
+         hover      (use-hover)
+         row-hover? (use-hover? hover first row)
+         column-hover? (use-hover? hover second column)]
+     [d/div
+      {:style
+       (merge
+        (cond
+          (= 0 row column)
+          {:z-index 3
+           :top 0
+           :left 0
+           :border-bottom [3 :solid (::c/border theme)]
+           :border-right [3 :solid (::c/border theme)]}
+          (zero? row)
+          {:z-index 2
+           :top 0
+           :text-align :center
+           :border-bottom [3 :solid (::c/border theme)]}
+          (zero? column)
+          {:z-index 1
+           :left 0
+           :text-align :right
+           :border-right [3 :solid (::c/border theme)]})
+        (cond
+          row-hover?
+          {:border-right [3 :solid (::c/boolean theme)]}
+          column-hover?
+          {:border-bottom [3 :solid (::c/boolean theme)]})
+        {:position :sticky
+         :background background
+         :box-sizing :border-box
+         :padding (:padding theme)
+         :grid-row (str (inc row)
+                        (when span (str " / span " span)))
+         :grid-column (str (inc column))})}
+      [select/with-position {:row row :column column} child]])))
 
 (defn- columns [cols]
   [:<>
@@ -139,18 +152,19 @@
              [special (inc row-index) 0 [ins/inspector row]]]
             [ins/toggle-bg
              [ins/with-key row
-              (map-indexed
-               (fn [col-index column]
-                 (let [coll (get values row)]
-                   ^{:key col-index}
-                   [ins/with-collection coll
-                    [ins/with-key column
-                     [cell
-                      (inc row-index)
-                      (inc col-index)
-                      (when (contains? coll column)
-                        [ins/inspector (ins/get-props coll column) (get coll column)])]]]))
-               cols)]]]))
+              [:<>
+               (map-indexed
+                (fn [col-index column]
+                  (let [coll (get values row)]
+                    ^{:key col-index}
+                    [ins/with-collection coll
+                     [ins/with-key column
+                      [cell
+                       (inc row-index)
+                       (inc col-index)
+                       (when (contains? coll column)
+                         [ins/inspector (ins/get-props coll column) (get coll column)])]]]))
+                cols)]]]]))
        rows)]]))
 
 (defn- inspect-coll-table [values]
@@ -171,17 +185,18 @@
              [special (inc row-index) 0 [ins/inspector row-index]]]
             [ins/toggle-bg
              [ins/with-key row-index
-              (map-indexed
-               (fn [col-index column]
-                 ^{:key col-index}
-                 [ins/with-collection row
-                  [ins/with-key column
-                   [cell
-                    (inc row-index)
-                    (inc col-index)
-                    (when (contains? row column)
-                      [ins/inspector (ins/get-props row column) (get row column)])]]])
-               cols)]]]))
+              [:<>
+               (map-indexed
+                (fn [col-index column]
+                  ^{:key col-index}
+                  [ins/with-collection row
+                   [ins/with-key column
+                    [cell
+                     (inc row-index)
+                     (inc col-index)
+                     (when (contains? row column)
+                       [ins/inspector (ins/get-props row column) (get row column)])]]])
+                cols)]]]]))
        rows)]]))
 
 (defn- inspect-vector-table [values]
@@ -200,16 +215,17 @@
              [special (inc row-index) 0 [ins/inspector row-index]]]
             [ins/toggle-bg
              [ins/with-key row-index
-              (map-indexed
-               (fn [col-index value]
-                 ^{:key col-index}
-                 [ins/with-collection row
-                  [ins/with-key col-index
-                   [cell
-                    (inc row-index)
-                    (inc col-index)
-                    [ins/inspector value]]]])
-               row)]]]))
+              [:<>
+               (map-indexed
+                (fn [col-index value]
+                  ^{:key col-index}
+                  [ins/with-collection row
+                   [ins/with-key col-index
+                    [cell
+                     (inc row-index)
+                     (inc col-index)
+                     [ins/inspector value]]]])
+                row)]]]]))
        values)]]))
 
 (defn- inspect-map [values]
@@ -256,18 +272,19 @@
                [special (inc row-index) 0 [ins/inspector row] (count (get values row))]])
             [ins/toggle-bg
              [ins/with-key row
-              (map-indexed
-               (fn [col-index column]
-                 ^{:key col-index}
-                 [ins/with-collection value
-                  [ins/with-key index
-                   [ins/with-key column
-                    [cell
-                     (inc row-index)
-                     (inc col-index)
-                     (when (contains? value column)
-                       [ins/inspector (ins/get-props value column) (get value column)])]]]])
-               cols)]]]))
+              [:<>
+               (map-indexed
+                (fn [col-index column]
+                  ^{:key col-index}
+                  [ins/with-collection value
+                   [ins/with-key index
+                    [ins/with-key column
+                     [cell
+                      (inc row-index)
+                      (inc col-index)
+                      (when (contains? value column)
+                        [ins/inspector (ins/get-props value column) (get value column)])]]]])
+                cols)]]]]))
        (mapcat
         (fn [row]
           (map-indexed

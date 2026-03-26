@@ -80,7 +80,7 @@
    ::v/image
    {:examples [(::d/binary d/platform-data)]}
    ::v/table
-   {:file "portal/ui/viewer/table.cljs"
+   {:file "portal/ui/viewer/table.cljc"
     :examples (vals d/table-data)}
    ::v/hiccup
    {:examples [d/hiccup]}

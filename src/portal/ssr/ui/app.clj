@@ -23,6 +23,7 @@
    [portal.ui.viewer.prepl :as prepl]
    [portal.ui.viewer.relative-time :as relative-time]
    [portal.ui.viewer.source-location :as source-location]
+   [portal.ui.viewer.table :as table]
    [portal.ui.viewer.test-report :as test-report]
    [portal.ui.viewer.text :as text]
    [portal.ui.viewer.tree :as tree]))
@@ -418,6 +419,7 @@
          duration/nano
          duration/ms
          bytes/viewer
+         table/viewer
          json/viewer
          tree/viewer
          text/viewer
