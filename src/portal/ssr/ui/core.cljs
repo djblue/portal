@@ -113,13 +113,18 @@
        (post-message! {:type :set-theme :color header}))
      timeout)))
 
+(webcomponent!
+ "set-theme"
+ {:observed-attributes [:header]
+  :on-attribute-changed (fn [_ _ _ header] (set-header header))})
+
+(webcomponent!
+ "scroll-into-view"
+ {:on-connect (fn [this] (.scrollIntoView this #js {:block "center"}))})
+
 (defn on-connect [ws]
   (js/setInterval #(.send ^js ws (.stringify js/JSON #js {:op "ping"})) 15000)
   (let [root (.getElementById js/document "root")]
-    (webcomponent!
-     "set-theme"
-     {:observed-attributes [:header]
-      :on-attribute-changed (fn [_ _ _ header] (set-header header))})
     (webcomponent!
      "visible-sensor"
      {:on-connect

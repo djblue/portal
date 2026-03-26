@@ -100,16 +100,6 @@
           :background (::c/string theme)
           :border-radius "50%"}}])]))
 
-(defn- scroll-into-view []
-  #_(let [el (atom nil)]
-      (fn []
-        (r/create-class
-         {:component-did-mount
-          (fn []
-            (when-let [el @el] (.scrollIntoView el {:block "center"})))
-          :reagent-render
-          (fn [] [:div {:ref #(reset! el %)}])}))))
-
 (defn- try-sort
   "Attempts to sort the given selection"
   [coll]
@@ -216,7 +206,7 @@
                     (when active?
                       {:border-left [5 :solid (::c/boolean theme)]
                        :background (::c/background theme)}))}
-                  (when active? [scroll-into-view])
+                  (when active? [:scroll-into-view])
                   [checkbox (some? (selected? option))]
                   [s/div {:style {:width (:padding theme)}}]
                   [ins/inspector option]])))
@@ -402,7 +392,7 @@
                                 (on-select option))]
                  ^{:key index}
                  [:<>
-                  (when active? [scroll-into-view])
+                  (when active? [:scroll-into-view])
                   [palette-component-item
                    {:active? active?
                     :on-click on-click}
