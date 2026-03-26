@@ -1,10 +1,9 @@
 (ns portal.ssr.hiccup
   (:require
-   [portal.ssr.ui.react :as react]
-   [portal.ui.styled :as d])
+   [portal.ssr.ui.react :as react])
   (:import
    [java.io ByteArrayInputStream]
-   [java.nio ByteBuffer CharBuffer]
+   [java.nio ByteBuffer]
    [java.nio.charset StandardCharsets]))
 
 (defn ->input-stream [^bytes bs n] (ByteArrayInputStream. bs 0 n))
@@ -73,62 +72,65 @@
     :track
     :wbr})
 
-(defn- display-none? [hiccup]
-  (and (map? (second hiccup))
-       (= :none (get-in hiccup [1 :style :display]))))
-
 (defn- html* [write! hiccup]
   (cond
     (or (list? hiccup) (seq? hiccup))
     (doseq [h hiccup] (html* write! h))
 
-    (and (vector? hiccup) (keyword? (first hiccup)))
-    (when-not (display-none? hiccup)
-      (let [[tag & args] hiccup
-            attrs (when (map? (first args)) (first args))
-            children (cond-> args (map? (first args)) rest)
-            element-id (::react/id (meta hiccup))]
-        (extract-handlers! element-id attrs)
-        (if (= :<> tag)
-          (doseq [h children] (html* write! h))
-          (let [tag-name (name tag)]
-            (if (self-closing? tag)
-              (do
-                (write! "<")
-                (write! tag-name)
-                (when element-id
-                  (write! " id=\"")
-                  (write! (str element-id))
-                  (write! "\""))
-                (when attrs
-                  (attrs! write! (d/attrs->css attrs)))
-                (write! "/>"))
-              (do
-                (write! "<")
-                (write! tag-name)
-                (when element-id
-                  (write! " id=\"")
-                  (write! (str element-id))
-                  (write! "\""))
-                (when attrs
-                  (attrs! write! (d/attrs->css attrs)))
-                (write! ">")
-                (doseq [h children] (html* write! h))
-                (write! "</")
-                (write! tag-name)
-                (write! ">")))))))
+    (and (vector? hiccup) (keyword? (nth hiccup 0)))
+    (let [tag        (nth hiccup 0)
+          has-attrs? (map? (nth hiccup 1 nil))
+          attrs      (when has-attrs? (nth hiccup 1))
+          element-id (::react/id (meta hiccup))
+          attrs      (cond-> attrs element-id (assoc :id element-id))]
+      (extract-handlers! element-id attrs)
+      (if (= :<> tag)
+        (let [start (if has-attrs? 2 1)
+              cnt   (count hiccup)]
+          (loop [i start]
+            (when (< i cnt)
+              (html* write! (nth hiccup i))
+              (recur (unchecked-inc i)))))
+        (let [tag-name (name tag)]
+          (if (self-closing? tag)
+            (do
+              (write! "<")
+              (write! tag-name)
+              (when element-id
+                (write! " id=\"")
+                (write! (str element-id))
+                (write! "\""))
+              (when attrs
+                (attrs! write! attrs))
+              (write! "/>"))
+            (do
+              (write! "<")
+              (write! tag-name)
+              (when element-id
+                (write! " id=\"")
+                (write! (str element-id))
+                (write! "\""))
+              (when attrs
+                (attrs! write! attrs))
+              (write! ">")
+              (let [start (if has-attrs? 2 1)
+                    cnt   (count hiccup)]
+                (loop [i start]
+                  (when (< i cnt)
+                    (html* write! (nth hiccup i))
+                    (recur (unchecked-inc i)))))
+              (write! "</")
+              (write! tag-name)
+              (write! ">"))))))
 
-    :else (write! (str hiccup))))
+    :else (write! hiccup)))
 
 (defn html! [^bytes out hiccup]
   (try
-    (let [buffer  (ByteBuffer/wrap out)
-          encoder (.newEncoder StandardCharsets/UTF_8)
-          write!  (fn write! [^String s]
-                    (let [char-buffer (CharBuffer/wrap s)]
-                      (.encode encoder char-buffer buffer true)))]
+    (let [buffer (ByteBuffer/wrap out)
+          write! (fn write! [^String s]
+                   (.put buffer (.getBytes s StandardCharsets/UTF_8)))]
       (html* write! hiccup)
-      (.flush encoder buffer)
       (.position buffer))
     (catch Exception e (tap> e))))
 

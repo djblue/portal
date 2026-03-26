@@ -1,7 +1,10 @@
 (ns portal.ssr.ui.react
   "Server-side render for react/react style components."
   (:refer-clojure :exclude [random-uuid])
-  (:require [portal.ssr.ui.uuid :refer [random-uuid]]))
+  (:require
+   [clojure.string :as str]
+   [portal.ssr.ui.uuid :refer [random-uuid]]
+   [portal.ui.styled :as d]))
 
 ;; [x] component macro expansion
 ;; [x] basic local state
@@ -18,31 +21,31 @@
 ;; [ ] serialize hiccup and ship to client
 ;; [ ] dispatch client events to server / complete ui loop
 
-(def ^:dynamic *id* nil)
-(def ^:dynamic *state* nil)
-(def ^:dynamic *effects* nil)
-(def ^:dynamic *hook* nil)
-(def ^:dynamic *debug* {})
-(def ^:dynamic *context* nil)
-(def ^:dynamic *context-set* nil)
-(def ^:dynamic *context-used* nil)
-(def ^:dynamic *component-state* nil)
+(def ^:private ^:dynamic *id* nil)
+(def ^:private ^:dynamic *state* nil)
+(def ^:private ^:dynamic *effects* nil)
+(def ^:private ^:dynamic *hook* nil)
+(def ^:private ^:dynamic *element* nil)
+(def ^:private ^:dynamic *context* nil)
+(def ^:private ^:dynamic *context-set* nil)
+(def ^:private ^:dynamic *context-used* nil)
+(def ^:private ^:dynamic *component-state* nil)
 
-(defn use-id [] *id*)
+;; (defn use-id [] *id*)
 
 (defn use-effect
   ([f]
    (use-effect f nil))
   ([f deps]
    (when-not *hook*
-     (throw (ex-info "Must be called during render." *debug*)))
+     (throw (ex-info "Must be called during render." {:element *element*})))
    (when-not (fn? f)
-     (throw (ex-info "Effect must be function." *debug*)))
+     (throw (ex-info "Effect must be function." {:element *element*})))
    (vswap! *effects* conj {:fn f :deps deps})))
 
 (defn use-state [init-value]
   (when-not *hook*
-    (throw (ex-info "Must be called during render." *debug*)))
+    (throw (ex-info "Must be called during render." {:element *element*})))
   (let [component-id *id*
         hook-id (:state (vswap! *hook* update :state (fnil inc 0)))
         state-id [component-id hook-id]
@@ -99,7 +102,7 @@
 
 (defn use-context [context]
   (when-not *hook*
-    (throw (ex-info "Must be called during render." *debug*)))
+    (throw (ex-info "Must be called during render." {:element *element*})))
   (vswap! *context-used* conj context)
   (resolve-context-value *context* context))
 
@@ -127,13 +130,14 @@
     {:element elements
      :vdom-index next-vdom-index
      :vdom-children vdom-children
-     :output (map :output vdom-children)}))
+     :output (doall (map :output vdom-children))}))
 
 (defn- render-component-post [output id]
   (when-not (or (nil? output)
                 (string? output)
                 (vector? output))
-    (throw (ex-info "Component must return vector, string or nil" (assoc *debug* :output output))))
+    (throw (ex-info "Component must return vector, string or nil"
+                    {:element *element* :output output})))
   (cond-> output
     (vector? output)
     (vary-meta assoc ::id id)))
@@ -150,7 +154,7 @@
 
 (defn- component-replaced? [vdom element]
   (and (some? vdom)
-       (or (not (identical? (first (:element vdom)) (first element)))
+       (or (not (identical? (nth (:element vdom) 0) (nth element 0)))
            (not= (:key vdom) (element-key element)))))
 
 (defn- run-effect [effect]
@@ -174,7 +178,7 @@
 
 (defn- render-component-cached [vdom state context _element]
   (let [child (-> (:vdom-children vdom)
-                  (first)
+                  (nth 0)
                   (render* state
                            (cond-> (merge context (:context-set vdom)))
                            (:component-output vdom)))]
@@ -197,12 +201,12 @@
           component-state (get @state id)]
       (if (use-cached? vdom component-state context element)
         (render-component-cached vdom state context element)
-        (let [[component & args] element
+        (let [component    (nth element 0)
               effects      (volatile! [])
               context-set  (atom {})
               context-used (volatile! [])
               output  (binding [*id*      id
-                                *debug*   {:component (first element) :args args}
+                                *element*   component
                                 *hook*    (volatile! {})
                                 *state*   state
                                 *effects* effects
@@ -211,7 +215,15 @@
                                 *context-set* context-set
                                 *context-used* context-used]
                         (try
-                          (render-component-post (apply component args) id)
+                          (render-component-post
+                           (let [cnt (count element)]
+                             (case cnt
+                               1 (component)
+                               2 (component (nth element 1))
+                               3 (component (nth element 1) (nth element 2))
+                               4 (component (nth element 1) (nth element 2) (nth element 3))
+                               (apply component (subvec element 1))))
+                           id)
                           (catch #?(:clj Exception :cljs :default) e
                             #_(tap> (Throwable->map e))
                             [:pre (pr-str e)])))
@@ -245,31 +257,38 @@
   (or (nil? element)
       (string? element)
       (and (vector? element)
-           (keyword? (first element))
-           (every? hiccup-only-tree?
-                   (cond-> (rest element)
-                     (map? (second element)) rest)))))
+           (keyword? (nth element 0))
+           (let [start (if (map? (nth element 1 nil)) 2 1)
+                 cnt   (count element)]
+             (loop [i start]
+               (if (>= i cnt)
+                 true
+                 (if (hiccup-only-tree? (nth element i))
+                   (recur (unchecked-inc i))
+                   false)))))))
 
 (defn- render-hiccup [vdom state context element]
   (if (and (:hiccup-only-tree? vdom)
            (= (:element vdom) element))
     vdom
-    (let [id (or (when (map? (second element))
-                   (get-in element [1 :id]))
+    (let [n  (count element)
+          id (or (when (and (> n 1) (map? (nth element 1)))
+                   (-> element (nth 1) :id))
                  (:id vdom)
                  (random-uuid))
-          [tag & args] element
-          attrs (if-not (map? (first args))
-                  {}
-                  (first args))
-          children (cond-> args (map? (first args)) (rest))
-          vdom-children (into []
-                              (map-indexed
-                               (fn [index element]
-                                 (-> (:vdom-children vdom)
-                                     (get index)
-                                     (render* state context element))))
-                              children)
+          tag           (nth element 0)
+          has-attrs?    (map? (nth element 1 nil))
+          attrs         (d/attrs->css (if has-attrs? (nth element 1) {}))
+          child-start   (int (if has-attrs? 2 1))
+          child-count   (- n child-start)
+          vdom-children (let [prev (:vdom-children vdom)]
+                          (loop [i 0 out (transient [])]
+                            (if (>= i child-count)
+                              (persistent! out)
+                              (recur (unchecked-inc i)
+                                     (conj! out
+                                            (-> (get prev i)
+                                                (render* state context (nth element (+ child-start i)))))))))
           output (with-meta
                    (into [tag attrs] (map :output) vdom-children)
                    (assoc (meta element) ::id id))]
@@ -306,10 +325,10 @@
     (or (list? element) (seq? element))
     (render-list vdom state context element)
 
-    (and (vector? element) (fn? (first element)))
+    (and (vector? element) (fn? (nth element 0 nil)))
     (render-component vdom state context element)
 
-    (and (vector? element) (keyword? (first element)))
+    (and (vector? element) (keyword? (nth element 0 nil)))
     (render-hiccup vdom state context element)
 
     :else
