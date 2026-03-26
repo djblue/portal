@@ -112,109 +112,109 @@
     (catch js/Error _
       coll)))
 
-(defn- selector-component []
-  (let [selected (r/atom #{})
-        active   (r/atom 0)]
-    (fn [input]
-      (let [theme     (theme/use-theme)
-            selected? @selected
-            state     (state/use-state)
-            on-close  (fn []
-                        (close state)
-                        (when (fn? (:on-dismiss input))
-                          ((:on-dismiss input))))
-            on-done   (:run input)
-            options   (try-sort (:options input))
-            n         (count (:options input))
-            on-select #(swap! selected (if (selected? %) disj conj) %)
-            on-toggle (fn toggle-all []
-                        (if (= (count @selected) (count options))
-                          (reset! selected #{})
-                          (swap! selected into options)))
-            on-invert (fn invert []
-                        (swap! selected #(set/difference (into #{} options) %)))
-            style     {:font   :bold
-                       :cursor :pointer
-                       :color  (::c/string theme)}]
-        [with-shortcuts
-         (fn [log]
-           (when
-            (condp shortcuts/match? log
-              "arrowup"        (swap! active #(mod (dec %) n))
-              "k"              (swap! active #(mod (dec %) n))
-              #{"shift" "tab"} (swap! active #(mod (dec %) n))
-              "arrowdown"      (swap! active #(mod (inc %) n))
-              "j"              (swap! active #(mod (inc %) n))
-              "tab"            (swap! active #(mod (inc %) n))
-              "a"       (on-toggle)
-              "i"       (on-invert)
-              " "       (on-select (nth options @active))
-              "enter"   (on-done @selected)
-              "escape"  (on-close)
+(defn- selector-component [input]
+  (let [[selected set-selected!] (react/use-state #{})
+        [active set-active!]     (react/use-state 0)
+        theme     (theme/use-theme)
+        selected? selected
+        state     (state/use-state)
+        on-close  (fn []
+                    (close state)
+                    (when (fn? (:on-dismiss input))
+                      ((:on-dismiss input))))
+        on-done   (:run input)
+        options   (try-sort (:options input))
+        n         (count (:options input))
+        on-select (fn [option]
+                    (if (selected? option)
+                      (set-selected! (disj selected option))
+                      (set-selected! (conj selected option))))
+        on-toggle (fn toggle-all []
+                    (if (= (count selected) (count options))
+                      (set-selected! #{})
+                      (set-selected! #(into % options))))
+        on-invert (fn invert []
+                    (set-selected! #(set/difference (into #{} options) %)))
+        style     {:font   :bold
+                   :cursor :pointer
+                   :color  (::c/string theme)}]
+    [with-shortcuts
+     (fn [log]
+       (when
+        (condp shortcuts/match? log
+          "arrowup"        (do (set-active! #(mod (dec %) n)) true)
+          "k"              (do (set-active! #(mod (dec %) n)) true)
+          #{"shift" "tab"} (do (set-active! #(mod (dec %) n)) true)
+          "arrowdown"      (do (set-active! #(mod (inc %) n)) true)
+          "j"              (do (set-active! #(mod (inc %) n)) true)
+          "tab"            (do (set-active! #(mod (inc %) n)) true)
+          "a"       (do (on-toggle) true)
+          "i"       (do (on-invert) true)
+          " "       (do (on-select (nth options active nil)) true)
+          "enter"   (do (on-done selected) true)
+          "escape"  (do (on-close) true)
+          false)
+         (shortcuts/matched! log)))
 
-              nil)
-             (shortcuts/matched! log)))
-
-         [palette-container
-          [s/div
-           {:style {:box-sizing :border-box
-                    :padding (:padding theme)
-                    :user-select :none
-                    :border-bottom [1 :solid (::c/border theme)]}}
-           "Press "
-           [:span
-            {:style    style
-             :on-click #(on-select (nth options @active))}
-            "space"]
-           " to select, "
-           [:span
-            {:style    style
-             :on-click on-toggle}
-            "a"]
-           " to toggle all, "
-           [:span
-            {:style    style
-             :on-click on-invert}
-            "i"]
-           " to invert and "
-           [:span
-            {:style    style
-             :on-click #(on-done @selected)}
-            "enter"]
-           " to accept"]
-          [s/div
-           {:style {:overflow :auto}}
-           (->> options
-                (map-indexed
-                 (fn [index option]
-                   (let [active? (= index @active)]
-                     [s/div
-                      {:key (hash option)
-                       :on-click (fn [e]
-                                   (.stopPropagation e)
-                                   (on-select option))
-                       :style
-                       (merge
-                        {:border-left [5 :solid "#0000"]
-                         :box-sizing     :border-box
-                         :padding-left   (:padding theme)
-                         :padding-top    (* 0.5 (:padding theme))
-                         :padding-bottom (* 0.5 (:padding theme))
-                         :cursor :pointer
-                         :color (if (selected? option)
-                                  (::c/boolean theme)
-                                  (::c/text theme))
-                         :display :flex
-                         :align-items :center
-                         :height :fit-content}
-                        (when active?
-                          {:border-left [5 :solid (::c/boolean theme)]
-                           :background (::c/background theme)}))}
-                      (when active? [scroll-into-view])
-                      [checkbox (some? (selected? option))]
-                      [s/div {:style {:width (:padding theme)}}]
-                      [ins/inspector option]])))
-                doall)]]]))))
+     [palette-container
+      [s/div
+       {:style {:box-sizing :border-box
+                :padding (:padding theme)
+                :user-select :none
+                :border-bottom [1 :solid (::c/border theme)]}}
+       "Press "
+       [:span
+        {:style    style
+         :on-click (fn [_] (on-select (nth options active nil)))}
+        "space"]
+       " to select, "
+       [:span
+        {:style    style
+         :on-click (fn [_] (on-toggle))}
+        "a"]
+       " to toggle all, "
+       [:span
+        {:style    style
+         :on-click (fn [_] (on-invert))}
+        "i"]
+       " to invert and "
+       [:span
+        {:style    style
+         :on-click (fn [_] (on-done selected))}
+        "enter"]
+       " to accept"]
+      [s/div
+       {:style {:overflow :auto}}
+       (->> options
+            (map-indexed
+             (fn [index option]
+               (let [active? (= index active)]
+                 [s/div
+                  {:key (hash option)
+                   :on-click (fn [_]
+                               (on-select option))
+                   :style
+                   (merge
+                    {:border-left [5 :solid "#0000"]
+                     :box-sizing     :border-box
+                     :padding-left   (:padding theme)
+                     :padding-top    (* 0.5 (:padding theme))
+                     :padding-bottom (* 0.5 (:padding theme))
+                     :cursor :pointer
+                     :color (if (selected? option)
+                              (::c/boolean theme)
+                              (::c/text theme))
+                     :display :flex
+                     :align-items :center
+                     :height :fit-content}
+                    (when active?
+                      {:border-left [5 :solid (::c/boolean theme)]
+                       :background (::c/background theme)}))}
+                  (when active? [scroll-into-view])
+                  [checkbox (some? (selected? option))]
+                  [s/div {:style {:width (:padding theme)}}]
+                  [ins/inspector option]])))
+            doall)]]]))
 
 (def ^:private client-keymap (r/atom {}))
 
@@ -332,85 +332,79 @@
             :when   (every? #(str/includes? s %) words)]
         option))))
 
-(defn- palette-component []
-  (let [active (r/atom 0)
-        filter-text (r/atom "")]
-    (fn [{:keys [on-select on-dismiss component]
-          :or   {component ins/inspector}
-          :as options}]
-      (let [theme (theme/use-theme)
-            options (try-sort (filter-options options @filter-text))
-            n (count options)
-            state (state/use-state)
-            on-close
-            (fn []
-              (close state)
-              (when (fn? on-dismiss)
-                (on-dismiss)))
-            on-select
-            (fn []
-              (reset! filter-text "")
-              (close state)
-              (when-let [option (nth options @active)]
-                ;; Give react time to close command palette
-                (js/setTimeout #(on-select option) 25)))]
-        [with-shortcuts
-         (fn [log]
-           (when
-            (condp shortcuts/match? log
-              "arrowup"        (swap! active #(mod (dec %) n))
-              #{"shift" "tab"} (swap! active #(mod (dec %) n))
-              "arrowdown"      (swap! active #(mod (inc %) n))
-              "tab"            (swap! active #(mod (inc %) n))
-              "enter"          (on-select)
-              "escape"         (on-close)
-              nil)
-             (shortcuts/matched! log)))
-         [palette-container
-          [s/div
-           {:style
-            {:padding (:padding theme)
-             :border-bottom [1 :solid (::c/border theme)]}}
-           [s/input
-            {:placeholder "Type to filter, <up> and <down> to move selection, <enter> to confirm."
-             :auto-focus true
-             :value @filter-text
-             :on-change #(do
-                           (reset! active 0)
-                           (reset! filter-text (.-value (.-target %))))
-             :style
-             {:width "100%"
-              :background (::c/background theme)
-              :padding (:padding theme)
-              :box-sizing :border-box
-              :font-size (:font-size theme)
-              :font-family (:font-family theme)
-              :color (::c/text theme)
-              :border [1 :solid (::c/border theme)]}
-             :style/placeholder {:color (::c/border theme)}}]]
-          [s/div
-           {:style
-            {:height "100%"
-             :overflow :auto}}
-           (->> options
-                (map-indexed
-                 (fn [index option]
-                   (let [active? (= index @active)
-                         on-click (fn [e]
-                                    (.stopPropagation e)
-                                    (reset! active index)
-                                    (on-select))]
-                     ^{:key index}
-                     [:<>
-                      (when active? [scroll-into-view])
-                      [palette-component-item
-                       {:active? active?
-                        :on-click on-click}
-                       [component
-                        {:active? active?
-                         :on-click on-click}
-                        option]]])))
-                doall)]]]))))
+(defn- palette-component [{:keys [on-select on-dismiss component]
+                           :or   {component ins/inspector}
+                           :as options}]
+  (let [[active set-active!] (react/use-state 0)
+        [filter-text set-filter-text!] (react/use-state "")
+        theme (theme/use-theme)
+        options (try-sort (filter-options options filter-text))
+        n (count options)
+        state (state/use-state)
+        on-close
+        (fn []
+          (close state)
+          (when (fn? on-dismiss)
+            (on-dismiss)))
+        on-select
+        (fn [option]
+          (close state)
+          (on-select option))]
+    [with-shortcuts
+     (fn [log]
+       (when
+        (condp shortcuts/match? log
+          "arrowup"        (do (set-active! #(mod (dec %) n)) true)
+          #{"shift" "tab"} (do (set-active! #(mod (dec %) n)) true)
+          "arrowdown"      (do (set-active! #(mod (inc %) n)) true)
+          "tab"            (do (set-active! #(mod (inc %) n)) true)
+          "enter"          (do (on-select (nth options active nil)) true)
+          "escape"         (do (on-close) true)
+          false)
+         (shortcuts/matched! log)))
+     [palette-container
+      [s/div
+       {:style
+        {:padding (:padding theme)
+         :border-bottom [1 :solid (::c/border theme)]}}
+       [s/input
+        {:placeholder "Type to filter, <up> and <down> to move selection, <enter> to confirm."
+         :auto-focus true
+         :value filter-text
+         :on-change (fn [e]
+                      (set-active! 0)
+                      (set-filter-text! (.. e -target -value)))
+         :style
+         {:width "100%"
+          :background (::c/background theme)
+          :padding (:padding theme)
+          :box-sizing :border-box
+          :font-size (:font-size theme)
+          :font-family (:font-family theme)
+          :color (::c/text theme)
+          :border [1 :solid (::c/border theme)]}
+         :style/placeholder {:color (::c/border theme)}}]]
+      [s/div
+       {:style
+        {:height "100%"
+         :overflow :auto}}
+       (->> options
+            (map-indexed
+             (fn [index option]
+               (let [active? (= index active)
+                     on-click (fn [_]
+                                (on-select option))]
+                 ^{:key index}
+                 [:<>
+                  (when active? [scroll-into-view])
+                  [palette-component-item
+                   {:active? active?
+                    :on-click on-click}
+                   [component
+                    {:active? active?
+                     :on-click on-click}
+                    option]]])))
+            doall)]]]))
 
 (defn- can-meta? [value] (implements? IWithMeta value))
 

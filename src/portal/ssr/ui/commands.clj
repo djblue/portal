@@ -148,19 +148,18 @@
      (fn [log]
        (when
         (condp shortcuts/match? log
-          "arrowup"        (set-active! #(mod (dec %) n))
-          "k"              (set-active! #(mod (dec %) n))
-          #{"shift" "tab"} (set-active! #(mod (dec %) n))
-          "arrowdown"      (set-active! #(mod (inc %) n))
-          "j"              (set-active! #(mod (inc %) n))
-          "tab"            (set-active! #(mod (inc %) n))
-          "a"       (on-toggle)
-          "i"       (on-invert)
-          " "       (on-select (nth options active nil))
-          "enter"   (on-done selected)
-          "escape"  (on-close)
-
-          nil)
+          "arrowup"        (do (set-active! #(mod (dec %) n)) true)
+          "k"              (do (set-active! #(mod (dec %) n)) true)
+          #{"shift" "tab"} (do (set-active! #(mod (dec %) n)) true)
+          "arrowdown"      (do (set-active! #(mod (inc %) n)) true)
+          "j"              (do (set-active! #(mod (inc %) n)) true)
+          "tab"            (do (set-active! #(mod (inc %) n)) true)
+          "a"       (do (on-toggle) true)
+          "i"       (do (on-invert) true)
+          " "       (do (on-select (nth options active nil)) true)
+          "enter"   (do (on-done selected) true)
+          "escape"  (do (on-close) true)
+          false)
          (shortcuts/matched! log)))
 
      [palette-container
@@ -359,18 +358,16 @@
           (on-select option))]
     [with-shortcuts
      (fn [log]
-       (try
-         (when
-          (condp shortcuts/match? log
-            "arrowup"        (set-active! #(mod (dec %) n))
-            #{"shift" "tab"} (set-active! #(mod (dec %) n))
-            "arrowdown"      (set-active! #(mod (inc %) n))
-            "tab"            (set-active! #(mod (inc %) n))
-            "enter"          (on-select (nth options active nil))
-            "escape"         (on-close)
-            nil)
-           (shortcuts/matched! log))
-         (catch Exception e (tap> e))))
+       (when
+        (condp shortcuts/match? log
+          "arrowup"        (do (set-active! #(mod (dec %) n)) true)
+          #{"shift" "tab"} (do (set-active! #(mod (dec %) n)) true)
+          "arrowdown"      (do (set-active! #(mod (inc %) n)) true)
+          "tab"            (do (set-active! #(mod (inc %) n)) true)
+          "enter"          (do (on-select (nth options active nil)) true)
+          "escape"         (do (on-close) true)
+          false)
+         (shortcuts/matched! log)))
      [palette-container
       [s/div
        {:style
