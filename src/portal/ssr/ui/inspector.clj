@@ -1035,4 +1035,4 @@
      [with-parent
       context
       ^{:key "tab-index"} [tab-index context]
-      [with-context context ^{:key value} [inspector* context value]]])))
+      [with-context context ^{:key (type value)} [inspector* context value]]])))
