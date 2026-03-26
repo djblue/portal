@@ -144,8 +144,10 @@
     (.addEventListener
      js/window "keydown"
      (fn [^js e]
-       (when (and (.-ctrlKey e)
-                  (#{"j" "p"} (.-key e)))
+       (when (or
+              (#{" "} (.-key e))
+              (and (.-ctrlKey e)
+                   (#{"j" "p"} (.-key e))))
          (.preventDefault e))
        (.send ^js ws
               (.stringify
