@@ -237,7 +237,6 @@
         :padding (:padding theme)}}
       [icons/copy]]
      [select-viewer]
-     [d/div]
      [d/div
       {:style
        {:flex "1"
