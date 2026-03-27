@@ -31,7 +31,8 @@
 
 (defn- get-theme [theme-name]
   #?(:clj
-     (when-let [theme (get c/themes theme-name)]
+     (when-let [theme (or (get @c/!themes theme-name)
+                          (get c/themes theme-name))]
        (merge
         {:font-family   "monospace"
          :font-size     "12pt"
