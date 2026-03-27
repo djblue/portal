@@ -104,9 +104,10 @@
      (server/send! channel message)
      (server/send! channel (cond-> message (not (string? message)) (json/write-str))))))
 
-(defn- render-app [{:keys [handlers selection-index output-buffer] :as session}
+(defn- render-app [{:keys [handlers selection-index output-buffer log] :as session}
                    {:keys [hiccup styles app-state] :as render-state}]
   (binding [rt/*session* session
+            shortcuts/*log* log
             select/*selection-index* selection-index]
     (process-event-queue! session)
     (let [app-state' (some-> hiccup meta :state deref)]
@@ -174,6 +175,7 @@
              :event-queue (atom [])
              :selection-index (atom {})
              :last-ping (atom (System/currentTimeMillis))
+             :log (atom nil)
              :output-buffer (byte-array (* 5 1024 1024)))))
 
 (defmethod route [:get "/ssr"] [request]

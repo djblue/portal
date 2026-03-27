@@ -50,24 +50,27 @@
         :border-radius (:border-radius theme)}}]
      children)))
 
-(defonce ^:private handlers (atom {}))
-(def ^:private shortcut-context (react/create-context 0))
+(defonce ^:private handlers-context (react/create-context nil))
+(defonce ^:private shortcut-context (react/create-context 0))
 
-(defn- dispatch [log]
+(defn- dispatch [handlers log]
   (when-let [[_ f] (last (sort-by first < @handlers))]
     (f log)))
 
-(defn- use-shortcuts-setup []
-  (react/use-effect
-   :once
-   (shortcuts/add! ::with-shortcuts dispatch)
-   (fn []
-     (shortcuts/remove! ::with-shortcuts))))
+(defn- shortcuts-setup [& children]
+  (let [handlers (atom {})]
+    (react/use-effect
+     :once
+     (shortcuts/add! ::with-shortcuts (partial dispatch handlers))
+     (fn []
+       (shortcuts/remove! ::with-shortcuts)))
+    (apply react/provider handlers-context handlers children)))
 
 (defn- with-shortcuts [f & children]
-  (let [i (react/use-context shortcut-context)]
+  (let [i (react/use-context shortcut-context)
+        handlers (react/use-context handlers-context)]
     (react/use-effect
-     [f]
+     [f handlers]
      (swap! handlers assoc i f)
      (fn []
        (swap! handlers dissoc i)))
@@ -1183,32 +1186,33 @@
        :overflow :hidden}}
      child]))
 
+(defn palette* [{:keys [container]}]
+  (let [state (state/use-state)
+        value (state/get-selected-value @state)
+        opts  #?(:clj nil :cljs (options/use-options))]
+    (react/use-effect
+     [(hash value)]
+     (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
+       (reset!
+        runtime-registry
+        (reduce-kv
+         (fn [out k opts]
+           (assoc out k (make-command
+                         (assoc opts :f (partial state/invoke (:name opts))))))
+         {}
+         fns))))
+    [with-shortcuts
+     (fn [log]
+       (when-not (shortcuts/input? log)
+         (when-let [f (shortcuts/match (merge @client-keymap (some-> opts :keymap deref)) log)]
+           (when-let [{:keys [run]} (or (get @registry f)
+                                        (get @runtime-registry f))]
+             (shortcuts/matched! log)
+             (run state)))))
+     (when-let [component (react/use-atom state ::input)]
+       [ins/with-readonly [(or container pop-up) [component state]]])]))
+
 (defn palette
-  ([]
-   (palette nil))
-  ([{:keys [container]}]
-   (let [state (state/use-state)
-         value (state/get-selected-value @state)
-         opts  #?(:clj nil :cljs (options/use-options))]
-     (use-shortcuts-setup)
-     (react/use-effect
-      [(hash value)]
-      (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
-        (reset!
-         runtime-registry
-         (reduce-kv
-          (fn [out k opts]
-            (assoc out k (make-command
-                          (assoc opts :f (partial state/invoke (:name opts))))))
-          {}
-          fns))))
-     [with-shortcuts
-      (fn [log]
-        (when-not (shortcuts/input? log)
-          (when-let [f (shortcuts/match (merge @client-keymap (some-> opts :keymap deref)) log)]
-            (when-let [{:keys [run]} (or (get @registry f)
-                                         (get @runtime-registry f))]
-              (shortcuts/matched! log)
-              (run state)))))
-      (when-let [component (react/use-atom state ::input)]
-        [ins/with-readonly [(or container pop-up) [component state]]])])))
+  ([] (palette nil))
+  ([options]
+   [shortcuts-setup [palette* options]]))

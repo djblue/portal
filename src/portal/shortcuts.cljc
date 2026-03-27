@@ -50,8 +50,9 @@
       #?(:clj (:alt-key e)   :cljs (.-altKey e))   (conj "alt"))))
 
 (defonce ^:private log (atom nil))
+(def ^:dynamic *log* nil)
 
-(defn clear! [] (reset! log (list)))
+(defn clear! [] (reset! (or *log* log) (list)))
 
 (defn match? [definition log]
   (some (fn [combo]
@@ -68,10 +69,10 @@
      #?(:clj  (get-in e [:target :tag-name])
         :cljs (.. e -target -tagName)))))
 
-(defn keydown [e] (swap! log #(take 5 (conj % e))) nil)
+(defn keydown [e] (swap! (or *log* log) #(take 5 (conj % e))) nil)
 
 (defn- init []
-  (when (nil? @log)
+  (when (nil? @(or *log* log))
     (clear!)
     #?(:cljs (.addEventListener js/window "blur" #(clear!)))
     #?(:cljs (.addEventListener js/window "keydown" #(keydown %)))))
@@ -83,10 +84,10 @@
 (defn add! [k f]
   (init)
   (add-watch
-   log k
+   (or *log* log) k
    (fn [_ _ _ log]
      (when-not (empty? log)
        (f log)))))
 
-(defn remove! [k] (remove-watch log k))
+(defn remove! [k] (remove-watch (or *log* log) k))
 
