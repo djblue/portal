@@ -103,7 +103,7 @@
           :border-radius "50%"}}])]))
 
 (defn- scroll-into-view []
-  #?(:clj [:scroll-into-view]
+  #?(:clj [:scroll-into-view {:block "center"}]
      :cljs
      (let [el (atom nil)]
        (fn []

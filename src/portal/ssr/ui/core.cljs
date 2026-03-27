@@ -118,9 +118,37 @@
  {:observed-attributes [:header]
   :on-attribute-changed (fn [_ _ _ header] (set-header header))})
 
+(defn element-visible? [element]
+  (let [buffer 100
+        rect   (.getBoundingClientRect element)
+        height (or (.-innerHeight js/window)
+                   (.. js/document -documentElement -clientHeight))
+        width  (or (.-innerWidth js/window)
+                   (.. js/document -documentElement -clientWidth))]
+    (and (> (.-bottom rect) buffer)
+         (< (.-top rect) (- height buffer))
+         (> (.-right rect) buffer)
+         (< (.-left rect) (- width buffer)))))
+
+(defn scroll-into-view [element]
+  (let [inline   (.getAttribute element "inline")
+        block    (.getAttribute element "block")
+        behavior (.getAttribute element "behavior")
+        options  (cond-> {}
+                   inline   (assoc :inline inline)
+                   block    (assoc :block block)
+                   behavior (assoc :behavior behavior))]
+    (.scrollIntoView element (clj->js options))))
+
 (webcomponent!
  "scroll-into-view"
- {:on-connect (fn [this] (.scrollIntoView this #js {:block "center"}))})
+ {:on-connect
+  (fn [this]
+    (if (= "not-visible" (.getAttribute this "when"))
+      (when-not (element-visible? this)
+        (scroll-into-view this))
+      (scroll-into-view this)))})
+
 (defn input? [e]
   (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"} (.. e -target -tagName)))
 

@@ -996,7 +996,7 @@
         state          (state/use-state)
         location       (state/get-location ctx)
         theme          (theme/use-theme)
-        {:keys [viewer expanded?] :as options}
+        {:keys [viewer selected expanded?] :as options}
         (react/use-atom state #(get-info % ctx location value))
         resolved-viewer  (use-resolve-viewer ctx viewer (react/use-atom viewers))
         options          (assoc options :props props :viewer resolved-viewer)
@@ -1014,9 +1014,20 @@
           state assoc-in [:expanded? location]
           (get-in (meta value) [:portal.viewer/inspector :expanded] 1))))
      [location (some? expanded?)])
-    [with-options options
-     [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
-      ctx [component value]]]))
+    [:<>
+     [with-options options
+      [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
+       ctx
+       (when selected
+         [:scroll-into-view
+          {:style {:position :absolute
+                   :pointer-events :none
+                   :left 0 :right 0 :bottom 0 :top 0}
+           :inline "nearest"
+           :block "nearest"
+           :behavior "smooth"
+           :when "not-visible"}])
+       [component value]]]]))
 
 (defn- tab-index [context]
   (let [;; ref      (react/use-ref)
