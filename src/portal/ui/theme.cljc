@@ -4,7 +4,7 @@
             #?(:cljs [portal.ui.options :as opts])
             [portal.ui.react :as react]))
 
-(defn ^:no-doc is-vs-code? []
+(defn ^:no-doc is-vs-code? [& _]
   #?(:cljs (-> js/document
                .-documentElement
                js/getComputedStyle

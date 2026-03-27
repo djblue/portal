@@ -1,26 +1,27 @@
-(ns portal.ssr.ui.commands
+(ns portal.ui.commands
   (:require [clojure.pprint :as pp]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.walk :as walk]
-            [portal.sync :as a]
+            #?(:clj  [portal.sync :as a]
+               :cljs [portal.async :as a])
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
-            ;; [portal.ui.drag-and-drop :as dnd]
+            #?(:cljs [portal.ui.drag-and-drop :as dnd])
             [portal.ui.icons :as icons]
-            [portal.ssr.ui.inspector :as ins]
-            ;; [portal.ui.options :as options]
-            ;; [portal.ui.parsers :as p]
-            [portal.ssr.ui.react :as react]
-            [portal.ssr.ui.state :as state]
+            #?(:clj [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
+            #?(:cljs [portal.ui.options :as options])
+            [portal.ui.parsers :as p]
+            [portal.ui.react :as react]
+            #?(:clj  [portal.ssr.ui.state :as state]
+               :cljs [portal.ui.state :as state])
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
-            ;; [reagent.core :as r]
-            )
-  (:import [java.util Base64]))
+            #?(:cljs [reagent.core :as r])))
 
 (def ^:dynamic *state* nil)
-(defonce ^:private input (atom nil))
+(defonce ^:private input #?(:clj (atom nil) :cljs (r/atom nil)))
 
 (defn open
   ([f] (open input f))
@@ -34,7 +35,7 @@
   (let [theme (theme/use-theme)]
     (into
      [s/div
-      {:on-click identity
+      {:on-click #?(:clj identity :cljs #(.stopPropagation %))
        :style
        {:font-family (:font-family theme)
         :max-height "100%"
@@ -58,20 +59,18 @@
 
 (defn- use-shortcuts-setup []
   (react/use-effect
+   :once
+   (shortcuts/add! ::with-shortcuts dispatch)
    (fn []
-     (shortcuts/add! ::with-shortcuts dispatch)
-     (fn []
-       (shortcuts/remove! ::with-shortcuts)))
-   []))
+     (shortcuts/remove! ::with-shortcuts))))
 
 (defn- with-shortcuts [f & children]
   (let [i (react/use-context shortcut-context)]
     (react/use-effect
+     [f]
+     (swap! handlers assoc i f)
      (fn []
-       (swap! handlers assoc i f)
-       (fn []
-         (swap! handlers dissoc i)))
-     [f])
+       (swap! handlers dissoc i)))
     (apply react/provider shortcut-context (inc i) children)))
 
 (defn- checkbox [checked?]
@@ -100,12 +99,24 @@
           :background (::c/string theme)
           :border-radius "50%"}}])]))
 
+(defn- scroll-into-view []
+  #?(:clj [:scroll-into-view]
+     :cljs
+     (let [el (atom nil)]
+       (fn []
+         (r/create-class
+          {:component-did-mount
+           (fn []
+             (when-let [el @el] (.scrollIntoView el #js {:block "center"})))
+           :reagent-render
+           (fn [] [:div {:ref #(reset! el %)}])})))))
+
 (defn- try-sort
   "Attempts to sort the given selection"
   [coll]
   (try
     (sort coll)
-    (catch Exception _
+    (catch #?(:clj Exception :cljs js/Error) _
       coll)))
 
 (defn- selector-component [input]
@@ -206,13 +217,13 @@
                     (when active?
                       {:border-left [5 :solid (::c/boolean theme)]
                        :background (::c/background theme)}))}
-                  (when active? [:scroll-into-view])
+                  (when active? [scroll-into-view])
                   [checkbox (some? (selected? option))]
                   [s/div {:style {:width (:padding theme)}}]
                   [ins/inspector option]])))
             doall)]]]))
 
-(def ^:private client-keymap (atom {}))
+(def ^:private client-keymap #?(:clj (atom {}) :cljs (r/atom {})))
 
 (def ^:private aliases {"cljs.core" "clojure.core"})
 
@@ -259,14 +270,14 @@
 
 (defn shortcut [command]
   (let [theme (theme/use-theme)
-        #_#_opts  (options/use-options)]
+        opts  #?(:clj nil :cljs (options/use-options))]
     [s/div {:style
             {:display :flex
              :align-items :stretch
              :white-space :nowrap}}
      [separate
       (for [combo (concat (find-combos @client-keymap command)
-                          #_(find-combos (some-> opts :keymap deref) command))]
+                          (find-combos (some-> opts :keymap deref) command))]
         [:<>
          {:key (hash combo)}
          (map-indexed
@@ -369,7 +380,9 @@
          :value filter-text
          :on-change (fn [e]
                       (set-active! 0)
-                      (set-filter-text! (-> e :target :value)))
+                      (set-filter-text!
+                       #?(:clj  (-> e :target :value)
+                          :cljs (.. e -target -value))))
          :style
          {:width "100%"
           :background (::c/background theme)
@@ -392,7 +405,7 @@
                                 (on-select option))]
                  ^{:key index}
                  [:<>
-                  (when active? [:scroll-into-view])
+                  (when active? [scroll-into-view])
                   [palette-component-item
                    {:active? active?
                     :on-click on-click}
@@ -402,7 +415,9 @@
                     option]]])))
             doall)]]]))
 
-(defn- can-meta? [_value] #_(implements? IWithMeta value))
+(defn- can-meta? [value]
+  #?(:clj  (instance? clojure.lang.IObj value)
+     :cljs (implements? IWithMeta value)))
 
 (defn- with-meta* [obj m]
   (if-not (can-meta? obj)
@@ -416,26 +431,26 @@
                         true
                         (try
                           (apply predicate (state/selected-values state))
-                          (catch Exception _e false))))
+                          (catch #?(:clj Exception :cljs :default) _e false))))
          :run (fn [state]
-                (future
-                  (a/let [selected (for [context (:selected @state)]
-                                     (with-meta*
-                                       (:value context)
-                                       {:portal.viewer/default (:name (ins/get-viewer state context))}))
-                          args     (when args (binding [*state* state] (apply args selected)))
-                          result   (if (= ::dismiss args)
-                                     args
-                                     (a/try (apply f (concat selected args))
-                                            (catch Exception e (ex-data e))))]
-                    (when-not (or command (= args ::dismiss))
-                      (state/dispatch!
-                       state
-                       state/history-push
-                       {:portal/key   name
-                        :portal/f     f
-                        :portal/args  args
-                        :portal/value result})))))))
+                (#?(:clj future :cljs do)
+                 (a/let [selected (for [context (:selected @state)]
+                                    (with-meta*
+                                      (:value context)
+                                      {:portal.viewer/default (:name (ins/get-viewer state context))}))
+                         args     (when args (binding [*state* state] (apply args selected)))
+                         result   (if (= ::dismiss args)
+                                    args
+                                    (a/try (apply f (concat selected args))
+                                           (catch #?(:clj Exception :cljs :default) e (ex-data e))))]
+                   (when-not (or command (= args ::dismiss))
+                     (state/dispatch!
+                      state
+                      state/history-push
+                      {:portal/key   name
+                       :portal/f     f
+                       :portal/args  args
+                       :portal/value result})))))))
 
 (defn- command-item [{:keys [active?]} command]
   (let [theme (theme/use-theme)]
@@ -497,7 +512,8 @@
          :component command-item
          :on-select
          (fn [command]
-           ((:run command) state))}]))))
+           (when-let [f (:run command)]
+             (f state)))}]))))
 
 ;; pick args
 
@@ -507,15 +523,26 @@
    NOTE: Will return `:portal.ui.commands/dismiss` if prompt is dimissed by the user."
   ([options] (pick-one *state* options))
   ([state options]
-   (let [p (promise)]
-     (open
-      state
-      (fn [_state]
-        [palette-component
-         {:on-select #(deliver p %)
-          :on-dismiss #(deliver p ::dismiss)
-          :options options}]))
-     (deref p))))
+   #?(:clj
+      (let [p (promise)]
+        (open
+         state
+         (fn [_state]
+           [palette-component
+            {:on-select #(deliver p %)
+             :on-dismiss #(deliver p ::dismiss)
+             :options options}]))
+        (deref p))
+      :cljs
+      (js/Promise.
+       (fn [resolve]
+         (open
+          state
+          (fn [_state]
+            [palette-component
+             {:on-select #(resolve %)
+              :on-dismiss #(resolve ::dismiss)
+              :options options}])))))))
 
 (defn pick-many
   "Prompt user to pick many values from a list of options.
@@ -524,48 +551,89 @@
   ([options]
    (pick-many *state* options))
   ([state options]
-   (let [p (promise)]
-     (open
-      state
-      (fn [_state]
-        (let [state (state/use-state)]
-          [selector-component
-           {:options options
-            :on-dismiss #(deliver p ::dismiss)
-            :run
-            (fn [options]
-              (close state)
-              (deliver p options))}])))
-     (deref p))))
+   #?(:clj
+      (let [p (promise)]
+        (open
+         state
+         (fn [_state]
+           (let [state (state/use-state)]
+             [selector-component
+              {:options options
+               :on-dismiss #(deliver p ::dismiss)
+               :run
+               (fn [options]
+                 (close state)
+                 (deliver p options))}])))
+        (deref p))
+      :cljs
+      (js/Promise.
+       (fn [resolve]
+         (open
+          state
+          (fn []
+            (let [state (state/use-state)]
+              [selector-component
+               {:options options
+                :on-dismiss #(resolve ::dismiss)
+                :run
+                (fn [options]
+                  (close state)
+                  (resolve options))}]))))))))
 
 (defn pick-in
   ([v]
    (pick-in *state* v))
   ([state v]
-   (let [p (promise)
-         get-key
-         (fn get-key [path v]
-           (open
-            state
-            (fn [_state]
-              [palette-component
-               {:options (concat [::done] (keys v))
-                :on-dismiss #(deliver p ::dismiss)
-                :on-select
-                (fn [k]
-                  (let [path (conj path k)
-                        next-value (get v k)]
-                    (cond
-                      (= k ::done)
-                      (deliver p (drop-last path))
+   #?(:clj
+      (let [p (promise)
+            get-key
+            (fn get-key [path v]
+              (open
+               state
+               (fn [_state]
+                 [palette-component
+                  {:options (concat [::done] (keys v))
+                   :on-dismiss #(deliver p ::dismiss)
+                   :on-select
+                   (fn [k]
+                     (let [path (conj path k)
+                           next-value (get v k)]
+                       (cond
+                         (= k ::done)
+                         (deliver p (drop-last path))
 
-                      (not (map? next-value))
-                      (deliver p path)
+                         (not (map? next-value))
+                         (deliver p path)
 
-                      :else
-                      (get-key path next-value))))}])))]
-     (get-key [] v)
-     (deref p))))
+                         :else
+                         (get-key path next-value))))}])))]
+        (get-key [] v)
+        (deref p))
+
+      :cljs (js/Promise.
+             (fn [resolve]
+               (let [get-key
+                     (fn get-key [path v]
+                       (open
+                        state
+                        (fn [_state]
+                          [palette-component
+                           {:options (concat [::done] (keys v))
+                            :on-dismiss #(resolve ::dismiss)
+                            :on-select
+                            (fn [k]
+                              (let [path (conj path k)
+                                    next-value (get v k)]
+                                (cond
+                                  (= k ::done)
+                                  (resolve (drop-last path))
+
+                                  (not (map? next-value))
+                                  (resolve path)
+
+                                  :else
+                                  (get-key path next-value))))}])))]
+                 (get-key [] v)))))))
 
 ;; portal data commands
 
@@ -622,7 +690,15 @@
   (with-out-str (pp/pprint value)))
 
 (defn- copy-to-clipboard! [s]
-  ((requiring-resolve 'portal.ssr.server/send!) {:op "on-copy" :text s}))
+  #?(:clj
+     ((requiring-resolve 'portal.ssr.server/send!) {:op "on-copy" :text s})
+     :cljs
+     (let [el (js/document.createElement "textarea")]
+       (set! (.-value el) s)
+       (js/document.body.appendChild el)
+       (.select el)
+       (js/document.execCommand "copy")
+       (js/document.body.removeChild el))))
 
 (defn- copy-edn! [value]
   (copy-to-clipboard!
@@ -645,17 +721,28 @@
                ^::shortcuts/osx #{"meta" "c"}
                ^::shortcuts/windows ^::shortcuts/linux #{"control" "c"}]}
   [state]
-  (copy-edn! (selected-values @state)))
+  #?(:clj (copy-edn! (selected-values @state))
+     :cljs
+     (if-let [selection (not-empty (.. js/window getSelection toString))]
+       (copy-to-clipboard! selection)
+       (copy-edn! (selected-values @state)))))
 
 (defn- map->qs [m]
-  (->> m
-       (map
-        (fn [[k v]]
-          (str (name k) "=" v)))
-       (str/join "&")))
+  #?(:clj
+     (->> m
+          (map
+           (fn [[k v]]
+             (str (name k) "=" v)))
+          (str/join "&"))
+     :cljs
+     (let [qs (js/URLSearchParams.)]
+       (doseq [[k v] m]
+         (.append qs (name k) v))
+       (str qs))))
 
 (defn- btoa [^String s]
-  (.encodeToString (Base64/getEncoder) (.getBytes s)))
+  #?(:clj  (.encodeToString (java.util.Base64/getEncoder) (.getBytes s))
+     :cljs (js/btoa s)))
 
 (defn ^:no-doc create-data-url [value]
   (let [edn (binding [*print-meta* true] (pr-str value))]
@@ -673,17 +760,20 @@
 (defn ^:command inspect-standalone
   "Open value in standalone Portal (https://djblue.github.io/portal/)."
   [state]
-  ((requiring-resolve 'clojure.java.browse/browse-url)
+  (#?(:clj (requiring-resolve 'clojure.java.browse/browse-url)
+      :clj js/open)
    (create-data-url (selected-values @state))))
 
 (defn- keyword-fn [k]
   (str (when-let [n (namespace k)] (str n "/")) (name k)))
 
 (defn- pprint-json [v]
-  (with-out-str
-    ((requiring-resolve 'clojure.data.json/pprint)
-     v
-     :key-fn keyword-fn :escape-slash false)))
+  #?(:clj
+     (with-out-str
+       ((requiring-resolve 'clojure.data.json/pprint)
+        v
+        :key-fn keyword-fn :escape-slash false))
+     :cljs (.stringify js/JSON (clj->js v :keyword-fn keyword-fn) nil 2)))
 
 (defn ^:command copy-json
   "Copy selected value as a json string to the clipboard."
@@ -709,13 +799,13 @@
   "Set the viewer for the currently selected value(s)."
   {:shortcuts [#{"v"}]}
   [state]
-  (future
-    (when-let [selected-context (state/get-all-selected-context @state)]
-      (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
-        (when (> (count viewers) 1)
-          (a/let [selected-viewer (pick-one state (map :name viewers))]
-            (when-not (= ::dismiss selected-viewer)
-              (ins/set-viewer! state selected-context selected-viewer))))))))
+  (#?(:clj future :cljs do)
+   (when-let [selected-context (state/get-all-selected-context @state)]
+     (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
+       (when (> (count viewers) 1)
+         (a/let [selected-viewer (pick-one state (map :name viewers))]
+           (when-not (= ::dismiss selected-viewer)
+             (ins/set-viewer! state selected-context selected-viewer))))))))
 
 (defn- get-viewer [state context direction]
   (let [viewers (map :name (ins/get-compatible-viewers @ins/viewers context))
@@ -753,8 +843,9 @@
 (defn ^:command focus-filter
   {:shortcuts [["/"]]}
   [_]
-  #_(doseq [ref @search-refs]
-      (when-let [input (.-current ref)] (.focus input))))
+  #?(:cljs
+     (doseq [ref @search-refs]
+       (when-let [input (.-current ref)] (.focus input)))))
 
 (defn ^:command clear-filter
   [state]
@@ -763,23 +854,23 @@
 (defn ^:command scroll-top
   {:shortcuts [["g" "g"]]}
   [_state]
-  ;; (when-let [el (:scroll-element @state)]
-  ;;   (.scroll el #js {:top 0}))
-  )
+  #?(:cljs
+     (when-let [el (:scroll-element @_state)]
+       (.scroll el #js {:top 0}))))
 
 (defn ^:command scroll-bottom
   {:shortcuts [#{"shift" "g"}]}
   [_state]
-  ;; (when-let [el (:scroll-element @state)]
-  ;;   (.scroll el #js {:top (+ (.-scrollHeight el) 1000)}))
-  )
+  #?(:cljs
+     (when-let [el (:scroll-element @_state)]
+       (.scroll el #js {:top (+ (.-scrollHeight el) 1000)}))))
 
 (defn ^:command center-selected
   {:shortcuts [["z" "z"]]}
   [_state]
-  ;; (when-let [el @state/selected-el]
-  ;;   (.scrollIntoView el #js {:inline "center" :block "center" :behavior "smooth"}))
-  )
+  #?(:cljs
+     (when-let [el @state/selected-el]
+       (.scrollIntoView el #js {:inline "center" :block "center" :behavior "smooth"}))))
 
 (defn ^:command toggle-shell
   "Toggle visibility of top / bottom helper UX. Allows for a value focused session."
@@ -913,7 +1004,9 @@
   [state]
   (state/dispatch! state state/history-push {:portal/value @state/log}))
 
-(defn- ->args [x] (if (= ::dismiss x) x [x]))
+(defn- ->args [x]
+  #?(:clj  (if (= ::dismiss x) x [x])
+     :cljs (.then ^js/Promise x #(if (= ::dismiss %) % [%]))))
 
 (def ^:private clojure-commands
   {#'clojure.core/vals        {:predicate map?}
@@ -950,12 +1043,12 @@
      (doseq [shortcut (concat (:shortcuts m) (:shortcuts opts))]
        (swap! client-keymap assoc shortcut name))
      (swap! registry
-            assoc name (merge {:name name :run (fn [& args] (future (apply var args)))}
+            assoc name (merge {:name name :run #?(:clj (fn [& args] (future (apply var args))) :cljs var)}
                               (when-let [doc (or (:doc m) (:doc opts))] {:doc doc})
                               (when-let [command (:command m)] {:command command})
                               opts)))))
 
-(doseq [var (vals (ns-publics 'portal.ssr.ui.commands))
+(doseq [var (vals (ns-publics 'portal.ui.commands))
         :when (-> var meta :command)]
   (register! var))
 
@@ -980,23 +1073,23 @@
 (register! #'nav {:name      'clojure.datafy/nav
                   :predicate (comp :collection state/get-selected-context)})
 
-;; (defn- vs-code-vars
-;;   "List all available css variable provided by vs-code."
-;;   [state]
-;;   (state/dispatch!
-;;    state
-;;    state/history-push
-;;    {:portal/value (theme/get-vs-code-css-vars)}))
+(defn- vs-code-vars
+  "List all available css variable provided by vs-code."
+  [state]
+  (state/dispatch!
+   state
+   state/history-push
+   {:portal/value (theme/get-vs-code-css-vars)}))
 
-;; (register! #'vs-code-vars {:predicate theme/is-vs-code?})
+(register! #'vs-code-vars {:predicate theme/is-vs-code?})
 
-;; (defn- vs-code-copy-theme
-;;   [_]
-;;   (-> (theme/get-vs-code-css-vars)
-;;       (walk/postwalk-replace (::c/vs-code-embedded c/themes))
-;;       (copy-edn!)))
+(defn- vs-code-copy-theme
+  [_]
+  (-> (theme/get-vs-code-css-vars)
+      (walk/postwalk-replace (::c/vs-code-embedded c/themes))
+      (copy-edn!)))
 
-;; (register! #'vs-code-copy-theme {:predicate theme/is-vs-code?})
+(register! #'vs-code-copy-theme {:predicate theme/is-vs-code?})
 
 (defn copy-str
   "Copy string to the clipboard."
@@ -1006,69 +1099,72 @@
 
 (register! #'copy-str {:predicate (comp string? state/get-selected-value)})
 
-;; (defn- prompt-file []
-;;   (js/Promise.
-;;    (fn [resolve _reject]
-;;      (let [id      "open-file-dialog"
-;;            input   (or
-;;                     (js/document.getElementById id)
-;;                     (js/document.createElement "input"))]
-;;        (set! (.-id input) id)
-;;        (set! (.-type input) "file")
-;;        (set! (.-multiple input) "true")
-;;        (set! (.-style input) "visibility:hidden")
-;;        (.addEventListener
-;;         input
-;;         "change"
-;;         (fn [event]
-;;           (a/let [value (dnd/handle-files (-> event .-target .-files))]
-;;             (resolve value)))
-;;         false)
-;;        (js/document.body.appendChild input)
-;;        (.click input)))))
+(defn- prompt-file []
+  #?(:cljs
+     (js/Promise.
+      (fn [resolve _reject]
+        (let [id      "open-file-dialog"
+              input   (or
+                       (js/document.getElementById id)
+                       (js/document.createElement "input"))]
+          (set! (.-id input) id)
+          (set! (.-type input) "file")
+          (set! (.-multiple input) "true")
+          (set! (.-style input) "visibility:hidden")
+          (.addEventListener
+           input
+           "change"
+           (fn [event]
+             (a/let [value (dnd/handle-files (-> event .-target .-files))]
+               (resolve value)))
+           false)
+          (js/document.body.appendChild input)
+          (.click input))))))
 
-;; (defn open-file
-;;   "Open a File"
-;;   {:shortcuts
-;;    [^::shortcuts/osx #{"meta" "o"}
-;;     ^::shortcuts/windows ^::shortcuts/linux #{"control" "o"}]}
-;;   [state]
-;;   (a/let [value (prompt-file)]
-;;     (state/dispatch! state state/history-push {:portal/value value})))
+(defn open-file
+  "Open a File"
+  {:shortcuts
+   [^::shortcuts/osx #{"meta" "o"}
+    ^::shortcuts/windows ^::shortcuts/linux #{"control" "o"}]}
+  [state]
+  (a/let [value (prompt-file)]
+    (state/dispatch! state state/history-push {:portal/value value})))
 
-;; (register! #'open-file)
+(register! #'open-file)
 
-;; (defn- clipboard []
-;;   (js/navigator.clipboard.readText))
+(defn- clipboard []
+  #?(:cljs (js/navigator.clipboard.readText)))
 
-;; (defn- parse-as
-;;   "Paste value from clipboard"
-;;   [state value]
-;;   (a/let [format (pick-one state (p/formats))]
-;;     (when-not (= ::dismiss format)
-;;       (state/dispatch! state
-;;                        state/history-push
-;;                        {:portal/value
-;;                         (try (p/parse-string format value) (catch :default e e))}))))
+(defn- parse-as
+  "Paste value from clipboard"
+  [state value]
+  (a/let [format (pick-one state (p/formats))]
+    (when-not (= ::dismiss format)
+      (state/dispatch! state
+                       state/history-push
+                       {:portal/value
+                        (try
+                          (p/parse-string format value)
+                          (catch #?(:clj Exception :cljs :default) e e))}))))
 
-;; (defn paste
-;;   "Paste value from clipboard"
-;;   {:shortcuts
-;;    [["p" "p"]
-;;     ^::shortcuts/osx #{"meta" "v"}
-;;     ^::shortcuts/windows ^::shortcuts/linux #{"control" "v"}]}
-;;   [state]
-;;   (a/let [value (clipboard)] (parse-as state value)))
+(defn paste
+  "Paste value from clipboard"
+  {:shortcuts
+   [["p" "p"]
+    ^::shortcuts/osx #{"meta" "v"}
+    ^::shortcuts/windows ^::shortcuts/linux #{"control" "v"}]}
+  [state]
+  (a/let [value (clipboard)] (parse-as state value)))
 
-;; (register! #'paste)
+(register! #'paste)
 
-;; (defn parse-selected
-;;   "Parse currently select text"
-;;   {:shortcuts [["p" "s"]]}
-;;   [state]
-;;   (parse-as state (.toString (.getSelection js/window))))
+(defn parse-selected
+  "Parse currently select text"
+  {:shortcuts [["p" "s"]]}
+  [_state]
+  #?(:cljs (parse-as _state (.toString (.getSelection js/window)))))
 
-;; (register! #'parse-selected)
+(register! #'parse-selected)
 
 (defn- pop-up [child]
   (let [state (state/use-state)]
@@ -1092,26 +1188,24 @@
    (palette nil))
   ([{:keys [container]}]
    (let [state (state/use-state)
-         value (react/use-atom state state/get-selected-value)
-         ;; opts  (options/use-options)
-         ]
+         value (state/get-selected-value @state)
+         opts  #?(:clj nil :cljs (options/use-options))]
      (use-shortcuts-setup)
      (react/use-effect
-      (fn []
-        (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
-          (reset!
-           runtime-registry
-           (reduce-kv
-            (fn [out k opts]
-              (assoc out k (make-command
-                            (assoc opts :f (partial state/invoke (:name opts))))))
-            {}
-            fns))))
-      [(hash value)])
+      [(hash value)]
+      (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
+        (reset!
+         runtime-registry
+         (reduce-kv
+          (fn [out k opts]
+            (assoc out k (make-command
+                          (assoc opts :f (partial state/invoke (:name opts))))))
+          {}
+          fns))))
      [with-shortcuts
       (fn [log]
         (when-not (shortcuts/input? log)
-          (when-let [f (shortcuts/match (merge @client-keymap #_(some-> opts :keymap deref)) log)]
+          (when-let [f (shortcuts/match (merge @client-keymap (some-> opts :keymap deref)) log)]
             (when-let [{:keys [run]} (or (get @registry f)
                                          (get @runtime-registry f))]
               (shortcuts/matched! log)

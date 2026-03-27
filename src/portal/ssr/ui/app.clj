@@ -2,7 +2,7 @@
   (:require
    [clojure.string :as str]
    [portal.colors :as c]
-   [portal.ssr.ui.commands :as commands]
+   [portal.ui.commands :as commands]
    [portal.ssr.ui.inspector :as ins]
    [portal.ssr.ui.react :as react]
    [portal.ssr.ui.state :as state]
