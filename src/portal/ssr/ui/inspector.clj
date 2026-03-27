@@ -29,6 +29,14 @@
 (defn viewers-by-name [viewers]
   (into {} (map (juxt :name identity) viewers)))
 
+(defn- get-compatible-viewers* [viewers value]
+  (into #{}
+        (filter
+         #(when-let [pred (:predicate %)]
+            (try (pred value)
+                 (catch Exception _ nil))))
+        viewers))
+
 (defn- get-compatible-viewers-1 [viewers {:keys [value] :as context}]
   (let [by-name        (viewers-by-name viewers)
         default-viewer (get by-name
@@ -842,8 +850,7 @@
   (let [state (atom state)]
     {:expanded? (state/expanded? state context)
      :selected  (state/selected state context)
-     :viewer    (or (get-selected-viewer state context location value)
-                    (get-compatible-viewer context value))}))
+     :viewer    (get-selected-viewer state context location value)}))
 
 (defn use-wrapper-options [context]
   (let [state          (state/use-state)
@@ -968,6 +975,22 @@
 
 (defn inspect [value] (inspect* value))
 
+(defn- get-default-viewer [{:keys [value] :as context} viewers]
+  (let [default-viewer (or (get-in (meta context) [:props :portal.viewer/default])
+                           (:portal.viewer/default (meta value))
+                           (:portal.viewer/default context))]
+    (some (fn [viewer] (when (= default-viewer (:name viewer)) viewer)) viewers)))
+
+(defn- use-resolve-viewer
+  [{:keys [value] :as context} selected-viewer viewers]
+  (let [compatible-viewers (react/use-memo #(get-compatible-viewers* viewers value) [viewers value])]
+    (if (contains? compatible-viewers selected-viewer)
+      selected-viewer
+      (let [default-viewer (get-default-viewer context viewers)]
+        (if (contains? compatible-viewers default-viewer)
+          default-viewer
+          (some compatible-viewers viewers))))))
+
 (defn inspector* [ctx value]
   (let [props          (:props (meta ctx))
         state          (state/use-state)
@@ -975,15 +998,14 @@
         theme          (theme/use-theme)
         {:keys [viewer expanded?] :as options}
         (react/use-atom state #(get-info % ctx location value))
-
-        options        (assoc options :props props)
-        component (or
-                   (when-not (= (:name viewer) :portal.viewer/inspector)
-                     @(:component viewer))
-                   (if (and (not expanded?) (coll? value))
-                     preview-coll
-                     inspect))]
-    (select/use-register-context ctx viewer)
+        resolved-viewer  (use-resolve-viewer ctx viewer (react/use-atom viewers))
+        options          (assoc options :props props :viewer resolved-viewer)
+        component        (cond
+                           (not= :portal.viewer/inspector (:name resolved-viewer))
+                           @(:component resolved-viewer)
+                           expanded? inspect
+                           :else preview)]
+    (select/use-register-context ctx resolved-viewer)
     (react/use-effect
      (fn []
        (when (and (nil? expanded?)
@@ -1013,8 +1035,7 @@
         :on-focus
         (fn [_]
           (when-not selected
-            (state/dispatch! state state/select-context context false))
-          #_(when-not selected (set-selected! [id])))}])))
+            (state/dispatch! state state/select-context context false)))}])))
 
 (defn inspector
   ([value]
@@ -1035,4 +1056,4 @@
      [with-parent
       context
       ^{:key "tab-index"} [tab-index context]
-      [with-context context ^{:key (type value)} [inspector* context value]]])))
+      [with-context context [inspector* context value]]])))
