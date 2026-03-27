@@ -624,7 +624,8 @@
                 {:box-sizing :border-box
                  :padding (:padding theme)
                  :border-right [1 :solid (::c/border theme)]}}
-         [select/with-position {:row -2 :column 1} [inspector type]]])
+         [select/with-position {:row -2 :column 1}
+          [with-key 'type [inspector type]]]])
 
       (when search-text
         (let [color (get theme (nth theme/order (:depth context)))]
@@ -660,7 +661,8 @@
           :box-sizing :border-box
           :padding (:padding theme)}}
         [with-depth
-         [select/with-position {:row -1 :column 0} [inspector metadata]]]])]))
+         [select/with-position {:row -1 :column 0}
+          [with-key 'meta [inspector metadata]]]]])]))
 
 (defn- container-map-k [child]
   (let [theme (theme/use-theme)]
