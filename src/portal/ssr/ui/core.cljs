@@ -121,6 +121,8 @@
 (webcomponent!
  "scroll-into-view"
  {:on-connect (fn [this] (.scrollIntoView this #js {:block "center"}))})
+(defn input? [e]
+  (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"} (.. e -target -tagName)))
 
 (defn on-connect [ws]
   (js/setInterval #(.send ^js ws (.stringify js/JSON #js {:op "ping"})) 15000)
@@ -191,11 +193,12 @@
     (.addEventListener
      js/window "keydown"
      (fn [^js e]
-       (when (or
-              (#{" "} (.-key e))
-              (and (.-ctrlKey e)
-                   (#{"j" "p"} (.-key e))))
-         (.preventDefault e))
+       (if (input? e)
+         (when (#{"Tab"} (.-key e))
+           (.preventDefault e))
+         (when-not (or (and (.-ctrlKey e) (#{"f"} (.-key e)))
+                       (#{"Tab"} (.-key e)))
+           (.preventDefault e)))
        (.send ^js ws
               (.stringify
                js/JSON
