@@ -10,8 +10,7 @@
             #?(:clj  [portal.ssr.ui.inspector :as ins]
                :cljs [portal.ui.inspector :as ins])
             [portal.ui.select :as select]
-            #?(:clj  [portal.ssr.ui.state :as state]
-               :cljs [portal.ui.state :as state])
+            [portal.ui.state :as state]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 

@@ -8,7 +8,7 @@
    [portal.ui.lazy :as l]
    [portal.ssr.ui.react :as react]
    [portal.ui.select :as select]
-   [portal.ssr.ui.state :as state]
+   [portal.ui.state :as state]
    [portal.ui.styled :as s]
    [portal.ui.theme :as theme]
    [portal.ui.filter :as f]))

@@ -7,8 +7,7 @@
             [portal.ui.react :as react]
             #?(:cljs [portal.ui.rpc :as rpc])
             [portal.ui.select :as select]
-            #?(:clj  [portal.ssr.ui.state :refer [atom?]]
-               :cljs [portal.ui.state :refer [atom?]])
+            [portal.ui.state :refer [atom?]]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 

@@ -5,7 +5,7 @@
    [portal.ui.commands :as commands]
    [portal.ssr.ui.inspector :as ins]
    [portal.ssr.ui.react :as react]
-   [portal.ssr.ui.state :as state]
+   [portal.ui.state :as state]
    [portal.ui.icons :as icons]
    [portal.ui.select :as select]
    [portal.ui.styled :as d]

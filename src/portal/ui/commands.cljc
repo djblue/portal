@@ -14,8 +14,7 @@
             #?(:cljs [portal.ui.options :as options])
             [portal.ui.parsers :as p]
             [portal.ui.react :as react]
-            #?(:clj  [portal.ssr.ui.state :as state]
-               :cljs [portal.ui.state :as state])
+            [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
             #?(:cljs [reagent.core :as r])))

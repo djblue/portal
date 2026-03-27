@@ -11,7 +11,7 @@
    [portal.ssr.hiccup :as hiccup]
    [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
-   [portal.ssr.ui.state :as state]
+   [portal.ui.state :as state]
    [portal.ssr.ui.uuid :refer [parse-uuid]]
    [portal.ui.select :as select]
    [portal.ui.styled :as d])
