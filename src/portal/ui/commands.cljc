@@ -766,9 +766,9 @@
 (defn ^:command inspect-standalone
   "Open value in standalone Portal (https://djblue.github.io/portal/)."
   [state]
-  (#?(:clj (requiring-resolve 'clojure.java.browse/browse-url)
-      :clj js/open)
-   (create-data-url (selected-values @state))))
+  (let [url (create-data-url (selected-values @state))]
+    #?(:clj  ((requiring-resolve 'clojure.java.browse/browse-url) url)
+       :cljs (js/open url))))
 
 (defn- keyword-fn [k]
   (str (when-let [n (namespace k)] (str n "/")) (name k)))
