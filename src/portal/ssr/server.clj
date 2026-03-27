@@ -1,21 +1,22 @@
 (ns portal.ssr.server
   (:refer-clojure :exclude [parse-uuid])
   (:require
-   [clojure.data.json :as json]
    [clojure.java.io :as io]
    [clojure.string :as str]
    [org.httpkit.server :as server]
    [portal.runtime :as rt]
+   [portal.runtime.json :as json]
    [portal.runtime.jvm.server :refer [enable-cors route]]
    [portal.shortcuts :as shortcuts]
    [portal.ssr.hiccup :as hiccup]
    [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
-   [portal.ui.state :as state]
    [portal.ssr.ui.uuid :refer [parse-uuid]]
    [portal.ui.select :as select]
+   [portal.ui.state :as state]
    [portal.ui.styled :as d])
-  (:import [java.io ByteArrayInputStream]))
+  (:import
+   [java.io ByteArrayInputStream]))
 
 (defn- on-message [{:keys [handlers last-ping]} {:keys [id] :as event}]
   (let [op (keyword (:op event))]
@@ -102,7 +103,7 @@
    (if (or (bytes? message)
            (instance? ByteArrayInputStream message))
      (server/send! channel message)
-     (server/send! channel (cond-> message (not (string? message)) (json/write-str))))))
+     (server/send! channel (cond-> message (not (string? message)) (json/write))))))
 
 (defn- render-app [{:keys [handlers selection-index output-buffer log] :as session}
                    {:keys [hiccup styles app-state] :as render-state}]
@@ -136,7 +137,7 @@
          (start-render-loop session (partial #'render-app session))))
 
 (defn- on-receive [session message]
-  (swap! (:event-queue session) conj (json/read-str message :key-fn keyword)))
+  (swap! (:event-queue session) conj (json/read message)))
 
 (defn- on-close [session]
   (remove-watch (:state session) :selected)
