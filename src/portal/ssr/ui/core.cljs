@@ -333,11 +333,9 @@
             (on-message
              {:op "on-render"
               :html (.decode (js/TextDecoder.) data)})
-            (if-not (.startsWith ^js/String data "{")
-              (on-message {:op "on-render" :html data})
-              (-> (.parse js/JSON data)
-                  (js->clj :keywordize-keys true)
-                  (on-message)))))})
+            (-> (.parse js/JSON data)
+                (js->clj :keywordize-keys true)
+                (on-message))))})
       (.then on-connect)))
 
 (main!)
