@@ -51,10 +51,11 @@
 
 (defn icon [icon & [props]]
   #?(:clj [:i (merge
-               {:class (str "fas " (name icon)
-                            (when-let [size (:size props)]
+               {:style (merge {:line-height :normal} (:style props))
+                :class (str "fas " (name icon)
+                            (when-let [size (:size props "lg")]
                               (str " fa-" size)))}
-               (dissoc props :size))]
+               (dissoc props :size :style))]
      :cljs [:> FontAwesomeIcon (d/attrs->css (merge {:icon icon :size "lg"} props))]))
 
 #?(:cljs (def arrow-down (partial icon faArrowDown)))

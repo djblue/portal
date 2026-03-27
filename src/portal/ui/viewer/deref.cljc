@@ -28,12 +28,10 @@
        :color      (if active?
                      (::c/tag theme)
                      (::c/exception theme))
-       :font-size  #?(:clj "1.35rem"
-                      :cljs  (:font-size theme))
        :box-sizing :border-box
        :padding    (if-not (coll? value')
                      0
-                     (inc (:padding theme)))}
+                     (* 1.25 (:padding theme)))}
 
       :style/hover {:opacity 1}
 
