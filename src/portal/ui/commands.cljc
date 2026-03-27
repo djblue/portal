@@ -23,6 +23,10 @@
 (def ^:dynamic *state* nil)
 (defonce ^:private input #?(:clj (atom nil) :cljs (r/atom nil)))
 
+(defn- use-options []
+  #?(:clj  {:keymap @(requiring-resolve 'portal.runtime/runtime-keymap)}
+     :cljs (options/use-options)))
+
 (defn open
   ([f] (open input f))
   ([state f] (swap! state assoc ::input f)))
@@ -273,7 +277,7 @@
 
 (defn shortcut [command]
   (let [theme (theme/use-theme)
-        opts  #?(:clj nil :cljs (options/use-options))]
+        opts  (use-options)]
     [s/div {:style
             {:display :flex
              :align-items :stretch
@@ -1188,8 +1192,8 @@
 
 (defn palette* [{:keys [container]}]
   (let [state (state/use-state)
-        value (state/get-selected-value @state)
-        opts  #?(:clj nil :cljs (options/use-options))]
+        value (react/use-atom state state/get-selected-value)
+        opts  (use-options)]
     (react/use-effect
      [(hash value)]
      (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
