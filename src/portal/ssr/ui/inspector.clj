@@ -1,4 +1,5 @@
 (ns portal.ssr.ui.inspector
+  (:refer-clojure :exclude [coll? map?])
   (:require
    [clojure.set :as set]
    [portal.colors :as c]
@@ -18,6 +19,14 @@
 
 (defn regex? [value] (instance? java.util.regex.Pattern value))
 (defn bigint? [value] (instance? clojure.lang.BigInt value))
+
+(defn coll? [value]
+  (and (clojure.core/coll? value)
+       (not (cson/tagged-value? value))))
+
+(defn map? [value]
+  (and (clojure.core/map? value)
+       (not (cson/tagged-value? value))))
 
 (def viewer
   {:predicate (constantly true)
@@ -160,6 +169,9 @@
   (cond
     (tagged-literal? value)
     :tagged
+
+    (cson/tagged-value? value)
+    (:tag value)
 
     (bytes? value)    :binary
     (map? value)      :map
@@ -836,6 +848,9 @@
 
 (defmethod inspect* :coll [value]
   [inspect-coll* (use-search-text) value])
+
+(defmethod inspect* "remote" [value]
+  (:rep value))
 
 (defmethod inspect* :default [value] [s/span (pr-str value)])
 
