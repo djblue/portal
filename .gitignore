@@ -6,7 +6,7 @@ node_modules/
 cljs-runtime/
 resources/portal/
 resources/portal-dev/
-!.clj-kondo/config
+!.clj-kondo/config.edn
 .clj-kondo/*
 .DS_Store
 .nrepl-port

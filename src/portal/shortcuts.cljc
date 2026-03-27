@@ -2,7 +2,8 @@
   (:require [clojure.string :as str]))
 
 (defn- get-platform []
-  (let [platform js/window.navigator.platform]
+  (let [platform #?(:clj  (System/getProperty "os.name")
+                    :cljs js/window.navigator.platform)]
     (cond
       (#{"Macintosh" "MacIntel" "MacPPC" "Mac68K"} platform)  ::osx
       (#{"Win32" "Win64" "Windows" "WinCE"} platform)         ::windows
@@ -27,7 +28,9 @@
     :else definition))
 
 (defn- event->key [e]
-  (when-let [k (.-key e)] (.toLowerCase k)))
+  (when-let [k #?(:clj  (:key e)
+                  :cljs (.-key e))]
+    (str/lower-case k)))
 
 (defn- log->seq
   "Returns all key sequences in the event log."
@@ -41,14 +44,15 @@
   [log]
   (when-let [e (first log)]
     (cond-> #{(event->key e)}
-      (.-ctrlKey e)  (conj "control")
-      (.-metaKey e)  (conj "meta")
-      (.-shiftKey e) (conj "shift")
-      (.-altKey e)   (conj "alt"))))
+      #?(:clj (:ctrl-key e)  :cljs (.-ctrlKey e))  (conj "control")
+      #?(:clj (:meta-key e)  :cljs (.-metaKey e))  (conj "meta")
+      #?(:clj (:shift-key e) :cljs (.-shiftKey e)) (conj "shift")
+      #?(:clj (:alt-key e)   :cljs (.-altKey e))   (conj "alt"))))
 
 (defonce ^:private log (atom nil))
+(def ^:dynamic *log* nil)
 
-(defn clear! [] (reset! log (list)))
+(defn clear! [] (reset! (or *log* log) (list)))
 
 (defn match? [definition log]
   (some (fn [combo]
@@ -62,27 +66,28 @@
 (defn input? [log]
   (when-let [e (first log)]
     (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"}
-     (.. e -target -tagName))))
+     #?(:clj  (get-in e [:target :tag-name])
+        :cljs (.. e -target -tagName)))))
 
-(defn- keydown [e] (swap! log #(take 5 (conj % e))) nil)
+(defn keydown [e] (swap! (or *log* log) #(take 5 (conj % e))) nil)
 
 (defn- init []
-  (when (nil? @log)
+  (when (nil? @(or *log* log))
     (clear!)
-    (.addEventListener js/window "blur" #(clear!))
-    (.addEventListener js/window "keydown" #(keydown %))))
+    #?(:cljs (.addEventListener js/window "blur" #(clear!)))
+    #?(:cljs (.addEventListener js/window "keydown" #(keydown %)))))
 
-(defn matched! [log]
+(defn matched! [_log]
   (clear!)
-  (when-let [e (first log)] (.preventDefault ^js e)))
+  #?(:cljs (when-let [e (first _log)] (.preventDefault ^js e))))
 
 (defn add! [k f]
   (init)
   (add-watch
-   log k
+   (or *log* log) k
    (fn [_ _ _ log]
      (when-not (empty? log)
        (f log)))))
 
-(defn remove! [k] (remove-watch log k))
+(defn remove! [k] (remove-watch (or *log* log) k))
 

@@ -3,22 +3,28 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.walk :as walk]
-            [portal.async :as a]
+            #?(:clj  [portal.sync :as a]
+               :cljs [portal.async :as a])
             [portal.colors :as c]
             [portal.shortcuts :as shortcuts]
-            [portal.ui.drag-and-drop :as dnd]
+            #?(:cljs [portal.ui.drag-and-drop :as dnd])
             [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
-            [portal.ui.options :as options]
+            #?(:clj [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
+            #?(:cljs [portal.ui.options :as options])
             [portal.ui.parsers :as p]
             [portal.ui.react :as react]
             [portal.ui.state :as state]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]
-            [reagent.core :as r]))
+            #?(:cljs [reagent.core :as r])))
 
 (def ^:dynamic *state* nil)
-(defonce ^:private input (r/atom nil))
+(defonce ^:private input #?(:clj (atom nil) :cljs (r/atom nil)))
+
+(defn- use-options []
+  #?(:clj  {:keymap @(requiring-resolve 'portal.runtime/runtime-keymap)}
+     :cljs (options/use-options)))
 
 (defn open
   ([f] (open input f))
@@ -32,7 +38,7 @@
   (let [theme (theme/use-theme)]
     (into
      [s/div
-      {:on-click #(.stopPropagation %)
+      {:on-click #?(:clj identity :cljs #(.stopPropagation %))
        :style
        {:font-family (:font-family theme)
         :max-height "100%"
@@ -47,25 +53,30 @@
         :border-radius (:border-radius theme)}}]
      children)))
 
-(defonce ^:private handlers (atom {}))
-(def ^:private shortcut-context (react/create-context 0))
+(defonce ^:private handlers-context (react/create-context nil))
+(defonce ^:private shortcut-context (react/create-context 0))
 
-(defn- dispatch [log]
+(defn- dispatch [handlers log]
   (when-let [[_ f] (last (sort-by first < @handlers))]
     (f log)))
 
-(defn- with-shortcuts [f & children]
-  (let [i (react/use-context shortcut-context)]
+(defn- shortcuts-setup [& children]
+  (let [handlers (atom {})]
     (react/use-effect
-     #js [f]
+     :once
+     (shortcuts/add! ::with-shortcuts (partial dispatch handlers))
+     (fn []
+       (shortcuts/remove! ::with-shortcuts)))
+    (apply react/provider handlers-context handlers children)))
+
+(defn- with-shortcuts [f & children]
+  (let [i (react/use-context shortcut-context)
+        handlers (react/use-context handlers-context)]
+    (react/use-effect
+     [f handlers]
      (swap! handlers assoc i f)
      (fn []
        (swap! handlers dissoc i)))
-    (react/use-effect
-     :always
-     (shortcuts/add! ::with-shortcuts dispatch)
-     (fn []
-       (shortcuts/remove! ::with-shortcuts)))
     (apply react/provider shortcut-context (inc i) children)))
 
 (defn- checkbox [checked?]
@@ -95,128 +106,130 @@
           :border-radius "50%"}}])]))
 
 (defn- scroll-into-view []
-  (let [el (atom nil)]
-    (fn []
-      (r/create-class
-       {:component-did-mount
-        (fn []
-          (when-let [el @el] (.scrollIntoView el #js {:block "center"})))
-        :reagent-render
-        (fn [] [:div {:ref #(reset! el %)}])}))))
+  #?(:clj [:scroll-into-view {:block "center"}]
+     :cljs
+     (let [el (atom nil)]
+       (fn []
+         (r/create-class
+          {:component-did-mount
+           (fn []
+             (when-let [el @el] (.scrollIntoView el #js {:block "center"})))
+           :reagent-render
+           (fn [] [:div {:ref #(reset! el %)}])})))))
 
 (defn- try-sort
   "Attempts to sort the given selection"
   [coll]
   (try
     (sort coll)
-    (catch js/Error _
+    (catch #?(:clj Exception :cljs js/Error) _
       coll)))
 
-(defn- selector-component []
-  (let [selected (r/atom #{})
-        active   (r/atom 0)]
-    (fn [input]
-      (let [theme     (theme/use-theme)
-            selected? @selected
-            state     (state/use-state)
-            on-close  (fn []
-                        (close state)
-                        (when (fn? (:on-dismiss input))
-                          ((:on-dismiss input))))
-            on-done   (:run input)
-            options   (try-sort (:options input))
-            n         (count (:options input))
-            on-select #(swap! selected (if (selected? %) disj conj) %)
-            on-toggle (fn toggle-all []
-                        (if (= (count @selected) (count options))
-                          (reset! selected #{})
-                          (swap! selected into options)))
-            on-invert (fn invert []
-                        (swap! selected #(set/difference (into #{} options) %)))
-            style     {:font   :bold
-                       :cursor :pointer
-                       :color  (::c/string theme)}]
-        [with-shortcuts
-         (fn [log]
-           (when
-            (condp shortcuts/match? log
-              "arrowup"        (swap! active #(mod (dec %) n))
-              "k"              (swap! active #(mod (dec %) n))
-              #{"shift" "tab"} (swap! active #(mod (dec %) n))
-              "arrowdown"      (swap! active #(mod (inc %) n))
-              "j"              (swap! active #(mod (inc %) n))
-              "tab"            (swap! active #(mod (inc %) n))
-              "a"       (on-toggle)
-              "i"       (on-invert)
-              " "       (on-select (nth options @active))
-              "enter"   (on-done @selected)
-              "escape"  (on-close)
+(defn- selector-component [input]
+  (let [[selected set-selected!] (react/use-state #{})
+        [active set-active!]     (react/use-state 0)
+        theme     (theme/use-theme)
+        selected? selected
+        state     (state/use-state)
+        on-close  (fn []
+                    (close state)
+                    (when (fn? (:on-dismiss input))
+                      ((:on-dismiss input))))
+        on-done   (:run input)
+        options   (try-sort (:options input))
+        n         (count (:options input))
+        on-select (fn [option]
+                    (if (selected? option)
+                      (set-selected! (disj selected option))
+                      (set-selected! (conj selected option))))
+        on-toggle (fn toggle-all []
+                    (if (= (count selected) (count options))
+                      (set-selected! #{})
+                      (set-selected! #(into % options))))
+        on-invert (fn invert []
+                    (set-selected! #(set/difference (into #{} options) %)))
+        style     {:font   :bold
+                   :cursor :pointer
+                   :color  (::c/string theme)}]
+    [with-shortcuts
+     (fn [log]
+       (when
+        (condp shortcuts/match? log
+          "arrowup"        (do (set-active! #(mod (dec %) n)) true)
+          "k"              (do (set-active! #(mod (dec %) n)) true)
+          #{"shift" "tab"} (do (set-active! #(mod (dec %) n)) true)
+          "arrowdown"      (do (set-active! #(mod (inc %) n)) true)
+          "j"              (do (set-active! #(mod (inc %) n)) true)
+          "tab"            (do (set-active! #(mod (inc %) n)) true)
+          "a"       (do (on-toggle) true)
+          "i"       (do (on-invert) true)
+          " "       (do (on-select (nth options active nil)) true)
+          "enter"   (do (on-done selected) true)
+          "escape"  (do (on-close) true)
+          false)
+         (shortcuts/matched! log)))
 
-              nil)
-             (shortcuts/matched! log)))
+     [palette-container
+      [s/div
+       {:style {:box-sizing :border-box
+                :padding (:padding theme)
+                :user-select :none
+                :border-bottom [1 :solid (::c/border theme)]}}
+       "Press "
+       [:span
+        {:style    style
+         :on-click (fn [_] (on-select (nth options active nil)))}
+        "space"]
+       " to select, "
+       [:span
+        {:style    style
+         :on-click (fn [_] (on-toggle))}
+        "a"]
+       " to toggle all, "
+       [:span
+        {:style    style
+         :on-click (fn [_] (on-invert))}
+        "i"]
+       " to invert and "
+       [:span
+        {:style    style
+         :on-click (fn [_] (on-done selected))}
+        "enter"]
+       " to accept"]
+      [s/div
+       {:style {:overflow :auto}}
+       (->> options
+            (map-indexed
+             (fn [index option]
+               (let [active? (= index active)]
+                 [s/div
+                  {:key (hash option)
+                   :on-click (fn [_]
+                               (on-select option))
+                   :style
+                   (merge
+                    {:border-left [5 :solid "#0000"]
+                     :box-sizing     :border-box
+                     :padding-left   (:padding theme)
+                     :padding-top    (* 0.5 (:padding theme))
+                     :padding-bottom (* 0.5 (:padding theme))
+                     :cursor :pointer
+                     :color (if (selected? option)
+                              (::c/boolean theme)
+                              (::c/text theme))
+                     :display :flex
+                     :align-items :center
+                     :height :fit-content}
+                    (when active?
+                      {:border-left [5 :solid (::c/boolean theme)]
+                       :background (::c/background theme)}))}
+                  (when active? [scroll-into-view])
+                  [checkbox (some? (selected? option))]
+                  [s/div {:style {:width (:padding theme)}}]
+                  [ins/inspector option]])))
+            doall)]]]))
 
-         [palette-container
-          [s/div
-           {:style {:box-sizing :border-box
-                    :padding (:padding theme)
-                    :user-select :none
-                    :border-bottom [1 :solid (::c/border theme)]}}
-           "Press "
-           [:span
-            {:style    style
-             :on-click #(on-select (nth options @active))}
-            "space"]
-           " to select, "
-           [:span
-            {:style    style
-             :on-click on-toggle}
-            "a"]
-           " to toggle all, "
-           [:span
-            {:style    style
-             :on-click on-invert}
-            "i"]
-           " to invert and "
-           [:span
-            {:style    style
-             :on-click #(on-done @selected)}
-            "enter"]
-           " to accept"]
-          [s/div
-           {:style {:overflow :auto}}
-           (->> options
-                (map-indexed
-                 (fn [index option]
-                   (let [active? (= index @active)]
-                     [s/div
-                      {:key (hash option)
-                       :on-click (fn [e]
-                                   (.stopPropagation e)
-                                   (on-select option))
-                       :style
-                       (merge
-                        {:border-left [5 :solid "#0000"]
-                         :box-sizing     :border-box
-                         :padding-left   (:padding theme)
-                         :padding-top    (* 0.5 (:padding theme))
-                         :padding-bottom (* 0.5 (:padding theme))
-                         :cursor :pointer
-                         :color (if (selected? option)
-                                  (::c/boolean theme)
-                                  (::c/text theme))
-                         :display :flex
-                         :align-items :center
-                         :height :fit-content}
-                        (when active?
-                          {:border-left [5 :solid (::c/boolean theme)]
-                           :background (::c/background theme)}))}
-                      (when active? [scroll-into-view])
-                      [checkbox (some? (selected? option))]
-                      [s/div {:style {:width (:padding theme)}}]
-                      [ins/inspector option]])))
-                doall)]]]))))
-
-(def ^:private client-keymap (r/atom {}))
+(def ^:private client-keymap #?(:clj (atom {}) :cljs (r/atom {})))
 
 (def ^:private aliases {"cljs.core" "clojure.core"})
 
@@ -263,7 +276,7 @@
 
 (defn shortcut [command]
   (let [theme (theme/use-theme)
-        opts  (options/use-options)]
+        opts  (use-options)]
     [s/div {:style
             {:display :flex
              :align-items :stretch
@@ -289,7 +302,7 @@
                :padding-right (:padding theme)
                :margin-right  (* 0.5 (:padding theme))
                :margin-left  (* 0.5 (:padding theme))}}
-             (get shortcut->symbol k (.toUpperCase k))])
+             (get shortcut->symbol k (str/upper-case k))])
           (sort-by combo-order combo))])]]))
 
 (defn- palette-component-item [props & children]
@@ -332,87 +345,85 @@
             :when   (every? #(str/includes? s %) words)]
         option))))
 
-(defn- palette-component []
-  (let [active (r/atom 0)
-        filter-text (r/atom "")]
-    (fn [{:keys [on-select on-dismiss component]
-          :or   {component ins/inspector}
-          :as options}]
-      (let [theme (theme/use-theme)
-            options (try-sort (filter-options options @filter-text))
-            n (count options)
-            state (state/use-state)
-            on-close
-            (fn []
-              (close state)
-              (when (fn? on-dismiss)
-                (on-dismiss)))
-            on-select
-            (fn []
-              (reset! filter-text "")
-              (close state)
-              (when-let [option (nth options @active)]
-                ;; Give react time to close command palette
-                (js/setTimeout #(on-select option) 25)))]
-        [with-shortcuts
-         (fn [log]
-           (when
-            (condp shortcuts/match? log
-              "arrowup"        (swap! active #(mod (dec %) n))
-              #{"shift" "tab"} (swap! active #(mod (dec %) n))
-              "arrowdown"      (swap! active #(mod (inc %) n))
-              "tab"            (swap! active #(mod (inc %) n))
-              "enter"          (on-select)
-              "escape"         (on-close)
-              nil)
-             (shortcuts/matched! log)))
-         [palette-container
-          [s/div
-           {:style
-            {:padding (:padding theme)
-             :border-bottom [1 :solid (::c/border theme)]}}
-           [s/input
-            {:placeholder "Type to filter, <up> and <down> to move selection, <enter> to confirm."
-             :auto-focus true
-             :value @filter-text
-             :on-change #(do
-                           (reset! active 0)
-                           (reset! filter-text (.-value (.-target %))))
-             :style
-             {:width "100%"
-              :background (::c/background theme)
-              :padding (:padding theme)
-              :box-sizing :border-box
-              :font-size (:font-size theme)
-              :font-family (:font-family theme)
-              :color (::c/text theme)
-              :border [1 :solid (::c/border theme)]}
-             :style/placeholder {:color (::c/border theme)}}]]
-          [s/div
-           {:style
-            {:height "100%"
-             :overflow :auto}}
-           (->> options
-                (map-indexed
-                 (fn [index option]
-                   (let [active? (= index @active)
-                         on-click (fn [e]
-                                    (.stopPropagation e)
-                                    (reset! active index)
-                                    (on-select))]
-                     ^{:key index}
-                     [:<>
-                      (when active? [scroll-into-view])
-                      [palette-component-item
-                       {:active? active?
-                        :on-click on-click}
-                       [component
-                        {:active? active?
-                         :on-click on-click}
-                        option]]])))
-                doall)]]]))))
+(defn- palette-component [{:keys [on-select on-dismiss component]
+                           :or   {component ins/inspector}
+                           :as options}]
+  (let [[active set-active!] (react/use-state 0)
+        [filter-text set-filter-text!] (react/use-state "")
+        theme (theme/use-theme)
+        options (try-sort (filter-options options filter-text))
+        n (count options)
+        state (state/use-state)
+        on-close
+        (fn []
+          (close state)
+          (when (fn? on-dismiss)
+            (on-dismiss)))
+        on-select
+        (fn [option]
+          (close state)
+          (on-select option))]
+    [with-shortcuts
+     (fn [log]
+       (when
+        (condp shortcuts/match? log
+          "arrowup"        (do (set-active! #(mod (dec %) n)) true)
+          #{"shift" "tab"} (do (set-active! #(mod (dec %) n)) true)
+          "arrowdown"      (do (set-active! #(mod (inc %) n)) true)
+          "tab"            (do (set-active! #(mod (inc %) n)) true)
+          "enter"          (do (on-select (nth options active nil)) true)
+          "escape"         (do (on-close) true)
+          false)
+         (shortcuts/matched! log)))
+     [palette-container
+      [s/div
+       {:style
+        {:padding (:padding theme)
+         :border-bottom [1 :solid (::c/border theme)]}}
+       [s/input
+        {:placeholder "Type to filter, <up> and <down> to move selection, <enter> to confirm."
+         :auto-focus true
+         :value filter-text
+         :on-change (fn [e]
+                      (set-active! 0)
+                      (set-filter-text!
+                       #?(:clj  (-> e :target :value)
+                          :cljs (.. e -target -value))))
+         :style
+         {:width "100%"
+          :background (::c/background theme)
+          :padding (:padding theme)
+          :box-sizing :border-box
+          :font-size (:font-size theme)
+          :font-family (:font-family theme)
+          :color (::c/text theme)
+          :border [1 :solid (::c/border theme)]}
+         :style/placeholder {:color (::c/border theme)}}]]
+      [s/div
+       {:style
+        {:height "100%"
+         :overflow :auto}}
+       (->> options
+            (map-indexed
+             (fn [index option]
+               (let [active? (= index active)
+                     on-click (fn [_]
+                                (on-select option))]
+                 ^{:key index}
+                 [:<>
+                  (when active? [scroll-into-view])
+                  [palette-component-item
+                   {:active? active?
+                    :on-click on-click}
+                   [component
+                    {:active? active?
+                     :on-click on-click}
+                    option]]])))
+            doall)]]]))
 
-(defn- can-meta? [value] (implements? IWithMeta value))
+(defn- can-meta? [value]
+  #?(:clj  (instance? clojure.lang.IObj value)
+     :cljs (implements? IWithMeta value)))
 
 (defn- with-meta* [obj m]
   (if-not (can-meta? obj)
@@ -424,25 +435,28 @@
          :predicate (fn [state]
                       (if-not predicate
                         true
-                        (apply predicate (state/selected-values state))))
+                        (try
+                          (apply predicate (state/selected-values state))
+                          (catch #?(:clj Exception :cljs :default) _e false))))
          :run (fn [state]
-                (a/let [selected (for [context (:selected @state)]
-                                   (with-meta*
-                                     (:value context)
-                                     {:portal.viewer/default (:name (ins/get-viewer state context))}))
-                        args     (when args (binding [*state* state] (apply args selected)))
-                        result   (if (= ::dismiss args)
-                                   args
-                                   (a/try (apply f (concat selected args))
-                                          (catch :default e (ex-data e))))]
-                  (when-not (or command (= args ::dismiss))
-                    (state/dispatch!
-                     state
-                     state/history-push
-                     {:portal/key   name
-                      :portal/f     f
-                      :portal/args  args
-                      :portal/value result}))))))
+                (#?(:clj future :cljs do)
+                 (a/let [selected (for [context (:selected @state)]
+                                    (with-meta*
+                                      (:value context)
+                                      {:portal.viewer/default (:name (ins/get-viewer state context))}))
+                         args     (when args (binding [*state* state] (apply args selected)))
+                         result   (if (= ::dismiss args)
+                                    args
+                                    (a/try (apply f (concat selected args))
+                                           (catch #?(:clj Exception :cljs :default) e (ex-data e))))]
+                   (when-not (or command (= args ::dismiss))
+                     (state/dispatch!
+                      state
+                      state/history-push
+                      {:portal/key   name
+                       :portal/f     f
+                       :portal/args  args
+                       :portal/value result})))))))
 
 (defn- command-item [{:keys [active?]} command]
   (let [theme (theme/use-theme)]
@@ -504,7 +518,8 @@
          :component command-item
          :on-select
          (fn [command]
-           ((:run command) state))}]))))
+           (when-let [f (:run command)]
+             (f state)))}]))))
 
 ;; pick args
 
@@ -514,15 +529,26 @@
    NOTE: Will return `:portal.ui.commands/dismiss` if prompt is dimissed by the user."
   ([options] (pick-one *state* options))
   ([state options]
-   (js/Promise.
-    (fn [resolve]
-      (open
-       state
-       (fn [_state]
-         [palette-component
-          {:on-select #(resolve %)
-           :on-dismiss #(resolve ::dismiss)
-           :options options}]))))))
+   #?(:clj
+      (let [p (promise)]
+        (open
+         state
+         (fn [_state]
+           [palette-component
+            {:on-select #(deliver p %)
+             :on-dismiss #(deliver p ::dismiss)
+             :options options}]))
+        (deref p))
+      :cljs
+      (js/Promise.
+       (fn [resolve]
+         (open
+          state
+          (fn [_state]
+            [palette-component
+             {:on-select #(resolve %)
+              :on-dismiss #(resolve ::dismiss)
+              :options options}])))))))
 
 (defn pick-many
   "Prompt user to pick many values from a list of options.
@@ -531,48 +557,89 @@
   ([options]
    (pick-many *state* options))
   ([state options]
-   (js/Promise.
-    (fn [resolve]
-      (open
-       state
-       (fn []
-         (let [state (state/use-state)]
-           [selector-component
-            {:options options
-             :on-dismiss #(resolve ::dismiss)
-             :run
-             (fn [options]
-               (close state)
-               (resolve options))}])))))))
+   #?(:clj
+      (let [p (promise)]
+        (open
+         state
+         (fn [_state]
+           (let [state (state/use-state)]
+             [selector-component
+              {:options options
+               :on-dismiss #(deliver p ::dismiss)
+               :run
+               (fn [options]
+                 (close state)
+                 (deliver p options))}])))
+        (deref p))
+      :cljs
+      (js/Promise.
+       (fn [resolve]
+         (open
+          state
+          (fn []
+            (let [state (state/use-state)]
+              [selector-component
+               {:options options
+                :on-dismiss #(resolve ::dismiss)
+                :run
+                (fn [options]
+                  (close state)
+                  (resolve options))}]))))))))
 
 (defn pick-in
   ([v]
    (pick-in *state* v))
   ([state v]
-   (js/Promise.
-    (fn [resolve]
-      (let [get-key
+   #?(:clj
+      (let [p (promise)
+            get-key
             (fn get-key [path v]
               (open
                state
                (fn [_state]
                  [palette-component
                   {:options (concat [::done] (keys v))
-                   :on-dismiss #(resolve ::dismiss)
+                   :on-dismiss #(deliver p ::dismiss)
                    :on-select
                    (fn [k]
                      (let [path (conj path k)
                            next-value (get v k)]
                        (cond
                          (= k ::done)
-                         (resolve (drop-last path))
+                         (deliver p (drop-last path))
 
                          (not (map? next-value))
-                         (resolve path)
+                         (deliver p path)
 
                          :else
                          (get-key path next-value))))}])))]
-        (get-key [] v))))))
+        (get-key [] v)
+        (deref p))
+
+      :cljs (js/Promise.
+             (fn [resolve]
+               (let [get-key
+                     (fn get-key [path v]
+                       (open
+                        state
+                        (fn [_state]
+                          [palette-component
+                           {:options (concat [::done] (keys v))
+                            :on-dismiss #(resolve ::dismiss)
+                            :on-select
+                            (fn [k]
+                              (let [path (conj path k)
+                                    next-value (get v k)]
+                                (cond
+                                  (= k ::done)
+                                  (resolve (drop-last path))
+
+                                  (not (map? next-value))
+                                  (resolve path)
+
+                                  :else
+                                  (get-key path next-value))))}])))]
+                 (get-key [] v)))))))
 
 ;; portal data commands
 
@@ -629,12 +696,15 @@
   (with-out-str (pp/pprint value)))
 
 (defn- copy-to-clipboard! [s]
-  (let [el (js/document.createElement "textarea")]
-    (set! (.-value el) s)
-    (js/document.body.appendChild el)
-    (.select el)
-    (js/document.execCommand "copy")
-    (js/document.body.removeChild el)))
+  #?(:clj
+     ((requiring-resolve 'portal.ssr.server/send!) {:op "on-copy" :text s})
+     :cljs
+     (let [el (js/document.createElement "textarea")]
+       (set! (.-value el) s)
+       (js/document.body.appendChild el)
+       (.select el)
+       (js/document.execCommand "copy")
+       (js/document.body.removeChild el))))
 
 (defn- copy-edn! [value]
   (copy-to-clipboard!
@@ -657,22 +727,35 @@
                ^::shortcuts/osx #{"meta" "c"}
                ^::shortcuts/windows ^::shortcuts/linux #{"control" "c"}]}
   [state]
-  (if-let [selection (not-empty (.. js/window getSelection toString))]
-    (copy-to-clipboard! selection)
-    (copy-edn! (selected-values @state))))
+  #?(:clj (copy-edn! (selected-values @state))
+     :cljs
+     (if-let [selection (not-empty (.. js/window getSelection toString))]
+       (copy-to-clipboard! selection)
+       (copy-edn! (selected-values @state)))))
 
 (defn- map->qs [m]
-  (let [qs (js/URLSearchParams.)]
-    (doseq [[k v] m]
-      (.append qs (name k) v))
-    (str qs)))
+  #?(:clj
+     (->> m
+          (map
+           (fn [[k v]]
+             (str (name k) "=" v)))
+          (str/join "&"))
+     :cljs
+     (let [qs (js/URLSearchParams.)]
+       (doseq [[k v] m]
+         (.append qs (name k) v))
+       (str qs))))
+
+(defn- btoa [^String s]
+  #?(:clj  (.encodeToString (java.util.Base64/getEncoder) (.getBytes s))
+     :cljs (js/btoa s)))
 
 (defn ^:no-doc create-data-url [value]
   (let [edn (binding [*print-meta* true] (pr-str value))]
     (str "https://djblue.github.io/portal/#"
          (map->qs
           {:content-url
-           (str "data:;base64," (js/btoa edn))
+           (str "data:;base64," (btoa edn))
            :content-type "application/edn"}))))
 
 (defn ^:command copy-link
@@ -683,20 +766,26 @@
 (defn ^:command inspect-standalone
   "Open value in standalone Portal (https://djblue.github.io/portal/)."
   [state]
-  (js/open (create-data-url (selected-values @state))))
-
-(defn- pprint-json [v]
-  (.stringify js/JSON v nil 2))
+  (#?(:clj (requiring-resolve 'clojure.java.browse/browse-url)
+      :clj js/open)
+   (create-data-url (selected-values @state))))
 
 (defn- keyword-fn [k]
   (str (when-let [n (namespace k)] (str n "/")) (name k)))
+
+(defn- pprint-json [v]
+  #?(:clj
+     (with-out-str
+       ((requiring-resolve 'clojure.data.json/pprint)
+        v
+        :key-fn keyword-fn :escape-slash false))
+     :cljs (.stringify js/JSON (clj->js v :keyword-fn keyword-fn) nil 2)))
 
 (defn ^:command copy-json
   "Copy selected value as a json string to the clipboard."
   [state]
   (-> @state
       selected-values
-      (clj->js :keyword-fn keyword-fn)
       pprint-json
       str/trim
       copy-to-clipboard!))
@@ -716,12 +805,13 @@
   "Set the viewer for the currently selected value(s)."
   {:shortcuts [#{"v"}]}
   [state]
-  (when-let [selected-context (state/get-all-selected-context @state)]
-    (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
-      (when (> (count viewers) 1)
-        (a/let [selected-viewer (pick-one state (map :name viewers))]
-          (when-not (= ::dismiss selected-viewer)
-            (ins/set-viewer! state selected-context selected-viewer)))))))
+  (#?(:clj future :cljs do)
+   (when-let [selected-context (state/get-all-selected-context @state)]
+     (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
+       (when (> (count viewers) 1)
+         (a/let [selected-viewer (pick-one state (map :name viewers))]
+           (when-not (= ::dismiss selected-viewer)
+             (ins/set-viewer! state selected-context selected-viewer))))))))
 
 (defn- get-viewer [state context direction]
   (let [viewers (map :name (ins/get-compatible-viewers @ins/viewers context))
@@ -759,8 +849,9 @@
 (defn ^:command focus-filter
   {:shortcuts [["/"]]}
   [_]
-  (doseq [ref @search-refs]
-    (when-let [input (.-current ref)] (.focus input))))
+  #?(:cljs
+     (doseq [ref @search-refs]
+       (when-let [input (.-current ref)] (.focus input)))))
 
 (defn ^:command clear-filter
   [state]
@@ -768,21 +859,24 @@
 
 (defn ^:command scroll-top
   {:shortcuts [["g" "g"]]}
-  [state]
-  (when-let [el (:scroll-element @state)]
-    (.scroll el #js {:top 0})))
+  [_state]
+  #?(:cljs
+     (when-let [el (:scroll-element @_state)]
+       (.scroll el #js {:top 0}))))
 
 (defn ^:command scroll-bottom
   {:shortcuts [#{"shift" "g"}]}
-  [state]
-  (when-let [el (:scroll-element @state)]
-    (.scroll el #js {:top (+ (.-scrollHeight el) 1000)})))
+  [_state]
+  #?(:cljs
+     (when-let [el (:scroll-element @_state)]
+       (.scroll el #js {:top (+ (.-scrollHeight el) 1000)}))))
 
 (defn ^:command center-selected
   {:shortcuts [["z" "z"]]}
   [_state]
-  (when-let [el @state/selected-el]
-    (.scrollIntoView el #js {:inline "center" :block "center" :behavior "smooth"})))
+  #?(:cljs
+     (when-let [el @state/selected-el]
+       (.scrollIntoView el #js {:inline "center" :block "center" :behavior "smooth"}))))
 
 (defn ^:command toggle-shell
   "Toggle visibility of top / bottom helper UX. Allows for a value focused session."
@@ -916,7 +1010,9 @@
   [state]
   (state/dispatch! state state/history-push {:portal/value @state/log}))
 
-(defn- ->args [^js/Promise x] (.then x #(if (= ::dismiss %) % [%])))
+(defn- ->args [x]
+  #?(:clj  (if (= ::dismiss x) x [x])
+     :cljs (.then ^js/Promise x #(if (= ::dismiss %) % [%]))))
 
 (def ^:private clojure-commands
   {#'clojure.core/vals        {:predicate map?}
@@ -953,7 +1049,7 @@
      (doseq [shortcut (concat (:shortcuts m) (:shortcuts opts))]
        (swap! client-keymap assoc shortcut name))
      (swap! registry
-            assoc name (merge {:name name :run  var}
+            assoc name (merge {:name name :run #?(:clj (fn [& args] (future (apply var args))) :cljs var)}
                               (when-let [doc (or (:doc m) (:doc opts))] {:doc doc})
                               (when-let [command (:command m)] {:command command})
                               opts)))))
@@ -1010,25 +1106,26 @@
 (register! #'copy-str {:predicate (comp string? state/get-selected-value)})
 
 (defn- prompt-file []
-  (js/Promise.
-   (fn [resolve _reject]
-     (let [id      "open-file-dialog"
-           input   (or
-                    (js/document.getElementById id)
-                    (js/document.createElement "input"))]
-       (set! (.-id input) id)
-       (set! (.-type input) "file")
-       (set! (.-multiple input) "true")
-       (set! (.-style input) "visibility:hidden")
-       (.addEventListener
-        input
-        "change"
-        (fn [event]
-          (a/let [value (dnd/handle-files (-> event .-target .-files))]
-            (resolve value)))
-        false)
-       (js/document.body.appendChild input)
-       (.click input)))))
+  #?(:cljs
+     (js/Promise.
+      (fn [resolve _reject]
+        (let [id      "open-file-dialog"
+              input   (or
+                       (js/document.getElementById id)
+                       (js/document.createElement "input"))]
+          (set! (.-id input) id)
+          (set! (.-type input) "file")
+          (set! (.-multiple input) "true")
+          (set! (.-style input) "visibility:hidden")
+          (.addEventListener
+           input
+           "change"
+           (fn [event]
+             (a/let [value (dnd/handle-files (-> event .-target .-files))]
+               (resolve value)))
+           false)
+          (js/document.body.appendChild input)
+          (.click input))))))
 
 (defn open-file
   "Open a File"
@@ -1042,7 +1139,7 @@
 (register! #'open-file)
 
 (defn- clipboard []
-  (js/navigator.clipboard.readText))
+  #?(:cljs (js/navigator.clipboard.readText)))
 
 (defn- parse-as
   "Paste value from clipboard"
@@ -1052,7 +1149,9 @@
       (state/dispatch! state
                        state/history-push
                        {:portal/value
-                        (try (p/parse-string format value) (catch :default e e))}))))
+                        (try
+                          (p/parse-string format value)
+                          (catch #?(:clj Exception :cljs :default) e e))}))))
 
 (defn paste
   "Paste value from clipboard"
@@ -1068,8 +1167,8 @@
 (defn parse-selected
   "Parse currently select text"
   {:shortcuts [["p" "s"]]}
-  [state]
-  (parse-as state (.toString (.getSelection js/window))))
+  [_state]
+  #?(:cljs (parse-as _state (.toString (.getSelection js/window)))))
 
 (register! #'parse-selected)
 
@@ -1090,20 +1189,21 @@
        :overflow :hidden}}
      child]))
 
-(defn palette [{:keys [container]}]
+(defn palette* [{:keys [container]}]
   (let [state (state/use-state)
-        value (state/get-selected-value @state)
-        opts  (options/use-options)]
+        value (react/use-atom state state/get-selected-value)
+        opts  (use-options)]
     (react/use-effect
-     #js [(hash value)]
+     [(hash value)]
      (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
        (reset!
         runtime-registry
-        (update-vals
-         fns
-         (fn [opts]
-           (make-command
-            (assoc opts :f (partial state/invoke (:name opts)))))))))
+        (reduce-kv
+         (fn [out k opts]
+           (assoc out k (make-command
+                         (assoc opts :f (partial state/invoke (:name opts))))))
+         {}
+         fns))))
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)
@@ -1112,5 +1212,10 @@
                                         (get @runtime-registry f))]
              (shortcuts/matched! log)
              (run state)))))
-     (when-let [component (::input @state)]
+     (when-let [component (react/use-atom state ::input)]
        [ins/with-readonly [(or container pop-up) [component state]]])]))
+
+(defn palette
+  ([] (palette nil))
+  ([options]
+   [shortcuts-setup [palette* options]]))

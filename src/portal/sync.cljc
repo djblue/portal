@@ -1,5 +1,7 @@
 (ns ^:no-doc portal.sync
-  (:refer-clojure :exclude [let try]))
+  (:refer-clojure :exclude [let do try]))
+
+(defmacro do [& body] `(~'do ~@body))
 
 (defmacro let [bindings & body]
   `(~'let ~bindings ~@body))

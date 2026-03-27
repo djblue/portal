@@ -1,12 +1,14 @@
 (ns ^:no-doc portal.ui.viewer.prepl
-  (:require ["anser" :as anser]
+  (:require #?(:cljs ["anser" :as anser])
+            #?(:clj [clojure.string :as str])
             [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.runtime.edn :as edn]
             [portal.ui.filter :as f]
-            [portal.ui.html :as h]
+            #?(:cljs [portal.ui.html :as h])
             [portal.ui.icons :as icons]
-            [portal.ui.inspector :as ins]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.ui.styled :as d]
@@ -84,7 +86,7 @@
           [ins/inspector
            (try
              (edn/read-string (:val value))
-             (catch :default _ (:val value)))]]]]
+             (catch #?(:clj Exception :cljs :default) _ (:val value)))]]]]
        (when-let [ms (:ms value)]
          (when (> ms 100)
            [ins/with-key
@@ -141,8 +143,8 @@
                :color (::c/exception theme)}
        :style/hover {:opacity 1}
        :title "Click to do nothing. 😊"
-       :on-click (fn [e]
-                   (.stopPropagation e))}]
+       :on-click (fn [_e]
+                   #?(:cljs (.stopPropagation _e)))}]
 
      [icons/minus-circle
       {:size "1x"
@@ -151,8 +153,8 @@
                :color (::c/tag theme)}
        :style/hover {:opacity 1}
        :title "Click to collapse."
-       :on-click (fn [e]
-                   (.stopPropagation e)
+       :on-click (fn [_e]
+                   #?(:cljs (.stopPropagation _e))
                    (state/dispatch! state assoc-in [:expanded? location] 0))}]
 
      [icons/plus-circle
@@ -162,14 +164,19 @@
                :color (::c/string theme)}
        :style/hover {:opacity 1}
        :title "Click to expand."
-       :on-click (fn [e]
-                   (.stopPropagation e)
+       :on-click (fn [_e]
+                   #?(:cljs (.stopPropagation _e))
                    (state/dispatch! state assoc-in [:expanded? location] 1))}]]))
 
-(defn- escape-html [text]
-  (let [el (.createElement js/document "div")]
-    (set! (.-innerText el) text)
-    (.-innerHTML el)))
+#?(:cljs
+   (defn- escape-html [text]
+     (let [el (.createElement js/document "div")]
+       (set! (.-innerText el) text)
+       (.-innerHTML el))))
+
+#?(:clj
+   (defn- strip-ansi [s]
+     (str/replace s #"\u001b\[[0-9;]*[a-zA-Z]" "")))
 
 (defn inspect-prepl [value]
   (let [theme (theme/use-theme)
@@ -203,26 +210,28 @@
          :font-family    (:font-family theme)}}
        [ins/with-collection
         value
-        (reverse
-         (keep-indexed
-          (fn [index value]
-            (when (matcher value)
-              (with-meta
-                (if (#{:tap :ret} (:tag value))
-                  [ins/with-key
-                   index
-                   [inspect-prepl-ret value index]]
-                  [d/span
-                   {:style
-                    {:color
-                     (if (= (:tag value) :err)
-                       (::c/exception theme)
-                       (::c/text theme))}}
-                   [h/html+ (anser/ansiToHtml
-                             (escape-html (:val value))
-                             #js {:use_classes true})]])
-                {:key index})))
-          value))]]]]))
+        [:<>
+         (reverse
+          (keep-indexed
+           (fn [index value]
+             (when (matcher value)
+               (with-meta
+                 (if (#{:tap :ret} (:tag value))
+                   [ins/with-key
+                    index
+                    [inspect-prepl-ret value index]]
+                   [d/span
+                    {:style
+                     {:color
+                      (if (= (:tag value) :err)
+                        (::c/exception theme)
+                        (::c/text theme))}}
+                    #?(:clj  (strip-ansi (:val value))
+                       :cljs [h/html+ (anser/ansiToHtml
+                                       (escape-html (:val value))
+                                       #js {:use_classes true})])])
+                 {:key index})))
+           value))]]]]]))
 
 (defn io? [value]
   (s/valid? ::prepl value))

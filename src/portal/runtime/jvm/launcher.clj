@@ -31,20 +31,33 @@
   ([options]
    (open nil options))
   ([portal options]
+   (when (= :ssr (:mode options)) (require 'portal.ssr.server))
    (let [server (start options)]
      (browser/open {:portal portal :options options :server server}))))
 
+(defn- clear-1 [session-id]
+  (case (rt/session-mode session-id)
+    :ssr ((requiring-resolve 'portal.ssr.server/clear) session-id)
+    (c/request session-id {:op :portal.rpc/clear})))
+
 (defn clear [portal]
-  (if (= portal :all)
-    (c/request {:op :portal.rpc/clear})
-    (c/request (:session-id portal) {:op :portal.rpc/clear}))
+  (if-not (= portal :all)
+    (clear-1 (:session-id portal))
+    (doseq [session-id (rt/active-sessions)]
+      (clear-1 session-id)))
   (rt/cleanup-sessions))
 
+(defn- close-1 [session-id]
+  (case (rt/session-mode session-id)
+    :ssr ((requiring-resolve 'portal.ssr.server/close) session-id)
+    (c/request session-id {:op :portal.rpc/close}))
+  (rt/close-session session-id))
+
 (defn close [portal]
-  (if (= portal :all)
-    (c/request {:op :portal.rpc/close})
-    (c/request (:session-id portal) {:op :portal.rpc/close}))
-  (rt/close-session (:session-id portal))
+  (if-not (= portal :all)
+    (close-1 (:session-id portal))
+    (doseq [session-id (rt/active-sessions)]
+      (close-1 session-id)))
   (rt/cleanup-sessions))
 
 (defn eval-str [portal msg]

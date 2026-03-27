@@ -5,10 +5,10 @@
   org.clojure/data.json      {:mvn/version "2.4.0"}
   http-kit/http-kit          {:mvn/version "2.7.0"}
   com.google.code.gson/gson  {:mvn/version "2.10.1"}}
- :deps/prep-lib
- {:ensure "resources/portal"
-  :alias  :build
-  :fn     prep}
+;;  :deps/prep-lib
+;;  {:ensure "resources/portal"
+;;   :alias  :build
+;;   :fn     prep}
  :aliases
  {:dev
   {:extra-paths ["dev" "test"]
@@ -21,7 +21,9 @@
                                    :git/sha "ae52edf"
                                    :exclusions [com.google.guava/guava]}
     io.github.djblue/tetris       {:git/url "https://github.com/djblue/tetris.git"
-                                   :git/sha "d40ae6b96f918ab7bb7f09ac071f77ca086e8b7f"}}}
+                                   :git/sha "d40ae6b96f918ab7bb7f09ac071f77ca086e8b7f"}
+    com.clojure-goes-fast/clj-async-profiler {:mvn/version "1.7.0"}}
+   :jvm-opts ["-Djdk.attach.allowAttachSelf=true"]}
   :plk
   {:extra-deps {planck/planck {:mvn/version "2.27.0"}}}
   :cljs

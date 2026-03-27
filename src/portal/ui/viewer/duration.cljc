@@ -1,7 +1,8 @@
 (ns ^:no-doc portal.ui.viewer.duration
   (:require
-   [portal.colors :as-alias c]
-   [portal.ui.inspector :as ins]
+   [portal.colors :as c]
+   #?(:clj  [portal.ssr.ui.inspector :as ins]
+      :cljs [portal.ui.inspector :as ins])
    [portal.ui.select :as select]
    [portal.ui.styled :as d]
    [portal.ui.theme :as theme]))
@@ -74,7 +75,7 @@
 (def nano
   {:predicate number?
    :name :portal.viewer/duration-ns
-   :component inspect-nano
+   :component #'inspect-nano
    :doc "Interpret number as a duration in nanoseconds, round up to minutes."})
 
 (defn inspect-ms [ms]
@@ -89,5 +90,5 @@
 (def ms
   {:predicate number?
    :name :portal.viewer/duration-ms
-   :component inspect-ms
+   :component #'inspect-ms
    :doc "Interpret number as a duration in milliseconds, round up to minutes."})

@@ -1,8 +1,10 @@
 (ns ^:no-doc portal.ui.viewer.source-location
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
-            [portal.ui.inspector :as ins]
-            [portal.ui.rpc :as rpc]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
+            #?(:clj  [portal.ui.state :as state]
+               :cljs [portal.ui.rpc :as rpc])
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
@@ -31,9 +33,10 @@
   (let [theme (theme/use-theme)]
     [d/div
      {:on-click
-      (fn [e]
-        (.stopPropagation e)
-        (rpc/call 'portal.runtime.jvm.editor/goto-definition value))
+      (fn [_e]
+        #?(:clj (state/invoke 'portal.runtime.jvm.editor/goto-definition value)
+           :cljs (do (.stopPropagation _e)
+                     (rpc/call 'portal.runtime.jvm.editor/goto-definition value))))
       :style/hover
       {:opacity 1
        :text-decoration :underline}

@@ -1,18 +1,21 @@
 (ns ^:no-doc portal.ui.select
   (:require [portal.ui.react :as react]))
 
+(def ^:dynamic *selection-index* nil)
 (defonce ^:no-doc selection-index (atom {}))
 (defonce ^:private position-context (react/create-context []))
+
+(defn- get-selection-index [] (or *selection-index* selection-index))
 
 (defn with-position [position & children]
   (let [index (conj (react/use-context position-context) position)]
     (apply react/provider position-context index children)))
 
-(defn get-root [] (::root @selection-index))
+(defn get-root [] (::root @(get-selection-index)))
 
 (defn- adjacent [f & args]
   (fn select
-    ([context] (select @selection-index context))
+    ([context] (select @(get-selection-index) context))
     ([selection-index context]
      (when-let [index (get selection-index context)]
        (loop [i 0 tail (last index)]
@@ -32,9 +35,9 @@
 
 (defn get-child
   ([context]
-   (get-child @selection-index context nil))
+   (get-child @(get-selection-index) context nil))
   ([context column-context]
-   (get-child @selection-index context column-context))
+   (get-child @(get-selection-index) context column-context))
   ([selection-index context column-context]
    (when-let [index (get selection-index context)]
      (or (get selection-index
@@ -48,7 +51,7 @@
               (conj index {:row :first :column 0}))))))
 
 (defn get-parent
-  ([context] (get-parent @selection-index context))
+  ([context] (get-parent @(get-selection-index) context))
   ([selection-index context]
    (when-let [index (get selection-index context)]
      (get selection-index (pop index)))))
@@ -77,9 +80,10 @@
   (react/use-context position-context))
 
 (defn use-register-context [context viewer]
-  (let [position (use-position)]
+  (let [position (use-position)
+        selection-index (get-selection-index)]
     (react/use-effect
-     #js [(hash position) (hash context) (hash viewer)]
+     [(hash position) (hash context) (hash viewer)]
      (let [updates (compute-relative-index @selection-index position context)]
        (swap! selection-index merge updates)
        (fn []

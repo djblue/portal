@@ -52,23 +52,22 @@
 
 (defn- info []
   {::v/log
-   {:file "portal/ui/viewer/log.cljs"
+   {:file "portal/ui/viewer/log.cljc"
     :examples d/log-data}
    ::v/prepl
-   {:file "portal/ui/viewer/prepl.cljs"
+   {:file "portal/ui/viewer/prepl.cljc"
     :examples [d/prepl-data]}
    ::v/ex
-   {:file "portal/ui/viewer/exception.cljs"
-    :examples (map Throwable->map
-                   [(::d/exception d/platform-data)
-                    (::d/user-exception d/platform-data)
-                    (::d/io-exception d/platform-data)
-                    (::d/ex-info d/platform-data)])}
+   {:file "portal/ui/viewer/exception.cljc"
+    :examples [(::d/exception d/platform-data)
+               (::d/user-exception d/platform-data)
+               (::d/io-exception d/platform-data)
+               (::d/ex-info d/platform-data)]}
    ::v/http
-   {:file "portal/ui/viewer/http.cljs"
+   {:file "portal/ui/viewer/http.cljc"
     :examples (concat d/http-requests d/http-responses)}
    ::v/test-report
-   {:file "portal/ui/viewer/test_report.cljs"
+   {:file "portal/ui/viewer/test_report.cljc"
     :examples [d/test-report]}
    ::v/vega
    {:file "portal/ui/viewer/vega.cljs"
@@ -81,15 +80,15 @@
    ::v/image
    {:examples [(::d/binary d/platform-data)]}
    ::v/table
-   {:file "portal/ui/viewer/table.cljs"
+   {:file "portal/ui/viewer/table.cljc"
     :examples (vals d/table-data)}
    ::v/hiccup
    {:examples [d/hiccup]}
    ::v/date-time
-   {:file "portal/ui/viewer/date_time.cljs"
+   {:file "portal/ui/viewer/date_time.cljc"
     :examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
    ::v/relative-time
-   {:file "portal/ui/viewer/relative_time.cljs"
+   {:file "portal/ui/viewer/relative_time.cljc"
     :examples (concat [(java.util.Date.)] (reverse (map :time d/log-data)))}
    ::v/diff
    {:file "portal/ui/viewer/diff.cljs"
@@ -123,7 +122,7 @@
    {:examples [1 1e3 6e4]}
    ::v/color
    {:examples (vals (first (vals c/themes)))
-    :file "portal/ui/viewer/color.cljs"}
+    :file "portal/ui/viewer/color.cljc"}
    ::v/source-location
    {:examples '[{:file "clojure/core.clj", :line 75, :column 1, :ns clojure.core}
                 {:file "clojure/core.clj", :line 183, :column 1, :ns clojure.core}
@@ -133,7 +132,7 @@
                  :ns clojure.java.io}
                 {:file "portal/api.cljc", :line 72, :column 1, :ns portal.api}
                 {:file "portal/api.cljc", :line 196, :column 1, :ns portal.api}]
-    :file "portal/ui/viewer/source_location.cljs"}
+    :file "portal/ui/viewer/source_location.cljc"}
    ::v/spec
    {:file "portal/ui/viewer/spec.cljs"
     :examples [d/spec-data]}})

@@ -1,52 +1,59 @@
 (ns ^:no-doc portal.ui.state
-  (:require [portal.async :as a]
+  (:require #?(:clj  [portal.sync :as a]
+               :cljs [portal.async :as a])
             [portal.colors :as c]
             [portal.ui.react :as react]
             [portal.ui.select :as select]
-            [reagent.core :as r]))
+            #?(:cljs [reagent.core :as r])))
 
 (defonce sender (atom nil))
 (defonce render (atom nil))
-(defonce state  (r/atom {}))
+(defonce state  #?(:clj nil :cljs (r/atom {})))
 (defonce ^:no-doc log (atom (list)))
 (defonce ^:no-doc selected-el (atom nil))
 (def ^:private ^:dynamic *state* "Holds current state atom." nil)
 
 (defn- get-parent []
-  (cond
-    (exists? js/acquireVsCodeApi) (js/acquireVsCodeApi)
-    (exists? js/parent)           js/parent))
+  #?(:cljs
+     (cond
+       (exists? js/acquireVsCodeApi) (js/acquireVsCodeApi)
+       (exists? js/parent)           js/parent)))
 
-(defonce ^:private parent (get-parent))
+#?(:cljs (defonce ^:private parent (get-parent)))
 
-(defn notify-parent [event]
-  (let [message (js/JSON.stringify (clj->js event))]
-    (when parent
-      (.postMessage ^js parent message "*"))))
+(defn notify-parent [_event]
+  #?(:cljs
+     (let [message (js/JSON.stringify (clj->js _event))]
+       (when parent
+         (.postMessage ^js parent message "*")))))
 
-(defonce ^:private sync-promise (atom (.resolve js/Promise nil)))
+#?(:cljs (defonce ^:private sync-promise (atom (.resolve js/Promise nil))))
 
-(defn- sleep [ms]
-  (js/Promise.
-   (fn [resolve _reject]
-     (js/setTimeout resolve ms))))
+#?(:cljs (defn- sleep [ms]
+           (js/Promise.
+            (fn [resolve _reject]
+              (js/setTimeout resolve ms)))))
 
-(defn- wait-for [p ms]
-  (.race js/Promise
-         #js
-          [(sleep ms)
-           (.catch p (fn [e] (.error js/console e)))]))
+#?(:cljs (defn- wait-for [p ms]
+           (.race js/Promise
+                  #js
+                   [(sleep ms)
+                    (.catch p (fn [e] (.error js/console e)))])))
 
 (defn dispatch! [state f & args]
-  (swap!
-   sync-promise
-   (fn [last-promise]
-     (a/do
-       (wait-for last-promise 1000)
-       (a/let [next-state (binding [*state* state] (apply f @state args))]
-         (when next-state (reset! state next-state)))))))
+  #?(:clj
+     (let [next-state (binding [*state* state] (apply f @state args))]
+       (when next-state (reset! state next-state)))
+     :cljs
+     (swap!
+      sync-promise
+      (fn [last-promise]
+        (a/do
+          (wait-for last-promise 1000)
+          (a/let [next-state (binding [*state* state] (apply f @state args))]
+            (when next-state (reset! state next-state))))))))
 
-(def ^:private state-context (react/create-context (r/atom {})))
+(def ^:private state-context (react/create-context nil))
 
 (defn use-state [] (react/use-context state-context))
 
@@ -76,8 +83,10 @@
     (update state :selected #(into [] (remove #{context}) %))))
 
 (defn atom? [value]
-  (and (satisfies? cljs.core/IDeref value)
-       (not (instance? cljs.core/Var value))))
+  #?(:clj (instance? clojure.lang.Atom value)
+     :cljs
+     (and (satisfies? cljs.core/IDeref value)
+          (not (instance? cljs.core/Var value)))))
 
 (defn- parent-atom? [context]
   (some-> context :parent :value atom?))
@@ -111,11 +120,12 @@
    (fn [index context']
      (when (=location context' context)
        index))
-   @(r/cursor state [:selected])))
+   #?(:clj (get-in @state [:selected])
+      :cljs @(r/cursor state [:selected]))))
 
 (defn clear-selected [state] (dissoc state :selected))
 
-(defn- send! [message] (@sender message))
+#?(:cljs (defn- send! [message] (@sender message)))
 
 (def no-history [::previous-commands ::c/theme :theme])
 
@@ -158,7 +168,8 @@
   (let [depth     (:depth context)
         expanded? (if (or (nil? state) (map? state))
                     (:expanded? state)
-                    @(r/cursor state [:expanded?]))
+                    #?(:clj  (get-in @state [:expanded?])
+                       :cljs @(r/cursor state [:expanded?])))
         location  (get-location context)]
     (or (get expanded? location)
         (some (fn [parent-context]
@@ -264,88 +275,95 @@
     (select-context state parent)
     state))
 
-(defn- select-child-async [state context]
-  (js/window.requestAnimationFrame
-   (partial
-    (fn select-position-async [counter]
-      (when (< counter 120) ;; 2 second timeout assuming 60 FPS
-        (if-let [child (select/get-child context)]
-          (dispatch! state select-context child)
-          (js/window.requestAnimationFrame
-           (partial select-position-async (inc counter))))))
-    0)))
+#?(:cljs
+   (defn- select-child-async [state context]
+     (js/window.requestAnimationFrame
+      (partial
+       (fn select-position-async [counter]
+         (when (< counter 120) ;; 2 second timeout assuming 60 FPS
+           (if-let [child (select/get-child context)]
+             (dispatch! state select-context child)
+             (js/window.requestAnimationFrame
+              (partial select-position-async (inc counter))))))
+       0))))
 
 (defn select-child [state context]
   (if-let [child (or (select/get-right context)
                      (select/get-child context))]
     (select-context state child)
-    (if (expanded? state context)
-      state
-      (do
-        ;; Since the child context isn't known until after it's rendered, we need to
-        ;; wait until the current context is expanded before we can select the child
-        ;; context.
-        (select-child-async *state* context)
-        (expand-inc-1 state context)))))
+    #?(:clj nil
+       :cljs
+       (if (expanded? state context)
+         state
+         (do
+           ;; Since the child context isn't known until after it's rendered, we need to
+           ;; wait until the current context is expanded before we can select the child
+           ;; context.
+           (select-child-async *state* context)
+           (expand-inc-1 state context))))))
 
 (defn get-path [state]
   (when-let [{:keys [key? path]} (get-selected-context state)]
     (cond-> path key? pop)))
 
-(defn set-theme [color]
-  (doseq [el (.querySelectorAll js/document "meta[name=theme-color]")]
-    (.setAttribute el "content" color)))
+(defn set-theme [_color]
+  #?(:cljs
+     (doseq [el (.querySelectorAll js/document "meta[name=theme-color]")]
+       (.setAttribute el "content" _color))))
 
 (defn set-theme! [state theme] (assoc state :theme theme))
 
-(defn set-title [title]
-  (set! (.-title js/document) title))
+(defn set-title [_title]
+  #?(:cljs (set! (.-title js/document) _title)))
 
 (defn set-title! [title]
   (set-title title)
   (notify-parent
    {:type :set-title :title title}))
 
-(defn- log-message [message]
-  (when-not (= 'portal.runtime/ping (:f message))
-    (swap! log
-           (fn [log]
-             (take 10 (conj log message))))))
+#?(:cljs (defn- log-message [message]
+           (when-not (= 'portal.runtime/ping (:f message))
+             (swap! log
+                    (fn [log]
+                      (take 10 (conj log message)))))))
 
 (defn invoke [f & args]
-  (let [time  (js/Date.)
-        start (.now js/Date)]
-    (-> (send! {:op :portal.rpc/invoke :f f :args args})
-        (.then (fn [{:keys [return error] :as response}]
-                 (when js/goog.DEBUG
-                   (log-message
-                    {:runtime :portal
-                     :level   (if error :error :info)
-                     :ns      (if-not (symbol? f)
-                                'unknown
-                                (-> f namespace symbol))
-                     :f       f
-                     :args    args
-                     :line    (:line response 1)
-                     :column  (:column response 1)
-                     :file    (:file response)
-                     :result  (or return error)
-                     :time    time
-                     :ms      (- (.now js/Date) start)}))
-                 (if-not error
-                   return
-                   (throw (ex-info (pr-str error) error))))))))
+  #?(:clj (apply (requiring-resolve f) args)
+     :cljs
+     (let [time  (js/Date.)
+           start (.now js/Date)]
+       (-> (send! {:op :portal.rpc/invoke :f f :args args})
+           (.then (fn [{:keys [return error] :as response}]
+                    (when js/goog.DEBUG
+                      (log-message
+                       {:runtime :portal
+                        :level   (if error :error :info)
+                        :ns      (if-not (symbol? f)
+                                   'unknown
+                                   (-> f namespace symbol))
+                        :f       f
+                        :args    args
+                        :line    (:line response 1)
+                        :column  (:column response 1)
+                        :file    (:file response)
+                        :result  (or return error)
+                        :time    time
+                        :ms      (- (.now js/Date) start)}))
+                    (if-not error
+                      return
+                      (throw (ex-info (pr-str error) error)))))))))
 
-(defonce value-cache (r/atom {}))
+#?(:cljs (defonce value-cache (r/atom {})))
 
 (defn reset-value-cache!
   "Useful when establishing or re-establishing a connection with the runtime."
   []
-  (reset! value-cache (with-meta {} {:key (.now js/Date)})))
+  #?(:cljs (reset! value-cache (with-meta {} {:key (.now js/Date)}))))
 
 (defn clear [state]
   (a/do
-    (invoke 'portal.runtime/clear-values)
+    #?(:clj  (invoke 'portal.ssr.server/clear-values)
+       :cljs (invoke 'portal.runtime/clear-values))
     (reset-value-cache!)
     (-> state
         (dissoc :portal/value
@@ -357,12 +375,12 @@
          :portal/previous-state nil
          :portal/next-state nil))))
 
-(defn- send-selected-values [_ _ state state']
+(defn send-selected-values [_ _ state state']
   (when (not= (selected-values state)
               (selected-values state'))
     (invoke 'portal.runtime/update-selected (selected-values state'))))
 
-(add-watch state :selected #'send-selected-values)
+#?(:cljs (add-watch state :selected #'send-selected-values))
 
 (defn nav [state context]
   (let [{:keys [collection key value]} context
@@ -394,4 +412,4 @@
   "Close this inspector windows."
   []
   (notify-parent {:type :close})
-  (.close js/window))
+  #?(:cljs (.close js/window)))

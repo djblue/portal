@@ -31,11 +31,14 @@
    :second      second
    :millisecond millisecond])
 
+(defn- date ^java.util.Date []
+  #?(:clj (java.util.Date.) :cljs (js/Date.)))
+
 (defn- relative-time
   ([b]
-   (relative-time (js/Date.) b))
+   (relative-time (date) b))
   ([a b]
-   (let [diff (- (.getTime b) (.getTime a))
+   (let [diff (long (- (inst-ms b) (inst-ms a)))
          ms   (Math/abs diff)]
      (some
       (fn [[unit scale]]
@@ -63,15 +66,20 @@
 
 (defn inspect-relative [value]
   (let [value          (date-time/parse value)
-        [now set-now!] (react/use-state (js/Date.))]
+        [now set-now!] (react/use-state (date))]
     (react/use-effect
      :once
-     (let [i (js/setInterval
-              (fn []
-                (set-now! (js/Date.)))
-              1000)]
+     (let [i #?(:clj  (future
+                        (while true
+                          (set-now! (date))
+                          (Thread/sleep 1000)))
+                :cljs (js/setInterval
+                       (fn []
+                         (set-now! (date)))
+                       1000))]
        (fn []
-         (js/clearInterval i))))
+         #?(:clj  (future-cancel i)
+            :cljs (js/clearInterval i)))))
     [d/div (format-relative-time (relative-time now value))]))
 
 (def viewer
@@ -79,3 +87,4 @@
    :component #'inspect-relative
    :name :portal.viewer/relative-time
    :doc "View value relative to the current time."})
+

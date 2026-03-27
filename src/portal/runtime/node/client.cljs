@@ -37,7 +37,7 @@
   ([message]
    (a/let [responses
            (.all js/Promise
-                 (for [session-id (keys @rt/connections)]
+                 (for [session-id (rt/active-sessions)]
                    (request session-id message)))]
      (last responses)))
   ([session-id message]

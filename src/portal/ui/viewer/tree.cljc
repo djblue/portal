@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.ui.viewer.tree
   (:require [portal.ui.filter :as f]
-            [portal.ui.inspector :as ins]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]
@@ -126,7 +127,7 @@
       (keep-indexed
        (fn [idx [k v]]
          (when (or (matcher k) (matcher v))
-           (if-not (ins/coll? v)
+           (if-not #?(:clj (coll? v) :cljs (ins/coll? v))
              ^{:key idx}
              [s/div
               {:style {:display :flex
@@ -175,7 +176,7 @@
       (keep-indexed
        (fn [idx v]
          (when (matcher v)
-           (if-not (ins/coll? v)
+           (if-not #?(:clj (coll? v) :cljs (ins/coll? v))
              ^{:key idx}
              [s/div
               [ins/with-key idx
@@ -213,7 +214,7 @@
       [tree-grid context child])))
 
 (def viewer
-  {:predicate ins/coll?
+  {:predicate #?(:clj coll? :cljs ins/coll?)
    :component #'inspect-tree
    :name      :portal.viewer/tree
    :doc       "For viewing highly nested values, such as hiccup."})

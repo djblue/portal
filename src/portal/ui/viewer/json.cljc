@@ -1,10 +1,19 @@
 (ns ^:no-doc portal.ui.viewer.json
-  (:require [portal.ui.inspector :as ins]
+  (:require #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.parsers :as p]))
 
 (defn- parse-json [json-string]
-  (try (js->clj (js/JSON.parse json-string) :keywordize-keys true)
-       (catch :default e (ins/error->data e))))
+  #?(:clj
+     (try
+       ((requiring-resolve 'clojure.data.json/read-str)
+        json-string
+        :key-fn keyword)
+       (catch Exception e
+         (Throwable->map e)))
+     :cljs
+     (try (js->clj (js/JSON.parse json-string) :keywordize-keys true)
+          (catch :default e (ins/error->data e)))))
 
 (defmethod p/parse-string :format/json [_ s] (parse-json s))
 

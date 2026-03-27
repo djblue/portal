@@ -46,8 +46,11 @@
     (throw (ex-info "No such portal session"
                     {:session-id session-id :message message}))))
 
+(defn- rpc-sessions []
+  (filter #(= :rpc (rt/session-mode %)) (rt/active-sessions)))
+
 (defn- broadcast! [message]
-  (when-let [sessions (keys @rt/connections)]
+  (when-let [sessions (seq (rpc-sessions))]
     (let [response (promise)]
       (doseq [session-id sessions]
         (future

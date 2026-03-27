@@ -101,6 +101,7 @@
   ([portal options]
    (l/open portal
            (merge
+            {:mode :rpc}
             (dissoc (:options rt/*session*) :value :main)
             (rename options)))))
 

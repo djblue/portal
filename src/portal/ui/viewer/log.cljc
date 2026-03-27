@@ -4,36 +4,13 @@
             [portal.resources :refer [inline]]
             [portal.ui.filter :as-alias f]
             #_[shadow.resource :refer [inline]] ;; for hot reloading
-            [portal.ui.inspector :as ins]
+            #?(:clj [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]
             [portal.ui.viewer.date-time :as date-time]
             [portal.ui.viewer.source-location :as src]))
-
-(defn- parse [xml-string]
-  (let [parser (js/DOMParser.)
-        dom    (.parseFromString parser xml-string "text/xml")]
-    (aget (.getElementsByTagName dom "svg") 0)))
-
-(defn- stringify [dom]
-  (.serializeToString (js/XMLSerializer.) dom))
-
-(defn- resolve-color [color]
-  (if-let [[_ var] (re-matches #"var\((.*)\)" color)]
-    (-> js/document
-        .-documentElement
-        js/getComputedStyle
-        (.getPropertyValue var))
-    color))
-
-(defn- theme-svg [svg color]
-  (let [color (resolve-color color)]
-    (doseq [el (.querySelectorAll svg "[fill]")]
-      (.setAttribute el "fill" color))
-    (doseq [el (.querySelectorAll svg "[stroke]")]
-      (.setAttribute el "stroke" color)))
-  svg)
 
 (def ^:private runtime->logo
   {:clj     {:color ::c/package
@@ -61,6 +38,10 @@
              :title "Python"
              :icon (inline "runtime/python.svg")}})
 
+(defn btoa [^String s]
+  #?(:clj  (.encodeToString (java.util.Base64/getEncoder) (.getBytes s))
+     :cljs (js/btoa s)))
+
 (defn icon
   ([value]
    (let [theme (theme/use-theme)]
@@ -68,15 +49,19 @@
       value
       (get theme (get-in runtime->logo [value :color] ::c/text))]))
   ([value color]
-   (let [{:keys [icon title]} (runtime->logo value)]
+   (let [{:keys [icon title]} (runtime->logo value)
+         mask (str "url(\"data:image/svg+xml;base64," (btoa icon) "\")")]
      (when icon
-       [d/img
+       [d/div
         {:title title
          :style
-         {:height 22 :width 22}
-         :src (str
-               "data:image/svg+xml;base64,"
-               (-> icon parse (theme-svg color) stringify js/btoa))}]))))
+         {:height 22
+          :width 22
+          :background-color color
+          :mask-image mask
+          :mask-size "contain"
+          :mask-repeat "no-repeat"
+          :mask-position "center"}}]))))
 
 ;;; :spec
 (def ^:private levels

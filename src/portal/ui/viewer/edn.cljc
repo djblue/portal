@@ -1,11 +1,17 @@
 (ns ^:no-doc portal.ui.viewer.edn
+  (:refer-clojure :exclude [read-string])
   (:require [portal.runtime.edn :as edn]
-            [portal.ui.inspector :as ins]
+            #?(:clj  [portal.ssr.ui.inspector :as ins]
+               :cljs [portal.ui.inspector :as ins])
             [portal.ui.parsers :as p]))
 
 (defn read-string [edn-string]
-  (try (edn/read-string edn-string)
-       (catch :default e (ins/error->data e))))
+  #?(:clj
+     (try (edn/read-string edn-string)
+          (catch Exception e (Throwable->map e)))
+     :cljs
+     (try (edn/read-string edn-string)
+          (catch :default e (ins/error->data e)))))
 
 (defmethod p/parse-string :format/edn [_ s] (read-string s))
 
