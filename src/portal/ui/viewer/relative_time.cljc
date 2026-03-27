@@ -75,7 +75,7 @@
                           (Thread/sleep 1000)))
                 :cljs (js/setInterval
                        (fn []
-                         (set-now! (now)))
+                         (set-now! (date)))
                        1000))]
        (fn []
          #?(:clj  (future-cancel i)
