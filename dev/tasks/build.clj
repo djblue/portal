@@ -20,7 +20,7 @@
             "package.json"
             "package-lock.json"
             "shadow-cljs.edn"]
-           (fs/glob "src/portal/ui" "**.cljs"))))
+           (fs/glob "src/portal/ui" "**.clj*"))))
     (install)
     (shadow :release :client))
   (fs/copy "resources/icon.svg"
