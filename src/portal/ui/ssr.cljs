@@ -152,140 +152,129 @@
 (defn- input? [e]
   (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"} (.. e -target -tagName)))
 
-(defn- on-connect [ws]
-  (js/setInterval #(.send ^js ws (.stringify js/JSON #js {:op "ping"})) 15000)
-  (let [root (.getElementById js/document "root")]
-    (webcomponent!
-     "visible-sensor"
-     {:on-connect
-      (fn [this]
-        (let [observer
-              (js/IntersectionObserver.
-               (fn [entries]
-                 (when (observer-visible? entries)
-                   (.unobserve (.-observer this) this)
-                   (.send ^js ws
-                          (.stringify
-                           js/JSON
-                           #js {:op "on-visible" :id (find-handler-1 this "data-on-visible")}))))
-               #js {:root nil :rootMargin "0px" :threshold 0.5})]
-          (set! (.-observer this) observer)
-          (.observe observer this)))
-      :on-disconnect
-      (fn [this]
-        (.unobserve (.-observer this) this))})
-    (.addEventListener
-     root "focusin"
-     (fn [^js e]
-       (when-let [id (find-handler (.-srcElement e) "data-on-focus")]
-         (.send ^js ws
-                (.stringify
-                 js/JSON
-                 #js {:op "on-focus" :id id})))))
-    (.addEventListener
-     root "mouseover"
-     (fn [^js e]
-       (when-let [id (find-handler (.-srcElement e) "data-on-mouse-over")]
-         (.send ^js ws
-                (.stringify
-                 js/JSON
-                 #js {:op "on-mouse-over" :id id})))
-       (let [target (.-target e)]
-         (when-let [id (find-handler-1 target "data-on-mouse-enter")]
-           (when-not (.contains target (.-relatedTarget e))
-             (.send ^js ws
-                    (.stringify
-                     js/JSON
-                     #js {:op "on-mouse-enter" :id id})))))))
-    (.addEventListener
-     root "mouseout"
-     (fn [^js e]
-       (let [target (.-target e)]
-         (when-let [id (find-handler-1 target "data-on-mouse-leave")]
-           (when-not (.contains target (.-relatedTarget e))
-             (.send ^js ws
-                    (.stringify
-                     js/JSON
-                     #js {:op "on-mouse-leave" :id id})))))))
-    (.addEventListener
-     js/window "input"
-     (fn [^js e]
-       (when-let [id (find-handler (.-srcElement e) "data-on-change")]
-         (.send ^js ws
-                (.stringify
-                 js/JSON
-                 #js
-                  {:op "on-change"
-                   :id id
-                   :target #js {:value (.. e -target -value)}})))))
-    (.addEventListener
-     js/window "keydown"
-     (fn [^js e]
-       (if (input? e)
-         (when (#{"Tab"} (.-key e))
-           (.preventDefault e))
-         (when-not (or (and (.-ctrlKey e) (#{"f"} (.-key e)))
-                       (#{"Tab"} (.-key e)))
-           (.preventDefault e)))
-       (.send ^js ws
-              (.stringify
-               js/JSON
-               (if-let [id (find-handler (.-srcElement e) "data-on-key-down")]
-                 #js {:op "on-key-down"
-                      :id id
-                      :key (.toLowerCase (.-key e))
-                      :ctrl-key (.-ctrlKey e)
-                      :meta-key (.-metaKey e)
-                      :shift-key (.-shiftKey e)
-                      :alt-key (.-altKey e)
-                      :target #js {:tag-name (.. e -target -tagName)}}
-                 #js {:op "on-key-down"
-                      :key (.toLowerCase (.-key e))
-                      :ctrl-key (.-ctrlKey e)
-                      :meta-key (.-metaKey e)
-                      :shift-key (.-shiftKey e)
-                      :alt-key (.-altKey e)
-                      :target #js {:tag-name (.. e -target -tagName)}})))))
-    (.addEventListener
-     root "mouseup"
-     (fn [^js e]
-       (when-let [id (find-handler (.-srcElement e) "data-on-mouse-up")]
-         (.send ^js ws
-                (.stringify
-                 js/JSON
-                 #js {:op "on-mouse-up"
-                      :id id
-                      :button (.-button e)
-                      :ctrl-key (.-ctrlKey e)
-                      :meta-key (.-metaKey e)
-                      :shift-key (.-shiftKey e)
-                      :alt-key (.-altKey e)})))))
-    (.addEventListener
-     root "click"
-     (fn [^js e]
-       (when-let [id (find-handler (.-srcElement e) "data-on-click")]
-         (.send ^js ws
-                (.stringify
-                 js/JSON
-                 #js {:op "on-click"
-                      :id id
-                      :ctrl-key (.-ctrlKey e)
-                      :meta-key (.-metaKey e)
-                      :shift-key (.-shiftKey e)
-                      :alt-key (.-altKey e)})))))
-    (.addEventListener
-     root "dblclick"
-     (fn [^js e]
-       (when-let [id (find-handler (.-srcElement e) "data-on-double-click")]
-         (.send ^js ws
-                (.stringify
-                 js/JSON
-                 #js {:op "on-double-click"
-                      :id id
-                      :ctrl-key (.-ctrlKey e)
-                      :meta-key (.-metaKey e)
-                      :shift-key (.-shiftKey e)
-                      :alt-key (.-altKey e)})))))))
+(defonce ^:private !channel (atom nil))
+
+(defn- send! [message]
+  (when-let [channel @!channel]
+    (.send ^js channel (.stringify js/JSON (clj->js message)))))
+
+(defonce ^:private root (.getElementById js/document "root"))
+
+(js/setInterval #(send! {:op "ping"}) 15000)
+
+(webcomponent!
+ "visible-sensor"
+ {:on-connect
+  (fn [this]
+    (let [observer
+          (js/IntersectionObserver.
+           (fn [entries]
+             (when (observer-visible? entries)
+               (.unobserve (.-observer this) this)
+               (send! {:op "on-visible" :id (find-handler-1 this "data-on-visible")})))
+           #js {:root nil :rootMargin "0px" :threshold 0.5})]
+      (set! (.-observer this) observer)
+      (.observe observer this)))
+  :on-disconnect
+  (fn [this]
+    (.unobserve (.-observer this) this))})
+
+(.addEventListener
+ root "focusin"
+ (fn [^js e]
+   (when-let [id (find-handler (.-srcElement e) "data-on-focus")]
+     (send! {:op "on-focus" :id id}))))
+
+(.addEventListener
+ root "mouseover"
+ (fn [^js e]
+   (when-let [id (find-handler (.-srcElement e) "data-on-mouse-over")]
+     (send! {:op "on-mouse-over" :id id}))
+   (let [target (.-target e)]
+     (when-let [id (find-handler-1 target "data-on-mouse-enter")]
+       (when-not (.contains target (.-relatedTarget e))
+         (send! {:op "on-mouse-enter" :id id}))))))
+
+(.addEventListener
+ root "mouseout"
+ (fn [^js e]
+   (let [target (.-target e)]
+     (when-let [id (find-handler-1 target "data-on-mouse-leave")]
+       (when-not (.contains target (.-relatedTarget e))
+         (send! {:op "on-mouse-leave" :id id}))))))
+
+(.addEventListener
+ js/window "input"
+ (fn [^js e]
+   (when-let [id (find-handler (.-srcElement e) "data-on-change")]
+     (send!
+      {:op "on-change"
+       :id id
+       :target {:value (.. e -target -value)}}))))
+
+(.addEventListener
+ js/window "keydown"
+ (fn [^js e]
+   (if (input? e)
+     (when (#{"Tab"} (.-key e))
+       (.preventDefault e))
+     (when-not (or (and (.-ctrlKey e) (#{"f"} (.-key e)))
+                   (#{"Tab"} (.-key e)))
+       (.preventDefault e)))
+   (send!
+    (if-let [id (find-handler (.-srcElement e) "data-on-key-down")]
+      {:op "on-key-down"
+       :id id
+       :key (.toLowerCase (.-key e))
+       :ctrl-key (.-ctrlKey e)
+       :meta-key (.-metaKey e)
+       :shift-key (.-shiftKey e)
+       :alt-key (.-altKey e)
+       :target {:tag-name (.. e -target -tagName)}}
+      {:op "on-key-down"
+       :key (.toLowerCase (.-key e))
+       :ctrl-key (.-ctrlKey e)
+       :meta-key (.-metaKey e)
+       :shift-key (.-shiftKey e)
+       :alt-key (.-altKey e)
+       :target {:tag-name (.. e -target -tagName)}}))))
+
+(.addEventListener
+ root "mouseup"
+ (fn [^js e]
+   (when-let [id (find-handler (.-srcElement e) "data-on-mouse-up")]
+     (send!
+      {:op "on-mouse-up"
+       :id id
+       :button (.-button e)
+       :ctrl-key (.-ctrlKey e)
+       :meta-key (.-metaKey e)
+       :shift-key (.-shiftKey e)
+       :alt-key (.-altKey e)}))))
+
+(.addEventListener
+ root "click"
+ (fn [^js e]
+   (when-let [id (find-handler (.-srcElement e) "data-on-click")]
+     (send!
+      {:op "on-click"
+       :id id
+       :ctrl-key (.-ctrlKey e)
+       :meta-key (.-metaKey e)
+       :shift-key (.-shiftKey e)
+       :alt-key (.-altKey e)}))))
+
+(.addEventListener
+ root "dblclick"
+ (fn [^js e]
+   (when-let [id (find-handler (.-srcElement e) "data-on-double-click")]
+     (send!
+      {:op "on-double-click"
+       :id id
+       :ctrl-key (.-ctrlKey e)
+       :meta-key (.-metaKey e)
+       :shift-key (.-shiftKey e)
+       :alt-key (.-altKey e)}))))
 
 (defn- connect [{:keys [protocol host port
                         path session
@@ -299,7 +288,7 @@
        (set! (.-onerror chan)   (fn [e]
                                   (reject e)))
        ;;  (set! (.-onclose chan)   #(reset!  ws-promise nil))
-       (set! (.-onopen chan)    (resolve chan))))))
+       (set! (.-onopen chan)    #(do (reset! !channel chan) (resolve chan)))))))
 
 (defn- get-session []
   (if (exists? js/PORTAL_SESSION)
@@ -320,22 +309,18 @@
     (when-not (= (.-port js/location) "")
       (js/parseInt (.-port js/location)))))
 
-(defn main! []
-  (-> (connect
-       {:path     "/ssr"
-        :protocol (get-proto)
-        :host     (get-host)
-        :port     (get-port)
-        :session  (get-session)
-        :on-message
-        (fn [data]
-          (if (instance? js/ArrayBuffer data)
-            (on-message
-             {:op "on-render"
-              :html (.decode (js/TextDecoder.) data)})
-            (-> (.parse js/JSON data)
-                (js->clj :keywordize-keys true)
-                (on-message))))})
-      (.then on-connect)))
-
-(main!)
+(connect
+ {:path     "/ssr"
+  :protocol (get-proto)
+  :host     (get-host)
+  :port     (get-port)
+  :session  (get-session)
+  :on-message
+  (fn [data]
+    (if (instance? js/ArrayBuffer data)
+      (on-message
+       {:op "on-render"
+        :html (.decode (js/TextDecoder.) data)})
+      (-> (.parse js/JSON data)
+          (js->clj :keywordize-keys true)
+          (on-message))))})
