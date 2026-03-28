@@ -7,10 +7,10 @@
    [portal.runtime :as rt]
    [portal.runtime.json :as json]
    [portal.runtime.jvm.server :refer [enable-cors route]]
+   [portal.runtime.polyfill :refer [parse-uuid]]
    [portal.shortcuts :as shortcuts]
    [portal.ssr.hiccup :as hiccup]
    [portal.ssr.ui.react :as react]
-   [portal.ssr.ui.uuid :refer [parse-uuid]]
    [portal.ui.app :as app]
    [portal.ui.select :as select]
    [portal.ui.state :as state]
@@ -204,7 +204,7 @@
   {:status  200
    :headers {"Access-Control-Allow-Origin" "*"}
    :body
-   (slurp (io/resource "portal/ssr/ui/core.cljs"))})
+   (slurp (io/resource "portal/ui/ssr.cljs"))})
 
 (defn clear-values []
   (let [value (get-in rt/*session* [:options :value])]

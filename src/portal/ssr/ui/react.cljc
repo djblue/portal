@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [random-uuid])
   (:require
    [clojure.string :as str]
-   [portal.ssr.ui.uuid :refer [random-uuid]]
+   [portal.runtime.polyfill :refer [random-uuid]]
    [portal.ui.styled :as d]))
 
 ;; [x] component macro expansion

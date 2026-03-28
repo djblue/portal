@@ -1,8 +1,8 @@
 (ns ^:no-doc portal.ui.lazy
   #?(:clj (:refer-clojure :exclude [lazy-seq random-uuid]))
   #?(:clj (:require
-           [portal.ssr.ui.react :as react]
-           [portal.ssr.ui.uuid :refer [random-uuid]])))
+           [portal.runtime.polyfill :refer [random-uuid]]
+           [portal.ssr.ui.react :as react])))
 
 #?(:clj
    (defn lazy-seq

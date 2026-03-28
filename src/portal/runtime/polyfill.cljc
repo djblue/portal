@@ -1,6 +1,5 @@
-(ns portal.ssr.ui.uuid
-  (:refer-clojure :exclude [parse-uuid random-uuid])
-  #?(:lpy (:import [uuid :as uuid])))
+(ns ^:no-doc portal.runtime.polyfill
+  (:refer-clojure :exclude [parse-uuid random-uuid]))
 
 (defn random-uuid []
   #?(:clj  (java.util.UUID/randomUUID)

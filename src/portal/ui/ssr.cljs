@@ -1,13 +1,13 @@
-(ns portal.ssr.ui.core
+(ns portal.ui.ssr
   (:require
    [clojure.string :as str]))
 
 (require '["Idiomorph" :as i])
 
-(defn webcomponent! [name {:keys [on-connect
-                                  on-disconnect
-                                  on-attribute-changed
-                                  observed-attributes]}]
+(defn- webcomponent! [name {:keys [on-connect
+                                   on-disconnect
+                                   on-attribute-changed
+                                   observed-attributes]}]
   (let [component
         (fn component []
           (let [e (.construct js/Reflect js/HTMLElement #js [] component)]
@@ -43,7 +43,7 @@
               sum
               (+ sum (.-intersectionRatio entry)))) 0 entries)))
 
-(defn render [html]
+(defn- render [html]
   (i/morph (.getElementById js/document "root")
            html
            #js {:morphStyle "innerHTML"
@@ -80,10 +80,10 @@
 (defmethod on-message "on-copy" [{:keys [text]}]
   (copy-to-clipboard! text))
 
-(defn find-handler-1 [el handler]
+(defn- find-handler-1 [el handler]
   (when (.getAttribute el handler) (.getAttribute el "id")))
 
-(defn find-handler [el handler]
+(defn- find-handler [el handler]
   (some
    (fn [^js el]
      (find-handler-1 el handler))
@@ -118,7 +118,7 @@
  {:observed-attributes [:header]
   :on-attribute-changed (fn [_ _ _ header] (set-header header))})
 
-(defn element-visible? [element]
+(defn- element-visible? [element]
   (let [buffer 100
         rect   (.getBoundingClientRect element)
         height (or (.-innerHeight js/window)
@@ -130,7 +130,7 @@
          (> (.-right rect) buffer)
          (< (.-left rect) (- width buffer)))))
 
-(defn scroll-into-view [element]
+(defn- scroll-into-view [element]
   (let [inline   (.getAttribute element "inline")
         block    (.getAttribute element "block")
         behavior (.getAttribute element "behavior")
@@ -149,10 +149,10 @@
         (scroll-into-view this))
       (scroll-into-view this)))})
 
-(defn input? [e]
+(defn- input? [e]
   (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"} (.. e -target -tagName)))
 
-(defn on-connect [ws]
+(defn- on-connect [ws]
   (js/setInterval #(.send ^js ws (.stringify js/JSON #js {:op "ping"})) 15000)
   (let [root (.getElementById js/document "root")]
     (webcomponent!
@@ -287,9 +287,9 @@
                       :shift-key (.-shiftKey e)
                       :alt-key (.-altKey e)})))))))
 
-(defn connect [{:keys [protocol host port
-                       path session
-                       on-message]}]
+(defn- connect [{:keys [protocol host port
+                        path session
+                        on-message]}]
   (js/Promise.
    (fn [resolve reject]
      (when-let [chan (js/WebSocket.

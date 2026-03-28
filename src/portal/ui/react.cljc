@@ -2,7 +2,7 @@
   #?(:clj  (:refer-clojure :exclude [random-uuid]))
   #?(:cljs (:require ["react" :as react])
      :clj  (:require [portal.ssr.ui.react :as react]
-                     [portal.ssr.ui.uuid :refer [random-uuid]]))
+                     [portal.runtime.polyfill :refer [random-uuid]]))
   #?(:cljs (:require-macros portal.ui.react)))
 
 (def ^:dynamic *static* false)

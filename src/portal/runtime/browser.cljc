@@ -6,6 +6,7 @@
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
                      [portal.runtime.jvm.client :as c]
+                     [portal.runtime.polyfill :refer [random-uuid]]
                      [portal.runtime.shell :as shell])
      :cljs (:require [clojure.string :as str]
                      [portal.runtime :as rt]
@@ -161,8 +162,6 @@
         (println "Goto" url "to view portal ui."))
       :lpy
       (browser/open url))))
-
-#?(:clj (defn- random-uuid [] (java.util.UUID/randomUUID)))
 
 (defn url [{:keys [portal server]}]
   (str "http://" (:host server) ":" (:port server) "?" (:session-id portal)))
