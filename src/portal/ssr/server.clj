@@ -46,6 +46,8 @@
 (def ^:private timeout-ms 30000)
 (def ^:private budget-ms (/ 1000.0 30))
 
+(declare on-close)
+
 (defn- sleep [start]
   (let [total-time (- (System/currentTimeMillis) start)]
     (when (< total-time budget-ms)
@@ -61,7 +63,10 @@
           (recur
            (let [start (System/currentTimeMillis)]
              (if (< timeout-ms (- start @last-ping))
-               (server/close channel)
+               (do
+                 (reset! running false)
+                 (on-close session)
+                 (server/close channel))
                (try
                  (render state)
                  (catch Exception e
@@ -133,8 +138,11 @@
 (defn- on-open [session]
   (add-watch (:state session) :selected #'state/send-selected-values)
   (swap! rt/connections assoc (:session-id session) (partial send! session))
-  (swap! render-loops assoc (:session-id session)
-         (start-render-loop session (partial #'render-app session))))
+  (swap! render-loops update (:session-id session)
+         (fn [stop-render-loop]
+           (when (fn? stop-render-loop)
+             (stop-render-loop))
+           (start-render-loop session (partial #'render-app session)))))
 
 (defn- on-receive [session message]
   (swap! (:event-queue session) conj (json/read message)))
