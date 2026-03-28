@@ -27,7 +27,7 @@
       (remove-watch rt/connections watch-key)
       result)))
 
-(defn- request! [session-id message]
+(defn request [session-id message]
   (if-let [send! (get-connection session-id)]
     (let [id       (rt/next-id)
           response (promise)
@@ -45,39 +45,6 @@
                    :message message})))))
     (throw (ex-info "No such portal session"
                     {:session-id session-id :message message}))))
-
-(defn- rpc-sessions []
-  (filter #(= :rpc (rt/session-mode %)) (rt/active-sessions)))
-
-(defn- broadcast! [message]
-  (when-let [sessions (seq (rpc-sessions))]
-    (let [response (promise)]
-      (doseq [session-id sessions]
-        (future
-          (try
-            (deliver response (request! session-id message))
-            (catch Exception ex
-              (when (-> ex ex-data ::timeout)
-                (swap! rt/connections dissoc session-id))
-              (deliver response ex)))))
-      (let [response (deref response timeout ::timeout)]
-        (cond
-          (instance? Throwable response)
-          (throw response)
-          (not= response ::timeout)
-          response
-          :else
-          (throw (ex-info
-                  "Portal request timeout"
-                  {::timeout true
-                   :session-id :all
-                   :message message})))))))
-
-(defn request
-  ([message]
-   (broadcast! message))
-  ([session-id message]
-   (request! session-id message)))
 
 (defn- push-state [session-id new-value]
   (request session-id {:op :portal.rpc/push-state :state new-value})

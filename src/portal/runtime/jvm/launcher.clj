@@ -27,6 +27,32 @@
   (some-> server deref :http-server http/server-stop!)
   (reset! server nil))
 
+(defn- sessions!
+  ([f]
+   (sessions! (rt/active-sessions) f))
+  ([sessions f]
+   (when-let [sessions (seq sessions)]
+     (let [response (promise)]
+       (doseq [session-id sessions]
+         (future
+           (try
+             (deliver response (f session-id))
+             (catch Exception ex
+               (when (-> ex ex-data ::timeout)
+                 (swap! rt/connections dissoc session-id))
+               (deliver response ex)))))
+       (let [response (deref response c/timeout ::timeout)]
+         (cond
+           (instance? Throwable response)
+           (throw response)
+           (not= response ::timeout)
+           response
+           :else
+           (throw (ex-info
+                   "Portal request timeout"
+                   {::timeout true
+                    :session-id :all}))))))))
+
 (defn open
   ([options]
    (open nil options))
@@ -41,10 +67,9 @@
     (c/request session-id {:op :portal.rpc/clear})))
 
 (defn clear [portal]
-  (if-not (= portal :all)
-    (clear-1 (:session-id portal))
-    (doseq [session-id (rt/active-sessions)]
-      (clear-1 session-id)))
+  (if (= portal :all)
+    (sessions! clear-1)
+    (clear-1 (:session-id portal)))
   (rt/cleanup-sessions))
 
 (defn- close-1 [session-id]
@@ -54,17 +79,21 @@
   (rt/close-session session-id))
 
 (defn close [portal]
-  (if-not (= portal :all)
-    (close-1 (:session-id portal))
-    (doseq [session-id (rt/active-sessions)]
-      (close-1 session-id)))
+  (if (= portal :all)
+    (sessions! close-1)
+    (close-1 (:session-id portal)))
   (rt/cleanup-sessions))
 
+(defn- rpc-sessions []
+  (filter #(= :rpc (rt/session-mode %)) (rt/active-sessions)))
+
 (defn eval-str [portal msg]
-  (let [response (if (= portal :all)
-                   (c/request (assoc msg :op :portal.rpc/eval-str))
-                   (c/request (:session-id portal)
-                              (assoc msg :op :portal.rpc/eval-str)))]
+  (let [response
+        (if (= portal :all)
+          (sessions!
+           (rpc-sessions)
+           #(c/request % (assoc msg :op :portal.rpc/eval-str)))
+          (c/request (:session-id portal) (assoc msg :op :portal.rpc/eval-str)))]
     (if-not (:error response)
       response
       (throw (ex-info (:message response) response)))))
