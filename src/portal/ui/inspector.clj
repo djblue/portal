@@ -4,14 +4,14 @@
    [clojure.set :as set]
    [portal.colors :as c]
    [portal.runtime.cson :as cson]
+   [portal.ui.filter :as f]
    [portal.ui.icons :as icons]
    [portal.ui.lazy :as l]
-   [portal.runtime.react :as react]
+   [portal.ui.react :as react]
    [portal.ui.select :as select]
    [portal.ui.state :as state]
    [portal.ui.styled :as s]
-   [portal.ui.theme :as theme]
-   [portal.ui.filter :as f]))
+   [portal.ui.theme :as theme]))
 
 (declare inspector*)
 (declare inspector)
@@ -713,7 +713,7 @@
          (catch Exception _e values))))
 
 (defn use-sort-map [values]
-  (react/use-memo #(try-sort-map values) [values]))
+  (react/use-memo [values] (try-sort-map values)))
 
 (defn- container-map [child]
   (let [theme (theme/use-theme)]
@@ -1000,7 +1000,7 @@
 
 (defn- use-resolve-viewer
   [{:keys [value] :as context} selected-viewer viewers]
-  (let [compatible-viewers (react/use-memo #(get-compatible-viewers* viewers value) [viewers value])]
+  (let [compatible-viewers (react/use-memo [viewers value] (get-compatible-viewers* viewers value))]
     (if (contains? compatible-viewers selected-viewer)
       selected-viewer
       (let [default-viewer (get-default-viewer context viewers)]
@@ -1024,13 +1024,12 @@
                            :else preview)]
     (select/use-register-context ctx resolved-viewer)
     (react/use-effect
-     (fn []
-       (when (and (nil? expanded?)
-                  (default-expand? state theme ctx value))
-         (state/dispatch!
-          state assoc-in [:expanded? location]
-          (get-in (meta value) [:portal.viewer/inspector :expanded] 1))))
-     [location (some? expanded?)])
+     [location (some? expanded?)]
+     (when (and (nil? expanded?)
+                (default-expand? state theme ctx value))
+       (state/dispatch!
+        state assoc-in [:expanded? location]
+        (get-in (meta value) [:portal.viewer/inspector :expanded] 1))))
     [:<>
      [with-options options
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)

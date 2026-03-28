@@ -2,10 +2,10 @@
   (:require
    [clojure.string :as str]
    [portal.colors :as c]
-   [portal.runtime.react :as react]
    [portal.ui.commands :as commands]
    [portal.ui.icons :as icons]
    [portal.ui.inspector :as ins]
+   [portal.ui.react :as react]
    [portal.ui.select :as select]
    [portal.ui.state :as state]
    [portal.ui.styled :as d]

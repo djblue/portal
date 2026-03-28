@@ -56,14 +56,12 @@
         #js {:current js/undefined}
         (react/useRef initial-value)))))
 
-#?(:cljs
-   (defn use-memo* [f deps]
-     (if *static*
-       (f)
-       (case deps
-         :always (react/useMemo f)
-         :once (react/useMemo f #js [])
-         (react/useMemo f deps)))))
+(defn use-memo* [f deps]
+  (if *static*
+    (f)
+    (case deps
+      :once #?(:clj (react/use-memo f []) :cljs (react/useMemo f #js []))
+      #?(:clj (react/use-memo f deps) :cljs (react/useMemo f deps)))))
 
 (defmacro use-memo [deps & body]
   `(use-memo* (fn [] ~@body) ~deps))

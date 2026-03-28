@@ -2,7 +2,7 @@
   #?(:clj (:refer-clojure :exclude [lazy-seq random-uuid]))
   #?(:clj (:require
            [portal.runtime.polyfill :refer [random-uuid]]
-           [portal.runtime.react :as react])))
+           [portal.ui.react :as react])))
 
 #?(:clj
    (defn lazy-seq
