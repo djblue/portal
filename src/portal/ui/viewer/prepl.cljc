@@ -7,8 +7,7 @@
             [portal.ui.filter :as f]
             #?(:cljs [portal.ui.html :as h])
             [portal.ui.icons :as icons]
-            #?(:clj  [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+            [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
             [portal.ui.state :as state]
             [portal.ui.styled :as d]

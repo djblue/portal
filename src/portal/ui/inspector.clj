@@ -1,4 +1,4 @@
-(ns portal.ssr.ui.inspector
+(ns portal.ui.inspector
   (:refer-clojure :exclude [coll? map?])
   (:require
    [clojure.set :as set]

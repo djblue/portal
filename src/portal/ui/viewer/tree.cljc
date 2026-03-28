@@ -1,7 +1,6 @@
 (ns ^:no-doc portal.ui.viewer.tree
   (:require [portal.ui.filter :as f]
-            #?(:clj  [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+            [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
             [portal.ui.styled :as s]

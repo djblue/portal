@@ -1,8 +1,7 @@
 (ns ^:no-doc portal.ui.viewer.source-location
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
-            #?(:clj  [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+            [portal.ui.inspector :as ins]
             #?(:clj  [portal.ui.state :as state]
                :cljs [portal.ui.rpc :as rpc])
             [portal.ui.styled :as d]

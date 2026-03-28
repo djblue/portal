@@ -4,8 +4,7 @@
             [portal.resources :refer [inline]]
             [portal.ui.filter :as-alias f]
             #_[shadow.resource :refer [inline]] ;; for hot reloading
-            #?(:clj [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+            [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]

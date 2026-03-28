@@ -9,9 +9,9 @@
    [portal.runtime.jvm.server :refer [enable-cors route]]
    [portal.shortcuts :as shortcuts]
    [portal.ssr.hiccup :as hiccup]
-   [portal.ssr.ui.app :as app]
    [portal.ssr.ui.react :as react]
    [portal.ssr.ui.uuid :refer [parse-uuid]]
+   [portal.ui.app :as app]
    [portal.ui.select :as select]
    [portal.ui.state :as state]
    [portal.ui.styled :as d])

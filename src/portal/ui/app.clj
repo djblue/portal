@@ -1,9 +1,9 @@
-(ns portal.ssr.ui.app
+(ns portal.ui.app
   (:require
    [clojure.string :as str]
    [portal.colors :as c]
    [portal.ui.commands :as commands]
-   [portal.ssr.ui.inspector :as ins]
+   [portal.ui.inspector :as ins]
    [portal.ssr.ui.react :as react]
    [portal.ui.state :as state]
    [portal.ui.icons :as icons]

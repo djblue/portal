@@ -2,8 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [portal.colors :as c]
             [portal.ui.icons :as icons]
-            #?(:clj  [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+            [portal.ui.inspector :as ins]
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]

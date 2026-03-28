@@ -9,8 +9,7 @@
             [portal.shortcuts :as shortcuts]
             #?(:cljs [portal.ui.drag-and-drop :as dnd])
             [portal.ui.icons :as icons]
-            #?(:clj [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+            [portal.ui.inspector :as ins]
             #?(:cljs [portal.ui.options :as options])
             [portal.ui.parsers :as p]
             [portal.ui.react :as react]

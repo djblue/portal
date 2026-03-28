@@ -1,8 +1,7 @@
 (ns ^:no-doc portal.ui.viewer.text
   (:require [clojure.string :as str]
             [portal.colors :as c]
-            #?(:clj  [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+            [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))

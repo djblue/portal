@@ -1,8 +1,7 @@
 (ns ^:no-doc portal.ui.viewer.deref
   (:require [portal.colors :as c]
             [portal.ui.icons :as icons]
-            #?(:clj  [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+            [portal.ui.inspector :as ins]
             #?(:cljs [portal.ui.options :as options])
             [portal.ui.react :as react]
             #?(:cljs [portal.ui.rpc :as rpc])

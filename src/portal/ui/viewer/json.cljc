@@ -1,6 +1,5 @@
 (ns ^:no-doc portal.ui.viewer.json
-  (:require #?(:clj  [portal.ssr.ui.inspector :as ins]
-               :cljs [portal.ui.inspector :as ins])
+  (:require [portal.ui.inspector :as ins]
             [portal.ui.parsers :as p]))
 
 (defn- parse-json [json-string]

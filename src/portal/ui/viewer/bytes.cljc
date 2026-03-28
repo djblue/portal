@@ -1,8 +1,7 @@
 (ns ^:no-doc portal.ui.viewer.bytes
   (:require
    [portal.colors :as c]
-   #?(:clj  [portal.ssr.ui.inspector :as ins]
-      :cljs [portal.ui.inspector :as ins])
+   [portal.ui.inspector :as ins]
    [portal.ui.select :as select]
    [portal.ui.styled :as d]
    [portal.ui.theme :as theme]))
