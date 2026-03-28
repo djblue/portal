@@ -1,4 +1,4 @@
-(ns portal.ui.app
+(ns ^:no-doc portal.ui.app
   (:require
    [clojure.string :as str]
    [portal.colors :as c]
