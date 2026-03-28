@@ -54,7 +54,7 @@
 (defn clj
   []
   (build)
-  (t/clj "-M:test" "-m" :portal.test-runner)
+  (t/clj "-M:cider:test" "-m" :portal.test-runner)
   (t/bb "-m" :portal.test-runner))
 
 (defn cljr []

@@ -33,6 +33,7 @@
 (defn -main []
   (let [{:keys [fail error]}
         (run-tests 'portal.client-test
+                   (when-not in-bb? 'portal.nrepl-test)
                    'portal.runtime-test
                    'portal.runtime.api-test
                    'portal.runtime.cson-test
