@@ -5,6 +5,7 @@
    [clojure.string :as str]
    [org.httpkit.server :as server]
    [portal.runtime :as rt]
+   [portal.runtime.fs :as fs]
    [portal.runtime.json :as json]
    [portal.runtime.jvm.hiccup :as hiccup]
    [portal.runtime.jvm.server :refer [enable-cors route]]
@@ -16,7 +17,8 @@
    [portal.ui.state :as state]
    [portal.ui.styled :as d])
   (:import
-   [java.io ByteArrayInputStream]))
+   [java.io ByteArrayInputStream]
+   [java.net URI]))
 
 (defn- on-message [{:keys [handlers last-ping]} {:keys [id] :as event}]
   (let [op (keyword (:op event))]
@@ -208,6 +210,45 @@
    :headers {"Access-Control-Allow-Origin" "*"}
    :body
    (slurp (io/resource "portal/ui/ssr.cljs"))})
+
+(defn- ->host [request]
+  (str (case (:scheme request)
+         :http "http://" :https "https://")
+       (:server-name request) ":" (:server-port request)))
+
+(defn- resolve-vendor*
+  "Fetch assets for vendoring or caching.
+   Additionally, re-write css urls to be vendor-able as well."
+  [request]
+  (let [url (subs (:query-string request) 4)]
+    (if-not (str/ends-with? url ".css")
+      (io/input-stream (io/as-url url))
+      (let [host (->host request) uri (URI. url)]
+        (-> (io/as-url url)
+            (io/input-stream)
+            (slurp)
+            (str/replace
+             #"url\(([^)]*)\)"
+             (fn [[_ path]]
+               (str "url(" host "/vendor?url=" (.resolve uri ^String path) ")"))))))))
+
+(defn- resolve-vendor
+  "Resolve vendor'd asset via classpath or cache via .portal/vendor"
+  [request]
+  (let [url  (subs (:query-string request) 4)
+        path (subs (.getPath (URI. url)) 1)]
+    (or (io/resource (fs/join "portal" "vendor" path))
+        (let [file (fs/join (fs/cwd) ".portal" "vendor" path)]
+          (when-not (fs/exists file)
+            (fs/mkdir (fs/dirname file))
+            (io/copy (resolve-vendor* request) (io/file file)))
+          (io/file file)))))
+
+(defmethod route [:get "/vendor"] [request]
+  {:status  200
+   :headers {"Access-Control-Allow-Origin" "*"
+             "Cache-Control" "max-age=31536000, immutable"}
+   :body    (io/input-stream (resolve-vendor request))})
 
 (defn clear-values []
   (let [value (get-in rt/*session* [:options :value])]
