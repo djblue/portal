@@ -71,7 +71,7 @@
              (future (cljs-runtime "1.10.844"))
              (future (cljs-ui))
              (future (cljs-nbb))
-             (future (t/clj "-M:test" "-m" :portal.test-runner))
+             (future (t/clj "-M:cider:test" "-m" :portal.test-runner))
              (future (t/bb "-m" :portal.test-runner))
              (future (cljr))
              (future (lpy))]]
