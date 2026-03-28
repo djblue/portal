@@ -1,6 +1,6 @@
 (ns ^:no-doc portal.runtime.jvm.hiccup
   (:require
-   [portal.ssr.ui.react :as react])
+   [portal.runtime.react :as react])
   (:import
    [java.io ByteArrayInputStream]
    [java.nio ByteBuffer]

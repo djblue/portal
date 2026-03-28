@@ -1,7 +1,7 @@
-(ns portal.ssr.ui.react-test
+(ns portal.runtime.react-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [portal.ssr.ui.react :as r]))
+   [portal.runtime.react :as r]))
 
 (deftest basic-hiccup-test
   (is (= [:div {} "hello, world"]

@@ -8,8 +8,8 @@
             [portal.runtime.fs-test]
             [portal.runtime.json-buffer-test]
             [portal.runtime.npm-test]
+            [portal.runtime.react]
             [portal.runtime.shell-test]
-            [portal.ssr.ui.react]
             [portal.test-runner :as runner]))
 
 (defn -main [])
@@ -24,7 +24,7 @@
                  'portal.runtime.fs-test
                  'portal.runtime.json-buffer-test
                  'portal.runtime.npm-test
-                 'portal.runtime.shell-test
-                 'portal.ssr.ui.react)))
+                 'portal.runtime.react
+                 'portal.runtime.shell-test)))
 
 (main!)

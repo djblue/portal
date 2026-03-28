@@ -44,8 +44,8 @@
                      'portal.runtime.jvm.custom-types-test)
                    'portal.runtime.jvm.editor-test
                    'portal.runtime.npm-test
+                   'portal.runtime.react-test
                    'portal.runtime.shell-test
-                   'portal.ssr.ui.react-test
                    'portal.ui.state-test)]
     (api/stop)
     (shutdown-agents)

@@ -1,7 +1,7 @@
 (ns ^:no-doc portal.ui.react
   #?(:clj  (:refer-clojure :exclude [random-uuid]))
   #?(:cljs (:require ["react" :as react])
-     :clj  (:require [portal.ssr.ui.react :as react]
+     :clj  (:require [portal.runtime.react :as react]
                      [portal.runtime.polyfill :refer [random-uuid]]))
   #?(:cljs (:require-macros portal.ui.react)))
 
