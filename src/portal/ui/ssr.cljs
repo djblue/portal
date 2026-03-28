@@ -276,19 +276,18 @@
        :shift-key (.-shiftKey e)
        :alt-key (.-altKey e)}))))
 
-(defn- connect [{:keys [protocol host port
-                        path session
-                        on-message]}]
-  (js/Promise.
-   (fn [resolve reject]
-     (when-let [chan (js/WebSocket.
-                      (str protocol "//" host (when port (str ":" port)) path "?" session))]
-       (set! (.-binaryType chan) "arraybuffer")
-       (set! (.-onmessage chan) #(on-message (.-data %)))
-       (set! (.-onerror chan)   (fn [e]
-                                  (reject e)))
-       ;;  (set! (.-onclose chan)   #(reset!  ws-promise nil))
-       (set! (.-onopen chan)    #(do (reset! !channel chan) (resolve chan)))))))
+(defn- connect! [{:keys [protocol host port
+                         path session
+                         on-message] :as opts}]
+  (let [channel (js/WebSocket.
+                 (str protocol "//" host (when port (str ":" port)) path "?" session))]
+    (set! (.-binaryType channel) "arraybuffer")
+    (set! (.-onmessage channel) #(on-message (.-data %)))
+    (set! (.-onopen channel) #(reset! !channel channel))
+    (set! (.-onclose channel)
+          (fn [_]
+            (reset! !channel nil)
+            (js/setTimeout #(connect! opts) 1000)))))
 
 (defn- get-session []
   (if (exists? js/PORTAL_SESSION)
@@ -309,7 +308,7 @@
     (when-not (= (.-port js/location) "")
       (js/parseInt (.-port js/location)))))
 
-(connect
+(connect!
  {:path     "/ssr"
   :protocol (get-proto)
   :host     (get-host)
