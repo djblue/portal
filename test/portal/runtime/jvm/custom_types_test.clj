@@ -2,8 +2,8 @@
   (:refer-clojure :exclude [read])
   (:require
    [clojure.test :refer [deftest is]]
-   [portal.runtime.cson :as cson]
-   [portal.runtime :as rt]))
+   [portal.runtime :as rt]
+   [portal.runtime.cson :as cson]))
 
 (deftype TestMap [^clojure.lang.IPersistentMap m ^clojure.lang.IPersistentMap _meta]
   clojure.lang.IPersistentMap

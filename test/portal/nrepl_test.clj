@@ -1,6 +1,7 @@
 (ns portal.nrepl-test
-  (:require [portal.nrepl :as nrepl]
-            [clojure.test :refer [deftest is]]))
+  (:require
+   [clojure.test :refer [deftest is]]
+   [portal.nrepl :as nrepl]))
 
 (deftest parse-warn-on-reflection-test
   (is (=
