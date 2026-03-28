@@ -403,25 +403,34 @@
         :display :flex}}
       [inspect-1-history value]]]))
 
+(defn- try-resolve [s]
+  (try
+    @(requiring-resolve s)
+    (catch Exception _ nil)))
+
 (reset! ins/viewers
-        [ex/viewer
-         log/viewer
-         http/viewer
-         deref/viewer
-         test-report/viewer
-         prepl/viewer
-         color/viewer
-         ins/viewer
-         ex/trace-viewer
-         ex/sub-trace-viewer
-         duration/nano
-         duration/ms
-         bytes/viewer
-         table/viewer
-         tree/viewer
-         text/viewer
-         json/viewer
-         edn/viewer
-         date-time/viewer
-         relative-time/viewer
-         source-location/viewer])
+        (filterv
+         some?
+         [ex/viewer
+          log/viewer
+          http/viewer
+          deref/viewer
+          test-report/viewer
+          prepl/viewer
+          color/viewer
+          (try-resolve 'portal.ui.viewer.diff/deep-diff2)
+          ins/viewer
+          ex/trace-viewer
+          ex/sub-trace-viewer
+          duration/nano
+          duration/ms
+          bytes/viewer
+          table/viewer
+          tree/viewer
+          text/viewer
+          json/viewer
+          edn/viewer
+          (try-resolve 'portal.ui.viewer.diff/viewer)
+          date-time/viewer
+          relative-time/viewer
+          source-location/viewer]))

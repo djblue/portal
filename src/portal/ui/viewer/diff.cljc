@@ -2,34 +2,40 @@
   (:require [clojure.spec.alpha :as s]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
-            [portal.runtime.cson :as cson]
+            #?(:cljs [portal.runtime.cson :as cson])
             [portal.ui.commands :as commands]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
-            [portal.ui.rpc :as rpc]
+            #?(:cljs [portal.ui.rpc :as rpc])
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
-            [portal.ui.theme :as theme]))
+            [portal.ui.theme :as theme])
+  #?(:clj (:import [lambdaisland.deep_diff2.diff_impl Deletion Insertion Mismatch])))
 
-(extend-protocol cson/ToJson
-  diff/Deletion
-  (to-json* [this buffer] (cson/tag buffer "diff/Deletion" (:- this)))
+#?(:cljs (def Deletion diff/Deletion))
+#?(:cljs (def Insertion diff/Insertion))
+#?(:cljs (def Mismatch diff/Mismatch))
 
-  diff/Insertion
-  (to-json* [this buffer] (cson/tag buffer "diff/Insertion" (:+ this)))
+#?(:cljs
+   (extend-protocol cson/ToJson
+     Deletion
+     (to-json* [this buffer] (cson/tag buffer "diff/Deletion" (:- this)))
 
-  diff/Mismatch
-  (to-json* [this buffer] (cson/tag buffer "diff/Mismatch" ((juxt :- :+) this))))
+     Insertion
+     (to-json* [this buffer] (cson/tag buffer "diff/Insertion" (:+ this)))
 
-(defmethod rpc/-read "diff/Deletion"  [_ value] (diff/Deletion. value))
-(defmethod rpc/-read "diff/Insertion" [_ value] (diff/Insertion. value))
-(defmethod rpc/-read "diff/Mismatch"  [_ [a b]] (diff/Mismatch. a b))
+     Mismatch
+     (to-json* [this buffer] (cson/tag buffer "diff/Mismatch" ((juxt :- :+) this)))))
+
+#?(:cljs (defmethod rpc/-read "diff/Deletion"  [_ value] (diff/Deletion. value)))
+#?(:cljs (defmethod rpc/-read "diff/Insertion" [_ value] (diff/Insertion. value)))
+#?(:cljs (defmethod rpc/-read "diff/Mismatch"  [_ [a b]] (diff/Mismatch. a b)))
 
 (defn diff? [value]
   (or
-   (instance? diff/Deletion value)
-   (instance? diff/Insertion value)
-   (instance? diff/Mismatch value)))
+   (instance? Deletion value)
+   (instance? Insertion value)
+   (instance? Mismatch value)))
 
 ;;; :spec
 (s/def ::diffable (s/coll-of any? :min-count 2))
@@ -100,11 +106,11 @@
 
 (defn- inspect-deep-diff2 [value]
   (cond
-    (instance? diff/Mismatch value)  [mismatch value]
-    (instance? diff/Deletion value)
+    (instance? Mismatch value)  [mismatch value]
+    (instance? Deletion value)
     [select/with-position {:row 0 :column 0}
      [deletion (:- value)]]
-    (instance? diff/Insertion value)
+    (instance? Insertion value)
     [select/with-position {:row 0 :column 0}
      [insertion (:+ value)]]))
 
@@ -151,22 +157,23 @@
         :border-bottom-left-radius (:border-radius theme)
         :border-bottom-right-radius (:border-radius theme)}}
       [ins/dec-depth
-       (->> (test-actual value)
-            (partition 2 1)
-            (map-indexed
-             (fn [idx [a b]]
-               ^{:key idx}
-               [ins/with-key
-                idx
-                [ins/with-collection
-                 [a b]
-                 [select/with-position
-                  {:row idx :column 0}
-                  [ins/inspector (diff/diff a b)]]]])))]]]))
+       [:<>
+        (->> (test-actual value)
+             (partition 2 1)
+             (map-indexed
+              (fn [idx [a b]]
+                ^{:key idx}
+                [ins/with-key
+                 idx
+                 [ins/with-collection
+                  [a b]
+                  [select/with-position
+                   {:row idx :column 0}
+                   [ins/inspector (diff/diff a b)]]]])))]]]]))
 
 (def ^:no-doc deep-diff2
   {:predicate diff?
-   :component inspect-deep-diff2
+   :component #'inspect-deep-diff2
    :name      ::diff/diff})
 
 (def viewer

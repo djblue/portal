@@ -16,7 +16,7 @@
        "--lint" :dev :src :test
        "extension-intellij/src/main/clojure"))
 
-(defn clj-check [] (clj "-M:cider:check"))
+(defn clj-check [] (clj "-M:cider:check:cljs"))
 
 (defn gradle-check []
   (binding [*cwd* "extension-intellij"]
