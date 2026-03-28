@@ -696,7 +696,7 @@
 
 (defn- copy-to-clipboard! [s]
   #?(:clj
-     ((requiring-resolve 'portal.ssr.server/send!) {:op "on-copy" :text s})
+     ((requiring-resolve 'portal.runtime.jvm.ssr/send!) {:op "on-copy" :text s})
      :cljs
      (let [el (js/document.createElement "textarea")]
        (set! (.-value el) s)

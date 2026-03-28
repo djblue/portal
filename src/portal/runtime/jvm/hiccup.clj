@@ -1,4 +1,4 @@
-(ns portal.ssr.hiccup
+(ns ^:no-doc portal.runtime.jvm.hiccup
   (:require
    [portal.ssr.ui.react :as react])
   (:import

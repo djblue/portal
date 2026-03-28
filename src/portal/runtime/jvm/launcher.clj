@@ -57,13 +57,13 @@
   ([options]
    (open nil options))
   ([portal options]
-   (when (= :ssr (:mode options)) (require 'portal.ssr.server))
+   (when (= :ssr (:mode options)) (require 'portal.runtime.jvm.ssr))
    (let [server (start options)]
      (browser/open {:portal portal :options options :server server}))))
 
 (defn- clear-1 [session-id]
   (case (rt/session-mode session-id)
-    :ssr ((requiring-resolve 'portal.ssr.server/clear) session-id)
+    :ssr ((requiring-resolve 'portal.runtime.jvm.ssr/clear) session-id)
     (c/request session-id {:op :portal.rpc/clear})))
 
 (defn clear [portal]
@@ -74,7 +74,7 @@
 
 (defn- close-1 [session-id]
   (case (rt/session-mode session-id)
-    :ssr ((requiring-resolve 'portal.ssr.server/close) session-id)
+    :ssr ((requiring-resolve 'portal.runtime.jvm.ssr/close) session-id)
     (c/request session-id {:op :portal.rpc/close}))
   (rt/close-session session-id))
 

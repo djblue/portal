@@ -1,4 +1,4 @@
-(ns portal.ssr.server
+(ns ^:no-doc portal.runtime.jvm.ssr
   (:refer-clojure :exclude [parse-uuid])
   (:require
    [clojure.java.io :as io]
@@ -6,10 +6,10 @@
    [org.httpkit.server :as server]
    [portal.runtime :as rt]
    [portal.runtime.json :as json]
+   [portal.runtime.jvm.hiccup :as hiccup]
    [portal.runtime.jvm.server :refer [enable-cors route]]
    [portal.runtime.polyfill :refer [parse-uuid]]
    [portal.shortcuts :as shortcuts]
-   [portal.ssr.hiccup :as hiccup]
    [portal.ssr.ui.react :as react]
    [portal.ui.app :as app]
    [portal.ui.select :as select]
