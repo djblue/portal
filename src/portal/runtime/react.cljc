@@ -1,4 +1,4 @@
-(ns portal.runtime.react
+(ns ^:no-doc portal.runtime.react
   "Server-side render for react/react style components."
   (:refer-clojure :exclude [random-uuid])
   (:require
