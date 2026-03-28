@@ -3,10 +3,9 @@
 (defn html [{:keys [name version host port session-id code-url platform mode]
              :or   {name       "portal"
                     version    "0.63.1"
+                    code-url   "main.js"
                     platform   #?(:bb "bb" :clj "jvm" :cljs "node" :cljr "clr" :lpy "py")}}]
-  (let [server-url (when (and host port) (str "http://" host ":" port))
-        vendor-url (str server-url "/vendor?url=")
-        code-url   (or code-url (str server-url "/main.js?" session-id))]
+  (let [vendor-url "/vendor?url="]
     (str
      "<!DOCTYPE html>"
      "<html lang=\"en\">"
@@ -35,7 +34,7 @@
        (str "<script src=\"" vendor-url "https://cdn.jsdelivr.net/npm/scittle@0.8.31/dist/scittle.js\"
                      type=\"application/javascript\"></script>"
             "<script src=\"" vendor-url "https://unpkg.com/idiomorph@0.7.4\"></script>"
-            "<script type=\"application/x-scittle\" src=\"" server-url "/main.cljs\"></script>")
+            "<script type=\"application/x-scittle\" src=\"main.cljs\"></script>")
        (str "<script src=\"" code-url "\"></script>"))
      ;; wait.js will ensure headless chrome doesn't exit early
      (when (= mode :test) "<script src=\"wait.js\"></script>")

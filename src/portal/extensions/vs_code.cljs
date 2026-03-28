@@ -36,7 +36,25 @@
   (let [^js context (:context @!app-db)]
     (-> context .-workspaceState (.update view-column-key column))))
 
-(defn- -open [{:keys [portal options server]}]
+(defn- path-html
+  "Patch index to work within vs-code webview."
+  [{:keys [portal server]} body]
+  (let [{:keys [host port]} server]
+    (-> body
+        ;; for allowing {:mode :dev} within vscode extension
+        (str/replace "main.js" (str "main.js?" (:session-id portal)))
+        (str/replace
+         "<head>"
+         (str "<head>"
+              ;; for resovling static assets
+              "<base href=" (pr-str (str "http://" host ":" port "/")) ">"
+              ;; for resolving web socket connection
+              "<script>"
+              "window.PORTAL_HOST=" (pr-str (str host ":" port)) ";"
+              "window.PORTAL_SESSION=" (pr-str (str (:session-id portal))) ";"
+              "</script>")))))
+
+(defn- -open [{:keys [portal options server] :as opts}]
   (a/let [{:keys [host port]} server
           {:keys [body]}      (client/fetch (str "http://" host ":" port "/?" (:session-id portal)))
           ^js panel           (.createWebviewPanel
@@ -57,7 +75,7 @@
           ^js web-view        (.-webview panel)]
     (set! (.-iconPath panel)
           (.file vscode/Uri (.asAbsolutePath ^js (:context @!app-db) "icon.png")))
-    (set! (.-html web-view) body)
+    (set! (.-html web-view) (path-html opts body))
     (.onDidReceiveMessage
      web-view
      (fn handle-message [^js message]

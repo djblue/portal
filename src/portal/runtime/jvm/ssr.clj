@@ -281,3 +281,4 @@
 ;; [x] portal.api/selected
 ;; [ ] portal.api/eval-str
 ;; [x] fix remote vs code websocket never disconnecting issue
+;; [x] new vscode fails to laod older versions of Portal UI

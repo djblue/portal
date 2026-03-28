@@ -149,13 +149,7 @@
 (defmethod route [:get "/"] [request]
   (if-let [session (:session request)]
     (send-resource
-     "text/html"
-     (index/html
-      (merge
-       {:port (:server-port request)
-        :host (:server-name request)
-        :session-id (:session-id session)}
-       (:options session))))
+     "text/html" (index/html (:options session)))
     (let [session-id (UUID/randomUUID)]
       (swap! rt/sessions assoc session-id {})
       {:status 307 :headers {"Location" (str "?" session-id)}})))
