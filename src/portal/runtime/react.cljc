@@ -287,6 +287,26 @@
                    (recur (unchecked-inc i))
                    false)))))))
 
+(def ^:private re-escape #"[&<>\"]")
+
+(defn- needs-escape? [^String s] (re-find re-escape s))
+
+(defn- escape-html [s]
+  (cond-> s
+    (needs-escape? s)
+    (str/escape {\& "&amp;" \< "&lt;" \> "&gt;" \" "&quot;"})))
+
+(defn- escape-attrs [attrs]
+  (when attrs
+    (persistent!
+     (reduce-kv
+      (fn [out k v]
+        (cond-> out
+          (string? v)
+          (assoc! k (escape-html v))))
+      (transient attrs)
+      attrs))))
+
 (defn- render-hiccup [vdom state context element]
   (if (and (:hiccup-only-tree? vdom)
            (= (:element vdom) element))
@@ -310,7 +330,7 @@
                                             (-> (get prev i)
                                                 (render* state context (nth element (+ child-start i)))))))))
           output (with-meta
-                   (into [tag attrs] (map :output) vdom-children)
+                   (into [tag (escape-attrs attrs)] (map :output) vdom-children)
                    (assoc (meta element) ::id id))]
       {:id id
        :output (if-not (= output (:output vdom))
@@ -319,15 +339,6 @@
        :element element
        :vdom-children vdom-children
        :hiccup-only-tree? (hiccup-only-tree? element)})))
-
-(def ^:private re-escape #"[&<>\"]")
-
-(defn- needs-escape? [^String s] (re-find re-escape s))
-
-(defn- escape-html [s]
-  (cond-> s
-    (needs-escape? s)
-    (str/escape {\& "&amp;" \< "&lt;" \> "&gt;" \" "&quot;"})))
 
 (defn- render* [vdom state context element]
   (cond
