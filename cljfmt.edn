@@ -1,0 +1,4 @@
+{:extra-indents
+ {on-connect [[:inner 0]]
+  on-disconnect [[:inner 0]]
+  on-attribute-changed [[:inner 0]]}}

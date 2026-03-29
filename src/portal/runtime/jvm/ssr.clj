@@ -209,7 +209,10 @@
   {:status  200
    :headers {"Access-Control-Allow-Origin" "*"}
    :body
-   (slurp (io/resource "portal/ui/ssr.cljs"))})
+   (str
+    (slurp (io/resource "portal/ui/macros.cljc"))
+    (slurp (io/resource "portal/ui/web_components.cljs"))
+    (slurp (io/resource "portal/ui/ssr.cljs")))})
 
 (defn- ->host [request]
   (str (case (:scheme request)

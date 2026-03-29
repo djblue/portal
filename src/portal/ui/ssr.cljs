@@ -1,40 +1,9 @@
 (ns ^:no-doc portal.ui.ssr
   (:require
-   [clojure.string :as str]))
-
-(require '["Idiomorph" :as i])
-
-(defn- webcomponent! [name {:keys [on-connect
-                                   on-disconnect
-                                   on-attribute-changed
-                                   observed-attributes]}]
-  (let [component
-        (fn component []
-          (let [e (.construct js/Reflect js/HTMLElement #js [] component)]
-            (set! (.-shadow e) (.attachShadow e #js {:mode "open"}))
-            e))]
-    (set! (.-prototype component)
-          (.create js/Object (.-prototype js/HTMLElement)
-                   #js {:connectedCallback
-                        #js {:configurable true
-                             :value        (fn []
-                                             (when on-connect
-                                               (this-as this (on-connect this))))}
-                        :disconnectedCallback
-                        #js {:configurable true
-                             :value        (fn []
-                                             (when on-disconnect
-                                               (this-as this (on-disconnect this))))}
-                        :attributeChangedCallback
-                        #js {:configurable true
-                             :value        (fn [attr old-val new-val]
-                                             (when on-attribute-changed
-                                               (this-as this (on-attribute-changed this attr old-val new-val))))}}))
-    (when observed-attributes
-      (.defineProperty js/Object component "observedAttributes"
-                       #js {:get (fn [] (clj->js observed-attributes))}))
-    (js/window.customElements.define name component)
-    component))
+   ["Idiomorph" :as i]
+   [clojure.string :as str]
+   [portal.ui.web-components]
+   [portal.ui.macros :refer [defcomponent]]))
 
 (defn- observer-visible? [entries]
   (< 0.5 (reduce
@@ -103,52 +72,6 @@
   (post-message! {:type :close})
   (.close js/window))
 
-(defn set-header [header]
-  (doseq [el (.querySelectorAll js/document "meta[name=theme-color]")]
-    (.setAttribute el "content" header))
-  (doseq [timeout (range 0 1000 250)]
-    (js/setTimeout
-     (fn []
-       (post-message! {:type :set-theme :color ""})
-       (post-message! {:type :set-theme :color header}))
-     timeout)))
-
-(webcomponent!
- "set-theme"
- {:observed-attributes [:header]
-  :on-attribute-changed (fn [_ _ _ header] (set-header header))})
-
-(defn- element-visible? [element]
-  (let [buffer 100
-        rect   (.getBoundingClientRect element)
-        height (or (.-innerHeight js/window)
-                   (.. js/document -documentElement -clientHeight))
-        width  (or (.-innerWidth js/window)
-                   (.. js/document -documentElement -clientWidth))]
-    (and (> (.-bottom rect) buffer)
-         (< (.-top rect) (- height buffer))
-         (> (.-right rect) buffer)
-         (< (.-left rect) (- width buffer)))))
-
-(defn- scroll-into-view [element]
-  (let [inline   (.getAttribute element "inline")
-        block    (.getAttribute element "block")
-        behavior (.getAttribute element "behavior")
-        options  (cond-> {}
-                   inline   (assoc :inline inline)
-                   block    (assoc :block block)
-                   behavior (assoc :behavior behavior))]
-    (.scrollIntoView element (clj->js options))))
-
-(webcomponent!
- "scroll-into-view"
- {:on-connect
-  (fn [this]
-    (if (= "not-visible" (.getAttribute this "when"))
-      (when-not (element-visible? this)
-        (scroll-into-view this))
-      (scroll-into-view this)))})
-
 (defn- input? [e]
   (#{"BUTTON" "INPUT" "SELECT" "TEXTAREA"} (.. e -target -tagName)))
 
@@ -162,10 +85,8 @@
 
 (js/setInterval #(send! {:op "ping"}) 15000)
 
-(webcomponent!
- "visible-sensor"
- {:on-connect
-  (fn [this]
+(defcomponent visible-sensor []
+  (on-connect [this]
     (let [observer
           (js/IntersectionObserver.
            (fn [entries]
@@ -175,9 +96,8 @@
            #js {:root nil :rootMargin "0px" :threshold 0.5})]
       (set! (.-observer this) observer)
       (.observe observer this)))
-  :on-disconnect
-  (fn [this]
-    (.unobserve (.-observer this) this))})
+  (on-disconnect [this]
+    (.unobserve (.-observer this) this)))
 
 (.addEventListener
  root "focusin"

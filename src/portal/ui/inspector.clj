@@ -11,7 +11,8 @@
    [portal.ui.select :as select]
    [portal.ui.state :as state]
    [portal.ui.styled :as s]
-   [portal.ui.theme :as theme]))
+   [portal.ui.theme :as theme]
+   [portal.ui.web-components :as web]))
 
 (declare inspector*)
 (declare inspector)
@@ -1035,7 +1036,7 @@
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
        ctx
        (when selected
-         [:scroll-into-view
+         [web/scroll-into-view
           {:style {:position :absolute
                    :pointer-events :none
                    :left 0 :right 0 :bottom 0 :top 0}

@@ -9,4 +9,5 @@
   portal.sync/try  clojure.core/try
   reagent.core/with-let              clojure.core/let
   portal.bench/simple-benchmark      clojure.core/let
-  portal.runtime.macros/extend-type? clojure.core/extend-type}}
+  portal.runtime.macros/extend-type? clojure.core/extend-type
+  portal.ui.macros/defcomponent      clojure.core/deftype}}

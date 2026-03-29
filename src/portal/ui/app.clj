@@ -29,7 +29,8 @@
    [portal.ui.viewer.test-report :as test-report]
    [portal.ui.viewer.text :as text]
    [portal.ui.viewer.transit :as transit]
-   [portal.ui.viewer.tree :as tree]))
+   [portal.ui.viewer.tree :as tree]
+   [portal.ui.web-components :as web]))
 
 (defn- search-input []
   (let [;ref      (react/use-ref nil)
@@ -362,7 +363,7 @@
         :width "100vw"}}
       [styles]
       [scrollbars]
-      [:set-theme {:header (::c/background2 theme)}]]
+      [web/set-theme {:header (::c/background2 theme)}]]
      children)))
 
 (defn- inspect-1-history [default-value]
