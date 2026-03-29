@@ -1,5 +1,17 @@
 (ns portal.ui.web-components
-  (:require [portal.ui.macros :refer [defcomponent]]))
+  (:require ["highlight.js" :as hljs]
+            [portal.ui.macros :refer [defcomponent]]))
+
+(defcomponent highlight-js [code language]
+  (on-attribute-changed [this _attr _old _new]
+    (let [out (if-not language
+                (hljs/highlightAuto code)
+                (hljs/highlight code #js {:language language}))]
+      (set! (.-innerHTML this)
+            (str
+             "<pre title=\"" (.-language out) "\" style=\"margin:0;padding:0\">"
+             (.-value out)
+             "</pre>")))))
 
 (defonce ^:private vs-code-api
   (when (exists? js/acquirevscodeapi)

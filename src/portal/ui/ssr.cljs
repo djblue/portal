@@ -12,13 +12,20 @@
               sum
               (+ sum (.-intersectionRatio entry)))) 0 entries)))
 
+(defn- custom-component? [element]
+  (and (.-tagName element)
+       (.includes (.-tagName element) "-")))
+
 (defn- render [html]
   (i/morph (.getElementById js/document "root")
            html
            #js {:morphStyle "innerHTML"
                 :ignoreActiveValue true
                 :callbacks
-                #js {:afterNodeAdded
+                #js {:beforeNodeRemoved
+                     (fn [old-node _new-node]
+                       (not (custom-component? (.-parentElement old-node))))
+                     :afterNodeAdded
                      (fn [node]
                        (when (.-querySelectorAll node)
                          (when-let [autofocus (first (.querySelectorAll node "[autofocus]"))]

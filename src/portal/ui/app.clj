@@ -12,6 +12,7 @@
    [portal.ui.theme :as theme]
    [portal.ui.viewer.bin :as bin]
    [portal.ui.viewer.bytes :as bytes]
+   [portal.ui.viewer.code :as code]
    [portal.ui.viewer.color :as color]
    [portal.ui.viewer.date-time :as date-time]
    [portal.ui.viewer.deref :as deref]
@@ -342,7 +343,7 @@
    #_[prepl/styles]
    #_[hiccup/styles]
    [text-selection]
-   #_[code/stylesheet]])
+   [code/stylesheet]])
 
 (defn- container [children]
   (let [theme (theme/use-theme)]
@@ -433,6 +434,8 @@
           table/viewer
           tree/viewer
           text/viewer
+          code/viewer
+          code/pr-str-viewer
           json/viewer
           jwt/viewer
           edn/viewer

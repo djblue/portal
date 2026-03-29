@@ -34,6 +34,9 @@
        (str "<script src=\"" vendor-url "https://cdn.jsdelivr.net/npm/scittle@0.8.31/dist/scittle.js\"
                      type=\"application/javascript\"></script>"
             "<script src=\"" vendor-url "https://unpkg.com/idiomorph@0.7.4\"></script>"
+            "<script src=\"" vendor-url "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js\"></script>"
+            "<script src=\"" vendor-url "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/clojure.min.js\"></script>"
+            "<script> window['highlight.js'] = window.hljs;</script>"
             "<script type=\"application/x-scittle\" src=\"main.cljs\"></script>")
        (str "<script src=\"" code-url "\"></script>"))
      ;; wait.js will ensure headless chrome doesn't exit early

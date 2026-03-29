@@ -1,12 +1,13 @@
 (ns ^:no-doc portal.ui.viewer.code
-  (:require ["highlight.js" :as hljs]
-            [clojure.string :as str]
+  (:refer-clojure :exclude [update-keys])
+  (:require [clojure.string :as str]
             [portal.colors :as c]
+            [portal.runtime.polyfill :refer [update-keys]]
             [portal.ui.filter :as f]
-            [portal.ui.html :as h]
             [portal.ui.inspector :as ins]
             [portal.ui.styled :as s]
-            [portal.ui.theme :as theme]))
+            [portal.ui.theme :as theme]
+            [portal.ui.web-components :as web]))
 
 (def ^:private root-class "portal-viewer-code")
 
@@ -99,21 +100,7 @@
      (->css (->styles theme))]))
 
 (defn highlight-clj [string-value]
-  (let [theme (theme/use-theme)]
-    [:pre
-     {:class root-class
-      :style {:margin      0
-              :padding     0
-              :background  :none
-              :width       "100%"
-              :white-space :pre-wrap
-              :color       (::c/text theme)
-              :font-size   (:font-size theme)
-              :font-family (:font-family theme)}}
-     [h/html+
-      (-> string-value
-          (hljs/highlight  #js {:language "clojure"})
-          .-value)]]))
+  [web/highlight-js {:code string-value :language "clojure" :class root-class}])
 
 (defn inspect-pr-str [value]
   (let [search-text (ins/use-search-text)]
@@ -134,19 +121,12 @@
                              (str/split search-text #"\s+"))))
                          (str/join "\n"))
                     code)
-         out      (if-let [language (or (:class attrs)
-                                        (some->
-                                         (get-in opts [:props :portal.viewer/code :language])
-                                         name))]
-                    (hljs/highlight
-                     code
-                     #js {:language (get language-map language language)})
-                    (hljs/highlightAuto code))
-         html     (.-value out)
-         language (or (:class attrs) (.-language out))]
+         language (or (:class attrs)
+                      (some->
+                       (get-in opts [:props :portal.viewer/code :language])
+                       name))]
      [s/div
       {:class root-class
-       :title language
        :style
        {:overflow      :auto
         :position      :relative
@@ -156,19 +136,7 @@
         :background    (ins/get-background)
         :border-radius (:border-radius theme)
         :max-height    (when-not (:expanded? opts) "24rem")}}
-      [:pre
-       {:on-click
-        (fn [e]
-          (when-not (=  "" (.toString (.getSelection js/window)))
-            (.stopPropagation e)))
-        :style                   {:padding     0
-                                  :margin      0
-                                  :background  :none
-                                  :width       :fit-content
-                                  :color       (::c/text theme)
-                                  :font-family (:font-family theme)
-                                  :font-size   (:font-size theme)}}
-       [h/html+ html]]])))
+      [web/highlight-js {:code code :language (get language-map language language)}]])))
 
 (def viewer
   {:predicate string?
