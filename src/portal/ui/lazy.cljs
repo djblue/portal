@@ -79,8 +79,6 @@
            [visible-sensor
             (fn [] (swap! n (fnil + default-take) step))])]))))
 
-(defn use-lazy* [k f] (react/use-memo #js [k] [lazy-seq (f)]))
-
 (defn lazy-render [child]
   (let [[show set-show!] (react/use-state false)]
     (if show

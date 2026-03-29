@@ -11,8 +11,12 @@
   (let [theme (theme/use-theme)]
     [s/div
      {:style {:color (::c/number theme)}}
-     (when a (.padStart (.toString a 16) 2 "0"))
-     (when b (.padStart (.toString b 16) 2 "0"))]))
+     (when a
+       #?(:clj  (format "%02x" (bit-and 0xFF a))
+          :cljs (.padStart (.toString a 16) 2 "0")))
+     (when b
+       #?(:clj  (format "%02x" (bit-and 0xFF b))
+          :cljs (.padStart (.toString b 16) 2 "0")))]))
 
 (defn- pad-8 [row]
   (take 8 (concat row (repeat nil))))
@@ -28,8 +32,7 @@
   (let [theme (theme/use-theme)]
     (if-not (<= 32 c 127)
       [s/div {:style {:color (::c/border theme)}} "."]
-      [s/div {:style {:color (::c/string theme)}}
-       (String/fromCharCode c)])))
+      [s/div {:style {:color (::c/string theme)}} (char c)])))
 
 (defn- inspect-ascii [value]
   (for [[idx row] (indexed (partition-all 16 value))]
@@ -38,10 +41,25 @@
      (for [[idx c] (indexed row)]
        ^{:key idx} [ascii-value c])]))
 
-(defn inspect-bin [value]
+(defn- inspect-bin* [value]
   (let [theme (theme/use-theme)
         hex   (inspect-hex value)
-        ascii (inspect-ascii value)
+        ascii (inspect-ascii value)]
+    [l/lazy-seq
+     (for [[idx [hex ascii]] (indexed (map vector hex ascii))]
+       [:<> {:key idx}
+        [s/div
+         {:style {:color (::c/border theme)}}
+         #?(:clj  (format "%08x" (bit-and 0xFFFFFFFF idx))
+            :cljs (.padStart (.toString idx 16) 8 "0"))
+         ":"]
+        [s/div]
+        [:<> hex]
+        [s/div]
+        [:<> ascii]])]))
+
+(defn inspect-bin [value]
+  (let [theme (theme/use-theme)
         opts  (ins/use-options)]
     [s/div
      {:style {:display :flex
@@ -52,20 +70,10 @@
                :grid-gap (:padding theme)
                :grid-template-columns
                (str "repeat(" (+ 1 1 8 1 16) ", auto)")}}
-      (l/use-lazy
-       value
-       (for [[idx [hex ascii]] (indexed (map vector hex ascii))]
-         [:<> {:key idx}
-          [s/div
-           {:style {:color (::c/border theme)}}
-           (.padStart (.toString idx 16) 8 "0") ":"]
-          [s/div]
-          [:<> hex]
-          [s/div]
-          [:<> ascii]]))]]))
+      [inspect-bin* value]]]))
 
 (def viewer
-  {:predicate ins/bin?
+  {:predicate #?(:clj bytes? :cljs ins/bin?)
    :component #'inspect-bin
    :name      :portal.viewer/bin
    :doc       "View binary data as a hexdump."})

@@ -27,5 +27,3 @@
            {:id (random-uuid)
             :on-visible (fn [_] (set-visible! true))}])
         visible?])))
-
-(defmacro use-lazy [k value] `(use-lazy* ~k (fn [] ~value)))
