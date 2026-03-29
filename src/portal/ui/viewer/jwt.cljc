@@ -1,29 +1,35 @@
 (ns ^:no-doc portal.ui.viewer.jwt
   (:require [clojure.string :as str]
-            [goog.crypt.base64 :as Base64]
+            #?(:cljs [goog.crypt.base64 :as Base64])
+            [portal.runtime.json :as json]
             [portal.ui.inspector :as ins]
-            [portal.ui.parsers :as p]))
+            [portal.ui.parsers :as p])
+  #?(:clj (:import [java.util Base64])))
 
-(defn- parse-json [value]
-  (js->clj (.parse js/JSON (js/atob value)) :keywordize-keys true))
+(defn- decode ^bytes [^String s]
+  #?(:clj  (.decode (Base64/getUrlDecoder) s)
+     :cljs (Base64/decodeStringToUint8Array s)))
+
+(defn- atob [s] #?(:clj (String. (decode s)) :cljs (js/atob s)))
 
 (defn parse-jwt [jwt]
   (try
-    (let [[header payload signature] (str/split jwt ".")]
+    (let [[header payload signature] (str/split jwt #"\.")]
       (with-meta
-        {:jwt/header (parse-json header)
+        {:jwt/header (json/read (atob header))
          :jwt/payload
-         (with-meta (parse-json payload)
+         (with-meta (json/read (atob payload))
            {:portal.viewer/for
             {:auth_time :portal.viewer/date-time
              :exp :portal.viewer/date-time
              :iat :portal.viewer/date-time
              :nbf :portal.viewer/date-time}})
-         :jwt/signature
-         (Base64/decodeStringToUint8Array signature)}
+         :jwt/signature (decode signature)}
         {:portal.viewer/for
          {:jwt/signature :portal.viewer/bin}}))
-    (catch :default e (ins/error->data e))))
+    (catch #?(:clj Exception :cljs :default) e
+      #?(:clj  (Throwable->map e)
+         :cljs (ins/error->data e)))))
 
 (defmethod p/parse-string :format/jwt [_ s] (parse-jwt s))
 

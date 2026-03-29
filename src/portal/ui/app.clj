@@ -20,6 +20,7 @@
    [portal.ui.viewer.exception :as ex]
    [portal.ui.viewer.http :as http]
    [portal.ui.viewer.json :as json]
+   [portal.ui.viewer.jwt :as jwt]
    [portal.ui.viewer.log :as log]
    [portal.ui.viewer.prepl :as prepl]
    [portal.ui.viewer.relative-time :as relative-time]
@@ -431,6 +432,7 @@
           tree/viewer
           text/viewer
           json/viewer
+          jwt/viewer
           edn/viewer
           (try-resolve 'portal.ui.viewer.diff/viewer)
           date-time/viewer
