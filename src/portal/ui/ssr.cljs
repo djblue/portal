@@ -2,8 +2,8 @@
   (:require
    ["Idiomorph" :as i]
    [clojure.string :as str]
-   [portal.ui.web-components]
-   [portal.ui.macros :refer [defcomponent]]))
+   [portal.ui.macros :refer [defcomponent]]
+   [portal.ui.web-components]))
 
 (defn- observer-visible? [entries]
   (< 0.5 (reduce
