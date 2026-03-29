@@ -216,18 +216,18 @@
       (push-viewer entry)
       (push-expanded entry)))
 
-(defn get-datafied [state context]
-  (get-in state [:datafied (get-location context)]))
+(defn get-transformed [state context]
+  (get-in state [:transformed (get-location context)]))
 
-(defn datafy-value [state context]
+(defn transform-value [state context transform]
   (let [location (get-location context)
         value    (:value context)]
-    (if (get-in state [:datafied location])
+    (if (get-in state [:transformed location])
       state
-      (let [datafied ((requiring-resolve 'clojure.datafy/datafy) value)]
+      (let [transformed (transform value)]
         (cond-> state
-          (not= datafied value)
-          (assoc-in [:datafied location] datafied))))))
+          (not= transformed value)
+          (assoc-in [:transformed location] transformed))))))
 
 (defn toggle-expand-1 [state context]
   (let [location (get-location context)]

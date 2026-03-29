@@ -1017,8 +1017,10 @@
         {:keys [viewer selected expanded?] :as options}
         (react/use-atom state #(get-info % ctx location value))
 
-        value            (or (react/use-atom state #(state/get-datafied % ctx)) value)
         resolved-viewer  (use-resolve-viewer ctx viewer (react/use-atom viewers))
+        transform        (:transform resolved-viewer)
+        transformed      (react/use-atom state #(state/get-transformed % ctx))
+        value            (if transform (or transformed value) value)
         options          (assoc options :props props :viewer resolved-viewer)
         component        (cond
                            (not= :portal.viewer/inspector (:name resolved-viewer))
@@ -1027,9 +1029,9 @@
                            :else preview)]
     (select/use-register-context ctx resolved-viewer)
     (react/use-effect
-     [location]
-     (when (coll? (:value ctx))
-       (state/dispatch! state state/datafy-value ctx)))
+     [location (some? transform)]
+     (when (and transform (coll? (:value ctx)))
+       (state/dispatch! state state/transform-value ctx transform)))
     (react/use-effect
      [location (some? expanded?)]
      (when (and (nil? expanded?)
