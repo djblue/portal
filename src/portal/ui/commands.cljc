@@ -439,23 +439,23 @@
                           (catch #?(:clj Exception :cljs :default) _e false))))
          :run (fn [state]
                 (#?(:clj future :cljs do)
-                 (a/let [selected (for [context (:selected @state)]
-                                    (with-meta*
-                                      (:value context)
-                                      {:portal.viewer/default (:name (ins/get-viewer state context))}))
-                         args     (when args (binding [*state* state] (apply args selected)))
-                         result   (if (= ::dismiss args)
-                                    args
-                                    (a/try (apply f (concat selected args))
-                                           (catch #?(:clj Exception :cljs :default) e (ex-data e))))]
-                   (when-not (or command (= args ::dismiss))
-                     (state/dispatch!
-                      state
-                      state/history-push
-                      {:portal/key   name
-                       :portal/f     f
-                       :portal/args  args
-                       :portal/value result})))))))
+                  (a/let [selected (for [context (:selected @state)]
+                                     (with-meta*
+                                       (:value context)
+                                       {:portal.viewer/default (:name (ins/get-viewer state context))}))
+                          args     (when args (binding [*state* state] (apply args selected)))
+                          result   (if (= ::dismiss args)
+                                     args
+                                     (a/try (apply f (concat selected args))
+                                            (catch #?(:clj Exception :cljs :default) e (ex-data e))))]
+                    (when-not (or command (= args ::dismiss))
+                      (state/dispatch!
+                       state
+                       state/history-push
+                       {:portal/key   name
+                        :portal/f     f
+                        :portal/args  args
+                        :portal/value result})))))))
 
 (defn- command-item [{:keys [active?]} command]
   (let [theme (theme/use-theme)]
@@ -805,12 +805,12 @@
   {:shortcuts [#{"v"}]}
   [state]
   (#?(:clj future :cljs do)
-   (when-let [selected-context (state/get-all-selected-context @state)]
-     (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
-       (when (> (count viewers) 1)
-         (a/let [selected-viewer (pick-one state (map :name viewers))]
-           (when-not (= ::dismiss selected-viewer)
-             (ins/set-viewer! state selected-context selected-viewer))))))))
+    (when-let [selected-context (state/get-all-selected-context @state)]
+      (let [viewers (ins/get-compatible-viewers @ins/viewers selected-context)]
+        (when (> (count viewers) 1)
+          (a/let [selected-viewer (pick-one state (map :name viewers))]
+            (when-not (= ::dismiss selected-viewer)
+              (ins/set-viewer! state selected-context selected-viewer))))))))
 
 (defn- get-viewer [state context direction]
   (let [viewers (map :name (ins/get-compatible-viewers @ins/viewers context))
@@ -1195,14 +1195,15 @@
     (react/use-effect
      [(hash value)]
      (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
-       (reset!
-        runtime-registry
-        (reduce-kv
-         (fn [out k opts]
-           (assoc out k (make-command
-                         (assoc opts :f (partial state/invoke (:name opts))))))
-         {}
-         fns))))
+       (#?(:clj future :cljs do)
+         (reset!
+          runtime-registry
+          (reduce-kv
+           (fn [out k opts]
+             (assoc out k (make-command
+                           (assoc opts :f (partial state/invoke (:name opts))))))
+           {}
+           fns)))))
     [with-shortcuts
      (fn [log]
        (when-not (shortcuts/input? log)

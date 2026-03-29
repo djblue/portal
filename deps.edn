@@ -61,7 +61,7 @@
    :extra-deps  {clj-kondo/clj-kondo {:mvn/version "2025.06.05"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
-   :extra-deps {cljfmt/cljfmt {:mvn/version "0.9.2"}}}
+   :extra-deps {dev.weavejester/cljfmt {:mvn/version "0.16.3"}}}
   :cider
   {:extra-deps
    {nrepl/nrepl       {:mvn/version "1.6.0"}
