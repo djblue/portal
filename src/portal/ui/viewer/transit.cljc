@@ -1,11 +1,13 @@
 (ns ^:no-doc portal.ui.viewer.transit
-  (:require [cognitect.transit :as t]
+  (:require [portal.runtime.transit :as transit]
             [portal.ui.inspector :as ins]
             [portal.ui.parsers :as p]))
 
 (defn- parse-transit [transit-string]
-  (try (t/read (t/reader :json) transit-string)
-       (catch :default e (ins/error->data e))))
+  (try (transit/read transit-string)
+       (catch #?(:clj Exception :cljs :default) e
+         #?(:clj  (Throwable->map e)
+            :cljs (ins/error->data e)))))
 
 (defmethod p/parse-string :format/transit [_ s] (parse-transit s))
 

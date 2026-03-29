@@ -28,6 +28,7 @@
    [portal.ui.viewer.table :as table]
    [portal.ui.viewer.test-report :as test-report]
    [portal.ui.viewer.text :as text]
+   [portal.ui.viewer.transit :as transit]
    [portal.ui.viewer.tree :as tree]))
 
 (defn- search-input []
@@ -434,6 +435,7 @@
           json/viewer
           jwt/viewer
           edn/viewer
+          transit/viewer
           (try-resolve 'portal.ui.viewer.diff/viewer)
           date-time/viewer
           relative-time/viewer
