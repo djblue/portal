@@ -19,6 +19,7 @@
    [portal.ui.viewer.duration :as duration]
    [portal.ui.viewer.edn :as edn]
    [portal.ui.viewer.exception :as ex]
+   [portal.ui.viewer.hiccup :as hiccup]
    [portal.ui.viewer.http :as http]
    [portal.ui.viewer.json :as json]
    [portal.ui.viewer.jwt :as jwt]
@@ -342,7 +343,7 @@
   [:<>
    #_[vega/styles]
    #_[prepl/styles]
-   #_[hiccup/styles]
+   [hiccup/styles]
    [text-selection]
    [code/stylesheet]])
 
@@ -443,6 +444,7 @@
           edn/viewer
           transit/viewer
           (try-resolve 'portal.ui.viewer.diff/viewer)
+          hiccup/viewer
           date-time/viewer
           relative-time/viewer
           source-location/viewer]))

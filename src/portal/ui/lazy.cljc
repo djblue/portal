@@ -27,3 +27,13 @@
            {:id (random-uuid)
             :on-visible (fn [_] (set-visible! true))}])
         visible?])))
+
+#?(:clj
+   (defn lazy-render [child]
+     (let [[show set-show!] (react/use-state false)]
+       (if show
+         child
+         [:<>
+          [:visible-sensor
+           {:on-visible (fn [_] (set-show! true))}]
+          [:div {:style {:height "50vh"}}]]))))
