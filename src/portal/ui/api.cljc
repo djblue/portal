@@ -1,8 +1,10 @@
 (ns portal.ui.api
   (:require [portal.viewer :as v]
-            [reagent.core :as r]))
+            #?(:cljs [reagent.core :as r])))
 
-(defonce viewers (r/atom (v/table [] {:columns [:name :doc]})))
+(defonce viewers
+  #?(:clj  (atom (v/table [] {:columns [:name :doc]}))
+     :cljs (r/atom (v/table [] {:columns [:name :doc]}))))
 
 (defn register-viewer! [viewer-spec]
   (swap! viewers
@@ -19,6 +21,6 @@
              (count viewers))
             viewer-spec))))
 
-(def ^:no-doc portal-api "Portal API for JS interop." #js {})
+#?(:cljs (def ^:no-doc portal-api "Portal API for JS interop." #js {}))
 
-(set! (.-portal_api js/window) portal-api)
+#?(:cljs (set! (.-portal_api js/window) portal-api))

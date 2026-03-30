@@ -4,6 +4,7 @@
    [clojure.set :as set]
    [portal.colors :as c]
    [portal.runtime.cson :as cson]
+   [portal.ui.api :as api]
    [portal.ui.filter :as f]
    [portal.ui.icons :as icons]
    [portal.ui.lazy :as l]
@@ -34,7 +35,7 @@
    :component #'inspector
    :name :portal.viewer/inspector})
 
-(defonce viewers (atom [viewer]))
+(defonce viewers api/viewers)
 
 (defn viewers-by-name [viewers]
   (into {} (map (juxt :name identity) viewers)))

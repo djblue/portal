@@ -2,6 +2,7 @@
   (:require
    [clojure.string :as str]
    [portal.colors :as c]
+   [portal.ui.api :as api]
    [portal.ui.commands :as commands]
    [portal.ui.icons :as icons]
    [portal.ui.inspector :as ins]
@@ -415,36 +416,40 @@
     @(requiring-resolve s)
     (catch Exception _ nil)))
 
-(reset! ins/viewers
-        (filterv
-         some?
-         [ex/viewer
-          log/viewer
-          http/viewer
-          deref/viewer
-          test-report/viewer
-          prepl/viewer
-          color/viewer
-          (try-resolve 'portal.ui.viewer.diff/deep-diff2)
-          ins/viewer
-          ex/trace-viewer
-          ex/sub-trace-viewer
-          duration/nano
-          duration/ms
-          bytes/viewer
-          pprint/viewer
-          bin/viewer
-          table/viewer
-          tree/viewer
-          text/viewer
-          code/viewer
-          code/pr-str-viewer
-          json/viewer
-          jwt/viewer
-          edn/viewer
-          transit/viewer
-          (try-resolve 'portal.ui.viewer.diff/viewer)
-          hiccup/viewer
-          date-time/viewer
-          relative-time/viewer
-          source-location/viewer]))
+(def viewers
+  ^{:portal.viewer/default :portal.viewer/table
+    :portal.viewer/table {:columns [:name :doc]}}
+  (filterv
+   some?
+   [ex/viewer
+    log/viewer
+    http/viewer
+    deref/viewer
+    test-report/viewer
+    prepl/viewer
+    color/viewer
+    (try-resolve 'portal.ui.viewer.diff/deep-diff2)
+    ins/viewer
+    ex/trace-viewer
+    ex/sub-trace-viewer
+    duration/nano
+    duration/ms
+    bytes/viewer
+    pprint/viewer
+    bin/viewer
+    table/viewer
+    tree/viewer
+    text/viewer
+    code/viewer
+    code/pr-str-viewer
+    json/viewer
+    jwt/viewer
+    edn/viewer
+    transit/viewer
+    (try-resolve 'portal.ui.viewer.diff/viewer)
+    hiccup/viewer
+    date-time/viewer
+    relative-time/viewer
+    source-location/viewer]))
+
+(reset! api/viewers viewers)
