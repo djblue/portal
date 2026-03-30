@@ -214,11 +214,6 @@
     (slurp (io/resource "portal/ui/web_components.cljs"))
     (slurp (io/resource "portal/ui/ssr.cljs")))})
 
-(defn- ->host [request]
-  (str (case (:scheme request)
-         :http "http://" :https "https://")
-       (:server-name request) ":" (:server-port request)))
-
 (defn- resolve-vendor*
   "Fetch assets for vendoring or caching.
    Additionally, re-write css urls to be vendor-able as well."
@@ -226,14 +221,14 @@
   (let [url (subs (:query-string request) 4)]
     (if-not (str/ends-with? url ".css")
       (io/input-stream (io/as-url url))
-      (let [host (->host request) uri (URI. url)]
+      (let [uri (URI. url)]
         (-> (io/as-url url)
             (io/input-stream)
             (slurp)
             (str/replace
              #"url\(([^)]*)\)"
              (fn [[_ path]]
-               (str "url(" host "/vendor?url=" (.resolve uri ^String path) ")"))))))))
+               (str "url(/vendor?url=" (.resolve uri ^String path) ")"))))))))
 
 (defn- resolve-vendor
   "Resolve vendor'd asset via classpath or cache via .portal/vendor"
