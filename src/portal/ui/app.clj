@@ -21,6 +21,7 @@
    [portal.ui.viewer.edn :as edn]
    [portal.ui.viewer.exception :as ex]
    [portal.ui.viewer.hiccup :as hiccup]
+   [portal.ui.viewer.html :as html]
    [portal.ui.viewer.http :as http]
    [portal.ui.viewer.json :as json]
    [portal.ui.viewer.jwt :as jwt]
@@ -417,39 +418,41 @@
     (catch Exception _ nil)))
 
 (def viewers
-  ^{:portal.viewer/default :portal.viewer/table
-    :portal.viewer/table {:columns [:name :doc]}}
-  (filterv
-   some?
-   [ex/viewer
-    log/viewer
-    http/viewer
-    deref/viewer
-    test-report/viewer
-    prepl/viewer
-    color/viewer
-    (try-resolve 'portal.ui.viewer.diff/deep-diff2)
-    ins/viewer
-    ex/trace-viewer
-    ex/sub-trace-viewer
-    duration/nano
-    duration/ms
-    bytes/viewer
-    pprint/viewer
-    bin/viewer
-    table/viewer
-    tree/viewer
-    text/viewer
-    code/viewer
-    code/pr-str-viewer
-    json/viewer
-    jwt/viewer
-    edn/viewer
-    transit/viewer
-    (try-resolve 'portal.ui.viewer.diff/viewer)
-    hiccup/viewer
-    date-time/viewer
-    relative-time/viewer
-    source-location/viewer]))
+  (with-meta
+    (filterv
+     some?
+     [ex/viewer
+      log/viewer
+      http/viewer
+      deref/viewer
+      test-report/viewer
+      prepl/viewer
+      color/viewer
+      (try-resolve 'portal.ui.viewer.diff/deep-diff2)
+      ins/viewer
+      ex/trace-viewer
+      ex/sub-trace-viewer
+      duration/nano
+      duration/ms
+      bytes/viewer
+      pprint/viewer
+      bin/viewer
+      table/viewer
+      tree/viewer
+      text/viewer
+      code/viewer
+      code/pr-str-viewer
+      json/viewer
+      jwt/viewer
+      edn/viewer
+      transit/viewer
+      html/viewer
+      (try-resolve 'portal.ui.viewer.diff/viewer)
+      hiccup/viewer
+      date-time/viewer
+      relative-time/viewer
+      source-location/viewer])
+    {:portal.viewer/default :portal.viewer/table
+     :portal.viewer/table {:columns [:name :doc]}}))
 
 (reset! api/viewers viewers)

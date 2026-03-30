@@ -296,15 +296,16 @@
     (needs-escape? s)
     (str/escape {\& "&amp;" \< "&lt;" \> "&gt;" \" "&quot;"})))
 
+(def ^:private attr-alias
+  {:src-doc :srcdoc})
+
 (defn- escape-attrs [attrs]
   (when attrs
     (persistent!
      (reduce-kv
       (fn [out k v]
-        (cond-> out
-          (string? v)
-          (assoc! k (escape-html v))))
-      (transient attrs)
+        (assoc! out (attr-alias k k) (cond-> v (string? v) (escape-html))))
+      (transient {})
       attrs))))
 
 (defn- render-hiccup [vdom state context element]
