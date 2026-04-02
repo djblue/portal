@@ -83,7 +83,8 @@
   (let [position (use-position)
         selection-index (get-selection-index)]
     (react/use-effect
-     [(hash position) (hash context) (hash viewer)]
+     #?(:clj  [position context viewer]
+        :cljs [(hash position) (hash context) (hash viewer)])
      (let [updates (compute-relative-index @selection-index position context)]
        (swap! selection-index merge updates)
        (fn []

@@ -305,9 +305,6 @@
        [s/div {:style {:position :absolute :top 2 :left 1}}
         sensor]])))
 
-(defn- ->id [value]
-  (str (hash value) (pr-str (type value))))
-
 (defn tabs [value]
   (let [theme   (theme/use-theme)
         options (keys value)
@@ -325,7 +322,7 @@
          :align-items :stretch
          :border-bottom [1 :solid (::c/border theme)]}}
        (for [value options]
-         ^{:key (->id value)}
+         ^{:key value}
          [s/div
           {:style
            {:flex "1"
@@ -769,7 +766,7 @@
       (keep-indexed
        (fn [index [k v]]
          (when (or (matcher k) (matcher v))
-           ^{:key (str (->id k) (->id v))}
+           ^{:key [k v]}
            [with-key k
             [select/with-position
              {:row index :column 0}
@@ -845,10 +842,10 @@
       (keep-indexed
        (fn [index value]
          (when (matcher value)
-           (let [key (str (if (vector? values)
-                            index
-                            (- n index 1))
-                          (->id value))]
+           (let [key [(if (vector? values)
+                        index
+                        (- n index 1))
+                      value]]
              ^{:key key}
              [select/with-position
               {:row index :column 0}
