@@ -19,6 +19,22 @@
 (declare inspector)
 (declare preview)
 
+(def ^:private count-limit 100000)
+
+(defn- safe-count
+  ([coll]
+   (safe-count coll count-limit))
+  ([coll count-limit]
+   (if (counted? coll)
+     [(count coll) false]
+     (let [n (count (take (inc count-limit) coll))
+           truncated? (> n count-limit)]
+       [(if truncated? count-limit n) truncated?]))))
+
+(defn safe-count-str [coll]
+  (let [[n truncated?] (safe-count coll)]
+    (if truncated? (str count-limit "+") (str n))))
+
 (defn regex? [value] (instance? java.util.regex.Pattern value))
 (defn bigint? [value] (instance? clojure.lang.BigInt value))
 
@@ -146,7 +162,7 @@
   (let [{:keys [collection stable-path] :or {stable-path []}} context]
     (if-not (and collection (seq? collection) (number? k))
       (conj stable-path k)
-      (conj stable-path (- (count collection) k 1)))))
+      (conj stable-path (- (first (safe-count collection)) k 1)))))
 
 (defn with-key [k & children]
   (let [context (use-context)
@@ -546,7 +562,7 @@
      [s/div
       {:style
        {:color (::c/diff-remove theme)}}
-      open close [:sub (count value)]]]))
+      open close [:sub (safe-count-str value)]]]))
 
 (defn preview-coll [value]
   (cond
@@ -820,7 +836,7 @@
        child]]]))
 
 (defn- inspect-coll* [search-text values]
-  (let [n (count values)
+  (let [[n] (safe-count values)
         matcher     (f/match search-text)]
     ^{:key search-text}
     [container-coll
