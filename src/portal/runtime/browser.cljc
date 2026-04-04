@@ -44,6 +44,18 @@
    (concat chrome-bin
            ["chrome" "chrome.exe" "google-chrome-stable" "chromium-browser" "Google Chrome"])))
 
+(defn- get-flatpak-bin [_]
+  (when-let [flatpak (fs/find-bin (fs/paths) ["flatpak"])]
+    (->> (str/join "," (map name [:application]))
+         (shell/sh flatpak "list" "--app" "--columns")
+         (:out)
+         (str/split-lines)
+         (some
+          (fn [csv-line]
+            (let [[application] (str/split csv-line #"\t")]
+              (when (= "com.google.Chrome" application)
+                [flatpak "run" application])))))))
+
 (defn- get-app-id-profile-osx [app-name]
   (let [info (fs/join
               (fs/home)
@@ -122,7 +134,9 @@
 
 (def pwa
   {:name "portal"
-   :host "https://djblue.github.io/portal/"})
+   :host "https://djblue.github.io/portal/"
+   :app-id "gbilcjcjkenedpcbagempggobciaddcp"
+   :profile "Default"})
 
 (defn- flags [url]
   (if-let [{:keys [app-id profile]} (get-app-id-profile (:name pwa))]
@@ -168,10 +182,18 @@
 
 (defmethod -open :default [{:keys [options] :as args}]
   (let [chrome-bin   (get-chrome-bin options)
+        flatpack-bin (get-flatpak-bin options)
         chrome-flags (::flags options flags)]
-    (if (and (some? chrome-bin)
-             (:app options true))
+    (cond
+      (and (some? chrome-bin)
+           (:app options true))
       (apply shell/spawn chrome-bin (chrome-flags (url args)))
+
+      (and (some? flatpack-bin)
+           (:app options true))
+      (apply shell/sh (concat flatpack-bin (chrome-flags (url args))))
+
+      :else
       (browse (url args)))))
 
 (defmethod -open false [_args])
