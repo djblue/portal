@@ -85,12 +85,14 @@
 (def shadow (partial #'clj "-M:cljs:shadow" "-m" "shadow.cljs.devtools.cli"))
 
 (defn cljr [& args]
-  (binding [*opts* (assoc-in
-                    *opts*
-                    [:extra-env "CLOJURE_LOAD_PATH"]
-                    (str/join (System/getProperty "path.separator")
-                              ["src" "resources" "dev" "test"]))]
-    (apply sh :Clojure.Main args)))
+  (let [path (fs/path (fs/home) ".dotnet" "tools" "Clojure.Main")]
+    (assert (fs/exists? path))
+    (binding [*opts* (assoc-in
+                      *opts*
+                      [:extra-env "CLOJURE_LOAD_PATH"]
+                      (str/join (System/getProperty "path.separator")
+                                ["src" "resources" "dev" "test"]))]
+      (apply sh (str path) args))))
 
 (defn py-script [bin]
   (str (if windows?
