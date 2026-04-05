@@ -138,8 +138,16 @@
    :app-id "gbilcjcjkenedpcbagempggobciaddcp"
    :profile "Default"})
 
+(defn- linux-pwa-installed? [options]
+  (fs/exists
+   (fs/join
+    (fs/home)
+    ".local" "share" "applications"
+    (str "com.google.Chrome.flextop.chrome-" (:app-id options) "-" (:profile options) ".desktop"))))
+
 (defn- flags [url]
-  (if-let [{:keys [app-id profile]} (get-app-id-profile (:name pwa))]
+  (if-let [{:keys [app-id profile]} (or (get-app-id-profile (:name pwa))
+                                        (when (linux-pwa-installed? pwa) pwa))]
     (->> [(str "--app-id=" app-id)
           (when profile
             (str "--profile-directory=" profile))
