@@ -153,7 +153,7 @@
 
 (defmethod report :default [message]
   (when *test-report*
-    (swap! *test-report* conj message))
+    (swap! *test-report* conj (assoc message :time (Date.) :runtime :clj)))
   (when-let [f (or (get-method report' (:type message))
                    (get-method report (:type message)))]
     (f message)))
