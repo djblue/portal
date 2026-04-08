@@ -151,8 +151,7 @@
 
 (defn with-collection [coll & children]
   (into [with-context
-         {:key nil
-          :collection coll}]
+         {:collection coll}]
         children))
 
 (defn- get-stable-path
@@ -168,8 +167,7 @@
   (let [context (use-context)
         path    (get context :path [])]
     (into [with-context
-           {:key         k
-            :path        (conj path k)
+           {:path        (conj path k)
             :stable-path (get-stable-path context k)}]
           children)))
 

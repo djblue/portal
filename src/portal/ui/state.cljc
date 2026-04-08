@@ -383,8 +383,8 @@
 #?(:cljs (add-watch state :selected #'send-selected-values))
 
 (defn nav [state context]
-  (let [{:keys [collection key value]} context
-        key (when (or (map? collection) (vector? collection)) key)]
+  (let [{:keys [collection path value]} context
+        key (when (or (map? collection) (vector? collection)) (last path))]
     (when collection
       (a/let [value (invoke 'clojure.datafy/nav collection key value)]
         (history-push state {:portal/value value :context context})))))
