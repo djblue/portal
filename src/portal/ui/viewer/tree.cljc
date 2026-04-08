@@ -56,7 +56,7 @@
                           :border-bottom-left-radius (:border-radius theme)}))
                :on-click (:on-click wrapper-options)}
         open
-        (when-not expanded? [:<> close [:sub #?(:clj (ins/safe-count-str value) :cljs (count value))]])
+        (when-not expanded? [:<> close [:sub #?(:clj (l/safe-count-str value) :cljs (count value))]])
         (when (and selected expanded?)
           [s/div
            {:style

@@ -4,6 +4,22 @@
            [portal.runtime.polyfill :refer [random-uuid]]
            [portal.ui.react :as react])))
 
+(def count-limit 100000)
+
+(defn safe-count
+  ([coll]
+   (safe-count coll count-limit))
+  ([coll count-limit]
+   (if (counted? coll)
+     [(count coll) false]
+     (let [n (count (take (inc count-limit) coll))
+           truncated? (> n count-limit)]
+       [(if truncated? count-limit n) truncated?]))))
+
+(defn safe-count-str [coll]
+  (let [[n truncated?] (safe-count coll)]
+    (if truncated? (str count-limit "+") (str n))))
+
 #?(:clj
    (defn lazy-seq
      ([coll]
