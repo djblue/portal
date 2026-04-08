@@ -6,7 +6,7 @@
             [portal.ui.styled :as s]
             [portal.ui.theme :as theme]))
 
-(def ^:private observer-context (react/create-context nil))
+(defonce ^:private observer-context (react/create-context nil))
 
 (defn- with-observer [f & children]
   (let [[observer set-observer!] (react/use-state nil)]
@@ -42,7 +42,7 @@
        #(.unobserve observer el)))
     ref))
 
-(def ^:private index-context (react/create-context 0))
+(defonce ^:private index-context (react/create-context 0))
 
 (defn- use-index [] (react/use-context index-context))
 

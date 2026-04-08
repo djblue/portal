@@ -53,7 +53,7 @@
           (a/let [next-state (binding [*state* state] (apply f @state args))]
             (when next-state (reset! state next-state))))))))
 
-(def ^:private state-context (react/create-context nil))
+(defonce ^:private state-context (react/create-context nil))
 
 (defn use-state [] (react/use-context state-context))
 

@@ -115,14 +115,14 @@
 (defn set-viewer! [state contexts viewer-name]
   (state/dispatch! state set-viewer contexts viewer-name))
 
-(def ^:private parent-context (react/create-context nil))
+(defonce ^:private parent-context (react/create-context nil))
 
 (defn- use-parent [] (react/use-context parent-context))
 
 (defn- with-parent [context & children]
   (apply react/provider parent-context context children))
 
-(def ^:private inspector-context
+(defonce ^:private inspector-context
   (react/create-context {:depth 0 :path [] :stable-path [] :alt-bg false}))
 
 (defn use-context []
