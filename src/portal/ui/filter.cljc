@@ -1,5 +1,6 @@
 (ns ^:no-doc portal.ui.filter
   (:require [clojure.string :as str]
+            #?(:clj [portal.ui.lazy :as l])
             #?(:cljs [portal.ui.rpc.runtime :as rt])))
 
 #?(:clj (defn regexp? [value] (instance? java.util.regex.Pattern value)))
@@ -30,7 +31,8 @@
     (or (some
          (fn [v]
            (match* v pattern))
-         value)
+         #?(:cljs value
+            :clj (l/safe-seq value)))
         (some-> (meta value) (match* pattern)))
 
     :else false))

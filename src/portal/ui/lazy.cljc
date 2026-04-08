@@ -20,6 +20,17 @@
   (let [[n truncated?] (safe-count coll)]
     (if truncated? (str count-limit "+") (str n))))
 
+(defn- lazy-seq? [value]
+  #?(:clj (or (instance? clojure.lang.LazySeq value)
+              (instance? clojure.lang.Iterate value)
+              (instance? clojure.lang.Range value))
+     :cljs (or (instance? cljs.core/LazySeq value)
+               (instance? cljs.core/Iterate value)
+               (instance? cljs.core/Range value))))
+
+(defn safe-seq [value]
+  (cond->> value (lazy-seq? value) (take count-limit)))
+
 #?(:clj
    (defn lazy-seq
      ([coll]
