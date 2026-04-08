@@ -216,6 +216,19 @@
       (push-viewer entry)
       (push-expanded entry)))
 
+(defn get-transformed [state context]
+  (get-in state [:transformed (get-location context)]))
+
+(defn transform-value [state context transform]
+  (let [location (get-location context)
+        value    (:value context)]
+    (if (get-in state [:transformed location])
+      state
+      (let [transformed (transform value)]
+        (cond-> state
+          (not= transformed value)
+          (assoc-in [:transformed location] transformed))))))
+
 (defn toggle-expand-1 [state context]
   (let [location (get-location context)]
     (update state :expanded?
