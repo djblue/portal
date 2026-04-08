@@ -766,7 +766,7 @@
       (keep-indexed
        (fn [index [k v]]
          (when (or (matcher k) (matcher v))
-           ^{:key [k v]}
+           ^{:key k}
            [with-key k
             [select/with-position
              {:row index :column 0}
@@ -842,10 +842,9 @@
       (keep-indexed
        (fn [index value]
          (when (matcher value)
-           (let [key [(if (vector? values)
-                        index
-                        (- n index 1))
-                      value]]
+           (let [key (if (vector? values)
+                       index
+                       (- n index 1))]
              ^{:key key}
              [select/with-position
               {:row index :column 0}
