@@ -850,9 +850,8 @@
 
 (defmethod inspect* :default [value] [s/span (pr-str value)])
 
-(defn- default-expand? [state theme context value]
-  (let [depth   (:depth context)
-        viewer  (get-viewer state context value)]
+(defn- default-expand? [theme context viewer value]
+  (let [depth   (:depth context)]
     (or (= depth 1)
         (= (:name viewer) :portal.viewer/tree)
         (and (coll? value)
@@ -1020,9 +1019,9 @@
                            :else preview)]
     (select/use-register-context ctx resolved-viewer)
     (react/use-effect
-     [location (some? expanded?)]
+     [location (some? expanded?) resolved-viewer value]
      (when (and (nil? expanded?)
-                (default-expand? state theme ctx value))
+                (default-expand? theme ctx resolved-viewer value))
        (state/dispatch!
         state assoc-in [:expanded? location]
         (get-in (meta value) [:portal.viewer/inspector :expanded] 1))))
