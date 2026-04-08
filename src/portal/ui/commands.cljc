@@ -439,7 +439,7 @@
                           (catch #?(:clj Exception :cljs :default) _e false))))
          :run (fn [state]
                 (#?(:clj future :cljs do)
-                  (a/let [selected (for [context (:selected @state)]
+                  (a/let [selected (for [context (state/get-all-selected-context @state)]
                                      (with-meta*
                                        (:value context)
                                        {:portal.viewer/default (:name (ins/get-viewer state context))}))
@@ -1193,7 +1193,8 @@
         value (react/use-atom state state/get-selected-value)
         opts  (use-options)]
     (react/use-effect
-     [(hash value)]
+     #?(:clj  [value]
+        :cljs [(hash value)])
      (a/let [fns (state/invoke 'portal.runtime/get-functions value)]
        (#?(:clj future :cljs do)
          (reset!
