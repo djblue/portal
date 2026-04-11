@@ -164,9 +164,12 @@
           (get-in [:headers "origin"])
           (str/starts-with? "vscode-webview://")))
 
-(defn close [session-id]
-  (when-let [send! (get @rt/connections session-id)]
-    (send! {:op "on-close"})))
+(defn close
+  ([]
+   (close (:session-id rt/*session*)))
+  ([session-id]
+   (when-let [send! (get @rt/connections session-id)]
+     (send! {:op "on-close"}))))
 
 (defn clear [session-id]
   (if-let [value (get-in @rt/sessions [session-id :options :value])]

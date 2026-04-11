@@ -409,7 +409,9 @@
             (filterv (complement #{notification}) notifications))))
 
 (defn close
-  "Close this inspector windows."
-  []
-  (notify-parent {:type :close})
-  #?(:cljs (.close js/window)))
+  "Close this inspector window."
+  [& _]
+  #?(:clj  ((requiring-resolve 'portal.runtime.jvm.ssr/close))
+     :cljs (do
+             (notify-parent {:type :close})
+             (.close js/window))))
