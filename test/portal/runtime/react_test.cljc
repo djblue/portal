@@ -232,3 +232,7 @@
         _ (is (== 2 @render))
         _ (is (== 1 @unmount))]
     output))
+
+(deftest sorted-map-element-key
+  (is (nil? (#'r/element-key [:div (sorted-map 'key :value)])))
+  (is (= :value (#'r/element-key [:div (sorted-map :key :value)]))))

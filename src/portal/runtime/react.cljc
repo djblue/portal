@@ -102,6 +102,10 @@
       [a active?])
      state)))
 
+(defn- report-error [_e]
+  #_(println _e)
+  nil)
+
 (defn- context-provider-component [id {:keys [value]} & children]
   (swap! *context-set* assoc id value)
   (if (= 1 (count children))
@@ -129,8 +133,13 @@
 (declare render*)
 
 (defn- element-key [element]
-  (or (when (map? (second element)) (:key (second element)))
-      (:key (meta element))))
+  (try
+    ;; sorted-map can throw exception when the type of the lookup key
+    ;; does not match the type of keys in the map
+    (or (when (map? (second element)) (:key (second element)))
+        (:key (meta element)))
+    (catch #?(:clj Exception :cljs :default) e
+      (report-error e))))
 
 (defn- render-list [vdom state context elements]
   (let [prev-vdom-index (:vdom-index vdom)
@@ -175,7 +184,10 @@
            (not= (:key vdom) (element-key element)))))
 
 (defn- run-effect [effect]
-  (let [f ((:fn effect))]
+  (let [f (try
+            ((:fn effect))
+            (catch #?(:clj Exception :cljs :default) e
+              (report-error e)))]
     (if (fn? f)
       (assoc effect :fn f)
       (dissoc effect :fn))))
