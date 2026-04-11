@@ -1,5 +1,5 @@
 (ns ^:no-doc portal.runtime.jvm.ssr
-  (:refer-clojure :exclude [parse-uuid])
+  (:refer-clojure :exclude [parse-uuid random-uuid])
   (:require
    [clojure.java.io :as io]
    [clojure.string :as str]
@@ -9,7 +9,7 @@
    [portal.runtime.json :as json]
    [portal.runtime.jvm.hiccup :as hiccup]
    [portal.runtime.jvm.server :refer [enable-cors route]]
-   [portal.runtime.polyfill :refer [parse-uuid]]
+   [portal.runtime.polyfill :refer [parse-uuid random-uuid]]
    [portal.runtime.react :as react]
    [portal.shortcuts :as shortcuts]
    [portal.ui.app :as app]
@@ -20,15 +20,33 @@
    [java.io ByteArrayInputStream]
    [java.net URI]))
 
-(defn- on-message [{:keys [handlers last-ping]} {:keys [id] :as event}]
+(defn- on-message [{:keys [handlers last-ping] :as session} {:keys [id] :as event}]
   (let [op (keyword (:op event))]
     (case op
       :ping (reset! last-ping (System/currentTimeMillis))
+      :on-response
+      (let [rpc (:rpc session) id (some-> id parse-uuid)]
+        (if-let [p (get @rpc id)]
+          (do (swap! rpc dissoc id) (deliver p event))
+          (tap> [:invalid-rpc event])))
       :on-key-down (shortcuts/keydown event)
       (if-let [f (get-in @handlers [(some-> id parse-uuid) op])]
         (f event)
         (when-not (= :on-visible op)
           (tap> [:missing-handler event]))))))
+
+(declare send!)
+
+(defn- rpc* [session {:keys [method params]}]
+  (let [p (promise)
+        id (random-uuid)]
+    (swap! (:rpc session) assoc id p)
+    (send! session
+           {:op "on-rpc"
+            :id (str id)
+            :method (str (namespace method) "/" (name method))
+            :params params})
+    p))
 
 (defn- start-profile [session]
   (when (get-in session [:options :profile?])
@@ -193,6 +211,7 @@
              :selection-index (atom {})
              :last-ping (atom (System/currentTimeMillis))
              :log (atom nil)
+             :rpc (atom {})
              :output-buffer (byte-array (* 5 1024 1024)))))
 
 (defmethod route [:get "/ssr"] [request]
@@ -255,6 +274,23 @@
   (let [value (get-in rt/*session* [:options :value])]
     (when (instance? clojure.lang.Atom value)
       (swap! value empty))))
+
+(defn- rpc
+  ([method]
+   (rpc rt/*session* method nil))
+  ([method params]
+   (rpc rt/*session* method params))
+  ([session method params]
+   (let [message {:method method :params params}
+         {:keys [result error]}
+         (-> (rpc* session message)
+             (deref 1000 {:error {:message "RPC Timeout"}}))]
+     (if-not error
+       result
+       (let [{:keys [message data]} error]
+         (throw (if-not data (Exception. message) (ex-info message data))))))))
+
+(defn clipboard [] (rpc :portal.ui.ssr/clipboard))
 
 ;; portal ui features
 ;; [x] finish porting inspector

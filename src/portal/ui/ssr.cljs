@@ -88,6 +88,34 @@
   (when-let [channel @!channel]
     (.send ^js channel (.stringify js/JSON (clj->js message)))))
 
+(defn clipboard [] (js/navigator.clipboard.readText))
+
+(def ^:private rpc-methods
+  {::clipboard clipboard})
+
+(defmethod on-message "on-rpc" [{:keys [id method params]}]
+  (if-let [method (get rpc-methods (keyword method))]
+    (-> (apply method params)
+        (js/Promise.resolve)
+        (.then (fn [result]
+                 (send!
+                  {:op "on-response"
+                   :id id
+                   :result result})))
+        (.catch (fn [error]
+                  (send!
+                   {:op "on-response"
+                    :id id
+                    :error (merge
+                            {:code -32600
+                             :message (ex-message error)}
+                            (when-let [data (ex-data error)]
+                              {:data data}))}))))
+    (send!
+     {:op "on-response"
+      :id id
+      :error {:code -32601 :message "Method not found"}})))
+
 (defonce ^:private root (.getElementById js/document "root"))
 
 (js/setInterval #(send! {:op "ping"}) 15000)

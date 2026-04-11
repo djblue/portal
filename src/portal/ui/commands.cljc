@@ -1101,7 +1101,8 @@
 (register! #'open-file)
 
 (defn- clipboard []
-  #?(:cljs (js/navigator.clipboard.readText)))
+  #?(:clj ((requiring-resolve 'portal.runtime.jvm.ssr/clipboard))
+     :cljs (js/navigator.clipboard.readText)))
 
 (defn- parse-as
   "Paste value from clipboard"
@@ -1122,7 +1123,11 @@
     ^::shortcuts/osx #{"meta" "v"}
     ^::shortcuts/windows ^::shortcuts/linux #{"control" "v"}]}
   [state]
-  (a/let [value (clipboard)] (parse-as state value)))
+  (a/try
+    (a/let [value (clipboard)]
+      (parse-as state value))
+    (catch #?(:clj Exception :cljs :default) e
+      (state/dispatch! state state/history-push {:portal/value (Throwable->map e)}))))
 
 (register! #'paste)
 
