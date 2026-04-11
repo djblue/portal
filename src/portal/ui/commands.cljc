@@ -927,43 +927,6 @@
   [state]
   (state/dispatch! state state/expand-inc))
 
-(defn ^:command redo-previous-command
-  {:shortcuts [#{"control" "r"}]}
-  [state]
-  (a/let [commands (::state/previous-commands @state)]
-    (when (seq commands)
-      (open
-       (fn [_state]
-         [palette-component
-          {:options commands
-           :filter-by :portal/key
-           :on-select
-           (fn [command]
-             (a/let [k (:portal/key command)
-                     f (or (:portal/f command)
-                           (if (keyword? k)
-                             k
-                             (partial state/invoke (:portal/key command))))
-                     args (:portal/args command)
-                     value (apply f (state/get-selected-value @state) args)]
-               (state/dispatch!
-                state
-                state/history-push
-                (assoc command :portal/value value))))
-           :component
-           (fn [command]
-             [s/div
-              {:style {:display :flex
-                       :justify-content :space-between
-                       :overflow :hidden
-                       :align-items :center
-                       :text-overflow :ellipsis
-                       :white-space :nowrap}}
-              [ins/inspector (:portal/key command)]
-              [s/div
-               {:style {:opacity 0.5}}
-               (for [a (:portal/args command)] (pr-str a))]])}])))))
-
 (defn ^:command set-theme [state]
   (a/let [theme (pick-one state (keys @c/!themes))]
     (when-not (= ::dismiss theme)

@@ -127,7 +127,7 @@
 
 #?(:cljs (defn- send! [message] (@sender message)))
 
-(def no-history [::previous-commands ::c/theme :theme])
+(def no-history [::c/theme :theme])
 
 (defn history-back [state]
   (when-let [previous-state (:portal/previous-state state)]
@@ -146,14 +146,6 @@
 
 (defn history-last [state]
   (->> (iterate history-forward state) (take-while some?) last))
-
-(defn- push-command [state {:portal/keys [key] :as entry}]
-  (if-not (or (symbol? key) (keyword? key))
-    state
-    (let [entry (dissoc entry :portal/value)]
-      (assoc state
-             ::previous-commands
-             (take 100 (conj (remove #{entry} (::previous-commands state)) entry))))))
 
 (defn- push-viewer [state {:keys [context] :portal/keys [value]}]
   (if-let [viewer (or (some-> value meta :portal.viewer/default)
@@ -204,7 +196,7 @@
        (dissoc :search-text)))))
 
 (defn history-push [state {:portal/keys [key value f] :as entry}]
-  (-> (push-command state entry)
+  (-> state
       (assoc
        :portal/previous-state state
        :portal/key   key
