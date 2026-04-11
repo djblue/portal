@@ -190,18 +190,14 @@
      (send! {:op "on-close"}))))
 
 (defn clear [session-id]
-  (if-let [value (get-in @rt/sessions [session-id :options :value])]
-    (when (instance? clojure.lang.Atom value)
-      (swap! value empty))
-    (swap! @#'rt/tap-list empty)))
+  (binding [rt/*session* (get-in @rt/sessions [session-id])]
+    (rt/clear-values)))
 
 (defn- open-session [{:keys [session] :as request}]
   (-> session
       (update :options
               (fn [options]
                 (cond-> options
-                  (not (contains? options :value))
-                  (assoc :value @#'rt/tap-list)
                   (and (nil? (:theme options))
                        (vs-code? request))
                   (assoc :theme :portal.colors/vs-code-embedded))))

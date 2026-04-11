@@ -6,6 +6,7 @@
    [portal.ui.commands :as commands]
    [portal.ui.icons :as icons]
    [portal.ui.inspector :as ins]
+   [portal.ui.options :as opts]
    [portal.ui.react :as react]
    [portal.ui.select :as select]
    [portal.ui.state :as state]
@@ -391,9 +392,11 @@
            [inspect-1 (state/get-value state default-value)]]])
        (state/get-history current-state)))]))
 
-(defn root [{:keys [options state]} & children]
-  (let [theme (or (react/use-atom state :theme)
-                  (:theme options)
+(defn root [{:keys [state]} & children]
+  (let [opts  (opts/use-options)
+        theme (or (react/use-atom state :theme)
+                  (:theme opts)
+                  (::c/theme opts)
                   ::c/nord)]
     [state/with-state
      state
@@ -401,8 +404,8 @@
       theme
       [container children]]]))
 
-(defn app [session]
-  (let [value (-> session :options :value)]
+(defn- app* [session]
+  (let [value (:value (opts/use-options))]
     [root
      session
      [d/div
@@ -411,6 +414,9 @@
         :height "100%"
         :display :flex}}
       [inspect-1-history value]]]))
+
+(defn app [session]
+  [opts/with-options [app* session]])
 
 (defn- try-resolve [s]
   (try

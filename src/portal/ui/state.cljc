@@ -354,8 +354,7 @@
 
 (defn clear [state]
   (a/do
-    #?(:clj  (invoke 'portal.runtime.jvm.ssr/clear-values)
-       :cljs (invoke 'portal.runtime/clear-values))
+    (invoke 'portal.runtime/clear-values)
     (reset-value-cache!)
     (-> state
         (dissoc :portal/value

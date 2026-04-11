@@ -10,7 +10,7 @@
             #?(:cljs [portal.ui.drag-and-drop :as dnd])
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
-            #?(:cljs [portal.ui.options :as options])
+            [portal.ui.options :as options]
             [portal.ui.parsers :as p]
             [portal.ui.react :as react]
             [portal.ui.state :as state]
@@ -20,10 +20,6 @@
 
 (def ^:dynamic *state* nil)
 (defonce ^:private input #?(:clj (atom nil) :cljs (r/atom nil)))
-
-(defn- use-options []
-  #?(:clj  {:keymap @(requiring-resolve 'portal.runtime/runtime-keymap)}
-     :cljs (options/use-options)))
 
 (defn open
   ([f] (open input f))
@@ -275,7 +271,7 @@
 
 (defn shortcut [command]
   (let [theme (theme/use-theme)
-        opts  (use-options)]
+        opts  (options/use-options)]
     [s/div {:style
             {:display :flex
              :align-items :stretch
@@ -1159,7 +1155,7 @@
 (defn palette* [{:keys [container]}]
   (let [state (state/use-state)
         value (react/use-atom state state/get-selected-value)
-        opts  (use-options)]
+        opts  (options/use-options)]
     (react/use-effect
      #?(:clj  [value]
         :cljs [(hash value)])

@@ -448,10 +448,11 @@
      (let [value (:value (get-options))]
        (when (atom? value)
          (swap! value empty)))
-     (reset! value-cache {})
-     (doseq [a @watch-registry]
-       (remove-watch a session-id))
-     (reset! watch-registry #{}))
+     (when value-cache (reset! value-cache {}))
+     (when watch-registry
+       (doseq [a @watch-registry]
+         (remove-watch a session-id))
+       (reset! watch-registry #{})))
    (cleanup-sessions)
    (done nil)))
 
