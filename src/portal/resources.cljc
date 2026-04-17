@@ -1,13 +1,16 @@
 (ns ^:no-doc portal.resources
-  #?(:cljs (:require-macros portal.resources))
-  #?(:clj (:require [clojure.java.io :as io]))
-  #?(:org.babashka/nbb (:require ["fs" :as fs]
+  #?(:clj  (:require [clojure.java.io :as io])
+     :org.babashka/nbb (:require ["fs" :as fs]
                                  ["path" :as path])
      :joyride (:require ["vscode" :as vscode]
-                        ["ext://djblue.portal$resources" :as resources]))
-  #?(:lpy (:import [importlib.resources :as resources])))
+                        ["ext://djblue.portal$resources" :as resources])
+     :cljs (:require-macros portal.resources)
+     :lpy  (:import [importlib.resources :as resources])
+     :jank (:require [clojure.string :as str]
+                     [portal.runtime.fs :as fs]))
+  #?(:jank (:include "jank/util/cli.hpp")))
 
-#?(:org.babashka/nbb (def file *file*))
+#?(:org.babashka/nbb (def file *file*) :jank nil)
 
 (defn resource [_resource-name]
   #?(:org.babashka/nbb (some
@@ -23,7 +26,11 @@
        (.join path (if-not (undefined? fs-path) fs-path (.-path uri))
               "resources"
               _resource-name))
-     :lpy (apply / (resources/files "resources") [_resource-name])))
+     :lpy (apply / (resources/files "resources") [_resource-name])
+     :jank (let [module-path (str/split (.-module_path cpp/jank.util.cli.opts) #":")]
+             (some (fn [path]
+                     (fs/is-file (fs/join path _resource-name)))
+                   module-path))))
 
 (defonce ^:no-doc resources (atom {}))
 
@@ -42,4 +49,5 @@
    :joyride (defn inline [resourece-name] (resources/inline resourece-name))
    :org.babashka/nbb (defn inline [resource-name]
                        (fs/readFileSync (resource resource-name) "utf8"))
-   :cljs    (defn inline [resourece-name] (get @resources resourece-name)))
+   :cljs    (defn inline [resourece-name] (get @resources resourece-name))
+   :jank    (defn inline [resource-name] (some-> resource-name resource fs/slurp)))

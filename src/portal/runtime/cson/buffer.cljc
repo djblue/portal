@@ -1,5 +1,6 @@
 (ns ^:no-doc portal.runtime.cson.buffer
-  #?(:cljr (:require [portal.runtime.clr.assembly]))
+  #?(:cljr (:require [portal.runtime.clr.assembly])
+     :jank (:require [clojure.string :as str]))
   #?(:bb  (:require [portal.runtime.json :as json])
      :clj (:import (com.google.gson.stream JsonReader JsonToken JsonWriter)
                    (java.io StringReader StringWriter))
@@ -13,7 +14,8 @@
                      JsonArray
                      JsonValue
                      JsonNodeOptions))
-     :lpy  (:import [json :as json])))
+     :lpy  (:import [json :as json])
+     :jank (:include "portal/runtime/cson/buffer.hpp")))
 
 (defn -shift [this] (this))
 
@@ -23,11 +25,16 @@
                (let [n      (.-n this)
                      result (aget source n)]
                  (set! (.-n this) (unchecked-inc n))
-                 result)))))
+                 result))))
+   :jank nil)
 
 (defn ->reader [data]
   #?(:bb
      (volatile! (json/read data))
+     :jank
+     (cpp/box
+      (cpp/portal.runtime.cson.buffer.create_reader
+       (cpp/cast std.string data)))
      :cljr
      (volatile!
       (seq
@@ -44,6 +51,9 @@
 
 (defn push-null   [buffer]
   #?(:bb   (conj! buffer nil)
+     :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
+                   (.push_null))
+               buffer)
      :clj  (doto ^JsonWriter buffer (.nullValue))
      :cljr (doto ^JsonArray buffer (.Add nil))
      :cljs (doto ^js buffer (.push nil))
@@ -51,6 +61,9 @@
 
 (defn push-bool   [buffer value]
   #?(:bb   (conj! buffer value)
+     :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
+                   (.push_bool (cpp/cast bool value)))
+               buffer)
      :clj  (doto ^JsonWriter buffer (.value ^Boolean value))
      :cljr (doto ^JsonArray buffer (.Add value))
      :cljs (doto ^js buffer (.push value))
@@ -58,6 +71,9 @@
 
 (defn push-long   [buffer value]
   #?(:bb   (conj! buffer value)
+     :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
+                   (.push_long (cpp/cast long value)))
+               buffer)
      :clj  (doto ^JsonWriter buffer (.value ^Long value))
      :cljr (doto ^JsonArray buffer (.Add value))
      :cljs (doto ^js buffer (.push value))
@@ -65,6 +81,9 @@
 
 (defn push-double [buffer value]
   #?(:bb   (conj! buffer value)
+     :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
+                   (.push_double (cpp/cast double value)))
+               buffer)
      :clj  (doto ^JsonWriter buffer (.value ^Double value))
      :cljr (doto ^JsonArray buffer (.Add value))
      :cljs (doto ^js buffer (.push value))
@@ -72,6 +91,9 @@
 
 (defn push-string [buffer value]
   #?(:bb   (conj! buffer value)
+     :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
+                   (.push_string (cpp/cast std.string value)))
+               buffer)
      :clj  (doto ^JsonWriter buffer (.value ^String value))
      :cljr (doto ^JsonArray buffer (.Add value))
      :cljs (doto ^js buffer (.push value))
@@ -87,6 +109,9 @@
 
 (defn next-null [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
+     :jank (->> buffer
+                (cpp/unbox (:* portal.runtime.cson.buffer.reader))
+                (.next_null))
      :clj  (.nextNull ^JsonReader buffer)
      :cljr (do (vswap! buffer rest) nil)
      :cljs (-shift buffer)
@@ -94,6 +119,9 @@
 
 (defn next-bool [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
+     :jank (->> buffer
+                (cpp/unbox (:* portal.runtime.cson.buffer.reader))
+                (.next_bool))
      :cljr (let [v ^JsonValue (first @buffer)]
              (vswap! buffer rest)
              (.GetValue v (type-args System.Boolean)))
@@ -103,6 +131,9 @@
 
 (defn next-long ^long [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
+     :jank (->> buffer
+                (cpp/unbox (:* portal.runtime.cson.buffer.reader))
+                (.next_long))
      :cljr (let [v ^JsonValue (first @buffer)]
              (vswap! buffer rest)
              (.GetValue v (type-args System.Int64)))
@@ -113,6 +144,9 @@
 (defn next-double ^double [buffer]
   (double
    #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
+      :jank (->> buffer
+                 (cpp/unbox (:* portal.runtime.cson.buffer.reader))
+                 (.next_double))
       :cljr (let [v ^JsonValue (first @buffer)]
               (vswap! buffer rest)
               (.GetValue v (type-args System.Double)))
@@ -122,6 +156,9 @@
 
 (defn next-string [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
+     :jank (->> buffer
+                (cpp/unbox (:* portal.runtime.cson.buffer.reader))
+                (.next_string))
      :cljr (let [v ^JsonValue (first @buffer)]
              (vswap! buffer rest)
              (.GetValue v (type-args System.String)))
@@ -131,6 +168,19 @@
 
 (defn next-value [buffer]
   #?(:bb (let [v (first @buffer)] (vswap! buffer rest) v)
+     :jank (let [reader (cpp/unbox (:* portal.runtime.cson.buffer.reader) buffer)
+                 type (.next_type reader)]
+             (condp == type
+               cpp/portal.runtime.cson.buffer.type.null
+               (.next_null reader)
+               cpp/portal.runtime.cson.buffer.type.boolean
+               (.next_bool reader)
+               cpp/portal.runtime.cson.buffer.type.integer
+               (.next_long reader)
+               cpp/portal.runtime.cson.buffer.type.floating
+               (.next_double reader)
+               cpp/portal.runtime.cson.buffer.type.string
+               (.next_string reader)))
      :cljr
      (let [result
            (when-let [^JsonElement value
@@ -161,6 +211,9 @@
 
 (defn with-buffer [f value]
   #?(:bb   (json/write (persistent! (f (transient []) value)))
+     :jank (let [writer (cpp/portal.runtime.cson.buffer.create_writer)]
+             (f (cpp/box writer) value)
+             (.str writer))
      :cljs (.stringify js/JSON (f (js/Array.) value))
      :cljr (let [json (JsonArray. (JsonNodeOptions.))]
              (f json value)

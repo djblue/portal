@@ -5,7 +5,8 @@
                :clj  [examples.hacker-news :as hn]
                :cljr [examples.hacker-news :as hn]
                :cljs [examples.hacker-news :as hn])
-            [clojure.pprint :as pp]
+            #?(:jank [portal.console :as console]
+               :default [clojure.pprint :as pp])
             [examples.macros :refer [read-file]]
             [portal.colors :as c]
             [portal.viewer :as v])
@@ -16,7 +17,8 @@
      :org.babashka/nbb (:import)
      :cljr (:import [System DateTime Guid Uri]
                     [System.IO File])
-     :lpy (:import [math :as Math])))
+     :lpy (:import [math :as Math])
+     :jank (:include "cmath")))
 
 #?(:clj
    (defn slurp-bytes [x]
@@ -78,7 +80,13 @@
       ::date #inst "2021-04-07T22:43:59.393-00:00"
       ::array #py [0 1 2 3 4]
       ::hash #py {:hello "world"}
-      ::binary (slurp-bytes (resource "screenshot.png"))}))
+      ::binary (slurp-bytes (resource "screenshot.png"))}
+     :jank
+     {::ratio 22/7
+      ::long 4611681620380904123
+      ::uuid (random-uuid)
+      ::date (console/now)
+      ::bigint 42N}))
 
 (def platform-collections
   #?(:bb nil
@@ -110,7 +118,8 @@
    ::special-doubles [##NaN ##Inf ##-Inf]
    ::url-string "https://github.com/djblue/portal"})
 
-(defrecord Point [x y])
+#?(:jank (defn ->Point [x y] {:x x :y y})
+   :default (defrecord Point [x y]))
 
 (defn- gt [a b]
   (if-not (and (number? a) (number? b))
@@ -120,8 +129,10 @@
 (def clojure-data
   {::regex #"hello-world"
    ::sorted-map #?(:lpy :not-implemented
+                   :jank :not-implemented
                    :default (sorted-map-by gt 3 "c" 2 "b" 1 "a"))
    ::sorted-set #?(:lpy :not-implemented
+                   :jank :not-implemented
                    :default (sorted-set-by gt 3 2 1))
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})
@@ -258,9 +269,11 @@
      ::different-value ::new-key}]))
 
 (def diff-text-data
-  (v/diff-text
-   [(with-out-str (pp/pprint (first diff-data)))
-    (with-out-str (pp/pprint (second diff-data)))]))
+  #?(:jank :skip
+     :default
+     (v/diff-text
+      [(with-out-str (pp/pprint (first diff-data)))
+       (with-out-str (pp/pprint (second diff-data)))])))
 
 (def string-data
   (v/for
@@ -283,7 +296,9 @@
     [::v/inspector {:hello :world}]]))
 
 (defn- sin [x]
-  #?(:cljr (Math/Sin x) :default (Math/sin x)))
+  #?(:cljr (Math/Sin x)
+     :jank (cpp/std.sin (cpp/float x))
+     :default (Math/sin x)))
 
 (def line-chart
   (v/vega-lite
@@ -1147,7 +1162,10 @@
 (def data
   (merge
    {::platform-data      platform-data
-    ::hacker-news        #?(:org.babashka/nbb nil :lpy :not-implemented :default hn/stories)
+    ::hacker-news        #?(:org.babashka/nbb nil
+                            :lpy :not-implemented
+                            :jank :not-implemented
+                            :default hn/stories)
     ::spec-data          spec-data
     ::table-data         table-data
     ::diff               diff-data
@@ -1156,7 +1174,8 @@
     ::themes             c/themes
     ::clojure-data       clojure-data
     ::hiccup             hiccup
-    ::data-visualization data-visualization
+    ::data-visualization #?(:jank :not-implemented
+                            :default data-visualization)
     ::string-data        string-data
     ::log-data           log-data
     ::profile-data       profile-data

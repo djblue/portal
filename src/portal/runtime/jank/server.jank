@@ -1,0 +1,140 @@
+(ns portal.runtime.jank.server
+  (:refer-clojure :exclude [read send])
+  (:require
+   [clojure.string :as str]
+   [portal.resources :refer [resource]]
+   [portal.runtime :as rt]
+   [portal.runtime.cson :as cson]
+   [portal.runtime.index :as index]
+   [portal.runtime.rpc :as rpc]))
+
+(cpp/raw "#include <httplib.h>")
+(cpp/raw "#include <portal/runtime/jank/server.hpp>")
+
+(def enable-cors
+  {:status 204
+   :headers
+   {"Access-Control-Allow-Origin"  "*"
+    "Access-Control-Allow-Headers" "origin, content-type"
+    "Access-Control-Allow-Methods" "POST, GET, OPTIONS, DELETE"
+    "Access-Control-Max-Age"       86400}})
+
+(defmulti route (juxt :request-method :uri))
+
+(defn- get-session-id [request]
+  ;; There might be a referrer which is not a UUID in standalone mode.
+  (try
+    (some->
+     (or (:query-string request)
+         (when-let [referer (get-in request [:headers "Referer"])]
+           (last (str/split referer #"\?"))))
+     parse-uuid)
+    (catch jank.runtime.object_ref _ nil)))
+
+(defn- with-session [request]
+  (if-let [session-id (get-session-id request)]
+    (assoc request :session (rt/get-session session-id))
+    request))
+
+(defmethod route :default [request] {:status 404})
+
+(defn- send [ws message]
+  (when (string? message)
+    (let [ws (cpp/unbox (:* httplib.ws.WebSocket) ws)]
+      (.send ws (cpp/cast std.string message))
+      nil)))
+
+(defn- read [ws]
+  (let [ws (cpp/unbox (:* httplib.ws.WebSocket) ws)
+        msg (cpp/std.string.)]
+    (.read ws msg)
+    msg))
+
+(defmethod route [:get "/rpc"] [{:keys [ws] :as request}]
+  (let [session (rt/open-session (:session request))]
+    (try
+      (rpc/on-open session #(send ws %))
+      (loop []
+        (when-let [message (not-empty (read ws))]
+          (rpc/on-receive session message)
+          (recur)))
+      (catch jank.runtime.object_ref e
+        (tap> e))
+      (finally
+        (rpc/on-close session)))))
+
+(defmethod route [:get "/icon.svg"] [_]
+  {:status  200
+   :headers {"Content-Type" "image/svg+xml"}
+   :body (slurp (resource "portal/icon.svg"))})
+
+(defmethod route [:get "/main.js"] [request]
+  {:status  200
+   :headers {"Content-Type" "text/javascript"}
+   :body (slurp
+          (resource
+           (if (= :dev (-> request :session :options :mode))
+             "portal-dev/main.js"
+             "portal/main.js")))})
+
+(defn- content-type [request]
+  (some-> (get-in request [:headers "content-type"])
+          (str/split #";")
+          first))
+
+(defn- body [{:keys [body] :as request}]
+  (case (content-type request)
+    "application/edn" (read-string body)
+    "application/cson" (cson/read body)
+    nil))
+
+(defmethod route [:options "/submit"] [_] enable-cors)
+(defmethod route [:post "/submit"] [request]
+  (if-let [data (body request)]
+    (do (rt/update-value data)
+        {:status  204
+         :headers {"Access-Control-Allow-Origin" "*"}})
+    {:status 204}))
+
+(defmethod route [:get "/"] [request]
+  (if-let [session (:session request)]
+    {:status 200
+     :headers {"content-type" "text/html"}
+     :body (index/html (index/html (:options session)))}
+    (let [session-id (random-uuid)]
+      (swap! rt/sessions assoc session-id {})
+      {:status 307 :headers {"Location" (str "?" session-id)}})))
+
+(defn- ->request [req]
+  (let [req (cpp/unbox (:* httplib.Request) req)]
+    {:request-method (keyword (str/lower-case (.-method req)))
+     :headers (cpp/portal.runtime.jank.server.request_headers req)
+     :query-string (second (str/split (.-target req) #"\?"))
+     :uri (.-path req)
+     :body (.-body req)}))
+
+(defn- handle-http [req res]
+  (let [res (cpp/unbox (:* httplib.Response) res)
+        request (->request req)
+        response (route (with-session request))]
+    (cpp/= (.-status res) (cpp/int (get response :status 200)))
+    (doseq [[k v] (:headers response)
+            :when (not= k "content-type")]
+      (.set_header res (name k) (name v)))
+    (when-let [body (:body response)]
+      (.set_content
+       res
+       (cpp/cast std.string body)
+       (cpp/cast std.string (get-in response [:headers "content-type"] "text/plain"))))))
+
+(defn- handle-ws [req ws]
+  (let [request (assoc (->request req) :ws ws)]
+    (route (with-session request))))
+
+(defn handler [req res ws]
+  (try
+    (if ws
+      (handle-ws req ws)
+      (handle-http req res))
+    (catch jank.runtime.object_ref e
+      (prn e))))

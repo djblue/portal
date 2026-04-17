@@ -24,6 +24,23 @@
       }
     },
     {
+      "name": "jank",
+      "projectType": "deps.edn",
+      "projectRootPath": [
+        "."
+      ],
+      "menuSelections": {
+        "cljAliases": []
+      },
+      "customJackInCommandLine": "script -qc 'bb jank' /dev/null",
+      "replSessionNames": {
+        "primary": "jank"
+      },
+      "nReplPortFile": [
+        ".nrepl-port"
+      ]
+    },
+    {
       "name": "shadow-cljs",
       "projectType": "deps.edn",
       "projectRootPath": [
@@ -109,5 +126,7 @@
         ]
       }
     }
-  ]
+  ],
+  "C_Cpp.errorSquiggles": "disabled",
+  "debug.allowBreakpointsEverywhere": true
 }

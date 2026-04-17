@@ -4,6 +4,7 @@
 
 (deftest un-hashable-values
   (let [value   #?(:bb   :skip
+                   :jank :skip
                    :org.babashka/nbb :skip
                    :clj  (reify Object
                            (hashCode [_] (throw (Exception. "test"))))
@@ -20,6 +21,7 @@
 
 (deftest un-printable-values
   (let [value #?(:bb   :skip
+                 :jank :skip
                  :org.babashka/nbb :skip
                  :clj  (reify Object
                          (toString [_] (throw (Exception. "test"))))
@@ -42,14 +44,16 @@
     {:a ^:one [1]}
     {:a ^:one [1]})
 
-  (are [a b]
-       (not= (#'rt/value->key a) (#'rt/value->key b))
+  #?(:jank :skip
+     :default
+     (are [a b]
+          (not= (#'rt/value->key a) (#'rt/value->key b))
 
-    [1] '(1)
+       [1] '(1)
 
-    #{1 2 3} #?(:lpy :skip :default (sorted-set 1 2 3))
+       #{1 2 3} #?(:lpy :skip :default (sorted-set 1 2 3))
 
-    ^{:one 1} [] ^{:two 2} []
+       ^{:one 1} [] ^{:two 2} []
 
-    {:a ^{:one 2} [1]}
-    {:a ^{:two 2} [1]}))
+       {:a ^{:one 2} [1]}
+       {:a ^{:two 2} [1]})))

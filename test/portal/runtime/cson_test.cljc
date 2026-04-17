@@ -18,10 +18,11 @@
        (= value (pass value))
     nil
     0
-    1.0
+    #?(:jank 1 :default 1.0)
     1.5
     #?(:clj  42N
        :cljr 42N
+       :jank 42N
        :joyride (js/BigInt "42")
        :cljs (when (exists? js/BigInt)
                (js/BigInt "42")))
@@ -98,7 +99,8 @@
        :cljr (is (= v (pass v))  "Range with meta works in cljr")
        :cljs (is (= v (pass v))  "Range with meta works in cljs")
        :lpy  (is (= v (pass v))  "Range with meta works in cljr")))
-  (let [v (range 0 5 1.0)]
+  (let [v #?(:jank (range 0 5 1)
+             :default (range 0 5 1.0))]
     (is (= v (pass v)) "Range with no meta works correctly"))
   (let [v (with-meta (range 0 5 1) {:my :meta})]
     (is (= v (pass v)) "LongRange with no meta works correctly")))
@@ -112,6 +114,17 @@
     {0 0}))
 
 #?(:lpy :skip
+   :jank
+   (deftest sorted-collections
+     (let [a (sorted-map :a 1 :c 3 :b 2)
+           b (pass a)]
+       (is (= a b))
+       (is (= (keys a) (keys b)))
+       (is (= (type a) (type b))))
+     (let [a (sorted-set 1 2 3)
+           b (pass a)]
+       (is (= a b))
+       (is (= (seq a) (seq b)))))
    :default
    (deftest sorted-collections
      (let [a (sorted-map :a 1 :c 3 :b 2)
@@ -135,6 +148,7 @@
 
 (def tagged
   [#?(:lpy :skip
+      :jank :skip
       :default #inst "2021-04-07T22:43:59.393-00:00")
    #?(:clj  (UUID/randomUUID)
       :cljr (Guid/NewGuid)
@@ -147,7 +161,7 @@
     (is (= value (pass value)))))
 
 (defn meta* [v]
-  #?(:bb (dissoc (meta v) :type) :cljr (meta v) :clj (meta v) :cljs (meta v)))
+  #?(:bb (dissoc (meta v) :type) :default (dissoc (meta v) ::core/tagged)))
 
 (deftest tagged-values []
   (let [v1 (core/tagged-value "my/tag" {:hello :world})
@@ -184,16 +198,21 @@
      (is (= 1 (short 1) (pass (short 1))))
      (is (= 1 (int 1)   (pass (int 1))))
      (is (= 1 (long 1)  (pass (long 1))))
-     (is (= 4611681620380904123 (pass 4611681620380904123)))))
+     (is (= 4611681620380904123 (pass 4611681620380904123))))
+   :jank :skip)
 
 #?(:clj
-   (deftest java-chars
+   (deftest chars-test
+     (is (= \A (pass \A)))
+     (is (= (seq "hi") (pass (seq "hi")))))
+   :jank
+   (deftest chars-test
      (is (= \A (pass \A)))
      (is (= (seq "hi") (pass (seq "hi")))))
    :joyride nil
    :org.babashka/nbb nil
    :cljs
-   (deftest js-chars
+   (deftest chars-test
      (let [a (core/char 10) b (core/char 10)]
        (is (= a b))
        (is (= a (pass b))))))

@@ -1,0 +1,74 @@
+(ns portal.runtime.jank.launcher
+  (:require
+   [portal.runtime :as rt]
+   [portal.runtime.browser :as browser]
+   [portal.runtime.jank.client :as c]
+   [portal.runtime.jank.server :as server]))
+
+(cpp/raw "#include <httplib.h>")
+(cpp/raw "#include <portal/runtime/jank/server.hpp>")
+
+(defonce ^:private server (atom nil))
+
+(defn- running? []
+  (when-let [{:keys [http-server]} @server]
+    (.is_running (cpp/unbox (:* httplib.Server) http-server))))
+
+(defn- sleep-ms [ms]
+  (cpp/std.this_thread.sleep_for
+   (cpp/std.chrono.milliseconds (cpp/cast long ms))))
+
+(defn start [options]
+  (or @server
+      (let [p (promise)
+            {:keys [port host]
+             :or {port 0 host "127.0.0.1"}} options]
+        (future
+          (let [http-server (cpp/portal.runtime.jank.server.create_server #'server/handler)
+                port (if (zero? port)
+                       (.bind_to_any_port http-server host)
+                       (do (.bind_to_port http-server host port) port))]
+            (deliver p {:http-server (cpp/box http-server)
+                        :port port
+                        :host host})
+            (.listen http-server host port))
+          nil)
+        (reset! server @p)
+        (while (not (running?))
+          (sleep-ms 15))
+        @p)))
+
+(defn stop []
+  (when-let [{:keys [http-server]} @server]
+    (cpp/portal.runtime.jank.server.destroy_server
+     (cpp/unbox (:* httplib.Server) http-server)))
+  (reset! server nil))
+
+(defn open
+  ([options]
+   (open nil options))
+  ([portal options]
+   (let [server (start options)]
+     (browser/open {:portal portal :options options :server server}))))
+
+(defn clear [portal])
+
+(defn close [portal])
+
+(defn eval-str [portal msg])
+
+(defn sessions []
+  (for [session-id (rt/active-sessions)] (c/make-atom session-id)))
+
+(defn url [portal]
+  (browser/url {:portal portal :server @server}))
+
+(comment
+  (-> @server)
+  (start {:host "localhost" :port 8000})
+  (stop)
+  ;; (get-port)
+  ;; (stop)
+  comment)
+
+(reset! rt/request c/request)

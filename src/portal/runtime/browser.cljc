@@ -25,6 +25,12 @@
                      [portal.runtime.python.client :as c]
                      [portal.runtime.fs :as fs]
                      [portal.runtime.json :as json]
+                     [portal.runtime.shell :as shell])
+     :jank (:require [clojure.string :as str]
+                     [portal.runtime :as rt]
+                     [portal.runtime.jank.client :as c]
+                     [portal.runtime.fs :as fs]
+                     [portal.runtime.json :as json]
                      [portal.runtime.shell :as shell]))
   #?(:cljr (:import [System.Runtime.InteropServices OSPlatform RuntimeInformation])
      :lpy  (:import [os :as os]
@@ -99,7 +105,7 @@
 
 (defn- windows-chrome-web-applications []
   (mapcat
-   (fn [root]
+   (fn windows-chrome-web-applications' [root]
      (tree-seq
       (fn [f]
         (and (not (fs/is-file f))
@@ -109,7 +115,7 @@
       (fn [d]
         (try
           (fs/list d)
-          (catch #?(:cljs :default :default Exception) _ nil)))
+          (catch #?(:cljs :default :jank jank.runtime.object_ref :default Exception) _ nil)))
       (fs/join
        root
        (get-windows-user)
@@ -123,7 +129,7 @@
        (when (str/ends-with? file (str app-name ".lnk"))
          {:app-id (str/replace (fs/basename (fs/dirname file)) "_crx_" "")}))
      (windows-chrome-web-applications))
-    (catch #?(:cljs :default :default Exception) _ nil)))
+    (catch #?(:cljs :default :jank jank.runtime.object_ref :default Exception) _ nil)))
 
 (defn- get-app-id-profile
   "Returns app-id and profile if portal is installed as `app-name` under any of the browser profiles"
@@ -159,7 +165,8 @@
   #?(:clj  (System/getenv "BROWSER")
      :cljs (.-BROWSER js/process.env)
      :cljr (Environment/GetEnvironmentVariable "BROWSER")
-     :lpy  (.get os/environ "BROWSER")))
+     :lpy  (.get os/environ "BROWSER")
+     :jank (cpp/getenv "BROWSER")))
 
 (defn- browse [url]
   (or
