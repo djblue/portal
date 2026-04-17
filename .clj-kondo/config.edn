@@ -1,4 +1,5 @@
 {:linters {:unsorted-required-namespaces {:level :fail}
+           :clojure-lsp/unused-public-var {:level :off}
            :unresolved-symbol
            {:exclude [(portal.ui.repl.sci.import/sci-import)
                       (portal.ui.repl.sci.import/import-ns)]}}
