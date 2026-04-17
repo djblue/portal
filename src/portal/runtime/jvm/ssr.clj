@@ -283,7 +283,7 @@
              (deref 1000 {:error {:message "RPC Timeout"}}))]
      (if-not error
        result
-       (let [{:keys [message data]} error]
+       (let [{:keys [^String message data]} error]
          (throw (if-not data (Exception. message) (ex-info message data))))))))
 
 (defn clipboard [] (rpc :portal.ui.ssr/clipboard))
