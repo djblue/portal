@@ -1,0 +1,81 @@
+(ns portal.client.jank
+  (:require [clojure.string :as str])
+  (:include "curl/curl.h"))
+
+;; jank repl -I/usr/include -L/usr/lib -lcurl
+
+(defn- ->headers [headers]
+  (reduce-kv
+   (fn [slist k v]
+     (let [header (cpp/.c_str
+                   (cpp/cast
+                    cpp/jtl.immutable_string
+                    (str (name k) ":" v)))]
+       (cpp/box
+        (cpp/curl_slist_append
+         (if-not slist
+           (cpp/cast (:* cpp/curl_slist) cpp/nullptr)
+           (cpp/unbox (:* cpp/curl_slist) slist)) header))))
+   nil
+   headers))
+
+(defn request [{:keys [url method body headers verbose]
+                :or   {method :get}}]
+  {:pre [(string? url)
+         (#{:get :put :post :delete :patch :options} method)
+         (or (string? body) (nil? body))
+         (or (map? headers) (nil? headers))]}
+
+  (let [curl (cpp/curl_easy_init)]
+
+    (when (cpp/! curl) (throw (ex-info "Curl failed to init" {})))
+    (when verbose (cpp/curl_easy_setopt curl cpp/CURLOPT_VERBOSE (cpp/long 1)))
+
+    (let [url'     (cpp/.c_str (cpp/cast cpp/jtl.immutable_string url))
+          method'  (cpp/.c_str
+                    (cpp/cast
+                     cpp/jtl.immutable_string
+                     (str/upper-case (name method))))
+          headers' (->headers headers)
+          body'    (cpp/.c_str (cpp/cast cpp/jtl.immutable_string body))]
+
+      (when headers'
+        (cpp/curl_easy_setopt
+         curl
+         cpp/CURLOPT_HTTPHEADER (cpp/unbox (:* cpp/curl_slist) headers')))
+      (cpp/curl_easy_setopt curl cpp/CURLOPT_URL url')
+      (cpp/curl_easy_setopt curl cpp/CURLOPT_CUSTOMREQUEST method')
+
+      (when body (cpp/curl_easy_setopt curl cpp/CURLOPT_POSTFIELDS body'))
+
+      (cpp/curl_easy_perform curl)
+
+      (when headers' (cpp/curl_slist_free_all (cpp/unbox (:* cpp/curl_slist) headers')))
+      (cpp/curl_easy_cleanup curl)))
+  nil)
+
+(defn submit
+  [{:keys [port host]
+    :or   {host     "localhost"
+           port     53755}}
+   value]
+  (request
+   {:url (str "http://" host ":" port "/submit")
+    :method :post
+    :headers
+    {"content-type" "application/edn"}
+    :body (binding [*print-meta* true]
+            (pr-str value))}))
+
+(comment
+
+  (submit
+   {:host "localhost" :port 36017}
+   (with-meta (range 100) {:hello :world}))
+
+  (def submit* (partial submit {:host "localhost" :port 36017}))
+  (add-tap #'submit*)
+  (tap> ::foo)
+
+  comment)
+
