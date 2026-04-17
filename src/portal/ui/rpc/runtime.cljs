@@ -1,5 +1,4 @@
 (ns ^:no-doc portal.ui.rpc.runtime
-  (:refer-clojure :exclude [deref pr-str])
   (:require [clojure.pprint :as pprint]
             [portal.runtime.cson :as cson]
             [portal.ui.state :as state]
@@ -59,8 +58,6 @@
 
 (deftype RuntimeAtom [runtime object a]
   Runtime
-  cson/ToJson (to-json* [this buffer] (runtime-to-json buffer this))
-
   IAtom
   IDeref
   (-deref [this]
@@ -78,6 +75,9 @@
     (-remove-watch a key))
   (-notify-watches [_this oldval newval]
     (-notify-watches a oldval newval))
+
+  cson/ToJson
+  (to-json* [this buffer] (runtime-to-json buffer this))
 
   IMeta       (-meta    [_] (:meta object))
   IHash       (-hash    [_] (:id object))

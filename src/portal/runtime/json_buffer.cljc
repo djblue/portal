@@ -111,13 +111,14 @@
      :lpy  (python/next buffer)))
 
 (defn next-double ^double [buffer]
-  #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
-     :cljr (let [v ^JsonValue (first @buffer)]
-             (vswap! buffer rest)
-             (.GetValue v (type-args System.Double)))
-     :clj  (.nextDouble ^JsonReader buffer)
-     :cljs (-shift buffer)
-     :lpy  (python/next buffer)))
+  (double
+   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)
+      :cljr (let [v ^JsonValue (first @buffer)]
+              (vswap! buffer rest)
+              (.GetValue v (type-args System.Double)))
+      :clj  (.nextDouble ^JsonReader buffer)
+      :cljs (-shift buffer)
+      :lpy  (python/next buffer))))
 
 (defn next-string [buffer]
   #?(:bb   (let [v (first @buffer)] (vswap! buffer rest) v)

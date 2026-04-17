@@ -129,8 +129,7 @@
     (inf? value)       (json/push-string buffer "inf")
     (-inf? value)      (json/push-string buffer "-inf")))
 
-(defn ->double [buffer]
-  (double (json/next-double buffer)))
+(defn ->double [buffer] (json/next-double buffer))
 
 #?(:clj (extend-type Byte    ToJson (to-json* [value buffer] (json/push-long buffer value))))
 #?(:clj (extend-type Short   ToJson (to-json* [value buffer] (json/push-long buffer value))))
