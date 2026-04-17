@@ -4,14 +4,16 @@
      :clj  (:require [clojure.data.json :as json])
      :cljr (:require [portal.runtime.clr.assembly]
                      [clojure.data.json :as json])
-     :lpy  (:require [basilisp.json :as json])))
+     :lpy  (:require [basilisp.json :as json])
+     :jank (:require [clojure.data.json :as json])))
 
 (defn write [value]
   #?(:bb   (json/generate-string value)
      :clj  (json/write-str value)
      :cljr (json/write-str value)
      :cljs (.stringify js/JSON (clj->js value))
-     :lpy  (json/write-str value)))
+     :lpy  (json/write-str value)
+     :jank (json/write-str value)))
 
 (defn read
   ([string]
@@ -23,7 +25,8 @@
       :cljs (js->clj (.parse js/JSON string)
                      :keywordize-keys
                      (= keyword (:key-fn opts)))
-      :lpy  (json/read-str string :key-fn (:key-fn opts)))))
+      :lpy  (json/read-str string :key-fn (:key-fn opts))
+      :jank (json/read-str string {:key-fn (:key-fn opts)}))))
 
 (defn read-stream [stream]
   #?(:bb   (json/parse-stream stream keyword)

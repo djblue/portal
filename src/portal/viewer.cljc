@@ -18,7 +18,8 @@
      :cljs (implements? IMeta value)
      :lpy
      (try (with-meta value {}) true
-          (catch Exception _e false))))
+          (catch Exception _e false))
+     :jank (coll? value)))
 
 (defn default
   "Set the default viewer for a value.

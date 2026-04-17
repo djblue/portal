@@ -39,17 +39,25 @@
          (json/push-long buffer value)
          (-> buffer
              (json/push-string "long")
+             (json/push-string (str value)))))
+     :jank
+     (let [js-min-int -9007199254740991
+           js-max-int  9007199254740991]
+       (if (<= js-min-int value js-max-int)
+         (json/push-long buffer value)
+         (-> buffer
+             (json/push-string "long")
              (json/push-string (str value)))))))
 
 (defn- push-double [buffer value]
   (cond
+    (core/nan? value)       (json/push-string buffer "nan")
     (core/is-finite? value) #?(:cljr    (if-not (zero? (mod value 1))
                                           (json/push-double buffer value)
                                           (-> buffer
                                               (json/push-string "D")
                                               (json/push-double value)))
                                :default (json/push-double buffer value))
-    (core/nan? value)       (json/push-string buffer "nan")
     (core/inf? value)       (json/push-string buffer "inf")
     (core/-inf? value)      (json/push-string buffer "-inf")))
 
@@ -64,7 +72,7 @@
     buffer))
 
 (defn- tagged-meta [buffer value]
-  (push-meta buffer (meta value)))
+  (push-meta buffer (dissoc (meta value) ::core/tagged)))
 
 (defn- bb-fix
   "Remove bb type tag for records which cause an infinite loop."
@@ -81,6 +89,7 @@
   #?(:clj  (instance? clojure.lang.BigInt value)
      :cljr (instance? clojure.lang.BigInt value)
      :cljs (identical? js/BigInt (some-> value .-constructor))
+     :jank (= "big_integer" (type value))
      :else false))
 
 (defn- push-bigint [buffer value]
@@ -187,8 +196,9 @@
      :default
      (-> buffer
          (json/push-string "R")
-         (json/push-long (numerator _value))
-         (json/push-long (denominator _value)))))
+         ;; TODO: fix bigger values, might need to type
+         (json/push-long (long (numerator _value)))
+         (json/push-long (long (denominator _value))))))
 
 #?(:cljs (defn- ratio? [_] false))
 

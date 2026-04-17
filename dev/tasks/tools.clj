@@ -129,3 +129,32 @@
            "--output-to" (str out ".js")
            "--compile" main))
     (node out)))
+
+(defn- jank-env []
+  (let [cwd (fs/cwd)
+        jank-dir (fs/canonicalize (fs/path cwd ".." "jank" "compiler+runtime"))
+        jank-local-llvm-bin (fs/path jank-dir "build/llvm-install/usr/local/bin")
+        local-jank (str (fs/file jank-dir "build" "jank"))]
+    (if-not (fs/exists? local-jank)
+      [:jank {}]
+      [local-jank
+       {#_#_"JANK_PRINT_IR" "1"
+        #_#_"JANK_PRINT_CODEGEN" "1"
+        #_#_"GC_DONT_GC" "1"
+        "CXX" (str (fs/file jank-local-llvm-bin "clang++"))
+        "CC"  (str (fs/file jank-local-llvm-bin "clang"))}])))
+
+(defn jank [& args]
+  (let [[bin extra-env] (jank-env)]
+    (binding [*opts* (-> *opts*
+                         (assoc :inherit true)
+                         (update :extra-env merge extra-env))]
+      (apply sh bin
+             "--eagerness" "eager"
+             "--module-path" "src:resources:dev:test"
+             (str "-I" (fs/path (fs/cwd) "src"))
+             "-I/usr/include"
+             (str "-I" (fs/path (fs/cwd) ".portal/include"))
+             "-L/usr/lib"
+             "-lcurl"
+             args))))

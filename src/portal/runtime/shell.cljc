@@ -2,7 +2,8 @@
   #?(:clj  (:require [clojure.java.shell :as shell])
      :cljs (:require ["child_process" :as cp])
      :cljr (:require [clojure.clr.shell :as shell])
-     :lpy  (:require [basilisp.shell :as shell]))
+     :lpy  (:require [basilisp.shell :as shell])
+     :jank (:require [jank.shell :as shell]))
   #?(:lpy (:import [threading])))
 
 (defn spawn [bin & args]
@@ -33,7 +34,13 @@
        #(let [{:keys [exit err out]} (apply shell/sh bin args)]
           (when-not (zero? exit)
             (prn (into [bin] args))
-            (println err out)))))))
+            (println err out)))))
+     :jank
+     (future
+       (let [{:keys [exit err out]} (apply shell/sh bin args)]
+         (when-not (zero? exit)
+           (prn (into [bin] args))
+           (println err out))))))
 
 (defn sh [bin & args]
   #?(:clj  (apply shell/sh bin args)
@@ -42,4 +49,5 @@
               :out  (str (.-stdout result))
               :err  (str (.-stderr result))})
      :cljr (apply shell/sh bin args)
-     :lpy  (apply shell/sh bin args)))
+     :lpy  (apply shell/sh bin args)
+     :jank (apply shell/sh bin args)))

@@ -3,7 +3,8 @@
   (:refer-clojure :exclude [read])
   (:require
    [portal.runtime.cson.reader :as reader]
-   [portal.runtime.cson.writer :as writer]))
+   #?(:jank [portal.runtime.cson.writer-simple :as writer]
+      :default [portal.runtime.cson.writer :as writer])))
 
 (defn write
   ([value]
