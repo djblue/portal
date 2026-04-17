@@ -58,7 +58,7 @@
   :kondo
   {:extra-paths ["dev"]
    :main-opts   ["-m" "tasks.kondo"]
-   :extra-deps  {clj-kondo/clj-kondo {:mvn/version "2025.06.05"}}}
+   :extra-deps  {clj-kondo/clj-kondo {:mvn/version "2026.04.15"}}}
   :cljfmt
   {:main-opts  ["-m" "cljfmt.main"]
    :extra-deps {dev.weavejester/cljfmt {:mvn/version "0.16.3"}}}
