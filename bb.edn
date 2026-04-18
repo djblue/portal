@@ -18,4 +18,5 @@
          pkg    tasks.package/all
          deploy tasks.deploy/all
          py     tasks.py/-main
+         jank   tasks.jank/-main
          bench  tasks.bench/-main}}

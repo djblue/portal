@@ -23,6 +23,20 @@
       }
     },
     {
+      "name": "jank",
+      "projectType": "deps.edn",
+      "projectRootPath": [
+        "."
+      ],
+      "menuSelections": {
+        "cljAliases": []
+      },
+      "customJackInCommandLine": "script -qc 'bb jank' /dev/null",
+      "nReplPortFile": [
+        ".nrepl-port"
+      ]
+    },
+    {
       "name": "shadow-cljs",
       "projectType": "deps.edn",
       "projectRootPath": [
