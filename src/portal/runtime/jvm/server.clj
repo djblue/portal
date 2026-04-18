@@ -103,13 +103,15 @@
           first))
 
 (defn- body [{:keys [body] :as request}]
-  (case (content-type request)
-    "application/transit+json" (transit/read (transit/reader body :json))
-    "application/json"         (json/read-stream (io/reader body))
-    "application/cson"         (cson/read (slurp body))
-    "application/edn"          (edn/read
-                                {:default tagged-literal}
-                                (PushbackReader. (io/reader body)))))
+  (try
+    (case (content-type request)
+      "application/transit+json" (transit/read (transit/reader body :json))
+      "application/json"         (json/read-stream (io/reader body))
+      "application/cson"         (cson/read (slurp body))
+      "application/edn"          (edn/read
+                                  {:default tagged-literal}
+                                  (PushbackReader. (io/reader body))))
+    (catch Exception e (Throwable->map e))))
 
 (defn- ->js [file]
   (let [source (fs/slurp file)]
