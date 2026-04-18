@@ -66,16 +66,3 @@
     {"content-type" "application/edn"}
     :body (binding [*print-meta* true]
             (pr-str value))}))
-
-(comment
-
-  (submit
-   {:host "localhost" :port 36017}
-   (with-meta (range 100) {:hello :world}))
-
-  (def submit* (partial submit {:host "localhost" :port 36017}))
-  (add-tap #'submit*)
-  (tap> ::foo)
-
-  comment)
-
