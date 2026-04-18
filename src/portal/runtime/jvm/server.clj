@@ -102,27 +102,15 @@
           (str/split #";")
           first))
 
-(defn- read-edn* [body]
-  (edn/read
-   {:default tagged-literal}
-   (PushbackReader. (io/reader body))))
-
-(def ^:private in-bb? (some? (System/getProperty "babashka.version")))
-
-(defn- read-edn [body]
-  (if-not in-bb?
-    (read-edn* body)
-    ;; Fixes the following issue with parsing #inst on babashka due to virtual threads:
-    ;; StackValue must not be used in a virtual thread unless the method is annotated @Uninterruptible.
-    @(future (read-edn* body))))
-
 (defn- body [{:keys [body] :as request}]
   (try
     (case (content-type request)
       "application/transit+json" (transit/read (transit/reader body :json))
       "application/json"         (json/read-stream (io/reader body))
       "application/cson"         (cson/read (slurp body))
-      "application/edn"          (read-edn body))
+      "application/edn"          (edn/read
+                                  {:default tagged-literal}
+                                  (PushbackReader. (io/reader body))))
     (catch Exception e (Throwable->map e))))
 
 (defn- ->js [file]
