@@ -3,13 +3,24 @@
      :clj     (:require [clojure.java.io :as io])
      :portal  (:import)
      :cljs    (:require-macros portal.console)
-     :lpy     (:import [datetime :as datetime])))
+     :lpy     (:import [datetime :as datetime])
+     :jank    (:include
+               "<chrono>"
+               "jank/runtime/obj/inst.hpp"
+               "jank/runtime/core/make_box.hpp")))
+
+(cpp/raw "namespace portal::console
+{
+  using namespace jank::runtime;
+  object_ref now() { return make_box<obj::inst>(); }
+}")
 
 (defn ^:no-doc now []
   #?(:clj  (java.util.Date.)
      :cljs (js/Date.)
      :cljr (DateTime/Now)
-     :lpy  (.now datetime/datetime)))
+     :lpy  (.now datetime/datetime)
+     :jank (cpp/portal.console.now)))
 
 (defn ^:no-doc run [f]
   (try
@@ -17,7 +28,8 @@
     (catch #?(:clj Exception
               :cljs :default
               :cljr Exception
-              :lpy Exception) ex
+              :lpy Exception
+              :jank cpp/jank.runtime.object_ref) ex
       [:throw ex])))
 
 (defn ^:no-doc runtime []
@@ -28,7 +40,8 @@
      :clj :clj
      :cljs :cljs
      :cljr :cljr
-     :lpy :py))
+     :lpy :py
+     :jank :jank))
 
 #?(:clj
    (defn ^:no-doc get-file [env file]
@@ -36,14 +49,19 @@
        (if-let [classpath-file (io/resource file)]
          (.getPath (io/file classpath-file))
          file)
-       *file*)))
+       *file*))
+   :default nil)
 
 #_{:clj-kondo/ignore #?(:cljs [:unused-binding] :default [])}
 (defn ^:no-doc capture [level form expr env]
   (let [#?(:lpy     {line   :basilisp.lang.reader/line
                      column :basilisp.lang.reader/col}
+           :jank    {{{line :line column :col} :start
+                      file :file}
+                     :jank/source}
            :default {:keys [line column file]})
-        (meta form)]
+        #?(:jank (meta env)
+           :default (meta form))]
     `(let [[flow# result#] (run (fn [] ~expr))]
        (tap>
         (with-meta
@@ -57,7 +75,8 @@
                          :org.babashka/nbb *file*
                          :cljs file
                          :cljr *file*
-                         :lpy  "unknown")
+                         :lpy  "unknown"
+                         :jank (or *file* file))
            :line     ~line
            :column   ~column
            :time     (now)
