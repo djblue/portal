@@ -1,6 +1,7 @@
 (ns tasks.package
   (:require [babashka.fs :as fs]
             [hiccup.core :refer [html]]
+            [portal.runtime.jvm.ssr :as ssr]
             [tasks.build :refer [build extensions]]
             [tasks.info :refer [options version]]
             [tasks.py :as py]
@@ -103,14 +104,16 @@
   "Build a jar."
   []
   (build)
-  (pom)
+  (ssr/vendor)
   (when (seq
          (fs/modified-since
           (str "target/portal-" version ".jar")
           (concat
            ["pom.xml"]
            (fs/glob "src" "**")
-           (fs/glob "resources" "**"))))
+           (fs/glob "resources" "**")
+           (fs/glob ".portal/vendor" "**"))))
+    (pom)
     (clj "-M:dev" "-m" :tasks.jar)))
 
 (defn all

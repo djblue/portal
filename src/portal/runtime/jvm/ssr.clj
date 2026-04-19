@@ -6,6 +6,7 @@
    [org.httpkit.server :as server]
    [portal.runtime :as rt]
    [portal.runtime.fs :as fs]
+   [portal.runtime.index :as index]
    [portal.runtime.json :as json]
    [portal.runtime.jvm.hiccup :as hiccup]
    [portal.runtime.jvm.server :refer [enable-cors route]]
@@ -287,3 +288,19 @@
          (throw (if-not data (Exception. message) (ex-info message data))))))))
 
 (defn clipboard [] (rpc :portal.ui.ssr/clipboard))
+
+(defn- extract-vendor-url [resource]
+  (re-seq #"/vendor\?(url=[^\")#]+)" resource))
+
+(defn- download-vendor-urls [resource]
+  (doseq [[_ query-string] (extract-vendor-url resource)
+          :let [{:keys [body]}
+                (route {:request-method :get
+                        :uri "/vendor"
+                        :query-string query-string})]]
+    (println " ->" query-string)
+    (download-vendor-urls (slurp body))))
+
+(defn vendor []
+  (println "=> Vendoring SSR resources")
+  (download-vendor-urls (index/html {:mode :ssr})))
