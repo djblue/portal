@@ -26,6 +26,6 @@ runs:
         distribution: 'adopt'
         java-version: '21'
     - name: Install Babashka
-      uses: turtlequeue/setup-babashka@v1.5.2
+      uses: turtlequeue/setup-babashka@v1.7.0
       with:
-        babashka-version: 1.0.165
+        babashka-version: 1.12.217
