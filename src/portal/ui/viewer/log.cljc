@@ -14,28 +14,28 @@
 (def ^:private runtime->logo
   {:clj     {:color ::c/package
              :title "Clojure"
-             :icon (inline "runtime/clojure.svg")}
+             :icon (inline "portal/icons/clojure.svg")}
    :cljr    {:color ::c/string
              :title "Clojure CLR"
-             :icon (inline "runtime/clojure.svg")}
+             :icon (inline "portal/icons/clojure.svg")}
    :cljs    {:color ::c/tag
              :title "ClojureScript"
-             :icon (inline "runtime/cljs.svg")}
+             :icon (inline "portal/icons/cljs.svg")}
    :bb      {:color ::c/exception
              :title "Babashka"
-             :icon (inline "runtime/babashka.svg")}
+             :icon (inline "portal/icons/babashka.svg")}
    :nbb     {:color ::c/diff-add
              :title "Node Babashka"
-             :icon (inline "runtime/babashka.svg")}
+             :icon (inline "portal/icons/babashka.svg")}
    :portal  {:color ::c/boolean
              :title "Portal"
-             :icon (inline "runtime/portal.svg")}
+             :icon (inline "portal/icons/portal.svg")}
    :joyride {:color ::c/exception
              :title "Joyride"
-             :icon (inline "runtime/joyride.svg")}
+             :icon (inline "portal/icons/joyride.svg")}
    :py      {:color ::c/tag
              :title "Python"
-             :icon (inline "runtime/python.svg")}})
+             :icon (inline "portal/icons/python.svg")}})
 
 (defn btoa [^String s]
   #?(:clj  (.encodeToString (java.util.Base64/getEncoder) (.getBytes s))
