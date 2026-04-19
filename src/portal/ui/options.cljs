@@ -1,4 +1,4 @@
-(ns portal.ui.options
+(ns ^:no-doc portal.ui.options
   (:require [clojure.edn :as edn]
             [portal.ui.react :as react]
             [portal.ui.state :as state]

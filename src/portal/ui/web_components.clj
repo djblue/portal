@@ -1,4 +1,4 @@
-(ns portal.ui.web-components)
+(ns ^:no-doc portal.ui.web-components)
 
 (def highlight-js :highlight-js)
 (def set-theme :set-theme)

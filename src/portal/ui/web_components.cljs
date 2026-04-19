@@ -1,4 +1,4 @@
-(ns portal.ui.web-components
+(ns ^:no-doc portal.ui.web-components
   (:require ["highlight.js" :as hljs]
             [portal.ui.macros :refer [defcomponent]]))
 

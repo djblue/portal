@@ -1,4 +1,4 @@
-(ns portal.ui.macros
+(ns ^:no-doc portal.ui.macros
   #?(:cljs (:require-macros portal.ui.macros)))
 
 (defn- dispatch [_this] #?(:cljs (.-dispatch _this)))
