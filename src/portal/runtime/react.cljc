@@ -6,21 +6,6 @@
    [portal.runtime.polyfill :refer [random-uuid]]
    [portal.ui.styled :as d]))
 
-;; [x] component macro expansion
-;; [x] basic local state
-;; [x] effects mount/unmount
-;; [ ] propogate state changes
-;; [x] rendering lists
-;; [x] match lists via :key
-;; [ ] teardown unmatched key elements
-;; [x] recursive un-mount?
-;; [x] create-context / use-context
-;; [ ] optimal re-render (granular updates / cache reuse)
-;; [ ] improve list key re-render (how keep lazy?)
-;; [ ] enumerate dom for fast insert / delete (patch updates)
-;; [ ] serialize hiccup and ship to client
-;; [ ] dispatch client events to server / complete ui loop
-
 (def ^:private ^:dynamic *id* nil)
 (def ^:private ^:dynamic *state* nil)
 (def ^:private ^:dynamic *effects* nil)
@@ -31,8 +16,6 @@
 (def ^:private ^:dynamic *context-set* nil)
 (def ^:private ^:dynamic *context-used* nil)
 (def ^:private ^:dynamic *component-state* nil)
-
-;; (defn use-id [] *id*)
 
 (defn use-effect
   ([f]

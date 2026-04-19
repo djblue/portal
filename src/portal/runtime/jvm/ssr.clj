@@ -287,31 +287,3 @@
          (throw (if-not data (Exception. message) (ex-info message data))))))))
 
 (defn clipboard [] (rpc :portal.ui.ssr/clipboard))
-
-;; portal ui features
-;; [x] finish porting inspector
-;; [ ] enqueue state updates to avoid race conditions
-;; [x] bind state/selection-index to web socket connection
-;; [x] select values
-;; [x] expand collapse values
-;; [x] hover preview
-;; [x] value filtering
-;; [x] relative selection via keyboard
-;; [x] pause / resume watching values
-;; [x] path tracking
-;; [x] commands / command palette
-;; [x] shortcuts
-;; [x] port more viewers
-;; [x] fix component with multiple handlers of the same type
-;; [ ] simplify viewer dispatch
-;; [x] figure out how to collapse ssr module back into existing code
-;; [x] fix deref pause not working sometimes
-;; [x] fix :launcher :vs-code dependency on portal.runtime.index
-;; [x] profile / optimize rendeing perf
-;; [x] portal.api/sessions
-;; [x] portal.api/clear
-;; [x] portal.api/close
-;; [x] portal.api/selected
-;; [ ] portal.api/eval-str
-;; [x] fix remote vs code websocket never disconnecting issue
-;; [x] new vscode fails to laod older versions of Portal UI
