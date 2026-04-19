@@ -1,3 +1,11 @@
+## 0.64.0 - 2026-04-19
+
+- Bump plugin version (#293) cb23e954
+  - Thanks @garethstephenson!
+- Include `:time` and `:runtime` in `portal.nrepl` for test-report viewer 3b7eb89b
+- Initial experimental implementation of `{:mode :ssr}`
+  - Thanks @Cyrik for testing and support
+
 ## 0.63.1 - 2026-03-22
 
 - Revert "Concurrent requests (#273)" 2d7c68b8
