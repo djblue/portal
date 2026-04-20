@@ -1,3 +1,7 @@
+## 0.64.1 - 2026-04-20
+
+- Fix ssr vendor resource resolution f07dc61d
+
 ## 0.64.0 - 2026-04-19
 
 - Bump plugin version (#293) cb23e954
