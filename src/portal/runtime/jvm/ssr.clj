@@ -254,7 +254,7 @@
   [request]
   (let [url  (subs (:query-string request) 4)
         path (subs (.getPath (URI. url)) 1)]
-    (or (io/resource (fs/join "portal" "vendor" path))
+    (or (io/resource (str "portal/vendor/" path))
         (let [file (fs/join (fs/cwd) ".portal" "vendor" path)]
           (when-not (fs/exists file)
             (fs/mkdir (fs/dirname file))
