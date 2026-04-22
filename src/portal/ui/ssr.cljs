@@ -173,7 +173,9 @@
    (if (input? e)
      (when (#{"Tab"} (.-key e))
        (.preventDefault e))
-     (when-not (or (and (.-ctrlKey e) (#{"f"} (.-key e)))
+     (when-not (or (and (or (.-ctrlKey e)
+                            (.-metaKey e))
+                        (#{"f" "w" "n" "r"} (.-key e)))
                    (#{"Tab"} (.-key e)))
        (.preventDefault e)))
    (send!
