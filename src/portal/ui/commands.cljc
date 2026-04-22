@@ -705,8 +705,7 @@
   (copy-to-clipboard!
    (str/trim
     (with-out-str
-      (binding [*print-meta* true
-                *print-length* 1000
+      (binding [*print-length* 1000
                 *print-level* 100]
         (pp/pprint value))))))
 
@@ -727,6 +726,16 @@
      (if-let [selection (not-empty (.. js/window getSelection toString))]
        (copy-to-clipboard! selection)
        (copy-edn! (selected-values @state)))))
+
+(defn ^:command copy-with-meta
+  "Copy selected value as an edn string (with metadata) to the clipboard."
+  [state]
+  (binding [*print-meta* true]
+    #?(:clj (copy-edn! (selected-values @state))
+       :cljs
+       (if-let [selection (not-empty (.. js/window getSelection toString))]
+         (copy-to-clipboard! selection)
+         (copy-edn! (selected-values @state))))))
 
 (defn- map->qs [m]
   #?(:clj
