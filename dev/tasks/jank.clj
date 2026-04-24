@@ -14,10 +14,39 @@
 
 (defn- nrepl [env]
   (let [[bin extra-env] (jank-env)]
-    (binding [*opts* {:inherit true :extra-env (merge env extra-env)}]
+    (binding [*opts* {:inherit true
+                      :extra-env
+                      (merge env extra-env
+                             {"LIBGL_ALWAYS_SOFTWARE" "1"
+                              "GLFW_USE_WAYLAND" "0"
+                              ;; "GLFW_PLATFORM" "x11"
+                              })}]
+
       (sh bin :repl
           "--module-path" "src:dev:test"
-          "-I/usr/include" "-L/usr/lib" "-lcurl"))))
+          "-I/usr/include"
+
+         "-I/usr/include/pango-1.0"
+         "-I/usr/include/cairo"
+          "-I/usr/include/pixman-1"
+          "-I/usr/include/libmount"
+          "-I/usr/include/blkid"
+          "-I/usr/include/fribidi"
+          "-I/usr/include/harfbuzz"
+          "-I/usr/include/freetype2"
+          "-I/usr/include/libpng16"
+          "-I/usr/include/glib-2.0"
+          "-I/usr/lib/glib-2.0/include"
+          "-I/usr/include/sysprof-6"
+          ;; "-pthread"
+
+          "-L/usr/lib"
+          "-lcurl"
+          "-lglfw"
+          "-lcairo"
+          "-lpango-1.0"
+          "-lpangocairo-1.0"
+          "-lgobject-2.0"))))
 
 (defn -main
   "Start jank dev env / nrepl"
