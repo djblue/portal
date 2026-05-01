@@ -13,11 +13,36 @@
 
 (defn get-root [] (::root @(get-selection-index)))
 
+;; TODO: share this code with `portal.ui.state`
+
+(defn- atom? [value]
+  #?(:clj (instance? clojure.lang.Atom value)
+     :cljs
+     (and (satisfies? cljs.core/IDeref value)
+          (not (instance? cljs.core/Var value)))))
+
+(defn- parent-atom? [context]
+  (some-> context :parent :value atom?))
+
+(defn- get-location
+  "Get a stable location for a given context."
+  [context]
+  (with-meta
+    (if (parent-atom? context)
+      {:value ::deref :stable-path (:stable-path context)}
+      #?(:clj {:value (System/identityHashCode (:value context))
+               :stable-path (:stable-path context)}
+         :default {:value (:value context) :stable-path (:stable-path context)}))
+    {:context context}))
+
+(defn- get-position [selection-index context]
+  (get selection-index (get-location context)))
+
 (defn- adjacent [f & args]
   (fn select
     ([context] (select @(get-selection-index) context))
     ([selection-index context]
-     (when-let [index (get selection-index context)]
+     (when-let [index (get-position selection-index context)]
        (loop [i 0 tail (last index)]
          (when-not (== i 25)
            (let [tail (apply f tail args)]
@@ -39,10 +64,10 @@
   ([context column-context]
    (get-child @(get-selection-index) context column-context))
   ([selection-index context column-context]
-   (when-let [index (get selection-index context)]
+   (when-let [index (get-position selection-index context)]
      (or (get selection-index
               (conj index (-> selection-index
-                              (get column-context)
+                              (get-position column-context)
                               (last)
                               (assoc :row 0))))
          (get selection-index
@@ -53,11 +78,12 @@
 (defn get-parent
   ([context] (get-parent @(get-selection-index) context))
   ([selection-index context]
-   (when-let [index (get selection-index context)]
+   (when-let [index (get-position selection-index context)]
      (get selection-index (pop index)))))
 
 (defn- compute-relative-index [selection-index index context]
-  (let [position-index  {index context context index}
+  (let [location        (get-location context)
+        position-index  {index context location index}
         selection-index (into selection-index position-index)]
     (if-not (seq index)
       position-index

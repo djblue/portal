@@ -97,13 +97,15 @@
   (with-meta
     (if (parent-atom? context)
       {:value ::deref :stable-path (:stable-path context)}
-      (select-keys context [:value :stable-path]))
+      #?(:clj  {:value (System/identityHashCode (:value context))
+                :stable-path (:stable-path context)}
+         :default {:value (:value context) :stable-path (:stable-path context)}))
     {:context context}))
 
 (defn- =location [a b]
   (and (= (:stable-path a) (:stable-path b))
        (or (parent-atom? a)
-           (= (:value a) (:value b)))))
+           (identical? (:value a) (:value b)))))
 
 (defn- some-indexed
   "(first (keep-indexed f coll))"
