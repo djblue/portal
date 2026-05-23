@@ -37,9 +37,9 @@
                    'portal.runtime-test
                    'portal.runtime.api-test
                    'portal.runtime.cson-test
+                   'portal.runtime.cson.buffer-test
                    'portal.runtime.edn-test
                    'portal.runtime.fs-test
-                   'portal.runtime.json-buffer-test
                    (when-not in-bb?
                      'portal.runtime.jvm.custom-types-test)
                    'portal.runtime.jvm.editor-test

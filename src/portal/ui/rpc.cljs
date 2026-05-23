@@ -1,7 +1,9 @@
 (ns ^:no-doc portal.ui.rpc
   (:require [clojure.string :as str]
             [portal.async :as a]
-            [portal.runtime.cson :as cson]
+            [portal.runtime.cson.core :as core]
+            [portal.runtime.cson.reader :as reader]
+            [portal.runtime.cson.writer :as writer]
             [portal.runtime.macros :as m]
             [portal.ui.cljs :as cljs]
             [portal.ui.rpc.runtime :as rt]
@@ -48,15 +50,15 @@
   (-pr-writer [this writer _opts]
     (-write writer (str this))))
 
-(defmethod cson/tagged-str "remote" [{:keys [rep]}] rep)
+(defmethod core/tagged-str "remote" [{:keys [rep]}] rep)
 
 (when-not js/goog.DEBUG
   (extend-type default
-    cson/ToJson
+    writer/ToJson
     (to-json* [value buffer]
-      (cson/to-json*
+      (writer/to-json*
        (with-meta
-         (cson/tagged-value "remote" (pr-str value))
+         (core/tagged-value "remote" (pr-str value))
          (meta value))
        buffer))))
 
@@ -64,21 +66,21 @@
 
 (defmethod -read "ref" [_ value] (rt/->value value))
 (defmethod -read "object" [_ value] (rt/->object call value))
-(defmethod -read :default [tag value] (cson/tagged-value tag value))
+(defmethod -read :default [tag value] (core/tagged-value tag value))
 
 (defn- read [string]
-  (cson/read
+  (reader/read
    string
    {:transform rt/transform
     :default-handler -read}))
 
 (defn- write [value]
-  (cson/write
+  (writer/write
    value
    {:transform
     (fn [value]
       (if-let [id (rt/->id value)]
-        (cson/tagged-value "ref" id)
+        (core/tagged-value "ref" id)
         value))}))
 
 (defonce ^:private id (atom 0))

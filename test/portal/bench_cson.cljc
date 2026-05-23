@@ -5,6 +5,7 @@
             [portal.client :as p]
             [portal.console :as console]
             [portal.runtime.cson :as cson]
+            [portal.runtime.cson.writer-simple :as cws]
             [portal.runtime.transit :as transit]
             [portal.viewer :as v]))
 
@@ -62,7 +63,7 @@
            :transit (b/run (transit/write value) n)
            :edn     (b/run (pr-meta value) n)
            :cson    (b/run (cson/write value) n)
-           :cson-simple (b/run (cson/write value {::cson/dispatch :cond}) n))
+           :cson-simple (b/run (cws/write value) n))
          {:test :write
           :encoding (if (= :cson-simple encoding) :cson encoding)
           :data data

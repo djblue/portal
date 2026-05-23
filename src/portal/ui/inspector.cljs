@@ -5,7 +5,7 @@
             [clojure.string :as str]
             [portal.async :as a]
             [portal.colors :as c]
-            [portal.runtime.cson :as cson]
+            [portal.runtime.cson.core :as core]
             [portal.runtime.edn :as edn]
             [portal.ui.api :as api]
             [portal.ui.filter :as f]
@@ -28,16 +28,16 @@
 (defn bin? [value] (instance? js/Uint8Array value))
 (defn bigint? [value] (= (type value) js/BigInt))
 (defn error? [value] (instance? js/Error value))
-(defn char? [value] (instance? cson/Character value))
-(defn ratio? [value] (instance? cson/Ratio value))
+(defn char? [value] (instance? core/Character value))
+(defn ratio? [value] (instance? core/Ratio value))
 
 (defn coll? [value]
   (and (clojure.core/coll? value)
-       (not (cson/tagged-value? value))))
+       (not (core/tagged-value? value))))
 
 (defn map? [value]
   (and (clojure.core/map? value)
-       (not (cson/tagged-value? value))))
+       (not (core/tagged-value? value))))
 
 (defn- long? [value] (instance? Long value))
 
@@ -235,7 +235,7 @@
     (tagged-literal? value)
     :tagged
 
-    (cson/tagged-value? value)
+    (core/tagged-value? value)
     (:tag value)
 
     (long? value)     :number
@@ -785,11 +785,11 @@
     [s/span {:style {:color (::c/number theme)}}
      [highlight-words
       (cond
-        (cson/is-finite? value) (str value)
+        (core/is-finite? value) (str value)
         (long? value)           (str value)
-        (cson/nan? value)       "##NaN"
-        (cson/inf? value)       "##Inf"
-        (cson/-inf? value)      "##-Inf")]]))
+        (core/nan? value)       "##NaN"
+        (core/inf? value)       "##Inf"
+        (core/-inf? value)      "##-Inf")]]))
 
 (defn- inspect-bigint [value]
   (let [theme (theme/use-theme)]

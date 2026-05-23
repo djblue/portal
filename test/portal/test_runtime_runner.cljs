@@ -4,9 +4,9 @@
             [portal.runtime-test]
             [portal.runtime.api-test]
             [portal.runtime.cson-test]
+            [portal.runtime.cson.buffer-test]
             [portal.runtime.edn-test]
             [portal.runtime.fs-test]
-            [portal.runtime.json-buffer-test]
             [portal.runtime.npm-test]
             [portal.runtime.react]
             [portal.runtime.shell-test]
@@ -20,9 +20,9 @@
                  'portal.runtime-test
                  'portal.runtime.api-test
                  'portal.runtime.cson-test
+                 'portal.runtime.cson.buffer-test
                  'portal.runtime.edn-test
                  'portal.runtime.fs-test
-                 'portal.runtime.json-buffer-test
                  'portal.runtime.npm-test
                  'portal.runtime.react
                  'portal.runtime.shell-test)))

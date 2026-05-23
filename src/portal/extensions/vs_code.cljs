@@ -164,8 +164,12 @@
 (def ^:private portal-source
   [(io/inline "portal/async.cljc")
    (io/inline "portal/runtime/datafy.cljc")
-   (io/inline "portal/runtime/json_buffer.cljc")
+   (io/inline "portal/runtime/cson/buffer.cljc")
    (io/inline "portal/runtime/macros.cljc")
+   (io/inline "portal/runtime/cson/core.cljc")
+   (io/inline "portal/runtime/cson/base64.cljc")
+   (io/inline "portal/runtime/cson/reader.cljc")
+   (io/inline "portal/runtime/cson/writer.cljc")
    (io/inline "portal/runtime/cson.cljc")
    (io/inline "portal/viewer.cljc")
    (io/inline "portal/runtime.cljc")

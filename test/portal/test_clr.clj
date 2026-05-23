@@ -7,9 +7,9 @@
             [portal.runtime-test]
             [portal.runtime.api-test]
             [portal.runtime.cson-test]
+            [portal.runtime.cson.buffer-test]
             [portal.runtime.edn-test]
             [portal.runtime.fs-test]
-            [portal.runtime.json-buffer-test]
             [portal.runtime.npm-test]
             [portal.runtime.shell-test])
   (:import (System Environment)))
@@ -42,9 +42,9 @@
          'portal.runtime-test
          'portal.runtime.api-test
          'portal.runtime.cson-test
+         'portal.runtime.cson.buffer-test
          'portal.runtime.edn-test
          'portal.runtime.fs-test
-         'portal.runtime.json-buffer-test
          'portal.runtime.npm-test
          'portal.runtime.shell-test)]
     (api/stop)

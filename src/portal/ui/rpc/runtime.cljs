@@ -1,6 +1,7 @@
 (ns ^:no-doc portal.ui.rpc.runtime
   (:require [clojure.pprint :as pprint]
-            [portal.runtime.cson :as cson]
+            [portal.runtime.cson.core :as core]
+            [portal.runtime.cson.writer :as writer]
             [portal.ui.state :as state]
             [reagent.core :as r]))
 
@@ -17,19 +18,19 @@
 
 (defn- runtime-to-json [buffer this]
   (let [object (.-object this)]
-    (if-let [to-object (:to-object cson/*options*)]
+    (if-let [to-object (:to-object core/*options*)]
       (to-object buffer this :runtime-object nil)
       (if-let [id (->id this)]
-        (cson/tag buffer "ref" id)
-        (cson/to-json*
-         (cson/tagged-value "remote" (:pr-str object))
+        (writer/tag buffer "ref" id)
+        (writer/to-json*
+         (core/tagged-value "remote" (:pr-str object))
          buffer)))))
 
 (defprotocol Runtime)
 
 (deftype RuntimeObject [runtime object]
   Runtime
-  cson/ToJson (to-json* [this buffer] (runtime-to-json buffer this))
+  writer/ToJson (to-json* [this buffer] (runtime-to-json buffer this))
   IMeta       (-meta    [_] (:meta object))
   IHash       (-hash    [_] (:id object))
   IEquiv
@@ -76,7 +77,7 @@
   (-notify-watches [_this oldval newval]
     (-notify-watches a oldval newval))
 
-  cson/ToJson
+  writer/ToJson
   (to-json* [this buffer] (runtime-to-json buffer this))
 
   IMeta       (-meta    [_] (:meta object))
@@ -136,7 +137,7 @@
 (defn ->value [id]
   (if-let [value (get @state/value-cache id)]
     (if-not registry value (weak-ref-value value))
-    (cson/tagged-value "ref" id)))
+    (core/tagged-value "ref" id)))
 
 (defn ->id [value]
   (when-let [id (runtime-id value)]

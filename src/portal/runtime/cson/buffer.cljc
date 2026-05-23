@@ -1,4 +1,4 @@
-(ns ^:no-doc portal.runtime.json-buffer
+(ns ^:no-doc portal.runtime.cson.buffer
   #?(:cljr (:require [portal.runtime.clr.assembly]))
   #?(:bb  (:require [portal.runtime.json :as json])
      :clj (:import (com.google.gson.stream JsonReader JsonToken JsonWriter)

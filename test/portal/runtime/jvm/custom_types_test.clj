@@ -3,7 +3,8 @@
   (:require
    [clojure.test :refer [deftest is]]
    [portal.runtime :as rt]
-   [portal.runtime.cson :as cson]))
+   [portal.runtime.cson :as cson]
+   [portal.runtime.cson.core :as core]))
 
 (deftype TestMap [^clojure.lang.IPersistentMap m ^clojure.lang.IPersistentMap _meta]
   clojure.lang.IPersistentMap
@@ -116,7 +117,7 @@
               cson
               {:default-handler
                (fn [op value]
-                 (cson/tagged-value op value))})
+                 (core/tagged-value op value))})
       :session session})))
 
 (deftest custom-coll-type-serialization
