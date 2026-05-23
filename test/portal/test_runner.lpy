@@ -65,8 +65,8 @@
   (let [{:keys [fail error]}
         (run-tests
          'portal.runtime.cson-test
+         'portal.runtime.cson.buffer-test
          'portal.runtime.fs-test
-         'portal.runtime.json-buffer-test
          'portal.runtime.npm-test
          'portal.runtime.shell-test
          'portal.client-test

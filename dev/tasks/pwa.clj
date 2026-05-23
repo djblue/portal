@@ -4,7 +4,7 @@
             [clojure.java.io :as io]
             [hiccup.core :refer [html]]
             [portal.colors :as c]
-            [portal.runtime.cson :as cson]
+            [portal.runtime.cson.base64 :as base64]
             [portal.runtime.json :as json]
             [tasks.build :refer [install]]
             [tasks.docs :as docs]
@@ -59,7 +59,7 @@
 
 (defmethod print-method (Class/forName "[B") [v ^java.io.Writer w]
   (.write w "#portal/bin \"")
-  (.write w (cson/base64-encode v))
+  (.write w (base64/encode v))
   (.write w "\""))
 
 (comment (remove-method print-method (Class/forName "[B")))

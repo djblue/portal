@@ -6,7 +6,8 @@
                :cljs [cljs.tools.reader.impl.utils :refer [numeric?]])
             [clojure.edn :as edn]
             [clojure.string :as str]
-            [portal.runtime.cson :as cson]))
+            [portal.runtime.cson.base64 :as base64]
+            [portal.runtime.cson.core :as core]))
 
 ;; Discard metadata on tagged-literals to improve success rate of read-string.
 ;; Consider using a different type in the future.
@@ -17,7 +18,7 @@
      IWithMeta (-with-meta [this _m] this)))
 
 (defn- ->var [var-symbol]
-  (cson/tagged-value "portal/var" var-symbol))
+  (core/tagged-value "portal/var" var-symbol))
 
 (defn- escape-var
   "Allows parsing edn that contains vars."
@@ -25,7 +26,7 @@
   (str/replace edn-string #"#'" "#portal/var "))
 
 (defn- ->regex [re-string]
-  (cson/tagged-value "portal/re" re-string))
+  (core/tagged-value "portal/re" re-string))
 
 (defn- escape-regex
   "Allows parsing edn that contains regular expressions."
@@ -66,7 +67,7 @@
       {:readers (merge
                  {'portal/var ->var
                   'portal/re ->regex
-                  'portal/bin cson/base64-decode}
+                  'portal/bin base64/decode}
                  readers)
        :default tagged-literal}
       (-> edn-string escape-var escape-regex)))))

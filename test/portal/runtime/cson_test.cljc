@@ -1,15 +1,17 @@
 (ns portal.runtime.cson-test
-  (:require [clojure.test :refer [deftest are is]]
-            [portal.runtime.cson :as cson])
+  (:require [clojure.test :refer [are deftest is]]
+            [portal.runtime.cson :as cson]
+            [portal.runtime.cson.core :as core]
+            [portal.runtime.cson.writer-simple :as cws])
   #?(:clj  (:import [java.util UUID])
      :cljr (:import [System Guid]
                     [System.Text Encoding])))
 
 (defn pass [v]
-  (let [proto  (cson/write v {::cson/dispatch :prototype})
-        simple (cson/write v {::cson/dispatch :cond})]
+  (let [proto  (cson/write v)
+        simple (cws/write v)]
     (is (= proto simple))
-    (cson/read simple)))
+    (cson/read proto)))
 
 (deftest simple-values
   (are [value]
@@ -148,13 +150,13 @@
   #?(:bb (dissoc (meta v) :type) :cljr (meta v) :clj (meta v) :cljs (meta v)))
 
 (deftest tagged-values []
-  (let [v1 (cson/tagged-value "my/tag" {:hello :world})
+  (let [v1 (core/tagged-value "my/tag" {:hello :world})
         v2 (with-meta v1 {:my :meta})]
     (are [v] (= v (pass v)) v1 v2)
     (are [v] (= (meta* v) (meta* (pass v))) v1 v2))
   (is (thrown?
        #?(:clj AssertionError :cljr Exception :cljs js/Error :lpy Exception)
-       (cson/tagged-value :my/tag {:hello :world}))
+       (core/tagged-value :my/tag {:hello :world}))
       "only allow string tags"))
 
 (deftest metadata
@@ -192,12 +194,12 @@
    :org.babashka/nbb nil
    :cljs
    (deftest js-chars
-     (let [a (cson/Character. 10) b (cson/Character. 10)]
+     (let [a (core/char 10) b (core/char 10)]
        (is (= a b))
        (is (= a (pass b))))))
 
 (deftest read-chars
-  (is (= (cson/char* 65) (cson/read "[\"C\",65]"))))
+  (is (= (core/char 65) (cson/read "[\"C\",65]"))))
 
 (deftest special-numbers
   (doseq [n    [##NaN ##Inf ##-Inf]

@@ -10,13 +10,15 @@
                :default [clojure.datafy :refer [datafy nav]])
             #?(:joyride [cljs.pprint :as pprint]
                :default [clojure.pprint :as pprint])
-            [portal.runtime.cson :as cson]
+            [portal.runtime.cson.core :as core]
+            [portal.runtime.cson.reader :as reader]
+            [portal.runtime.cson.writer :as writer]
             [portal.viewer :as v])
   #?(:clj (:import (java.util.concurrent Executors ScheduledExecutorService TimeUnit))
      :lpy (:import [asyncio]
                    [threading])))
 
-(def ^:private tagged-type (type (cson/->Tagged "tag" [])))
+(def ^:private tagged-type (type (core/tagged-value "tag" [])))
 
 #?(:joyride nil
    :org.babashka/nbb nil
@@ -247,16 +249,16 @@
 
 (defn- to-object [buffer value tag rep]
   (if-not *session*
-    (cson/to-json*
+    (writer/to-json*
      (with-meta
-       (cson/tagged-value "remote" (pr-str value))
+       (core/tagged-value "remote" (pr-str value))
        (meta value))
      buffer)
     (if-let [id (value->id? value)]
-      (cson/to-json* (cson/tagged-value "ref" id) buffer)
+      (writer/to-json* (core/tagged-value "ref" id) buffer)
       (let [m (meta value)]
         (when (atom? value) (watch-atom value))
-        (cson/tag
+        (writer/tag
          buffer
          "object"
          (cond-> {:tag       tag
@@ -279,11 +281,11 @@
 #?(:bb nil
    :clj
    (extend-type java.util.Collection
-     cson/ToJson
+     writer/ToJson
      (to-json* [value buffer]
        (if-let [id (value->id? value)]
-         (cson/to-json* (cson/tagged-value "ref" id) buffer)
-         (cson/tagged-coll
+         (writer/to-json* (core/tagged-value "ref" id) buffer)
+         (writer/tagged-coll
           buffer
           (cond
             (instance? java.util.Set value)          "#"
@@ -295,17 +297,17 @@
 #?(:bb nil
    :clj
    (extend-type java.util.Map
-     cson/ToJson
+     writer/ToJson
      (to-json* [value buffer]
        (if-let [id (value->id? value)]
-         (cson/to-json* (cson/tagged-value "ref" id) buffer)
-         (cson/tagged-map buffer "{" (->meta value) value)))))
+         (writer/to-json* (core/tagged-value "ref" id) buffer)
+         (writer/tagged-map buffer "{" (->meta value) value)))))
 
 (extend-type #?(:clj  Object
                 :cljr Object
                 :cljs default
                 :lpy  python/object)
-  cson/ToJson
+  writer/ToJson
   (to-json* [value buffer]
     (to-object buffer value :object nil)))
 
@@ -317,7 +319,7 @@
 (defn- no-cache [value]
   (or (not (coll? value))
       (empty? value)
-      (cson/tagged-value? value)
+      (core/tagged-value? value)
       (not (can-meta? value))
       (has? value ::id)
       (has? value :portal.rpc/id)
@@ -327,7 +329,7 @@
   (if (no-cache value)
     value
     (if-let [id (value->id? value)]
-      (cson/tagged-value "ref" id)
+      (core/tagged-value "ref" id)
       (vary-meta value
                  merge
                  (cond-> {::id (value->id value)}
@@ -347,12 +349,12 @@
   (if-not (var? value)
     value
     (with-meta
-      (cson/tagged-value "portal/var" (var->name value))
+      (core/tagged-value "portal/var" (var->name value))
       (assoc (meta value) ::id (value->id value)))))
 
 (defn write [value session]
   (binding [*session* session]
-    (cson/write
+    (writer/write
      value
      (merge
       session
@@ -361,7 +363,7 @@
 
 (defn read [string session]
   (binding [*session* session]
-    (cson/read
+    (reader/read
      string
      (merge
       session
@@ -369,7 +371,7 @@
        (fn [op value]
          (case op
            "ref" (id->value value)
-           (cson/tagged-value op value)))}))))
+           (core/tagged-value op value)))}))))
 
 (defonce ^:private tap-list
   (atom (with-meta (list)

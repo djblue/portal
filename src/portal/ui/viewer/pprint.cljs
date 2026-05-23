@@ -1,7 +1,8 @@
 (ns ^:no-doc portal.ui.viewer.pprint
   (:require [clojure.pprint :as pp]
             [clojure.string :as str]
-            [portal.runtime.cson :as cson]
+            [portal.runtime.cson.base64 :as base64]
+            [portal.runtime.cson.core :as core]
             [portal.ui.filter :as f]
             [portal.ui.inspector :as ins]
             [portal.ui.viewer.code :as code]))
@@ -14,7 +15,7 @@
 
 (defn- type-dispatcher [obj]
   (cond
-    (cson/tagged-value? obj) :tagged
+    (core/tagged-value? obj) :tagged
     (ins/bin? obj) :bin
 
     (queue? obj)  :queue
@@ -44,7 +45,7 @@
     (-write *out* (pr-str value))
     (do
       (-write *out* "#portal/bin \"")
-      (-write *out* (cson/base64-encode value))
+      (-write *out* (base64/encode value))
       (-write *out* "\""))))
 
 (defmethod pprint-dispatch :tagged  [value] (-write *out* (pr-str value)))

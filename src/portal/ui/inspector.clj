@@ -3,7 +3,7 @@
   (:require
    [clojure.set :as set]
    [portal.colors :as c]
-   [portal.runtime.cson :as cson]
+   [portal.runtime.cson.core :as core]
    [portal.ui.api :as api]
    [portal.ui.filter :as f]
    [portal.ui.icons :as icons]
@@ -24,11 +24,11 @@
 
 (defn coll? [value]
   (and (clojure.core/coll? value)
-       (not (cson/tagged-value? value))))
+       (not (core/tagged-value? value))))
 
 (defn map? [value]
   (and (clojure.core/map? value)
-       (not (cson/tagged-value? value))))
+       (not (core/tagged-value? value))))
 
 (def viewer
   {:predicate (constantly true)
@@ -170,7 +170,7 @@
     (tagged-literal? value)
     :tagged
 
-    (cson/tagged-value? value)
+    (core/tagged-value? value)
     (:tag value)
 
     (bytes? value)    :binary
@@ -399,9 +399,9 @@
      (if-not (double? value)
        (str value)
        (cond
-         (cson/nan? value)       "##NaN"
-         (cson/inf? value)       "##Inf"
-         (cson/-inf? value)      "##-Inf"
+         (core/nan? value)       "##NaN"
+         (core/inf? value)       "##Inf"
+         (core/-inf? value)      "##-Inf"
          :else                   (str value)))]))
 
 (defmethod inspect* :bigint [value]

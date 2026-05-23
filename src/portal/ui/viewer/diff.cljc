@@ -2,7 +2,7 @@
   (:require [clojure.spec.alpha :as s]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
-            #?(:cljs [portal.runtime.cson :as cson])
+            #?(:cljs [portal.runtime.cson.writer :as writer])
             [portal.ui.commands :as commands]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
@@ -17,15 +17,15 @@
 #?(:cljs (def Mismatch diff/Mismatch))
 
 #?(:cljs
-   (extend-protocol cson/ToJson
+   (extend-protocol writer/ToJson
      Deletion
-     (to-json* [this buffer] (cson/tag buffer "diff/Deletion" (:- this)))
+     (to-json* [this buffer] (writer/tag buffer "diff/Deletion" (:- this)))
 
      Insertion
-     (to-json* [this buffer] (cson/tag buffer "diff/Insertion" (:+ this)))
+     (to-json* [this buffer] (writer/tag buffer "diff/Insertion" (:+ this)))
 
      Mismatch
-     (to-json* [this buffer] (cson/tag buffer "diff/Mismatch" ((juxt :- :+) this)))))
+     (to-json* [this buffer] (writer/tag buffer "diff/Mismatch" ((juxt :- :+) this)))))
 
 #?(:cljs (defmethod rpc/-read "diff/Deletion"  [_ value] (diff/Deletion. value)))
 #?(:cljs (defmethod rpc/-read "diff/Insertion" [_ value] (diff/Insertion. value)))
