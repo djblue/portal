@@ -60,7 +60,6 @@
      :cljs (let [opts    (options/use-options)
                  active? (some-> opts :watch-registry deref (contains? _value))]
              [active? (fn set-active! [_]
-                        (prn :set-active)
                         (rpc/call 'portal.api/toggle-watch _value))])))
 
 (defn inspect-deref [value]
