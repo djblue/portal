@@ -42,24 +42,20 @@
                                [custom-app opts]]]
       :else [app/app (:value opts)])))
 
-(defn with-cache [& children]
-  (into [:<> (meta @state/value-cache)] children))
-
 (defn render-app []
   (when-let [el (.getElementById js/document "root")]
     (client/render (client/create-root el)
                    [:<>
                     [load-portal-user]
-                    [with-cache
-                     [opts/with-options
-                      [connected-app]]]]
+                    [opts/with-options
+                     [connected-app]]]
                    functional-compiler)))
 
 (defn main! []
   (cljs/init)
   (reset! state/sender rpc/request)
   (reset! state/render #'render-app)
-  (render-app))
+  (.then (rpc/connect) render-app))
 
 (defn reload! [] (render-app))
 

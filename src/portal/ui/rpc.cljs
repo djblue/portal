@@ -201,7 +201,9 @@
 
 (defn connect
   ([]
-   (connect (resolve-connection)))
+   (if js/window.opener
+     (js/Promise.resolve (rt/reset-cache!))
+     (connect (resolve-connection))))
   ([{:keys [host port protocol session]}]
    (if-let [ws @ws-promise]
      ws

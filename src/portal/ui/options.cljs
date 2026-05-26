@@ -25,11 +25,13 @@
          children))
 
 (defn with-options [& children]
-  (let [[options set-options!] (react/use-state ::loading)]
+  (let [k (:key (meta @state/value-cache))
+        [options set-options!] (react/use-state ::loading)]
     (react/use-effect
-     :once
-     (-> (state/invoke `portal.runtime/get-options)
-         (.then set-options!)))
-    (into [with-options* options] children)))
+     [k]
+     (when (some? k)
+       (-> (state/invoke `portal.runtime/get-options)
+           (.then set-options!))))
+    (into ^{:key k} [with-options* options] children)))
 
 (defn use-options [] (react/use-context options-context))
