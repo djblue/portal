@@ -205,7 +205,7 @@
       (set? value)      (cond
                           (sorted? value) (tagged-coll buffer "sset" value)
                           :else           (tagged-coll buffer "#" value))
-      (coll? value)     (cond
+      (seqable? value)  (cond
                           (range? value)  (tagged-coll buffer "(" (with-meta
                                                                     (into [] value)
                                                                     (meta value)))
