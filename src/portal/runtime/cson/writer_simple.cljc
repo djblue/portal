@@ -5,6 +5,8 @@
 
 (declare to-json)
 
+(defn to-json* [value buffer] (to-json buffer value))
+
 (defn tag [buffer tag value]
   (assert tag string?)
   (to-json (json/push-string buffer tag) value))
