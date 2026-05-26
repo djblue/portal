@@ -423,6 +423,7 @@
       clojure.lang.PersistentList+EmptyList
       clojure.lang.LazySeq
       clojure.lang.ArraySeq
+      clojure.lang.ArraySeq_object
       clojure.lang.APersistentMap+KeySeq
       clojure.lang.APersistentMap+ValSeq
       clojure.lang.LongRange

@@ -38,6 +38,7 @@
          'portal.runtime.edn-test
          'portal.runtime.fs-test
          'portal.runtime.npm-test
+         'portal.runtime.rpc-test
          'portal.runtime.shell-test)]
     (api/stop)
     (shutdown-agents)
