@@ -303,14 +303,6 @@
          (writer/to-json* (core/tagged-value "ref" id) buffer)
          (writer/tagged-map buffer "{" (->meta value) value)))))
 
-(extend-type #?(:clj  Object
-                :cljr Object
-                :cljs default
-                :lpy  python/object)
-  writer/ToJson
-  (to-json* [value buffer]
-    (to-object buffer value :object nil)))
-
 (defn- has? [m k]
   (try
     (k m)
@@ -359,7 +351,10 @@
      (merge
       session
       {:transform (comp id-var id-coll)
-       :to-object to-object}))))
+       :to-object to-object
+       :default-handler
+       (fn [buffer value]
+         (to-object buffer value :object nil))}))))
 
 (defn read [string session]
   (binding [*session* session]

@@ -696,6 +696,20 @@
      (to-json* [value buffer]
        (push-tagged-literal buffer value))))
 
+(extend-type #?(:clj  Object
+                :cljr Object
+                :cljs default
+                :lpy  python/object)
+  ToJson
+  (to-json* [value buffer]
+    (if-let [handler (:default-handler core/*options*)]
+      (handler buffer value)
+      (to-json
+       buffer
+       (with-meta
+         (core/tagged-value "remote" (pr-str value))
+         (meta value))))))
+
 (defn write
   ([value] (write value nil))
   ([value options]

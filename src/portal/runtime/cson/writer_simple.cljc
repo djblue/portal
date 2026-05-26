@@ -216,7 +216,14 @@
       (tagged-literal? value)
       (push-tagged-literal buffer value)
 
-      :else (throw (ex-info "Unknown value type" {:value value})))))
+      :else
+      (if-let [handler (:default-handler core/*options*)]
+        (handler buffer value)
+        (to-json
+         buffer
+         (with-meta
+           (core/tagged-value "remote" (pr-str value))
+           (meta value)))))))
 
 (defn write
   ([value] (write value nil))
