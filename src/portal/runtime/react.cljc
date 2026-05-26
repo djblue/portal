@@ -121,7 +121,7 @@
     ;; does not match the type of keys in the map
     (or (when (map? (second element)) (:key (second element)))
         (:key (meta element)))
-    (catch #?(:clj Exception :cljs :default) e
+    (catch #?(:cljs :default :default Exception) e
       (report-error e))))
 
 (defn- render-list [vdom state context elements]
@@ -169,7 +169,7 @@
 (defn- run-effect [effect]
   (let [f (try
             ((:fn effect))
-            (catch #?(:clj Exception :cljs :default) e
+            (catch #?(:cljs :default :default Exception) e
               (report-error e)))]
     (if (fn? f)
       (assoc effect :fn f)
@@ -238,7 +238,7 @@
                                4 (component (nth element 1) (nth element 2) (nth element 3))
                                (apply component (subvec element 1))))
                            id)
-                          (catch #?(:clj Exception :cljs :default) e
+                          (catch #?(:cljs :default :default Exception) e
                             #_(tap> (Throwable->map e))
                             [:pre (pr-str e)])))
               child-context (merge context @context-set)
