@@ -2,19 +2,11 @@
   (:require [clojure.test :as t]
             [portal.api :as api]
             [portal.client :as p]
-            [portal.client-test]
-            [portal.console :as console]
-            [portal.runtime-test]
-            [portal.runtime.api-test]
-            [portal.runtime.cson-test]
-            [portal.runtime.cson.buffer-test]
-            [portal.runtime.edn-test]
-            [portal.runtime.fs-test]
-            [portal.runtime.npm-test]
-            [portal.runtime.shell-test])
+            [portal.console :as console])
   (:import (System Environment)))
 
 (defn run-tests [& tests]
+  (doseq [test tests] (require test))
   (if-not (p/enabled?)
     (apply t/run-tests tests)
     (let [report (atom [])
