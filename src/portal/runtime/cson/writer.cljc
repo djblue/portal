@@ -704,11 +704,11 @@
   (to-json* [value buffer]
     (if-let [handler (:default-handler core/*options*)]
       (handler buffer value)
-      (to-json
-       buffer
+      (to-json*
        (with-meta
          (core/tagged-value "remote" (pr-str value))
-         (meta value))))))
+         (meta value))
+       buffer))))
 
 (defn write
   ([value] (write value nil))

@@ -3,9 +3,9 @@
    [portal.runtime.cson.core :as core]
    [portal.runtime.cson.buffer :as json]))
 
-(declare to-json)
+(declare to-json*)
 
-(defn to-json* [value buffer] (to-json buffer value))
+(defn to-json [buffer value] (to-json* (core/transform value) buffer))
 
 (defn tag [buffer tag value]
   (assert tag string?)
@@ -182,48 +182,58 @@
 
 #?(:lpy (defn- sorted? [_] false))
 
-(defn- to-json [buffer value]
-  (let [value (core/transform value)]
-    (cond
-      (core/tagged-value? value)
-      (push-tagged buffer value)
+(defn- push-ratio [buffer _value]
+  #?(:cljs buffer
+     :default
+     (-> buffer
+         (json/push-string "R")
+         (json/push-long (numerator _value))
+         (json/push-long (denominator _value)))))
 
-      (nil? value)      (json/push-null buffer)
-      (boolean? value)  (json/push-bool buffer value)
-      (is-char? value)  (push-char buffer value)
-      (string? value)   (push-string buffer value)
-      (bigint? value)   (push-bigint buffer value)
-      (number? value)   (cond
-                          (float? value)  (push-double buffer value)
-                          :else           (box-long buffer value))
-      (keyword? value)  (push-keyword buffer value)
-      (symbol? value)   (push-symbol buffer value)
-      (map? value)      (cond
-                          (sorted? value) (tagged-map buffer "smap" value)
-                          :else           (tagged-map buffer value))
-      (vector? value)   (tagged-coll buffer "[" value)
-      (set? value)      (cond
-                          (sorted? value) (tagged-coll buffer "sset" value)
-                          :else           (tagged-coll buffer "#" value))
-      (seqable? value)  (cond
-                          (range? value)  (tagged-coll buffer "(" (with-meta
-                                                                    (into [] value)
-                                                                    (meta value)))
-                          :else           (tagged-coll buffer "(" value))
-      (uuid? value)     (push-uuid buffer value)
-      (inst? value)     (push-inst buffer value)
+#?(:cljs (defn- ratio? [_] false))
 
-      (tagged-literal? value)
-      (push-tagged-literal buffer value)
+(defn to-json* [value buffer]
+  (cond
+    (core/tagged-value? value)
+    (push-tagged buffer value)
 
-      :else
-      (if-let [handler (:default-handler core/*options*)]
-        (handler buffer value)
-        (to-json
-         buffer
-         (with-meta
-           (core/tagged-value "remote" (pr-str value))
-           (meta value)))))))
+    (nil? value)      (json/push-null buffer)
+    (boolean? value)  (json/push-bool buffer value)
+    (is-char? value)  (push-char buffer value)
+    (string? value)   (push-string buffer value)
+    (bigint? value)   (push-bigint buffer value)
+    (number? value)   (cond
+                        (ratio? value)  (push-ratio buffer value)
+                        (float? value)  (push-double buffer value)
+                        :else           (box-long buffer value))
+    (keyword? value)  (push-keyword buffer value)
+    (symbol? value)   (push-symbol buffer value)
+    (map? value)      (cond
+                        (sorted? value) (tagged-map buffer "smap" value)
+                        :else           (tagged-map buffer value))
+    (vector? value)   (tagged-coll buffer "[" value)
+    (set? value)      (cond
+                        (sorted? value) (tagged-coll buffer "sset" value)
+                        :else           (tagged-coll buffer "#" value))
+    (seqable? value)  (cond
+                        (range? value)  (tagged-coll buffer "(" (with-meta
+                                                                  (into [] value)
+                                                                  (meta value)))
+                        :else           (tagged-coll buffer "(" value))
+    (uuid? value)     (push-uuid buffer value)
+    (inst? value)     (push-inst buffer value)
+
+    (tagged-literal? value)
+    (push-tagged-literal buffer value)
+
+    :else
+    (if-let [handler (:default-handler core/*options*)]
+      (handler buffer value)
+      (to-json*
+       (with-meta
+         (core/tagged-value "remote" (pr-str value))
+         (meta value))
+       buffer))))
 
 (defn write
   ([value] (write value nil))
