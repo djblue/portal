@@ -4,7 +4,7 @@
 (defn random-uuid []
   #?(:clj  (java.util.UUID/randomUUID)
      :cljs (cljs.core/random-uuid)
-     :cljr (System.Guid)
+     :cljr (System.Guid/NewGuid)
      :lpy  (uuid/UUID)))
 
 (defn parse-uuid [^String s]
