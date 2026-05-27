@@ -4,6 +4,7 @@
    [portal.colors :as c]
    [portal.ui.api :as api]
    [portal.ui.commands :as commands]
+   [portal.ui.find :as find]
    [portal.ui.icons :as icons]
    [portal.ui.inspector :as ins]
    [portal.ui.options :as opts]
@@ -38,15 +39,36 @@
    [portal.ui.viewer.tree :as tree]
    [portal.ui.web-components :as web]))
 
+(defn- make-predicate [code]
+  #_(try
+      (let [predicate? (eval (read-string code))]
+        (fn [x]
+          (try
+            (predicate? x)
+            (catch Exception _ (prn _)))))
+      (catch Exception e
+        (tap> (Throwable->map e))
+        nil))
+  (fn [x]
+    (try
+      (and (string? x)
+           (str/includes? x code))
+      (catch Exception _ (prn _)))))
+
 (defn- search-input []
   (let [;ref      (react/use-ref nil)
         theme    (theme/use-theme)
         state    (state/use-state)
         context  (react/use-atom state state/get-selected-context)
+        ;; find-mode (nil? context)
+        ;; location (if find-mode
+        ;;            {:stable-path [] :value ::search-mode}
+        ;;            (state/get-location context))
         location (state/get-location context)
         color    (if-let [depth (:depth context)]
                    (nth theme/order depth)
-                   ::c/border)]
+                   ::c/text)
+        value    (state/get-value state (:value (opts/use-options)))]
     ;; (react/use-effect
     ;;  :always
     ;;  (swap! commands/search-refs conj ref)
@@ -61,20 +83,33 @@
       {;:ref ref
        :disabled  (nil? context)
        :on-change (fn [e]
+                    ;; (state/dispatch! state dissoc ::find/locations ::find/focus)
                     (let [value (get-in e [:target :value])]
-                      (when context
-                        (state/dispatch!
-                         state
-                         update
-                         :search-text
-                         (fn [filters]
-                           (if (str/blank? value)
-                             (dissoc filters location)
-                             (assoc filters location value)))))))
-       #_#_:on-key-down (fn [e]
-                          (tap> e)
-                          #_(when (= (.-key e) "Enter")
-                              (.blur (.-current ref))))
+                      (state/dispatch!
+                       state
+                       update
+                       :search-text
+                       (fn [filters]
+                         (if (str/blank? value)
+                           (dissoc filters location)
+                           (assoc filters location value))))))
+       :on-key-down (fn [e]
+                      (cond
+                        (= (:key e) "escape")
+                        (state/dispatch! state dissoc :selected :focus)
+                        (= (:key e) "enter")
+                        (let [{:keys [selected focus]} @state]
+                          (prn {:focus focus :selected (count selected)})
+                          (if (second selected)
+                            (let [next-focus (mod
+                                              (if (:shift-key e) (dec focus) (inc focus))
+                                              (count selected))]
+                              (state/dispatch! state assoc :focus next-focus))
+                            (when-let [predicate? (some-> @state
+                                                          (get-in [:search-text location])
+                                                          (make-predicate))]
+                              (let [contexts (find/find-location state value predicate?)]
+                                (state/dispatch! state assoc :focus 1 :selected (conj contexts context))))))))
        :value (get-in @state [:search-text location] "")
        :placeholder (if-not context
                       "Select a value to enable filtering"
@@ -462,3 +497,5 @@
      :portal.viewer/table {:columns [:name :doc]}}))
 
 (reset! api/viewers viewers)
+
+:portal.api/ignore

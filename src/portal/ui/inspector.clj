@@ -859,8 +859,11 @@
              (<= depth (:max-depth theme))))))
 
 (defn- get-info [state context location value]
-  (let [state (atom state)]
-    {:expanded? (state/expanded? state context)
+  (let [state (atom state)
+        focus (state/get-focus-context @state)]
+    {:expanded? (or (state/contains-context? context focus)
+                    (state/expanded? state context))
+     :focus?    (= context focus)
      :selected  (state/selected state context)
      :viewer    (get-selected-viewer state context location value)}))
 
@@ -915,7 +918,9 @@
 
 (defn- inspector-border [context]
   (let [theme    (theme/use-theme)
-        selected (:selected (use-options))
+        options  (use-options)
+        selected (:selected options)
+        focus?   (:focus? options)
         color    (get theme (nth theme/order (:depth context)))
         transition "all 0.35s"]
     [:<>
@@ -938,6 +943,7 @@
        :style/parent-hover
        {:border-top-left-radius 0
         :border-bottom-left-radius 0}}]
+     (when focus? "*")
      [s/div
       {:style
        (merge
@@ -1008,8 +1014,11 @@
         state          (state/use-state)
         location       (state/get-location ctx)
         theme          (theme/use-theme)
-        {:keys [viewer selected expanded?] :as options}
-        (react/use-atom state #(get-info % ctx location value))
+        options        (react/use-atom state #(get-info % ctx location value))
+        {:keys [viewer expanded? focus?] :as options}
+        (if-not (::default-expand theme)
+          options
+          (assoc options :expanded? true))
         resolved-viewer  (use-resolve-viewer ctx viewer (react/use-atom viewers))
         options          (assoc options :props props :viewer resolved-viewer)
         component        (cond
@@ -1017,6 +1026,7 @@
                            @(:component resolved-viewer)
                            expanded? inspect
                            :else preview)]
+
     (select/use-register-context ctx resolved-viewer)
     (react/use-effect
      [location (some? expanded?) resolved-viewer value]
@@ -1029,7 +1039,7 @@
      [with-options options
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
        ctx
-       (when selected
+       (when focus?
          [web/scroll-into-view
           {:style {:position :absolute
                    :pointer-events :none

@@ -139,7 +139,7 @@
     {:element elements
      :vdom-index next-vdom-index
      :vdom-children vdom-children
-     :output (doall (map :output vdom-children))}))
+     :output (cond-> (map :output vdom-children) (not (::lazy @state)) (doall))}))
 
 (defn- render-component-post [output id]
   (when-not (or (nil? output)

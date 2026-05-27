@@ -64,6 +64,8 @@
 
 (defn get-all-selected-context [state] (:selected state))
 
+(defn get-focus-context [state] (nth (:selected state) (:focus state 0) nil))
+
 (defn get-selected-value [state] (:value (get-selected-context state)))
 
 (defn selected-values [state] (map :value (:selected state)))
@@ -107,6 +109,12 @@
        (or (parent-atom? a)
            (identical? (:value a) (:value b)))))
 
+(defn contains-context? [parent child]
+  (and (not= parent child)
+       (->> (iterate :parent child)
+            (take-while some?)
+            (some (partial =location parent)))))
+
 (defn- some-indexed
   "(first (keep-indexed f coll))"
   [f coll]
@@ -114,7 +122,7 @@
     (loop [i 0]
       (if (== n i)
         nil
-        (or (f i (get coll i))
+        (or (f i (nth coll i nil))
             (recur (inc i)))))))
 
 (defn selected [state context]
@@ -125,7 +133,7 @@
    #?(:clj (get-in @state [:selected])
       :cljs @(r/cursor state [:selected]))))
 
-(defn clear-selected [state] (dissoc state :selected))
+(defn clear-selected [state] (dissoc state :selected :focus))
 
 #?(:cljs (defn- send! [message] (@sender message)))
 
@@ -363,7 +371,9 @@
                 :search-text
                 :selected
                 :selected-viewers
-                :lazy-take)
+                :lazy-take
+                :portal.ui.find/locations
+                :portal.ui.find/focus)
         (assoc
          :portal/previous-state nil
          :portal/next-state nil))))

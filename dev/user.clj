@@ -14,7 +14,7 @@
 (defn node [] (cljs :node))
 
 (comment
-  (require '[portal.api :as p])
+  (time (require '[portal.api :as p]))
   (add-tap #'p/submit)
   (remove-tap #'p/submit)
 
@@ -24,6 +24,7 @@
   (p/close)
   (p/stop)
   (p/docs {:mode :dev})
+  (p/selected)
 
   (def ssr    (p/open {:mode :ssr #_#_:profile? true}))
   (def portal (p/open {:launcher :auto}))
@@ -37,4 +38,5 @@
   (p/repl portal)
 
   (require '[examples.data :refer [data]])
-  (dotimes [_i 25] (tap> data)))
+  (dotimes [_i 25] (tap> data))
+  )

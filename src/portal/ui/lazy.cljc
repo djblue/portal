@@ -2,7 +2,8 @@
   #?(:clj (:refer-clojure :exclude [lazy-seq random-uuid]))
   #?(:clj (:require
            [portal.runtime.polyfill :refer [random-uuid]]
-           [portal.ui.react :as react])))
+           [portal.ui.react :as react]
+           [portal.ui.theme :as theme])))
 
 (def count-limit 100000)
 
@@ -37,7 +38,9 @@
       (lazy-seq coll nil))
      ([coll {:keys [default-take step]
              :or   {default-take 0 step 10}}]
-      (let [[n set-n!] (react/use-state default-take)
+      (let [theme (theme/use-theme)
+            default-take (::default-take theme default-take)
+            [n set-n!] (react/use-state default-take)
             [head tail] (split-at n coll)]
         [:<>
          head
