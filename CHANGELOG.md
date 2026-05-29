@@ -1,3 +1,12 @@
+## 0.65.0 - 2026-05-29
+
+- Bump transit 1b839060
+  - Thanks @seancorfield!
+- Explicitly connect before rendering app on init e04f5728
+- Support infinite seqs for `{:mode :ssr}` 894e8538
+- Improve native browser shortcut handler for `:ssr` 19b4e104
+- Add `portal.ui.commands/copy-with-meta` e6afa743
+
 ## 0.64.1 - 2026-04-20
 
 - Fix ssr vendor resource resolution f07dc61d
