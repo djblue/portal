@@ -407,10 +407,11 @@
         [selected-context-view]])]))
 
 (defn scrollbars []
-  (let [theme (theme/use-theme)]
+  (let [theme (theme/use-theme)
+        size (* 1.5 (:padding theme))]
     (when-not (theme/is-vs-code?)
       [:style
-       (str "*::-webkit-scrollbar { width: " (* 2 (:padding theme)) "px }"
+       (str "*::-webkit-scrollbar { width: " size "px; height: " size "px; }"
             "*::-webkit-scrollbar-corner { opacity: 0 }"
             "*::-webkit-scrollbar-track  { opacity: 0 }"
             "*::-webkit-scrollbar-thumb  { background-color: " (::c/border theme) "; }"
