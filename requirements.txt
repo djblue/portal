@@ -5,7 +5,7 @@ asyncio==3.4.3
 attrs==24.3.0
 basilisp==0.4.0
 frozenlist==1.5.0
-idna==3.10
+idna==3.15
 immutables==0.21
 multidict==6.1.0
 prompt_toolkit==3.0.48
