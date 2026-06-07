@@ -175,7 +175,14 @@
        (.preventDefault e))
      (when-not (or (and (or (.-ctrlKey e)
                             (.-metaKey e))
-                        (#{"f" "w" "n" "r"} (.-key e)))
+                        (#{"f" ;; find in page
+                           "w" ;; close tag
+                           "n" ;; new window
+                           "r" ;; reload page
+                           "-" ;; zoom-out
+                           "=" ;; zoom-in
+                           }
+                         (.-key e)))
                    (#{"Tab"} (.-key e)))
        (.preventDefault e)))
    (send!
