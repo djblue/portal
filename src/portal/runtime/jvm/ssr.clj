@@ -78,12 +78,13 @@
       (let [sleep-time (long (- budget-ms total-time))]
         (Thread/sleep sleep-time)))))
 
-(defn- start-render-loop [{:keys [last-ping channel] :as session} render]
+(defn- start-render-loop [{:keys [last-ping channel] :as session} render stop]
   (let [running (atom true)]
     (future
       (start-profile session)
       (loop [state nil]
-        (when @running
+        (if-not @running
+          (stop state)
           (recur
            (let [start (System/currentTimeMillis)]
              (if (< timeout-ms (- start @last-ping))
@@ -159,6 +160,9 @@
                   (send! session (hiccup/->input-stream output-buffer written-bytes))))
               {:hiccup hiccup' :styles @cache :app-state app-state'})))))))
 
+(defn- stop-app [{:keys [hiccup]}]
+  (when hiccup (react/render (meta hiccup) nil)))
+
 (defn- on-open [session]
   (add-watch (:state session) :selected #'state/send-selected-values)
   (swap! rt/connections assoc (:session-id session) (partial send! session))
@@ -166,7 +170,7 @@
          (fn [stop-render-loop]
            (when (fn? stop-render-loop)
              (stop-render-loop))
-           (start-render-loop session (partial #'render-app session)))))
+           (start-render-loop session (partial #'render-app session) #'stop-app))))
 
 (defn- on-receive [session message]
   (swap! (:event-queue session) conj (json/read message)))
