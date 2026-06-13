@@ -79,6 +79,9 @@
      :sha     "6ad6d6333d2e9baf1644a870072c12f206a9b722"}}
    :override-deps
    {org.clojure/clojure {:mvn/version "1.10.0"}}}
+  :coverage
+  {:extra-deps
+   {cloverage/cloverage {:mvn/version "1.2.4"}}}
   :antq
   {:replace-deps
    {com.github.liquidz/antq {:mvn/version "2.11.1276"}

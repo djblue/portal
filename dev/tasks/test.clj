@@ -77,6 +77,11 @@
              (future (lpy))]]
     @f))
 
+(defn coverage
+  "Get test coverage numbers via cloverage."
+  []
+  (t/clj "-M:dev:cljs:cider:test:coverage" "-m" :tasks.coverage))
+
 (defn test "Run all clj/s tests." [] (cljs) (cljs-ui) (clj))
 
 (defn -main [] (test))

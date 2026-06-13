@@ -12,6 +12,7 @@
          docs   tasks.docs/-main
          jar    tasks.package/jar
          test   tasks.test/test
+         cov    tasks.test/coverage
          tag    tasks.version/tag
          ext    tasks.build/extensions
          ide    tasks.ide/open

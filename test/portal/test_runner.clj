@@ -30,7 +30,7 @@
 
 (def ^:private in-bb? (some? (System/getProperty "babashka.version")))
 
-(defn -main []
+(defn runner ^long []
   (let [{:keys [fail error]}
         (run-tests 'portal.client-test
                    (when-not in-bb? 'portal.nrepl-test)
@@ -50,4 +50,6 @@
                    'portal.ui.state-test)]
     (api/stop)
     (shutdown-agents)
-    (System/exit (+ fail error))))
+    (+ fail error)))
+
+(defn -main [] (System/exit (runner)))
