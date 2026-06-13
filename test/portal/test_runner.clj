@@ -43,6 +43,7 @@
                    (when-not in-bb?
                      'portal.runtime.jvm.custom-types-test)
                    'portal.runtime.jvm.editor-test
+                   'portal.runtime.jvm.ssr-test
                    'portal.runtime.npm-test
                    'portal.runtime.react-test
                    'portal.runtime.rpc-test

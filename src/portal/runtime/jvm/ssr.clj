@@ -130,10 +130,12 @@
   ([message]
    (send! rt/*session* message))
   ([{:keys [channel]} message]
-   (if (or (bytes? message)
-           (instance? ByteArrayInputStream message))
-     (server/send! channel message)
-     (server/send! channel (cond-> message (not (string? message)) (json/write))))))
+   (if (fn? channel)
+     (channel message)
+     (if (or (bytes? message)
+             (instance? ByteArrayInputStream message))
+       (server/send! channel message)
+       (server/send! channel (cond-> message (not (string? message)) (json/write)))))))
 
 (defn- render-app [{:keys [handlers selection-index output-buffer log] :as session}
                    {:keys [hiccup styles app-state] :as render-state}]
