@@ -68,6 +68,7 @@
                                (view-column)
                                (clj->js
                                 {:enableScripts           true
+                                 :enableFindWidget        true
                                  :retainContextWhenHidden true
                                  :portMapping
                                  [{:webviewPort port
