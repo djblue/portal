@@ -1213,7 +1213,7 @@
        (when-let [el (.-current ref)]
          (reset! state/selected-el el)
          (when-not (and (.hasFocus js/document) (l/element-visible? el))
-           (.scrollIntoView el #js {:inline "nearest" :block "nearest" :behavior "smooth"})))))
+           (.scrollIntoView el #js {:inline "nearest" :block "center" :behavior "smooth"})))))
     [:> error-boundary
      [with-options options
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
