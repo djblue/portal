@@ -12,6 +12,7 @@
       "projectRootPath": [
         "."
       ],
+      "afterPrimaryReplConnectedCode": "(portal.api/start {:port 53755})",
       "extraNReplMiddleware": [
         "portal.nrepl/middleware"
       ],
