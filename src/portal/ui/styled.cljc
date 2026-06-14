@@ -36,15 +36,16 @@
                (value->css v)) ";")))) "" style))
 
 (defn- generate-class [selector style]
-  (let [css (style->css style)]
-    (when-not (empty? css)
-      #?(:clj (when *cache*
-                (let [css (style->css style)]
-                  (when-not (empty? css)
-                    (let [k  (gensym)]
-                      (swap! *cache* assoc [selector style] k)
-                      k))))
-         :cljs
+  #?(:clj
+     (when *cache*
+       (let [css (style->css style)]
+         (when-not (empty? css)
+           (let [k (gensym)]
+             (swap! *cache* assoc [selector style] k)
+             k))))
+     :cljs
+     (let [css (style->css style)]
+       (when-not (empty? css)
          (let [k  (gensym)
                f  (get selectors selector)
                el (js/document.createElement "style")]
