@@ -27,6 +27,13 @@ In this talk I share some issues with my previous workflows and how the the
 visual tool Portal has improved them. This will demonstrate what's possible, but
 also hopefully spark more exploration and collaboration.
 
+## 2024-10-15 - Calva Notebooks by [Lukas Domagala][cyrik]
+
+<a target="_blank" href="https://www.youtube.com/watch?v=nUQpYNE9TCw">
+<img src="https://img.youtube.com/vi/nUQpYNE9TCw/hqdefault.jpg"
+     alt="Calva Notebooks by Lukas Domagala at Heart of Clojure 2024" />
+</a>
+
 ## 2023-12-13 - Cooking up a workflow for data (by [Slutsky][daslu], Prately & McLean)
 
 <a target="_blank" href="https://www.youtube.com/watch?v=skMMvxWjmNM&t=3150s">
@@ -52,6 +59,13 @@ interactive development. In this talk we will explore aspects of Portal's
 internals and how they enable various types of workflows for different users.
 After this talk, you should be better equipped to leverage Portal in your
 specific workflow.
+
+## 2023-06-26 - Babashka notebooks in VS Code by [Lukas Domagala][cyrik]
+
+<a target="_blank" href="https://www.youtube.com/watch?v=c2Nh5VGzNKU">
+<img src="https://img.youtube.com/vi/c2Nh5VGzNKU/hqdefault.jpg"
+     alt="Babashka notebooks in VS Code at Babashka Conf 2023" />
+</a>
 
 ## 2023-04-06 - Clojure visual-tools meeting 17 - Various Updates
 
