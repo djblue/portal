@@ -2,36 +2,36 @@
   #?(:clj
      (:require
       [portal.runtime.cson.base64 :as base64]
-      [portal.runtime.cson.core :as core]
-      [portal.runtime.cson.buffer :as json])
+      [portal.runtime.cson.buffer :as json]
+      [portal.runtime.cson.core :as core])
      :cljr
      (:require
       [portal.runtime.cson.base64 :as base64]
-      [portal.runtime.cson.core :as core]
-      [portal.runtime.cson.buffer :as json])
+      [portal.runtime.cson.buffer :as json]
+      [portal.runtime.cson.core :as core])
      :joyride
      (:require
       [portal.runtime.cson.base64 :as base64]
-      [portal.runtime.cson.core :as core]
       [portal.runtime.cson.buffer :as json]
+      [portal.runtime.cson.core :as core]
       [portal.runtime.macros :as m])
      :org.babashka/nbb
      (:require
       [portal.runtime.cson.base64 :as base64]
-      [portal.runtime.cson.core :as core]
       [portal.runtime.cson.buffer :as json]
+      [portal.runtime.cson.core :as core]
       [portal.runtime.macros :as m])
      :cljs
      (:require
       [portal.runtime.cson.base64 :as base64]
-      [portal.runtime.cson.core :as core]
       [portal.runtime.cson.buffer :as json]
+      [portal.runtime.cson.core :as core]
       [portal.runtime.macros :as m])
      :lpy
      (:require
       [portal.runtime.cson.base64 :as base64]
-      [portal.runtime.cson.core :as core]
-      [portal.runtime.cson.buffer :as json]))
+      [portal.runtime.cson.buffer :as json]
+      [portal.runtime.cson.core :as core]))
   #?(:clj  (:import [java.net URL]
                     [java.util Date UUID])
      :joyride (:import)

@@ -2,8 +2,8 @@
   (:refer-clojure :exclude [read])
   (:require
    [portal.runtime.cson.base64 :as base64]
-   [portal.runtime.cson.core :as core]
-   [portal.runtime.cson.buffer :as json])
+   [portal.runtime.cson.buffer :as json]
+   [portal.runtime.cson.core :as core])
   #?(:clj  (:import [java.net URL]
                     [java.util Date UUID])
      :joyride (:import)

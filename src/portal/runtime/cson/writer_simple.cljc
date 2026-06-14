@@ -1,7 +1,7 @@
 (ns ^:no-doc portal.runtime.cson.writer-simple
   (:require
-   [portal.runtime.cson.core :as core]
-   [portal.runtime.cson.buffer :as json]))
+   [portal.runtime.cson.buffer :as json]
+   [portal.runtime.cson.core :as core]))
 
 (declare to-json*)
 
