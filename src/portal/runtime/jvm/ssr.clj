@@ -30,7 +30,10 @@
         (if-let [p (get @rpc id)]
           (do (swap! rpc dissoc id) (deliver p event))
           (tap> [:invalid-rpc event])))
-      :on-key-down (shortcuts/keydown event)
+      :on-key-down
+      (if-let [f (get-in @handlers [(some-> id parse-uuid) op])]
+        (f event)
+        (shortcuts/keydown event))
       (if-let [f (get-in @handlers [(some-> id parse-uuid) op])]
         (f event)
         (when-not (= :on-visible op)
