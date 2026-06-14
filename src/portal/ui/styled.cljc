@@ -38,11 +38,12 @@
 (defn- generate-class [selector style]
   (let [css (style->css style)]
     (when-not (empty? css)
-      #?(:clj (let [css (style->css style)]
-                (when-not (empty? css)
-                  (let [k  (gensym)]
-                    (when *cache* (swap! *cache* assoc [selector style] k))
-                    k)))
+      #?(:clj (when *cache*
+                (let [css (style->css style)]
+                  (when-not (empty? css)
+                    (let [k  (gensym)]
+                      (swap! *cache* assoc [selector style] k)
+                      k))))
          :cljs
          (let [k  (gensym)
                f  (get selectors selector)
