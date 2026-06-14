@@ -993,6 +993,8 @@
    #'walk/keywordize-keys     {}
    #'clojure.core/dissoc      {:predicate map? :args (comp pick-many keys)}
    #'clojure.core/vector      {}
+   #'clojure.core/set         {:predicate coll?}
+   #'clojure.core/distinct    {:predicate coll?}
    #'clojure.core/str         {}
    #'clojure.core/concat      {:predicate (fn [& args] (every? coll? args))}
    #'clojure.core/contains?   {:predicate (fn [coll & args]
