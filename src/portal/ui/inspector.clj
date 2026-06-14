@@ -103,7 +103,7 @@
 
 (defn- use-parent [] (react/use-context parent-context))
 
-(defn- with-parent [context & children]
+(defn with-parent [context & children]
   (apply react/provider parent-context context children))
 
 (defonce ^:private inspector-context
@@ -763,7 +763,9 @@
              {:row index :column 1}
              [container-map-v
               [inspector (get-props values k) v]]]]))
-       sorted-values)]]))
+       sorted-values)
+      {:context (use-context)
+       :style {:grid-column "1/3" :background (get-background2)}}]]))
 
 (defn inspect-map-k-v [values]
   (let [map-ns (:map-ns (use-options))]
@@ -831,7 +833,9 @@
              [select/with-position
               {:row index :column 0}
               [with-key index [inspector value]]])))
-       values)]]))
+       values)
+      {:context (use-context)
+       :style {:background (get-background2)}}]]))
 
 (defmethod inspect* :set [value]
   [inspect-coll* (use-search-text) value])
@@ -859,8 +863,11 @@
              (<= depth (:max-depth theme))))))
 
 (defn- get-info [state context location value]
-  (let [state (atom state)]
-    {:expanded? (state/expanded? state context)
+  (let [state (atom state)
+        focus (state/get-focus-context @state)]
+    {:expanded? (or (state/contains-context? context focus)
+                    (state/expanded? state context))
+     :focus?    (state/=location context focus)
      :selected  (state/selected state context)
      :viewer    (get-selected-viewer state context location value)}))
 
@@ -913,11 +920,19 @@
                :background (get theme (nth theme/order (:depth context)))}}
        selected])))
 
+(defn styles []
+  [:style
+   "@keyframes blink {"
+   "  50% { opacity: 0; }"
+   "}"])
+
 (defn- inspector-border [context]
   (let [theme    (theme/use-theme)
-        selected (:selected (use-options))
+        options  (use-options)
+        selected (:selected options)
+        focus?   (:focus? options)
         color    (get theme (nth theme/order (:depth context)))
-        transition "all 0.35s"]
+        timing   0.35]
     [:<>
      [s/div
       {:style
@@ -929,12 +944,14 @@
          :right 0
          :bottom 0
          :z-index 2
-         :transition transition
          :border [1 :solid "rgba(0,0,0,0)"]
          :border-radius (:border-radius theme)}
         (when selected
           {:border [1 :solid color]
-           :box-shadow [0 0 5 color]}))
+           :box-shadow [0 0 5 color]})
+        (when focus?
+          {:animation-delay (str (* 1 0.35) "s")
+           :animation [:blink (str (* 5 0.35) "s") :ease-in-out :infinite]}))
        :style/parent-hover
        {:border-top-left-radius 0
         :border-bottom-left-radius 0}}]
@@ -948,7 +965,7 @@
          :top 0
          :bottom 0
          :border-radius (:border-radius theme)
-         :transition transition
+         :transition (str "all " timing "s")
          :opacity 0
          :border-left [(- (:padding theme) 1) :solid color]}
         (when selected {:right 0}))
@@ -979,7 +996,7 @@
            :z-index       0
            :flex          "1"
            :font-family   (:font-family theme)
-           :border        [1 :solid "rgba(0,0,0,0)"]
+           :border-radius (:border-radius theme)
            :background    (when selected background)}})
         ^{:key "inspector-border"} [inspector-border context]
         ^{:key "multi-select-counter"} [multi-select-counter context]])
@@ -1008,8 +1025,11 @@
         state          (state/use-state)
         location       (state/get-location ctx)
         theme          (theme/use-theme)
-        {:keys [viewer selected expanded?] :as options}
-        (react/use-atom state #(get-info % ctx location value))
+        options        (react/use-atom state #(get-info % ctx location value))
+        {:keys [viewer expanded? focus?] :as options}
+        (if-not (::default-expand theme)
+          options
+          (assoc options :expanded? true))
         resolved-viewer  (use-resolve-viewer ctx viewer (react/use-atom viewers))
         options          (assoc options :props props :viewer resolved-viewer)
         component        (cond
@@ -1029,7 +1049,7 @@
      [with-options options
       [(get-in props [:portal.viewer/inspector :wrapper] wrapper)
        ctx
-       (when selected
+       (when focus?
          [web/scroll-into-view
           {:style {:position :absolute
                    :pointer-events :none

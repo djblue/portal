@@ -4,6 +4,8 @@
    [portal.colors :as c]
    [portal.ui.api :as api]
    [portal.ui.commands :as commands]
+   [portal.ui.filter :as filter]
+   [portal.ui.find :as find]
    [portal.ui.icons :as icons]
    [portal.ui.inspector :as ins]
    [portal.ui.options :as opts]
@@ -38,6 +40,13 @@
    [portal.ui.viewer.tree :as tree]
    [portal.ui.web-components :as web]))
 
+(defn- make-predicate [search-text]
+  (when-let [pattern (filter/->pattern search-text)]
+    (fn [value]
+      (try
+        (filter/match-1 value pattern)
+        (catch Exception _ (prn _))))))
+
 (defn- search-input []
   (let [;ref      (react/use-ref nil)
         theme    (theme/use-theme)
@@ -46,12 +55,26 @@
         location (state/get-location context)
         color    (if-let [depth (:depth context)]
                    (nth theme/order depth)
-                   ::c/border)]
+                   ::c/text)
+        [search set-search!] (react/use-state 0)]
     ;; (react/use-effect
     ;;  :always
     ;;  (swap! commands/search-refs conj ref)
     ;;  #(swap! commands/search-refs disj ref))
-
+    (react/use-effect
+     [search]
+     (when-let [search-text (get-in @state [:search-text location])]
+       (let [f (future
+                 (binding [select/*selection-index* nil d/*cache* nil]
+                   (when-let [predicate? (make-predicate search-text)]
+                     (let [find-sleep (quot 1000 (* 30 3)) ;; 5 nodes / frame
+                           contexts (seq (find/find-location state context))]
+                       (state/dispatch! state assoc :focus 1)
+                       (doseq [context contexts
+                               :when (predicate? (:value context))]
+                         (state/dispatch! state state/select-context context true)
+                         (Thread/sleep find-sleep))))))]
+         #(future-cancel f))))
     [d/div
      {:style
       {:display :flex
@@ -61,20 +84,26 @@
       {;:ref ref
        :disabled  (nil? context)
        :on-change (fn [e]
+                    (state/dispatch! state dissoc :focus)
                     (let [value (get-in e [:target :value])]
-                      (when context
-                        (state/dispatch!
-                         state
-                         update
-                         :search-text
-                         (fn [filters]
-                           (if (str/blank? value)
-                             (dissoc filters location)
-                             (assoc filters location value)))))))
-       #_#_:on-key-down (fn [e]
-                          (tap> e)
-                          #_(when (= (.-key e) "Enter")
-                              (.blur (.-current ref))))
+                      (state/dispatch!
+                       state
+                       update
+                       :search-text
+                       (fn [filters]
+                         (if (str/blank? value)
+                           (dissoc filters location)
+                           (assoc filters location value))))))
+       :on-key-down (fn [e]
+                      (cond
+                        (= (:key e) "enter")
+                        (let [{:keys [selected focus]} @state]
+                          (if (and focus (second selected))
+                            (let [next-focus (mod
+                                              (if (:shift-key e) (dec focus) (inc focus))
+                                              (count selected))]
+                              (state/dispatch! state assoc :focus next-focus))
+                            (set-search! inc)))))
        :value (get-in @state [:search-text location] "")
        :placeholder (if-not context
                       "Select a value to enable filtering"
@@ -91,20 +120,65 @@
         :border-radius (:border-radius theme)}
        :style/placeholder
        {:color (if-not context (::c/border theme) (::c/text theme))}}]
-     (when (seq (react/use-atom state :search-text))
+     (let [all-search-text (react/use-atom state :search-text)
+           all-selected (react/use-atom state :selected)
+           multi? (some? (second all-selected))
+           focus (or (react/use-atom state :focus) 0)]
        [d/div
-        {:title "Clear all filters."
-         :style
-         {:cursor :pointer
+        {:style
+         {:display :flex
           :position :absolute
-          :right (:padding theme)
-          :color (::c/border theme)}
-         :style/hover
-         {:color (::c/exception theme)}
-         :on-click
-         (fn [_]
-           (state/dispatch! state state/clear-search))}
-        [icons/times-circle]])]))
+          :align-items :center
+          :gap (:padding theme)
+          :right (:padding theme)}}
+        (when (and multi? (some? (get-in @state [:search-text location])))
+          [:<>
+           [d/div
+            {:style
+             {:font-weight :bold
+              :color (::c/border theme)}}
+            (str focus)
+            "/"
+            (count all-selected)]
+           [d/div
+            {:style
+             {:height :stretch
+              :margin-top (* 0.5 (:padding theme))
+              :margin-bottom (* 0.5 (:padding theme))
+              :border-left [1 :solid (::c/border theme)]}}]
+           [icons/chevron-up
+            {:style
+             {:cursor :pointer
+              :color (::c/border theme)}
+             :style/hover
+             {:color (::c/text theme)}
+             :on-click
+             (fn [_]
+               (let [next-focus (mod (dec focus) (count all-selected))]
+                 (state/dispatch! state assoc :focus next-focus)))}]
+           [icons/chevron-down
+            {:style
+             {:cursor :pointer
+              :color (::c/border theme)}
+             :style/hover
+             {:color (::c/text theme)}
+             :on-click
+             (fn [_]
+               (let [next-focus (mod (inc focus) (count all-selected))]
+                 (state/dispatch! state assoc :focus next-focus)))}]])
+        (when (seq all-search-text)
+          [d/div
+           {:title "Clear all filters."
+            :style
+            {:cursor :pointer
+             :color (::c/border theme)}
+            :style/hover
+            {:color (::c/exception theme)}
+            :on-click
+            (fn [_]
+              (set-search! 0)
+              (state/dispatch! state state/clear-search))}
+           [icons/times-circle]])])]))
 
 (defn- button-hover [props child]
   (let [theme (theme/use-theme)]
@@ -346,6 +420,7 @@
   [:<>
    #_[vega/styles]
    #_[prepl/styles]
+   [ins/styles]
    [hiccup/styles]
    [text-selection]
    [code/stylesheet]])

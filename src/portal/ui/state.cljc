@@ -64,6 +64,8 @@
 
 (defn get-all-selected-context [state] (:selected state))
 
+(defn get-focus-context [state] (nth (:selected state) (:focus state 0) nil))
+
 (defn get-selected-value [state] (:value (get-selected-context state)))
 
 (defn selected-values [state] (map :value (:selected state)))
@@ -79,7 +81,7 @@
 (defn deselect-context
   [state context multi?]
   (if-not multi?
-    (assoc state :selected [])
+    (-> state (assoc :selected []) (dissoc :focus))
     (update state :selected #(into [] (remove #{context}) %))))
 
 (defn atom? [value]
@@ -102,10 +104,16 @@
          :default {:value (:value context) :stable-path (:stable-path context)}))
     {:context context}))
 
-(defn- =location [a b]
+(defn =location [a b]
   (and (= (:stable-path a) (:stable-path b))
        (or (parent-atom? a)
            (identical? (:value a) (:value b)))))
+
+(defn contains-context? [parent child]
+  (and (not (=location parent child))
+       (->> (iterate :parent child)
+            (take-while some?)
+            (some (partial =location parent)))))
 
 (defn- some-indexed
   "(first (keep-indexed f coll))"
@@ -114,7 +122,7 @@
     (loop [i 0]
       (if (== n i)
         nil
-        (or (f i (get coll i))
+        (or (f i (nth coll i nil))
             (recur (inc i)))))))
 
 (defn selected [state context]
@@ -125,7 +133,7 @@
    #?(:clj (get-in @state [:selected])
       :cljs @(r/cursor state [:selected]))))
 
-(defn clear-selected [state] (dissoc state :selected))
+(defn clear-selected [state] (dissoc state :selected :focus))
 
 #?(:cljs (defn- send! [message] (@sender message)))
 
@@ -297,7 +305,7 @@
            (expand-inc-1 state context))))))
 
 (defn get-path [state]
-  (when-let [{:keys [key? path]} (get-selected-context state)]
+  (when-let [{:keys [key? path]} (get-focus-context state)]
     (cond-> path key? pop)))
 
 (defn set-theme [_color]

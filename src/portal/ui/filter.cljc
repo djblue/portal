@@ -5,6 +5,16 @@
 
 #?(:clj (defn regexp? [value] (instance? java.util.regex.Pattern value)))
 
+(defn match-1 [value pattern]
+  (when (or (nil? value)
+            (boolean? value)
+            (number? value)
+            (string? value)
+            (keyword? value)
+            (symbol? value)
+            (regexp? value))
+    (re-find pattern (str value))))
+
 (defn- match* [value pattern]
   (cond
     (or (nil? value)
@@ -37,7 +47,7 @@
 
     :else false))
 
-(defn- ->pattern [search-text]
+(defn ->pattern [search-text]
   (when-not (str/blank? search-text)
     (let [text    (str/replace search-text #"[.*+?^${}()|\[\]\\]" "\\$&")
           tokens  (str/split text #"\s+")]

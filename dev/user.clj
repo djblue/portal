@@ -24,6 +24,7 @@
   (p/close)
   (p/stop)
   (p/docs {:mode :dev})
+  (p/selected)
 
   (def ssr    (p/open {:mode :ssr #_#_:profile? true}))
   (def portal (p/open {:launcher :auto}))

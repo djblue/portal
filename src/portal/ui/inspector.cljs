@@ -168,7 +168,7 @@
 
 (defn- use-parent [] (react/use-context parent-context))
 
-(defn- with-parent [context & children]
+(defn with-parent [context & children]
   (apply react/provider parent-context context children))
 
 (defonce ^:private inspector-context
@@ -1183,7 +1183,7 @@
         ^{:key "multi-select-counter"} [multi-select-counter context]])
      children)))
 
-(defn- inspector* [context value]
+(defn inspector* [context value]
   (let [ref            (react/use-ref)
         props          (:props (meta context))
         state          (state/use-state)

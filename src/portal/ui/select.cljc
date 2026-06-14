@@ -5,7 +5,11 @@
 (defonce ^:no-doc selection-index (atom {}))
 (defonce ^:private position-context (react/create-context []))
 
-(defn- get-selection-index [] (or *selection-index* selection-index))
+(defn- get-selection-index [] #?(:clj *selection-index*
+                                 :cljs selection-index))
+
+(defn with-index [index & children]
+  (apply react/provider position-context index children))
 
 (defn with-position [position & children]
   (let [index (conj (react/use-context position-context) position)]
@@ -106,12 +110,30 @@
   (react/use-context position-context))
 
 (defn use-register-context [context viewer]
-  (let [position (use-position)
-        selection-index (get-selection-index)]
-    (react/use-effect
-     #?(:clj  [position context viewer]
-        :cljs [(hash position) (hash context) (hash viewer)])
-     (let [updates (compute-relative-index @selection-index position context)]
-       (swap! selection-index merge updates)
-       (fn []
-         (apply swap! selection-index dissoc (keys updates)))))))
+  (when-let [selection-index (get-selection-index)]
+    (let [position (use-position)]
+      (react/use-effect
+       #?(:clj  [position context viewer]
+          :cljs [(hash position) (hash context) (hash viewer)])
+       (let [updates (compute-relative-index @selection-index position context)]
+         (swap! selection-index merge updates)
+         (fn []
+           (apply swap! selection-index dissoc (keys updates))))))))
+
+(defn find-positions
+  ([hiccup]
+   (find-positions nil hiccup))
+  ([out hiccup]
+   (cond
+     (or (seq? hiccup) (list? hiccup))
+     (reduce find-positions out hiccup)
+
+     (vector? hiccup)
+     (cond
+       (identical? (first hiccup) with-position)
+       (conj out (second hiccup))
+
+       :else
+       (find-positions out (rest hiccup)))
+
+     :else out)))
