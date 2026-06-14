@@ -1035,7 +1035,7 @@
                    :pointer-events :none
                    :left 0 :right 0 :bottom 0 :top 0}
            :inline "nearest"
-           :block "nearest"
+           :block "center"
            :behavior "smooth"
            :when "not-visible"}])
        [component value]]]]))
