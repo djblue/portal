@@ -68,7 +68,7 @@
       (catch Exception e (tap> (Throwable->map e))))))
 
 (def ^:private timeout-ms
-  "Browsers can throttle `js/setInteval` to once per 60 seconds, so this timeout
+  "Browsers can throttle `js/setInterval` to once per 60 seconds, so this timeout
   should take that into account."
   120000)
 (def ^:private budget-ms (/ 1000.0 30))
