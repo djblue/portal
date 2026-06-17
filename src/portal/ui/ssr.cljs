@@ -20,7 +20,6 @@
   (i/morph (.getElementById js/document "root")
            html
            #js {:morphStyle "innerHTML"
-                :ignoreActiveValue true
                 :callbacks
                 #js {:beforeNodeRemoved
                      (fn [old-node _new-node]

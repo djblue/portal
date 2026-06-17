@@ -119,6 +119,7 @@
 #?(:clj (def play-circle (partial icon :fa-play-circle)))
 #?(:clj (def play (partial icon :fa-play)))
 #?(:clj (def plus-circle (partial icon :fa-plus-circle)))
+#?(:clj (def search (partial icon :fa-search)))
 #?(:clj (def sign-out-alt (partial icon :fa-sign-out-alt)))
 #?(:clj (def stop-circle (partial icon :fa-stop-circle)))
 #?(:clj (def terminal (partial icon :fa-terminal)))

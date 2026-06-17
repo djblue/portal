@@ -56,7 +56,8 @@
         color    (if-let [depth (:depth context)]
                    (nth theme/order depth)
                    ::c/text)
-        [search set-search!] (react/use-state 0)]
+        [search set-search!] (react/use-state 0)
+        mode     (get (react/use-atom state :mode) location :filter)]
     ;; (react/use-effect
     ;;  :always
     ;;  (swap! commands/search-refs conj ref)
@@ -80,46 +81,75 @@
       {:display :flex
        :position :relative
        :align-items :center}}
-     [d/input
-      {;:ref ref
-       :disabled  (nil? context)
-       :on-change (fn [e]
-                    (state/dispatch! state dissoc :focus)
-                    (let [value (get-in e [:target :value])]
+     [d/div
+      {:style
+       {:display :flex :flex "1"}}
+      (when context
+        [d/button
+         {:on-click (fn [_]
                       (state/dispatch!
-                       state
-                       update
-                       :search-text
-                       (fn [filters]
-                         (if (str/blank? value)
-                           (dissoc filters location)
-                           (assoc filters location value))))))
-       :on-key-down (fn [e]
-                      (cond
-                        (= (:key e) "enter")
-                        (let [{:keys [selected focus]} @state]
-                          (if (and focus (second selected))
-                            (let [next-focus (mod
-                                              (if (:shift-key e) (dec focus) (inc focus))
-                                              (count selected))]
-                              (state/dispatch! state assoc :focus next-focus))
-                            (set-search! inc)))))
-       :value (get-in @state [:search-text location] "")
-       :placeholder (if-not context
-                      "Select a value to enable filtering"
-                      "Type here to begin filtering")
-       :style
-       {:flex "1"
-        :background (::c/background theme)
-        :padding (* 0.75 (:padding theme))
-        :box-sizing :border-box
-        :font-family (:font-family theme)
-        :font-size (:font-size theme)
-        :color (get theme color)
-        :border [1 :solid (::c/border theme)]
-        :border-radius (:border-radius theme)}
-       :style/placeholder
-       {:color (if-not context (::c/border theme) (::c/text theme))}}]
+                       state assoc-in [:mode location]
+                       (case mode :filter :search :search :filter)))
+          :style
+          {:cursor :pointer
+           :background (::c/background theme)
+           :padding [(* 0.75 (:padding theme)) (* 1.25 (:padding theme))]
+           :box-sizing :border-box
+           :font-family (:font-family theme)
+           :font-size (:font-size theme)
+           :color (get theme color)
+           :border-top [1 :solid (::c/border theme)]
+           :border-left [1 :solid (::c/border theme)]
+           :border-bottom [1 :solid (::c/border theme)]
+           :border-right :none
+           :border-top-left-radius (:border-radius theme)
+           :border-bottom-left-radius (:border-radius theme)}}
+         (case mode
+           :filter [icons/filter {:type mode :size :sm}]
+           :search [icons/search {:type mode :size :sm}])])
+      [d/input
+       {;:ref ref
+        :disabled  (nil? context)
+        :on-change (fn [e]
+                     (state/dispatch! state dissoc :focus)
+                     (let [value (get-in e [:target :value])]
+                       (state/dispatch!
+                        state
+                        update
+                        :search-text
+                        (fn [filters]
+                          (if (str/blank? value)
+                            (dissoc filters location)
+                            (assoc filters location value))))))
+        :on-key-down (fn [e]
+                       (cond
+                         (= (:key e) "enter")
+                         (let [{:keys [selected focus]} @state]
+                           (if (and focus (second selected))
+                             (let [next-focus (mod
+                                               (if (:shift-key e) (dec focus) (inc focus))
+                                               (count selected))]
+                               (state/dispatch! state assoc :focus next-focus))
+                             (set-search! inc)))))
+        :value (get-in @state [:search-text location] "")
+        :placeholder (if-not context
+                       "Select a value to enable filtering"
+                       "Type here to begin filtering")
+        :style
+        {:flex "1"
+         :background (::c/background theme)
+         :padding (* 0.75 (:padding theme))
+         :box-sizing :border-box
+         :font-family (:font-family theme)
+         :font-size (:font-size theme)
+         :color (get theme color)
+         :border [1 :solid (::c/border theme)]
+         :border-top-right-radius (:border-radius theme)
+         :border-bottom-right-radius (:border-radius theme)
+         :border-top-left-radius (when-not context (:border-radius theme))
+         :border-bottom-left-radius (when-not context (:border-radius theme))}
+        :style/placeholder
+        {:color (if-not context (::c/border theme) (::c/text theme))}}]]
      (let [all-search-text (react/use-atom state :search-text)
            all-selected (react/use-atom state :selected)
            multi? (some? (second all-selected))

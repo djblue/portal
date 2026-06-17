@@ -570,7 +570,8 @@
   (let [state       (state/use-state)
         context     (use-context)
         location    (state/get-location context)]
-    (react/use-atom state #(get-in % [:search-text location]))))
+    (react/use-atom state #(when (= :filter (get-in % [:mode location] :filter))
+                             (get-in % [:search-text location])))))
 
 (defn preview [value]
   (if-not (coll? value)
