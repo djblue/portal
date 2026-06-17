@@ -181,6 +181,7 @@
                            "r" ;; reload page
                            "-" ;; zoom-out
                            "=" ;; zoom-in
+                           "0" ;; zoom-reset
                            }
                          (.-key e)))
                    (#{"Tab"} (.-key e)))
