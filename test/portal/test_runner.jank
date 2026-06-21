@@ -32,7 +32,7 @@
 (defn -main []
   (let [{:keys [fail error]}
         (run-tests
-         #_'portal.client-test
+         'portal.client-test
          'portal.runtime-test
          'portal.runtime.cson-test
          'portal.runtime.cson.buffer-test
