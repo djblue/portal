@@ -156,5 +156,4 @@
              "-I/usr/include"
              (str "-I" (fs/path (fs/cwd) ".portal/include"))
              "-L/usr/lib"
-             "-lcurl"
              args))))
