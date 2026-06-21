@@ -820,7 +820,15 @@
      :line 1,
      :result :basilisp.user/py,
      :runtime :py,
-     :form :basilisp.user/py}]))
+     :form :basilisp.user/py}
+    {:ns 'user,
+     :time #inst "2015-01-29T22:05:04.000+08:00",
+     :level :info,
+     :column 1,
+     :line 1,
+     :result :hello/jank,
+     :runtime :jank,
+     :form :hello/jank}]))
 
 (defn- profile-ms [v]
   (v/for v
