@@ -35,7 +35,7 @@
       :edn     (binding [*print-meta* true]
                  (pr-str value)))
     (catch jank.runtime.object_ref ex
-      (serialize encoding (pr-str ex)))))
+      (serialize encoding ex))))
 
 (defn submit
   [{:keys [encoding port host]

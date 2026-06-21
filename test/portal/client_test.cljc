@@ -30,14 +30,18 @@
 
 (defn- client-test* []
   (#?(:cljs a/let :default let)
-   [server (p/start {})
+   [server (p/start
+            #?(:jank {:port 9999} ;; httplib.h has issues during test time with dynamic ports
+               :default {}))
     opts (select-keys server [:port :host])
     tap-list @#'rt/tap-list]
     (swap! tap-list empty)
     (c/submit opts ::value)
-    #?(:jank :skip :default (c/submit opts bad-seq))
-    #?(:jank :skip :default (is (= "Error" (:cause (first @tap-list)))))
-    #?(:jank :skip :default (is (= ::value (second @tap-list))))))
+    (c/submit opts bad-seq)
+    (is (= "Error"
+           (or (:cause (first @tap-list))
+               (:error (first @tap-list)))))
+    (is (= ::value (second @tap-list)))))
 
 (deftest client-test
   #?(:cljs    (async done (.then (client-test*) done))

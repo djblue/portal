@@ -10,13 +10,13 @@
 
 (defonce ^:private server (atom nil))
 
-(defn- running? []
+(defn- wait-until-ready []
+  (when-let [{:keys [http-server]} @server]
+    (.wait_until_ready (cpp/unbox (:* httplib.Server) http-server))))
+
+(defn running? []
   (when-let [{:keys [http-server]} @server]
     (.is_running (cpp/unbox (:* httplib.Server) http-server))))
-
-(defn- sleep-ms [ms]
-  (cpp/std.this_thread.sleep_for
-   (cpp/std.chrono.milliseconds (cpp/cast long ms))))
 
 (defn start [options]
   (or @server
@@ -27,16 +27,16 @@
           (let [http-server (cpp/portal.runtime.jank.server.create_server #'server/handler)
                 port (if (zero? port)
                        (.bind_to_any_port http-server host)
-                       (do (.bind_to_port http-server host port) port))]
+                       port)]
             (deliver p {:http-server (cpp/box http-server)
                         :port port
                         :host host})
-            (.listen http-server host port))
-          nil)
+            (.bind_to_port http-server host port)
+            (.listen_after_bind http-server)
+            nil))
         (reset! server @p)
-        (while (not (running?))
-          (sleep-ms 15))
-        @p)))
+        (wait-until-ready)
+        @server)))
 
 (defn stop []
   (when-let [{:keys [http-server]} @server]

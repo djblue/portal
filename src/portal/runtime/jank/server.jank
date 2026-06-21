@@ -116,7 +116,15 @@
 (defn- handle-http [req res]
   (let [res (cpp/unbox (:* httplib.Response) res)
         request (->request req)
-        response (route (with-session request))]
+        response (try
+                   (route (with-session request))
+                   (catch jank.error_ref e
+                     {:status 500 :body (.-message (cpp/* e))})
+                   (catch std.exception e
+                     {:status 500 :body (.what e)})
+                   (catch jank.runtime.object_ref e
+                     (prn e)
+                     {:status 500 :body (pr-str e)}))]
     (cpp/= (.-status res) (cpp/int (get response :status 200)))
     (doseq [[k v] (:headers response)
             :when (not= k "content-type")]
