@@ -130,7 +130,7 @@ jobs:
     needs: [ setup, build ]
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: browser-actions/setup-chrome@v1
@@ -144,13 +144,7 @@ jobs:
       with:
         name: portal-client
         path: resources/portal
-    - name: setup-jank
-      run: |
-        sudo apt install -y curl gnupg
-        curl -s "https://ppa.jank-lang.org/KEY.gpg" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/jank.gpg >/dev/null
-        sudo curl -s -o /etc/apt/sources.list.d/jank.list "https://ppa.jank-lang.org/jank.list"
-        sudo apt update
-        sudo apt install -y jank libcurl4-openssl-dev
+    - uses: djblue/setup-jank@main
     - run: bb -m tasks.test/jank
   app:
     runs-on: ubuntu-latest
