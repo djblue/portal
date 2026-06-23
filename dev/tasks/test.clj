@@ -65,6 +65,9 @@
   (py/install)
   (t/lpy :run "--include-path" "test" "--include-path" "src" "-n" :portal.test-runner))
 
+(defn jank []
+  (t/jank :run "test/portal/test_runner.jank"))
+
 (defn all []
   (build)
   (doseq [f [(future (cljs-runtime "1.10.773"))

@@ -35,7 +35,10 @@
              :icon (inline "portal/icons/joyride.svg")}
    :py      {:color ::c/tag
              :title "Python"
-             :icon (inline "portal/icons/python.svg")}})
+             :icon (inline "portal/icons/python.svg")}
+   :jank    {:color ::c/uri
+             :title "jank"
+             :icon (inline "portal/icons/jank.svg")}})
 
 (defn btoa [^String s]
   #?(:clj  (.encodeToString (java.util.Base64/getEncoder) (.getBytes s))

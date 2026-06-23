@@ -1,0 +1,54 @@
+(ns portal.client.jank
+  (:require [clojure.string :as str]
+            [portal.runtime.cson :as cson])
+  (:include "httplib.h"))
+
+(defn request [{:keys [url method body headers]
+                :or   {method :get}}]
+  {:pre [(string? url)
+         (#{:get :put :post :delete :patch :options} method)
+         (or (string? body) (nil? body))
+         (or (map? headers) (nil? headers))]}
+  (let [[_ host path] (re-matches #"(.*://[^/]+)(/?.*)" url)
+        client (cpp/httplib.Client. (cpp/cast std.string host))
+        request (cpp/httplib.Request.)]
+    (cpp/= (.-method request)
+           (cpp/cast std.string (str/upper-case (name method))))
+    (cpp/= (.-path request)
+           (cpp/cast std.string (if (str/blank? path) "/" path)))
+    (doseq [[k v] headers]
+      (-> request
+          (.-headers)
+          (.insert
+           (cpp/std.make_pair (cpp/cast std.string (name k))
+                              (cpp/cast std.string v)))))
+    (when body
+      (cpp/= (.-body request) (cpp/cast std.string body)))
+    (let [response (.value (.send client request))]
+      {:status (.-status response)
+       :body (.-body response)})))
+
+(defn- serialize [encoding value]
+  (try
+    (case encoding
+      :cson    (cson/write value)
+      :edn     (binding [*print-meta* true]
+                 (pr-str value)))
+    (catch jank.runtime.object_ref ex
+      (serialize encoding ex))))
+
+(defn submit
+  [{:keys [encoding port host]
+    :or   {encoding :edn
+           host     "localhost"
+           port     53755}}
+   value]
+  (request
+   {:url (str "http://" host ":" port "/submit")
+    :method :post
+    :headers
+    {"content-type"
+     (case encoding
+       :cson "application/cson"
+       :edn  "application/edn")}
+    :body (serialize encoding value)}))

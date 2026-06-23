@@ -27,3 +27,6 @@ obj/
 # basilisp/python
 **__pycache__**
 dist/
+
+#jank
+.jank-repl-history

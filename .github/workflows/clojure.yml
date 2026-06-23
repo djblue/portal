@@ -126,6 +126,26 @@ jobs:
         cache: 'pip'
     - run: pip install virtualenv
     - run: bb -m tasks.test/lpy
+  test-jank:
+    needs: [ setup, build ]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: 135
+    - uses: actions/checkout@v3
+    - uses: ./.github/setup
+    - run: rm package.json
+    - run: npm install "react@^17.0.2"
+    - uses: actions/download-artifact@v4
+      with:
+        name: portal-client
+        path: resources/portal
+    - uses: jank-lang/setup-jank@main
+    - run: bb -m tasks.test/jank
   app:
     runs-on: ubuntu-latest
     needs: [ test-ui, test-clj, test-cljs, test-cljr, test-py, check ]

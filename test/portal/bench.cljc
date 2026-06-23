@@ -2,7 +2,19 @@
   #?(:cljs (:refer-clojure :exclude [simple-benchmark]))
   #?(:cljs (:require-macros portal.bench))
   #?(:lpy (:import [math :as Math]
-                   [time :as time])))
+                   [time :as time])
+     :jank (:include "chrono" "cmath")))
+
+#?(:jank
+   (cpp/raw "namespace portal::bench
+{
+  long process_time_ns()
+  {
+    auto now(std::chrono::steady_clock::now());
+    auto duration_since_epoch(now.time_since_epoch());
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(duration_since_epoch).count();
+  }
+}"))
 
 (defn- now
   ([]
@@ -11,7 +23,8 @@
       :cljs (if (exists? js/process)
               (.hrtime js/process)
               (.now js/Date))
-      :lpy  (time/process_time_ns)))
+      :lpy  (time/process_time_ns)
+      :jank (cpp/portal.bench.process_time_ns)))
   ([a]
    #?(:clj  (/ (- (now) a) 1000000.0)
       :cljr (/ (- (now) a) 10000.0)
@@ -19,13 +32,11 @@
               (let [[a b] (.hrtime js/process a)]
                 (+ (* a 1000.0) (/ b  1000000.0)))
               (- (.now js/Date) a))
-      :lpy (/ (- (now) a) 1000000.0))))
-
-(defn floor [v]
-  #?(:cljr (Math/Floor v) :default (Math/floor v)))
+      :lpy  (/ (- (now) a) 1000000.0)
+      :jank (/ (- (now) a) 1000000.0))))
 
 (defn trunc [v]
-  (/ (floor (* 100 v)) 100.0))
+  (/ (long (* 100 v)) 100.0))
 
 (defn- simple-stats [results]
   (let [n       (count results)

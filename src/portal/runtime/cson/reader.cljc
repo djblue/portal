@@ -22,7 +22,8 @@
   #?(:clj  (Long/parseLong (json/next-string buffer))
      :cljr (System.Int64/Parse (json/next-string buffer))
      :cljs (.fromString Long (json/next-string buffer))
-     :lpy  (int (json/next-string buffer))))
+     :lpy  (int (json/next-string buffer))
+     :jank (parse-long (json/next-string buffer))))
 
 (defn ->double [buffer] (json/next-double buffer))
 
@@ -44,7 +45,8 @@
      (try (with-meta value {}) true
           (catch :default _e false))
      :cljs (implements? IMeta value)
-     :lpy (or (coll? value) (symbol? value))))
+     :lpy (or (coll? value) (symbol? value))
+     :jank (or (coll? value) (symbol? value))))
 
 (defn- ->meta [buffer]
   (let [m (->value buffer) v (->value buffer)]
@@ -55,7 +57,8 @@
 (defn- ->bigint [buffer]
   #?(:clj  (bigint    (json/next-string buffer))
      :cljr (bigint    (json/next-string buffer))
-     :cljs (js/BigInt (json/next-string buffer))))
+     :cljs (js/BigInt (json/next-string buffer))
+     :jank (bigint (json/next-string buffer))))
 
 (defn- ->char [buffer]
   (core/char (->value buffer)))
@@ -66,13 +69,16 @@
             (System.DateTimeOffset/FromUnixTimeMilliseconds
              (json/next-long buffer)))
      :cljs (js/Date. (json/next-long buffer))
-     :lpy  (datetime.datetime/utcfromtimestamp (/ (json/next-long buffer) 1000.0))))
+     :lpy  (datetime.datetime/utcfromtimestamp (/ (json/next-long buffer) 1000.0))
+     ;; TODO: fix me
+     :jank (tagged-literal 'inst (json/next-long buffer))))
 
 (defn- ->uuid [buffer]
   #?(:clj  (UUID/fromString (json/next-string buffer))
      :cljr (System.Guid/Parse (json/next-string buffer))
      :cljs (uuid (json/next-string buffer))
-     :lpy  (uuid/UUID (json/next-string buffer))))
+     :lpy  (uuid/UUID (json/next-string buffer))
+     :jank (parse-uuid (json/next-string buffer))))
 
 (defn- ->url [buffer]
   #?(:clj  (URL. (json/next-string buffer))
@@ -97,12 +103,14 @@
       (if (== i n)
         (persistent! out)
         (recur
-         (unchecked-inc i)
+         #?(:jank (inc i) :default (unchecked-inc i))
          (conj! out (->value buffer)))))))
 
 (defn- ->sset [buffer]
   #?(:lpy
      (->into #{} buffer)
+     :jank
+     (->into (sorted-set) buffer)
      :default
      (let [n      (json/next-long buffer)
            values (for [_ (range n)] (->value buffer))
@@ -113,18 +121,23 @@
            (compare (get order a) (get order b))))
         values))))
 
-(defn- ->map [buffer]
-  (let [n (json/next-long buffer)]
-    (loop [i 0 m (transient {})]
-      (if (== i n)
-        (persistent! m)
-        (recur
-         (unchecked-inc i)
-         (assoc! m (->value buffer) (->value buffer)))))))
+(defn- ->map
+  ([buffer]
+   (->map {} buffer))
+  ([zero buffer]
+   (let [n (json/next-long buffer)]
+     (loop [i 0 m (transient zero)]
+       (if (== i n)
+         (persistent! m)
+         (recur
+          #?(:jank (inc i) :default (unchecked-inc i))
+          (assoc! m (->value buffer) (->value buffer))))))))
 
 (defn- ->sorted-map [buffer]
   #?(:lpy
      (->map buffer)
+     :jank
+     (->map (sorted-map) buffer)
      :default
      (let [n      (json/next-long buffer)
            pairs  (for [_ (range n)]
@@ -150,7 +163,7 @@
     (if-not (string? op)
       op
       (core/transform
-       (#?@(:bb [case] :cljr [case] :clj [condp eq] :cljs [case] :lpy [condp identical?])
+       (#?@(:bb [case] :cljr [case] :clj [condp eq] :cljs [case] :lpy [condp identical?] :jank [case])
         op
         "s"    (json/next-string buffer)
         ":"    (->keyword buffer)

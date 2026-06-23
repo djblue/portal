@@ -1,0 +1,74 @@
+(ns portal.runtime.jank.launcher
+  (:require
+   [portal.runtime :as rt]
+   [portal.runtime.browser :as browser]
+   [portal.runtime.jank.client :as c]
+   [portal.runtime.jank.server :as server]))
+
+(cpp/raw "#include <httplib.h>")
+(cpp/raw "#include <portal/runtime/jank/server.hpp>")
+
+(defonce ^:private server (atom nil))
+
+(defn- wait-until-ready []
+  (when-let [{:keys [http-server]} @server]
+    (.wait_until_ready (cpp/unbox (:* httplib.Server) http-server))))
+
+(defn running? []
+  (when-let [{:keys [http-server]} @server]
+    (.is_running (cpp/unbox (:* httplib.Server) http-server))))
+
+(defn start [options]
+  (or @server
+      (let [p (promise)
+            {:keys [port host]
+             :or {port 0 host "127.0.0.1"}} options]
+        (future
+          (let [http-server (cpp/portal.runtime.jank.server.create_server #'server/handler)
+                port (if (zero? port)
+                       (.bind_to_any_port http-server host)
+                       port)]
+            (deliver p {:http-server (cpp/box http-server)
+                        :port port
+                        :host host})
+            (.bind_to_port http-server host port)
+            (.listen_after_bind http-server)
+            nil))
+        (reset! server @p)
+        (wait-until-ready)
+        @server)))
+
+(defn stop []
+  (when-let [{:keys [http-server]} @server]
+    (cpp/portal.runtime.jank.server.destroy_server
+     (cpp/unbox (:* httplib.Server) http-server)))
+  (reset! server nil))
+
+(defn open
+  ([options]
+   (open nil options))
+  ([portal options]
+   (let [server (start options)]
+     (browser/open {:portal portal :options options :server server}))))
+
+(defn clear [portal])
+
+(defn close [portal])
+
+(defn eval-str [portal msg])
+
+(defn sessions []
+  (for [session-id (rt/active-sessions)] (c/make-atom session-id)))
+
+(defn url [portal]
+  (browser/url {:portal portal :server @server}))
+
+(comment
+  (-> @server)
+  (start {:host "localhost" :port 8000})
+  (stop)
+  ;; (get-port)
+  ;; (stop)
+  comment)
+
+(reset! rt/request c/request)

@@ -5,13 +5,15 @@
   #?(:clj  (java.util.UUID/randomUUID)
      :cljs (cljs.core/random-uuid)
      :cljr (System.Guid/NewGuid)
-     :lpy  (uuid/UUID)))
+     :lpy  (uuid/UUID)
+     :jank (clojure.core/random-uuid)))
 
 (defn parse-uuid [^String s]
   #?(:clj  (java.util.UUID/fromString s)
      :cljs (uuid s)
      :cljr (System.Guid/Parse s)
-     :lpy  (uuid/UUID (json/next-string buffer))))
+     :lpy  (uuid/UUID (json/next-string buffer))
+     :jank (parse-uuid s)))
 
 (defn update-keys [m f]
   (with-meta

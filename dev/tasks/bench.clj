@@ -17,7 +17,8 @@
             #(t/cljs "1.10.773" :portal.bench-cson)
             #(t/cljr "-m" :portal.bench-cson)
             #(t/nbb "-m" :portal.bench-cson)
-            #(t/lpy :run "-n" :portal.bench-cson)]]
+            #(t/lpy :run "-n" :portal.bench-cson)
+            #(t/jank :run "test/portal/bench_cson.cljc")]]
      (future (with-out-data (f))))))
 
 (def windows

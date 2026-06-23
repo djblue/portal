@@ -3,26 +3,34 @@
   (:require #?(:clj  [portal.sync  :as a]
                :cljr [portal.sync  :as a]
                :cljs [portal.async :as a]
-               :lpy  [portal.sync  :as a])
+               :lpy  [portal.sync  :as a]
+               :jank [clojure.core :as a])
             #?(:joyride [portal.runtime.datafy :refer [datafy nav]]
                :org.babashka/nbb [portal.runtime.datafy :refer [datafy nav]]
                :lpy     [portal.runtime.datafy :refer [datafy nav]]
+               :jank    [portal.runtime.datafy :refer [datafy nav]]
                :default [clojure.datafy :refer [datafy nav]])
             #?(:joyride [cljs.pprint :as pprint]
-               :default [clojure.pprint :as pprint])
+               :clj     [clojure.pprint :as pprint]
+               :cljs    [clojure.pprint :as pprint]
+               :cljr    [clojure.pprint :as pprint]
+               :lpy     [clojure.pprint :as pprint])
             [portal.runtime.cson.core :as core]
             [portal.runtime.cson.reader :as reader]
-            [portal.runtime.cson.writer :as writer]
+            #?(:jank [portal.runtime.cson.writer-simple :as writer]
+               :default [portal.runtime.cson.writer :as writer])
             [portal.viewer :as v])
   #?(:clj (:import (java.util.concurrent Executors ScheduledExecutorService TimeUnit))
      :lpy (:import [asyncio]
-                   [threading])))
+                   [threading])
+     :jank (:include "chrono" "thread")))
 
 (def ^:private tagged-type (type (core/tagged-value "tag" [])))
 
 #?(:joyride nil
    :org.babashka/nbb nil
    :lpy nil
+   :jank nil
    :default
    (defmethod pprint/simple-dispatch tagged-type [value]
      (if (not= (:tag value) "remote")
@@ -79,7 +87,8 @@
 (defonce request (atom nil))
 
 #?(:clj (defonce ^:private executor (Executors/newSingleThreadScheduledExecutor))
-   :lpy (defonce ^:no-doc async-loop (atom nil)))
+   :lpy (defonce ^:no-doc async-loop (atom nil))
+   :jank nil)
 
 (defn- set-timeout [f ^long timeout]
   #?(:clj  (.schedule ^ScheduledExecutorService executor
@@ -92,16 +101,24 @@
              (fn []
                (await (asyncio/sleep (/ timeout 1000.0)))
                (.start (threading/Thread ** :daemon true :target f))))
-            @async-loop))
+            @async-loop)
+     :jank (future
+             (cpp/std.this_thread.sleep_for
+              (cpp/std.chrono.milliseconds
+               (cpp/long timeout)))
+             (f)))
   nil)
 
 (defn- hashable? [value]
   (try
     (and (hash value) true)
-    (catch #?(:cljs :default :default Exception) _
+    (catch #?(:cljs :default
+              :jank jank.runtime.object_ref
+              :default Exception) _
       false)))
 
-#?(:bb (def clojure.lang.Range (type (range 1.0))))
+#?(:bb (def clojure.lang.Range (type (range 1.0)))
+   :jank nil)
 
 (defn- can-meta? [value]
   #?(:clj  (and
@@ -124,7 +141,9 @@
 
      :lpy
      (try (with-meta value {}) true
-          (catch Exception _e false))))
+          (catch Exception _e false))
+
+     :jank (or (coll? value) (symbol? value))))
 
 #?(:lpy (defn- sorted? [_] false))
 
@@ -157,11 +176,14 @@
 (defn- value->key
   "Include metadata when capturing values in cache."
   [value]
-  (when (hashable? value)
-    [:value value (hash+ value)]))
+  #?(:jank
+     [:value value]
+     :default
+     (when (hashable? value)
+       [:value value (hash+ value)])))
 
-#?(:joyride (def Atom (type (atom nil))))
-#?(:org.babashka/nbb (def Atom (type (atom nil))))
+#?(:joyride (def Atom (type (atom nil))) :jank nil)
+#?(:org.babashka/nbb (def Atom (type (atom nil))) :jank nil)
 
 (defn- atom? [o]
   #?(:clj  (instance? clojure.lang.Atom o)
@@ -169,7 +191,8 @@
      :joyride (= Atom (type o))
      :org.babashka/nbb (= Atom (type o))
      :cljs (satisfies? cljs.core/IAtom o)
-     :lpy (instance? basilisp.lang.atom/Atom o)))
+     :lpy (instance? basilisp.lang.atom/Atom o)
+     :jank (= "atom" (type o))))
 
 (defn- notify [session-id a]
   (when-let [request @request]
@@ -198,20 +221,21 @@
   "Toggle watching an atom for a given Portal session."
   {:command true}
   [a]
-  (let [{:keys [session-id watch-registry]} *session*]
-    (when
-     (contains?
-      (swap!
-       watch-registry
-       (fn [atoms]
-         (if (contains? atoms a)
-           (do
-             (remove-watch a session-id)
-             (disj atoms a))
-           (do
-             (add-watch a session-id #'invalidate)
-             (conj atoms a))))) a)
-      (set-timeout #(notify session-id a) 0))))
+  (when (atom? a)
+    (let [{:keys [session-id watch-registry]} *session*]
+      (when
+       (contains?
+        (swap!
+         watch-registry
+         (fn [atoms]
+           (if (contains? atoms a)
+             (do
+               (remove-watch a session-id)
+               (disj atoms a))
+             (do
+               (add-watch a session-id #'invalidate)
+               (conj atoms a))))) a)
+        (set-timeout #(notify session-id a) 0)))))
 
 (defn- value->id [value]
   (let [k   (value->key value)
@@ -237,14 +261,15 @@
                (instance? clojure.lang.IDeref value))
      :cljr (instance? clojure.lang.IRef value)
      :cljs (satisfies? cljs.core/IDeref value)
-     :lpy  (atom? value)))
+     :lpy  (atom? value)
+     :jank (atom? value)))
 
 (defn- pr-str' [value]
   (try
     (if-not (deref? value)
       (pr-str value)
       (str "#object " (pr-str [(type value) {:val ::elided}])))
-    (catch #?(:cljs :default :default Exception) _
+    (catch #?(:cljs :default :jank jank.runtime.object_ref :default Exception) _
       (str "#object [" (pr-str (type value)) " unprintable]"))))
 
 (defn- to-object [buffer value tag rep]
@@ -261,16 +286,19 @@
         (writer/tag
          buffer
          "object"
-         (cond-> {:tag       tag
-                  :id        (value->id value)
-                  :type      (pr-str (type value))
-                  :pr-str    (pr-str' value)
-                  :protocols (cond-> #{}
-                               (deref? value) (conj :IDeref))}
+         (cond->
+          ^::no-cache
+          {:tag       tag
+           :id        (value->id value)
+           :type      (pr-str (type value))
+           :pr-str    (pr-str' value)
+           :protocols (cond-> ^::no-cache #{}
+                        (deref? value) (conj :IDeref))}
            m   (assoc :meta m)
            rep (assoc :rep rep)))))))
 
 #?(:bb nil
+   :jank nil
    :clj
    (defn- ->meta [value]
      (let [m (meta value)]
@@ -279,6 +307,7 @@
          (merge m {::id (value->id value) ::type (type value)})))))
 
 #?(:bb nil
+   :jank nil
    :clj
    (extend-type java.util.Collection
      writer/ToJson
@@ -295,6 +324,7 @@
           value)))))
 
 #?(:bb nil
+   :jank nil
    :clj
    (extend-type java.util.Map
      writer/ToJson
@@ -306,7 +336,9 @@
 (defn- has? [m k]
   (try
     (k m)
-    (catch #?(:cljs :default :default Exception) _e nil)))
+    (catch #?(:cljs :default
+              :jank jank.runtime.object_ref
+              :default Exception) _e nil)))
 
 (defn- no-cache [value]
   (or (not (coll? value))
@@ -315,7 +347,10 @@
       (not (can-meta? value))
       (has? value ::id)
       (has? value :portal.rpc/id)
+      (::no-cache value)
       (::no-cache (meta value))))
+
+#?(:jank (def record? (constantly false)))
 
 (defn- id-coll [value]
   (if (no-cache value)
@@ -331,11 +366,13 @@
 (def ^:private aliases {"cljs.core" "clojure.core"})
 
 (defn- var->name [var]
-  (let [{:keys [name ns]} (meta var)
-        ns                (str ns)]
-    (if-not name
-      `var-unnamed
-      (symbol (aliases ns ns) (str name)))))
+  #?(:jank (symbol var)
+     :default
+     (let [{:keys [name ns]} (meta var)
+           ns                (str ns)]
+       (if-not name
+         `var-unnamed
+         (symbol (aliases ns ns) (str name))))))
 
 (defn- id-var [value]
   (if-not (var? value)
@@ -390,7 +427,15 @@
       (realize-value! v))))
 
 (defn- runtime []
-  #?(:portal :portal :bb :bb :clj :clj :joyride :joyride :org.babashka/nbb :nbb :cljs :cljs :cljr :cljr :lpy :py))
+  #?(:portal :portal
+     :bb :bb
+     :clj :clj
+     :joyride :joyride
+     :org.babashka/nbb :nbb
+     :cljs :cljs
+     :cljr :cljr
+     :lpy :py
+     :jank :jank))
 
 (defn- error->data [e]
   #?(:clj  (assoc (Throwable->map e) :runtime (runtime))
@@ -401,7 +446,7 @@
   (try
     (realize-value! new-value)
     (swap! tap-list conj new-value)
-    (catch #?(:cljs :default :default Exception) e
+    (catch #?(:cljs :default :jank jank.runtime.object_ref :default Exception) e
       (swap! tap-list conj
              (error->data
               #?(:lpy
@@ -431,7 +476,8 @@
                    (exists? js/window)         "web"
                    (exists? js/process)        "node"
                    (exists? js/PLANCK_VERSION) "planck"
-                   :else                        "web"))
+                   :else                        "web")
+           :jank "jank")
         :value tap-list
         :keymap runtime-keymap
         :watch-registry watch-registry}
@@ -454,13 +500,15 @@
    (done nil)))
 
 (defn- cache-evict [id]
-  (let [value (id->value id)
-        {:keys [session-id value-cache watch-registry]} *session*]
-    (when (atom? value)
-      (swap! watch-registry disj value)
-      (remove-watch value session-id))
-    (swap! value-cache dissoc [:id id] (value->key value))
-    nil))
+  #?(:jank nil
+     :default
+     (let [value (id->value id)
+           {:keys [session-id value-cache watch-registry]} *session*]
+       (when (atom? value)
+         (swap! watch-registry disj value)
+         (remove-watch value session-id))
+       (swap! value-cache dissoc [:id id] (value->key value))
+       nil)))
 
 (defn update-selected
   ([value]
@@ -485,7 +533,7 @@
                  (cond-> out
                    (predicate v)
                    (assoc name result))
-                 (catch #?(:cljs :default :default Exception) _ex out))
+                 (catch #?(:cljs :default :jank jank.runtime.object_ref :default Exception) _ex out))
                (assoc out name result)))))
        {}
        @registry)
@@ -504,10 +552,11 @@
 (defn invoke [{:keys [f args]} done]
   (let [session *session*
         f (if (symbol? f) (get-function f) f)]
-    (a/try
-      (a/let [return (binding [*session* session] (apply f args))]
+    (#?(:jank try :default a/try)
+      (#?(:jank let :default a/let)
+       [return (binding [*session* session] (apply f args))]
         (done (assoc (source-info f) :return return)))
-      (catch #?(:cljs :default :default Exception) e
+      (catch #?(:cljs :default :jank jank.runtime.object_ref :default Exception) e
         (done (assoc
                (source-info f)
                :error
