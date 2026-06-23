@@ -20,7 +20,7 @@
   (or (some-> item .-added)
       (some-> item .-removed)))
 
-(defn- inspect-text-diff [value]
+(defn inspect-text-diff [value]
   (let [theme  (theme/use-theme)
         add    (::c/diff-add theme)
         remove (::c/diff-remove theme)
