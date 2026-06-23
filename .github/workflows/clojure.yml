@@ -144,7 +144,7 @@ jobs:
       with:
         name: portal-client
         path: resources/portal
-    - uses: djblue/setup-jank@main
+    - uses: jank-lang/setup-jank@main
     - run: bb -m tasks.test/jank
   app:
     runs-on: ubuntu-latest
