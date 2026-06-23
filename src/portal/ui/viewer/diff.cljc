@@ -1,12 +1,13 @@
 (ns ^:no-doc portal.ui.viewer.diff
-  (:require [clojure.spec.alpha :as s]
+  (:require #?(:cljs [portal.runtime.cson.writer :as writer])
+            #?(:cljs [portal.ui.rpc :as rpc])
+            #?(:cljs [portal.ui.viewer.diff-text :as text])
+            [clojure.spec.alpha :as s]
             [lambdaisland.deep-diff2.diff-impl :as diff]
             [portal.colors :as c]
-            #?(:cljs [portal.runtime.cson.writer :as writer])
             [portal.ui.commands :as commands]
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
-            #?(:cljs [portal.ui.rpc :as rpc])
             [portal.ui.select :as select]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme])
@@ -85,7 +86,7 @@
      [background color]
      [ins/with-key :- [ins/inspector value]]]))
 
-(defn- mismatch [value]
+(defn- mismatch-data [value]
   (let [theme (theme/use-theme)
         removed (get value :- ::not-found)
         added   (get value :+ ::not-found)]
@@ -103,6 +104,14 @@
        [d/div {:style {:flex 1}}
         [select/with-position {:row 0 :column 1}
          [insertion added]]])]))
+
+(defn- mismatch [value]
+  #?(:clj [mismatch-data value]
+     :cljs
+     (if (and (string? (:- value))
+              (string? (:+ value)))
+       [text/inspect-text-diff value]
+       [mismatch-data value])))
 
 (defn- inspect-deep-diff2 [value]
   (cond
