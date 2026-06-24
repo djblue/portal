@@ -1,5 +1,6 @@
 (ns ^:no-doc portal.ui.viewer.tree
-  (:require [portal.ui.filter :as f]
+  (:require #?(:cljs [portal.ui.viewer.diff :as diff])
+            [portal.ui.filter :as f]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
             [portal.ui.select :as select]
@@ -212,8 +213,14 @@
       child
       [tree-grid context child])))
 
+(defn- tree? [value]
+  #?(:clj (coll? value)
+     :cljs
+     (and (ins/coll? value)
+          (not (diff/diff? value)))))
+
 (def viewer
-  {:predicate #?(:clj coll? :cljs ins/coll?)
+  {:predicate tree?
    :component #'inspect-tree
    :name      :portal.viewer/tree
    :doc       "For viewing highly nested values, such as hiccup."})

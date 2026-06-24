@@ -258,9 +258,27 @@
      ::different-value ::new-key}]))
 
 (def diff-text-data
-  (v/diff-text
+  (v/diff
    [(with-out-str (pp/pprint (first diff-data)))
-    (with-out-str (pp/pprint (second diff-data)))]))
+    (with-out-str (pp/pprint (assoc (first diff-data) ::deep-change {:a 2})))]))
+
+(def hiccup-diff
+  (v/diff
+   [(v/tree
+     [:<>
+      [:h1 "Hello, I'm hiccup"]
+      [:a {:hre "https://github.com/djblue/portal"} "djblue/portal"]
+      [::v/inspector {:hello :world}]])
+    (v/tree
+     [:<>
+      [:h1 "Hello, I'm hiccup!"]
+      [:a {:href "https://github.com/djblue/portal"} "djblue/portal"]
+      [::v/inspector {:hello :world}]])]))
+
+(def diff
+  {::data diff-data
+   ::tree hiccup-diff
+   ::text diff-text-data})
 
 (def string-data
   (v/for
@@ -1150,8 +1168,7 @@
     ::hacker-news        #?(:org.babashka/nbb nil :lpy :not-implemented :default hn/stories)
     ::spec-data          spec-data
     ::table-data         table-data
-    ::diff               diff-data
-    ::diff-text          diff-text-data
+    ::diff               diff
     ::basic-data         basic-data
     ::themes             c/themes
     ::clojure-data       clojure-data
