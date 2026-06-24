@@ -6,6 +6,7 @@
             [portal.ui.icons :as icons]
             [portal.ui.inspector :as ins]
             [portal.ui.lazy :as l]
+            [portal.ui.state :as state]
             [portal.ui.styled :as d]
             [portal.ui.theme :as theme]))
 
@@ -22,6 +23,8 @@
 
 (defn inspect-text-diff [value]
   (let [theme  (theme/use-theme)
+        state  (state/use-state)
+        ctx    (ins/use-context)
         add    (::c/diff-add theme)
         remove (::c/diff-remove theme)
         diff   (df/diffLines (or (:- value) (first value))
@@ -66,13 +69,17 @@
                      (when before
                        [:<>
                         [ins/highlight-words (str/join "\n" (take 3 lines))]
-                        [d/div {:style {:background (::c/border theme)
-                                        :text-align :center}}
+                        [d/div {:style {:cursor :pointer
+                                        :text-align :center
+                                        :background (::c/border theme)}
+                                :on-click #(state/dispatch! state state/expand-inc-1 ctx)}
                          [icons/ellipsis-h]]])
                      (when after
                        [:<>
-                        [d/div {:style {:background (::c/border theme)
-                                        :text-align :center}}
+                        [d/div {:style {:cursor :pointer
+                                        :text-align :center
+                                        :background (::c/border theme)}
+                                :on-click #(state/dispatch! state state/expand-inc-1 ctx)}
                          [icons/ellipsis-h]]
                         [ins/highlight-words (str/join "\n" (take-last 3 lines))]])])))
               (cond
