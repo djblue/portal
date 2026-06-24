@@ -446,6 +446,7 @@
            :color (::c/border theme)}
           style)
          :style/hover {:color color}
+         :on-double-click (fn [e] (.stopPropagation e))
          :on-click (fn [e]
                      (.stopPropagation e)
                      (if (.-shiftKey e)
