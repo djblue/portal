@@ -1,3 +1,15 @@
+## 0.66.0 - 2026-06-29
+
+- Prevent accidental double clicks when shift+clicking to expand children 7253402a
+- Improve UX for diffing trees, useful for hiccup d712dc29
+- Allow `:portal.viewer/diff-text` to expand hidden text fa954ba3
+- Update `:portal.viewer/diff` to use diff-text for strings (#308) 77f4a815
+- More native browser shortcuts for `:ssr` a9dd6fbf
+- Enable find for vs-code extension 4f7189a7
+- Center element on focus when hidden a4532d70
+- Add more core fns as commands 58a04cab
+- Unmount react app on-close for `:ssr` aa0aea74
+
 ## 0.65.0 - 2026-05-29
 
 - Bump transit 1b839060
