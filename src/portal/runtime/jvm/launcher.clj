@@ -13,7 +13,8 @@
         (let [{:keys [port host]
                :or {port 0 host "localhost"}} options
               http-server (http/run-server #'server/handler
-                                           {:port port
+                                           {:ip host
+                                            :port port
                                             :max-body (* 1024 1024 1024)
                                             :max-ws (* 1024 1024 1024)
                                             :legacy-return-value? false})]
