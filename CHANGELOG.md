@@ -1,3 +1,10 @@
+## 0.67.0 - 2026-07-09
+
+- Update `portal.runtime.jvm.launcher/start` to respect host b0bd023d
+  - Thanks @cruegge!
+  - This may be a breaking change for some as the default for http-kit is
+    `0.0.0.0` but the default for portal was always intended to be `localhost`.
+
 ## 0.66.0 - 2026-06-29
 
 - Prevent accidental double clicks when shift+clicking to expand children 7253402a
