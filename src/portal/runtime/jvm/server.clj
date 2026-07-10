@@ -24,28 +24,13 @@
 
 (defmulti route (juxt :request-method :uri))
 
-(defn- open-debug [{:keys [options] :as session}]
-  (try
-    (when (= :server (:debug options))
-      ((requiring-resolve 'portal.runtime.debug/open) session))
-    (catch Exception e (tap> e) nil)))
-
-(defn- close-debug [instance]
-  (try
-    (when instance
-      ((requiring-resolve 'portal.runtime.debug/close) instance))
-    (catch Exception e (tap> e) nil)))
-
 (defmethod route [:get "/rpc"] [request]
-  (let [session (rt/open-session (:session request))
-        debug   (open-debug session)]
+  (let [session (rt/open-session (:session request))]
     (server/as-channel
      request
      {:on-receive (fn [_ch message] (rpc/on-receive session message))
       :on-open    (fn [ch] (rpc/on-open session #(server/send! ch %)))
-      :on-close   (fn [_ch _status]
-                    (close-debug debug)
-                    (rpc/on-close session))})))
+      :on-close   (fn [_ch _status] (rpc/on-close session))})))
 
 (defn- send-resource [content-type resource]
   {:status  200
