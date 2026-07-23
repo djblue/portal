@@ -1,3 +1,8 @@
+## 0.67.1 - 2026-07-22
+
+- Add WSL2 workaround d2869ef0
+  - Thanks @seancorfield!
+
 ## 0.67.0 - 2026-07-09
 
 - Update `portal.runtime.jvm.launcher/start` to respect host b0bd023d
