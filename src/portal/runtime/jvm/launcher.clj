@@ -3,7 +3,8 @@
             [portal.runtime :as rt]
             [portal.runtime.browser :as browser]
             [portal.runtime.jvm.client :as c]
-            [portal.runtime.jvm.server :as server]))
+            [portal.runtime.jvm.server :as server]
+            [portal.runtime.os :as os]))
 
 (defonce ^:private server (atom nil))
 
@@ -13,7 +14,7 @@
         (let [{:keys [port host]
                :or {port 0 host "localhost"}} options
               http-server (http/run-server #'server/handler
-                                           {:ip host
+                                           {:ip (if (os/wsl?) "0.0.0.0" host)
                                             :port port
                                             :max-body (* 1024 1024 1024)
                                             :max-ws (* 1024 1024 1024)
