@@ -266,7 +266,7 @@
                   :type      (pr-str (type value))
                   :pr-str    (pr-str' value)
                   :protocols (cond-> #{}
-                               (deref? value) (conj :IDeref))}
+                               (atom? value) (conj :IAtom))}
            m   (assoc :meta m)
            rep (assoc :rep rep)))))))
 

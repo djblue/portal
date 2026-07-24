@@ -99,9 +99,7 @@
   (satisfies? Runtime value))
 
 (defn ->runtime [call object]
-  (if (and
-       (not= (:tag object) :var)
-       (contains? (:protocols object) :IDeref))
+  (if (contains? (:protocols object) :IAtom)
     (->RuntimeAtom call object (r/atom ::loading))
     (->RuntimeObject call object)))
 
