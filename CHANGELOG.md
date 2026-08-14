@@ -1,3 +1,10 @@
+## 0.67.2 - 2026-08-14
+
+- Upgrade Intellij plugin for 2026.2 (#313) a7248cdc
+  - Thanks @jasonmm!
+- Only deref atoms in Portal UI 736e19f8
+  - Prevents issues when tapping a `(promise)`
+
 ## 0.67.1 - 2026-07-22
 
 - Add WSL2 workaround d2869ef0
