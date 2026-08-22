@@ -25,14 +25,24 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.portalOpen",
-        "title": "Open Portal",
-        "enablement": "portal:is-dev"
+        "title": "Open",
+        "category": "Calva+Portal",
+        "command": "portal.api/open"
       },
       {
-        "command": "extension.portalOpenDev",
-        "title": "Open Portal (DEV)",
-        "enablement": "portal:is-dev"
+        "title": "Close",
+        "category": "Calva+Portal",
+        "command": "portal.api/close"
+      },
+      {
+        "title": "Clear",
+        "category": "Calva+Portal",
+        "command": "portal.api/clear"
+      },
+      {
+        "title": "Docs",
+        "category": "Calva+Portal",
+        "command": "portal.api/docs"
       }
     ],
     "notebookRenderer": [
