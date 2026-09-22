@@ -5,19 +5,9 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Portal"
-                    anchor="right"
-                    icon="PortalIcons.ToolWindow"
-                    factoryClass="portal.extensions.intellij.Factory" />
-    </extensions>
-
-    <projectListeners>
-        <listener
-            class="portal.extensions.intellij.Factory"
-            topic="com.intellij.ide.ui.UISettingsListener"/>
-        <listener
-            class="portal.extensions.intellij.Factory"
-            topic="com.intellij.openapi.editor.colors.EditorColorsListener"/>
-    </projectListeners>
+    <!-- JCEF (JBCefBrowser) moved out of the platform core into its own
+         bundled plugin/module starting with IDE build 262 (2026.2). The
+         module id doesn't exist on older builds, so this must stay
+         optional to keep working on IDEs down to pluginSinceBuild. -->
+    <depends optional="true" config-file="withJcef.xml">com.intellij.modules.jcef</depends>
 </idea-plugin>

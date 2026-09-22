@@ -1,0 +1,17 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Portal"
+                    anchor="right"
+                    icon="PortalIcons.ToolWindow"
+                    factoryClass="portal.extensions.intellij.Factory" />
+    </extensions>
+
+    <projectListeners>
+        <listener
+            class="portal.extensions.intellij.Factory"
+            topic="com.intellij.ide.ui.UISettingsListener"/>
+        <listener
+            class="portal.extensions.intellij.Factory"
+            topic="com.intellij.openapi.editor.colors.EditorColorsListener"/>
+    </projectListeners>
+</idea-plugin>
