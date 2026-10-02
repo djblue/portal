@@ -4,6 +4,10 @@
     <vendor url="https://github.com/djblue/portal">djblue</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <!-- JCEF became a separate bundled plugin in IDEA 2026.2.
+     Optional keeps compatibility with older IDEA versions,
+     where JCEF is part of the platform itself. -->
+    <depends optional="true" config-file="withJcef.xml">com.intellij.modules.jcef</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Portal"
