@@ -5,6 +5,7 @@
             [clojure.java.io :as io]
             [clojure.main :as main]
             [clojure.test :as test]
+            [nrepl.config :refer [config]]
             [nrepl.middleware :refer [set-descriptor!]]
             [nrepl.middleware.caught :as caught]
             [nrepl.middleware.print :as print]
@@ -110,7 +111,9 @@
     (transport/send transport msg)
     (try
       (let [handler-msg (read-cursive-file-meta handler-msg)]
-        (when (and (seq (p/sessions)) (:file handler-msg))
+        (when (and (seq (p/sessions))
+                   (or (:file handler-msg)
+                       (get-in config [::wrap-portal :all-evals])))
           (when-let [out (:out msg)]
             (swap! (:stdio handler-msg) conj {:tag :out :val out}))
           (when-let [err (:err msg)]
