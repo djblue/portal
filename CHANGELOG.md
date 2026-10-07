@@ -1,3 +1,10 @@
+## 0.68.0 - 2026-10-06
+
+- Fix plugin crash for IntelliJ `2026.2.*` (#317) 39c903a4
+  - Thanks @akaplyar and @green-coder!
+- Update `portal.nrepl/wrap-portal` to tap `:all-evals` b7ed5f2f
+  - Thanks @seancorfield!
+
 ## 0.67.2 - 2026-08-14
 
 - Upgrade Intellij plugin for 2026.2 (#313) a7248cdc
