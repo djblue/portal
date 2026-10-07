@@ -4,6 +4,14 @@
             [portal.runtime.json :as json]
             [portal.runtime.transit :as transit]))
 
+(defn encoding->content-type
+  [encoding]
+  (case encoding
+    :json    "application/json"
+    :cson    "application/cson"
+    :transit "application/transit+json"
+    :edn     "application/edn"))
+
 (defn- error->data [ex]
   (merge
    (when-let [data (ex-data ex)]
@@ -14,7 +22,7 @@
                :message (ex-message ex)}]
     :stack   (.-stack ex)}))
 
-(defn- serialize [encoding value]
+(defn serialize [encoding value]
   (try
     (case encoding
       :json    (json/write value)
@@ -37,10 +45,5 @@
       (str "http://" host ":" port "/submit")
       {:method "POST"
        :headers
-       {"content-type"
-        (case encoding
-          :json    "application/json"
-          :cson    "application/cson"
-          :transit "application/transit+json"
-          :edn     "application/edn")}
+       {"content-type" (encoding->content-type encoding)}
        :body (serialize encoding value)}))))
