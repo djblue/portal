@@ -1,3 +1,7 @@
+## 0.68.1 - 2026-10-06
+
+* Potential fix for intellij extension release 39b521f3
+
 ## 0.68.0 - 2026-10-06
 
 - Fix plugin crash for IntelliJ `2026.2.*` (#317) 39c903a4
