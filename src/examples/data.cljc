@@ -315,7 +315,7 @@
 
 (defn- sin [x]
   #?(:cljr (Math/Sin x)
-     :jank (cpp/std.sin (cpp/float x))
+     :jank (cpp/std.sin (cpp/cast float (float x)))
      :default (Math/sin x)))
 
 (def line-chart
@@ -1199,8 +1199,7 @@
     ::themes             c/themes
     ::clojure-data       clojure-data
     ::hiccup             hiccup
-    ::data-visualization #?(:jank :not-implemented
-                            :default data-visualization)
+    ::data-visualization data-visualization
     ::string-data        string-data
     ::log-data           log-data
     ::profile-data       profile-data
