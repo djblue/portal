@@ -34,6 +34,7 @@
         (run-tests
          'portal.client-test
          'portal.runtime-test
+         'portal.runtime.api-test
          'portal.runtime.cson-test
          'portal.runtime.cson.buffer-test
          'portal.runtime.fs-test
