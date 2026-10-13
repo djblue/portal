@@ -148,7 +148,7 @@ jobs:
     - run: bb -m tasks.test/jank
   app:
     runs-on: ubuntu-latest
-    needs: [ test-ui, test-clj, test-cljs, test-cljr, test-py, check ]
+    needs: [ test-ui, test-clj, test-cljs, test-cljr, test-py, test-jank, check ]
     if: github.event_name == 'push'
     steps:
     - uses: actions/checkout@v3
@@ -161,7 +161,7 @@ jobs:
         force_orphan: true
   package:
     runs-on: ubuntu-latest
-    needs: [ test-ui, test-clj, test-cljs, test-cljr, test-py, check ]
+    needs: [ test-ui, test-clj, test-cljs, test-cljr, test-py, test-jank, check ]
     if: startsWith(github.event.head_commit.message, 'Release ')
     steps:
     - uses: actions/checkout@v3
