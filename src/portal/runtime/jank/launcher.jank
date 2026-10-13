@@ -27,11 +27,11 @@
           (let [http-server (cpp/portal.runtime.jank.server.create_server #'server/handler)
                 port (if (zero? port)
                        (.bind_to_any_port http-server host)
-                       port)]
+                       (do (.bind_to_port http-server host port)
+                           port))]
             (deliver p {:http-server (cpp/box http-server)
                         :port port
                         :host host})
-            (.bind_to_port http-server host port)
             (.listen_after_bind http-server)
             nil))
         (reset! server @p)
