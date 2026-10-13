@@ -4,7 +4,8 @@
                :cljr [portal.runtime.clr.client :as c]
                :lpy  [portal.runtime.python.client :as c]
                :jank [portal.runtime.jank.client :as c])
-            [portal.runtime :as rt]))
+            [portal.runtime :as rt]
+            #?(:lpy [portal.runtime.protocols :as p])))
 
 (defn on-open [session send!]
   (swap! rt/connections
@@ -47,3 +48,17 @@
 (defn on-close [session]
   (swap! rt/connections dissoc (:session-id session))
   (rt/reset-session session))
+
+;; TODO: remove p/Listener
+#?(:lpy
+   (defn listener [session]
+     (reify p/Listener
+       (on-open    [_ socket]
+         (on-open session (fn send [message]
+                            (p/send socket message))))
+       (on-message [_ _socket message]
+         (on-receive session message))
+       (on-close   [_ _socket _code _reason]
+         (on-close session))
+       (on-pong    [_ _socket _data])
+       (on-error   [_ _socket _throwable]))))
