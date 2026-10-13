@@ -129,10 +129,10 @@
 (def clojure-data
   {::regex #"hello-world"
    ::sorted-map #?(:lpy :not-implemented
-                   :jank :not-implemented
+                   :jank (sorted-map 3 "c" 2 "b" 1 "a")
                    :default (sorted-map-by gt 3 "c" 2 "b" 1 "a"))
    ::sorted-set #?(:lpy :not-implemented
-                   :jank :not-implemented
+                   :jank (sorted-set 3 2 1)
                    :default (sorted-set-by gt 3 2 1))
    ::var #'portal.colors/themes
    ::with-meta (with-meta 'with-meta {:hello :world})

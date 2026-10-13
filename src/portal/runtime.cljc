@@ -337,7 +337,7 @@
   (try
     (k m)
     (catch #?(:cljs :default
-              :jank jank.runtime.object_ref
+              :jank :default
               :default Exception) _e nil)))
 
 (defn- no-cache [value]
@@ -347,7 +347,7 @@
       (not (can-meta? value))
       (has? value ::id)
       (has? value :portal.rpc/id)
-      (::no-cache value)
+      (has? value ::no-cache)
       (::no-cache (meta value))))
 
 #?(:jank (def record? (constantly false)))
