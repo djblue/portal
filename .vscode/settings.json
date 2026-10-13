@@ -7,7 +7,24 @@
   },
   "calva.replConnectSequences": [
     {
-      "name": "basic-clj",
+      "name": "clojure",
+      "projectType": "deps.edn",
+      "projectRootPath": [
+        "."
+      ],
+      "afterPrimaryReplConnectedCode": "(portal.api/start {:port 53755})",
+      "extraNReplMiddleware": [
+        "portal.nrepl/middleware"
+      ],
+      "menuSelections": {
+        "cljAliases": [
+          ":dev",
+          ":cider"
+        ]
+      }
+    },
+    {
+      "name": "babashka",
       "projectType": "deps.edn",
       "projectRootPath": [
         "."
