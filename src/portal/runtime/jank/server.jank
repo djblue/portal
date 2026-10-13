@@ -1,5 +1,7 @@
 (ns portal.runtime.jank.server
   (:refer-clojure :exclude [read send])
+  (:include "httplib.h"
+            "portal/runtime/jank/server.hpp")
   (:require
    [clojure.string :as str]
    [portal.resources :refer [resource]]
@@ -7,9 +9,6 @@
    [portal.runtime.cson :as cson]
    [portal.runtime.index :as index]
    [portal.runtime.rpc :as rpc]))
-
-(cpp/raw "#include <httplib.h>")
-(cpp/raw "#include <portal/runtime/jank/server.hpp>")
 
 (def enable-cors
   {:status 204

@@ -1,12 +1,11 @@
 (ns portal.runtime.jank.launcher
+  (:include "httplib.h"
+            "portal/runtime/jank/server.hpp")
   (:require
    [portal.runtime :as rt]
    [portal.runtime.browser :as browser]
    [portal.runtime.jank.client :as c]
    [portal.runtime.jank.server :as server]))
-
-(cpp/raw "#include <httplib.h>")
-(cpp/raw "#include <portal/runtime/jank/server.hpp>")
 
 (defonce ^:private server (atom nil))
 

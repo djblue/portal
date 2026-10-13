@@ -141,8 +141,8 @@
        {#_#_"JANK_PRINT_IR" "1"
         #_#_"JANK_PRINT_CODEGEN" "1"
         #_#_"GC_DONT_GC" "1"
-        "CXX" (str (fs/file jank-local-llvm-bin "clang++"))
-        "CC"  (str (fs/file jank-local-llvm-bin "clang"))}])))
+        #_#_"CXX" (str (fs/file jank-local-llvm-bin "clang++"))
+        #_#_"CC"  (str (fs/file jank-local-llvm-bin "clang"))}])))
 
 (defn jank [& args]
   (let [[bin extra-env] (jank-env)]
