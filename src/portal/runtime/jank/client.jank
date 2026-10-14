@@ -1,0 +1,51 @@
+(ns portal.runtime.jank.client
+  (:require [portal.runtime :as rt]))
+
+(def ops
+  {:portal.rpc/response
+   (fn [message _send!]
+     (let [id (:portal.rpc/id message)]
+       (when-let [response (get @rt/pending-requests id)]
+         (deliver response message))))})
+
+(def timeout 60000)
+
+(defn- get-connection [session-id]
+  (let [p (promise)
+        watch-key (keyword (gensym))]
+    (if-let [send! (get @rt/connections session-id)]
+      (deliver p send!)
+      (add-watch
+       rt/connections
+       watch-key
+       (fn [_ _ _old new]
+         (when-let [send! (get new session-id)]
+           (deliver p send!)))))
+    (let [result (deref p #_#_timeout nil)]
+      (remove-watch rt/connections watch-key)
+      result)))
+
+(defn request [session-id message]
+  (if-let [send! (get-connection session-id)]
+    (let [id       (rt/next-id)
+          response (promise)
+          message  (assoc message :portal.rpc/id id)]
+      (swap! rt/pending-requests assoc id response)
+      (send! message)
+      (let [response (deref response #_#_timeout ::timeout)]
+        (swap! rt/pending-requests dissoc id)
+        (if-not (= response ::timeout)
+          response
+          (throw (ex-info
+                  "Portal request timeout"
+                  {::timeout true
+                   :session-id session-id
+                   :message message})))))
+    (throw (ex-info "No such portal session"
+                    {:session-id session-id :message message}))))
+
+(defn make-atom [session-id]
+  {:session-id session-id})
+
+(defn open? [session-id]
+  (contains? @rt/connections session-id))

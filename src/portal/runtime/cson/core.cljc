@@ -9,7 +9,8 @@
     (f value)
     value))
 
-(defrecord Tagged [tag rep])
+#?(:jank nil
+   :default (defrecord Tagged [tag rep]))
 
 (defmulti tagged-str :tag)
 (defmethod tagged-str :default
@@ -25,16 +26,21 @@
    (extend-type Tagged
      IPrintWithWriter
      (-pr-writer [this writer _opts]
-       (-write writer (tagged-str this)))))
+       (-write writer (tagged-str this))))
+   :jank nil)
 
 (defn tagged-value [tag rep] {:pre [(string? tag)]}
   #?(:lpy (assert (string? tag) "only string tags allowed"))
-  (->Tagged tag rep))
+  #?(:jank ^::tagged {:tag tag :rep rep}
+     :default (->Tagged tag rep)))
 
-(defn tagged-value? [x] (instance? Tagged x))
+(defn tagged-value? [x]
+  #?(:jank (::tagged (meta x))
+     :default (instance? Tagged x)))
 
 #?(:joyride nil
    :org.babashka/nbb nil
+   :jank nil
 
    :cljs
    (deftype Character [code]
@@ -66,6 +72,7 @@
 
 #?(:joyride nil
    :org.babashka/nbb nil
+   :jank nil
 
    :cljs
    (deftype Ratio [numerator denominator]
@@ -79,22 +86,26 @@
   #?(:clj  (Double/isFinite ^Double value)
      :cljr (Double/IsFinite ^Double value)
      :cljs (.isFinite js/Number value)
-     :lpy  (math/isfinite value)))
+     :lpy  (math/isfinite value)
+     :jank (not (infinite? value))))
 
 (defn nan? [value]
   #?(:clj  (.equals ^Double value ##NaN)
      :cljr (Double/IsNaN value)
      :cljs (.isNaN js/Number value)
-     :lpy  (math/isnan value)))
+     :lpy  (math/isnan value)
+     :jank (NaN? value)))
 
 (defn inf? [value]
   #?(:clj  (.equals ^Double value ##Inf)
      :cljr (Double/IsInfinity value)
      :cljs (== ##Inf value)
-     :lpy  (and (math/isinf value) (> value 0))))
+     :lpy  (and (math/isinf value) (> value 0))
+     :jank (== ##Inf value)))
 
 (defn -inf? [value]
   #?(:clj  (.equals ^Double value ##-Inf)
      :cljr (Double/IsNegativeInfinity value)
      :cljs (== ##-Inf value)
-     :lpy  (and (math/isinf value) (< value 0))))
+     :lpy  (and (math/isinf value) (< value 0))
+     :jank (== ##-Inf value)))

@@ -20,12 +20,16 @@
 (deftest e2e-jvm-test
   (let [portal (open)]
     #?(:lpy :skip
+       :jank :skip
        :default (test-atom portal))
     (is (= 6 (p/eval-str portal "(+ 1 2 3)")))
     (is (= 6 (p/eval-str portal "*1")))
     (is (= :world (:hello (p/eval-str portal "{:hello :world}"))))
     (is (thrown?
-         #?(:lpy Exception :cljs :default :default clojure.lang.ExceptionInfo)
+         #?(:lpy Exception
+            :cljs :default
+            :jank :default
+            :default clojure.lang.ExceptionInfo)
          (p/eval-str portal "(throw (ex-info \"error\" {:hello :world}))")))
     (is (= :hi (p/eval-str portal "(.resolve js/Promise :hi)" {:await true})))
     (is (some? (some #{portal} (p/sessions))))

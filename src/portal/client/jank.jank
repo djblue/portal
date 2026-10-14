@@ -1,0 +1,62 @@
+(ns portal.client.jank
+  (:require [clojure.string :as str]
+            [portal.runtime.cson :as cson])
+  (:include "httplib.h"))
+
+(defn request [{:keys [url method body headers]
+                :or   {method :get}}]
+  {:pre [(string? url)
+         (#{:get :put :post :delete :patch :options} method)
+         (or (string? body) (nil? body))
+         (or (map? headers) (nil? headers))]}
+  (let [[_ host path] (re-matches #"(.*://[^/]+)(/?.*)" url)
+        client (cpp/httplib.Client. (cpp/cast std.string host))
+        request (cpp/httplib.Request.)
+        method (cpp/cast std.string (str/upper-case (name method)))
+        path (cpp/cast std.string (if (str/blank? path) "/" path))]
+    (.set_keep_alive client false)
+    (.set_connection_timeout client 3 0)
+    (.set_read_timeout client 3 0)
+    (.set_write_timeout client 3 0)
+    (cpp/= (.-method request) method)
+    (cpp/= (.-path request) path)
+    (doseq [[k v] headers]
+      (-> request
+          (.-headers)
+          (.insert
+           (cpp/std.make_pair (cpp/cast std.string (name k))
+                              (cpp/cast std.string v)))))
+    (when body
+      (cpp/= (.-body request) (cpp/cast std.string body)))
+    (let [response (cpp/httplib.Response.)
+          error    (cpp/httplib.Error.)]
+      (if (.send client request response error)
+        {:status (.-status response)
+         :body (.-body response)}
+        {:status -1 :body (cpp/httplib.to_string error)}))))
+
+(defn- serialize [encoding value]
+  (try
+    (case encoding
+      :cson    (cson/write value)
+      :edn     (binding [*print-meta* true]
+                 (pr-str value)))
+    (catch jank.runtime.object_ref ex
+      ;; TODO: remove when jank can edn/read-string the error via tagged-literal
+      (str/replace (pr-str ex) #"^#error " ""))))
+
+(defn submit
+  [{:keys [encoding port host]
+    :or   {encoding :edn
+           host     "localhost"
+           port     53755}}
+   value]
+  (request
+   {:url (str "http://" host ":" port "/submit")
+    :method :post
+    :headers
+    {"content-type"
+     (case encoding
+       :cson "application/cson"
+       :edn  "application/edn")}
+    :body (serialize encoding value)}))

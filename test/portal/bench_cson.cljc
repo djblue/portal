@@ -13,7 +13,8 @@
   {:platform-data (select-keys d/platform-data [::d/uuid ::d/date])
    :basic-data (dissoc d/basic-data ::d/range)
    :hiccup-data d/hiccup
-   :data-visualization d/data-visualization
+   ;; TODO: re-enable when chunked seqs get fixed in jank
+  ;;  :data-visualization d/data-visualization
    :string-data d/string-data
    :log-data d/log-data
    :profile-data d/profile-data
@@ -27,10 +28,11 @@
     (pr-str v)))
 
 (def ^:private formats
-  #?(:org.babashka/nbb [:edn :cson :cson-simple]
-     :cljr [:edn :cson :cson-simple]
-     :lpy [:cson :cson-simple]
-     :default [:transit :edn :cson :cson-simple]))
+  #?(:org.babashka/nbb [#_:edn :cson #_:cson-simple]
+     :cljr [#_:edn :cson #_:cson-simple]
+     :lpy [:cson #_:cson-simple]
+     :jank [:cson]
+     :default [#_:transit #_:edn :cson #_:cson-simple]))
 
 (defn run-benchmark []
   (doall
@@ -46,7 +48,7 @@
            :edn     (let [value (pr-meta value)]
                       (try
                         (b/run (edn/read-string value) n)
-                        (catch #?(:cljs :default :default Exception) e
+                        (catch #?(:cljs :default :jank jank.runtime.object_ref :default Exception) e
                           (tap> e)
                           (throw e))))
            :cson    (let [value (cson/write value)]
@@ -156,4 +158,4 @@
 
 (defn -main [] (p/submit (run-benchmark)))
 
-#?(:lpy (-main) :org.babashka/nbb :skip :cljs (-main))
+#?(:lpy (-main) :org.babashka/nbb :skip :cljs (-main) :jank (-main))

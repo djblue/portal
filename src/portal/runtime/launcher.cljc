@@ -2,11 +2,13 @@
   (:require #?(:clj  [portal.client.jvm :as client]
                :cljs [portal.client.node :as client]
                :cljr [portal.client.clr :as client]
-               :lpy  [portal.client.py :as client])
+               :lpy  [portal.client.py :as client]
+               :jank [portal.client.jank :as client])
             #?(:cljs    [portal.async :as a]
-               :default [portal.sync :as a])
-            [clojure.edn :as edn]
+               :default [clojure.core :as a])
             [portal.runtime.browser :as browser]
+            #?(:lpy [clojure.edn :as edn]
+               :default [portal.runtime.edn :as edn])
             [portal.runtime.fs :as fs]
             [portal.runtime.shell :refer [spawn]]))
 
@@ -66,7 +68,7 @@
 (defmethod browser/-open :intellij [args]
   (try
     (remote-open (assoc args :config-file "intellij.edn"))
-    (catch #?(:cljs js/Error :default Exception) e
+    (catch #?(:cljs js/Error :jank jank.runtime.object_ref :default Exception) e
       (throw
        (ex-info
         (str

@@ -1,0 +1,70 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(gdb) jank remote",
+      "type": "cppdbg",
+      "request": "attach",
+      "program": "/home/chris/repos/jank/compiler+runtime/build/jank",
+      "MIMode": "gdb",
+      "logging": {
+        "engineLogging": true,
+        "trace": true
+      },
+      "setupCommands": [
+        {
+          "text": "handle SIGPWR nostop noprint pass",
+          "ignoreFailures": true
+        },
+        {
+          "text": "handle SIGXCPU nostop noprint pass",
+          "ignoreFailures": true
+        },
+        {
+          "text": "handle SIG32 nostop noprint pass",
+          "ignoreFailures": true
+        },
+        {
+          "text": "handle SIGUSR1 nostop noprint pass",
+          "ignoreFailures": true
+        },
+        {
+          "text": "handle SIGUSR2 nostop noprint pass",
+          "ignoreFailures": true
+        },
+        {
+          "text": "catch throw",
+          "ignoreFailures": false
+        },
+        {
+          "text": "catch signal SIGABRT",
+          "ignoreFailures": false
+        },
+        {
+          "text": "set unwind-on-signal on",
+          "ignoreFailures": false
+        },
+        {
+          "description": "Enable frame filters for MI",
+          "text": "-enable-frame-filters",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Enable gdb script extensions",
+          "text": "set auto-load safe-path ${workspaceFolder}/../jank/",
+          "ignoreFailures": false
+        },
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "source ${workspaceFolder}/../jank/gdb/jank.py",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
