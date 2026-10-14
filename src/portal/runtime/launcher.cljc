@@ -7,7 +7,8 @@
             #?(:cljs    [portal.async :as a]
                :default [clojure.core :as a])
             [portal.runtime.browser :as browser]
-            [portal.runtime.edn :as edn]
+            #?(:lpy [clojure.edn :as edn]
+               :default [portal.runtime.edn :as edn])
             [portal.runtime.fs :as fs]
             [portal.runtime.shell :refer [spawn]]))
 
