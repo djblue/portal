@@ -49,7 +49,7 @@
       "menuSelections": {
         "cljAliases": []
       },
-      "customJackInCommandLine": "script -qc 'bb jank' /dev/null",
+      "customJackInCommandLine": "bb jank",
       "replSessionNames": {
         "primary": "jank"
       },
