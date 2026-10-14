@@ -4,7 +4,8 @@
                :cljs [cljs.tools.reader.impl.commons :as commons])
             #?(:org.babashka/nbb [clojure.core]
                :cljs [cljs.tools.reader.impl.utils :refer [numeric?]])
-            [clojure.edn :as edn]
+            #?(:jank [clojure.core]
+               :default [clojure.edn :as edn])
             [clojure.string :as str]
             [portal.runtime.cson.base64 :as base64]
             [portal.runtime.cson.core :as core]))
@@ -62,12 +63,14 @@
   ([edn-string]
    (read-string {} edn-string))
   ([{:keys [readers]} edn-string]
-   (with-redefs  #?(:org.babashka/nbb [] :cljs [commons/parse-symbol parse-symbol] :default [])
-     (edn/read-string
-      {:readers (merge
-                 {'portal/var ->var
-                  'portal/re ->regex
-                  'portal/bin base64/decode}
-                 readers)
-       :default tagged-literal}
-      (-> edn-string escape-var escape-regex)))))
+   #?(:jank (clojure.core/read-string edn-string)
+      :default
+      (with-redefs  #?(:org.babashka/nbb [] :cljs [commons/parse-symbol parse-symbol] :default [])
+        (edn/read-string
+         {:readers (merge
+                    {'portal/var ->var
+                     'portal/re ->regex
+                     'portal/bin base64/decode}
+                    readers)
+          :default tagged-literal}
+         (-> edn-string escape-var escape-regex))))))

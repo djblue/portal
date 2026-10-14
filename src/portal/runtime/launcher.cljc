@@ -6,8 +6,8 @@
                :jank [portal.client.jank :as client])
             #?(:cljs    [portal.async :as a]
                :default [clojure.core :as a])
-            [clojure.edn :as edn]
             [portal.runtime.browser :as browser]
+            [portal.runtime.edn :as edn]
             [portal.runtime.fs :as fs]
             [portal.runtime.shell :refer [spawn]]))
 
