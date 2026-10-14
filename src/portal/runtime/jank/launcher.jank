@@ -109,12 +109,4 @@
 (defn url [portal]
   (browser/url {:portal portal :server @server}))
 
-(comment
-  (-> @server)
-  (start {:host "localhost" :port 8000})
-  (stop)
-  ;; (get-port)
-  ;; (stop)
-  comment)
-
 (reset! rt/request c/request)
