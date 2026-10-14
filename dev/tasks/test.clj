@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [test])
   (:require [babashka.fs :as fs]
             [tasks.build :refer [build install]]
+            [tasks.jank :as jank]
             [tasks.py :as py]
             [tasks.tools :as t]))
 
@@ -66,6 +67,7 @@
   (t/lpy :run "--include-path" "test" "--include-path" "src" "-n" :portal.test-runner))
 
 (defn jank []
+  (jank/install)
   (t/jank :run "test/portal/test_runner.jank"))
 
 (defn all []
