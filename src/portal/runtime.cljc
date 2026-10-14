@@ -377,9 +377,8 @@
 (defn- id-var [value]
   (if-not (var? value)
     value
-    (with-meta
-      (core/tagged-value "portal/var" (var->name value))
-      (assoc (meta value) ::id (value->id value)))))
+    (-> (core/tagged-value "portal/var" (var->name value))
+        (vary-meta assoc ::id (value->id value)))))
 
 (defn write [value session]
   (binding [*session* session]
