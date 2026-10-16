@@ -147,7 +147,7 @@
                          (assoc :inherit true)
                          (update :extra-env merge extra-env))]
       (apply sh bin
-             "--eagerness" "eager"
+             "--eager"
              "--module-path" "src:resources:dev:test"
              (str "-I" (fs/path (fs/cwd) "src"))
              "-I/usr/include"
