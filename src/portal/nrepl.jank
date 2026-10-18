@@ -1,0 +1,95 @@
+(ns portal.nrepl
+  (:include "chrono")
+  (:require [clojure.string :as str]
+            [clojure.test :as test]
+            [portal.console :as console]))
+
+#?(:jank
+   (cpp/raw "namespace portal::nrepl
+{
+  long process_time_ns()
+  {
+    auto now(std::chrono::steady_clock::now());
+    auto duration_since_epoch(now.time_since_epoch());
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(duration_since_epoch).count();
+  }
+}"))
+
+(defn- normalize-trace [[function file line]]
+  (cond
+    (str/blank? function)
+    nil
+
+    (str/includes? function "::")
+    (let [parts (str/split function #"::")]
+      [(str/join "::" (butlast parts)) (last parts) file line])
+
+    :else
+    (let [[s _] (str/split function #" ")
+          s (symbol s)]
+      [s "" file line])))
+
+(defn- normalize-via [{:keys [message at data]}]
+  {:message message
+   :type 'exception_info
+   :at (normalize-trace at)
+   :data data})
+
+(defn- ->exception [ex]
+  (-> ex
+      (Throwable->map)
+      (update :trace #(into [] (keep normalize-trace) %))
+      (update :via #(mapv normalize-via %))))
+
+(defn- wrap-portal* [input output]
+  (let [op (get input "op")
+        stdio
+        (keep
+         (fn [{:keys [out err]}]
+           (cond
+             out {:tag :out :val out}
+             err {:tag :err :val err}))
+         output)
+        error? (some :err output)
+        result (if error? (->exception *e) *1)]
+    (when (and (= op "eval")
+               (get input "file")
+               (not= :portal.api/ignore result))
+      (tap>
+       (with-meta
+         (merge
+          {:level (if error? :error :info)
+           :result result
+           :code (get input "code")
+           :file (get input "file")
+           :ns (some-> (get input "ns") symbol)
+           :time (console/now)
+           :runtime :jank
+           :line (get input "line")
+           :column (get input "column")
+           :ms (get input :ms)}
+          (when (seq stdio)
+            {:stdio stdio})
+          (when-let [report (not-empty (:report input))]
+            {:report report}))
+         {::eval true
+          :portal.viewer/for
+          {:code :portal.viewer/code
+           :time :portal.viewer/relative-time
+           :ms   :portal.viewer/duration-ns}
+          :portal.viewer/code {:language :clojure}})))))
+
+(defn wrap-portal [handler]
+  (fn [input]
+    (let [report* test/report
+          report  (atom [])
+          start   (cpp/portal.nrepl.process_time_ns)
+          output  (binding [test/report (fn [message]
+                                          (report* message)
+                                          (swap! report conj message))]
+                    (handler input))
+          stop   (cpp/portal.nrepl.process_time_ns)]
+      (wrap-portal* (assoc input :ms (- stop start) :report @report) output)
+      output)))
+
+(defn middleware [handler] (-> handler wrap-portal))
