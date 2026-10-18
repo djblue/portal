@@ -137,15 +137,22 @@
            {:color       (::c/border theme)}}
           " [" (count trace) "]"])]]]))
 
+(def ^:private extensions
+  #{".clj"
+    ".cljs"
+    ".cljc"
+    ".jank"
+    ".lpy"
+    ".cljr"
+    ".bb"})
+
 (defn- analyze-trace-item [index trace]
   (let [[class method file line] trace
         class (str class)
         clj-name (symbol (demunge class))
-        clj? (or (and (string? file)
-                      (or (str/ends-with? file ".clj")
-                          (str/ends-with? file ".cljs")
-                          (str/ends-with? file ".cljc")))
-                 (not= clj-name class))]
+        clj? (if (string? file)
+               (some #(str/ends-with? file %) extensions)
+               (not= clj-name class))]
     (with-meta
       trace
       (merge
@@ -167,6 +174,12 @@
       [d/div
        {:style {:grid-column "1 / 3"}}
        (into [ins/wrapper context] children)])))
+
+(def ^:private default-hidden
+  ["nrepl.middleware"
+   "jank.nrepl"
+   "portal.nrepl"
+   "clojure.lang.Compiler"])
 
 (defn- inspect-stack-trace [trace]
   (let [theme   (theme/use-theme)
@@ -199,9 +212,8 @@
               (when (matcher line)
                 (let [{:keys [clj? ns]} (meta line)]
                   (if (:expanded? options) true
-                      (and clj? (not (or
-                                      (str/starts-with? (str ns) "nrepl.middleware")
-                                      (str/starts-with? (str ns) "clojure.lang.Compiler")))))))))
+                      (and clj?
+                           (not (some #(str/starts-with? (str ns) %) default-hidden))))))))
            (partition-by (comp :file meta))
            (map-indexed
             (fn [index trace]
