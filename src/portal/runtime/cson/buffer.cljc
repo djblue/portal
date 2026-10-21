@@ -33,8 +33,7 @@
      (volatile! (json/read data))
      :jank
      (cpp/box
-      (cpp/portal.runtime.cson.buffer.create_reader
-       (cpp/cast std.string data)))
+      (cpp/portal.runtime.cson.buffer.create_reader data))
      :cljr
      (volatile!
       (seq
@@ -62,7 +61,7 @@
 (defn push-bool   [buffer value]
   #?(:bb   (conj! buffer value)
      :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
-                   (.push_bool (cpp/cast bool value)))
+                   (.push_bool value))
                buffer)
      :clj  (doto ^JsonWriter buffer (.value ^Boolean value))
      :cljr (doto ^JsonArray buffer (.Add value))
@@ -72,7 +71,7 @@
 (defn push-long   [buffer value]
   #?(:bb   (conj! buffer value)
      :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
-                   (.push_long (cpp/cast long value)))
+                   (.push_long value))
                buffer)
      :clj  (doto ^JsonWriter buffer (.value ^Long value))
      :cljr (doto ^JsonArray buffer (.Add value))
@@ -82,7 +81,7 @@
 (defn push-double [buffer value]
   #?(:bb   (conj! buffer value)
      :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
-                   (.push_double (cpp/cast double value)))
+                   (.push_double value))
                buffer)
      :clj  (doto ^JsonWriter buffer (.value ^Double value))
      :cljr (doto ^JsonArray buffer (.Add value))
@@ -92,7 +91,7 @@
 (defn push-string [buffer value]
   #?(:bb   (conj! buffer value)
      :jank (do (-> (cpp/unbox (:* portal.runtime.cson.buffer.writer) buffer)
-                   (.push_string (cpp/cast std.string value)))
+                   (.push_string value))
                buffer)
      :clj  (doto ^JsonWriter buffer (.value ^String value))
      :cljr (doto ^JsonArray buffer (.Add value))
