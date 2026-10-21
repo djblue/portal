@@ -1,9 +1,8 @@
 #pragma once
 
-#include <gc/gc.h>
-
-#include <string>
 #include <nlohmann/json.hpp>
+
+#include <jtl/immutable_string.hpp>
 
 namespace portal::runtime::cson::buffer
 {
@@ -23,10 +22,9 @@ namespace portal::runtime::cson::buffer
     nlohmann::json::iterator it;
     nlohmann::json::iterator end;
 
-    reader(nlohmann::json &&j) : buffer(std::move(j))
+    reader(jtl::immutable_string const &json_str)
+        : buffer(nlohmann::json::parse(json_str)), it{buffer.begin()}, end{buffer.end()}
     {
-      it = buffer.begin();
-      end = buffer.end();
     }
 
     void next_null()
@@ -46,7 +44,7 @@ namespace portal::runtime::cson::buffer
         throw std::out_of_range("Iterator reached the end of the JSON buffer");
       }
 
-      auto value(it->get<bool>());
+      auto const value(it->get<bool>());
       std::advance(it, 1);
       return value;
     }
@@ -58,7 +56,7 @@ namespace portal::runtime::cson::buffer
         throw std::out_of_range("Iterator reached the end of the JSON buffer");
       }
 
-      auto value(it->get<long>());
+      auto const value(it->get<long>());
       std::advance(it, 1);
       return value;
     }
@@ -70,19 +68,19 @@ namespace portal::runtime::cson::buffer
         throw std::out_of_range("Iterator reached the end of the JSON buffer");
       }
 
-      auto value(it->get<double>());
+      auto const value(it->get<double>());
       std::advance(it, 1);
       return value;
     }
 
-    std::string next_string()
+    jtl::immutable_string next_string()
     {
       if (it == end)
       {
         throw std::out_of_range("Iterator reached the end of the JSON buffer");
       }
 
-      auto value(it->get<std::string>());
+      auto const value(it->get<jtl::immutable_string>());
       std::advance(it, 1);
       return value;
     }
@@ -113,12 +111,6 @@ namespace portal::runtime::cson::buffer
     }
   };
 
-  reader *create_reader(std::string json_str)
-  {
-    auto json(nlohmann::json::parse(json_str));
-    return new (UseGC) reader{std::move(json)};
-  }
-
   struct writer
   {
     nlohmann::json buffer;
@@ -147,19 +139,14 @@ namespace portal::runtime::cson::buffer
       buffer.push_back(value);
     }
 
-    void push_string(const std::string &value)
+    void push_string(jtl::immutable_string const &value)
     {
       buffer.push_back(value);
     }
 
-    std::string str() const
+    jtl::immutable_string str() const
     {
       return buffer.dump();
     }
   };
-
-  writer *create_writer()
-  {
-    return new (UseGC) writer{};
-  }
 }

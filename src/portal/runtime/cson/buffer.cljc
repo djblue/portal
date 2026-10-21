@@ -33,7 +33,7 @@
      (volatile! (json/read data))
      :jank
      (cpp/box
-      (cpp/portal.runtime.cson.buffer.create_reader data))
+      (cpp/new cpp/portal.runtime.cson.buffer.reader data))
      :cljr
      (volatile!
       (seq
@@ -210,7 +210,7 @@
 
 (defn with-buffer [f value]
   #?(:bb   (json/write (persistent! (f (transient []) value)))
-     :jank (let [writer (cpp/portal.runtime.cson.buffer.create_writer)]
+     :jank (let [writer (cpp/new cpp/portal.runtime.cson.buffer.writer)]
              (f (cpp/box writer) value)
              (.str writer))
      :cljs (.stringify js/JSON (f (js/Array.) value))
