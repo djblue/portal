@@ -222,7 +222,8 @@
   (cson/read
    #?(:clj  (slurp (io/resource "portal/docs.json"))
       :cljs docs-json
-      :lpy  (slurp (resource "portal/docs.json")))))
+      :lpy  (slurp (resource "portal/docs.json"))
+      :jank (slurp (io/resource "portal/docs.json")))))
 
 (defn docs
   "Open portal docs.
