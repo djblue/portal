@@ -148,7 +148,6 @@
                          (update :extra-env merge extra-env))]
       (apply sh bin
              "--eager"
-             "--module-path" "src:resources:dev:test"
              (str "-I" (fs/path (fs/cwd) "src"))
              "-I/usr/include"
              (str "-I" (fs/path (fs/cwd) ".portal/include"))

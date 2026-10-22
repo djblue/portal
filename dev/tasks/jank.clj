@@ -40,4 +40,4 @@
   "Start jank dev env / nrepl"
   []
   (install)
-  (jank :repl))
+  (jank "--module-path" "src:resources:dev:test" :repl))

@@ -7,7 +7,10 @@
    [portal.resources :refer [resource]]
    [portal.runtime :as rt]
    [portal.runtime.cson :as cson]
+   [portal.runtime.fs :as fs]
    [portal.runtime.index :as index]
+   [portal.runtime.json :as json]
+   [portal.runtime.npm :as npm]
    [portal.runtime.rpc :as rpc]))
 
 (def enable-cors
@@ -87,6 +90,35 @@
     "application/cson" (cson/read body)
     nil))
 
+(defn- ->js [file]
+  (let [source (fs/slurp file)]
+    {:lang :js :npm true :file file :dir (fs/dirname file) :source source}))
+
+(defn- node-resolve [{:keys [name parent]}]
+  (if-not parent
+    (some-> name npm/node-resolve ->js)
+    (some-> name (npm/node-resolve parent) ->js)))
+
+(defmethod route [:options "/load"] [_] enable-cors)
+(defmethod route [:post "/load"] [request]
+  {:headers
+   {"content-type" "application/json"
+    "Access-Control-Allow-Origin" "*"}
+   :body
+   (json/write
+    (let [{:keys [name path macros] :as m} (body request)]
+      (if (or (= name 'react) (string? name) (:npm name))
+        (node-resolve m)
+        (some
+         (fn [ext]
+           (when-let [resource (resource (str path ext))]
+             {:lang (if (= ext ".js") :js :clj)
+              :file (str resource)
+              :source (slurp resource)}))
+         (if macros
+           [".clj"  ".cljc"]
+           [".cljs" ".cljc" ".js"])))))})
+
 (defmethod route [:options "/submit"] [_] enable-cors)
 (defmethod route [:post "/submit"] [request]
   (if-let [data (body request)]
@@ -127,7 +159,7 @@
     (cpp/= (.-status res) (cpp/int (get response :status 200)))
     (doseq [[k v] (:headers response)
             :when (not= k "content-type")]
-      (.set_header res (name k) (name v)))
+      (.set_header res (name k) (cond-> v (keyword? v) name :always str)))
     (when-let [body (:body response)]
       (.set_content
        res

@@ -55,6 +55,7 @@ namespace portal::runtime::jank::server
     server->Put(R"(.*)", http_handler);
     server->Delete(R"(.*)", http_handler);
     server->Patch(R"(.*)", http_handler);
+    server->Options(R"(.*)", http_handler);
 
     server->WebSocket(
         R"(.*)",

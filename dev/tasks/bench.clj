@@ -18,7 +18,7 @@
             #(t/cljr "-m" :portal.bench-cson)
             #(t/nbb "-m" :portal.bench-cson)
             #(t/lpy :run "-n" :portal.bench-cson)
-            #(t/jank :run "test/portal/bench_cson.cljc")]]
+            #(t/jank "--module-path" "src:resources" :run "test/portal/bench_cson.cljc")]]
      (future (with-out-data (f))))))
 
 (def windows
