@@ -1,0 +1,35 @@
+(ns ^:no-doc portal.runtime.jank.scheduler
+  (:include "chrono" "thread"))
+
+(defonce ^:private timeouts (atom {:id 0 :queue (sorted-map)}))
+
+(defn- now-ms []
+  (quot
+   (.count
+    (.time_since_epoch
+     (cpp/std.chrono.steady_clock.now)))
+   (quot cpp/std.chrono.steady_clock.period.den 1000)))
+
+(defonce ^:private timeout-loop
+  (delay
+    (future
+      (while true
+        (when-let [queue (seq (:queue @timeouts))]
+          (let [now    (now-ms)
+                ready? (fn ready? [job] (<= (ffirst job) now))]
+            (doseq [[k f] (take-while ready? queue)]
+              (try (f) (catch :default _))
+              (swap! timeouts update :queue dissoc k))))
+        (cpp/std.this_thread.sleep_for
+         (cpp/std.chrono.milliseconds (cpp/long 10)))))))
+
+(defn set-timeout [f timeout]
+  (force timeout-loop)
+  (let [deadline (+ (now-ms) timeout)]
+    (swap!
+     timeouts
+     (fn [{:keys [id] :as state}]
+       (-> state
+           (update :id inc)
+           (update :queue assoc [deadline id] f))))
+    nil))

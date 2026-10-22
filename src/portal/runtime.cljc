@@ -15,15 +15,15 @@
                :cljs    [clojure.pprint :as pprint]
                :cljr    [clojure.pprint :as pprint]
                :lpy     [clojure.pprint :as pprint])
-            [portal.runtime.cson.core :as core]
-            [portal.runtime.cson.reader :as reader]
+            #?(:jank [portal.runtime.jank.scheduler :as scheduler])
             #?(:jank [portal.runtime.cson.writer-simple :as writer]
                :default [portal.runtime.cson.writer :as writer])
+            [portal.runtime.cson.core :as core]
+            [portal.runtime.cson.reader :as reader]
             [portal.viewer :as v])
   #?(:clj (:import (java.util.concurrent Executors ScheduledExecutorService TimeUnit))
      :lpy (:import [asyncio]
-                   [threading])
-     :jank (:include "chrono" "thread")))
+                   [threading])))
 
 (def ^:private tagged-type (type (core/tagged-value "tag" [])))
 
@@ -102,11 +102,7 @@
                (await (asyncio/sleep (/ timeout 1000.0)))
                (.start (threading/Thread ** :daemon true :target f))))
             @async-loop)
-     :jank (future
-             (cpp/std.this_thread.sleep_for
-              (cpp/std.chrono.milliseconds
-               (cpp/long timeout)))
-             (f)))
+     :jank (scheduler/set-timeout f timeout))
   nil)
 
 (defn- hashable? [value]
