@@ -149,7 +149,5 @@
       (apply sh bin
              "--eager"
              (str "-I" (fs/path (fs/cwd) "src"))
-             "-I/usr/include"
              (str "-I" (fs/path (fs/cwd) ".portal/include"))
-             "-L/usr/lib"
              args))))

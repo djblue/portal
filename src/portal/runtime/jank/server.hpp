@@ -21,6 +21,26 @@ namespace portal::runtime::jank::server
 
   httplib::Server *create_server(object_ref const handler)
   {
+    struct gc_thread_scope
+    {
+      bool registered{};
+
+      gc_thread_scope()
+      {
+        struct GC_stack_base sb;
+        GC_get_stack_base(&sb);
+        registered = GC_register_my_thread(&sb) == GC_SUCCESS;
+      }
+
+      ~gc_thread_scope()
+      {
+        if (registered)
+        {
+          GC_unregister_my_thread();
+        }
+      }
+    };
+
     auto const server = new (UseGC) httplib::Server();
 
     auto http_handler(
@@ -31,9 +51,7 @@ namespace portal::runtime::jank::server
             return httplib::Server::HandlerResponse::Unhandled;
           }
 
-          struct GC_stack_base sb;
-          GC_get_stack_base(&sb);
-          GC_register_my_thread(&sb);
+          gc_thread_scope const _{};
 
           auto const req_type(jtl::immutable_string("httplib::Request*"));
           auto const res_type(jtl::immutable_string("httplib::Response*"));
@@ -46,7 +64,6 @@ namespace portal::runtime::jank::server
 
           handler.call(boxed_req, boxed_res, jank_nil);
 
-          GC_unregister_my_thread();
           return httplib::Server::HandlerResponse::Handled;
         });
 
@@ -61,9 +78,7 @@ namespace portal::runtime::jank::server
         R"(.*)",
         [=](const httplib::Request &req, httplib::ws::WebSocket &ws)
         {
-          struct GC_stack_base sb;
-          GC_get_stack_base(&sb);
-          GC_register_my_thread(&sb);
+          gc_thread_scope const _{};
 
           auto const req_type(jtl::immutable_string("httplib::Request*"));
           auto const ws_type(jtl::immutable_string("httplib::ws::WebSocket*"));
@@ -75,8 +90,6 @@ namespace portal::runtime::jank::server
           auto const boxed_ws(make_box<obj::opaque_box>(ws_val, ws_type));
 
           handler.call(boxed_req, jank_nil, boxed_ws);
-
-          GC_unregister_my_thread();
         });
 
     return server;
