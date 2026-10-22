@@ -139,7 +139,8 @@
       [local-jank
        {#_#_"JANK_PRINT_IR" "1"
         #_#_"JANK_PRINT_CODEGEN" "1"
-        #_#_"GC_DONT_GC" "1"}])))
+        #_#_"GC_DONT_GC" "1"
+        "JANK_EXTRA_FLAGS" "-fno-standalone-debug"}])))
 
 (defn jank [& args]
   (let [[bin extra-env] (jank-env)]
@@ -147,7 +148,6 @@
                          (assoc :inherit true)
                          (update :extra-env merge extra-env))]
       (apply sh bin
-             "--eager"
              (str "-I" (fs/path (fs/cwd) "src"))
              (str "-I" (fs/path (fs/cwd) ".portal/include"))
              args))))

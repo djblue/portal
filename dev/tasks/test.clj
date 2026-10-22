@@ -68,7 +68,7 @@
 
 (defn jank []
   (jank/install)
-  (t/jank "--module-path" "src:resources:test" :run "test/portal/test_runner.jank"))
+  (t/jank "--no-debug" "--module-path" "src:resources:test" :run "test/portal/test_runner.jank"))
 
 (defn all []
   (build)
