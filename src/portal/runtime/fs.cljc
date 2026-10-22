@@ -94,9 +94,8 @@
 {
   long modified(std::string path)
   {
-    auto const modified_time(std::filesystem::last_write_time(path));
-    auto system_time(std::chrono::clock_cast<std::chrono::system_clock>(modified_time));
-    return std::chrono::duration_cast<std::chrono::milliseconds>(system_time.time_since_epoch()).count();
+    auto const modified_time = std::filesystem::last_write_time(path);
+    return std::chrono::duration_cast<std::chrono::milliseconds>(modified_time.time_since_epoch()).count();
   }
 }
 "))
