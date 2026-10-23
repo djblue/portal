@@ -89,7 +89,7 @@
   #?(:clj  (instance? clojure.lang.BigInt value)
      :cljr (instance? clojure.lang.BigInt value)
      :cljs (identical? js/BigInt (some-> value .-constructor))
-     :jank (= "big_integer" (type value))
+     :jank (cpp/== cpp/jank.runtime.object_type.big_integer (.get_type value))
      :else false))
 
 (defn- push-bigint [buffer value]
