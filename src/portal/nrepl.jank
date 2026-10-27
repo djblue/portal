@@ -92,4 +92,6 @@
       (wrap-portal* (assoc input :ms (- stop start) :report @report) output)
       output)))
 
-(defn middleware [handler] (-> handler wrap-portal))
+(def middleware
+  "All of portal's nREPL middleware."
+  [`wrap-portal])
