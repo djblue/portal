@@ -10,6 +10,8 @@
                  :target-dir (str class-dir "/portal")})
     (b/copy-dir {:src-dirs   [".portal/vendor"]
                  :target-dir (str class-dir "/portal/vendor")})
+    (b/copy-dir {:src-dirs   [".portal/include"]
+                 :target-dir (str class-dir "/portal/include")})
     (b/delete {:path (str class-dir "/portal/extensions/")})
     (b/jar {:class-dir class-dir :jar-file  jar-file})
     (shutdown-agents)))

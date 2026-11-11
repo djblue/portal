@@ -4,6 +4,7 @@
             [portal.runtime.jvm.ssr :as ssr]
             [tasks.build :refer [build extensions]]
             [tasks.info :refer [options version]]
+            [tasks.jank :as jank]
             [tasks.py :as py]
             [tasks.tools :refer [clj]]))
 
@@ -105,6 +106,7 @@
   []
   (build)
   (ssr/vendor)
+  (jank/install)
   (when (seq
          (fs/modified-since
           (str "target/portal-" version ".jar")
@@ -112,7 +114,8 @@
            ["pom.xml"]
            (fs/glob "src" "**")
            (fs/glob "resources" "**")
-           (fs/glob ".portal/vendor" "**"))))
+           (fs/glob ".portal/vendor" "**")
+           (fs/glob ".portal/include" "**"))))
     (pom)
     (clj "-M:dev" "-m" :tasks.jar)))
 
