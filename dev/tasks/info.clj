@@ -20,7 +20,9 @@
      (:deps deps)
      (provided (get-in deps [:aliases :cider :extra-deps]))
      (provided (get-in deps [:aliases :cljs :extra-deps]))
-     (provided (get-in deps [:aliases :plk :extra-deps])))))
+     (provided (get-in deps [:aliases :plk :extra-deps]))
+     '{org.jank-lang.commons/jank-build
+       {:mvn/version "2026.10-1" :scope "jank-build"}})))
 
 (def options
   {:lib           'djblue/portal

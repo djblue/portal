@@ -27,7 +27,9 @@
               "resources"
               _resource-name))
      :lpy (apply / (resources/files "resources") [_resource-name])
-     :jank (let [module-path (str/split (.-module_path cpp/jank.util.cli.opts) #":")]
+     :jank (let [module-path (concat
+                              (.-include_dirs cpp/jank.util.cli.opts)
+                              (str/split (.-module_path cpp/jank.util.cli.opts) #":"))]
              (some (fn [path]
                      (fs/is-file (fs/join path _resource-name)))
                    module-path))))
