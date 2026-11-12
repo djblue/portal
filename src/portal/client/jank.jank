@@ -1,7 +1,8 @@
 (ns portal.client.jank
   (:require [clojure.string :as str]
             [portal.runtime.cson :as cson])
-  (:include "httplib.h"))
+  (:include "httplib.h"
+            "portal/runtime/jank/aot.hpp"))
 
 (defn request [{:keys [url method body headers]
                 :or   {method :get}}]

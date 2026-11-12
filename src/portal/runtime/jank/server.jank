@@ -1,6 +1,7 @@
 (ns portal.runtime.jank.server
   (:refer-clojure :exclude [read send])
   (:include "httplib.h"
+            "portal/runtime/jank/aot.hpp"
             "portal/runtime/jank/server.hpp")
   (:require
    [clojure.string :as str]

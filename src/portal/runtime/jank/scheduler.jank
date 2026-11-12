@@ -1,5 +1,7 @@
 (ns ^:no-doc portal.runtime.jank.scheduler
-  (:include "chrono" "thread"))
+  (:include "chrono"
+            "thread"
+            "portal/runtime/jank/aot.hpp"))
 
 (defonce ^:private timeouts (atom {:id 0 :queue (sorted-map)}))
 

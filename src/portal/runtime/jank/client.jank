@@ -1,4 +1,5 @@
 (ns portal.runtime.jank.client
+  (:include "portal/runtime/jank/aot.hpp")
   (:require [portal.runtime :as rt]))
 
 (def ops

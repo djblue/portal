@@ -1,5 +1,6 @@
 (ns portal.runtime.jank.launcher
   (:include "httplib.h"
+            "portal/runtime/jank/aot.hpp"
             "portal/runtime/jank/server.hpp")
   (:require
    [portal.runtime :as rt]

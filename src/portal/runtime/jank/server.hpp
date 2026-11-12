@@ -14,12 +14,14 @@
 
 #include "httplib.h"
 
+#include <portal/runtime/jank/aot.hpp>
+
 namespace portal::runtime::jank::server
 {
 
   using namespace ::jank::runtime;
 
-  httplib::Server *create_server(object_ref const handler)
+  inline httplib::Server *create_server(object_ref const handler)
   {
     struct gc_thread_scope
     {
@@ -95,7 +97,7 @@ namespace portal::runtime::jank::server
     return server;
   }
 
-  object_ref request_headers(httplib::Request const *req)
+  inline object_ref request_headers(httplib::Request const *req)
   {
     obj::transient_hash_map m{};
     for (const auto &[k, v] : req->headers)
@@ -106,7 +108,7 @@ namespace portal::runtime::jank::server
     return m.to_persistent();
   }
 
-  void destroy_server(httplib::Server *server)
+  inline void destroy_server(httplib::Server *server)
   {
     server->stop();
   }

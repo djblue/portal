@@ -36,6 +36,9 @@
     (.mkdirs (.getParentFile target))
     (io/copy body target)))
 
+(defn aot []
+  (jank "--module-path" "src:resources" :compile-module :portal.api))
+
 (defn -main
   "Start jank dev env / nrepl"
   []
