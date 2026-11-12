@@ -39,17 +39,15 @@
     (assoc request :session (rt/get-session session-id))
     request))
 
-(defmethod route :default [request] {:status 404})
+(defmethod route :default [_request] {:status 404})
 
-(defn- send [ws message]
+(defn- send [^(:* httplib.ws.WebSocket) ws message]
   (when (string? message)
-    (let [ws (cpp/unbox (:* httplib.ws.WebSocket) ws)]
-      (.send ws (cpp/cast std.string message))
-      nil)))
+    (.send ws (cpp/cast std.string message))
+    nil))
 
-(defn- read [ws]
-  (let [ws (cpp/unbox (:* httplib.ws.WebSocket) ws)
-        msg (cpp/std.string.)]
+(defn- read [^(:* httplib.ws.WebSocket) ws]
+  (let [msg (cpp/std.string.)]
     (.read ws msg)
     msg))
 
@@ -137,17 +135,15 @@
       (swap! rt/sessions assoc session-id {})
       {:status 307 :headers {"Location" (str "?" session-id)}})))
 
-(defn- ->request [req]
-  (let [req (cpp/unbox (:* httplib.Request) req)]
-    {:request-method (keyword (str/lower-case (.-method req)))
-     :headers (cpp/portal.runtime.jank.server.request_headers req)
-     :query-string (second (str/split (.-target req) #"\?"))
-     :uri (.-path req)
-     :body (.-body req)}))
+(defn- ->request [^(:* httplib.Request) req]
+  {:request-method (keyword (str/lower-case (.-method req)))
+   :headers (cpp/portal.runtime.jank.server.request_headers req)
+   :query-string (second (str/split (.-target req) #"\?"))
+   :uri (.-path req)
+   :body (.-body req)})
 
-(defn- handle-http [req res]
-  (let [res (cpp/unbox (:* httplib.Response) res)
-        request (->request req)
+(defn- handle-http [req ^(:* httplib.Response) res]
+  (let [request  (->request req)
         response (try
                    (route (with-session request))
                    (catch jank.error_ref e
