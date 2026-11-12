@@ -2,7 +2,11 @@
            :clojure-lsp/unused-public-var {:level :off}
            :unresolved-symbol
            {:exclude [(portal.ui.repl.sci.import/sci-import)
-                      (portal.ui.repl.sci.import/import-ns)]}}
+                      (portal.ui.repl.sci.import/import-ns)
+                      std.string
+                      std.exception]}
+           :unresolved-namespace {:exclude [cpp]}
+           :unknown-ns-option {:level :off}}
  :lint-as
  {portal.async/let clojure.core/let
   portal.sync/let  clojure.core/let
