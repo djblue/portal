@@ -2,6 +2,7 @@
   (:require
    [clojure.java.io :as io]
    [org.httpkit.client :as http]
+   [tasks.build :refer [build]]
    [tasks.tools :refer [jank]])
   (:import [java.security MessageDigest]))
 
@@ -43,4 +44,6 @@
   "Start jank dev env / nrepl"
   []
   (install)
+  (build)
+  (aot)
   (jank "--module-path" "src:resources:dev:test" :repl))

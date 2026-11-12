@@ -12,7 +12,7 @@
       "projectRootPath": [
         "."
       ],
-      "afterPrimaryReplConnectedCode": "(portal.api/start {:port 53755})",
+      "afterPrimaryReplConnectedCode": "(user/start)",
       "extraNReplMiddleware": [
         "portal.nrepl/middleware"
       ],
@@ -29,7 +29,7 @@
       "projectRootPath": [
         "."
       ],
-      "afterPrimaryReplConnectedCode": "(portal.api/start {:port 53755})",
+      "afterPrimaryReplConnectedCode": "(user/start)",
       "extraNReplMiddleware": [
         "portal.nrepl/middleware"
       ],
@@ -50,6 +50,7 @@
         "cljAliases": []
       },
       "customJackInCommandLine": "bb jank",
+      "afterPrimaryReplConnectedCode": "(require 'user) (user/start)",
       "replSessionNames": {
         "primary": "jank"
       },

@@ -1,5 +1,10 @@
 (ns user)
 
+#?(:cljs
+   (defn requiring-resolve [sym]
+     (-> sym namespace symbol require)
+     (resolve sym)))
+
 (defn lazy-fn [symbol]
   (fn [& args] (apply (requiring-resolve symbol) args)))
 
@@ -12,6 +17,11 @@
   ([build-id] (start!) (watch build-id) (repl build-id)))
 
 (defn node [] (cljs :node))
+
+(defn start []
+  (require 'portal.api)
+  (add-tap (resolve 'portal.api/submit))
+  ((resolve 'portal.api/start) {:port 53755}))
 
 (comment
   (require '[portal.api :as p])
