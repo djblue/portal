@@ -1,8 +1,16 @@
 (ns ^:no-doc portal.client.common
-  (:require [portal.runtime]
+  (:require [clojure.string :as str]
+            [portal.runtime]
             [portal.runtime.cson :as cson]
             [portal.runtime.json :as json]
             [portal.runtime.transit :as transit]))
+
+(defn- ex-type [ex]
+  (let [type-name (some-> ex type .-name)]
+    (cond
+      (instance? ExceptionInfo ex) 'cljs.core/ExceptionInfo
+      (not (str/blank? type-name)) (symbol type-name)
+      :else                        'js/Error)))
 
 (defn- error->data [ex]
   (merge
@@ -10,7 +18,7 @@
      {:data data})
    {:runtime :cljs
     :cause   (ex-message ex)
-    :via     [{:type    (symbol (.-name (type ex)))
+    :via     [{:type    (ex-type ex)
                :message (ex-message ex)}]
     :stack   (.-stack ex)}))
 
