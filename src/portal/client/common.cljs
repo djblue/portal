@@ -8,7 +8,7 @@
 (defn- ex-type [ex]
   (let [type-name (some-> ex type .-name)]
     (cond
-      (instance? ExceptionInfo ex) 'cljs.core/ExceptionInfo
+      (some? (ex-data ex))         'cljs.core/ExceptionInfo
       (not (str/blank? type-name)) (symbol type-name)
       :else                        'js/Error)))
 
