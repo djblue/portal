@@ -3,8 +3,7 @@
             [portal.runtime :as rt]
             [portal.runtime.web.client :as c]
             [portal.runtime.web.launcher :as l]
-            [portal.shortcuts :as shortcuts]
-            [portal.spec :as s]))
+            [portal.shortcuts :as shortcuts]))
 
 (def ^:export send! l/send!)
 
@@ -42,7 +41,6 @@
   "Open a new inspector window."
   ([] (open nil))
   ([options]
-   (s/assert-options options)
    (l/open (rename options))))
 
 (defn inspect
