@@ -1,3 +1,9 @@
+## 0.69.1 - 2026-11-14
+
+- Fix `ex-type` for all cljs runtimes 56484e8e
+  - Thanks @seancorfield!
+- Update `:portal.colors/gruvbox` to be more colorful b5a541ef
+
 ## 0.69.0 - 2026-11-13
 
 - Fix `nbb` failure a787ea57
