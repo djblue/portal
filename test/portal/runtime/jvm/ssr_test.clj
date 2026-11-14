@@ -8,18 +8,20 @@
 
 (deftest render-app-test
   (let [session-id (random-uuid)
-        value (atom data)
+        connection-id (random-uuid)
+        value   (atom data)
         channel (fn send! [_])
-        session (#'ssr/open-session
-                 {:session
-                  {:channel channel
-                   :session-id session-id
-                   :options {:value value}}})]
+        opts    {:session-id session-id
+                 :options {:value value}}]
     (try
-      (#'ssr/on-open session)
+      (#'ssr/on-open session-id opts)
+      (#'ssr/on-connect session-id connection-id channel)
       (is (contains? @rt/connections session-id))
       (is (contains? @@#'ssr/render-loops session-id))
+      (is (contains? @@#'ssr/sessions session-id))
       (finally
-        (#'ssr/on-close session)))
+        (#'ssr/on-disconnect session-id connection-id)
+        (#'ssr/on-close session-id)))
     (is (not (contains? @rt/connections session-id)))
-    (is (not (contains? @@#'ssr/render-loops session-id)))))
+    (is (not (contains? @@#'ssr/render-loops session-id)))
+    (is (not (contains? @@#'ssr/sessions session-id)))))

@@ -1,4 +1,5 @@
 (ns portal.api
+  (:refer-clojure :exclude [clone])
   (:require #?(:clj
                [portal.runtime.jvm.commands])
             #?(:clj  [portal.runtime.jvm.launcher :as l]
@@ -250,6 +251,29 @@
    (open (assoc options :value value))))
 
 (register! #'inspect)
+
+(defn clone
+  "Open a new portal window linked to an existing session. Only works with `{:mode :ssr}` session."
+  {:command true
+   :added "0.70.0"
+   :see-also ["open"]}
+  ([]
+   (when-not rt/*session*
+     (throw (ex-info "No portal session available for clone." {})))
+   (clone rt/*session*))
+  ([portal]
+   (clone portal nil))
+  ([{:keys [session-id] :as portal} options]
+   (let [session-options (get-in @rt/sessions [session-id :options])
+         options (merge session-options (select-keys options [:launcher]))]
+     (when-not (= :ssr (:mode options))
+       (throw (ex-info "Clone only supported on `{:mode :ssr}`" options)))
+     (try
+       (open portal (assoc options :always-open true))
+       (finally
+         (swap! rt/sessions assoc-in [session-id :options] session-options))))))
+
+(register! #'clone)
 
 (defn selected
   "Get a sequence of all currently selected values."
