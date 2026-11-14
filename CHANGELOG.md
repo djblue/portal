@@ -1,3 +1,10 @@
+## 0.69.0 - 2026-11-13
+
+- Fix `nbb` failure a787ea57
+- Initial `portal.nrepl` for `jank` 71196c9a
+- Update exception viewer for `jank` 22cfd55b
+- Initial jank runtime support (#307) 99dc0181
+
 ## 0.68.1 - 2026-10-06
 
 * Potential fix for intellij extension release 39b521f3
