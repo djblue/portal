@@ -1,3 +1,8 @@
+## 0.69.2 - 2026-11-14
+
+- Fix `setup-joyride!` 82239dec
+  - Thanks @seancorfield!
+
 ## 0.69.1 - 2026-11-14
 
 - Fix `ex-type` for all cljs runtimes 56484e8e
