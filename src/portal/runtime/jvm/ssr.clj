@@ -45,22 +45,28 @@
   (let [p (promise)
         id (random-uuid)]
     (swap! (:rpc session) assoc id p)
-    (send! session
+    (send! (:session-id session)
            {:op "on-rpc"
             :id (str id)
             :method (str (namespace method) "/" (name method))
             :params params})
     p))
 
-(defn- start-profile [session]
-  (when (get-in session [:options :profile?])
+(defonce ^:private sessions (atom {}))
+
+(defn- get-session [session-id] (get @sessions session-id))
+
+(defn- get-connections [session-id] (get-in @sessions [session-id :connections]))
+
+(defn- start-profile [session-id]
+  (when (get-in (get-session session-id) [:options :profile?])
     (try
       (let [start (requiring-resolve 'clj-async-profiler.core/start)]
         (start {:event :alloc}))
       (catch Exception e (tap> (Throwable->map e))))))
 
-(defn- stop-profile [session]
-  (when (get-in session [:options :profile?])
+(defn- stop-profile [session-id]
+  (when (get-in (get-session session-id) [:options :profile?])
     (try
       (let [browse-url (requiring-resolve 'clojure.java.browse/browse-url)
             stop (requiring-resolve 'clj-async-profiler.core/stop)]
@@ -73,38 +79,39 @@
   120000)
 (def ^:private budget-ms (/ 1000.0 30))
 
-(declare on-close)
-
 (defn- sleep [start]
   (let [total-time (- (System/currentTimeMillis) start)]
     (when (< total-time budget-ms)
       (let [sleep-time (long (- budget-ms total-time))]
         (Thread/sleep sleep-time)))))
 
-(defn- start-render-loop [{:keys [last-ping channel] :as session} render stop]
+(defn- start-render-loop [session-id render stop]
   (let [running (atom true)]
     (future
-      (start-profile session)
+      (start-profile session-id)
       (loop [state nil]
-        (if-not @running
-          (stop state)
-          (recur
-           (let [start (System/currentTimeMillis)]
-             (if (< timeout-ms (- start @last-ping))
-               (do
-                 (reset! running false)
-                 (on-close session)
-                 (server/close channel))
-               (try
-                 (render state)
-                 (catch Exception e
-                   (tap> [state e])
-                   (reset! running false))
-                 (finally
-                   (sleep start)))))))))
+        (let [{:keys [last-ping] :as session} (get-session session-id)]
+          (if-not @running
+            (stop state)
+            (recur
+             (let [start (System/currentTimeMillis)]
+               (if (< timeout-ms (- start @last-ping))
+                 (do
+                   (reset! running false)
+                   (doseq [[_ channel] (:connections session)]
+                     (server/close channel))
+                   state)
+                 (try
+                   (render state)
+                   (catch Exception e
+                     (tap> [state e])
+                     (reset! running false)
+                     state)
+                   (finally
+                     (sleep start))))))))))
     (fn stop-render-loop []
       (reset! running false)
-      (stop-profile session))))
+      (stop-profile session-id))))
 
 (defonce ^:private render-loops (atom {}))
 
@@ -131,8 +138,11 @@
 
 (defn send!
   ([message]
-   (send! rt/*session* message))
-  ([{:keys [channel]} message]
+   (send! (:session-id rt/*session*) message))
+  ([session-id message]
+   (doseq [[_ channel] (get-connections session-id)]
+     (send! session-id channel message)))
+  ([_ channel message]
    (if (fn? channel)
      (channel message)
      (if (or (bytes? message)
@@ -140,57 +150,94 @@
        (server/send! channel message)
        (server/send! channel (cond-> message (not (string? message)) (json/write)))))))
 
-(defn- render-app [{:keys [handlers selection-index output-buffer log] :as session}
-                   {:keys [hiccup styles app-state] :as render-state}]
-  (binding [rt/*session* session
-            shortcuts/*log* log
-            select/*selection-index* selection-index]
-    (process-event-queue! session)
-    (let [app-state' (some-> hiccup meta :state deref)]
-      (if (and (some? app-state) (= app-state app-state'))
-        render-state
-        (let [cache (atom styles)]
-          (binding [d/*cache* cache]
-            (let [hiccup'
-                  (if-not hiccup
-                    (react/render [app/app session])
-                    (react/render (meta hiccup) [app/app session]))]
-              (when (not (identical? styles @cache))
-                (send! session {:op "on-styles" :append-styles (->style (apply dissoc @cache (keys styles)))}))
-              (when-not (= hiccup hiccup')
-                (vreset! handlers {})
-                (let [written-bytes
-                      (binding [hiccup/*handlers* handlers]
-                        (hiccup/html! output-buffer hiccup'))]
-                  (send! session (hiccup/->input-stream output-buffer written-bytes))))
-              {:hiccup hiccup' :styles @cache :app-state app-state'})))))))
+(defn- render-app [session-id {:keys [hiccup styles app-state connections] :as render-state}]
+  (let [{:keys [handlers selection-index output-buffer log] :as session} (get-session session-id)]
+    (binding [rt/*session* session
+              shortcuts/*log* log
+              select/*selection-index* selection-index]
+      (process-event-queue! session)
+
+      ;; The app has already started and new connections have shown up.
+      (when-let [written-bytes (:written-bytes render-state)]
+        (let [all-styles (delay {:op "on-styles" :append-styles (->style styles)})]
+          (doseq [[connection-id channel] (:connections session)
+                  :when (not (contains? connections connection-id))]
+            (send! session-id channel @all-styles)
+            (send! session-id channel (hiccup/->input-stream output-buffer written-bytes)))))
+
+      (let [app-state' (some-> hiccup meta :state deref)]
+        (-> (if (and (some? app-state) (= app-state app-state'))
+              render-state
+              (let [cache (atom styles)]
+                (binding [d/*cache* cache]
+                  (let [hiccup'
+                        (if-not hiccup
+                          (react/render [app/app session])
+                          (react/render (meta hiccup) [app/app session]))]
+                    (when-not (identical? styles @cache)
+                      (let [new-styles {:op "on-styles" :append-styles (->style (apply dissoc @cache (keys styles)))}]
+                        (doseq [[_ channel] (:connections session)]
+                          (send! session-id channel new-styles))))
+                    (if (= hiccup hiccup')
+                      (assoc render-state :hiccup hiccup' :styles @cache :app-state app-state')
+                      (do
+                        (vreset! handlers {})
+                        (let [written-bytes
+                              (binding [hiccup/*handlers* handlers]
+                                (hiccup/html! output-buffer hiccup'))]
+                          (doseq [[_ channel] (:connections session)]
+                            (send! session-id channel (hiccup/->input-stream output-buffer written-bytes)))
+                          {:hiccup hiccup'
+                           :styles @cache
+                           :app-state app-state'
+                           :written-bytes written-bytes})))))))
+            (assoc :connections (:connections session)))))))
 
 (defn- stop-app [{:keys [hiccup]}]
   (when hiccup (react/render (meta hiccup) nil)))
 
-(defn- on-open [session]
-  (add-watch (:state session) :selected #'state/send-selected-values)
-  (swap! rt/connections assoc (:session-id session) (partial send! session))
-  (swap! render-loops update (:session-id session)
-         (fn [stop-render-loop]
-           (when (fn? stop-render-loop)
-             (stop-render-loop))
-           (start-render-loop session (partial #'render-app session) #'stop-app))))
+(defn- open-session [session-id opts]
+  (-> sessions
+      (swap! update session-id
+             (fn [session]
+               (or session
+                   (merge
+                    opts
+                    {:rpc (atom {})
+                     :state (atom {})
+                     :log (atom nil)
+                     :handlers (volatile! {})
+                     :event-queue (atom [])
+                     :selection-index (atom {})
+                     :last-ping (atom (System/currentTimeMillis))
+                     :output-buffer (byte-array (* 5 1024 1024))}))))
+      (get session-id)))
 
-(defn- on-receive [session message]
-  (swap! (:event-queue session) conj (json/read message)))
+(defn- close-session [session-id]
+  (swap! sessions dissoc session-id))
 
-(defn- on-close [session]
-  (remove-watch (:state session) :selected)
-  (swap! rt/connections dissoc (:session-id session))
-  (when-let [stop-render-loop (get @render-loops (:session-id session))]
-    (stop-render-loop)
-    (swap! render-loops dissoc (:session-id session))))
+(defn- on-open [session-id opts]
+  (let [session (open-session session-id opts)]
+    (add-watch (:state session) :selected #'state/send-selected-values)
+    (swap! rt/connections assoc session-id (partial send! session-id))
+    (swap! render-loops update session-id
+           (fn [stop-render-loop]
+             (when (fn? stop-render-loop)
+               (stop-render-loop))
+             (start-render-loop session-id (partial #'render-app session-id) #'stop-app)))))
 
-(defn- vs-code? [request]
-  (some-> request
-          (get-in [:headers "origin"])
-          (str/starts-with? "vscode-webview://")))
+(defn- on-receive [session-id message]
+  (when-let [event-queue (:event-queue (get-session session-id))]
+    (swap! event-queue conj (json/read message))))
+
+(defn- on-close [session-id]
+  (let [session (get-session session-id)]
+    (remove-watch (:state session) :selected)
+    (swap! rt/connections dissoc session-id)
+    (when-let [stop-render-loop (get @render-loops session-id)]
+      (stop-render-loop)
+      (swap! render-loops dissoc session-id))
+    (close-session session-id)))
 
 (defn close
   ([]
@@ -203,34 +250,39 @@
   (binding [rt/*session* (get-in @rt/sessions [session-id])]
     (rt/clear-values)))
 
-(defn- open-session [{:keys [session] :as request}]
-  (-> session
-      (update :options
-              (fn [options]
-                (cond-> options
-                  (and (nil? (:theme options))
-                       (vs-code? request))
-                  (assoc :theme :portal.colors/vs-code-embedded))))
-      (assoc :state (atom {})
-             :handlers (volatile! {})
-             :event-queue (atom [])
-             :selection-index (atom {})
-             :last-ping (atom (System/currentTimeMillis))
-             :log (atom nil)
-             :rpc (atom {})
-             :output-buffer (byte-array (* 5 1024 1024)))))
+(defn- on-connect [session-id connection-id ch]
+  (swap! sessions assoc-in [session-id :connections connection-id] ch))
 
-(defmethod route [:get "/ssr"] [request]
-  (let [session (atom (open-session request))]
+(defn- on-disconnect [session-id connection-id]
+  (swap! sessions update-in [session-id :connections] dissoc connection-id))
+
+(defn- ->opts [{:keys [session] :as request}]
+  (cond-> session
+    (some-> request
+            (get-in [:headers "origin"])
+            (str/starts-with? "vscode-webview://"))
+    (update :options
+            (fn [options]
+              (cond-> options
+                (nil? (:theme options))
+                (assoc :theme :portal.colors/vs-code-embedded))))))
+
+(defmethod route [:get "/ssr"] [{{:keys [session-id]} :session :as request}]
+  (let [connection-id (random-uuid)]
     (server/as-channel
      request
-     {:on-receive (fn [_ch message]
-                    (on-receive @session message))
-      :on-open    (fn [ch]
-                    (swap! session assoc :channel ch)
-                    (on-open @session))
+     {:on-open    (fn [ch]
+                    (locking sessions
+                      (when (zero? (count (get-connections session-id)))
+                        (on-open session-id (->opts request)))
+                      (on-connect session-id connection-id ch)))
+      :on-receive (fn [_ch message]
+                    (on-receive session-id message))
       :on-close   (fn [_ch _status]
-                    (on-close @session))})))
+                    (locking sessions
+                      (on-disconnect session-id connection-id)
+                      (when (zero? (count (get-connections session-id)))
+                        (on-close session-id))))})))
 
 (defmethod route [:options "/main.cljs"] [_] enable-cors)
 (defmethod route [:get "/main.cljs"] [_]
